@@ -25,5 +25,5 @@ trước khi vào `innerHTML`; `esc` chỉ thoát `& < >` → **không dùng k�
 
 ## 3. Secrets
 
-Không có. `server-config.example.md` để trống có chủ đích. Repo có remote GitHub → không commit
+Không có. Repo có remote GitHub → không commit
 payload thật (log UAT, điện, dữ liệu khách hàng) làm file mẫu.

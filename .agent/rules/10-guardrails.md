@@ -8,7 +8,7 @@
 - **File ops:** đọc/ghi/sửa file thường → làm trực tiếp. Hành động phá hủy/bất thường → xác nhận trước.
 - **Markdown:** chỉ tạo ở `c:/_web_tool/plans` hoặc `c:/_web_tool/docs`, trừ khi user yêu cầu rõ.
 - **Cài tool:** dưới `C:\_devtools\<tool>\`, per-user (máy KHÔNG có quyền admin).
-- **Secrets:** không đọc/commit `server-config.md`, `.env*`; chỉ dùng `server-config.example.md` làm mẫu.
+- **Secrets:** không đọc/commit `server-config.md`, `.env*`.
 
 ## Ngôn ngữ
 

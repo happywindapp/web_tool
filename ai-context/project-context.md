@@ -1,19 +1,19 @@
 # Project Context — web_tool (HSC)
 
 > Mọi AI Agent ĐỌC FILE NÀY ĐẦU TIÊN. Nội dung rút từ mã nguồn `c:/_web_tool` (GitHub
-> `happywindapp/web_tool`, nhánh `main`, commit `365d471`, quét 2026-10-27).
+> `happywindapp/web_tool`, nhánh `main`, quét 2026-10-27).
 
 ## Elevator pitch
 
 `web_tool` là **bộ sưu tập công cụ web tiện ích** chạy **100% trong trình duyệt**: mỗi tool là
 **1 file HTML tự chứa** (HTML + CSS + vanilla JS inline, không build, không dependency, không gọi mạng)
-nằm trong `_tools/`. Mở file bằng trình duyệt là dùng được, kể cả offline.
+nằm trong `tools/`; `index.html` ở root là trang chủ liệt kê tool. Mở file bằng trình duyệt là dùng được, kể cả offline.
 
 Tool hiện có:
 
 | Tool | File | Việc |
 |------|------|------|
-| Đọc & Format JSON · XML · HTML | `_tools/format-json-xml-html.html` | Kiểm tra cú pháp, **tự sửa lỗi** cú pháp phổ biến, format (2/4 space/Tab), minify, xem dạng cây, tải về |
+| Đọc & Format JSON · XML · HTML | `tools/format-json-xml-html.html` | Kiểm tra cú pháp, **tự sửa lỗi** cú pháp phổ biến, format (2/4 space/Tab), minify, xem dạng cây, tải về |
 
 ## Kiến trúc high-level
 
@@ -36,7 +36,7 @@ Người dùng ─ dán / kéo-thả / mở file ─► <textarea id="src">
   lại từng sửa đổi `{line, col, msg}` để người dùng duyệt.
 - Không backend, không storage, không network request.
 
-Chi tiết: [`docs/architecture/README.md`](../docs/architecture/README.md).
+Chi tiết: [`docs/tools/format-json-xml-html.md`](../docs/tools/format-json-xml-html.md).
 
 ## Repos
 
@@ -53,7 +53,7 @@ Không có. Không backend, không API, không DB, không CDN.
 
 ## Ranh giới & nguyên tắc
 
-- **1 tool = 1 file HTML tự chứa** trong `_tools/`, tên kebab-case mô tả việc. Không thêm build step,
+- **1 tool = 1 file HTML tự chứa** trong `tools/`, tên kebab-case mô tả việc. Không thêm build step,
   framework hay script CDN nếu chưa hỏi user (xem [ADR](../docs/decisions/README.md)).
 - **Không gửi dữ liệu đi đâu** — đây là cam kết hiển thị ngay trên UI; mọi thay đổi gọi mạng là breaking.
 - **Tự sửa = đoán**: mỗi sửa đổi phải được ghi vào danh sách `fixes`, không sửa âm thầm.
@@ -65,8 +65,7 @@ Xem [`ai-context/working/issues-open.md`](working/issues-open.md).
 
 ## Trỏ tới chi tiết
 
-- Luật detect + catalog sửa lỗi JSON/XML/HTML: `docs/business/`
-- Module, luồng xử lý, giới hạn hiệu năng: `docs/architecture/`
-- Mô hình AST nội bộ: `docs/data-models/` · "Contract" (URL param, đuôi file, tên file tải về): `docs/api-contracts/`
+- **Riêng từng tool** (luật detect, catalog sửa lỗi, contract, AST, module, giới hạn): `docs/tools/<tool>.md`
+- Luật/contract/model **chung** mọi tool: `docs/business/` · `docs/api-contracts/` · `docs/data-models/` · `docs/architecture/`
 - Bảo mật/riêng tư: `docs/security/` · Chạy/publish: `docs/deployment/`
 - Thuật ngữ: `docs/glossary.md` · Quyết định đã chốt: `docs/decisions/`

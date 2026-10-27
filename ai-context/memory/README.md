@@ -2,7 +2,7 @@
 
 > Nơi AI ghi lại **bài học** để lần sau không lặp lại sai lầm.
 > Khác với memory global riêng từng AI tool (`~/.claude/projects/.../memory/` với Claude Code) — xem
-> `docs/business/README.md` mục 3 "Memory protocol" để phân biệt 2 hệ. File ở ĐÂY là bản chung, git-tracked,
+> `docs/glossary.md` mục "Memory" để phân biệt 2 hệ. File ở ĐÂY là bản chung, git-tracked,
 > mọi AI tool + người đều đọc được — không phải bản thay thế cho memory global.
 
 ## Cách dùng

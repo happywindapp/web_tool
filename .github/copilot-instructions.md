@@ -5,7 +5,7 @@
 ## Bối cảnh
 
 `c:/_web_tool` = git repo `happywindapp/web_tool`: bộ công cụ web, mỗi tool là 1 file HTML tự chứa
-trong `_tools/`, chạy 100% client-side. Tài liệu nguồn: `ai-context/project-context.md`.
+trong `tools/`, chạy 100% client-side. Tài liệu nguồn: `ai-context/project-context.md`.
 
 ## Stack
 

@@ -5,7 +5,8 @@
 ## 1. Chạy
 
 ```powershell
-start C:\_web_tool\_tools\format-json-xml-html.html            # mở bằng trình duyệt mặc định
+start C:\_web_tool\index.html                                  # trang chủ: danh sách tool
+start C:\_web_tool\tools\format-json-xml-html.html             # mở thẳng 1 tool
 ```
 
 - Thử nhanh: thêm `?demo=json` (hoặc `xml`, `html`) vào URL → nạp mẫu lỗi và format ngay.
@@ -16,7 +17,7 @@ start C:\_web_tool\_tools\format-json-xml-html.html            # mở bằng tr�
 | Cách | Trạng thái |
 |------|-----------|
 | Gửi/clone repo, mở file local | Đang dùng |
-| GitHub Pages / host tĩnh nội bộ | **Chưa cấu hình** — chỉ cần serve thư mục `_tools/` (không cần build) |
+| GitHub Pages | Nguồn: nhánh `main`, thư mục `/` (root) → `https://happywindapp.github.io/web_tool/`. Bật ở repo **Settings → Pages → Deploy from a branch**; tự build lại sau mỗi push. Không đặt thư mục web bắt đầu bằng `_` (Jekyll của Pages bỏ qua) |
 
 ## 3. Kiểm thử thủ công trước khi push
 
@@ -26,4 +27,4 @@ start C:\_web_tool\_tools\format-json-xml-html.html            # mở bằng tr�
 
 ## 4. Biến môi trường
 
-Không có. Xem [server-config.example.md](../../server-config.example.md).
+Không có — mọi tool chạy client-side.

@@ -18,5 +18,3 @@ flowchart LR
     MB --> SE["serialize / minify"]
     JS & SE --> OUT["#out highlight · #tree cây<br/>Sao chép · Tải về · ← Dùng kết quả"]
 ```
-
-- Sơ đồ cơ chế template AI: [template-how-it-works.md](template-how-it-works.md).

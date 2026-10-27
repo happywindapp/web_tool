@@ -7,7 +7,7 @@
 ## Workspace là gì
 
 `c:/_web_tool` **chính là git repo** `happywindapp/web_tool` (nhánh `main`): bộ công cụ web tiện ích,
-mỗi tool là **1 file HTML tự chứa** trong `_tools/`, chạy 100% client-side, không gọi mạng.
+mỗi tool là **1 file HTML tự chứa** trong `tools/`, chạy 100% client-side, không gọi mạng.
 Đọc `ai-context/project-context.md` để nắm toàn cảnh.
 
 ## Tech stack

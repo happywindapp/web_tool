@@ -6,8 +6,8 @@
 ## Workspace là gì
 
 `c:/_web_tool` **chính là git repo** `happywindapp/web_tool` (nhánh `main`): bộ công cụ web tiện ích,
-mỗi tool là **1 file HTML tự chứa** trong `_tools/`, chạy 100% client-side, không gọi mạng.
-Tool hiện có: `_tools/format-json-xml-html.html` (kiểm tra · tự sửa lỗi · format · minify JSON/XML/HTML).
+mỗi tool là **1 file HTML tự chứa** trong `tools/`, chạy 100% client-side, không gọi mạng.
+Tool hiện có: `tools/format-json-xml-html.html` (kiểm tra · tự sửa lỗi · format · minify JSON/XML/HTML).
 Đọc `ai-context/project-context.md` để nắm toàn cảnh.
 
 ## Tech stack
@@ -18,7 +18,8 @@ Tool hiện có: `_tools/format-json-xml-html.html` (kiểm tra · tự sửa l�
 
 ## Convention riêng của repo
 
-- 1 tool = 1 file `_tools/<viec-lam-kebab-case>.html`; module JS dạng IIFE (`const X = (() => {...})()`), UI tiếng Việt.
+- 1 tool = 1 file `tools/<viec-lam-kebab-case>.html`; module JS dạng IIFE (`const X = (() => {...})()`), UI tiếng Việt.
+- Thêm/đổi tool ⇒ cập nhật đủ 3 chỗ: card trong `index.html`, bảng Tools trong `README.md`, `docs/tools/<tool>.md`.
 - Ngoại lệ có chủ đích với luật "file < 200 dòng": tool phải tự chứa để mở trực tiếp (xem `docs/decisions/`).
 - Mọi sửa lỗi tự động phải đẩy vào `fixes` (`{line, col, msg}`) — không sửa âm thầm.
 

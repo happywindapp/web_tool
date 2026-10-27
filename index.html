@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Web Tools</title>
+<style>
+  :root { --bg:#f8fafc; --panel:#fff; --line:#cbd5e1; --ink:#0f172a; --muted:#64748b; --acc:#0e7490; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:14px/1.5 "Segoe UI", Arial, sans-serif; }
+  header, main, footer { max-width:960px; margin:0 auto; padding:16px; }
+  h1 { font-size:22px; margin:16px 0 4px; }
+  .muted { color:var(--muted); }
+  main { display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:12px; }
+  a.card { display:block; padding:14px 16px; background:var(--panel); border:1px solid var(--line); border-radius:8px;
+           color:inherit; text-decoration:none; }
+  a.card:hover { border-color:var(--acc); }
+  a.card b { display:block; color:var(--acc); font-size:15px; margin-bottom:4px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Web Tools</h1>
+  <div class="muted">Bộ công cụ chạy hoàn toàn trên máy bạn — không cài đặt, không gửi dữ liệu đi đâu, dùng được cả offline.</div>
+</header>
+<main>
+  <a class="card" href="tools/format-json-xml-html.html">
+    <b>Đọc &amp; Format JSON · XML · HTML</b>
+    <span class="muted">Kiểm tra cú pháp, tự sửa lỗi phổ biến, format, thu gọn 1 dòng, xem dạng cây, sao chép/tải về.</span>
+  </a>
+</main>
+</body>
+</html>

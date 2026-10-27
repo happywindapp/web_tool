@@ -9,8 +9,10 @@
 ## Task list
 
 - [x] Apply AI-native template v1.0.0 (2026-10-27)
-- [ ] User review + commit `_tools/format-json-xml-html.html` (đang untracked) cùng scaffold
-- [ ] Quyết định có publish GitHub Pages hay không
+- [x] Commit tool đầu tiên + scaffold (`40cb755`)
+- [x] Tái cấu trúc: `_tools/` → `tools/`, thêm `index.html`, docs riêng tool ở `docs/tools/`, gỡ template N/A (2026-10-27)
+- [x] Chốt publish GitHub Pages: nhánh `main`, root (2026-10-27)
+- [ ] Bật Pages trên GitHub (Settings → Pages) — PAT hiện tại thiếu quyền `Pages: write` nên chưa bật được qua API
 
 ## Đang làm (in progress)
 

@@ -14,7 +14,8 @@
   body.drop { outline:3px dashed var(--acc); outline-offset:-6px; }
   header { display:flex; flex-wrap:wrap; gap:8px; align-items:center; padding:8px 16px; background:var(--panel); border-bottom:1px solid var(--line); }
   header h1 { font-size:16px; margin:0 8px 0 0; }
-  button, select, label.btn { font:inherit; padding:5px 10px; border:1px solid var(--line); border-radius:6px; background:#fff; color:var(--ink); cursor:pointer; }
+  a.btn { text-decoration:none; }
+  button, select, label.btn, a.btn { font:inherit; padding:5px 10px; border:1px solid var(--line); border-radius:6px; background:#fff; color:var(--ink); cursor:pointer; }
   button.main { background:var(--acc); color:#fff; border-color:var(--acc); font-weight:600; }
   label.btn input { display:none; }
   main { display:grid; grid-template-columns:1fr 1fr; gap:10px; padding:10px 16px; min-height:0; }
@@ -40,6 +41,7 @@
 </head>
 <body>
 <header>
+  <a class="btn" href="../index.html">← Trang chủ</a>
   <h1>Đọc &amp; Format JSON · XML · HTML</h1>
   <label class="btn">Mở file…<input id="file" type="file"></label>
   <select id="kind" title="Định dạng"><option value="auto">Tự nhận diện</option><option value="json">JSON</option><option value="xml">XML</option><option value="html">HTML</option></select>

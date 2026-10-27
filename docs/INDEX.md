@@ -5,13 +5,14 @@
 ## Bắt đầu từ đâu
 
 - [Project Context](../ai-context/project-context.md) — mục tiêu + kiến trúc high-level (đọc đầu tiên)
-- [Service Registry](services-registry.md) — danh sách service theo tier (single source, sinh từ manifest)
+- [Tools](tools/README.md) — mỗi tool 1 file doc (luật, contract, data model, module, giới hạn)
 - [Glossary](glossary.md) — thuật ngữ domain, viết tắt, tên riêng
 
 ## Danh mục tài liệu
 
 | Khu vực | Mô tả | Link |
 |---------|-------|------|
+| Tools | Kiến thức riêng từng tool (`tools/<x>.html` ↔ `docs/tools/<x>.md`) | [tools/](tools/) |
 | Business | Business rules, luồng xử lý, edge cases | [business/](business/) |
 | Architecture | System design, C4, giao tiếp giữa services | [architecture/](architecture/) |
 | Data Models | ERD, schema, migration, naming | [data-models/](data-models/) |
