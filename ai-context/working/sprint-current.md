@@ -12,7 +12,7 @@
 - [x] Commit tool đầu tiên + scaffold (`40cb755`)
 - [x] Tái cấu trúc: `_tools/` → `tools/`, thêm `index.html`, docs riêng tool ở `docs/tools/`, gỡ template N/A (2026-10-27)
 - [x] Chốt publish GitHub Pages: nhánh `main`, root (2026-10-27)
-- [ ] Bật Pages trên GitHub (Settings → Pages) — PAT hiện tại thiếu quyền `Pages: write` nên chưa bật được qua API
+- [x] Bật Pages (bật tay ở Settings → Pages) → https://happywindapp.github.io/web_tool/ (2026-10-27)
 
 ## Đang làm (in progress)
 
