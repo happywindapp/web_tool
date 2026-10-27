@@ -1,0 +1,45 @@
+# Secrets / local config — NEVER commit
+server-config.md
+.env
+.env.*
+*.local
+secrets.*
+
+
+# Personal working notes / reports
+plans/reports/*
+!plans/reports/.gitkeep
+
+# Office / temp artifacts
+*.xlsx
+*.docx
+*.pptx
+*.pdf
+*.log
+tmp_extract/
+tmp/
+
+# Dependencies / build
+node_modules/
+dist/
+build/
+.venv/
+venv/
+__pycache__/
+vendor/
+target/
+
+# Junction skills đa-AI (tạo bởi scripts/link-shared-skills.ps1) — KHÔNG commit, nguồn thật ở ai-context/skills/
+.agents/skills/
+.claude/skills/
+.github/skills/
+.agent/skills/
+.gemini/skills/
+
+# Editor / OS
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+.antigravity/
+# NOTE: .agent/ (rules + workflows) IS committed — it's Antigravity template content, not local state.

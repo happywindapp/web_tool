@@ -1,0 +1,17 @@
+# Decisions (ADR) — web_tool
+
+Architecture Decision Records — quyết định đã chốt + **TẠI SAO**.
+
+## Quy ước
+
+- Mỗi quyết định = 1 file `NNNN-tieu-de-kebab.md` (số tăng dần) khi cần thảo luận chi tiết.
+- Cấu trúc: **Context → Decision → Consequences** (+ Status: proposed/accepted/superseded).
+
+## Quyết định đã chốt (rút từ code hiện tại — chưa tách file riêng)
+
+| # | Quyết định | Lý do (Context) | Hệ quả |
+|---|-----------|-----------------|--------|
+| 1 | **1 tool = 1 file HTML tự chứa**, không build, không dependency | Mở trực tiếp bằng `file://`, gửi qua chat/email là dùng được, không cần Node/npm | File dài (`format-json-xml-html.html` 618 dòng) — **ngoại lệ có chủ đích** với luật "< 200 dòng"; tách module bằng IIFE trong file |
+| 2 | **100% client-side, không gọi mạng** | Người dùng dán payload nhạy cảm (log UAT, dữ liệu khách hàng) | Không CDN/analytics; thêm request bất kỳ = đổi cam kết ghi trên UI → phải hỏi user |
+| 3 | **Tự sửa có audit trail** (`fixes`) thay vì từ chối input lỗi | Tự sửa là đoán; người dùng phải thấy đã đổi gì | Mọi nhánh sửa trong parser phải gọi `fix(msg, at)` |
+| 4 | **Workspace root = git repo** (khác các workspace có repo con) | Repo nhỏ, 1 người, không cần tách hub và code | Scaffold AI (`ai-context/`, `docs/`…) commit chung repo tool; junction skills gitignored |

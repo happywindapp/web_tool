@@ -1,0 +1,618 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Đọc & Format JSON XML HTML</title>
+<style>
+  :root { --bg:#f8fafc; --panel:#fff; --line:#cbd5e1; --ink:#0f172a; --muted:#64748b; --acc:#0e7490;
+          --good:#15803d; --bad:#b91c1c; --warn:#b45309; --code:#f8fafc;
+          --k:#7c3aed; --s:#047857; --n:#b45309; --l:#be185d; --tn:#1d4ed8; --an:#7c3aed; --av:#047857; --c:#94a3b8; }
+  * { box-sizing:border-box; }
+  body { margin:0; height:100vh; display:grid; grid-template-rows:auto 1fr auto; background:var(--bg); color:var(--ink);
+         font:14px/1.45 "Segoe UI", Arial, sans-serif; }
+  body.drop { outline:3px dashed var(--acc); outline-offset:-6px; }
+  header { display:flex; flex-wrap:wrap; gap:8px; align-items:center; padding:8px 16px; background:var(--panel); border-bottom:1px solid var(--line); }
+  header h1 { font-size:16px; margin:0 8px 0 0; }
+  button, select, label.btn { font:inherit; padding:5px 10px; border:1px solid var(--line); border-radius:6px; background:#fff; color:var(--ink); cursor:pointer; }
+  button.main { background:var(--acc); color:#fff; border-color:var(--acc); font-weight:600; }
+  label.btn input { display:none; }
+  main { display:grid; grid-template-columns:1fr 1fr; gap:10px; padding:10px 16px; min-height:0; }
+  .pane { display:grid; grid-template-rows:auto 1fr; min-height:0; background:var(--panel); border:1px solid var(--line); border-radius:8px; overflow:hidden; }
+  .bar { display:flex; gap:6px; align-items:center; padding:6px 10px; border-bottom:1px solid var(--line); flex-wrap:wrap; }
+  .bar b { margin-right:auto; }
+  .ed { display:grid; grid-template-columns:auto 1fr; min-height:0; }
+  #gut { margin:0; padding:8px 6px 8px 10px; text-align:right; color:#94a3b8; background:#f1f5f9; overflow:hidden; user-select:none;
+         font:12.5px/1.5 Consolas, "Cascadia Mono", monospace; white-space:pre; }
+  #gut b { color:#fff; background:var(--bad); border-radius:3px; padding:0 3px; }
+  textarea, #out { margin:0; padding:8px 10px; border:0; outline:0; resize:none; width:100%; height:100%; overflow:auto;
+         font:12.5px/1.5 Consolas, "Cascadia Mono", monospace; white-space:pre; tab-size:4; background:var(--code); color:var(--ink); }
+  #tree { overflow:auto; padding:8px 12px; font:12.5px/1.6 Consolas, monospace; }
+  #tree details { margin-left:14px; } #tree summary { cursor:pointer; margin-left:-14px; } #tree .leaf { margin-left:0; }
+  .tabs button.on { background:var(--ink); color:#fff; border-color:var(--ink); }
+  .k{color:var(--k)} .s{color:var(--s)} .n{color:var(--n)} .l{color:var(--l)} .p{color:var(--muted)}
+  .t{color:var(--muted)} .tn{color:var(--tn);font-weight:600} .an{color:var(--an)} .av{color:var(--av)} .c{color:var(--c);font-style:italic} .d,.cd{color:var(--l)}
+  footer { background:var(--panel); border-top:1px solid var(--line); padding:6px 16px 10px; max-height:28vh; overflow:auto; }
+  #status { font-weight:600; margin:4px 0; } .good{color:var(--good)} .bad{color:var(--bad)} .warn{color:var(--warn)} .muted{color:var(--muted)}
+  #msgs { margin:0; padding-left:20px; } #msgs li { cursor:pointer; padding:1px 0; } #msgs li:hover { background:#f1f5f9; }
+  @media (max-width: 900px) { main { grid-template-columns:1fr; grid-template-rows:45vh 45vh; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>Đọc &amp; Format JSON · XML · HTML</h1>
+  <label class="btn">Mở file…<input id="file" type="file"></label>
+  <select id="kind" title="Định dạng"><option value="auto">Tự nhận diện</option><option value="json">JSON</option><option value="xml">XML</option><option value="html">HTML</option></select>
+  <select id="indent" title="Thụt lề"><option value="2">Thụt 2 dấu cách</option><option value="4">Thụt 4 dấu cách</option><option value="tab">Thụt bằng Tab</option></select>
+  <button id="btnCheck">Kiểm tra</button>
+  <button id="btnFmt" class="main">Format &amp; sửa lỗi</button>
+  <button id="btnMin">Thu gọn 1 dòng</button>
+  <select id="demo"><option value="">Thử file mẫu bị lỗi…</option><option value="json">JSON lỗi</option><option value="xml">XML lỗi</option><option value="html">HTML lỗi</option></select>
+  <span class="muted" id="kindNow"></span>
+</header>
+<main>
+  <section class="pane">
+    <div class="bar"><b>Nội dung gốc</b><span class="muted" id="fname">dán nội dung hoặc kéo thả file vào đây</span></div>
+    <div class="ed"><pre id="gut">1</pre><textarea id="src" spellcheck="false" placeholder="Dán JSON / XML / HTML vào đây…"></textarea></div>
+  </section>
+  <section class="pane">
+    <div class="bar"><b>Kết quả</b><span class="tabs"><button data-tab="out" class="on">Văn bản</button> <button data-tab="tree">Cây dữ liệu</button></span>
+      <button id="btnCopy">Sao chép</button><button id="btnSave">Tải về</button><button id="btnUse" title="Đưa kết quả sang ô bên trái để sửa tiếp">← Dùng kết quả</button></div>
+    <div style="min-height:0;display:grid"><pre id="out"></pre><div id="tree" hidden></div></div>
+  </section>
+</main>
+<footer>
+  <div id="status" class="muted">Chưa có nội dung.</div>
+  <div class="muted" id="outInfo"></div>
+  <ol id="msgs"></ol>
+  <div class="muted" style="font-size:12px">Bấm vào một dòng lỗi để nhảy tới vị trí đó. Công cụ chạy hoàn toàn trên máy bạn, không gửi dữ liệu đi đâu. Tự sửa lỗi là “đoán” ý định ban đầu, nên luôn đọc lại danh sách thay đổi.</div>
+</footer>
+<script>
+// JSON: strict check + tolerant parser that repairs common syntax errors, AST keeps raw numbers & duplicate keys.
+const JsonTool = (() => {
+  const lineCol = (s, i) => { const pre = s.slice(0, i).split("\n"); return { line: pre.length, col: pre[pre.length - 1].length + 1 }; };
+
+  function check(text) {
+    try { JSON.parse(text); return null; }
+    catch (e) {
+      const m = e.message.match(/line (\d+) column (\d+)/) || null;
+      const p = e.message.match(/position (\d+)/);
+      const lc = m ? { line: +m[1], col: +m[2] } : p ? lineCol(text, +p[1]) : { line: 1, col: 1 };
+      return { ...lc, msg: e.message };
+    }
+  }
+
+  function parse(text) {
+    const s = text.replace(/^﻿/, "");
+    let i = 0;
+    const fixes = [];
+    const fix = (msg, at = i) => fixes.push({ ...lineCol(s, at), msg });
+    const ws = () => {
+      for (;;) {
+        while (i < s.length && /\s/.test(s[i])) i++;
+        if (s.startsWith("//", i) || s[i] === "#") { fix("Bỏ chú thích (JSON không cho phép chú thích)"); while (i < s.length && s[i] !== "\n") i++; }
+        else if (s.startsWith("/*", i)) { fix("Bỏ chú thích /* */"); const e = s.indexOf("*/", i + 2); i = e < 0 ? s.length : e + 2; }
+        else return;
+      }
+    };
+    const isKeyStart = c => c === '"' || c === "'" || /[A-Za-z_$À-￿]/.test(c || "");
+    const isValStart = c => c !== undefined && /["'{[\-+.\dA-Za-z_$]/.test(c);
+
+    function str() {
+      const q = s[i], start = i;
+      if (q === "'") fix("Chuỗi dùng nháy đơn → đổi sang nháy kép");
+      i++;
+      let out = "";
+      while (i < s.length) {
+        const c = s[i];
+        if (c === q) { i++; return out; }
+        if (c === "\n" || c === "\r") { fix("Chuỗi thiếu dấu đóng nháy → tự đóng ở cuối dòng", start); return out; }
+        if (c === "\\") {
+          const n = s[i + 1];
+          const map = { n: "\n", t: "\t", r: "\r", b: "\b", f: "\f", "/": "/", "\\": "\\", '"': '"', "'": "'" };
+          if (n === "u" && /^[0-9a-fA-F]{4}$/.test(s.substr(i + 2, 4))) { out += String.fromCharCode(parseInt(s.substr(i + 2, 4), 16)); i += 6; continue; }
+          if (n in map) { out += map[n]; i += 2; continue; }
+          fix(`Ký tự thoát không hợp lệ "\\${n}" → giữ nguyên dấu \\`); out += "\\"; i++; continue;
+        }
+        if (c === "\t") fix("Ký tự Tab trong chuỗi → thay bằng \\t");
+        out += c; i++;
+      }
+      fix("Chuỗi chưa đóng đến cuối file → tự đóng", start);
+      return out;
+    }
+
+    function word() {
+      const m = s.slice(i).match(/^[A-Za-z_$À-￿][\w$\-À-￿]*/);
+      i += m[0].length;
+      return m[0];
+    }
+
+    function num() {
+      const m = s.slice(i).match(/^[+\-]?(0[xX][0-9a-fA-F]+|\d*\.?\d*(?:[eE][+\-]?\d+)?)/);
+      let raw = m[0];
+      i += raw.length;
+      const orig = raw;
+      if (/^[+\-]?0[xX]/.test(raw)) raw = String(parseInt(raw, 16));
+      raw = raw.replace(/^\+/, "").replace(/^(-?)\./, "$10.").replace(/\.(?=$|[eE])/, "").replace(/^(-?)0+(?=\d)/, "$1");
+      if (!/^-?\d/.test(raw)) { fix(`Số không hợp lệ "${orig}" → null`); return { t: "lit", v: "null" }; }
+      if (raw !== orig) fix(`Số "${orig}" sai định dạng JSON → "${raw}"`);
+      return { t: "num", raw };
+    }
+
+    function value(depth) {
+      ws();
+      const c = s[i];
+      if (c === undefined) { fix("Thiếu giá trị ở cuối file → null"); return { t: "lit", v: "null" }; }
+      if (c === "{") return obj(depth);
+      if (c === "[") return arr(depth);
+      if (c === '"' || c === "'") return { t: "str", v: str() };
+      if (/[\d\-+.]/.test(c)) return num();
+      if (/[A-Za-z_$À-￿]/.test(c)) {
+        const at = i, w = word();
+        const lit = { true: "true", false: "false", null: "null", True: "true", False: "false", None: "null",
+                      undefined: "null", NaN: "null", Infinity: "null", TRUE: "true", FALSE: "false", NULL: "null" }[w];
+        if (lit) { if (lit !== w) fix(`"${w}" không có trong JSON → ${lit}`, at); return { t: "lit", v: lit }; }
+        fix(`Giá trị "${w}" chưa đặt trong nháy kép → chuyển thành chuỗi`, at);
+        return { t: "str", v: w };
+      }
+      fix(`Ký tự không hợp lệ "${c}" → bỏ qua`); i++;
+      return value(depth);
+    }
+
+    function container(open, close, depth, readItem) {
+      const start = i;
+      i++;
+      const items = [];
+      let needComma = false;
+      for (;;) {
+        ws();
+        const c = s[i];
+        if (c === undefined) { fix(`Thiếu dấu "${close}" để đóng "${open}" mở ở đây → tự thêm`, start); return items; }
+        if (c === close) { i++; return items; }
+        if (c === "}" || c === "]") { fix(`Dấu "${c}" không khớp với "${open}" → đổi thành "${close}"`); i++; return items; }
+        if (c === ",") {
+          if (!needComma) fix("Dấu phẩy thừa → bỏ");
+          i++; ws();
+          if (s[i] === close) fix("Dấu phẩy thừa trước dấu đóng → bỏ", i - 1);
+          needComma = false; continue;
+        }
+        if (needComma) {
+          if ((open === "{" && isKeyStart(c)) || (open === "[" && isValStart(c))) fix("Thiếu dấu phẩy giữa hai phần tử → tự thêm");
+          else { fix(`Ký tự không hợp lệ "${c}" → bỏ qua`); i++; continue; }
+        }
+        const it = readItem();
+        if (it !== null) { items.push(it); needComma = true; }
+      }
+    }
+
+    function obj(depth) {
+      const items = container("{", "}", depth, () => {
+        let k;
+        const at = i;
+        if (s[i] === '"' || s[i] === "'") k = str();
+        else if (/[A-Za-z_$À-￿\d]/.test(s[i])) { k = s.slice(i).match(/^[^\s:=,{}\[\]"']+/)[0]; i += k.length; fix(`Tên khóa ${k} chưa đặt trong nháy kép → thêm nháy`, at); }
+        else { fix(`Ký tự không hợp lệ "${s[i]}" → bỏ qua`); i++; return null; }
+        ws();
+        if (s[i] === ":") i++;
+        else if (s[i] === "=") { fix('Dùng "=" thay cho ":" → sửa'); i++; }
+        else fix(`Thiếu dấu ":" sau khóa "${k}" → tự thêm`);
+        return { k, v: value(depth + 1) };
+      });
+      const seen = new Set();
+      for (const it of items) if (it) { if (seen.has(it.k)) fixes.push({ line: 0, col: 0, msg: `Khóa "${it.k}" bị trùng (giữ nguyên cả hai, nên kiểm tra lại)` }); seen.add(it.k); }
+      return { t: "obj", items: items.filter(Boolean) };
+    }
+    const arr = depth => ({ t: "arr", items: container("[", "]", depth, () => value(depth + 1)) });
+
+    ws();
+    if (i >= s.length) throw new Error("Nội dung trống");
+    const roots = [value(0)];
+    for (ws(); i < s.length; ws()) {
+      if (s[i] === "," ) { i++; continue; }
+      if (!isValStart(s[i])) { fix(`Nội dung thừa sau giá trị gốc "${s.slice(i, i + 20)}…" → bỏ`); break; }
+      roots.push(value(0));
+    }
+    if (roots.length > 1) fix(`Có ${roots.length} giá trị gốc liền nhau (kiểu NDJSON) → gộp thành một mảng`, 0);
+    return { ast: roots.length > 1 ? { t: "arr", items: roots } : roots[0], fixes };
+  }
+
+  const q = v => JSON.stringify(v);
+  function stringify(n, indent, lvl = 0) {
+    const pad = indent ? "\n" + indent.repeat(lvl + 1) : "", end = indent ? "\n" + indent.repeat(lvl) : "", sep = indent ? ": " : ":";
+    if (n.t === "str") return q(n.v);
+    if (n.t === "num") return n.raw;
+    if (n.t === "lit") return n.v;
+    if (!n.items.length) return n.t === "obj" ? "{}" : "[]";
+    const parts = n.items.map(it => n.t === "obj" ? pad + q(it.k) + sep + stringify(it.v, indent, lvl + 1) : pad + stringify(it, indent, lvl + 1));
+    return (n.t === "obj" ? "{" : "[") + parts.join(",") + end + (n.t === "obj" ? "}" : "]");
+  }
+
+  return { check, parse, stringify };
+})();
+
+// XML / HTML: tolerant tokenizer + tree builder that repairs structure, and a pretty printer.
+const MarkupTool = (() => {
+  const VOID = new Set("area base br col embed hr img input link meta param source track wbr".split(" "));
+  const RAW = new Set(["script", "style", "textarea", "title", "pre"]);
+  const OPTIONAL_END = new Set("p li dt dd tr td th option optgroup thead tbody tfoot colgroup html head body caption rt rp".split(" "));
+  const P_CLOSERS = new Set("address article aside blockquote details div dl fieldset figure footer form h1 h2 h3 h4 h5 h6 header hr main nav ol p pre section table ul".split(" "));
+  const AUTO_CLOSE = { li: ["li"], dt: ["dt", "dd"], dd: ["dt", "dd"], tr: ["tr", "td", "th"], td: ["td", "th"], th: ["td", "th"],
+                       option: ["option"], optgroup: ["optgroup", "option"], thead: ["tbody", "tfoot"], tbody: ["thead", "tbody", "tfoot", "tr", "td", "th"], tfoot: ["thead", "tbody"] };
+  const INLINE = new Set("a abbr b bdi bdo br cite code data dfn em i img input kbd label mark q s samp small span strong sub sup time u var wbr button select textarea".split(" "));
+  const lineCol = (s, i) => { const pre = s.slice(0, i).split("\n"); return { line: pre.length, col: pre[pre.length - 1].length + 1 }; };
+
+  function build(text, html) {
+    const s = text.replace(/^﻿/, "");
+    const fixes = [];
+    const fix = (msg, at) => fixes.push({ ...lineCol(s, at), msg });
+    const norm = n => html ? n.toLowerCase() : n;
+    const root = { name: "#root", children: [] }, stack = [root];
+    const top = () => stack[stack.length - 1];
+    const add = n => top().children.push(n);
+    const escText = (t, at) => {
+      const bad = t.match(/&(?![A-Za-z][\w.-]*;|#\d+;|#x[0-9a-fA-F]+;)/g);
+      if (bad && !html) fix(`Ký tự "&" chưa được thoát → &amp;`, at);
+      return t.replace(/&(?![A-Za-z][\w.-]*;|#\d+;|#x[0-9a-fA-F]+;)/g, "&amp;");
+    };
+    const closeTo = (idx, at, reason) => {
+      while (stack.length - 1 > idx) {
+        const n = stack.pop();
+        if (!(html && OPTIONAL_END.has(n.name))) fix(`Thẻ <${n.name}> chưa được đóng → tự đóng${reason}`, n.at);
+      }
+    };
+    let i = 0;
+    while (i < s.length) {
+      const at = i;
+      if (s[i] !== "<" || !/[A-Za-z_!?\/:]/.test(s[i + 1] || "")) {
+        let j = s.indexOf("<", i + 1);
+        while (j >= 0 && !/[A-Za-z_!?\/:]/.test(s[j + 1] || "")) j = s.indexOf("<", j + 1);
+        const raw = s.slice(i, j < 0 ? s.length : j);
+        if (/<(?![A-Za-z_!?\/:])/.test(raw)) fix(`Ký tự "<" đứng riêng → &lt;`, at);
+        add({ text: escText(raw.replace(/<(?![A-Za-z_!?\/:])/g, "&lt;"), at) });
+        i = j < 0 ? s.length : j;
+        continue;
+      }
+      const grab = (endTok, label) => {
+        const e = s.indexOf(endTok, i);
+        if (e < 0) { fix(`${label} chưa đóng đến cuối file → tự đóng`, at); i = s.length; return s.slice(at) + endTok; }
+        i = e + endTok.length; return s.slice(at, i);
+      };
+      if (s.startsWith("<!--", i)) { add({ comment: grab("-->", "Chú thích <!--") }); continue; }
+      if (s.startsWith("<![CDATA[", i)) { add({ cdata: grab("]]>", "Khối CDATA") }); continue; }
+      if (s.startsWith("<?", i)) { add({ pi: grab("?>", "Khai báo <?") }); continue; }
+      if (s[i + 1] === "!") {
+        let depth = 0, j = i + 2;
+        for (; j < s.length; j++) { if (s[j] === "[") depth++; else if (s[j] === "]") depth--; else if (s[j] === ">" && depth <= 0) break; }
+        add({ doctype: s.slice(i, Math.min(j + 1, s.length)) }); i = j + 1; continue;
+      }
+      if (s[i + 1] === "/") {
+        const m = s.slice(i).match(/^<\/\s*([^\s>\/<]*)\s*(>?)/);
+        i += m[0].length;
+        if (!m[2]) fix(`Thẻ đóng </${m[1]}> thiếu dấu ">" → tự thêm`, at);
+        const name = norm(m[1]);
+        let idx = -1;
+        for (let k = stack.length - 1; k > 0; k--) if (stack[k].name === name) { idx = k; break; }
+        if (idx < 0) { fix(html && VOID.has(name) ? `Thẻ </${name}> không cần thiết (thẻ rỗng) → bỏ` : `Thẻ đóng </${m[1]}> thừa, không có thẻ mở tương ứng → bỏ`, at); continue; }
+        closeTo(idx, at, ` (gặp </${m[1]}>)`);
+        stack.pop();
+        continue;
+      }
+      // open tag
+      const nm = s.slice(i + 1).match(/^[^\s>\/<"'=]+/)[0];
+      const name = norm(nm);
+      i += 1 + nm.length;
+      const attrs = [];
+      let self = false, closed = false;
+      while (i < s.length) {
+        while (/\s/.test(s[i] || "")) i++;
+        if (s[i] === ">") { i++; closed = true; break; }
+        if (s.startsWith("/>", i)) { i += 2; self = closed = true; break; }
+        if (s[i] === "<") break;
+        if (s[i] === "/") { i++; continue; }
+        const an = (s.slice(i).match(/^[^\s"'>\/=<]+/) || [s[i]])[0];
+        const aAt = i;
+        i += an.length;
+        while (/\s/.test(s[i] || "")) i++;
+        let v = null;
+        if (s[i] === "=") {
+          i++; while (/\s/.test(s[i] || "")) i++;
+          const qc = s[i];
+          if (qc === '"' || qc === "'") {
+            const e = s.indexOf(qc, i + 1), gt = s.indexOf(">", i + 1);
+            if (e < 0 || (gt >= 0 && s.slice(i + 1, e).includes("\n") && gt < e)) { fix(`Giá trị thuộc tính ${an} thiếu dấu đóng nháy → tự đóng`, aAt); const stop = gt < 0 ? s.length : gt; v = s.slice(i + 1, stop); i = stop; }
+            else { v = s.slice(i + 1, e); i = e + 1; }
+          } else {
+            const m = s.slice(i).match(/^[^\s>]*/)[0];
+            v = m.replace(/\/$/, ""); i += v.length;
+            if (!html) fix(`Giá trị thuộc tính ${an}=${v} chưa đặt trong nháy → thêm nháy`, aAt);
+          }
+          if (/</.test(v) && !html) fix(`Thuộc tính ${an} chứa ký tự "<" → &lt;`, aAt);
+          v = escText(v.replace(/</g, "&lt;"), aAt);
+        } else if (!html) { fix(`Thuộc tính ${an} không có giá trị → ${an}="${an}"`, aAt); v = an; }
+        if (attrs.some(a => a.n === an)) { fix(`Thuộc tính ${an} bị trùng trong <${nm}> → bỏ bản sau`, aAt); continue; }
+        attrs.push({ n: html ? an.toLowerCase() : an, v });
+      }
+      if (!closed) fix(`Thẻ <${nm}> thiếu dấu ">" → tự thêm`, at);
+      if (html) {
+        if (name === "p" || AUTO_CLOSE[name] || P_CLOSERS.has(name)) {
+          const closes = name === "p" || P_CLOSERS.has(name) ? ["p", ...(AUTO_CLOSE[name] || [])] : AUTO_CLOSE[name];
+          const t = top();
+          if (closes.includes(t.name)) stack.pop();
+        }
+        if (self && !VOID.has(name)) { fix(`<${name}/> không hợp lệ trong HTML → <${name}></${name}>`, at); }
+        if (VOID.has(name)) self = true;
+      }
+      const node = { name, attrs, children: [], self, at };
+      add(node);
+      if (self) continue;
+      if (html && RAW.has(name) && name !== "pre") {
+        const re = new RegExp(`</\\s*${name}\\s*>`, "i"), rest = s.slice(i), m = rest.match(re);
+        node.raw = m ? rest.slice(0, m.index) : rest;
+        if (!m) fix(`Thẻ <${name}> chưa đóng → tự đóng ở cuối file`, at);
+        i += m ? m.index + m[0].length : rest.length;
+        continue;
+      }
+      stack.push(node);
+    }
+    closeTo(0, s.length, " (hết file)");
+    if (!html) {
+      const els = root.children.filter(n => n.name), stray = root.children.filter(n => n.text && n.text.trim());
+      if (els.length !== 1 || stray.length) {
+        fix(els.length ? `XML phải có đúng 1 phần tử gốc (đang có ${els.length}${stray.length ? " và có chữ nằm ngoài" : ""}) → bọc trong <root>` : "Không có phần tử XML nào → bọc nội dung trong <root>", 0);
+        const head = root.children.filter(n => n.pi || n.doctype);
+        root.children = [...head, { name: "root", attrs: [], children: root.children.filter(n => !n.pi && !n.doctype) }];
+      }
+    }
+    return { root, fixes };
+  }
+
+  function serialize(root, indent, html) {
+    const out = [];
+    const attrsOf = n => n.attrs.map(a => a.v === null ? " " + a.n : ` ${a.n}="${a.v.replace(/"/g, "&quot;")}"`).join("");
+    const inlineStr = (n, keep) => {
+      if (n.text !== undefined) return keep ? n.text : n.text.replace(/\s*\n\s*/g, " ");
+      if (n.comment || n.cdata || n.pi || n.doctype) return n.comment || n.cdata || n.pi || n.doctype;
+      const open = `<${n.name}${attrsOf(n)}`;
+      if (n.self) return html && VOID.has(n.name) ? open + ">" : html ? `${open}></${n.name}>` : open + "/>";
+      const body = n.raw !== undefined ? n.raw : n.children.map(c => inlineStr(c, keep)).join("");
+      return `${open}>${body}</${n.name}>`;
+    };
+    const walk = (n, lvl) => {
+      const pad = indent.repeat(lvl);
+      if (n.text !== undefined) { const t = n.text.trim(); if (t) out.push(pad + t.replace(/\s*\n\s*/g, " ")); return; }
+      if (n.comment || n.cdata || n.pi || n.doctype) { out.push(pad + (n.comment || n.cdata || n.pi || n.doctype)); return; }
+      const open = `<${n.name}${attrsOf(n)}`;
+      if (n.self) { out.push(pad + inlineStr(n)); return; }
+      if (n.raw !== undefined) {
+        const body = n.raw.replace(/^\s*\n/, "").replace(/\s+$/, "");
+        if (!body.includes("\n") || n.name === "textarea") { out.push(`${pad}${open}>${n.name === "textarea" ? n.raw : body.trim()}</${n.name}>`); return; }
+        const lines = body.split("\n"), cut = Math.min(...lines.filter(l => l.trim()).map(l => l.match(/^\s*/)[0].length));
+        out.push(pad + open + ">", ...lines.map(l => l.trim() ? pad + indent + l.slice(cut) : ""), `${pad}</${n.name}>`);
+        return;
+      }
+      const hasText = n.children.some(k => k.text !== undefined && k.text.trim());
+      const kids = hasText ? n.children : n.children.filter(k => k.text === undefined);
+      if (!kids.length) { out.push(pad + (html ? `${open}></${n.name}>` : open + "/>")); return; }
+      const mixed = kids.some(k => k.text !== undefined && k.text.trim()) || (html && n.name === "pre");
+      const allInline = kids.every(k => k.text !== undefined || (html && INLINE.has(k.name)));
+      if (html && n.name === "pre") { out.push(pad + open + ">" + n.children.map(c => inlineStr(c, true)).join("").replace(/^\n/, "") + `</${n.name}>`); return; }
+      if (kids.length === 1 && kids[0].text !== undefined) { out.push(`${pad}${open}>${html ? kids[0].text.trim().replace(/\s*\n\s*/g, " ") : kids[0].text.replace(/^[ \t]*\n\s*/, "").replace(/\s*\n[ \t]*$/, "")}</${n.name}>`); return; }
+      if (mixed && (allInline || !html)) { out.push(`${pad}${open}>${kids.map(inlineStr).join("").trim()}</${n.name}>`); return; }
+      out.push(pad + open + ">");
+      kids.forEach(k => walk(k, lvl + 1));
+      out.push(`${pad}</${n.name}>`);
+    };
+    root.children.forEach(n => walk(n, 0));
+    return out.join("\n");
+  }
+
+  const minify = (root, html) => root.children.map(function m(n) {
+    if (n.text !== undefined) return n.text.trim() ? n.text.replace(/\s+/g, " ") : "";
+    if (n.comment) return "";
+    if (n.cdata || n.pi || n.doctype) return n.cdata || n.pi || n.doctype;
+    const open = `<${n.name}${n.attrs.map(a => a.v === null ? " " + a.n : ` ${a.n}="${a.v.replace(/"/g, "&quot;")}"`).join("")}`;
+    if (n.self) return html && VOID.has(n.name) ? open + ">" : html ? `${open}></${n.name}>` : open + "/>";
+    return `${open}>${n.raw !== undefined ? n.raw : n.children.map(m).join("")}</${n.name}>`;
+  }).join("");
+
+  function checkXml(text) {
+    const doc = new DOMParser().parseFromString(text.replace(/^﻿/, ""), "application/xml");
+    const err = doc.getElementsByTagName("parsererror")[0];
+    if (!err) return null;
+    const msg = err.textContent.replace(/\s+/g, " ").replace(/^This page contains the following errors:/, "").replace(/Below is a rendering.*$/, "").trim();
+    const m = msg.match(/line (\d+) at column (\d+)/) || msg.match(/Line Number (\d+), Column (\d+)/);
+    return { line: m ? +m[1] : 1, col: m ? +m[2] : 1, msg };
+  }
+
+  return { build, serialize, minify, checkXml };
+})();
+
+// Syntax highlighting (output pane) and collapsible tree view for JSON AST / markup tree.
+const ViewRender = (() => {
+  const esc = s => s.replace(/[&<>]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]));
+  const span = (c, t) => `<span class="${c}">${esc(t)}</span>`;
+
+  function json(code) {
+    return code.replace(/("(?:\\.|[^"\\])*")(\s*:)?|(-?\d[\d.eE+\-]*)|\b(true|false|null)\b|([{}\[\],])|([^"\d{}\[\],tfn-]+|.)/g,
+      (m, str, colon, num, lit, punc, other) =>
+        str ? span(colon ? "k" : "s", str) + (colon ? esc(colon) : "") : num ? span("n", num) : lit ? span("l", lit) : punc ? span("p", punc) : esc(m));
+  }
+
+  function attrs(a) {
+    return a.replace(/([^\s=]+)(\s*=\s*)?("[^"]*"|'[^']*'|[^\s"']+)?|(\s+)/g, (m, n, eq, v, w) =>
+      w ? w : span("an", n) + (eq ? esc(eq) : "") + (v ? span("av", v) : ""));
+  }
+  function markup(code) {
+    return code.replace(/(<!--[\s\S]*?-->)|(<!\[CDATA\[[\s\S]*?\]\]>)|(<[?!][\s\S]*?>)|(<\/?)([^\s>\/]+)([^>]*?)(\/?>)|([^<]+|<)/g,
+      (m, com, cdata, decl, open, name, at, close, text) =>
+        com ? span("c", com) : cdata ? span("cd", cdata) : decl ? span("d", decl)
+          : open ? span("t", open) + span("tn", name) + attrs(at) + span("t", close) : esc(m));
+  }
+
+  const highlight = (code, kind) => code.length > 1500000 ? esc(code) : kind === "json" ? json(code) : markup(code);
+
+  function tree(model, kind, limit = 4000) {
+    let count = 0;
+    const more = () => `<div class="muted">… còn nữa (cây chỉ hiển thị ${limit} nút đầu tiên)</div>`;
+    const leaf = (k, v, cls) => `<div class="leaf">${k}${span(cls, v)}</div>`;
+    function jnode(n, key) {
+      if (++count > limit) return count === limit + 1 ? more() : "";
+      const k = key === undefined ? "" : `${span("k", key)}: `;
+      if (n.t === "str") return leaf(k, JSON.stringify(n.v), "s");
+      if (n.t === "num") return leaf(k, n.raw, "n");
+      if (n.t === "lit") return leaf(k, n.v, "l");
+      const sum = n.t === "obj" ? `{ ${n.items.length} khóa }` : `[ ${n.items.length} phần tử ]`;
+      const inner = n.items.map((it, i) => n.t === "obj" ? jnode(it.v, JSON.stringify(it.k)) : jnode(it, String(i))).join("");
+      return `<details ${count < 60 ? "open" : ""}><summary>${k}<span class="muted">${sum}</span></summary>${inner}</details>`;
+    }
+    function mnode(n) {
+      if (++count > limit) return count === limit + 1 ? more() : "";
+      if (n.text !== undefined) return n.text.trim() ? leaf("", n.text.trim().slice(0, 300), "s") : "";
+      if (n.comment) return leaf("", n.comment.slice(0, 200), "c");
+      if (n.cdata || n.pi || n.doctype) return leaf("", (n.cdata || n.pi || n.doctype).slice(0, 200), "d");
+      const at = n.attrs.map(a => ` ${span("an", a.n)}${a.v === null ? "" : "=" + span("av", '"' + a.v + '"')}`).join("");
+      const kids = n.raw !== undefined ? (n.raw.trim() ? leaf("", n.raw.trim().slice(0, 300), "s") : "") : n.children.map(mnode).join("");
+      const head = `${span("t", "<")}${span("tn", n.name)}${at}${span("t", ">")}`;
+      return kids ? `<details ${count < 80 ? "open" : ""}><summary>${head}</summary>${kids}</details>` : `<div class="leaf">${head}</div>`;
+    }
+    return kind === "json" ? jnode(model) : model.children.map(mnode).join("");
+  }
+
+  return { highlight, tree, esc };
+})();
+
+// UI wiring: file open / drag-drop, check, format & repair, minify, tree, jump-to-line.
+const $ = id => document.getElementById(id);
+const EXT = { json: "json jsonc json5 geojson har ipynb webmanifest map babelrc eslintrc",
+              xml: "xml cdm pdm ldm oom bpm svg xsd xsl xslt wsdl config csproj vbproj props targets plist kml gpx rss atom xaml resx pom nuspec dtsx",
+              html: "html htm xhtml shtml" };
+let fileName = "", lastModel = null, lastKind = "";
+
+function detect(text, name) {
+  const ext = (name.split(".").pop() || "").toLowerCase();
+  for (const k in EXT) if (name.includes(".") && EXT[k].split(" ").includes(ext)) return k;
+  const t = text.replace(/^﻿/, "").trimStart();
+  if (/^[\[{]/.test(t)) return "json";
+  if (/^</.test(t)) return /^(<!doctype html|<html|<head|<body)|<(div|p|span|table|script|a)[\s>]/i.test(t) ? "html" : "xml";
+  return /^["\d\-]|^(true|false|null)\b/.test(t) ? "json" : "xml";
+}
+const kind = () => $("kind").value === "auto" ? detect($("src").value, fileName) : $("kind").value;
+const indentUnit = () => ({ "2": "  ", "4": "    ", tab: "\t" }[$("indent").value]);
+const KIND_LABEL = { json: "JSON", xml: "XML", html: "HTML" };
+
+function gutter() {
+  const n = Math.min($("src").value.split("\n").length, 200000);
+  const bad = new Set(($("gut").dataset.bad || "").split(",").filter(Boolean).map(Number));
+  let h = "";
+  for (let i = 1; i <= n; i++) h += bad.has(i) ? `<b>${i}</b>\n` : i + "\n";
+  $("gut").innerHTML = h;
+  $("gut").scrollTop = $("src").scrollTop;
+}
+
+function report(status, cls, items) {
+  $("gut").dataset.bad = items.filter(x => x.line).map(x => x.line).join(",");
+  gutter();
+  $("status").className = cls;
+  $("status").textContent = status;
+  $("msgs").innerHTML = items.map(x => `<li data-line="${x.line || 0}">${x.line ? `<b>Dòng ${x.line}, cột ${x.col}</b> · ` : ""}${ViewRender.esc(x.msg)}</li>`).join("");
+}
+
+function jump(line) {
+  const ta = $("src"), lines = ta.value.split("\n");
+  if (!line || line > lines.length) return;
+  const start = lines.slice(0, line - 1).join("\n").length + (line > 1 ? 1 : 0);
+  ta.focus();
+  ta.setSelectionRange(start, start + lines[line - 1].length);
+  ta.scrollTop = Math.max(0, (line - 5) * parseFloat(getComputedStyle(ta).lineHeight));
+}
+
+function check() {
+  const text = $("src").value, k = kind();
+  $("kindNow").textContent = text.trim() ? `Định dạng: ${KIND_LABEL[k]}` : "";
+  if (!text.trim()) { report("Chưa có nội dung.", "muted", []); return null; }
+  if (k === "json") {
+    const e = JsonTool.check(text);
+    report(e ? `✖ JSON bị lỗi cú pháp (dòng ${e.line}, cột ${e.col}). Bấm “Format & sửa lỗi” để tự sửa.` : "✔ JSON hợp lệ.", e ? "bad" : "good", e ? [e] : []);
+    return e;
+  }
+  if (k === "xml") {
+    const e = MarkupTool.checkXml(text);
+    report(e ? `✖ XML bị lỗi cú pháp (dòng ${e.line}, cột ${e.col}). Bấm “Format & sửa lỗi” để tự sửa.` : "✔ XML hợp lệ (well-formed).", e ? "bad" : "good", e ? [e] : []);
+    return e;
+  }
+  const { fixes } = MarkupTool.build(text, true);
+  report(fixes.length ? `⚠ HTML có ${fixes.length} lỗi cấu trúc (trình duyệt vẫn hiển thị được nhưng nên sửa).` : "✔ HTML có cấu trúc thẻ hợp lệ.", fixes.length ? "warn" : "good", fixes);
+  return fixes.length ? fixes[0] : null;
+}
+
+function run(mode) {
+  const text = $("src").value, k = kind();
+  if (!text.trim()) return check();
+  let out, fixes = [], model;
+  try {
+    if (k === "json") {
+      const r = JsonTool.parse(text);
+      fixes = r.fixes; model = r.ast;
+      out = JsonTool.stringify(model, mode === "min" ? "" : indentUnit());
+    } else {
+      const r = MarkupTool.build(text, k === "html");
+      fixes = r.fixes; model = r.root;
+      out = mode === "min" ? MarkupTool.minify(model, k === "html") : MarkupTool.serialize(model, indentUnit(), k === "html");
+    }
+  } catch (e) { report("✖ Không xử lý được: " + e.message, "bad", []); return; }
+  lastModel = model; lastKind = k;
+  $("out").dataset.raw = out;
+  $("out").innerHTML = ViewRender.highlight(out, k);
+  $("tree").innerHTML = ViewRender.tree(model, k);
+  $("outInfo").textContent = `${KIND_LABEL[k]} · ${out.split("\n").length.toLocaleString("vi")} dòng · ${(new Blob([out]).size / 1024).toFixed(1)} KB`;
+  report(fixes.length ? `✔ Đã format. Tự sửa ${fixes.length} lỗi cú pháp, xem danh sách bên dưới và kiểm tra lại kết quả.`
+                      : `✔ Đã format. Nội dung gốc không có lỗi cú pháp.`, fixes.length ? "warn" : "good", fixes);
+}
+
+function load(name, text) {
+  fileName = name;
+  $("src").value = text;
+  $("fname").textContent = name;
+  gutter(); check();
+}
+function readFile(f) { const r = new FileReader(); r.onload = () => load(f.name, r.result); r.readAsText(f, "utf-8"); }
+
+$("file").onchange = e => e.target.files[0] && readFile(e.target.files[0]);
+$("btnCheck").onclick = check;
+$("btnFmt").onclick = () => run("pretty");
+$("btnMin").onclick = () => run("min");
+$("kind").onchange = check;
+$("msgs").onclick = e => { const li = e.target.closest("li"); li && jump(+li.dataset.line); };
+$("src").addEventListener("scroll", () => { $("gut").scrollTop = $("src").scrollTop; });
+let timer;
+$("src").addEventListener("input", () => { clearTimeout(timer); timer = setTimeout(() => { gutter(); if ($("src").value.length < 3e6) check(); }, 400); });
+$("btnCopy").onclick = () => navigator.clipboard.writeText($("out").dataset.raw || "").then(() => $("outInfo").textContent = "Đã sao chép kết quả.");
+$("btnUse").onclick = () => { if ($("out").dataset.raw) { $("src").value = $("out").dataset.raw; gutter(); check(); } };
+$("btnSave").onclick = () => {
+  const raw = $("out").dataset.raw; if (!raw) return;
+  const base = fileName ? fileName.replace(/(\.[^.]+)?$/, "") : "ket-qua", ext = fileName.includes(".") ? fileName.split(".").pop() : lastKind;
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([raw], { type: "text/plain;charset=utf-8" }));
+  a.download = `${base}.formatted.${ext}`; a.click();
+};
+for (const t of document.querySelectorAll("[data-tab]")) t.onclick = () => {
+  document.querySelectorAll("[data-tab]").forEach(x => x.classList.toggle("on", x === t));
+  $("out").hidden = t.dataset.tab !== "out"; $("tree").hidden = t.dataset.tab !== "tree";
+};
+$("demo").onchange = e => { const d = DEMOS[e.target.value]; if (d) load(d.name, d.text); e.target.value = ""; };
+document.body.ondragover = e => { e.preventDefault(); document.body.classList.add("drop"); };
+document.body.ondragleave = e => { if (!e.relatedTarget) document.body.classList.remove("drop"); };
+document.body.ondrop = e => { e.preventDefault(); document.body.classList.remove("drop"); e.dataTransfer.files[0] && readFile(e.dataTransfer.files[0]); };
+
+const DEMOS = {
+  json: { name: "mau-loi.json", text: `{\n  // cấu hình\n  name: 'Diễn đàn sinh viên',\n  "version": 1.0,\n  "active": True,\n  "tags": ["json", "xml" "html",],\n  "owner": { "id": 007, "email": "an@truong.edu.vn" }\n  "note": "thiếu dấu đóng\n}` },
+  xml: { name: "mau-loi.xml", text: `<?xml version="1.0" encoding="UTF-8"?>\n<thuvien>\n<sach id=1 ma="S01">\n<ten>Phân tích & thiết kế HTTT</ten>\n<gia>120000\n</sach>\n<sach id="2" con-hang>\n<ten>Cơ sở dữ liệu</ten>\n</tacgia>\n</sach>` },
+  html: { name: "mau-loi.html", text: `<!DOCTYPE html><html><head><title>Trang thử</title></head><body><div class=box><h1>Diễn đàn<p>Đoạn 1<p>Đoạn 2 <b>đậm <i>nghiêng</b></i><ul><li>Mục 1<li>Mục 2</ul></span><img src="a.png"></img></div></body></html>` },
+};
+gutter(); check();
+const demoParam = new URLSearchParams(location.search).get("demo");
+if (DEMOS[demoParam]) { load(DEMOS[demoParam].name, DEMOS[demoParam].text); run("pretty"); }
+
+</script>
+</body>
+</html>
