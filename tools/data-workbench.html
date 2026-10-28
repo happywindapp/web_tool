@@ -57,6 +57,14 @@
   .gut { margin:0; padding:8px 6px 8px 10px; text-align:right; color:var(--c); background:var(--gut); overflow:hidden; user-select:none;
          font:12.5px/1.5 Consolas, "Cascadia Mono", monospace; white-space:pre; }
   .gut b { color:#fff; background:var(--bad); border-radius:3px; padding:0 3px; }
+  .hl-box { display:grid; min-width:0; min-height:0; }
+  .hl-box > * { grid-area:1/1; }
+  /* Extra end padding keeps the overlay's scroll range ≥ the textarea's (which loses room to scrollbars); weight/style stay plain so glyphs line up. */
+  .code.hl { overflow:hidden; pointer-events:none; padding-right:48px; padding-bottom:48px; }
+  .hl span { font-weight:inherit; font-style:inherit; }
+  textarea.hl-on { position:relative; background:transparent; color:transparent; caret-color:var(--ink); }
+  textarea.hl-on::placeholder { color:var(--muted); }
+  textarea.hl-on::selection { background:color-mix(in srgb, var(--acc) 30%, transparent); }
   .out-wrap { min-height:0; display:grid; }
   .tree { overflow:auto; padding:8px 12px; font:12.5px/1.6 Consolas, monospace; }
   .tree details { margin-left:14px; } .tree summary { cursor:pointer; margin-left:-14px; } .tree .leaf { margin-left:0; }
@@ -701,6 +709,7 @@ I18n.add({
   "bằng": "equals",
   "khác": "is not",
   "Lọc cột {col}": "Filter column {col}",
+  "Giờ HH:MM:SS.fff, có thể kèm ngày YYYY-MM-DD ở trước để lọc log nhiều ngày.": "Time HH:MM:SS.fff, optionally preceded by a YYYY-MM-DD date to filter multi-day logs.",
   "Áp dụng": "Apply",
   "Đóng": "Close",
   "Chỉ hiện “{v}”": "Only show “{v}”",
@@ -794,12 +803,37 @@ const Store = (() => {
   const del = k => { try { localStorage.removeItem(P + k); } catch { /* storage blocked */ } };
   return { get, set, del };
 })();
-// Textarea + line-number gutter that highlights error lines; keeps a localStorage draft when draftKey is given.
-function LineEditor(textarea, { draftKey = "", onChange = null } = {}) {
+// Textarea + line-number gutter that highlights error lines; draftKey keeps a localStorage draft; highlight() → kind paints syntax colors under the text.
+function LineEditor(textarea, { draftKey = "", onChange = null, highlight = null } = {}) {
+  const HL_LIMIT = 300 * 1024;
   const gut = document.createElement("pre");
   gut.className = "gut";
   textarea.before(gut);
-  let bad = new Set(), paintedLines = -1, paintedBad = "";
+  let bad = new Set(), paintedLines = -1, paintedBad = "", hl = null, hlFrame = 0;
+  if (highlight) {
+    const box = document.createElement("div");
+    box.className = "hl-box";
+    hl = document.createElement("pre");
+    hl.className = "code hl";
+    hl.setAttribute("aria-hidden", "true");
+    textarea.before(box);
+    box.append(hl, textarea);
+  }
+
+  function syncScroll() {
+    gut.scrollTop = textarea.scrollTop;
+    if (hl) { hl.scrollTop = textarea.scrollTop; hl.scrollLeft = textarea.scrollLeft; }
+  }
+
+  // Large texts fall back to plain textarea colors so typing stays responsive.
+  function paintColors() {
+    hlFrame = 0;
+    const v = textarea.value, on = v.length <= HL_LIMIT;
+    textarea.classList.toggle("hl-on", on);
+    hl.innerHTML = on ? ViewRender.highlight(v, highlight()) : "";
+    syncScroll();
+  }
+  const queueColors = () => { if (hl && !hlFrame) hlFrame = requestAnimationFrame(paintColors); };
 
   // Rebuilding up to 200k gutter lines is costly, so only repaint when line count or error set changes.
   function paint() {
@@ -811,6 +845,7 @@ function LineEditor(textarea, { draftKey = "", onChange = null } = {}) {
       paintedLines = n; paintedBad = key;
     }
     gut.scrollTop = textarea.scrollTop;
+    queueColors();
   }
 
   const saveDraft = Dom.debounce(() => {
@@ -820,8 +855,8 @@ function LineEditor(textarea, { draftKey = "", onChange = null } = {}) {
   }, 600);
   const changed = Dom.debounce(() => { paint(); if (onChange) onChange(); }, 300);
 
-  textarea.addEventListener("input", () => { changed(); saveDraft(); });
-  textarea.addEventListener("scroll", () => { gut.scrollTop = textarea.scrollTop; });
+  textarea.addEventListener("input", () => { changed(); saveDraft(); queueColors(); });
+  textarea.addEventListener("scroll", syncScroll);
   if (draftKey && !textarea.value) textarea.value = Store.get("draft." + draftKey, "");
   paint();
 
@@ -841,6 +876,7 @@ function LineEditor(textarea, { draftKey = "", onChange = null } = {}) {
     get value() { return textarea.value; },
     set,
     mark(lines) { bad = new Set(lines.filter(Boolean)); paint(); },
+    refresh: queueColors,
     jump,
   };
 }
@@ -931,9 +967,18 @@ const ColFilter = (() => {
   const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
   let pop = null;
 
-  // range compares strings, so a time window "09:00" … "09:30" also keeps "09:30:59.999".
+  const DATE = /^\d{4}-\d{2}-\d{2}/;
+  // Strings are compared, so "09:00" … "09:30" also keeps "09:30:59.999". A bound with a date ("2026-10-28 09:00") compares the full
+  // "YYYY-MM-DD HH:MM:SS" value and lends its date to a bound without one; with no dates at all, a dated value is compared on its time only.
+  function inRange(f, v) {
+    let a = f.v.replace("T", " "), b = f.v2.replace("T", " ");
+    const day = (DATE.exec(a) || DATE.exec(b) || [""])[0];
+    if (day) { if (a && !DATE.test(a)) a = `${day} ${a}`; if (b && !DATE.test(b)) b = `${day} ${b}`; }
+    else v = v.replace(/^\d{4}-\d{2}-\d{2}[ T]/, "");
+    return (!a || v >= a) && (!b || v <= b + "￿");
+  }
   function test(f, v) {
-    if (f.op === "range") return (!f.v || v >= f.v) && (!f.v2 || v <= f.v2 + "￿");
+    if (f.op === "range") return inRange(f, v);
     if (f.op === "eq") return v === f.v;
     if (f.op === "neq") return v !== f.v;
     return v.toLowerCase().includes(f.v.toLowerCase());
@@ -959,8 +1004,9 @@ const ColFilter = (() => {
   function editor(x, y, colLabel, range, onApply) {
     const from = esc(T("Từ")), to = esc(T("Đến")), has = esc(T("chứa")), eq = esc(T("bằng")), neq = esc(T("khác"));
     const title = esc(T("Lọc cột {col}", { col: colLabel })), apply = esc(T("Áp dụng")), shut = esc(T("Đóng"));
+    const dated = esc(T("Giờ HH:MM:SS.fff, có thể kèm ngày YYYY-MM-DD ở trước để lọc log nhiều ngày."));
     const body = range
-      ? `<label>${from} <input type="text" data-f="v" placeholder="09:00:00.000"></label><label>${to} <input type="text" data-f="v2" placeholder="09:30:00"></label>`
+      ? `<label>${from} <input type="text" data-f="v" placeholder="09:00:00.000"></label><label>${to} <input type="text" data-f="v2" placeholder="2026-10-28 09:30:00"></label><div class="muted">${dated}</div>`
       : `<select data-f="op"><option value="has">${has}</option><option value="eq">${eq}</option><option value="neq">${neq}</option></select><input type="text" data-f="v">`;
     show(x, y, `<b>${title}</b><div class="row">${body}</div>` +
       `<div class="row"><button class="main" data-a="ok">${apply}</button><button data-a="x">${shut}</button></div>`, p => {
@@ -1743,8 +1789,25 @@ const ViewRender = (() => {
           : open ? span("t", open) + span("tn", name) + attrs(at) + span("t", close) : esc(m));
   }
 
+  const JS_KW = new Set(("async await break case catch class const continue debugger default delete do else export extends finally for from function "
+    + "if import in instanceof let new of return static super switch this throw try typeof var void while with yield").split(" "));
+  const JS_LIT = new Set(["true", "false", "null", "undefined", "NaN", "Infinity"]);
+  // Regex literals are not recognised; unterminated strings/comments stop at end of line/input so typing stays readable.
+  function script(code) {
+    return code.replace(/(\/\/[^\n]*|\/\*[\s\S]*?(?:\*\/|$))|("(?:\\.|[^"\\\n])*"?|'(?:\\.|[^'\\\n])*'?|`(?:\\[\s\S]|[^`\\])*`?)|([A-Za-z_$][\w$]*)|(\d[\w.]*)|([^\w$"'`\/]+|[\s\S])/g,
+      (m, com, str, id, num) => com ? span("c", com) : str ? span("s", str)
+        : id ? (JS_KW.has(id) ? span("k", id) : JS_LIT.has(id) ? span("l", id) : esc(id)) : num ? span("n", num) : esc(m));
+  }
+  // "name:" counts as a property only when ; or } comes before the next { (so a:hover { … } stays a selector).
+  function css(code) {
+    return code.replace(/(\/\*[\s\S]*?(?:\*\/|$))|("(?:\\.|[^"\\\n])*"?|'(?:\\.|[^'\\\n])*'?)|(@[\w-]+)|(#[\da-fA-F]{3,8}\b|-?\.?\d[\d.]*(?:%|[a-zA-Z]+)?)|([\w-]+)(\s*:(?=[^;{}]*[;}]))?|([^\w"'\/#@.-]+|[\s\S])/g,
+      (m, com, str, at, num, word, colon) => com ? span("c", com) : str ? span("s", str) : at ? span("k", at) : num ? span("n", num)
+        : word ? (colon ? span("an", word) + esc(colon) : esc(word)) : esc(m));
+  }
+
   const highlight = (code, kind) => code.length > 1500000 ? esc(code)
-    : kind === "json" ? json(code) : kind === "xml" || kind === "html" ? markup(code) : esc(code);
+    : kind === "json" ? json(code) : kind === "xml" || kind === "html" ? markup(code)
+    : kind === "js" ? script(code) : kind === "css" ? css(code) : esc(code);
 
   function tree(model, kind, limit = 4000) {
     let count = 0;
@@ -2333,7 +2396,7 @@ const DEMOS = {
   }
 
   function init() {
-    ed = LineEditor($("fmt-src"), { draftKey: "format", onChange: () => { if (ed.value.length < 3e6) check(); } });
+    ed = LineEditor($("fmt-src"), { draftKey: "format", highlight: () => kind(), onChange: () => { if (ed.value.length < 3e6) check(); } });
     report = ReportPanel($("fmt-status"), $("fmt-msgs"), ed);
     $("fmt-file").onchange = e => { if (e.target.files[0]) onFile(e.target.files[0]); e.target.value = ""; };
     $("fmt-check").onclick = check;
@@ -2441,7 +2504,7 @@ const DEMOS = {
   }
 
   function init() {
-    ed = LineEditor($("cv-src"), { draftKey: "convert", onChange: () => { if (ed.value.length < AUTO_LIMIT) run(); } });
+    ed = LineEditor($("cv-src"), { draftKey: "convert", highlight: () => $("cv-from").value === "auto" ? detected : $("cv-from").value, onChange: () => { if (ed.value.length < AUTO_LIMIT) run(); } });
     report = ReportPanel($("cv-status"), $("cv-msgs"), ed);
     $("cv-file").onchange = e => { if (e.target.files[0]) onFile(e.target.files[0]); e.target.value = ""; };
     $("cv-run").onclick = run;
@@ -2877,7 +2940,7 @@ const DiffRender = (() => {
 
   function show(out, l, status, cls, items = []) {
     lastOut = out; lastLang = l;
-    $("cf-out").textContent = out;
+    $("cf-out").innerHTML = ViewRender.highlight(out, l);
     $("cf-info").textContent = `${LABEL[l]} · ` + T("{lines} dòng · {kb} KB (gốc {src} KB)", { lines: I18n.num(TextUtil.countLines(out)), kb: TextUtil.sizeKb(out), src: TextUtil.sizeKb(ed.value) });
     report.show(status, cls, items);
   }
@@ -2924,13 +2987,13 @@ const DiffRender = (() => {
   }
 
   function init() {
-    ed = LineEditor($("cf-src"), { draftKey: "code", onChange: () => syncLangUi(lang()) });
+    ed = LineEditor($("cf-src"), { draftKey: "code", highlight: () => lang(), onChange: () => syncLangUi(lang()) });
     report = ReportPanel($("cf-status"), $("cf-msgs"), ed);
     $("cf-file").onchange = e => { if (e.target.files[0]) onFile(e.target.files[0]); e.target.value = ""; };
     $("cf-run").onclick = run;
     $("cf-min").onclick = minify;
     $("cf-clear").onclick = () => { lastOut = ""; $("cf-out").textContent = ""; $("cf-info").textContent = ""; load("", ""); report.show(T("Chưa có nội dung."), "muted"); };
-    $("cf-lang").onchange = () => syncLangUi(lang());
+    $("cf-lang").onchange = () => { syncLangUi(lang()); ed.refresh(); };
     $("cf-copy").onclick = () => lastOut && Dom.copy(lastOut).then(ok => {
       $("cf-info").textContent = ok ? T("Đã sao chép kết quả.") : T("Trình duyệt chặn sao chép — hãy bôi đen kết quả rồi nhấn Ctrl+C.");
     });

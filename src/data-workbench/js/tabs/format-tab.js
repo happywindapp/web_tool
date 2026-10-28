@@ -87,7 +87,7 @@
   }
 
   function init() {
-    ed = LineEditor($("fmt-src"), { draftKey: "format", onChange: () => { if (ed.value.length < 3e6) check(); } });
+    ed = LineEditor($("fmt-src"), { draftKey: "format", highlight: () => kind(), onChange: () => { if (ed.value.length < 3e6) check(); } });
     report = ReportPanel($("fmt-status"), $("fmt-msgs"), ed);
     $("fmt-file").onchange = e => { if (e.target.files[0]) onFile(e.target.files[0]); e.target.value = ""; };
     $("fmt-check").onclick = check;

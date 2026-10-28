@@ -1,9 +1,34 @@
-// Textarea + line-number gutter that highlights error lines; keeps a localStorage draft when draftKey is given.
-function LineEditor(textarea, { draftKey = "", onChange = null } = {}) {
+// Textarea + line-number gutter that highlights error lines; draftKey keeps a localStorage draft; highlight() → kind paints syntax colors under the text.
+function LineEditor(textarea, { draftKey = "", onChange = null, highlight = null } = {}) {
+  const HL_LIMIT = 300 * 1024;
   const gut = document.createElement("pre");
   gut.className = "gut";
   textarea.before(gut);
-  let bad = new Set(), paintedLines = -1, paintedBad = "";
+  let bad = new Set(), paintedLines = -1, paintedBad = "", hl = null, hlFrame = 0;
+  if (highlight) {
+    const box = document.createElement("div");
+    box.className = "hl-box";
+    hl = document.createElement("pre");
+    hl.className = "code hl";
+    hl.setAttribute("aria-hidden", "true");
+    textarea.before(box);
+    box.append(hl, textarea);
+  }
+
+  function syncScroll() {
+    gut.scrollTop = textarea.scrollTop;
+    if (hl) { hl.scrollTop = textarea.scrollTop; hl.scrollLeft = textarea.scrollLeft; }
+  }
+
+  // Large texts fall back to plain textarea colors so typing stays responsive.
+  function paintColors() {
+    hlFrame = 0;
+    const v = textarea.value, on = v.length <= HL_LIMIT;
+    textarea.classList.toggle("hl-on", on);
+    hl.innerHTML = on ? ViewRender.highlight(v, highlight()) : "";
+    syncScroll();
+  }
+  const queueColors = () => { if (hl && !hlFrame) hlFrame = requestAnimationFrame(paintColors); };
 
   // Rebuilding up to 200k gutter lines is costly, so only repaint when line count or error set changes.
   function paint() {
@@ -15,6 +40,7 @@ function LineEditor(textarea, { draftKey = "", onChange = null } = {}) {
       paintedLines = n; paintedBad = key;
     }
     gut.scrollTop = textarea.scrollTop;
+    queueColors();
   }
 
   const saveDraft = Dom.debounce(() => {
@@ -24,8 +50,8 @@ function LineEditor(textarea, { draftKey = "", onChange = null } = {}) {
   }, 600);
   const changed = Dom.debounce(() => { paint(); if (onChange) onChange(); }, 300);
 
-  textarea.addEventListener("input", () => { changed(); saveDraft(); });
-  textarea.addEventListener("scroll", () => { gut.scrollTop = textarea.scrollTop; });
+  textarea.addEventListener("input", () => { changed(); saveDraft(); queueColors(); });
+  textarea.addEventListener("scroll", syncScroll);
   if (draftKey && !textarea.value) textarea.value = Store.get("draft." + draftKey, "");
   paint();
 
@@ -45,6 +71,7 @@ function LineEditor(textarea, { draftKey = "", onChange = null } = {}) {
     get value() { return textarea.value; },
     set,
     mark(lines) { bad = new Set(lines.filter(Boolean)); paint(); },
+    refresh: queueColors,
     jump,
   };
 }

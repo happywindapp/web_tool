@@ -68,7 +68,7 @@
   }
 
   function init() {
-    ed = LineEditor($("cv-src"), { draftKey: "convert", onChange: () => { if (ed.value.length < AUTO_LIMIT) run(); } });
+    ed = LineEditor($("cv-src"), { draftKey: "convert", highlight: () => $("cv-from").value === "auto" ? detected : $("cv-from").value, onChange: () => { if (ed.value.length < AUTO_LIMIT) run(); } });
     report = ReportPanel($("cv-status"), $("cv-msgs"), ed);
     $("cv-file").onchange = e => { if (e.target.files[0]) onFile(e.target.files[0]); e.target.value = ""; };
     $("cv-run").onclick = run;

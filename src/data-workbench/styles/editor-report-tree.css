@@ -2,6 +2,14 @@
   .gut { margin:0; padding:8px 6px 8px 10px; text-align:right; color:var(--c); background:var(--gut); overflow:hidden; user-select:none;
          font:12.5px/1.5 Consolas, "Cascadia Mono", monospace; white-space:pre; }
   .gut b { color:#fff; background:var(--bad); border-radius:3px; padding:0 3px; }
+  .hl-box { display:grid; min-width:0; min-height:0; }
+  .hl-box > * { grid-area:1/1; }
+  /* Extra end padding keeps the overlay's scroll range ≥ the textarea's (which loses room to scrollbars); weight/style stay plain so glyphs line up. */
+  .code.hl { overflow:hidden; pointer-events:none; padding-right:48px; padding-bottom:48px; }
+  .hl span { font-weight:inherit; font-style:inherit; }
+  textarea.hl-on { position:relative; background:transparent; color:transparent; caret-color:var(--ink); }
+  textarea.hl-on::placeholder { color:var(--muted); }
+  textarea.hl-on::selection { background:color-mix(in srgb, var(--acc) 30%, transparent); }
   .out-wrap { min-height:0; display:grid; }
   .tree { overflow:auto; padding:8px 12px; font:12.5px/1.6 Consolas, monospace; }
   .tree details { margin-left:14px; } .tree summary { cursor:pointer; margin-left:-14px; } .tree .leaf { margin-left:0; }

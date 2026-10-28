@@ -230,6 +230,7 @@ nút "Format & sửa lỗi" → run("pretty") · "Thu gọn 1 dòng" → run("mi
 | Giới hạn | Giá trị | Hành vi |
 |----------|---------|---------|
 | Tô màu output | > 1.500.000 ký tự | Chỉ escape, không tô màu |
+| Tô màu ô nguồn (Format · Chuyển đổi · CSS/JS) | > 300 KB | Lớp `<pre>` tô màu nằm dưới textarea chữ trong suốt; lớn hơn thì hiện chữ thường để gõ không lag |
 | Cây dữ liệu | 4.000 nút | Cắt, hiện "… còn nữa"; tự mở 60 nút JSON / 80 nút markup đầu |
 | Gutter số dòng | 200.000 dòng | Không đánh số quá mức này; chỉ vẽ lại khi số dòng hoặc tập dòng lỗi đổi |
 | Auto-check khi gõ (Format) | < 3.000.000 ký tự | Lớn hơn thì chỉ cập nhật gutter |

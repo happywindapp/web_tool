@@ -30,7 +30,7 @@
 
   function show(out, l, status, cls, items = []) {
     lastOut = out; lastLang = l;
-    $("cf-out").textContent = out;
+    $("cf-out").innerHTML = ViewRender.highlight(out, l);
     $("cf-info").textContent = `${LABEL[l]} · ` + T("{lines} dòng · {kb} KB (gốc {src} KB)", { lines: I18n.num(TextUtil.countLines(out)), kb: TextUtil.sizeKb(out), src: TextUtil.sizeKb(ed.value) });
     report.show(status, cls, items);
   }
@@ -77,13 +77,13 @@
   }
 
   function init() {
-    ed = LineEditor($("cf-src"), { draftKey: "code", onChange: () => syncLangUi(lang()) });
+    ed = LineEditor($("cf-src"), { draftKey: "code", highlight: () => lang(), onChange: () => syncLangUi(lang()) });
     report = ReportPanel($("cf-status"), $("cf-msgs"), ed);
     $("cf-file").onchange = e => { if (e.target.files[0]) onFile(e.target.files[0]); e.target.value = ""; };
     $("cf-run").onclick = run;
     $("cf-min").onclick = minify;
     $("cf-clear").onclick = () => { lastOut = ""; $("cf-out").textContent = ""; $("cf-info").textContent = ""; load("", ""); report.show(T("Chưa có nội dung."), "muted"); };
-    $("cf-lang").onchange = () => syncLangUi(lang());
+    $("cf-lang").onchange = () => { syncLangUi(lang()); ed.refresh(); };
     $("cf-copy").onclick = () => lastOut && Dom.copy(lastOut).then(ok => {
       $("cf-info").textContent = ok ? T("Đã sao chép kết quả.") : T("Trình duyệt chặn sao chép — hãy bôi đen kết quả rồi nhấn Ctrl+C.");
     });

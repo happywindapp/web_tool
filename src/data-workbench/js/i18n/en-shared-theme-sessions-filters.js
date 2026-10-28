@@ -18,6 +18,7 @@ I18n.add({
   "bằng": "equals",
   "khác": "is not",
   "Lọc cột {col}": "Filter column {col}",
+  "Giờ HH:MM:SS.fff, có thể kèm ngày YYYY-MM-DD ở trước để lọc log nhiều ngày.": "Time HH:MM:SS.fff, optionally preceded by a YYYY-MM-DD date to filter multi-day logs.",
   "Áp dụng": "Apply",
   "Đóng": "Close",
   "Chỉ hiện “{v}”": "Only show “{v}”",

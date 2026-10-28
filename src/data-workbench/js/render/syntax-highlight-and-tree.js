@@ -20,8 +20,25 @@ const ViewRender = (() => {
           : open ? span("t", open) + span("tn", name) + attrs(at) + span("t", close) : esc(m));
   }
 
+  const JS_KW = new Set(("async await break case catch class const continue debugger default delete do else export extends finally for from function "
+    + "if import in instanceof let new of return static super switch this throw try typeof var void while with yield").split(" "));
+  const JS_LIT = new Set(["true", "false", "null", "undefined", "NaN", "Infinity"]);
+  // Regex literals are not recognised; unterminated strings/comments stop at end of line/input so typing stays readable.
+  function script(code) {
+    return code.replace(/(\/\/[^\n]*|\/\*[\s\S]*?(?:\*\/|$))|("(?:\\.|[^"\\\n])*"?|'(?:\\.|[^'\\\n])*'?|`(?:\\[\s\S]|[^`\\])*`?)|([A-Za-z_$][\w$]*)|(\d[\w.]*)|([^\w$"'`\/]+|[\s\S])/g,
+      (m, com, str, id, num) => com ? span("c", com) : str ? span("s", str)
+        : id ? (JS_KW.has(id) ? span("k", id) : JS_LIT.has(id) ? span("l", id) : esc(id)) : num ? span("n", num) : esc(m));
+  }
+  // "name:" counts as a property only when ; or } comes before the next { (so a:hover { … } stays a selector).
+  function css(code) {
+    return code.replace(/(\/\*[\s\S]*?(?:\*\/|$))|("(?:\\.|[^"\\\n])*"?|'(?:\\.|[^'\\\n])*'?)|(@[\w-]+)|(#[\da-fA-F]{3,8}\b|-?\.?\d[\d.]*(?:%|[a-zA-Z]+)?)|([\w-]+)(\s*:(?=[^;{}]*[;}]))?|([^\w"'\/#@.-]+|[\s\S])/g,
+      (m, com, str, at, num, word, colon) => com ? span("c", com) : str ? span("s", str) : at ? span("k", at) : num ? span("n", num)
+        : word ? (colon ? span("an", word) + esc(colon) : esc(word)) : esc(m));
+  }
+
   const highlight = (code, kind) => code.length > 1500000 ? esc(code)
-    : kind === "json" ? json(code) : kind === "xml" || kind === "html" ? markup(code) : esc(code);
+    : kind === "json" ? json(code) : kind === "xml" || kind === "html" ? markup(code)
+    : kind === "js" ? script(code) : kind === "css" ? css(code) : esc(code);
 
   function tree(model, kind, limit = 4000) {
     let count = 0;
