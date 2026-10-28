@@ -5,11 +5,12 @@
   let ed, report, fileName = "", lastOut = "", lastKind = "", redo = () => check();
 
   const kind = () => $("fmt-kind").value === "auto" ? Detect.markup(ed.value, fileName) : $("fmt-kind").value;
+  const showKind = () => { $("fmt-kind-now").textContent = ed.value.trim() ? T("Định dạng: {k}", { k: KIND_LABEL[kind()] }) : ""; };
 
   function check() {
     const text = ed.value, k = kind();
     redo = check;
-    $("fmt-kind-now").textContent = text.trim() ? T("Định dạng: {k}", { k: KIND_LABEL[k] }) : "";
+    showKind();
     if (!text.trim()) return report.show(T("Chưa có nội dung."), "muted");
     if (k === "json") {
       const e = JsonTool.check(text);
@@ -112,13 +113,13 @@
     });
     $("fmt-demo").onchange = e => { demo(e.target.value); e.target.value = ""; };
     Workbench.bindSendTo($("fmt-send"), "format", () => lastOut ? { text: lastOut, kind: lastKind } : null);
-    check();
+    if (ed.value.trim()) check(); else demo("json");
   }
 
   Workbench.register("format", {
     label: "Format JSON · XML · HTML", init, onFile, demo,
     primary: () => run("pretty"),
     receive: (text, meta) => { load("", text); if (KIND_LABEL[meta.kind]) run("pretty"); },
-    relang: () => { showName(); redo(); },
+    relang: () => { showName(); showKind(); redo(); },
   });
 })();

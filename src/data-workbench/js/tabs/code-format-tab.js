@@ -95,7 +95,7 @@
     };
     $("cf-demo").onchange = e => { demo(e.target.value); e.target.value = ""; };
     Workbench.bindSendTo($("cf-send"), "code", () => lastOut ? { text: lastOut, kind: lastLang } : null);
-    syncLangUi(lang());
+    if (ed.value.trim()) syncLangUi(lang()); else demo("css");
   }
 
   Workbench.register("code", {

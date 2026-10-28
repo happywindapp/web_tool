@@ -586,105 +586,105 @@ document.body.ondrop = e => { e.preventDefault(); document.body.classList.remove
 
 const SAMPLES = {
   flowchart: ["Flowchart — sơ đồ luồng", `---
-title: Quy trình đặt lệnh
+title: Order placement flow
 ---
 flowchart LR
-    A([Khách hàng]) --> B[Nhập lệnh]
-    B --> C{Đủ số dư?}
-    C -- Có --> D[Gửi lên sàn]
-    C -- Không --> E[Từ chối]:::bad
-    D --> F[(CSDL lệnh)]
-    D -.-> G>Thông báo]
+    A([Customer]) --> B[Enter order]
+    B --> C{Enough balance?}
+    C -- Yes --> D[Send to exchange]
+    C -- No --> E[Reject]:::bad
+    D --> F[(Order DB)]
+    D -.-> G>Notify]
     classDef bad fill:#fee2e2,stroke:#b91c1c`],
   sequence: ["Sequence — tuần tự", `sequenceDiagram
     autonumber
-    actor KH as Khách hàng
+    actor U as Customer
     participant FE as Web
     participant API
-    participant DB as Cơ sở dữ liệu
-    KH->>FE: Đăng nhập
+    participant DB as Database
+    U->>FE: Sign in
     FE->>+API: POST /login
-    API->>DB: Kiểm tra tài khoản
+    API->>DB: Check account
     DB-->>API: OK
-    alt Mật khẩu đúng
+    alt Password correct
         API-->>FE: token
-    else Sai mật khẩu
+    else Wrong password
         API-->>FE: 401
     end
     deactivate API
-    Note over FE,API: Token hết hạn sau 15 phút`],
+    Note over FE,API: Token expires after 15 minutes`],
   class: ["Class — lớp", `classDiagram
-    class KhachHang {
-        +String hoTen
+    class Customer {
+        +String fullName
         +String email
     }
-    class TaiKhoan {
-        +String soTK
-        +decimal soDu
-        +napTien(soTien) bool
-        +rutTien(soTien) bool
+    class Account {
+        +String number
+        +decimal balance
+        +deposit(amount) bool
+        +withdraw(amount) bool
     }
-    class TaiKhoanTietKiem {
-        +float laiSuat
+    class SavingsAccount {
+        +float interestRate
     }
-    KhachHang "1" --> "*" TaiKhoan : sở hữu
-    TaiKhoan <|-- TaiKhoanTietKiem`],
+    Customer "1" --> "*" Account : owns
+    Account <|-- SavingsAccount`],
   state: ["State — trạng thái", `stateDiagram-v2
-    state "Mới" as Moi
-    state "Chờ khớp" as ChoKhop
-    state "Khớp một phần" as KhopMotPhan
-    state "Đã khớp" as DaKhop
-    state "Đã huỷ" as DaHuy
-    [*] --> Moi
-    Moi --> ChoKhop : Gửi lệnh
-    ChoKhop --> KhopMotPhan : Khớp 1 phần
-    KhopMotPhan --> DaKhop : Khớp hết
-    ChoKhop --> DaKhop : Khớp hết
-    ChoKhop --> DaHuy : Huỷ
-    DaKhop --> [*]
-    DaHuy --> [*]
-    note right of ChoKhop : Có thể sửa giá`],
+    state "New" as New
+    state "Pending" as Pending
+    state "Partially filled" as Partial
+    state "Filled" as Filled
+    state "Cancelled" as Cancelled
+    [*] --> New
+    New --> Pending : Submit
+    Pending --> Partial : Partial fill
+    Partial --> Filled : Fully filled
+    Pending --> Filled : Fully filled
+    Pending --> Cancelled : Cancel
+    Filled --> [*]
+    Cancelled --> [*]
+    note right of Pending : Price can be amended`],
   er: ["ER — thực thể quan hệ", `erDiagram
-    KHACH_HANG ||--o{ DON_HANG : "đặt"
-    DON_HANG ||--|{ CHI_TIET : "gồm"
-    SAN_PHAM ||--o{ CHI_TIET : "thuộc"
-    KHACH_HANG {
+    CUSTOMER ||--o{ ORDER : "places"
+    ORDER ||--|{ ORDER_LINE : "contains"
+    PRODUCT ||--o{ ORDER_LINE : "appears in"
+    CUSTOMER {
         int id PK
-        string ho_ten
+        string full_name
         string email UK
     }
-    DON_HANG {
+    ORDER {
         int id PK
-        int khach_hang_id FK
-        date ngay_dat
+        int customer_id FK
+        date order_date
     }`],
   gantt: ["Gantt — kế hoạch", `gantt
-    title Kế hoạch dự án
+    title Project plan
     dateFormat YYYY-MM-DD
-    section Phân tích
-        Thu thập yêu cầu :done, a1, 2026-11-02, 5d
-        Thiết kế         :active, a2, after a1, 7d
-    section Phát triển
-        Backend          :b1, after a2, 10d
-        Frontend         :b2, after a2, 12d
-    section Kiểm thử
-        UAT              :crit, c1, after b2, 5d
-        Go-live          :milestone, m1, after c1, 0d`],
+    section Analysis
+        Gather requirements :done, a1, 2026-11-02, 5d
+        Design              :active, a2, after a1, 7d
+    section Development
+        Backend             :b1, after a2, 10d
+        Frontend            :b2, after a2, 12d
+    section Testing
+        UAT                 :crit, c1, after b2, 5d
+        Go-live             :milestone, m1, after c1, 0d`],
   pie: ["Pie — biểu đồ tròn", `pie showData
-    title Tỷ trọng danh mục
-    "Cổ phiếu" : 45
-    "Trái phiếu" : 30
-    "Tiền gửi" : 15
-    "Vàng" : 10`],
+    title Portfolio allocation
+    "Stocks" : 45
+    "Bonds" : 30
+    "Deposits" : 15
+    "Gold" : 10`],
   journey: ["User journey — hành trình", `journey
-    title Mở tài khoản online
-    section Đăng ký
-      Tải app: 5: Khách hàng
-      Nhập thông tin: 3: Khách hàng
-      Chụp CCCD: 2: Khách hàng
-    section Xác thực
-      eKYC: 4: Khách hàng, Hệ thống
-      Ký hợp đồng: 4: Khách hàng`],
+    title Open an account online
+    section Sign up
+      Download the app: 5: Customer
+      Fill in details: 3: Customer
+      Photograph ID card: 2: Customer
+    section Verification
+      eKYC: 4: Customer, System
+      Sign the contract: 4: Customer`],
   git: ["Git graph — nhánh git", `gitGraph
     commit id: "init"
     branch develop
@@ -700,51 +700,50 @@ flowchart LR
     commit id: "hotfix"`],
   mindmap: ["Mindmap — sơ đồ tư duy", `mindmap
   root((Mermaid))
-    Luồng
+    Flows
       flowchart
       sequence
-    Dữ liệu
+    Data
       ER
       class
-    Kế hoạch
+    Planning
       gantt
       timeline
-    Biểu đồ
+    Charts
       pie
       xychart`],
   timeline: ["Timeline — dòng thời gian", `timeline
-    title Lộ trình sản phẩm 2026
-    Q1 : Khảo sát người dùng
-    Q2 : Bản thử nghiệm
-       : Thu phản hồi
-    Q3 : Ra mắt chính thức
-    Q4 : Mở rộng tính năng`],
+    title Product roadmap 2026
+    Q1 : User research
+    Q2 : Beta release
+       : Collect feedback
+    Q3 : General availability
+    Q4 : Feature expansion`],
   quadrant: ["Quadrant — ma trận 4 ô", `quadrantChart
-    title Ưu tiên tính năng
-    x-axis Ít công sức --> Nhiều công sức
-    y-axis Giá trị thấp --> Giá trị cao
-    quadrant-1 Lên kế hoạch
-    quadrant-2 Làm ngay
-    quadrant-3 Cân nhắc
-    quadrant-4 Bỏ qua
-    Xuất PNG: [0.2, 0.85]
-    Chia sẻ link: [0.35, 0.7]
-    Cộng tác: [0.85, 0.75]
-    Đổi màu nút: [0.15, 0.2]`],
+    title Feature priorities
+    x-axis Low effort --> High effort
+    y-axis Low value --> High value
+    quadrant-1 Plan
+    quadrant-2 Do now
+    quadrant-3 Consider
+    quadrant-4 Skip
+    PNG export: [0.2, 0.85]
+    Share link: [0.35, 0.7]
+    Collaboration: [0.85, 0.75]
+    Button colors: [0.15, 0.2]`],
   xychart: ["XY chart — cột & đường", `xychart-beta
-    title "Doanh thu 2026 (tỷ đồng)"
-    x-axis [T1, T2, T3, T4, T5, T6]
-    y-axis "Tỷ đồng" 0 --> 120
+    title "Revenue 2026 (million USD)"
+    x-axis [Jan, Feb, Mar, Apr, May, Jun]
+    y-axis "Million USD" 0 --> 120
     bar [52, 60, 75, 82, 95, 110]
     line [50, 58, 70, 85, 90, 105]`],
-  sankey: ["Sankey — dòng chảy", `%% parser sankey chưa nhận chữ có dấu → viết không dấu
-sankey-beta
+  sankey: ["Sankey — dòng chảy", `sankey-beta
 
-Luong,Chi tieu,60
-Luong,Tiet kiem,25
-Luong,Dau tu,15
-Dau tu,Co phieu,10
-Dau tu,Trai phieu,5`],
+Salary,Spending,60
+Salary,Savings,25
+Salary,Investing,15
+Investing,Stocks,10
+Investing,Bonds,5`],
   block: ["Block — khối", `block-beta
     columns 3
     FE["Frontend"] space BE["Backend"]
@@ -752,60 +751,60 @@ Dau tu,Trai phieu,5`],
     FE --> BE
     BE --> DB`],
   architecture: ["Architecture — kiến trúc", `architecture-beta
-    group sys(cloud)[He thong]
+    group sys(cloud)[System]
     service web(internet)[Web] in sys
     service api(server)[API] in sys
-    service db(database)[CSDL] in sys
-    service disk(disk)[Luu tru] in sys
+    service db(database)[Database] in sys
+    service disk(disk)[Storage] in sys
     web:R --> L:api
     api:R --> L:db
     db:B --> T:disk`],
   kanban: ["Kanban — bảng công việc", `kanban
-  todo[Cần làm]
-    t1[Viết tài liệu]
-    t2[Thiết kế UI]
-  doing[Đang làm]
-    t3[Tool Mermaid]
-  done[Xong]
-    t4[Tool format JSON]`],
+  todo[To do]
+    t1[Write docs]
+    t2[Design UI]
+  doing[In progress]
+    t3[Mermaid tool]
+  done[Done]
+    t4[JSON format tool]`],
   requirement: ["Requirement — yêu cầu", `requirementDiagram
-    requirement xuat_anh {
+    requirement export_image {
         id: 1
-        text: "Xuất PNG/SVG"
+        text: "Export PNG/SVG"
         risk: low
         verifymethod: test
     }
     element tool {
         type: "html"
     }
-    tool - satisfies -> xuat_anh`],
+    tool - satisfies -> export_image`],
   c4: ["C4 — ngữ cảnh hệ thống", `C4Context
-    title Ngữ cảnh hệ thống
-    Person(user, "Người dùng")
-    System(tool, "Web Tools", "HTML chạy trong trình duyệt")
-    System_Ext(gh, "GitHub Pages", "Host file tĩnh")
-    Rel(user, tool, "Dùng")
-    Rel(gh, tool, "Phục vụ")`],
+    title System context
+    Person(user, "User")
+    System(tool, "Web Tools", "HTML running in the browser")
+    System_Ext(gh, "GitHub Pages", "Static file hosting")
+    Rel(user, tool, "Uses")
+    Rel(gh, tool, "Serves")`],
   packet: ["Packet — cấu trúc gói tin", `packet-beta
-    title Gói tin UDP
+    title UDP packet
     0-15: "Source Port"
     16-31: "Destination Port"
     32-47: "Length"
     48-63: "Checksum"
     64-95: "Data (variable)"`],
   radar: ["Radar — mạng nhện", `radar-beta
-    title So sánh công cụ
-    axis e["Dễ dùng"], o["Offline"], x["Xuất ảnh"], s["Chia sẻ"], c["Cộng tác"]
-    curve a["Tool này"]{4, 5, 4, 4, 1}
-    curve b["Công cụ online"]{5, 2, 5, 5, 3}
+    title Tool comparison
+    axis e["Ease of use"], o["Offline"], x["Image export"], s["Sharing"], c["Collaboration"]
+    curve a["This tool"]{4, 5, 4, 4, 1}
+    curve b["Online tool"]{5, 2, 5, 5, 3}
     max 5`],
   treemap: ["Treemap — cây tỷ trọng", `treemap-beta
-"Danh mục"
-    "Cổ phiếu"
-        "Ngân hàng": 30
-        "Bất động sản": 15
-    "Trái phiếu": 35
-    "Tiền mặt": 20`],
+"Portfolio"
+    "Stocks"
+        "Banks": 30
+        "Real estate": 15
+    "Bonds": 35
+    "Cash": 20`],
 };
 
 const LOAD_ERROR = "✖ Không nạp được thư viện tools/vendor/mermaid-12.2.0.min.js — hãy tải cả thư mục vendor/ cùng file HTML.";

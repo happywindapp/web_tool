@@ -1883,27 +1883,27 @@ const JsonDiff = (() => {
 
   return { compare, describe };
 })();
-// Broken / realistic sample inputs per tab (also used by ?demo= for manual testing).
+// Broken / realistic sample inputs per tab: starter content of an empty tab, the sample picker and ?demo=.
 const DEMOS = {
   format: {
-    json: { name: "mau-loi.json", text: `{\n  // cấu hình\n  name: 'Diễn đàn sinh viên',\n  "version": 1.0,\n  "active": True,\n  "tags": ["json", "xml" "html",],\n  "owner": { "id": 007, "email": "an@truong.edu.vn" }\n  "note": "thiếu dấu đóng\n}` },
-    xml: { name: "mau-loi.xml", text: `<?xml version="1.0" encoding="UTF-8"?>\n<thuvien>\n<sach id=1 ma="S01">\n<ten>Phân tích & thiết kế HTTT</ten>\n<gia>120000\n</sach>\n<sach id="2" con-hang>\n<ten>Cơ sở dữ liệu</ten>\n</tacgia>\n</sach>` },
-    html: { name: "mau-loi.html", text: `<!DOCTYPE html><html><head><title>Trang thử</title></head><body><div class=box><h1>Diễn đàn<p>Đoạn 1<p>Đoạn 2 <b>đậm <i>nghiêng</b></i><ul><li>Mục 1<li>Mục 2</ul></span><img src="a.png"></img></div></body></html>` },
+    json: { name: "broken.json", text: `{\n  // settings\n  name: 'Student forum',\n  "version": 1.0,\n  "active": True,\n  "tags": ["json", "xml" "html",],\n  "owner": { "id": 007, "email": "alice@school.example" }\n  "note": "missing closing quote\n}` },
+    xml: { name: "broken.xml", text: `<?xml version="1.0" encoding="UTF-8"?>\n<library>\n<book id=1 code="B01">\n<title>Systems Analysis & Design</title>\n<price>120000\n</book>\n<book id="2" in-stock>\n<title>Database Systems</title>\n</author>\n</book>` },
+    html: { name: "broken.html", text: `<!DOCTYPE html><html><head><title>Test page</title></head><body><div class=box><h1>Forum<p>Paragraph 1<p>Paragraph 2 <b>bold <i>italic</b></i><ul><li>Item 1<li>Item 2</ul></span><img src="a.png"></img></div></body></html>` },
     nested: { name: "log-payload.json", text: `{"event":"order.created","payload":"{\\"orderId\\":12345678901234567890,\\"items\\":[{\\"sku\\":\\"A01\\",\\"qty\\":2}]}","ts":"2026-10-28T09:00:00Z"}` },
   },
   convert: {
-    json: { name: "khach-hang.json", text: `{"data":[\n  {"id":12345678901234567890,"ma":"KH000123","ten":"Nguyễn An","dia_chi":{"tinh":"HCM","quan":"1"},"tags":["vip"],"active":true},\n  {"id":2,"ma":"KH000002","ten":"Trần Bình","dia_chi":{"tinh":"HN"},"active":false}\n]}` },
-    csv: { name: "giao-dich.csv", text: `ngay;ma_ck;so_luong;gia;ghi_chu\n2026-10-27;HPG;1000;27500;"mua; đợt 1"\n2026-10-28;VNM;200;61200;"bán ""chốt lời"""` },
-    xml: { name: "cau-hinh.xml", text: `<config env="test">\n  <db host="localhost" port="5432">shop_db</db>\n  <feature name="export" enabled="true"/>\n  <feature name="beta" enabled="false"/>\n</config>` },
+    json: { name: "customers.json", text: `{"data":[\n  {"id":12345678901234567890,"code":"C000123","name":"Alice Nguyen","address":{"city":"HCM","district":"1"},"tags":["vip"],"active":true},\n  {"id":2,"code":"C000002","name":"Bob Tran","address":{"city":"HN"},"active":false}\n]}` },
+    csv: { name: "trades.csv", text: `date;symbol;quantity;price;note\n2026-10-27;HPG;1000;27500;"buy; batch 1"\n2026-10-28;VNM;200;61200;"sell ""take profit"""` },
+    xml: { name: "config.xml", text: `<config env="test">\n  <db host="localhost" port="5432">shop_db</db>\n  <feature name="export" enabled="true"/>\n  <feature name="beta" enabled="false"/>\n</config>` },
     yaml: { name: "docker-compose.yml", text: `services:\n  api:\n    image: shop-api:1.4.2\n    ports: ["8080:8080"]\n    environment:\n      DB_HOST: db\n      RETRY: 3\n  db:\n    image: postgres:16` },
   },
   csv: {
-    csv: { name: "danh-sach.csv", text: `STT,Họ tên,Mã KH,Số dư,Ghi chú\n1,Nguyễn An,KH000123,15000000,"Khách VIP, ưu tiên"\n2,Trần Bình,KH000002,250000\n3,Lê "Cường",KH000003,1200000,ok\n4,Phạm Dung,KH000004,98000000,"chưa đóng nháy` },
+    csv: { name: "customers.csv", text: `No,Full name,Customer ID,Balance,Note\n1,Alice Nguyen,C000123,15000000,"VIP customer, priority"\n2,Bob Tran,C000002,250000\n3,Carol "Le",C000003,1200000,ok\n4,Dave Pham,C000004,98000000,"unclosed quote` },
   },
   diff: {
     json: {
-      left: `{\n  "orderId": 1001,\n  "status": "PENDING",\n  "items": [{"sku": "A01", "qty": 2}, {"sku": "B02", "qty": 1}],\n  "note": "giao giờ hành chính"\n}`,
-      right: `{\n  "status": "FILLED",\n  "orderId": 1001,\n  "items": [{"sku": "A01", "qty": 3}],\n  "note": "giao giờ hành chính",\n  "filledAt": "2026-10-28T10:15:00Z"\n}`,
+      left: `{\n  "orderId": 1001,\n  "status": "PENDING",\n  "items": [{"sku": "A01", "qty": 2}, {"sku": "B02", "qty": 1}],\n  "note": "deliver during office hours"\n}`,
+      right: `{\n  "status": "FILLED",\n  "orderId": 1001,\n  "items": [{"sku": "A01", "qty": 3}],\n  "note": "deliver during office hours",\n  "filledAt": "2026-10-28T10:15:00Z"\n}`,
     },
     text: {
       left: `server:\n  port: 8080\n  timeout: 30s\nlog:\n  level: info\n  file: /var/log/app.log`,
@@ -1922,11 +1922,12 @@ const DEMOS = {
   let ed, report, fileName = "", lastOut = "", lastKind = "", redo = () => check();
 
   const kind = () => $("fmt-kind").value === "auto" ? Detect.markup(ed.value, fileName) : $("fmt-kind").value;
+  const showKind = () => { $("fmt-kind-now").textContent = ed.value.trim() ? T("Định dạng: {k}", { k: KIND_LABEL[kind()] }) : ""; };
 
   function check() {
     const text = ed.value, k = kind();
     redo = check;
-    $("fmt-kind-now").textContent = text.trim() ? T("Định dạng: {k}", { k: KIND_LABEL[k] }) : "";
+    showKind();
     if (!text.trim()) return report.show(T("Chưa có nội dung."), "muted");
     if (k === "json") {
       const e = JsonTool.check(text);
@@ -2029,14 +2030,14 @@ const DEMOS = {
     });
     $("fmt-demo").onchange = e => { demo(e.target.value); e.target.value = ""; };
     Workbench.bindSendTo($("fmt-send"), "format", () => lastOut ? { text: lastOut, kind: lastKind } : null);
-    check();
+    if (ed.value.trim()) check(); else demo("json");
   }
 
   Workbench.register("format", {
     label: "Format JSON · XML · HTML", init, onFile, demo,
     primary: () => run("pretty"),
     receive: (text, meta) => { load("", text); if (KIND_LABEL[meta.kind]) run("pretty"); },
-    relang: () => { showName(); redo(); },
+    relang: () => { showName(); showKind(); redo(); },
   });
 })();
 // Tab "Chuyển đổi": JSON / CSV / TSV / XML / YAML → JSON, CSV, TSV, XML, YAML, JS object, SQL INSERT, Markdown / HTML table.
@@ -2127,7 +2128,7 @@ const DEMOS = {
     };
     $("cv-demo").onchange = e => { demo(e.target.value); e.target.value = ""; };
     Workbench.bindSendTo($("cv-send"), "convert", () => lastOut ? { text: lastOut, kind: lastTo } : null);
-    run();
+    if (ed.value.trim()) run(); else demo("json");
   }
 
   Workbench.register("convert", {
@@ -2281,7 +2282,7 @@ const DEMOS = {
     $("csv-clear").onclick = () => { lastFile = null; head = []; rows = []; loadText(""); };
     $("csv-demo").onchange = e => { demo(e.target.value); e.target.value = ""; };
     Workbench.bindSendTo($("csv-send"), "csv", () => head.length ? { text: csvText(), kind: outDelim() === "\t" ? "tsv" : "csv" } : null);
-    render();
+    demo("csv");
   }
 
   function demo(name) {
@@ -2418,7 +2419,10 @@ const DiffRender = (() => {
 
   const autoRun = () => { if (edA.value && edB.value && edA.value.length + edB.value.length < AUTO_LIMIT) run(); };
   const readInto = (ed, f) => Dom.readFile(f, (name, text) => { if (text === null) report.show(T("✖ Không đọc được file {name}", { name }), "bad"); else { ed.set(text); autoRun(); } });
-  const intoFreeSide = (fill) => fill(edA.value.trim() ? edB : edA);
+  const clear = () => { edA.set(""); edB.set(""); $("df-result").innerHTML = ""; report.show(T(EMPTY), "muted"); };
+  // Incoming data replaces the starter sample instead of being diffed against half of it.
+  const isSample = () => edA.value === DEMOS.diff.json.left && edB.value === DEMOS.diff.json.right;
+  const intoFreeSide = (fill) => { if (isSample()) clear(); fill(edA.value.trim() ? edB : edA); };
 
   function demo(name) {
     const d = DEMOS.diff[name];
@@ -2436,11 +2440,11 @@ const DiffRender = (() => {
     $("df-run").onclick = run;
     $("df-next").onclick = nextChange;
     $("df-swap").onclick = () => { const t = edA.value; edA.set(edB.value); edB.set(t); autoRun(); };
-    $("df-clear").onclick = () => { edA.set(""); edB.set(""); $("df-result").innerHTML = ""; report.show(T(EMPTY), "muted"); };
+    $("df-clear").onclick = clear;
     document.querySelectorAll("#df-mode, #df-ws, #df-case, #df-ctx").forEach(el => el.addEventListener("change", autoRun));
     $("df-result").onclick = e => { const tr = e.target.closest("tr.skip"); if (tr) tr.outerHTML = hidden[+tr.dataset.skip]; };
     $("df-demo").onchange = e => { demo(e.target.value); e.target.value = ""; };
-    autoRun();
+    if (edA.value.trim() || edB.value.trim()) autoRun(); else demo("json");
   }
 
   Workbench.register("diff", {
@@ -2547,7 +2551,7 @@ const DiffRender = (() => {
     };
     $("cf-demo").onchange = e => { demo(e.target.value); e.target.value = ""; };
     Workbench.bindSendTo($("cf-send"), "code", () => lastOut ? { text: lastOut, kind: lastLang } : null);
-    syncLangUi(lang());
+    if (ed.value.trim()) syncLangUi(lang()); else demo("css");
   }
 
   Workbench.register("code", {

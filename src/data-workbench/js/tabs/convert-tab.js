@@ -86,7 +86,7 @@
     };
     $("cv-demo").onchange = e => { demo(e.target.value); e.target.value = ""; };
     Workbench.bindSendTo($("cv-send"), "convert", () => lastOut ? { text: lastOut, kind: lastTo } : null);
-    run();
+    if (ed.value.trim()) run(); else demo("json");
   }
 
   Workbench.register("convert", {

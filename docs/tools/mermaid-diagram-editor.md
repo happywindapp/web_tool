@@ -32,7 +32,7 @@ Dev/BA cần vẽ nhanh flowchart, sequence, ER… bằng mã Mermaid để dán
 | Input | Gõ/dán · `<input type=file>` · kéo-thả (`.mmd .mermaid .md .txt`, UTF-8); file có khối ` ```mermaid ` → lấy khối đầu |
 | Output | `<ten>.mmd` · `<ten>.svg` · `<ten>@<N>x.png`; chép PNG / khối Markdown vào clipboard |
 | localStorage | Khoá `mermaid-editor:draft` `{code, config}` · `mermaid-editor:history` `[{t, code, config}]` (≤ 30) · `mermaid-editor:auto` · `web_tool.lang` (ngôn ngữ UI, chung mọi tool) |
-| Ngôn ngữ UI | Nút `VI \| EN` góc trên-phải (ADR #8): đổi là dịch ngay + vẽ lại để status đổi ngôn ngữ; tên 22 mẫu dịch, **nội dung sơ đồ mẫu giữ tiếng Việt**; thông báo lỗi của Mermaid (khung đỏ) là tiếng Anh gốc |
+| Ngôn ngữ UI | Nút `VI \| EN` góc trên-phải (ADR #8): đổi là dịch ngay + vẽ lại để status đổi ngôn ngữ; tên 22 mẫu dịch, **nội dung sơ đồ mẫu bằng English** (cố định); thông báo lỗi của Mermaid (khung đỏ) là tiếng Anh gốc |
 | Mạng | **Không request nào, cưỡng chế bằng CSP** `default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'unsafe-inline'; img-src data: blob:; font-src data:` — chặn cả beacon trong link độc hại (`<img src=http…>` trong nhãn, `img:` của shape, `url()` trong `themeCSS`) mà `securityLevel: strict` không chặn. Đã kiểm: server cục bộ nhận 0 request |
 | Phím tắt | `Ctrl+Enter` vẽ · `Ctrl+S` tải `.mmd` · `Tab` chèn 4 dấu cách |
 

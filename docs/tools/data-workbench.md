@@ -18,6 +18,7 @@ giữa JSON/CSV/XML/YAML/SQL; xem-sửa CSV dạng bảng; so 2 phiên bản; fo
 |-----------|----------|
 | URL `?tab=format\|convert\|csv\|diff\|code` | Mở thẳng tab; không có thì mở tab dùng lần trước (localStorage) |
 | URL `?demo=json\|xml\|html\|nested` | Tab Format: nạp mẫu lỗi rồi chạy "Format & sửa lỗi" ngay. Không kèm `tab` ⇒ tab Format |
+| Dữ liệu mẫu khởi đầu | Tab mở lần đầu mà ô nhập trống (không có nháp) ⇒ tự nạp mẫu `DEMOS` rồi chạy luôn: Format = JSON lỗi · Chuyển đổi = JSON → CSV · Bảng CSV = CSV có lỗi · So sánh = JSON 2 phiên bản · CSS·JS = CSS 1 dòng. Bảng CSV không lưu nháp ⇒ lần nào mở cũng có mẫu. So sánh: dữ liệu gửi sang / thả file vào thay hẳn cặp mẫu chưa sửa (không so với nửa mẫu) |
 | Input | Dán text · `<input type=file>` · kéo-thả file vào trang (vào tab đang mở); UTF-8, bỏ BOM. Tab CSV chọn được bảng mã |
 | Tên file tải về | Format/CSS·JS: `<base>.formatted.<ext>` · Chuyển đổi: `<base>.<ext đích>` · Bảng CSV: `<base>.edited.csv\|tsv`; dán tay ⇒ base `ket-qua` (EN: `result`) |
 | CSV tải về | Có BOM (Excel đọc đúng tiếng Việt) — tab CSV cho tắt; xuống dòng CRLF/LF tuỳ chọn |

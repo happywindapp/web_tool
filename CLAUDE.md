@@ -22,6 +22,11 @@ Tool hiện có: `tools/data-workbench.html` (format/tự sửa JSON·XML·HTML 
 
 - 1 tool = 1 file `tools/<viec-lam-kebab-case>.html`; module JS dạng IIFE (`const X = (() => {...})()`), UI song ngữ VI/EN: chuỗi gốc tiếng Việt bọc `T()` + thêm bản English vào từ điển (ADR #8).
 - Thêm/đổi tool ⇒ cập nhật đủ 3 chỗ: card trong `index.html`, bảng Tools trong `README.md`, `docs/tools/<tool>.md`.
+- **Mọi tool (mới hoặc sửa) BẮT BUỘC song ngữ English + Tiếng Việt**: nút `VI | EN` góc trên-phải, module `I18n` chép từ
+  `src/data-workbench/js/core/i18n-ui-language-vi-en.js`, mọi chuỗi hiển thị có bản English, card `index.html` cũng dịch.
+  Làm đủ **checklist song ngữ** ở `docs/architecture/README.md` mục 3 trước khi báo xong (ADR #8).
+- **Mọi tool BẮT BUỘC có dữ liệu mẫu để test nhanh**: dropdown `Thử mẫu…` (chọn là nạp + chạy) + URL `?demo=<key>`;
+  có mẫu hợp lệ và mẫu lỗi/ca khó, dữ liệu giả, nội dung bằng English — checklist "Dữ liệu mẫu" ở `docs/architecture/README.md` mục 3.
 - Mọi tool phải có khối tác giả `<div class="author">` (Tác giả + GitHub Source) ngay sau footer trạng thái — chép markup/CSS chuẩn từ `docs/architecture/README.md` mục 3.
 - Ngoại lệ có chủ đích với luật "file < 200 dòng": tool phải tự chứa để mở trực tiếp (xem `docs/decisions/`).
 - Data Workbench: **chỉ sửa `src/data-workbench/`**, không sửa tay `tools/data-workbench.html`; sửa xong chạy build + `-Check` + test node.

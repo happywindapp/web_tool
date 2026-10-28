@@ -9,5 +9,5 @@ Mỗi tool trong `tools/` có đúng 1 file doc ở đây, cùng tên: `tools/<x
 
 ## Khung 1 file doc tool
 
-Mục đích · Contract (URL param, input, file tải về) · Luật nghiệp vụ / catalog xử lý · Data model ·
+Mục đích · Contract (URL param — gồm các key `?demo=`, input, file tải về, ngôn ngữ UI VI/EN) · Luật nghiệp vụ / catalog xử lý · Data model ·
 Module & luồng · Giới hạn hiệu năng. Bỏ mục không áp dụng; không ghi số dòng code (dễ lệch) — dùng tên hàm/module.

@@ -143,7 +143,7 @@
     $("csv-clear").onclick = () => { lastFile = null; head = []; rows = []; loadText(""); };
     $("csv-demo").onchange = e => { demo(e.target.value); e.target.value = ""; };
     Workbench.bindSendTo($("csv-send"), "csv", () => head.length ? { text: csvText(), kind: outDelim() === "\t" ? "tsv" : "csv" } : null);
-    render();
+    demo("csv");
   }
 
   function demo(name) {

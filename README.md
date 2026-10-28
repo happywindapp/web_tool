@@ -46,7 +46,11 @@ Sau khi clone, chạy `pwsh scripts/link-shared-skills.ps1` một lần để t�
 ## Thêm tool mới
 
 1. Tạo `tools/<ten-viec-kebab-case>.html`, tự chứa (CSS/JS inline, không CDN, không gọi mạng); chép dòng tác giả `<div class="author">` (+ CSS `.author`) từ tool có sẵn, đặt ngay sau `</footer>`.
-2. Thêm 1 card vào `index.html` và 1 dòng vào bảng **Tools** ở trên.
-3. Viết `docs/tools/<ten-viec-kebab-case>.md` theo khung trong [`docs/tools/README.md`](docs/tools/README.md).
+2. **Song ngữ English + Tiếng Việt (bắt buộc):** nút `VI | EN` góc trên-phải, module `I18n` + từ điển English — làm theo
+   checklist song ngữ ở [`docs/architecture/README.md`](docs/architecture/README.md) mục 3.
+3. **Dữ liệu mẫu để test nhanh (bắt buộc):** dropdown `Thử mẫu…` (chọn là nạp + chạy) + URL `?demo=<key>`; có mẫu hợp lệ
+   và mẫu lỗi/ca khó, dữ liệu giả, nội dung bằng English — checklist "Dữ liệu mẫu" cùng mục 3 ở trên.
+4. Thêm 1 card vào `index.html` (kèm bản English của tên + mô tả trong `I18n.add` của `index.html`) và 1 dòng vào bảng **Tools** ở trên.
+5. Viết `docs/tools/<ten-viec-kebab-case>.md` (ghi các key `?demo=`) theo khung trong [`docs/tools/README.md`](docs/tools/README.md).
 
 Quy ước chi tiết: [`docs/decisions/README.md`](docs/decisions/README.md).

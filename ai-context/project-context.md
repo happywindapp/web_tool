@@ -62,7 +62,11 @@ Không có. Không backend, không API, không DB, không CDN.
 - **Tự sửa = đoán**: mỗi sửa đổi phải được ghi vào danh sách `fixes`, không sửa âm thầm.
 - **Mọi tool phải có khối tác giả** `<div class="author">` (Tác giả + GitHub Source) — markup/CSS chuẩn ở
   [`docs/architecture/README.md`](../docs/architecture/README.md) mục 3.
-- UI song ngữ VI/EN (nút góc trên-phải, chuỗi gốc tiếng Việt + từ điển English — ADR #8, `docs/architecture/` mục 3). Git commit/push do user tự chạy.
+- **Mọi tool phải song ngữ English + Tiếng Việt** (nút `VI | EN` góc trên-phải, chuỗi gốc tiếng Việt + từ điển English) —
+  tool mới/sửa tool làm đủ checklist song ngữ ở [`docs/architecture/README.md`](../docs/architecture/README.md) mục 3 (ADR #8).
+- **Mọi tool phải có dữ liệu mẫu để test nhanh**: dropdown `Thử mẫu…` (chọn là nạp + chạy) + `?demo=<key>`; mẫu hợp lệ + mẫu lỗi,
+  dữ liệu giả, nội dung bằng English — checklist "Dữ liệu mẫu" cùng mục 3.
+- Git commit/push do user tự chạy.
 
 ## Đang vướng
 

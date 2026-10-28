@@ -25,4 +25,12 @@
   (scale/paging DB, che lỗi, không trả entity, tên = cột domain, Validate() ở request DTO + guard nil ở usecase, tách DDL/backfill, index);
   ngã rẽ thiết kế ⇒ hỏi user; review PR theo mục D. Bản Claude: `~/.claude/rules/code-quality-gates.md`
 
+- [new-tool-must-support-vi-en-i18n.md](new-tool-must-support-vi-en-i18n.md) —
+  **bắt buộc mọi AI khi thêm/sửa tool:** song ngữ English + Tiếng Việt (nút `VI | EN`, module `I18n`, từ điển English, dịch card index);
+  checklist ở `docs/architecture/README.md` mục 3.
+
+- [new-tool-must-ship-quick-test-sample-data.md](new-tool-must-ship-quick-test-sample-data.md) —
+  **bắt buộc mọi AI khi thêm/sửa tool:** dropdown `Thử mẫu…` + `?demo=<key>`, mẫu hợp lệ + mẫu lỗi, dữ liệu giả;
+  checklist ở `docs/architecture/README.md` mục 3.
+
 - [scaffold-robocopy-copies-skill-junctions.md](scaffold-robocopy-copies-skill-junctions.md) — robocopy cần `/XJ` khi copy template

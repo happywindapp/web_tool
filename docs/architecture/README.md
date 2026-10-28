@@ -19,7 +19,20 @@ Xem `docs/tools/<tool>.md` — danh sách ở [`docs/tools/`](../tools/README.md
 
 ## 3. Nguyên tắc kiến trúc
 
-- Thêm tool mới = thêm 1 file `tools/<ten-kebab>.html`, cùng khuôn: header toolbar · 2 pane · footer trạng thái · khối tác giả.
+- Thêm tool mới = thêm 1 file `tools/<ten-kebab>.html`, cùng khuôn: header toolbar (có dropdown dữ liệu mẫu) · nút `VI | EN` · 2 pane · footer trạng thái · khối tác giả.
+  Tool chưa song ngữ hoặc chưa có dữ liệu mẫu = **chưa xong** (xem 2 checklist bên dưới).
+- **Dữ liệu mẫu để test nhanh (bắt buộc mọi tool):** người dùng phải thử được tool trong 1 cú bấm, không cần chuẩn bị input.
+  1. Toolbar có `<select>` mẫu, option đầu rỗng `Thử mẫu…` (tên mẫu ngắn, mô tả tình huống: "JSON lỗi", "CSV có lỗi"…).
+     Chọn xong là **nạp + chạy luôn** rồi trả dropdown về option rỗng. Tool nhiều tab ⇒ mỗi tab 1 dropdown mẫu riêng.
+  2. URL `?demo=<key>` nạp mẫu `<key>` rồi chạy ngay (dùng để chia sẻ link thử + test tự động); xoá `demo` khỏi URL sau khi nạp
+     để F5 không đè bài đang sửa.
+  3. Bộ mẫu phủ được tính năng chính: ≥ 1 mẫu **hợp lệ/điển hình** + ≥ 1 mẫu **có lỗi/ca khó** nếu tool có kiểm tra, tự sửa
+     hay báo lỗi (để người dùng thấy ngay danh sách lỗi/sửa). Tool có nhiều chế độ/loại input ⇒ mỗi chế độ chính 1 mẫu.
+  4. Mẫu nhỏ (vài chục dòng), thực tế, **dữ liệu giả** — không dữ liệu khách hàng thật, token, mật khẩu, URL nội bộ.
+     Gom vào 1 hằng (`DEMOS` / `SAMPLES`), không rải trong code UI.
+  5. Tên mẫu trong dropdown dịch theo VI/EN; **nội dung mẫu viết bằng English** (tên, ghi chú, nhãn sơ đồ…), cố định, không đổi theo ngôn ngữ UI.
+  6. Tool có nháp/lịch sử: nạp mẫu không được âm thầm làm mất bài đang sửa (lưu vào lịch sử trước, như Mermaid `setState`).
+  7. Ghi danh sách key `?demo=` vào mục Contract của `docs/tools/<tool>.md`.
 - **Khối tác giả (bắt buộc mọi tool):** đặt ngay sau `</footer>` trạng thái, chép nguyên văn markup + CSS dưới đây:
 
   ```html
@@ -42,7 +55,24 @@ Xem `docs/tools/<tool>.md` — danh sách ở [`docs/tools/`](../tools/README.md
     `textarea, pre, code, svg, table, [contenteditable], [data-i18n-skip]` (thuộc tính của chính `textarea`/`pre` vẫn dịch).
   - Ngôn ngữ: `localStorage["web_tool.lang"]` (dùng chung mọi tool) → không có thì theo `navigator.language` (`vi*` → VI, khác → EN).
   - Đổi ngôn ngữ **không reload**: `I18n.onChange(fn)` để tool dựng lại nội dung động (status, danh sách lỗi, dropdown sinh bằng JS).
-  - Dữ liệu mẫu (demo/sample) là dữ liệu, không dịch; tên tác giả không dịch.
+  - Nội dung dữ liệu mẫu (demo/sample) viết bằng **English**, không đổi theo ngôn ngữ UI; tên tác giả không dịch.
+  - **Checklist song ngữ khi thêm/sửa tool** (áp dụng cả khi chỉ thêm 1 nút/1 thông báo):
+    1. Header có nút `VI | EN` + CSS màu chuẩn ở trên; `<html lang="vi">`; script gọi `I18n.init()` trước khi dựng UI động.
+    2. Chép module `I18n` + `const T = I18n.t` nguyên văn từ file nguồn ở trên (sửa module ⇒ chép lại sang **mọi** tool + `index.html`).
+    3. Mọi chuỗi hiển thị (text, `title`, `placeholder`, status, lỗi, `prompt`/`confirm`, option sinh bằng JS, tên file tải mặc định)
+       có bản English trong từ điển; chuỗi động đi qua `T("… {x} …", { x })` — **không** ghép tiếng Việt trong template literal.
+    4. Nội dung dựng bằng JS phải dựng lại trong `I18n.onChange` (chạy lại hành động cuối, không làm mất dữ liệu người dùng đang sửa).
+    5. Vùng chứa dữ liệu người dùng nằm trong `SKIP`, hoặc gắn `data-i18n-skip`.
+    6. Card mới trong `index.html` ⇒ thêm bản English của tên + mô tả card vào `I18n.add` của `index.html`.
+    7. Kiểm: bấm EN, chạy thử mọi chức năng, rồi dán vào DevTools Console — kết quả phải rỗng:
+
+       ```js
+       [...document.querySelectorAll("body *")].filter(e => !e.closest("script,style,textarea,pre,code,svg,table,[contenteditable],[data-i18n-skip]"))
+         .flatMap(e => [...e.childNodes].filter(n => n.nodeType === 3).map(n => n.data).concat(e.title || [], e.placeholder || []))
+         .filter(s => /[àáảãạăằắẳẵặâầấẩẫậèéẻẽẹêềếểễệìíỉĩịòóỏõọôồốổỗộơờớởỡợùúủũụưừứửữựỳýỷỹỵđ]/.test(s) && !s.includes("Phan Ngọc Minh Quân"))
+       ```
+
+       Data Workbench có thêm test tự động `src/data-workbench/tests/i18n-dictionary-coverage.test.js`.
 - Code dùng chung giữa các tool được **chép** vào từng file (chấp nhận trùng lặp để giữ tự chứa — ADR #1).
   Ngoại lệ: Data Workbench viết module ở `src/data-workbench/` rồi build ghép thành 1 file (ADR #7).
 - Không đưa thư viện ngoài vào; nếu bắt buộc → hỏi user và ghi ADR (đổi cam kết offline/riêng tư).

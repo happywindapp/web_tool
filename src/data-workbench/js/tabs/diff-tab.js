@@ -69,7 +69,10 @@
 
   const autoRun = () => { if (edA.value && edB.value && edA.value.length + edB.value.length < AUTO_LIMIT) run(); };
   const readInto = (ed, f) => Dom.readFile(f, (name, text) => { if (text === null) report.show(T("✖ Không đọc được file {name}", { name }), "bad"); else { ed.set(text); autoRun(); } });
-  const intoFreeSide = (fill) => fill(edA.value.trim() ? edB : edA);
+  const clear = () => { edA.set(""); edB.set(""); $("df-result").innerHTML = ""; report.show(T(EMPTY), "muted"); };
+  // Incoming data replaces the starter sample instead of being diffed against half of it.
+  const isSample = () => edA.value === DEMOS.diff.json.left && edB.value === DEMOS.diff.json.right;
+  const intoFreeSide = (fill) => { if (isSample()) clear(); fill(edA.value.trim() ? edB : edA); };
 
   function demo(name) {
     const d = DEMOS.diff[name];
@@ -87,11 +90,11 @@
     $("df-run").onclick = run;
     $("df-next").onclick = nextChange;
     $("df-swap").onclick = () => { const t = edA.value; edA.set(edB.value); edB.set(t); autoRun(); };
-    $("df-clear").onclick = () => { edA.set(""); edB.set(""); $("df-result").innerHTML = ""; report.show(T(EMPTY), "muted"); };
+    $("df-clear").onclick = clear;
     document.querySelectorAll("#df-mode, #df-ws, #df-case, #df-ctx").forEach(el => el.addEventListener("change", autoRun));
     $("df-result").onclick = e => { const tr = e.target.closest("tr.skip"); if (tr) tr.outerHTML = hidden[+tr.dataset.skip]; };
     $("df-demo").onchange = e => { demo(e.target.value); e.target.value = ""; };
-    autoRun();
+    if (edA.value.trim() || edB.value.trim()) autoRun(); else demo("json");
   }
 
   Workbench.register("diff", {

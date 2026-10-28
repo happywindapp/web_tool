@@ -9,7 +9,7 @@
 Input của user ─┬─ URL web tool tham khảo ──► Chrome CDP + REA (cấu trúc trang, script, route, screenshot)
                 └─ Tài liệu .docx/.xlsx/.pdf/.pptx ──► skill office-extract (text) + ai-multimodal (ảnh/sơ đồ)
                                      ▼
-                   AI viết tools/<viec-lam>.html  (+ card index.html, bảng README, docs/tools/<x>.md)
+                   AI viết tools/<viec-lam>.html  (song ngữ VI/EN + card index.html, bảng README, docs/tools/<x>.md)
                                      ▼
                    Mở trình duyệt kiểm tra (?demo=...) · skill chrome-devtools để chụp/so sánh
 ```
