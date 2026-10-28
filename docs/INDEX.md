@@ -7,6 +7,7 @@
 - [Project Context](../ai-context/project-context.md) — mục tiêu + kiến trúc high-level (đọc đầu tiên)
 - [Tools](tools/README.md) — mỗi tool 1 file doc (luật, contract, data model, module, giới hạn)
 - [Glossary](glossary.md) — thuật ngữ domain, viết tắt, tên riêng
+- [Dev toolchain](deployment/dev-toolchain-build-tool-from-url-or-document.md) — build tool mới từ URL/tài liệu (REA, Chrome CDP, office-extract)
 
 ## Danh mục tài liệu
 
