@@ -74,13 +74,14 @@ const Workbench = (() => {
     note(T("Đã khôi phục bản trước."));
   }
 
+  const valid = p => p && Object.hasOwn(tabs, p.tab) && tabs[p.tab].open && typeof p.text === "string" && (p.text2 == null || typeof p.text2 === "string");
+
   async function openLink(raw, tab) {
     let p;
     try { p = await ShareCodec.decode(raw); }
     catch (e) { return note(T("✖ Link chia sẻ bị hỏng hoặc không đúng định dạng: {msg}", { msg: e.message }), "bad"); }
     if (p === null) p = { tab, text: raw };
-    if (!p || !Object.hasOwn(tabs, p.tab) || !tabs[p.tab].open || typeof p.text !== "string" || (p.text2 != null && typeof p.text2 !== "string"))
-      return note(T("✖ Link không chứa dữ liệu của Data Workbench."), "bad");
+    if (!valid(p)) return note(T("✖ Link không chứa dữ liệu của Data Workbench."), "bad");
     apply(p);
     note(backups[p.tab] ? T("Đã nạp dữ liệu từ link — bấm “↶ Khôi phục bản trước” để lấy lại bài đang soạn.") : T("Đã nạp dữ liệu từ link."));
   }
@@ -130,6 +131,12 @@ const Workbench = (() => {
     document.querySelectorAll("[data-wb-tab]").forEach(b => { b.onclick = () => show(b.dataset.wbTab); });
     $("wb-share").onclick = share;
     $("wb-undo").onclick = restore;
+    ThemePicker.bind($("wb-theme"), Store);
+    // Saved sessions hold one tab's snapshot (same shape as a share link payload).
+    const saved = SavedSessions({ select: $("wb-saved"), saveBtn: $("wb-save"), delBtn: $("wb-del-saved"), store: Store, key: "sessions",
+      snapshot: () => snapshot(active), isEmpty, note, open: p => { if (valid(p)) apply(p); },
+      suggestName: () => `${T(tabs[active].label)} · ${new Date().toLocaleDateString(I18n.lang)}` });
+    I18n.onChange(() => saved.fill());
     document.addEventListener("keydown", e => {
       if ((e.ctrlKey || e.metaKey) && e.key === "Enter" && tabs[active].primary) { e.preventDefault(); tabs[active].primary(); }
     });

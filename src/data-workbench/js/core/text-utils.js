@@ -6,5 +6,7 @@ const TextUtil = (() => {
   const indentUnit = v => INDENT[v] ?? "  ";
   const countLines = s => { let n = 1; for (let i = s.indexOf("\n"); i >= 0; i = s.indexOf("\n", i + 1)) n++; return n; };
   const sizeKb = s => (new Blob([s]).size / 1024).toFixed(1);
-  return { stripBom, lineCol, indentUnit, countLines, sizeKb };
+  // Excel would drop leading zeros, round >15-digit ids, cut trailing decimals and reformat times → write those as ="…" text.
+  const excelExact = v => (/^-?\d+(\.\d+)?$/.test(v) && (String(Number(v)) !== v || v.replace(/\D/g, "").length > 15)) || /^\d{1,2}:\d{2}(:\d{2})?(\.\d+)?$/.test(v);
+  return { stripBom, lineCol, indentUnit, countLines, sizeKb, excelExact };
 })();

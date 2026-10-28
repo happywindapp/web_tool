@@ -26,7 +26,7 @@ giữa JSON/CSV/XML/YAML/SQL; xem-sửa CSV dạng bảng; so 2 phiên bản; fo
 | Tên file tải về | Format/CSS·JS: `<base>.formatted.<ext>` · Chuyển đổi: `<base>.<ext đích>` · Bảng CSV: `<base>.edited.csv\|tsv`; dán tay ⇒ base `ket-qua` (EN: `result`) |
 | CSV tải về | Có BOM (Excel đọc đúng tiếng Việt) — tab CSV cho tắt; xuống dòng CRLF/LF tuỳ chọn |
 | Clipboard | `navigator.clipboard` khi secure context, ngược lại fallback `execCommand("copy")`; thất bại thì báo |
-| localStorage | Khoá `web_tool.data-workbench.*`: tab cuối + nháp từng ô nhập (≤ 1 MB/ô). Bảng CSV **không** lưu nháp. `web_tool.lang` = ngôn ngữ UI (chung mọi tool) |
+| localStorage | Khoá `web_tool.data-workbench.*`: tab cuối + nháp từng ô nhập (≤ 1 MB/ô) · `theme` (auto/light/dark) · `sessions` (≤ 30 phiên đã lưu `{id, name, t, payload}`, payload = cùng dạng link chia sẻ `{tab, text, text2?, opts}`, chỉ khi bấm 💾). Bảng CSV **không** lưu nháp. `web_tool.lang` = ngôn ngữ UI (chung mọi tool) |
 | Ngôn ngữ UI | Nút `VI \| EN` góc trên-phải (ADR #8). Đổi là dịch ngay: markup tĩnh + mỗi tab đã mở chạy lại hành động cuối (`relang`) để status/danh sách sửa lỗi đổi ngôn ngữ; Bảng CSV chỉ dựng lại báo cáo, **giữ nguyên chỗ đã sửa**. Message `fixes` sinh theo ngôn ngữ lúc parse |
 | Mạng | **Không có request nào** — thư viện nhúng sẵn trong file (js-beautify, js-yaml) |
 
@@ -158,6 +158,9 @@ nguồn ──read──► value model ──write──► đích
   Ghi `fixes`: ô mở nháy không đóng (tự đóng cuối file), ký tự sau nháy đóng (nối vào ô), bỏ dòng trống, hàng lệch số cột (thiếu → để trống, thừa → thêm cột).
 - Bảng mã: UTF-8, UTF-16 LE, Windows-1258, Windows-1252 (`FileReader.readAsText`) — đổi bảng mã/dấu phân cách là đọc lại (mất chỗ đã sửa).
 - Sắp xếp: số thập phân so theo số, còn lại `Intl.Collator("vi", {numeric})`; lọc = chứa chuỗi (không phân biệt hoa thường).
+- **Lọc theo cột** (`ColFilter`): nút ⏷ ở tiêu đề ⇒ `chứa / bằng / khác`; chuột phải vào ô ⇒ `Chỉ hiện` / `Loại trừ` giá trị; mỗi bộ lọc là 1 chip ✕, cộng dồn với ô lọc chữ. Xoá cột ⇒ bỏ bộ lọc của cột đó; nạp dữ liệu mới ⇒ xoá hết bộ lọc.
+- **Đổi chỗ cột**: kéo tay nắm ⠿ của tiêu đề thả lên cột khác ⇒ di chuyển cột **trong dữ liệu** (file tải về theo thứ tự mới), sắp xếp/bộ lọc đi theo cột.
+- **Giữ số cho Excel** (checkbox khi tải): ô có 0 ở đầu, > 15 chữ số, số lẻ có 0 cuối, giờ `HH:MM(:SS(.fff))` ghi thành `="…"` (`TextUtil.excelExact`) để Excel không làm tròn/cắt.
 - Sửa ô/tên cột: `contenteditable`, Enter xác nhận, Esc huỷ. Phân trang 500 hàng. Cột toàn số căn phải.
 - Nhận dữ liệu không phải CSV từ tab khác ⇒ chạy `Convert.run(…, "csv")` trước.
 
@@ -188,6 +191,7 @@ src/data-workbench/
   data-workbench.template.html  # khung trang + marker @include (thứ tự include = thứ tự chạy)
   styles/*.css  partials/*.html  third-party/ (js-beautify, js-yaml + LICENSE)
   js/core/        I18n + T() (song ngữ, nạp đầu tiên) · TextUtil · ShareCodec (link pako:) · Dom/Store · LineEditor (gutter + nháp) · ReportPanel · Workbench (router tab)
+                  · dùng chung với tool khác: ThemePicker (giao diện) · SavedSessions (💾 lưu phiên) · ColFilter (lọc cột + chip) — css `styles/theme-filter-popover-chips.css`, EN `js/i18n/en-shared-theme-sessions-filters.js`
   js/i18n/        từ điển English: en-markup-labels · en-tab-status-messages · en-parser-converter-messages (khoá = chuỗi VI)
   js/parsers/     Detect · JsonTool · JsonAst · MarkupTool · CsvTool · CssMin
   js/render/      ViewRender

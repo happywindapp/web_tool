@@ -5,11 +5,13 @@
     <select id="csv-delim" title="Dấu phân cách — đổi để đọc lại dữ liệu (mất các chỗ đã sửa)"><option value="auto">Dấu phân cách: tự nhận diện</option><option value=",">Dấu phẩy ,</option><option value=";">Chấm phẩy ;</option><option value="tab">Tab</option><option value="|">Dấu |</option></select>
     <label class="chk"><input id="csv-header" type="checkbox" checked>Dòng đầu là tiêu đề</label>
     <input id="csv-filter" type="text" placeholder="Lọc hàng (chứa chữ)…">
+    <span id="csv-chips" class="chips" hidden></span>
     <button id="csv-add-row">+ Hàng</button><button id="csv-add-col">+ Cột</button>
     <button id="csv-paste-toggle">Dán dữ liệu…</button>
     <span class="sep"></span>
     <button id="csv-save" class="main">Tải CSV</button>
     <label class="chk" title="Thêm BOM để Excel nhận đúng UTF-8 (tiếng Việt)"><input id="csv-bom" type="checkbox" checked>BOM cho Excel</label>
+    <label class="chk" title="Ghi số có 0 ở đầu, ID dài, số lẻ có 0 cuối, giờ dạng =&quot;…&quot; để Excel giữ nguyên giá trị"><input id="csv-exact" type="checkbox">Giữ số cho Excel</label>
     <select id="csv-eol" title="Kiểu xuống dòng khi tải về"><option value="crlf">CRLF (Windows/Excel)</option><option value="lf">LF (Linux/Mac)</option></select>
     <select id="csv-send"></select>
     <button id="csv-clear">Xoá</button>
@@ -26,6 +28,6 @@
   <footer class="report">
     <div id="csv-status" class="status muted">Chưa có dữ liệu.</div>
     <ol id="csv-msgs" class="msgs"></ol>
-    <div class="muted hint">Bấm vào ô hoặc tên cột để sửa · Enter xác nhận · Esc huỷ · ⇅ sắp xếp · × xoá hàng/cột. Mỗi trang 500 hàng, dùng ô lọc để thu hẹp. Bảng không lưu nháp — nhớ “Tải CSV” trước khi đóng tab.</div>
+    <div class="muted hint">Bấm vào ô hoặc tên cột để sửa · Enter xác nhận · Esc huỷ · ⇅ sắp xếp · ⏷ lọc cột · chuột phải vào ô: chỉ hiện / loại trừ giá trị · kéo ⠿ để đổi chỗ cột · × xoá hàng/cột. Mỗi trang 500 hàng, dùng ô lọc để thu hẹp. Bảng không lưu nháp — nhớ “Tải CSV” trước khi đóng tab.</div>
   </footer>
 </section>

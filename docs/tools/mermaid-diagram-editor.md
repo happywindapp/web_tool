@@ -32,7 +32,7 @@ Dev/BA cần vẽ nhanh flowchart, sequence, ER… bằng mã Mermaid để dán
 | URL `?data=<mã>` | Mã Mermaid thô tự soạn (URL-encode) → nạp + vẽ; giá trị `pako:`/`base64:` giải như hash. Đi qua query ⇒ có gửi lên server — chỉ cho sơ đồ ngắn, không nhạy cảm. Ưu tiên hash khi có cả hai |
 | Input | Gõ/dán · `<input type=file>` · kéo-thả (`.mmd .mermaid .md .txt`, UTF-8); file có khối ` ```mermaid ` → lấy khối đầu |
 | Output | `<ten>.mmd` · `<ten>.svg` · `<ten>@<N>x.png`; chép PNG / khối Markdown vào clipboard |
-| localStorage | Khoá `mermaid-editor:draft` `{code, config}` · `mermaid-editor:history` `[{t, code, config}]` (≤ 30) · `mermaid-editor:auto` · `web_tool.lang` (ngôn ngữ UI, chung mọi tool) |
+| localStorage | Khoá `mermaid-editor:draft` `{code, config}` · `mermaid-editor:history` `[{t, code, config}]` (≤ 30) · `mermaid-editor:auto` · `mermaid-editor:saved` (≤ 30 sơ đồ đặt tên `{id, name, t, payload: {text, config}}`, nút 💾 / 📂 / 🗑, tách khỏi lịch sử tự động; mở ⇒ qua `setState` nên bản đang sửa vào lịch sử trước) · `mermaid-editor:theme` (giao diện auto/light/dark — khung xem trước luôn nền trắng) · `web_tool.lang` (ngôn ngữ UI, chung mọi tool) |
 | Ngôn ngữ UI | Nút `VI \| EN` góc trên-phải (ADR #8): đổi là dịch ngay + vẽ lại để status đổi ngôn ngữ; tên 22 mẫu dịch, **nội dung sơ đồ mẫu bằng English** (cố định); thông báo lỗi của Mermaid (khung đỏ) là tiếng Anh gốc |
 | Mạng | **Không request nào, cưỡng chế bằng CSP** `default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'unsafe-inline'; img-src data: blob:; font-src data:` — chặn cả beacon trong link độc hại (`<img src=http…>` trong nhãn, `img:` của shape, `url()` trong `themeCSS`) mà `securityLevel: strict` không chặn. Đã kiểm: server cục bộ nhận 0 request |
 | Phím tắt | `Ctrl+Enter` vẽ · `Ctrl+S` tải `.mmd` · `Tab` chèn 4 dấu cách |
@@ -54,7 +54,7 @@ Dev/BA cần vẽ nhanh flowchart, sequence, ER… bằng mã Mermaid để dán
 
 ## 5. Module (IIFE trong 1 `<script>`)
 
-`I18n` + `T()` (chép từ `src/data-workbench/js/core/i18n-ui-language-vi-en.js`) + từ điển EN · `Store` (localStorage có try/catch) · `ShareLink` (`CompressionStream("deflate")` = zlib như `pako.deflate`) ·
+`I18n` + `T()` (chép từ `src/data-workbench/js/core/i18n-ui-language-vi-en.js`) + từ điển EN · `ThemePicker` + `SavedSessions` (chép **nguyên văn** từ `src/data-workbench/js/core/` — sửa ở nguồn thì chép lại) · `Store` (localStorage có try/catch) · `ShareLink` (`CompressionStream("deflate")` = zlib như `pako.deflate`) ·
 `Highlight` (tô màu xấp xỉ bằng regex: comment, chuỗi, mũi tên, từ khoá) · `PanZoom` (transform chỉ trên `#stage`) ·
 `Exporter` (SVG/PNG) · `History` · UI wiring + `SAMPLES`.
 

@@ -13,6 +13,7 @@
   table.grid [contenteditable]:focus { outline:2px solid var(--acc); outline-offset:-2px; background:var(--code); white-space:pre-wrap; text-overflow:clip; }
   .th { display:flex; gap:2px; align-items:center; }
   .th .hname { flex:1; min-width:3em; }
+  .th .grip { cursor:grab; color:var(--muted); padding:0 2px; user-select:none; }
   table.grid button.mini { padding:0 3px; border:0; background:none; color:var(--muted); cursor:pointer; font:inherit; }
   table.grid button.mini:hover { color:var(--acc); }
   table.grid button.del:hover { color:var(--bad); }

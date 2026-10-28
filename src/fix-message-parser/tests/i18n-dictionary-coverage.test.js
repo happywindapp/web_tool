@@ -16,7 +16,7 @@ const UI_JS = f => f.endsWith(".js") && !/\/(dictionary|i18n)\/|\/(venue-trade|f
 const KEEP = new Set(["Phan Ngọc Minh Quân"]);
 
 const ctx = vm.createContext({ localStorage: { getItem: () => "en" } });
-vm.runInContext([read("../data-workbench/js/core/i18n-ui-language-vi-en.js"), ...walk("js/i18n").map(read)].join("\n;\n") + "\n;globalThis.I = I18n;", ctx);
+vm.runInContext([read("../data-workbench/js/core/i18n-ui-language-vi-en.js"), read("../data-workbench/js/i18n/en-shared-theme-sessions-filters.js"), ...walk("js/i18n").map(read)].join("\n;\n") + "\n;globalThis.I = I18n;", ctx);
 
 function jsKeys() {
   const keys = new Map();

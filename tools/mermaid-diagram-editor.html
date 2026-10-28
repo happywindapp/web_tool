@@ -8,7 +8,11 @@
 <style>
   :root { --bg:#f8fafc; --panel:#fff; --line:#cbd5e1; --ink:#0f172a; --muted:#64748b; --acc:#0e7490;
           --good:#15803d; --bad:#b91c1c; --code:#f8fafc;
-          --k:#7c3aed; --s:#047857; --a:#be185d; --c:#94a3b8; }
+          --k:#7c3aed; --s:#047857; --a:#be185d; --c:#94a3b8; --btn:#fff; --gut:#f1f5f9; --errbg:#fef2f2; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg:#0b1220; --panel:#111827; --line:#334155; --ink:#e2e8f0; --muted:#94a3b8; --good:#4ade80; --bad:#f87171;
+          --code:#0f172a; --k:#c4b5fd; --s:#6ee7b7; --a:#f9a8d4; --c:#64748b; --btn:#1e293b; --gut:#0b1220; --errbg:#3f1717; } }
+  :root[data-theme="dark"] { --bg:#0b1220; --panel:#111827; --line:#334155; --ink:#e2e8f0; --muted:#94a3b8; --good:#4ade80; --bad:#f87171;
+          --code:#0f172a; --k:#c4b5fd; --s:#6ee7b7; --a:#f9a8d4; --c:#64748b; --btn:#1e293b; --gut:#0b1220; --errbg:#3f1717; }
   * { box-sizing:border-box; }
   [hidden] { display:none !important; }
   body { margin:0; height:100vh; display:grid; grid-template-rows:auto 1fr auto; background:var(--bg); color:var(--ink);
@@ -17,7 +21,7 @@
   header { position:relative; display:flex; flex-wrap:wrap; gap:8px; align-items:center; padding:8px 112px 8px 16px; background:var(--panel); border-bottom:1px solid var(--line); }
   header h1 { font-size:16px; margin:0 8px 0 0; }
   a.btn { text-decoration:none; }
-  button, select, label.btn, a.btn { font:inherit; padding:5px 10px; border:1px solid var(--line); border-radius:6px; background:#fff; color:var(--ink); cursor:pointer; }
+  button, select, label.btn, a.btn { font:inherit; padding:5px 10px; border:1px solid var(--line); border-radius:6px; background:var(--btn); color:var(--ink); cursor:pointer; }
   button.main { background:var(--acc); color:#fff; border-color:var(--acc); font-weight:600; }
   label.btn input { display:none; }
   label.chk { display:inline-flex; gap:4px; align-items:center; cursor:pointer; }
@@ -27,13 +31,13 @@
   .pane { display:grid; grid-template-rows:auto 1fr; min-height:0; min-width:0; background:var(--panel); border:1px solid var(--line); border-radius:8px; overflow:hidden; }
   .bar { display:flex; gap:6px; align-items:center; padding:6px 10px; border-bottom:1px solid var(--line); flex-wrap:wrap; }
   .bar b { margin-right:auto; }
-  .tabs button.on { background:var(--ink); color:#fff; border-color:var(--ink); }
+  .tabs button.on { background:var(--ink); color:var(--bg); border-color:var(--ink); }
   .lang-switch { position:absolute; top:8px; right:16px; display:inline-flex; gap:4px; }
   .lang-switch button { background:#fef3c7; color:#92400e; border-color:#fcd34d; font-weight:600; }
   .lang-switch button:hover { background:#fde68a; }
   .lang-switch button.on { background:#c2410c; color:#fff; border-color:#c2410c; }
   .ed { display:grid; grid-template-columns:auto 1fr; min-height:0; }
-  #gut { margin:0; padding:8px 6px 40px 10px; text-align:right; color:#94a3b8; background:#f1f5f9; overflow:hidden; user-select:none;
+  #gut { margin:0; padding:8px 6px 40px 10px; text-align:right; color:var(--c); background:var(--gut); overflow:hidden; user-select:none;
          font:12.5px/1.5 Consolas, "Cascadia Mono", monospace; white-space:pre; }
   #gut b { color:#fff; background:var(--bad); border-radius:3px; padding:0 3px; }
   .code { position:relative; min-height:0; }
@@ -44,7 +48,8 @@
   #src::selection { background:rgba(14,116,144,.25); }
   #cfg { position:static; background:var(--code); }
   .k{color:var(--k);font-weight:600} .s{color:var(--s)} .a{color:var(--a);font-weight:600} .c{color:var(--c);font-style:italic}
-  #view { position:relative; overflow:hidden; cursor:grab; user-select:none; touch-action:none; }
+  /* The diagram canvas stays white: Mermaid's default themes draw dark lines and text. */
+  #view { position:relative; overflow:hidden; cursor:grab; user-select:none; touch-action:none; background:#fff; }
   #view.grab { cursor:grabbing; }
   #stage { position:absolute; left:0; top:0; transform-origin:0 0; }
   #stage.stale { opacity:.35; }
@@ -52,11 +57,11 @@
   #zPct { min-width:58px; }
   footer { background:var(--panel); border-top:1px solid var(--line); padding:6px 16px 10px; max-height:30vh; overflow:auto; }
   #status { font-weight:600; margin:4px 0; } .good{color:var(--good)} .bad{color:var(--bad)} .muted{color:var(--muted)}
-  #err { margin:4px 0; padding:6px 8px; background:#fef2f2; border-radius:6px; color:var(--bad); font:12px/1.4 Consolas, monospace; white-space:pre-wrap; cursor:pointer; }
+  #err { margin:4px 0; padding:6px 8px; background:var(--errbg); border-radius:6px; color:var(--bad); font:12px/1.4 Consolas, monospace; white-space:pre-wrap; cursor:pointer; }
   .author { display:flex; flex-wrap:wrap; gap:2px 6px; padding:4px 16px 6px; background:var(--panel); font-size:12px; color:var(--muted); } .author a { color:var(--acc); } .author span:not(:first-child) { margin-left:10px; }
-  dialog { width:min(720px, 92vw); max-height:80vh; padding:0; border:1px solid var(--line); border-radius:8px; }
+  dialog { width:min(720px, 92vw); max-height:80vh; padding:0; border:1px solid var(--line); border-radius:8px; background:var(--panel); color:var(--ink); }
   #hList { margin:0; padding:8px 16px 12px 36px; overflow:auto; max-height:60vh; }
-  #hList li { padding:4px 0; border-bottom:1px solid #f1f5f9; }
+  #hList li { padding:4px 0; border-bottom:1px solid var(--gut); }
   #hList code { display:block; color:var(--muted); font-size:12px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   @media (max-width: 900px) { main { grid-template-columns:1fr; grid-template-rows:45vh 0 50vh; gap:10px; } #split { display:none; } }
 </style>
@@ -74,6 +79,10 @@
   <button id="btnShare" title="Chép link chứa sơ đồ + cấu hình (dữ liệu nằm sau dấu #, không gửi lên máy chủ; tương thích mermaid.live)">🔗 Chia sẻ link</button>
   <button id="btnOpenLink" title="Mở link chia sẻ của tool này hoặc của mermaid.live">Mở link…</button>
   <button id="btnHist">Lịch sử</button>
+  <button id="btnSave" title="Lưu sơ đồ + cấu hình với một cái tên, trong trình duyệt này (tách khỏi lịch sử tự động)">💾 Lưu sơ đồ</button>
+  <select id="savedSel" title="Mở lại một sơ đồ đã lưu trong trình duyệt này"></select>
+  <button id="btnDelSaved" title="Xoá sơ đồ đang mở khỏi danh sách đã lưu" hidden>🗑</button>
+  <label class="chk" title="Giao diện sáng / tối">Giao diện <select id="uiTheme"><option value="auto">Tự động</option><option value="light">Sáng</option><option value="dark">Tối</option></select></label>
   <span class="lang-switch" title="Ngôn ngữ"><button data-lang="vi">VI</button><button data-lang="en">EN</button></span>
 </header>
 <main>
@@ -167,6 +176,22 @@ const I18n = (() => {
 const T = I18n.t;
 // English UI strings, keyed by the Vietnamese source text.
 I18n.add({
+  "Giao diện": "Appearance",
+  "Giao diện sáng / tối": "Light / dark theme",
+  "Tự động": "Auto",
+  "Sáng": "Light",
+  "Tối": "Dark",
+  "📂 Đã lưu ({n})": "📂 Saved ({n})",
+  "Chưa có dữ liệu để lưu.": "Nothing to save yet.",
+  "Tên bản lưu (lưu trong trình duyệt này):": "Name for this save (stored in this browser):",
+  "✖ Không lưu được — bộ nhớ trình duyệt đầy hoặc bị chặn.": "✖ Could not save — browser storage is full or blocked.",
+  "✔ Đã lưu “{name}”.": "✔ Saved “{name}”.",
+  "Đã mở “{name}”.": "Opened “{name}”.",
+  "Xoá “{name}” khỏi trình duyệt?": "Delete “{name}” from the browser?",
+  "💾 Lưu sơ đồ": "💾 Save diagram",
+  "Lưu sơ đồ + cấu hình với một cái tên, trong trình duyệt này (tách khỏi lịch sử tự động)": "Save the diagram + config under a name in this browser (separate from the automatic history)",
+  "Mở lại một sơ đồ đã lưu trong trình duyệt này": "Reopen a diagram saved in this browser",
+  "Xoá sơ đồ đang mở khỏi danh sách đã lưu": "Delete the open diagram from the saved list",
   "Soạn & xem trước sơ đồ Mermaid": "Mermaid diagram editor & preview",
   "← Trang chủ": "← Home",
   "Ngôn ngữ": "Language",
@@ -282,6 +307,71 @@ const Store = (() => {
   const del = k => { try { localStorage.removeItem(P + k); } catch {} };
   return { get, set, del };
 })();
+
+// UI theme: auto (follows the OS) / light / dark, remembered per tool; colours come from the :root[data-theme] overrides in the tool's CSS.
+const ThemePicker = (() => {
+  const apply = v => { if (v === "light" || v === "dark") document.documentElement.dataset.theme = v; else delete document.documentElement.dataset.theme; };
+  // store: the tool's prefixed localStorage wrapper ({ get, set }).
+  function bind(select, store) {
+    const v = store.get("theme", "auto");
+    select.value = v === "light" || v === "dark" ? v : "auto";
+    apply(select.value);
+    select.addEventListener("change", () => { apply(select.value); store.set("theme", select.value); });
+  }
+  return { bind, apply };
+})();
+
+// Named saves in localStorage (newest first, ≤ 30): 💾 asks a name and saves snapshot() · pick one in the <select> to reopen · 🗑 deletes the open one.
+const SavedSessions = ({ select, saveBtn, delBtn, store, key = "saved", snapshot, open, suggestName = () => "", isEmpty = p => !String(p.text || "").trim(), note, keep = () => {} }) => {
+  const MAX = 30;
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  let current = null;
+  // Stored entries are only trusted after this shape check; the tool's open() still validates its own payload fields.
+  const list = () => (store.get(key, []) || []).filter(a => a && typeof a.id === "string" && typeof a.name === "string" && a.payload && typeof a.payload === "object");
+
+  function fill() {
+    const items = list(), head = esc(T("📂 Đã lưu ({n})", { n: items.length }));
+    select.innerHTML = `<option value="">${head}</option>` +
+      items.map(a => `<option value="${esc(a.id)}">${esc(`${a.name} · ${new Date(a.t).toLocaleString(I18n.lang)}`)}</option>`).join("");
+    delBtn.hidden = !current;
+  }
+
+  function save() {
+    const p = snapshot();
+    if (isEmpty(p)) return note(T("Chưa có dữ liệu để lưu."), "bad");
+    const name = prompt(T("Tên bản lưu (lưu trong trình duyệt này):"), current ? current.name : suggestName());
+    if (!name || !name.trim()) return;
+    const id = current && current.name === name.trim() ? current.id : Date.now().toString(36);
+    const entry = { id, name: name.trim().slice(0, 80), t: Date.now(), payload: p };
+    if (!store.set(key, [entry, ...list().filter(a => a.id !== id)].slice(0, MAX))) return note(T("✖ Không lưu được — bộ nhớ trình duyệt đầy hoặc bị chặn."), "bad");
+    current = entry;
+    fill();
+    note(T("✔ Đã lưu “{name}”.", { name: entry.name }), "good");
+  }
+
+  function openId(id) {
+    const a = list().find(x => x.id === id);
+    if (!a) return;
+    keep();
+    open(a.payload);
+    current = a;
+    fill();
+    note(T("Đã mở “{name}”.", { name: a.name }), "muted");
+  }
+
+  function remove() {
+    if (!current || !confirm(T("Xoá “{name}” khỏi trình duyệt?", { name: current.name }))) return;
+    store.set(key, list().filter(a => a.id !== current.id));
+    current = null;
+    fill();
+  }
+
+  select.onchange = () => { const v = select.value; select.value = ""; if (v) openId(v); };
+  saveBtn.onclick = save;
+  delBtn.onclick = remove;
+  fill();
+  return { fill, forget: () => { current = null; fill(); } };
+};
 
 // Hash format of mermaid.live: "#pako:" + base64url(zlib(JSON {code, mermaid})) — links open in both tools.
 const ShareLink = (() => {
@@ -820,6 +910,14 @@ I18n.onChange(() => {
 
 (async function boot() {
   I18n.init();
+  ThemePicker.bind($("uiTheme"), Store);
+  // Named saves (key "saved") are separate from the automatic history; opening one goes through setState so the current diagram lands in history first.
+  const saved = SavedSessions({ select: $("savedSel"), saveBtn: $("btnSave"), delBtn: $("btnDelSaved"), store: Store, key: "saved",
+    snapshot: () => ({ text: $("src").value, config: $("cfg").value }),
+    open: p => { if (typeof p.text === "string") setState({ code: p.text, config: typeof p.config === "string" ? p.config : DEFAULT_CONFIG }, ""); },
+    suggestName: () => (fileName || ($("src").value.trim().split("\n")[0] || "").slice(0, 40)).trim(),
+    note: (msg, cls) => flash(msg, cls === "bad") });
+  I18n.onChange(() => saved.fill());
   $("theme").innerHTML = THEMES.map(t => `<option value="${t}">Theme: ${t}</option>`).join("");
   fillDemo();
   $("auto").checked = Store.get("auto", true);

@@ -91,10 +91,9 @@ const Timeline = (() => {
   // Excel keeps values exactly as on the wire: leading zeros, long ids, trailing decimals and times are written as ="…" text.
   function csv(msgs, vis, ctx) {
     const cols = [...columns(ctx).filter(c => c.id !== "lv"), { id: "note", label: "Ghi chú" }, { id: "issues", label: "Lỗi/cảnh báo" }, { id: "raw", label: "Raw" }];
-    const exact = v => (/^-?\d+(\.\d+)?$/.test(v) && (String(Number(v)) !== v || v.replace(/\D/g, "").length > 15)) || /^\d{1,2}:\d{2}(:\d{2})?(\.\d+)?$/.test(v);
     // Values from untrusted logs starting with = + - @ would run as Excel formulas.
     const q = v => {
-      if (exact(v)) return `"=""${v}"""`;
+      if (TextUtil.excelExact(v)) return `"=""${v}"""`;
       const s = /^[=+\-@\t\r]/.test(v) && !/^-?\d/.test(v) ? "'" + v : v;
       return /[",\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
     };

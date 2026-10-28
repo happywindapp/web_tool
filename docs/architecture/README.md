@@ -88,6 +88,7 @@ Xem `docs/tools/<tool>.md` — danh sách ở [`docs/tools/`](../tools/README.md
 
        Data Workbench có thêm test tự động `src/data-workbench/tests/i18n-dictionary-coverage.test.js`.
 - Code dùng chung giữa các tool được **chép** vào từng file (chấp nhận trùng lặp để giữ tự chứa — ADR #1).
+  Tool có build (Data Workbench, FIX Parser) `@include ../data-workbench/js/core/…` thay vì chép. Module dùng chung hiện có: `I18n`, `ShareCodec`, `TextUtil`, `ThemePicker` (giao diện Tự động/Sáng/Tối, `:root[data-theme]`), `SavedSessions` (💾 lưu / 📂 mở / 🗑 xoá bản lưu đặt tên trong localStorage, ≤ 30), `ColFilter` (lọc cột: popover, menu chuột phải, chip) + css `styles/theme-filter-popover-chips.css` + EN `js/i18n/en-shared-theme-sessions-filters.js`. Mermaid (tool 1 file) chép nguyên văn `ThemePicker` + `SavedSessions`. Sửa module chung ⇒ `pwsh scripts/build-single-file-tool.ps1` (build mọi tool) và chép lại sang tool 1 file.
   Ngoại lệ: Data Workbench viết module ở `src/data-workbench/` rồi build ghép thành 1 file (ADR #7).
 - Không đưa thư viện ngoài vào; nếu bắt buộc → hỏi user và ghi ADR (đổi cam kết offline/riêng tư).
 - Parser trả `fixes` thay vì throw — chỉ throw khi không thể xử lý (vd nội dung trống).

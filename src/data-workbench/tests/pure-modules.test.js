@@ -157,3 +157,9 @@ test("share link codec: pako round trip, base64, raw text → null", async () =>
   assert.equal(await ShareCodec.decode("hello"), null);
   await assert.rejects(ShareCodec.decode("pako:not-zlib"));
 });
+
+test("text utils: Excel-exact cells (leading zeros, long ids, trailing decimals, times) but not plain numbers or text", () => {
+  const { TextUtil } = vm.runInContext("({ TextUtil })", ctx);
+  for (const v of ["007", "12345678901234567890", "25.40", "09:00:30.120", "-0.50"]) assert.equal(TextUtil.excelExact(v), true, v);
+  for (const v of ["42", "-3.5", "ABC", "C000123", ""]) assert.equal(TextUtil.excelExact(v), false, v);
+});

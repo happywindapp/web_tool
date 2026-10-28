@@ -9,6 +9,7 @@
 /* @include styles/editor-report-tree.css */
 /* @include styles/csv-grid-tab.css */
 /* @include styles/diff-tab.css */
+/* @include styles/theme-filter-popover-chips.css */
 </style>
 </head>
 <body>
@@ -24,6 +25,10 @@
   </nav>
   <button id="wb-share" title="Chép link chứa dữ liệu + tuỳ chọn của tab đang mở (dữ liệu nằm sau dấu #, không gửi lên máy chủ)">🔗 Chia sẻ link</button>
   <button id="wb-undo" title="Lấy lại nội dung đang soạn trước khi nạp mẫu / link" hidden>↶ Khôi phục bản trước</button>
+  <button id="wb-save" title="Lưu dữ liệu + tuỳ chọn của tab đang mở vào trình duyệt này">💾 Lưu phiên</button>
+  <select id="wb-saved" title="Mở lại một phiên đã lưu trong trình duyệt này"></select>
+  <button id="wb-del-saved" title="Xoá phiên đang mở khỏi trình duyệt" hidden>🗑</button>
+  <label class="chk" title="Giao diện sáng / tối">Giao diện <select id="wb-theme"><option value="auto">Tự động</option><option value="light">Sáng</option><option value="dark">Tối</option></select></label>
   <span id="wb-note" class="muted"></span>
   <span class="seg lang-switch" title="Ngôn ngữ"><button data-lang="vi">VI</button><button data-lang="en">EN</button></span>
 </header>
@@ -51,11 +56,15 @@
 // @include js/i18n/en-markup-labels.js
 // @include js/i18n/en-tab-status-messages.js
 // @include js/i18n/en-parser-converter-messages.js
+// @include js/i18n/en-shared-theme-sessions-filters.js
 // @include js/core/text-utils.js
 // @include js/core/share-link-codec.js
 // @include js/core/dom-and-storage-helpers.js
 // @include js/core/line-numbered-editor.js
 // @include js/core/report-panel.js
+// @include js/core/theme-picker-auto-light-dark.js
+// @include js/core/saved-sessions-local-storage.js
+// @include js/core/column-filter-popover-and-chips.js
 // @include js/core/workbench-tab-router.js
 // @include js/parsers/format-detect.js
 // @include js/parsers/json-tolerant-parser.js

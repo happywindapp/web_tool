@@ -12,27 +12,17 @@
   pre.hl { margin:0; pointer-events:none; overflow:hidden; }
   pre.hl.probe { pointer-events:auto; z-index:2; cursor:help; }
   pre.hl .hl-x { color:var(--muted); } pre.hl .hl-d { color:var(--c); } pre.hl .hl-f:hover { background:var(--hover); }
-  .chips { display:inline-flex; flex-wrap:wrap; gap:4px; }
   table.grid th[data-col] { cursor:pointer; } table.grid th[data-col]:hover { color:var(--acc); }
-  .pop { position:fixed; z-index:60; display:flex; flex-direction:column; gap:6px; padding:8px; min-width:220px; background:var(--panel); border:1px solid var(--line);
-         border-radius:8px; box-shadow:0 6px 24px rgba(0,0,0,.18); }
-  .pop .row, dialog .row { display:flex; flex-wrap:wrap; gap:6px; align-items:center; }
-  .pop input[type=text] { flex:1; min-width:120px; }
+  dialog .row { display:flex; flex-wrap:wrap; gap:6px; align-items:center; }
   dialog { max-width:720px; width:calc(100% - 32px); border:1px solid var(--line); border-radius:10px; background:var(--panel); color:var(--ink); }
   dialog::backdrop { background:rgba(15,23,42,.45); }
   dialog h3 { margin:0 0 6px; } dialog label { display:flex; gap:6px; align-items:center; margin:4px 0; } dialog textarea { width:100%; height:200px; }
   dialog .grow { flex:1; }
   textarea.anno { width:100%; min-height:44px; margin:2px 0 6px; padding:5px 8px; border:1px dashed var(--line); border-radius:6px; background:var(--code); color:var(--ink); font:12.5px "Segoe UI", Arial, sans-serif; resize:vertical; }
-  :root[data-theme="light"] { --bg:#f8fafc; --panel:#fff; --line:#cbd5e1; --ink:#0f172a; --muted:#64748b; --code:#f8fafc; --btn:#fff; --gut:#f1f5f9; --hover:#f1f5f9;
-          --k:#7c3aed; --s:#047857; --n:#b45309; --l:#be185d; --tn:#1d4ed8; --an:#7c3aed; --av:#047857; --c:#94a3b8; --good:#15803d; --bad:#b91c1c; --warn:#b45309; --del:#fee2e2; }
-  :root[data-theme="dark"] { --bg:#0b1220; --panel:#111827; --line:#334155; --ink:#e2e8f0; --muted:#94a3b8; --code:#0f172a; --btn:#1e293b; --gut:#0b1220; --hover:#1e293b;
-          --k:#c4b5fd; --s:#6ee7b7; --n:#fcd34d; --l:#f9a8d4; --tn:#93c5fd; --an:#c4b5fd; --av:#6ee7b7; --c:#64748b; --good:#4ade80; --bad:#f87171; --warn:#fbbf24; --del:#3f1717; }
   .bar .muted { font-size:12px; }
   .filters { gap:6px 8px; }
   .filters #q { flex:1 1 220px; min-width:160px; }
   .scroll { overflow:auto; min-height:0; }
-  .chip { display:inline-flex; gap:6px; align-items:center; padding:2px 8px; border-radius:12px; background:var(--acc); color:#fff; font-size:12px; }
-  .chip button { padding:0 6px; border:0; background:transparent; color:#fff; font-weight:700; }
   table.grid, table.fields { border-collapse:collapse; width:100%; font:12px/1.35 Consolas, "Cascadia Mono", monospace; }
   table.grid th, table.fields th { position:sticky; top:0; z-index:1; background:var(--gut); text-align:left; font-weight:600; padding:4px 6px; border-bottom:1px solid var(--line); white-space:nowrap; }
   table.grid td { padding:3px 6px; border-bottom:1px solid var(--line); white-space:nowrap; max-width:260px; overflow:hidden; text-overflow:ellipsis; }

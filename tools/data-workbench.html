@@ -79,6 +79,7 @@
   table.grid [contenteditable]:focus { outline:2px solid var(--acc); outline-offset:-2px; background:var(--code); white-space:pre-wrap; text-overflow:clip; }
   .th { display:flex; gap:2px; align-items:center; }
   .th .hname { flex:1; min-width:3em; }
+  .th .grip { cursor:grab; color:var(--muted); padding:0 2px; user-select:none; }
   table.grid button.mini { padding:0 3px; border:0; background:none; color:var(--muted); cursor:pointer; font:inherit; }
   table.grid button.mini:hover { color:var(--acc); }
   table.grid button.del:hover { color:var(--bad); }
@@ -96,6 +97,17 @@
   table.dt ins { background:var(--add2); text-decoration:none; }
   table.dt tr.skip td { text-align:center; color:var(--muted); background:var(--gut); cursor:pointer; padding:2px; }
   table.dt tr.cur td { box-shadow:inset 0 2px 0 var(--acc); }
+  :root[data-theme="light"] { --bg:#f8fafc; --panel:#fff; --line:#cbd5e1; --ink:#0f172a; --muted:#64748b; --good:#15803d; --bad:#b91c1c; --warn:#b45309; --code:#f8fafc; --btn:#fff; --gut:#f1f5f9; --hover:#f1f5f9;
+          --k:#7c3aed; --s:#047857; --n:#b45309; --l:#be185d; --tn:#1d4ed8; --an:#7c3aed; --av:#047857; --c:#94a3b8; --add:#dcfce7; --del:#fee2e2; --add2:#86efac; --del2:#fca5a5; }
+  :root[data-theme="dark"] { --bg:#0b1220; --panel:#111827; --line:#334155; --ink:#e2e8f0; --muted:#94a3b8; --good:#4ade80; --bad:#f87171; --warn:#fbbf24; --code:#0f172a; --btn:#1e293b; --gut:#0b1220; --hover:#1e293b;
+          --k:#c4b5fd; --s:#6ee7b7; --n:#fcd34d; --l:#f9a8d4; --tn:#93c5fd; --an:#c4b5fd; --av:#6ee7b7; --c:#64748b; --add:#14361f; --del:#3f1717; --add2:#166534; --del2:#991b1b; }
+  .chip { display:inline-flex; gap:6px; align-items:center; padding:2px 8px; border-radius:12px; background:var(--acc); color:#fff; font-size:12px; }
+  .chip button { padding:0 6px; border:0; background:transparent; color:#fff; font-weight:700; }
+  .chips { display:inline-flex; flex-wrap:wrap; gap:4px; }
+  .pop { position:fixed; z-index:60; display:flex; flex-direction:column; gap:6px; padding:8px; min-width:220px; background:var(--panel); color:var(--ink);
+         border:1px solid var(--line); border-radius:8px; box-shadow:0 6px 24px rgba(0,0,0,.18); }
+  .pop .row { display:flex; flex-wrap:wrap; gap:6px; align-items:center; }
+  .pop input[type=text] { flex:1; min-width:120px; }
 </style>
 </head>
 <body>
@@ -111,6 +123,10 @@
   </nav>
   <button id="wb-share" title="Chép link chứa dữ liệu + tuỳ chọn của tab đang mở (dữ liệu nằm sau dấu #, không gửi lên máy chủ)">🔗 Chia sẻ link</button>
   <button id="wb-undo" title="Lấy lại nội dung đang soạn trước khi nạp mẫu / link" hidden>↶ Khôi phục bản trước</button>
+  <button id="wb-save" title="Lưu dữ liệu + tuỳ chọn của tab đang mở vào trình duyệt này">💾 Lưu phiên</button>
+  <select id="wb-saved" title="Mở lại một phiên đã lưu trong trình duyệt này"></select>
+  <button id="wb-del-saved" title="Xoá phiên đang mở khỏi trình duyệt" hidden>🗑</button>
+  <label class="chk" title="Giao diện sáng / tối">Giao diện <select id="wb-theme"><option value="auto">Tự động</option><option value="light">Sáng</option><option value="dark">Tối</option></select></label>
   <span id="wb-note" class="muted"></span>
   <span class="seg lang-switch" title="Ngôn ngữ"><button data-lang="vi">VI</button><button data-lang="en">EN</button></span>
 </header>
@@ -194,11 +210,13 @@
     <select id="csv-delim" title="Dấu phân cách — đổi để đọc lại dữ liệu (mất các chỗ đã sửa)"><option value="auto">Dấu phân cách: tự nhận diện</option><option value=",">Dấu phẩy ,</option><option value=";">Chấm phẩy ;</option><option value="tab">Tab</option><option value="|">Dấu |</option></select>
     <label class="chk"><input id="csv-header" type="checkbox" checked>Dòng đầu là tiêu đề</label>
     <input id="csv-filter" type="text" placeholder="Lọc hàng (chứa chữ)…">
+    <span id="csv-chips" class="chips" hidden></span>
     <button id="csv-add-row">+ Hàng</button><button id="csv-add-col">+ Cột</button>
     <button id="csv-paste-toggle">Dán dữ liệu…</button>
     <span class="sep"></span>
     <button id="csv-save" class="main">Tải CSV</button>
     <label class="chk" title="Thêm BOM để Excel nhận đúng UTF-8 (tiếng Việt)"><input id="csv-bom" type="checkbox" checked>BOM cho Excel</label>
+    <label class="chk" title="Ghi số có 0 ở đầu, ID dài, số lẻ có 0 cuối, giờ dạng =&quot;…&quot; để Excel giữ nguyên giá trị"><input id="csv-exact" type="checkbox">Giữ số cho Excel</label>
     <select id="csv-eol" title="Kiểu xuống dòng khi tải về"><option value="crlf">CRLF (Windows/Excel)</option><option value="lf">LF (Linux/Mac)</option></select>
     <select id="csv-send"></select>
     <button id="csv-clear">Xoá</button>
@@ -215,7 +233,7 @@
   <footer class="report">
     <div id="csv-status" class="status muted">Chưa có dữ liệu.</div>
     <ol id="csv-msgs" class="msgs"></ol>
-    <div class="muted hint">Bấm vào ô hoặc tên cột để sửa · Enter xác nhận · Esc huỷ · ⇅ sắp xếp · × xoá hàng/cột. Mỗi trang 500 hàng, dùng ô lọc để thu hẹp. Bảng không lưu nháp — nhớ “Tải CSV” trước khi đóng tab.</div>
+    <div class="muted hint">Bấm vào ô hoặc tên cột để sửa · Enter xác nhận · Esc huỷ · ⇅ sắp xếp · ⏷ lọc cột · chuột phải vào ô: chỉ hiện / loại trừ giá trị · kéo ⠿ để đổi chỗ cột · × xoá hàng/cột. Mỗi trang 500 hàng, dùng ô lọc để thu hẹp. Bảng không lưu nháp — nhớ “Tải CSV” trước khi đóng tab.</div>
   </footer>
 </section>
 <section class="panel" data-wb-panel="diff" hidden>
@@ -446,7 +464,7 @@ I18n.add({
   "Mở file, kéo thả file vào trang, hoặc bấm “Dán dữ liệu…”.": "Open a file, drop one onto the page, or click “Paste data…”.",
   "‹ Trước": "‹ Prev",
   "Sau ›": "Next ›",
-  "Bấm vào ô hoặc tên cột để sửa · Enter xác nhận · Esc huỷ · ⇅ sắp xếp · × xoá hàng/cột. Mỗi trang 500 hàng, dùng ô lọc để thu hẹp. Bảng không lưu nháp — nhớ “Tải CSV” trước khi đóng tab.": "Click a cell or column name to edit · Enter confirms · Esc cancels · ⇅ sort · × delete row/column. 500 rows per page, use the filter to narrow down. The table is not saved as a draft — remember to “Download CSV” before closing the tab.",
+  "Bấm vào ô hoặc tên cột để sửa · Enter xác nhận · Esc huỷ · ⇅ sắp xếp · ⏷ lọc cột · chuột phải vào ô: chỉ hiện / loại trừ giá trị · kéo ⠿ để đổi chỗ cột · × xoá hàng/cột. Mỗi trang 500 hàng, dùng ô lọc để thu hẹp. Bảng không lưu nháp — nhớ “Tải CSV” trước khi đóng tab.": "Click a cell or column name to edit · Enter confirms · Esc cancels · ⇅ sort · ⏷ filter column · right-click a cell: only show / exclude its value · drag ⠿ to move a column · × delete row/column. 500 rows per page, use the filter to narrow down. The table is not saved as a draft — remember to “Download CSV” before closing the tab.",
   "Cách so sánh": "Compare mode",
   "Văn bản theo dòng": "Line-by-line text",
   "JSON theo cấu trúc (bỏ qua thứ tự khóa)": "Structural JSON (ignores key order)",
@@ -489,6 +507,14 @@ I18n.add({
   "Mã gốc": "Source code",
   "Dán CSS / SCSS / LESS / JavaScript vào đây…": "Paste CSS / SCSS / LESS / JavaScript here…",
   "Đưa kết quả sang ô bên trái": "Move the result to the left pane",
+  "💾 Lưu phiên": "💾 Save session",
+  "Lọc cột": "Filter column",
+  "Kéo để đổi chỗ cột": "Drag to move the column",
+  "Lưu dữ liệu + tuỳ chọn của tab đang mở vào trình duyệt này": "Save the open tab's data + options in this browser",
+  "Mở lại một phiên đã lưu trong trình duyệt này": "Reopen a session saved in this browser",
+  "Xoá phiên đang mở khỏi trình duyệt": "Delete the open session from the browser",
+  "Giữ số cho Excel": "Keep numbers for Excel",
+  "Ghi số có 0 ở đầu, ID dài, số lẻ có 0 cuối, giờ dạng =\"…\" để Excel giữ nguyên giá trị": "Write numbers with leading zeros, long ids, trailing-zero decimals and times as =\"…\" so Excel keeps them exactly",
   "Format dùng js-beautify 1.15.1 (nhúng sẵn, không tải gì từ mạng). JS được trình duyệt kiểm tra cú pháp sau khi format (chỉ biên dịch, không chạy mã). Thu gọn JS chưa hỗ trợ.": "Formatting uses js-beautify 1.15.1 (embedded, nothing is downloaded). JS is syntax-checked by the browser after formatting (compiled only, never run). JS minify is not supported yet.",
 });
 // English status / info / report texts built by the tabs and shared panels, keyed by the Vietnamese source text.
@@ -655,6 +681,32 @@ I18n.add({
   "XML phải có đúng 1 phần tử gốc (đang có {n} và có chữ nằm ngoài) → bọc trong <root>": "XML must have exactly 1 root element (found {n}, plus text outside) → wrapped in <root>",
   "XML phải có đúng 1 phần tử gốc (đang có {n}) → bọc trong <root>": "XML must have exactly 1 root element (found {n}) → wrapped in <root>",
 });
+// English for the shared core modules (ThemePicker markup, SavedSessions, ColFilter) — included by every tool that uses them.
+I18n.add({
+  "Giao diện": "Appearance",
+  "Giao diện sáng / tối": "Light / dark theme",
+  "Tự động": "Auto",
+  "Sáng": "Light",
+  "Tối": "Dark",
+  "📂 Đã lưu ({n})": "📂 Saved ({n})",
+  "Chưa có dữ liệu để lưu.": "Nothing to save yet.",
+  "Tên bản lưu (lưu trong trình duyệt này):": "Name for this save (stored in this browser):",
+  "✖ Không lưu được — bộ nhớ trình duyệt đầy hoặc bị chặn.": "✖ Could not save — browser storage is full or blocked.",
+  "✔ Đã lưu “{name}”.": "✔ Saved “{name}”.",
+  "Đã mở “{name}”.": "Opened “{name}”.",
+  "Xoá “{name}” khỏi trình duyệt?": "Delete “{name}” from the browser?",
+  "Từ": "From",
+  "Đến": "To",
+  "chứa": "contains",
+  "bằng": "equals",
+  "khác": "is not",
+  "Lọc cột {col}": "Filter column {col}",
+  "Áp dụng": "Apply",
+  "Đóng": "Close",
+  "Chỉ hiện “{v}”": "Only show “{v}”",
+  "Loại trừ “{v}”": "Exclude “{v}”",
+  "Bỏ bộ lọc này": "Remove this filter",
+});
 // Pure text helpers shared by parsers and tabs (no DOM, so node tests can load them).
 const TextUtil = (() => {
   const stripBom = s => s.charCodeAt(0) === 0xfeff ? s.slice(1) : s;
@@ -663,7 +715,9 @@ const TextUtil = (() => {
   const indentUnit = v => INDENT[v] ?? "  ";
   const countLines = s => { let n = 1; for (let i = s.indexOf("\n"); i >= 0; i = s.indexOf("\n", i + 1)) n++; return n; };
   const sizeKb = s => (new Blob([s]).size / 1024).toFixed(1);
-  return { stripBom, lineCol, indentUnit, countLines, sizeKb };
+  // Excel would drop leading zeros, round >15-digit ids, cut trailing decimals and reformat times → write those as ="…" text.
+  const excelExact = v => (/^-?\d+(\.\d+)?$/.test(v) && (String(Number(v)) !== v || v.replace(/\D/g, "").length > 15)) || /^\d{1,2}:\d{2}(:\d{2})?(\.\d+)?$/.test(v);
+  return { stripBom, lineCol, indentUnit, countLines, sizeKb, excelExact };
 })();
 // Share-link payload codec, same format as mermaid.live: "pako:" + base64url(zlib(JSON)); also reads uncompressed "base64:".
 const ShareCodec = (() => {
@@ -808,6 +862,147 @@ function ReportPanel(statusEl, listEl, editor = null) {
     },
   };
 }
+// UI theme: auto (follows the OS) / light / dark, remembered per tool; colours come from the :root[data-theme] overrides in the tool's CSS.
+const ThemePicker = (() => {
+  const apply = v => { if (v === "light" || v === "dark") document.documentElement.dataset.theme = v; else delete document.documentElement.dataset.theme; };
+  // store: the tool's prefixed localStorage wrapper ({ get, set }).
+  function bind(select, store) {
+    const v = store.get("theme", "auto");
+    select.value = v === "light" || v === "dark" ? v : "auto";
+    apply(select.value);
+    select.addEventListener("change", () => { apply(select.value); store.set("theme", select.value); });
+  }
+  return { bind, apply };
+})();
+// Named saves in localStorage (newest first, ≤ 30): 💾 asks a name and saves snapshot() · pick one in the <select> to reopen · 🗑 deletes the open one.
+const SavedSessions = ({ select, saveBtn, delBtn, store, key = "saved", snapshot, open, suggestName = () => "", isEmpty = p => !String(p.text || "").trim(), note, keep = () => {} }) => {
+  const MAX = 30;
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  let current = null;
+  // Stored entries are only trusted after this shape check; the tool's open() still validates its own payload fields.
+  const list = () => (store.get(key, []) || []).filter(a => a && typeof a.id === "string" && typeof a.name === "string" && a.payload && typeof a.payload === "object");
+
+  function fill() {
+    const items = list(), head = esc(T("📂 Đã lưu ({n})", { n: items.length }));
+    select.innerHTML = `<option value="">${head}</option>` +
+      items.map(a => `<option value="${esc(a.id)}">${esc(`${a.name} · ${new Date(a.t).toLocaleString(I18n.lang)}`)}</option>`).join("");
+    delBtn.hidden = !current;
+  }
+
+  function save() {
+    const p = snapshot();
+    if (isEmpty(p)) return note(T("Chưa có dữ liệu để lưu."), "bad");
+    const name = prompt(T("Tên bản lưu (lưu trong trình duyệt này):"), current ? current.name : suggestName());
+    if (!name || !name.trim()) return;
+    const id = current && current.name === name.trim() ? current.id : Date.now().toString(36);
+    const entry = { id, name: name.trim().slice(0, 80), t: Date.now(), payload: p };
+    if (!store.set(key, [entry, ...list().filter(a => a.id !== id)].slice(0, MAX))) return note(T("✖ Không lưu được — bộ nhớ trình duyệt đầy hoặc bị chặn."), "bad");
+    current = entry;
+    fill();
+    note(T("✔ Đã lưu “{name}”.", { name: entry.name }), "good");
+  }
+
+  function openId(id) {
+    const a = list().find(x => x.id === id);
+    if (!a) return;
+    keep();
+    open(a.payload);
+    current = a;
+    fill();
+    note(T("Đã mở “{name}”.", { name: a.name }), "muted");
+  }
+
+  function remove() {
+    if (!current || !confirm(T("Xoá “{name}” khỏi trình duyệt?", { name: current.name }))) return;
+    store.set(key, list().filter(a => a.id !== current.id));
+    current = null;
+    fill();
+  }
+
+  select.onchange = () => { const v = select.value; select.value = ""; if (v) openId(v); };
+  saveBtn.onclick = save;
+  delBtn.onclick = remove;
+  fill();
+  return { fill, forget: () => { current = null; fill(); } };
+};
+// Column filters for table tools: contains / equals / not equals / range, header popover editor, right-click "only / exclude this value" menu, removable chips.
+const ColFilter = (() => {
+  const OPS = { has: "∋", eq: "=", neq: "≠", range: "∈" };
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  let pop = null;
+
+  // range compares strings, so a time window "09:00" … "09:30" also keeps "09:30:59.999".
+  function test(f, v) {
+    if (f.op === "range") return (!f.v || v >= f.v) && (!f.v2 || v <= f.v2 + "￿");
+    if (f.op === "eq") return v === f.v;
+    if (f.op === "neq") return v !== f.v;
+    return v.toLowerCase().includes(f.v.toLowerCase());
+  }
+  const match = (filters, valueOf) => filters.every(f => test(f, String(valueOf(f.col) ?? "")));
+
+  const close = () => { if (pop) pop.hidden = true; };
+  function show(x, y, html, bind) {
+    if (!pop) {
+      pop = Object.assign(document.body.appendChild(document.createElement("div")), { className: "pop", hidden: true });
+      document.addEventListener("mousedown", e => { if (!pop.hidden && !pop.contains(e.target)) close(); });
+    }
+    pop.innerHTML = html;
+    pop.hidden = false;
+    pop.style.left = Math.max(4, Math.min(x, innerWidth - pop.offsetWidth - 8)) + "px";
+    pop.style.top = Math.max(4, Math.min(y, innerHeight - pop.offsetHeight - 8)) + "px";
+    bind(pop);
+    const first = pop.querySelector("input");
+    if (first) first.focus();
+  }
+
+  // onApply({op, v, v2}); range=true shows From / To instead of the operator picker.
+  function editor(x, y, colLabel, range, onApply) {
+    const from = esc(T("Từ")), to = esc(T("Đến")), has = esc(T("chứa")), eq = esc(T("bằng")), neq = esc(T("khác"));
+    const title = esc(T("Lọc cột {col}", { col: colLabel })), apply = esc(T("Áp dụng")), shut = esc(T("Đóng"));
+    const body = range
+      ? `<label>${from} <input type="text" data-f="v" placeholder="09:00:00.000"></label><label>${to} <input type="text" data-f="v2" placeholder="09:30:00"></label>`
+      : `<select data-f="op"><option value="has">${has}</option><option value="eq">${eq}</option><option value="neq">${neq}</option></select><input type="text" data-f="v">`;
+    show(x, y, `<b>${title}</b><div class="row">${body}</div>` +
+      `<div class="row"><button class="main" data-a="ok">${apply}</button><button data-a="x">${shut}</button></div>`, p => {
+      const val = k => (p.querySelector(`[data-f="${k}"]`) || {}).value || "";
+      const ok = () => {
+        const v = val("v").trim(), v2 = val("v2").trim();
+        close();
+        if (range ? v || v2 : v) onApply(range ? { op: "range", v, v2 } : { op: val("op"), v });
+      };
+      p.querySelector('[data-a="ok"]').onclick = ok;
+      p.querySelector('[data-a="x"]').onclick = close;
+      p.onkeydown = e => { if (e.key === "Enter") ok(); if (e.key === "Escape") close(); };
+    });
+  }
+
+  // onPick("eq" | "neq"); extra: [{ label, run }] more actions (e.g. follow an order chain).
+  function menu(x, y, value, onPick, extra = []) {
+    const short = value.length > 40 ? value.slice(0, 40) + "…" : value;
+    const only = esc(T("Chỉ hiện “{v}”", { v: short })), skip = esc(T("Loại trừ “{v}”", { v: short }));
+    show(x, y, `<button data-a="eq">${only}</button><button data-a="neq">${skip}</button>` +
+      extra.map((a, k) => `<button data-x="${k}">${esc(a.label)}</button>`).join(""), p => {
+      p.querySelector('[data-a="eq"]').onclick = () => { close(); onPick("eq"); };
+      p.querySelector('[data-a="neq"]').onclick = () => { close(); onPick("neq"); };
+      p.querySelectorAll("[data-x]").forEach(b => { b.onclick = () => { close(); extra[+b.dataset.x].run(); }; });
+    });
+  }
+
+  // Renders filters as chips into el; onRemove(index).
+  function chips(el, filters, labelOf, onRemove) {
+    const remove = esc(T("Bỏ bộ lọc này"));
+    el.innerHTML = filters.map((f, k) => `<span class="chip" data-k="${k}">${esc(labelOf(f.col))} ${OPS[f.op]} ${esc(f.op === "range" ? `${f.v || "…"} – ${f.v2 || "…"}` : f.v)}` +
+      `<button title="${remove}">✕</button></span>`).join("");
+    el.hidden = !filters.length;
+    el.onclick = e => { const b = e.target.closest(".chip button"); if (b) onRemove(+b.parentElement.dataset.k); };
+  }
+
+  // Filters from share links / saved sessions are untrusted; okCol checks the column id type of the tool.
+  const clean = (list, okCol) => Array.isArray(list) ? list.filter(f => f && okCol(f.col) && Object.hasOwn(OPS, f.op) && typeof (f.v ?? "") === "string" && typeof (f.v2 ?? "") === "string")
+    .map(f => ({ col: f.col, op: f.op, v: f.v || "", v2: f.v2 || "" })) : [];
+
+  return { OPS, match, editor, menu, chips, close, clean };
+})();
 // Tab registry: lazy init, ?tab= deep link, Ctrl+Enter → primary, file drop, relang(), share links (#pako: / ?data=) with ↶ restore of replaced work.
 const Workbench = (() => {
   const tabs = {}, sendSelects = [], backups = {};
@@ -884,13 +1079,14 @@ const Workbench = (() => {
     note(T("Đã khôi phục bản trước."));
   }
 
+  const valid = p => p && Object.hasOwn(tabs, p.tab) && tabs[p.tab].open && typeof p.text === "string" && (p.text2 == null || typeof p.text2 === "string");
+
   async function openLink(raw, tab) {
     let p;
     try { p = await ShareCodec.decode(raw); }
     catch (e) { return note(T("✖ Link chia sẻ bị hỏng hoặc không đúng định dạng: {msg}", { msg: e.message }), "bad"); }
     if (p === null) p = { tab, text: raw };
-    if (!p || !Object.hasOwn(tabs, p.tab) || !tabs[p.tab].open || typeof p.text !== "string" || (p.text2 != null && typeof p.text2 !== "string"))
-      return note(T("✖ Link không chứa dữ liệu của Data Workbench."), "bad");
+    if (!valid(p)) return note(T("✖ Link không chứa dữ liệu của Data Workbench."), "bad");
     apply(p);
     note(backups[p.tab] ? T("Đã nạp dữ liệu từ link — bấm “↶ Khôi phục bản trước” để lấy lại bài đang soạn.") : T("Đã nạp dữ liệu từ link."));
   }
@@ -940,6 +1136,12 @@ const Workbench = (() => {
     document.querySelectorAll("[data-wb-tab]").forEach(b => { b.onclick = () => show(b.dataset.wbTab); });
     $("wb-share").onclick = share;
     $("wb-undo").onclick = restore;
+    ThemePicker.bind($("wb-theme"), Store);
+    // Saved sessions hold one tab's snapshot (same shape as a share link payload).
+    const saved = SavedSessions({ select: $("wb-saved"), saveBtn: $("wb-save"), delBtn: $("wb-del-saved"), store: Store, key: "sessions",
+      snapshot: () => snapshot(active), isEmpty, note, open: p => { if (valid(p)) apply(p); },
+      suggestName: () => `${T(tabs[active].label)} · ${new Date().toLocaleDateString(I18n.lang)}` });
+    I18n.onChange(() => saved.fill());
     document.addEventListener("keydown", e => {
       if ((e.ctrlKey || e.metaKey) && e.key === "Enter" && tabs[active].primary) { e.preventDefault(); tabs[active].primary(); }
     });
@@ -2268,11 +2470,11 @@ const DEMOS = {
     open: p => load("", p.text, $("cv-from").value),
   });
 })();
-// Tab "Bảng CSV": view/edit CSV-TSV in a grid — encoding, delimiter sniffing, sort, filter, edit cells, add/remove rows & columns, export.
+// Tab "Bảng CSV": view/edit CSV-TSV in a grid — encoding, delimiter sniffing, sort, filter (text + per-column chips), edit cells, add/remove/reorder rows & columns, export.
 (() => {
   const PAGE = 500, DECIMAL = /^-?\d+(\.\d+)?$/, NUMERIC_CELL = /^-?\d+(?:[.,]\d+)*$/;
   const collator = new Intl.Collator("vi", { numeric: true, sensitivity: "base" });
-  let report, head = [], rows = [], sort = { col: -1, dir: 1 }, page = 0, editBefore = "";
+  let report, head = [], rows = [], sort = { col: -1, dir: 1 }, page = 0, editBefore = "", colFilters = [], dragCol = -1;
   let lastFile = null, lastText = "", fileName = "", delimUsed = ",", lastShow = () => {};
 
   const delimSel = () => ({ auto: "", tab: "\t" }[$("csv-delim").value] ?? $("csv-delim").value);
@@ -2286,7 +2488,7 @@ const DEMOS = {
     delimUsed = p.delimiter;
     const all = p.rows.map(r => r.length < p.width ? [...r, ...new Array(p.width - r.length).fill("")] : r);
     if ($("csv-header").checked && all.length) { head = all[0]; rows = all.slice(1); } else { head = genHead(p.width); rows = all; }
-    sort = { col: -1, dir: 1 }; page = 0; $("csv-filter").value = "";
+    sort = { col: -1, dir: 1 }; page = 0; $("csv-filter").value = ""; colFilters = [];
     render();
     const n = rows.length, cols = head.length, delimiter = delimSel();
     lastShow = (q = CsvTool.parse(text, delimiter), ex = extra(true)) => {
@@ -2301,6 +2503,7 @@ const DEMOS = {
     const f = $("csv-filter").value.trim().toLowerCase();
     let idx = rows.map((_, i) => i);
     if (f) idx = idx.filter(i => rows[i].some(v => v.toLowerCase().includes(f)));
+    if (colFilters.length) idx = idx.filter(i => ColFilter.match(colFilters, c => rows[i][c]));
     if (sort.col >= 0) idx.sort((a, b) => sort.dir * cmp(rows[a][sort.col], rows[b][sort.col]));
     return idx;
   }
@@ -2312,9 +2515,9 @@ const DEMOS = {
     const shown = idx.slice(page * PAGE, (page + 1) * PAGE);
     const numCol = head.map((_, c) => shown.some(r => rows[r][c]) && shown.every(r => !rows[r][c] || NUMERIC_CELL.test(rows[r][c].trim())));
     const arrow = c => sort.col !== c ? "⇅" : sort.dir > 0 ? "▲" : "▼";
-    const tip = { sort: T("Sắp xếp"), delCol: T("Xoá cột"), delRow: T("Xoá hàng") };
-    const th = (h, c) => `<th><div class="th"><span class="hname" contenteditable="true" data-h="${c}">${Dom.esc(h)}</span>`
-      + `<button class="mini" data-sort="${c}" title="${tip.sort}">${arrow(c)}</button><button class="mini del" data-delc="${c}" title="${tip.delCol}">×</button></div></th>`;
+    const tip = { sort: T("Sắp xếp"), delCol: T("Xoá cột"), delRow: T("Xoá hàng"), filter: T("Lọc cột"), grip: T("Kéo để đổi chỗ cột") };
+    const th = (h, c) => `<th data-col="${c}"><div class="th"><span class="grip" draggable="true" data-grip="${c}" title="${tip.grip}">⠿</span><span class="hname" contenteditable="true" data-h="${c}">${Dom.esc(h)}</span>`
+      + `<button class="mini" data-filt="${c}" title="${tip.filter}">⏷</button><button class="mini" data-sort="${c}" title="${tip.sort}">${arrow(c)}</button><button class="mini del" data-delc="${c}" title="${tip.delCol}">×</button></div></th>`;
     const tr = r => `<tr><td class="rn"><button class="mini del" data-delr="${r}" title="${tip.delRow}">×</button>${r + 1}</td>`
       + head.map((_, c) => `<td contenteditable="true" data-r="${r}" data-c="${c}"${numCol[c] ? ' class="num"' : ""}>${Dom.esc(rows[r][c] ?? "")}</td>`).join("") + "</tr>";
     $("csv-table").innerHTML = head.length ? `<thead><tr><th class="rn">#</th>${head.map(th).join("")}</tr></thead><tbody>${shown.map(tr).join("")}</tbody>` : "";
@@ -2323,10 +2526,33 @@ const DEMOS = {
     $("csv-next").disabled = page >= pages - 1;
     $("csv-info").textContent = head.length ? T("{n} hàng × {cols} cột", { n: I18n.num(rows.length), cols: head.length })
       + (idx.length !== rows.length ? " · " + T("lọc còn {n}", { n: I18n.num(idx.length) }) : "") : "";
+    ColFilter.chips($("csv-chips"), colFilters, c => head[c] || T("Cột {n}", { n: c + 1 }), k => { colFilters.splice(k, 1); page = 0; render(); });
+  }
+
+  function addFilter(c, f) {
+    colFilters = colFilters.filter(x => !(x.col === c && x.op === f.op));
+    colFilters.push({ col: c, op: f.op, v: f.v, v2: "" });
+    page = 0;
+    render();
+  }
+
+  // Moves column `from` before column `to` in the data itself (export follows); sort and filters follow their column.
+  function moveCol(from, to) {
+    const order = head.map((_, i) => i).filter(i => i !== from);
+    order.splice(order.indexOf(to), 0, from);
+    const at = old => order.indexOf(old);
+    head = order.map(i => head[i]);
+    rows = rows.map(r => order.map(i => r[i] ?? ""));
+    if (sort.col >= 0) sort = { col: at(sort.col), dir: sort.dir };
+    colFilters = colFilters.map(f => ({ ...f, col: at(f.col) }));
+    render();
   }
 
   const outDelim = () => delimSel() || delimUsed;
-  const csvText = (eol = "\n") => CsvTool.stringify($("csv-header").checked ? [head, ...rows] : rows, outDelim(), eol);
+  const csvText = (eol = "\n", exact = false) => {
+    const body = exact ? rows.map(r => r.map(v => TextUtil.excelExact(v) ? `="${v}"` : v)) : rows;
+    return CsvTool.stringify($("csv-header").checked ? [head, ...body] : body, outDelim(), eol);
+  };
 
   function readCurrentFile() {
     if (!lastFile) return;
@@ -2374,18 +2600,46 @@ const DEMOS = {
       if (b.dataset.sort !== undefined) {
         const c = +b.dataset.sort;
         sort = sort.col !== c ? { col: c, dir: 1 } : sort.dir > 0 ? { col: c, dir: -1 } : { col: -1, dir: 1 };
+      } else if (b.dataset.filt !== undefined) {
+        const c = +b.dataset.filt, r = b.getBoundingClientRect();
+        return ColFilter.editor(r.left, r.bottom + 4, head[c] || T("Cột {n}", { n: c + 1 }), false, f => addFilter(c, f));
       } else if (b.dataset.delc !== undefined) {
         const c = +b.dataset.delc;
         head.splice(c, 1); rows.forEach(r => r.splice(c, 1));
         sort = sort.col === c ? { col: -1, dir: 1 } : { col: sort.col > c ? sort.col - 1 : sort.col, dir: sort.dir };
+        colFilters = colFilters.filter(f => f.col !== c).map(f => ({ ...f, col: f.col > c ? f.col - 1 : f.col }));
       } else if (b.dataset.delr !== undefined) rows.splice(+b.dataset.delr, 1);
       render();
     });
   }
 
+  // Right-click a cell → only show / exclude its value; drag the ⠿ grip of a header onto another header to move the column.
+  function bindFilterAndDrag() {
+    const table = $("csv-table");
+    table.addEventListener("contextmenu", e => {
+      const td = e.target.closest("td[data-c]");
+      if (!td) return;
+      e.preventDefault();
+      const c = +td.dataset.c;
+      ColFilter.menu(e.clientX, e.clientY, rows[+td.dataset.r][c] ?? "", op => addFilter(c, { op, v: rows[+td.dataset.r][c] ?? "" }));
+    });
+    table.addEventListener("dragstart", e => { const g = e.target.closest("[data-grip]"); if (g) { dragCol = +g.dataset.grip; e.dataTransfer.effectAllowed = "move"; } });
+    table.addEventListener("dragover", e => { if (dragCol >= 0 && e.target.closest("th[data-col]")) e.preventDefault(); });
+    table.addEventListener("drop", e => {
+      const th = e.target.closest("th[data-col]");
+      if (dragCol < 0 || !th) return;
+      e.preventDefault();
+      const to = +th.dataset.col, from = dragCol;
+      dragCol = -1;
+      if (to !== from) moveCol(from, to);
+    });
+    table.addEventListener("dragend", () => { dragCol = -1; });
+  }
+
   function init() {
     report = ReportPanel($("csv-status"), $("csv-msgs"));
     bindTable();
+    bindFilterAndDrag();
     $("csv-file").onchange = e => { if (e.target.files[0]) onFile(e.target.files[0]); e.target.value = ""; };
     $("csv-enc").onchange = readCurrentFile;
     $("csv-delim").onchange = () => { if (lastText) loadText(lastText, fileName); };
@@ -2407,7 +2661,7 @@ const DEMOS = {
     $("csv-save").onclick = () => {
       if (!head.length) return;
       const d = outDelim();
-      Dom.download(($("csv-bom").checked ? "﻿" : "") + csvText($("csv-eol").value === "crlf" ? "\r\n" : "\n"),
+      Dom.download(($("csv-bom").checked ? "﻿" : "") + csvText($("csv-eol").value === "crlf" ? "\r\n" : "\n", $("csv-exact").checked),
         `${Dom.baseName(fileName)}.edited.${d === "\t" ? "tsv" : "csv"}`, "text/csv;charset=utf-8");
     };
     $("csv-clear").onclick = () => { lastFile = null; head = []; rows = []; loadText(""); };

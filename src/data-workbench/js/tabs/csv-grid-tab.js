@@ -1,8 +1,8 @@
-// Tab "Bảng CSV": view/edit CSV-TSV in a grid — encoding, delimiter sniffing, sort, filter, edit cells, add/remove rows & columns, export.
+// Tab "Bảng CSV": view/edit CSV-TSV in a grid — encoding, delimiter sniffing, sort, filter (text + per-column chips), edit cells, add/remove/reorder rows & columns, export.
 (() => {
   const PAGE = 500, DECIMAL = /^-?\d+(\.\d+)?$/, NUMERIC_CELL = /^-?\d+(?:[.,]\d+)*$/;
   const collator = new Intl.Collator("vi", { numeric: true, sensitivity: "base" });
-  let report, head = [], rows = [], sort = { col: -1, dir: 1 }, page = 0, editBefore = "";
+  let report, head = [], rows = [], sort = { col: -1, dir: 1 }, page = 0, editBefore = "", colFilters = [], dragCol = -1;
   let lastFile = null, lastText = "", fileName = "", delimUsed = ",", lastShow = () => {};
 
   const delimSel = () => ({ auto: "", tab: "\t" }[$("csv-delim").value] ?? $("csv-delim").value);
@@ -16,7 +16,7 @@
     delimUsed = p.delimiter;
     const all = p.rows.map(r => r.length < p.width ? [...r, ...new Array(p.width - r.length).fill("")] : r);
     if ($("csv-header").checked && all.length) { head = all[0]; rows = all.slice(1); } else { head = genHead(p.width); rows = all; }
-    sort = { col: -1, dir: 1 }; page = 0; $("csv-filter").value = "";
+    sort = { col: -1, dir: 1 }; page = 0; $("csv-filter").value = ""; colFilters = [];
     render();
     const n = rows.length, cols = head.length, delimiter = delimSel();
     lastShow = (q = CsvTool.parse(text, delimiter), ex = extra(true)) => {
@@ -31,6 +31,7 @@
     const f = $("csv-filter").value.trim().toLowerCase();
     let idx = rows.map((_, i) => i);
     if (f) idx = idx.filter(i => rows[i].some(v => v.toLowerCase().includes(f)));
+    if (colFilters.length) idx = idx.filter(i => ColFilter.match(colFilters, c => rows[i][c]));
     if (sort.col >= 0) idx.sort((a, b) => sort.dir * cmp(rows[a][sort.col], rows[b][sort.col]));
     return idx;
   }
@@ -42,9 +43,9 @@
     const shown = idx.slice(page * PAGE, (page + 1) * PAGE);
     const numCol = head.map((_, c) => shown.some(r => rows[r][c]) && shown.every(r => !rows[r][c] || NUMERIC_CELL.test(rows[r][c].trim())));
     const arrow = c => sort.col !== c ? "⇅" : sort.dir > 0 ? "▲" : "▼";
-    const tip = { sort: T("Sắp xếp"), delCol: T("Xoá cột"), delRow: T("Xoá hàng") };
-    const th = (h, c) => `<th><div class="th"><span class="hname" contenteditable="true" data-h="${c}">${Dom.esc(h)}</span>`
-      + `<button class="mini" data-sort="${c}" title="${tip.sort}">${arrow(c)}</button><button class="mini del" data-delc="${c}" title="${tip.delCol}">×</button></div></th>`;
+    const tip = { sort: T("Sắp xếp"), delCol: T("Xoá cột"), delRow: T("Xoá hàng"), filter: T("Lọc cột"), grip: T("Kéo để đổi chỗ cột") };
+    const th = (h, c) => `<th data-col="${c}"><div class="th"><span class="grip" draggable="true" data-grip="${c}" title="${tip.grip}">⠿</span><span class="hname" contenteditable="true" data-h="${c}">${Dom.esc(h)}</span>`
+      + `<button class="mini" data-filt="${c}" title="${tip.filter}">⏷</button><button class="mini" data-sort="${c}" title="${tip.sort}">${arrow(c)}</button><button class="mini del" data-delc="${c}" title="${tip.delCol}">×</button></div></th>`;
     const tr = r => `<tr><td class="rn"><button class="mini del" data-delr="${r}" title="${tip.delRow}">×</button>${r + 1}</td>`
       + head.map((_, c) => `<td contenteditable="true" data-r="${r}" data-c="${c}"${numCol[c] ? ' class="num"' : ""}>${Dom.esc(rows[r][c] ?? "")}</td>`).join("") + "</tr>";
     $("csv-table").innerHTML = head.length ? `<thead><tr><th class="rn">#</th>${head.map(th).join("")}</tr></thead><tbody>${shown.map(tr).join("")}</tbody>` : "";
@@ -53,10 +54,33 @@
     $("csv-next").disabled = page >= pages - 1;
     $("csv-info").textContent = head.length ? T("{n} hàng × {cols} cột", { n: I18n.num(rows.length), cols: head.length })
       + (idx.length !== rows.length ? " · " + T("lọc còn {n}", { n: I18n.num(idx.length) }) : "") : "";
+    ColFilter.chips($("csv-chips"), colFilters, c => head[c] || T("Cột {n}", { n: c + 1 }), k => { colFilters.splice(k, 1); page = 0; render(); });
+  }
+
+  function addFilter(c, f) {
+    colFilters = colFilters.filter(x => !(x.col === c && x.op === f.op));
+    colFilters.push({ col: c, op: f.op, v: f.v, v2: "" });
+    page = 0;
+    render();
+  }
+
+  // Moves column `from` before column `to` in the data itself (export follows); sort and filters follow their column.
+  function moveCol(from, to) {
+    const order = head.map((_, i) => i).filter(i => i !== from);
+    order.splice(order.indexOf(to), 0, from);
+    const at = old => order.indexOf(old);
+    head = order.map(i => head[i]);
+    rows = rows.map(r => order.map(i => r[i] ?? ""));
+    if (sort.col >= 0) sort = { col: at(sort.col), dir: sort.dir };
+    colFilters = colFilters.map(f => ({ ...f, col: at(f.col) }));
+    render();
   }
 
   const outDelim = () => delimSel() || delimUsed;
-  const csvText = (eol = "\n") => CsvTool.stringify($("csv-header").checked ? [head, ...rows] : rows, outDelim(), eol);
+  const csvText = (eol = "\n", exact = false) => {
+    const body = exact ? rows.map(r => r.map(v => TextUtil.excelExact(v) ? `="${v}"` : v)) : rows;
+    return CsvTool.stringify($("csv-header").checked ? [head, ...body] : body, outDelim(), eol);
+  };
 
   function readCurrentFile() {
     if (!lastFile) return;
@@ -104,18 +128,46 @@
       if (b.dataset.sort !== undefined) {
         const c = +b.dataset.sort;
         sort = sort.col !== c ? { col: c, dir: 1 } : sort.dir > 0 ? { col: c, dir: -1 } : { col: -1, dir: 1 };
+      } else if (b.dataset.filt !== undefined) {
+        const c = +b.dataset.filt, r = b.getBoundingClientRect();
+        return ColFilter.editor(r.left, r.bottom + 4, head[c] || T("Cột {n}", { n: c + 1 }), false, f => addFilter(c, f));
       } else if (b.dataset.delc !== undefined) {
         const c = +b.dataset.delc;
         head.splice(c, 1); rows.forEach(r => r.splice(c, 1));
         sort = sort.col === c ? { col: -1, dir: 1 } : { col: sort.col > c ? sort.col - 1 : sort.col, dir: sort.dir };
+        colFilters = colFilters.filter(f => f.col !== c).map(f => ({ ...f, col: f.col > c ? f.col - 1 : f.col }));
       } else if (b.dataset.delr !== undefined) rows.splice(+b.dataset.delr, 1);
       render();
     });
   }
 
+  // Right-click a cell → only show / exclude its value; drag the ⠿ grip of a header onto another header to move the column.
+  function bindFilterAndDrag() {
+    const table = $("csv-table");
+    table.addEventListener("contextmenu", e => {
+      const td = e.target.closest("td[data-c]");
+      if (!td) return;
+      e.preventDefault();
+      const c = +td.dataset.c;
+      ColFilter.menu(e.clientX, e.clientY, rows[+td.dataset.r][c] ?? "", op => addFilter(c, { op, v: rows[+td.dataset.r][c] ?? "" }));
+    });
+    table.addEventListener("dragstart", e => { const g = e.target.closest("[data-grip]"); if (g) { dragCol = +g.dataset.grip; e.dataTransfer.effectAllowed = "move"; } });
+    table.addEventListener("dragover", e => { if (dragCol >= 0 && e.target.closest("th[data-col]")) e.preventDefault(); });
+    table.addEventListener("drop", e => {
+      const th = e.target.closest("th[data-col]");
+      if (dragCol < 0 || !th) return;
+      e.preventDefault();
+      const to = +th.dataset.col, from = dragCol;
+      dragCol = -1;
+      if (to !== from) moveCol(from, to);
+    });
+    table.addEventListener("dragend", () => { dragCol = -1; });
+  }
+
   function init() {
     report = ReportPanel($("csv-status"), $("csv-msgs"));
     bindTable();
+    bindFilterAndDrag();
     $("csv-file").onchange = e => { if (e.target.files[0]) onFile(e.target.files[0]); e.target.value = ""; };
     $("csv-enc").onchange = readCurrentFile;
     $("csv-delim").onchange = () => { if (lastText) loadText(lastText, fileName); };
@@ -137,7 +189,7 @@
     $("csv-save").onclick = () => {
       if (!head.length) return;
       const d = outDelim();
-      Dom.download(($("csv-bom").checked ? "﻿" : "") + csvText($("csv-eol").value === "crlf" ? "\r\n" : "\n"),
+      Dom.download(($("csv-bom").checked ? "﻿" : "") + csvText($("csv-eol").value === "crlf" ? "\r\n" : "\n", $("csv-exact").checked),
         `${Dom.baseName(fileName)}.edited.${d === "\t" ? "tsv" : "csv"}`, "text/csv;charset=utf-8");
     };
     $("csv-clear").onclick = () => { lastFile = null; head = []; rows = []; loadText(""); };

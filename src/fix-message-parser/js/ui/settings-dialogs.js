@@ -1,4 +1,4 @@
-// Dialogs: anonymize by category (remembered) and custom dictionary CSV (stored in this browser); theme picker (auto / light / dark).
+// Dialogs: anonymize by category (remembered) and custom dictionary CSV (stored in this browser); theme select bound to ThemePicker.
 const Settings = (() => {
   let deps = null, custom = null;
   const esc = s => Dom.esc(s);
@@ -57,10 +57,6 @@ const Settings = (() => {
     deps.dictChanged();
   }
 
-  function theme(v) {
-    if (v === "light" || v === "dark") document.documentElement.dataset.theme = v; else delete document.documentElement.dataset.theme;
-    Store.set("theme", v);
-  }
 
   // deps: { mask(cats, extraTags), dictChanged() }
   function init(d) {
@@ -69,10 +65,7 @@ const Settings = (() => {
     FixDict.setCustom(custom);
     $("mask").onclick = anonymize;
     $("dictBtn").onclick = dictionary;
-    const t = Store.get("theme", "auto");
-    $("theme").value = ["light", "dark"].includes(t) ? t : "auto";
-    theme($("theme").value);
-    $("theme").onchange = e => theme(e.target.value);
+    ThemePicker.bind($("theme"), Store);
   }
 
   return { init, linkTags: () => FixCustom.tags(custom, "link") };

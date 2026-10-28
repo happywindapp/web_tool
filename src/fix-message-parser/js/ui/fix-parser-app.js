@@ -3,6 +3,7 @@ const FixApp = (() => {
   const KEEP = ["dialect", "tz", "cols", "hideAdmin", "hideBc", "order", "hideHdr"];
   // Exchange → firm messages carry the venue in 49; firm → exchange order/quote messages carry it in 56.
   const FROM_VENUE = new Set(["8", "9", "h", "f", "j", "AI"]), TO_VENUE = new Set(["D", "F", "G", "s", "t", "u", "S", "Z", "AJ", "R"]);
+  let saved = null;
   const S = { msgs: [], dict: null, dialect: "fix44", chain: null, vis: [], sel: -1, chainRoot: null, skipped: 0, us: "", venueId: "" };
 
   const opts = () => Dom.readOpts();
@@ -141,7 +142,7 @@ const FixApp = (() => {
     });
     $("toggleIn").onclick = () => { const c = document.querySelector(".left").classList.toggle("collapsed"); $("toggleIn").textContent = c ? "▾" : "▴"; };
     $("file").onchange = e => { const f = e.target.files[0]; e.target.value = ""; if (f) readFile(f); };
-    $("clear").onclick = () => { LinkIO.keep(); Saved.forget(); open({ text: "", opts: { q: "" }, chain: null }); };
+    $("clear").onclick = () => { LinkIO.keep(); saved.forget(); open({ text: "", opts: { q: "" }, chain: null }); };
     $("csv").onclick = () => Dom.download(Timeline.csv(S.msgs, S.vis, ctx()), "fix-messages.csv", "text/csv;charset=utf-8");
     $("json").onclick = () => Dom.download(JSON.stringify(S.vis.map(i => Detail.json(S.msgs[i], S.dict, opts().tz, Notes.get(i))), null, 2), "fix-messages.json", "application/json");
     const body = document.body;
@@ -163,13 +164,14 @@ const FixApp = (() => {
   function start() {
     I18n.init();
     Dom.writeOpts(Store.get("opts", {}));
-    I18n.onChange(() => { LinkIO.note(""); LinkIO.fillDemos(); Saved.fill(); fillTypes(); fillChains(); ColView.set(ColView.get()); refresh(); });
+    I18n.onChange(() => { LinkIO.note(""); LinkIO.fillDemos(); saved.fill(); fillTypes(); fillChains(); ColView.set(ColView.get()); refresh(); });
     ColView.init({ columns: () => Timeline.columns(ctx()), onChange: refresh, select: i => select(i), follow: () => act("chain"),
       chainable: () => S.sel >= 0 && S.chain.size(S.chain.root[S.sel]) > 1 });
     ColView.bindTable($("grid"));
     Settings.init({ mask, dictChanged: () => { if (S.chain) parse(true); } });
     InputView.init((mi, fi) => { const m = S.msgs[mi], f = m && m.fields[fi]; return f && f.tag !== null ? TagInfo.tooltip(S.dict, m, f, opts().tz) : ""; });
-    Saved.init({ snapshot, open, suggestName });
+    saved = SavedSessions({ select: $("saved"), saveBtn: $("saveBtn"), delBtn: $("delSaved"), store: Store, key: "analyses",
+      snapshot, open, suggestName, note: LinkIO.note, keep: LinkIO.keep });
     bind();
     LinkIO.init({ snapshot, open });
   }
