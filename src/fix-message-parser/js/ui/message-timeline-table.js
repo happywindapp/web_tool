@@ -1,4 +1,4 @@
-// Message timeline: filters (text / tag=value terms, MsgType, session & broadcast, errors, notes, order chain, column filters), ordered columns, rows, CSV export.
+// Message timeline: filters (text / tag=value terms, MsgType, session & broadcast, errors, notes, picked chain/family, column filters), ordered columns, rows, CSV export.
 const Timeline = (() => {
   const MAX_ROWS = 3000;
   const ADMIN = new Set(["0", "1", "2", "4", "5", "A"]), BROADCAST = new Set(["h", "f"]), REJECT = new Set(["3", "j", "9"]);
@@ -49,18 +49,18 @@ const Timeline = (() => {
   }
 
   // Space-separated terms, all must match; "tag=value" compares that tag (contains, case-insensitive), other terms search the raw line.
-  function visible(msgs, f, chain, ctx) {
+  function visible(msgs, f, ctx) {
     const terms = f.q.trim().toLowerCase().split(/\s+/).filter(Boolean).map(t => { const m = /^(\d+)=(.*)$/.exec(t); return m ? { tag: m[1], v: m[2] } : { v: t }; });
     const cols = ColView.active();
     const out = [];
     msgs.forEach((m, i) => {
-      if (f.chainRoot !== null && chain.root[i] !== f.chainRoot) return;
+      if (f.only && !f.only.has(i)) return;
       if (f.type && m.type !== f.type) return;
       if (f.hideAdmin && ADMIN.has(m.type) && f.type !== m.type) return;
       if (f.hideBc && BROADCAST.has(m.type) && f.type !== m.type) return;
       if (f.onlyBad && m.level !== "error" && m.level !== "warn") return;
       if (f.onlyNotes && !Notes.get(i)) return;
-      if (cols && !ColView.match(id => cell(id, m, i, ctx))) return;
+      if (cols && !ColView.match(id => cell(id, m, i, ctx), () => FixTime.stamp(m.get("52"), ctx.tz))) return;
       const hay = (m.prefix + " " + m.raw).toLowerCase();
       if (terms.every(t => t.tag ? m.all(t.tag).some(v => v.toLowerCase().includes(t.v)) : hay.includes(t.v))) out.push(i);
     });

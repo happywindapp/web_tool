@@ -1,4 +1,4 @@
-// Fake FIX 4.4 samples: a broker⇄exchange order lifecycle (raw SOH, Parties group) and a set of broken messages (^A delimiter) for the validator.
+// Fake FIX 4.4 samples: a broker⇄exchange order lifecycle (raw SOH, Parties group), an algo parent with child orders (583), and broken messages (^A) for the validator.
 const StdSamples = (() => {
   const t = s => `20261028-${s}`;
   let seq = { BROKER01: 0, EXCH: 0 };
@@ -50,5 +50,32 @@ const StdSamples = (() => {
     ].join("\n");
   }
 
-  return { orderLifecycle, broken };
+  // Client parent order sliced by the broker into child orders that carry ClOrdLinkID(583) = parent ClOrdID; one child points at an earlier parent.
+  function algoParentChild() {
+    seq = { BROKER01: 0, EXCH: 0, CLIENT1: 0 };
+    const p = s => s.split(FixCodec.SOH).join("|");
+    const child = (time, id, qty, px, more = []) => m("BROKER01", "EXCH", time, "D", [["11", id], ["38", qty], ["40", 2], ["44", px], ["54", 1], ["55", "ACME"], ["60", t(time)], ["583", "PARENT-7001"], ...more]);
+    const er = (time, id, ex, et, st, left, cum = 0, more = []) => m("EXCH", "BROKER01", time, "8", [["6", cum ? "25.48" : 0], ["11", id], ["14", cum], ["17", `E-${ex}-${et}${cum}`], ["37", ex], ["39", st], ["54", 1], ["55", "ACME"], ["150", et], ["151", left], ...more]);
+    return [
+      m("CLIENT1", "BROKER01", "02:30:00.000", "D", [["1", "ACC-7781"], ["11", "PARENT-7001"], ["38", 9000], ["40", 2], ["44", "25.50"], ["54", 1], ["55", "ACME"], ["60", t("02:30:00.000")], ["847", "TWAP"]]),
+      m("BROKER01", "CLIENT1", "02:30:00.020", "8", [["6", 0], ["11", "PARENT-7001"], ["14", 0], ["17", "B-1"], ["37", "BO-7001"], ["39", 0], ["54", 1], ["55", "ACME"], ["150", 0], ["151", 9000]]),
+      child("02:30:01.000", "CH-7001-1", 3000, "25.48"),
+      er("02:30:01.015", "CH-7001-1", "EX-81", 0, 0, 3000),
+      child("02:31:01.000", "CH-7001-2", 3000, "25.47"),
+      er("02:31:01.012", "CH-7001-2", "EX-82", 0, 0, 3000),
+      er("02:31:30.400", "CH-7001-1", "EX-81", "F", 2, 0, 3000, [["31", "25.48"], ["32", 3000]]),
+      m("BROKER01", "EXCH", "02:32:00.000", "G", [["11", "CH-7001-2R"], ["41", "CH-7001-2"], ["38", 3000], ["40", 2], ["44", "25.49"], ["54", 1], ["55", "ACME"], ["60", t("02:32:00.000")], ["583", "PARENT-7001"]]),
+      er("02:32:00.018", "CH-7001-2R", "EX-82", 5, 0, 3000, 0, [["41", "CH-7001-2"]]),
+      er("02:32:40.700", "CH-7001-2R", "EX-82", "F", 1, 2000, 1000, [["31", "25.49"], ["32", 1000]]),
+      child("02:33:01.000", "CH-7001-3", 3000, "25.50"),
+      er("02:33:01.011", "CH-7001-3", "EX-83", 0, 0, 3000),
+      m("BROKER01", "EXCH", "02:34:00.000", "F", [["11", "CH-7001-3X"], ["41", "CH-7001-3"], ["38", 3000], ["54", 1], ["55", "ACME"], ["60", t("02:34:00.000")]]),
+      er("02:34:00.009", "CH-7001-3X", "EX-83", 4, 4, 0, 0, [["41", "CH-7001-3"]]),
+      m("BROKER01", "CLIENT1", "02:34:05.000", "8", [["6", "25.48"], ["11", "PARENT-7001"], ["14", 4000], ["17", "B-2"], ["31", "25.48"], ["32", 4000], ["37", "BO-7001"], ["39", 1], ["54", 1], ["55", "ACME"], ["150", "F"], ["151", 5000]]),
+      m("BROKER01", "EXCH", "02:35:00.000", "D", [["11", "CH-6999-4"], ["38", 500], ["40", 2], ["44", "25.40"], ["54", 2], ["55", "ACME"], ["60", t("02:35:00.000")], ["583", "PARENT-6999"]]),
+      er("02:35:00.010", "CH-6999-4", "EX-84", 0, 0, 500),
+    ].map(p).join("\n");
+  }
+
+  return { orderLifecycle, algoParentChild, broken };
 })();

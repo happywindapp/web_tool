@@ -182,7 +182,7 @@
         <label class="chk" title="TradingSessionStatus (h) và SecurityStatus (f) — Server Sàn gửi hàng nghìn bản mỗi ngày"><input type="checkbox" id="hideBc" data-opt>Ẩn broadcast h/f</label>
         <label class="chk"><input type="checkbox" id="onlyBad" data-opt>Chỉ message lỗi</label>
         <label class="chk"><input type="checkbox" id="onlyNotes" data-opt>Có ghi chú</label>
-        <select id="chains" title="Chọn 1 chuỗi lệnh (đặt → xác nhận → sửa/huỷ → khớp, lệnh cha–con) để chỉ xem các message của nó"></select>
+        <select id="chains" title="Chọn 1 chuỗi lệnh (đặt → xác nhận → sửa/huỷ → khớp) hoặc 1 lệnh cha 🌳 (kèm mọi lệnh con nối qua 583 / tag link của từ điển riêng) để chỉ xem các message đó"></select>
         <span id="chainChip" class="chip" hidden></span>
         <span id="colChips" class="chips" hidden></span>
         <button id="resetCols" title="Đưa thứ tự cột về mặc định (kéo-thả tiêu đề cột để đổi thứ tự, bấm tiêu đề để lọc, chuột phải vào ô để chỉ hiện / loại trừ giá trị)">↺ Cột</button>
@@ -431,8 +431,15 @@ I18n.add({
   "📝 Ghi chú cho message này — đi kèm link chia sẻ, phân tích đã lưu và file xuất": "📝 Annotation for this message — travels with share links, saved analyses and exports",
   "Ghi chú": "Annotation",
   "⛓ Chuỗi lệnh ({n})": "⛓ Order chains ({n})",
-  "Chọn 1 chuỗi lệnh (đặt → xác nhận → sửa/huỷ → khớp, lệnh cha–con) để chỉ xem các message của nó": "Pick an order chain (new → ack → replace/cancel → fill, parent/child) to see only its messages",
+  "Chọn 1 chuỗi lệnh (đặt → xác nhận → sửa/huỷ → khớp) hoặc 1 lệnh cha 🌳 (kèm mọi lệnh con nối qua 583 / tag link của từ điển riêng) để chỉ xem các message đó": "Pick an order chain (new → ack → replace/cancel → fill) or a parent order 🌳 (with every child linked by 583 / custom-dictionary link tags) to see only those messages",
   "Theo chuỗi lệnh": "Follow order chain",
+  "Theo lệnh cha + con": "Follow parent + child orders",
+  "Theo lệnh cha + con ({n} message)": "Follow parent + child orders ({n} messages)",
+  "{id} (lệnh cha không có trong log)": "{id} (parent order not in the log)",
+  "{k} lệnh con, {n} message": "{k} child orders, {n} messages",
+  "chỉ lệnh cha": "parent order only",
+  "{parent} + {k} lệnh con: {n} message": "{parent} + {k} child orders: {n} messages",
+  "FIX 4.4 — lệnh algo cha + lệnh con (583)": "FIX 4.4 — algo parent + child orders (583)",
   "↺ Cột": "↺ Columns",
   "Đưa thứ tự cột về mặc định (kéo-thả tiêu đề cột để đổi thứ tự, bấm tiêu đề để lọc, chuột phải vào ô để chỉ hiện / loại trừ giá trị)": "Reset column order (drag a header to reorder, click a header to filter, right-click a cell to only show / exclude its value)",
   "{col} — bấm để lọc, kéo để đổi chỗ": "{col} — click to filter, drag to move",
@@ -458,6 +465,7 @@ I18n.add({
   "bằng": "equals",
   "khác": "is not",
   "Lọc cột {col}": "Filter column {col}",
+  "Giờ HH:MM:SS.fff, có thể kèm ngày YYYY-MM-DD ở trước để lọc log nhiều ngày.": "Time HH:MM:SS.fff, optionally preceded by a YYYY-MM-DD date to filter multi-day logs.",
   "Áp dụng": "Apply",
   "Đóng": "Close",
   "Chỉ hiện “{v}”": "Only show “{v}”",
@@ -570,9 +578,18 @@ const ColFilter = (() => {
   const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
   let pop = null;
 
-  // range compares strings, so a time window "09:00" … "09:30" also keeps "09:30:59.999".
+  const DATE = /^\d{4}-\d{2}-\d{2}/;
+  // Strings are compared, so "09:00" … "09:30" also keeps "09:30:59.999". A bound with a date ("2026-10-28 09:00") compares the full
+  // "YYYY-MM-DD HH:MM:SS" value and lends its date to a bound without one; with no dates at all, a dated value is compared on its time only.
+  function inRange(f, v) {
+    let a = f.v.replace("T", " "), b = f.v2.replace("T", " ");
+    const day = (DATE.exec(a) || DATE.exec(b) || [""])[0];
+    if (day) { if (a && !DATE.test(a)) a = `${day} ${a}`; if (b && !DATE.test(b)) b = `${day} ${b}`; }
+    else v = v.replace(/^\d{4}-\d{2}-\d{2}[ T]/, "");
+    return (!a || v >= a) && (!b || v <= b + "￿");
+  }
   function test(f, v) {
-    if (f.op === "range") return (!f.v || v >= f.v) && (!f.v2 || v <= f.v2 + "￿");
+    if (f.op === "range") return inRange(f, v);
     if (f.op === "eq") return v === f.v;
     if (f.op === "neq") return v !== f.v;
     return v.toLowerCase().includes(f.v.toLowerCase());
@@ -598,8 +615,9 @@ const ColFilter = (() => {
   function editor(x, y, colLabel, range, onApply) {
     const from = esc(T("Từ")), to = esc(T("Đến")), has = esc(T("chứa")), eq = esc(T("bằng")), neq = esc(T("khác"));
     const title = esc(T("Lọc cột {col}", { col: colLabel })), apply = esc(T("Áp dụng")), shut = esc(T("Đóng"));
+    const dated = esc(T("Giờ HH:MM:SS.fff, có thể kèm ngày YYYY-MM-DD ở trước để lọc log nhiều ngày."));
     const body = range
-      ? `<label>${from} <input type="text" data-f="v" placeholder="09:00:00.000"></label><label>${to} <input type="text" data-f="v2" placeholder="09:30:00"></label>`
+      ? `<label>${from} <input type="text" data-f="v" placeholder="09:00:00.000"></label><label>${to} <input type="text" data-f="v2" placeholder="2026-10-28 09:30:00"></label><div class="muted">${dated}</div>`
       : `<select data-f="op"><option value="has">${has}</option><option value="eq">${eq}</option><option value="neq">${neq}</option></select><input type="text" data-f="v">`;
     show(x, y, `<b>${title}</b><div class="row">${body}</div>` +
       `<div class="row"><button class="main" data-a="ok">${apply}</button><button data-a="x">${shut}</button></div>`, p => {
@@ -5315,18 +5333,18 @@ const FixCheck = (() => {
   return { analyse, RANK };
 })();
 // Order chains: union-find over shared ID values (ClOrdID/OrigClOrdID/OrderID/CrossID/QuoteID…); session/business Rejects join the message their RefSeqNum(45) points at.
+// Families: a link tag (583 ClOrdLinkID, custom-dictionary "link" tags) in a chain names its parent order → parent chain + child chains, without merging them.
 const FixChain = (() => {
-  // 583 ClOrdLinkID ties linked/child orders to their parent; extra = custom-dictionary "link" tags (e.g. a firm's ParentOrderID).
-  const ID_TAGS = ["11", "41", "37", "526", "548", "551", "117", "131", "171", "693", "583"];
+  const ID_TAGS = ["11", "41", "37", "526", "548", "551", "117", "131", "171", "693"];
+  const LINK_TAGS = ["583"];
 
   function link(msgs, extra = []) {
-    const tags = [...ID_TAGS, ...extra];
     const parent = msgs.map((_, i) => i);
     const find = i => { while (parent[i] !== i) i = parent[i] = parent[parent[i]]; return i; };
     const union = (a, b) => { a = find(a); b = find(b); if (a !== b) parent[Math.max(a, b)] = Math.min(a, b); };
     const owner = new Map(), sent = new Map();
     msgs.forEach((m, i) => {
-      for (const t of tags) for (const v of m.all(t)) {
+      for (const t of ID_TAGS) for (const v of m.all(t)) {
         if (!v || v === "NONE") continue;
         if (owner.has(v)) union(owner.get(v), i); else owner.set(v, i);
       }
@@ -5340,10 +5358,42 @@ const FixChain = (() => {
     const root = msgs.map((_, i) => find(i));
     const size = new Map();
     root.forEach(r => size.set(r, (size.get(r) || 0) + 1));
-    return { root, size: r => size.get(r) || 0 };
+
+    // Parent key: the root of the chain that owns the linked id, or "v:<id>" when the parent order is not in the log.
+    const parentOf = new Map(), children = new Map();
+    msgs.forEach((m, i) => {
+      for (const t of [...LINK_TAGS, ...extra]) for (const v of m.all(t)) {
+        if (!v) continue;
+        const o = owner.get(v), key = o !== undefined ? root[o] : "v:" + v, r = root[i];
+        if (key === r || parentOf.has(r)) continue;
+        parentOf.set(r, key);
+        if (!children.has(key)) children.set(key, []);
+        children.get(key).push(r);
+      }
+    });
+
+    // Message indexes of a parent and all its descendants (nested algo slices included).
+    function family(key) {
+      const roots = new Set(), stack = [key];
+      while (stack.length) {
+        const k = stack.pop();
+        if (roots.has(k)) continue;
+        roots.add(k);
+        stack.push(...(children.get(k) || []));
+      }
+      return new Set(msgs.map((_, i) => i).filter(i => roots.has(root[i])));
+    }
+
+    return {
+      root, size: r => size.get(r) || 0,
+      parentOf: r => parentOf.has(r) ? parentOf.get(r) : null,
+      children: key => children.get(key) || [],
+      parents: () => [...children.keys()],
+      family,
+    };
   }
 
-  return { link, ID_TAGS };
+  return { link, ID_TAGS, LINK_TAGS };
 })();
 // FIX UTCTimestamp "YYYYMMDD-HH:MM:SS(.fff)" shown in UTC, Vietnam time (UTC+7) or the browser's zone; fraction digits kept as sent.
 const FixTime = (() => {
@@ -5373,7 +5423,10 @@ const FixTime = (() => {
   const short = (value, tz) => { const c = convert(value, tz); return c ? c.time : value; };
   const full = (value, tz) => { const c = convert(value, tz); return c ? `${c.date} ${c.time} (${c.zone})` : ""; };
 
-  return { convert, short, full };
+  // "YYYY-MM-DD HH:MM:SS.fff" in the chosen zone, for date-aware time-window filters.
+  const stamp = (value, tz) => { const c = convert(value, tz); return c ? `${c.date} ${c.time}` : ""; };
+
+  return { convert, short, full, stamp };
 })();
 // Anonymizes chosen categories in the pasted text: same length, one pseudonym per original value (order chains stay linked), 9/10 re-signed for valid messages.
 const FixMask = (() => {
@@ -5617,7 +5670,7 @@ const VenueSamples = (() => {
 
   return { lifecycle, tradingDay, quotes };
 })();
-// Fake FIX 4.4 samples: a broker⇄exchange order lifecycle (raw SOH, Parties group) and a set of broken messages (^A delimiter) for the validator.
+// Fake FIX 4.4 samples: a broker⇄exchange order lifecycle (raw SOH, Parties group), an algo parent with child orders (583), and broken messages (^A) for the validator.
 const StdSamples = (() => {
   const t = s => `20261028-${s}`;
   let seq = { BROKER01: 0, EXCH: 0 };
@@ -5669,7 +5722,34 @@ const StdSamples = (() => {
     ].join("\n");
   }
 
-  return { orderLifecycle, broken };
+  // Client parent order sliced by the broker into child orders that carry ClOrdLinkID(583) = parent ClOrdID; one child points at an earlier parent.
+  function algoParentChild() {
+    seq = { BROKER01: 0, EXCH: 0, CLIENT1: 0 };
+    const p = s => s.split(FixCodec.SOH).join("|");
+    const child = (time, id, qty, px, more = []) => m("BROKER01", "EXCH", time, "D", [["11", id], ["38", qty], ["40", 2], ["44", px], ["54", 1], ["55", "ACME"], ["60", t(time)], ["583", "PARENT-7001"], ...more]);
+    const er = (time, id, ex, et, st, left, cum = 0, more = []) => m("EXCH", "BROKER01", time, "8", [["6", cum ? "25.48" : 0], ["11", id], ["14", cum], ["17", `E-${ex}-${et}${cum}`], ["37", ex], ["39", st], ["54", 1], ["55", "ACME"], ["150", et], ["151", left], ...more]);
+    return [
+      m("CLIENT1", "BROKER01", "02:30:00.000", "D", [["1", "ACC-7781"], ["11", "PARENT-7001"], ["38", 9000], ["40", 2], ["44", "25.50"], ["54", 1], ["55", "ACME"], ["60", t("02:30:00.000")], ["847", "TWAP"]]),
+      m("BROKER01", "CLIENT1", "02:30:00.020", "8", [["6", 0], ["11", "PARENT-7001"], ["14", 0], ["17", "B-1"], ["37", "BO-7001"], ["39", 0], ["54", 1], ["55", "ACME"], ["150", 0], ["151", 9000]]),
+      child("02:30:01.000", "CH-7001-1", 3000, "25.48"),
+      er("02:30:01.015", "CH-7001-1", "EX-81", 0, 0, 3000),
+      child("02:31:01.000", "CH-7001-2", 3000, "25.47"),
+      er("02:31:01.012", "CH-7001-2", "EX-82", 0, 0, 3000),
+      er("02:31:30.400", "CH-7001-1", "EX-81", "F", 2, 0, 3000, [["31", "25.48"], ["32", 3000]]),
+      m("BROKER01", "EXCH", "02:32:00.000", "G", [["11", "CH-7001-2R"], ["41", "CH-7001-2"], ["38", 3000], ["40", 2], ["44", "25.49"], ["54", 1], ["55", "ACME"], ["60", t("02:32:00.000")], ["583", "PARENT-7001"]]),
+      er("02:32:00.018", "CH-7001-2R", "EX-82", 5, 0, 3000, 0, [["41", "CH-7001-2"]]),
+      er("02:32:40.700", "CH-7001-2R", "EX-82", "F", 1, 2000, 1000, [["31", "25.49"], ["32", 1000]]),
+      child("02:33:01.000", "CH-7001-3", 3000, "25.50"),
+      er("02:33:01.011", "CH-7001-3", "EX-83", 0, 0, 3000),
+      m("BROKER01", "EXCH", "02:34:00.000", "F", [["11", "CH-7001-3X"], ["41", "CH-7001-3"], ["38", 3000], ["54", 1], ["55", "ACME"], ["60", t("02:34:00.000")]]),
+      er("02:34:00.009", "CH-7001-3X", "EX-83", 4, 4, 0, 0, [["41", "CH-7001-3"]]),
+      m("BROKER01", "CLIENT1", "02:34:05.000", "8", [["6", "25.48"], ["11", "PARENT-7001"], ["14", 4000], ["17", "B-2"], ["31", "25.48"], ["32", 4000], ["37", "BO-7001"], ["39", 1], ["54", 1], ["55", "ACME"], ["150", "F"], ["151", 5000]]),
+      m("BROKER01", "EXCH", "02:35:00.000", "D", [["11", "CH-6999-4"], ["38", 500], ["40", 2], ["44", "25.40"], ["54", 2], ["55", "ACME"], ["60", t("02:35:00.000")], ["583", "PARENT-6999"]]),
+      er("02:35:00.010", "CH-6999-4", "EX-84", 0, 0, 500),
+    ].map(p).join("\n");
+  }
+
+  return { orderLifecycle, algoParentChild, broken };
 })();
 // Sample picker + ?demo=<key>: names are translated, contents are fixed fake data in English; text is built once on first use.
 const DEMOS = (() => {
@@ -5678,6 +5758,7 @@ const DEMOS = (() => {
     "bcgd-day": { name: "Server Sàn BCGD — 14 báo cáo giao dịch trong ngày", make: () => VenueSamples.tradingDay() },
     ttdt: { name: "Server Sàn ĐTTTT — chào giá, huỷ, chấp nhận", make: () => VenueSamples.quotes() },
     order: { name: "FIX 4.4 — vòng đời lệnh cổ phiếu (SOH)", make: () => StdSamples.orderLifecycle() },
+    algo: { name: "FIX 4.4 — lệnh algo cha + lệnh con (583)", make: () => StdSamples.algoParentChild() },
     broken: { name: "Message lỗi — checksum, độ dài, thiếu tag…", make: () => StdSamples.broken() },
   };
   const cache = {};
@@ -5737,7 +5818,7 @@ const Store = (() => {
   const set = (k, v) => { try { localStorage.setItem(P + k, JSON.stringify(v)); return true; } catch { return false; } };
   return { get, set };
 })();
-// Message timeline: filters (text / tag=value terms, MsgType, session & broadcast, errors, notes, order chain, column filters), ordered columns, rows, CSV export.
+// Message timeline: filters (text / tag=value terms, MsgType, session & broadcast, errors, notes, picked chain/family, column filters), ordered columns, rows, CSV export.
 const Timeline = (() => {
   const MAX_ROWS = 3000;
   const ADMIN = new Set(["0", "1", "2", "4", "5", "A"]), BROADCAST = new Set(["h", "f"]), REJECT = new Set(["3", "j", "9"]);
@@ -5788,18 +5869,18 @@ const Timeline = (() => {
   }
 
   // Space-separated terms, all must match; "tag=value" compares that tag (contains, case-insensitive), other terms search the raw line.
-  function visible(msgs, f, chain, ctx) {
+  function visible(msgs, f, ctx) {
     const terms = f.q.trim().toLowerCase().split(/\s+/).filter(Boolean).map(t => { const m = /^(\d+)=(.*)$/.exec(t); return m ? { tag: m[1], v: m[2] } : { v: t }; });
     const cols = ColView.active();
     const out = [];
     msgs.forEach((m, i) => {
-      if (f.chainRoot !== null && chain.root[i] !== f.chainRoot) return;
+      if (f.only && !f.only.has(i)) return;
       if (f.type && m.type !== f.type) return;
       if (f.hideAdmin && ADMIN.has(m.type) && f.type !== m.type) return;
       if (f.hideBc && BROADCAST.has(m.type) && f.type !== m.type) return;
       if (f.onlyBad && m.level !== "error" && m.level !== "warn") return;
       if (f.onlyNotes && !Notes.get(i)) return;
-      if (cols && !ColView.match(id => cell(id, m, i, ctx))) return;
+      if (cols && !ColView.match(id => cell(id, m, i, ctx), () => FixTime.stamp(m.get("52"), ctx.tz))) return;
       const hay = (m.prefix + " " + m.raw).toLowerCase();
       if (terms.every(t => t.tag ? m.all(t.tag).some(v => v.toLowerCase().includes(t.v)) : hay.includes(t.v))) out.push(i);
     });
@@ -5966,6 +6047,7 @@ const Detail = (() => {
       (m.prefix ? `<div class="prefix">${esc(m.prefix)}</div>` : "") +
       `<div class="dacts">` +
         (ctx.chainSize > 1 ? `<button data-act="chain">⛓ ${esc(T("Theo chuỗi lệnh ({n} message)", { n: ctx.chainSize }))}</button>` : "") +
+        (ctx.familySize > ctx.chainSize ? `<button data-act="family">🌳 ${esc(T("Theo lệnh cha + con ({n} message)", { n: ctx.familySize }))}</button>` : "") +
         `<button data-act="pipe">${esc(T("Chép (|)"))}</button><button data-act="soh">${esc(T("Chép (SOH)"))}</button><button data-act="json">${esc(T("Chép JSON"))}</button>` +
         (resign ? `<button data-act="fix" title="${esc(T("Tính lại BodyLength (9) và CheckSum (10) rồi chép"))}">${esc(T("Chép bản sửa 9/10"))}</button>` : "") +
       `</div>` +
@@ -6048,7 +6130,7 @@ const LinkIO = (() => {
     if (!p || typeof p.text !== "string" || (p.opts != null && typeof p.opts !== "object"))
       return note(T("✖ Link không chứa dữ liệu của FIX Parser."), "bad");
     keep();
-    app.open({ text: p.text, opts: p.opts || {}, sel: Number.isInteger(p.sel) ? p.sel : 0, chain: Number.isInteger(p.chain) ? p.chain : null, notes: p.notes, filters: p.filters, layout: p.layout });
+    app.open({ text: p.text, opts: p.opts || {}, sel: Number.isInteger(p.sel) ? p.sel : 0, chain: Number.isInteger(p.chain) || typeof p.chain === "string" ? p.chain : null, notes: p.notes, filters: p.filters, layout: p.layout });
     note(backup ? T("Đã nạp dữ liệu từ link — bấm “↶ Khôi phục bản trước” để lấy lại bài đang soạn.") : T("Đã nạp dữ liệu từ link."));
   }
 
@@ -6098,8 +6180,8 @@ const ColView = (() => {
   const changed = () => { chips(); deps.onChange(); };
   function add(f) { filters = filters.filter(x => !(x.col === f.col && (x.op === f.op || f.op === "range"))); filters.push(f); changed(); }
 
-  // Values are the table's own cell text, so filters see exactly what is displayed (time in the chosen zone).
-  const match = cellOf => ColFilter.match(filters, cellOf);
+  // Values are the table's own cell text (time in the chosen zone); a time window gets "YYYY-MM-DD HH:MM:SS.fff" so it can include dates.
+  const match = (cellOf, stampOf) => filters.every(f => ColFilter.match([f], c => f.op === "range" && c === "time" ? stampOf() : cellOf(c)));
 
   // Header drag & drop: the new order covers built-in and extra columns alike.
   function bindTable(table) {
@@ -6129,11 +6211,11 @@ const ColView = (() => {
       e.preventDefault();
       deps.select(+tr.dataset.i);
       const col = td.dataset.col, v = td.textContent;
-      ColFilter.menu(e.clientX, e.clientY, v, op => add({ col, op, v, v2: "" }), deps.chainable() ? [{ label: "⛓ " + T("Theo chuỗi lệnh"), run: deps.follow }] : []);
+      ColFilter.menu(e.clientX, e.clientY, v, op => add({ col, op, v, v2: "" }), deps.extras());
     });
   }
 
-  // deps: { columns(), onChange(), select(i), follow(), chainable() }
+  // deps: { columns(), onChange(), select(i), extras() → [{ label, run }] for the right-click menu }
   function init(d) { deps = d; layout = Store.get("layout", null); chips(); }
 
   const resetLayout = () => { layout = null; Store.set("layout", null); deps.onChange(); };
@@ -6147,17 +6229,45 @@ const ColView = (() => {
 
   return { init, bindTable, match, get, set, resetLayout, layout: () => layout, active: () => filters.length > 0 };
 })();
-// Annotations: one note per message (timeline marker, CSV/JSON, share links, saved analyses).
+// Annotations keyed by message content (hash of its tag=value pairs + occurrence), so they stay on their message when lines are added or removed above it.
 const Notes = (() => {
-  let notes = {};
-  const get = i => notes[i] || "";
-  const set = (i, text) => { if (text.trim()) notes[i] = text; else delete notes[i]; };
-  // Payload values are untrusted: only "index → string" pairs are kept.
-  function load(obj) {
-    notes = {};
-    if (obj && typeof obj === "object") for (const [k, v] of Object.entries(obj)) if (/^\d+$/.test(k) && typeof v === "string" && v.trim()) notes[k] = v.slice(0, 2000);
+  const MAX = 1000;
+  let notes = {}, keys = [], legacy = null;
+
+  // FNV-1a over the delimiter-independent text of the message.
+  const hash = s => { let h = 0x811c9dc5; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 0x01000193) >>> 0; } return h.toString(36); };
+
+  // Called after every parse; identical messages get .1, .2 … in input order. Legacy index keys (old links) resolve here once.
+  function bind(msgs) {
+    const seen = new Map();
+    keys = msgs.map(m => {
+      const h = hash(m.fields.map(f => f.tag === null ? f.value : `${f.tag}=${f.value}`).join("\x01"));
+      const n = (seen.get(h) || 0) + 1;
+      seen.set(h, n);
+      return `${h}.${n}`;
+    });
+    if (legacy) { for (const [i, v] of Object.entries(legacy)) if (keys[i] && !notes[keys[i]]) notes[keys[i]] = v; legacy = null; }
   }
-  return { get, set, load, all: () => ({ ...notes }), count: () => Object.keys(notes).length };
+
+  const get = i => notes[keys[i]] || "";
+  function set(i, text) { const k = keys[i]; if (!k) return; if (text.trim()) notes[k] = text.slice(0, 2000); else delete notes[k]; }
+
+  // Payload values are untrusted: content keys "<hash>.<n>" or legacy message indexes, string notes only.
+  function load(obj) {
+    notes = {}; legacy = null;
+    if (!obj || typeof obj !== "object") return;
+    for (const [k, v] of Object.entries(obj).slice(0, MAX)) {
+      if (typeof v !== "string" || !v.trim()) continue;
+      if (/^[0-9a-z]+\.\d+$/.test(k)) notes[k] = v.slice(0, 2000);
+      else if (/^\d+$/.test(k)) (legacy ||= {})[k] = v.slice(0, 2000);
+    }
+  }
+
+  // Edits that rewrite message content but keep the order (anonymizing) carry notes over by position.
+  const byIndex = () => keys.map((_, i) => get(i));
+  const setByIndex = list => list.forEach((t, i) => { if (t) set(i, t); });
+
+  return { bind, get, set, load, byIndex, setByIndex, all: () => ({ ...notes }), count: () => keys.filter(k => notes[k]).length };
 })();
 // Dialogs: anonymize by category (remembered) and custom dictionary CSV (stored in this browser); theme select bound to ThemePicker.
 const Settings = (() => {
@@ -6286,13 +6396,78 @@ const InputView = (() => {
 
   return { init, paint };
 })();
+// Order chain picker: dropdown tree (parent order → child chains, then standalone chains), current pick as a message set, chip text, share-link form.
+const ChainPick = (() => {
+  let pick = null, ctx = null; // pick: { kind: "chain" | "family", key: chain root (number) or "v:<id>" for a parent not in the log }
+  const esc = s => Dom.esc(s);
+
+  const firstOf = r => ctx.chain.root.indexOf(r);
+  function label(i) {
+    const m = ctx.msgs[i];
+    return [m.get("11") || m.get("37") || m.get("117") || m.get("548"), m.get("55")].filter(Boolean).join(" · ") || FixDict.msgName(ctx.dict, m.type);
+  }
+  const parentLabel = key => typeof key === "number" ? label(firstOf(key)) : T("{id} (lệnh cha không có trong log)", { id: key.slice(2) });
+  const valid = p => p && (p.kind === "chain" ? ctx.chain.root[p.key] === p.key : ctx.chain.children(p.key).length > 0);
+
+  // ctx: { msgs, chain, dict } after every parse; a pick that no longer exists is dropped.
+  function bind(c) { ctx = c; if (pick && !valid(pick)) pick = null; }
+
+  // Family of message i: its parent's key, or its own chain when it is a parent itself.
+  function familyKeyOf(i) {
+    const r = ctx.chain.root[i], p = ctx.chain.parentOf(r);
+    return p !== null ? p : ctx.chain.children(r).length ? r : null;
+  }
+
+  function fill(select) {
+    const ch = ctx.chain, used = new Set(), opt = (v, text) => `<option value="${esc(v)}">${esc(text)}</option>`;
+    let html = "", n = 0;
+    for (const key of ch.parents()) {
+      const kids = ch.children(key);
+      html += opt("f:" + key, `🌳 ${parentLabel(key)} — ${T("{k} lệnh con, {n} message", { k: kids.length, n: ch.family(key).size })}`);
+      if (typeof key === "number") { html += opt("c:" + key, `    · ${T("chỉ lệnh cha")} — ${ch.size(key)} msg`); used.add(key); }
+      for (const r of kids) { html += opt("c:" + r, `    └ ${label(firstOf(r))} — ${ch.size(r)} msg`); used.add(r); }
+      n++;
+    }
+    const seen = new Set();
+    ch.root.forEach((r, i) => { if (!used.has(r) && !seen.has(r) && ch.size(r) > 1) { seen.add(r); html += opt("c:" + r, `${label(i)} — ${ch.size(r)} msg`); } });
+    select.innerHTML = opt("", T("⛓ Chuỗi lệnh ({n})", { n: n + seen.size })) + html;
+  }
+
+  const parseKey = s => /^\d+$/.test(s) ? +s : s;
+  function choose(value) {
+    if (value.startsWith("c:")) pick = { kind: "chain", key: +value.slice(2) };
+    else if (value.startsWith("f:")) pick = { kind: "family", key: parseKey(value.slice(2)) };
+    if (!valid(pick)) pick = null;
+  }
+  function follow(kind, i) {
+    const key = kind === "family" ? familyKeyOf(i) : ctx.chain.root[i];
+    pick = key === null ? null : { kind, key };
+  }
+
+  const members = () => !pick ? null : pick.kind === "chain" ? new Set(ctx.chain.root.flatMap((r, i) => r === pick.key ? [i] : [])) : ctx.chain.family(pick.key);
+  function chip() {
+    if (!pick) return "";
+    return pick.kind === "chain" ? `⛓ ${T("Chuỗi lệnh: {n} message", { n: ctx.chain.size(pick.key) })}`
+      : `🌳 ${T("{parent} + {k} lệnh con: {n} message", { parent: parentLabel(pick.key), k: ctx.chain.children(pick.key).length, n: ctx.chain.family(pick.key).size })}`;
+  }
+  const chainSize = i => i < 0 ? 0 : ctx.chain.size(ctx.chain.root[i]);
+  const familySize = i => { const k = i < 0 ? null : familyKeyOf(i); return k === null ? 0 : ctx.chain.family(k).size; };
+
+  // Share links / saved analyses: a chain root number, or "f:<key>" for a family (untrusted, validated on bind).
+  const save = () => !pick ? null : pick.kind === "chain" ? pick.key : "f:" + pick.key;
+  function load(v) {
+    pick = Number.isInteger(v) ? { kind: "chain", key: v } : typeof v === "string" && v.startsWith("f:") ? { kind: "family", key: parseKey(v.slice(2)) } : null;
+  }
+
+  return { bind, fill, choose, follow, members, chip, chainSize, familySize, save, load, clear: () => { pick = null; } };
+})();
 // Wiring: input → extract → analyse (dialect) → chains → timeline + detail; notes, column filters/layout, saved analyses, dialogs, exports, VI/EN relang.
 const FixApp = (() => {
   const KEEP = ["dialect", "tz", "cols", "hideAdmin", "hideBc", "order", "hideHdr"];
   // Exchange → firm messages carry the venue in 49; firm → exchange order/quote messages carry it in 56.
   const FROM_VENUE = new Set(["8", "9", "h", "f", "j", "AI"]), TO_VENUE = new Set(["D", "F", "G", "s", "t", "u", "S", "Z", "AJ", "R"]);
   let saved = null;
-  const S = { msgs: [], dict: null, dialect: "fix44", chain: null, vis: [], sel: -1, chainRoot: null, skipped: 0, us: "", venueId: "" };
+  const S = { msgs: [], dict: null, dialect: "fix44", chain: null, vis: [], sel: -1, skipped: 0, us: "", venueId: "" };
 
   const opts = () => Dom.readOpts();
   const cols = () => opts().cols.split(/[\s,;]+/).filter(t => /^\d+$/.test(t)).slice(0, 8);
@@ -6303,7 +6478,7 @@ const FixApp = (() => {
   const venueName = () => S.venueId || T("Server Sàn");
   const dictLabel = () => S.dialect === "venue" ? `${venueName()} FIX 4.4` : "FIX 4.4";
 
-  // keepChain: only open() keeps the chain filter, and only if it still names a chain root after re-parsing.
+  // keepChain: only open() keeps the chain / family pick, and only if it still exists after re-parsing.
   function parse(keepChain = false) {
     const text = $("src").value, ex = FixLog.extract(text), want = opts().dialect;
     S.dialect = want === "auto" ? (ex.items.some(isVenue) ? "venue" : "fix44") : want;
@@ -6311,23 +6486,16 @@ const FixApp = (() => {
     S.msgs = ex.items.map(it => FixCheck.analyse(it, S.dict));
     S.skipped = ex.skipped;
     S.chain = FixChain.link(S.msgs, Settings.linkTags());
+    Notes.bind(S.msgs);
     const out = S.msgs.find(m => /\b(OUT|outgoing|sent)\b|->|>>/i.test(m.prefix));
     S.us = (out || S.msgs[0] || { get: () => "" }).get("49");
     S.venueId = venueIdOf(S.msgs);
-    if (!keepChain || S.chain.root[S.chainRoot] !== S.chainRoot) S.chainRoot = null;
+    if (!keepChain) ChainPick.clear();
+    ChainPick.bind({ msgs: S.msgs, chain: S.chain, dict: S.dict });
     fillTypes();
-    fillChains();
+    ChainPick.fill($("chains"));
     InputView.paint(S.msgs);
     refresh();
-  }
-
-  // Chains of 2+ messages, labelled by their first order id + symbol.
-  function fillChains() {
-    const seen = new Map();
-    S.chain.root.forEach((r, i) => { if (!seen.has(r) && S.chain.size(r) > 1) seen.set(r, i); });
-    const label = i => { const m = S.msgs[i]; return [m.get("11") || m.get("37") || m.get("117") || m.get("548"), m.get("55")].filter(Boolean).join(" · ") || FixDict.msgName(S.dict, m.type); };
-    $("chains").innerHTML = `<option value="">${Dom.esc(T("⛓ Chuỗi lệnh ({n})", { n: seen.size }))}</option>` +
-      [...seen].slice(0, 500).map(([r, i]) => `<option value="${r}">${Dom.esc(`${label(i)} — ${S.chain.size(r)} msg`)}</option>`).join("");
   }
 
   function fillTypes() {
@@ -6341,20 +6509,20 @@ const FixApp = (() => {
   function refresh() {
     const o = opts();
     FixKnow.setVenue(venueName());
-    S.vis = Timeline.visible(S.msgs, { ...o, chainRoot: S.chainRoot }, S.chain, ctx());
+    S.vis = Timeline.visible(S.msgs, { ...o, only: ChainPick.members() }, ctx());
     if (!S.vis.includes(S.sel)) S.sel = S.vis.length ? S.vis[0] : -1;
     Timeline.render($("grid"), S.msgs, S.vis, S.sel, ctx());
     $("count").textContent = T("{shown}/{total} message", { shown: I18n.num(S.vis.length), total: I18n.num(S.msgs.length) });
-    const chip = $("chainChip");
-    chip.hidden = S.chainRoot === null;
-    if (S.chainRoot !== null) chip.innerHTML = `⛓ ${Dom.esc(T("Chuỗi lệnh: {n} message", { n: S.chain.size(S.chainRoot) }))}<button title="${Dom.esc(T("Bỏ lọc chuỗi"))}">✕</button>`;
+    const chip = $("chainChip"), text = ChainPick.chip();
+    chip.hidden = !text;
+    if (text) chip.innerHTML = `${Dom.esc(text)}<button title="${Dom.esc(T("Bỏ lọc chuỗi"))}">✕</button>`;
     showDetail();
     status();
   }
 
   function showDetail() {
     const m = S.msgs[S.sel], o = opts();
-    Detail.render($("detail"), m, { ...ctx(), index: S.sel, order: o.order, hideHdr: o.hideHdr, dictLabel: dictLabel(), note: Notes.get(S.sel), chainSize: m ? S.chain.size(S.chain.root[S.sel]) : 0 });
+    Detail.render($("detail"), m, { ...ctx(), index: S.sel, order: o.order, hideHdr: o.hideHdr, dictLabel: dictLabel(), note: Notes.get(S.sel), chainSize: ChainPick.chainSize(S.sel), familySize: ChainPick.familySize(S.sel) });
   }
 
   function status() {
@@ -6378,20 +6546,20 @@ const FixApp = (() => {
   async function act(name) {
     const m = S.msgs[S.sel];
     if (!m) return;
-    if (name === "chain") { S.chainRoot = S.chain.root[S.sel]; return refresh(); }
+    if (name === "chain" || name === "family") { ChainPick.follow(name, S.sel); return refresh(); }
     const wire = fields => FixCodec.toWire(fields, name === "soh" ? FixCodec.SOH : "|");
     const text = name === "json" ? JSON.stringify(Detail.json(m, S.dict, opts().tz, Notes.get(S.sel)), null, 2) : name === "fix" ? wire(FixCodec.rebuild(m.fields.filter(f => f.tag !== null))) : wire(m.fields);
     LinkIO.note(await Dom.copy(text) ? T("✔ Đã chép.") : T("✖ Trình duyệt chặn sao chép."), "good");
   }
 
   // Payload for share links / saved analyses / ↶ restore; open() is its inverse.
-  const snapshot = () => ({ text: $("src").value, opts: opts(), sel: S.sel, chain: S.chainRoot, notes: Notes.all(), ...ColView.get() });
+  const snapshot = () => ({ text: $("src").value, opts: opts(), sel: S.sel, chain: ChainPick.save(), notes: Notes.all(), ...ColView.get() });
   function open(p) {
     Dom.writeOpts(p.opts);
     Notes.load(p.notes);
     ColView.set(p);
     $("src").value = p.text;
-    S.chainRoot = Number.isInteger(p.chain) ? p.chain : null;
+    ChainPick.load(p.chain);
     parse(true);
     if (Number.isInteger(p.sel) && S.vis.includes(p.sel)) select(p.sel, true);
   }
@@ -6410,8 +6578,8 @@ const FixApp = (() => {
     for (const id of ["q", "cols"]) $(id).addEventListener("input", Dom.debounce(refresh, 200));
     document.addEventListener("change", e => { if (KEEP.includes(e.target.id)) Store.set("opts", Object.fromEntries(KEEP.map(k => [k, opts()[k]]))); });
     $("grid").addEventListener("click", e => { const tr = e.target.closest("tr[data-i]"); if (tr) select(+tr.dataset.i); });
-    $("chainChip").addEventListener("click", e => { if (e.target.closest("button")) { S.chainRoot = null; refresh(); } });
-    $("chains").onchange = e => { const r = e.target.value; e.target.value = ""; if (r !== "") { S.chainRoot = +r; refresh(); } };
+    $("chainChip").addEventListener("click", e => { if (e.target.closest("button")) { ChainPick.clear(); refresh(); } });
+    $("chains").onchange = e => { const v = e.target.value; e.target.value = ""; if (v) { ChainPick.choose(v); refresh(); } };
     $("resetCols").onclick = () => ColView.resetLayout();
     $("detail").addEventListener("input", e => {
       if (!e.target.matches("textarea.anno") || S.sel < 0) return;
@@ -6443,7 +6611,10 @@ const FixApp = (() => {
     const r = FixMask.apply($("src").value, FixLog.extract($("src").value).items, S.dialect, cats, extra);
     if (!r.count) return LinkIO.note(T("Không có giá trị nhạy cảm nào để che."));
     LinkIO.keep();
+    const notes = Notes.byIndex();
     open({ ...snapshot(), text: r.text });
+    Notes.setByIndex(notes);
+    refresh();
     LinkIO.note(T("✔ Đã che {n} giá trị (tính lại 9/10 cho message hợp lệ).", { n: r.count }), "good");
   }
 
@@ -6452,9 +6623,12 @@ const FixApp = (() => {
   function start() {
     I18n.init();
     Dom.writeOpts(Store.get("opts", {}));
-    I18n.onChange(() => { LinkIO.note(""); LinkIO.fillDemos(); saved.fill(); fillTypes(); fillChains(); ColView.set(ColView.get()); refresh(); });
-    ColView.init({ columns: () => Timeline.columns(ctx()), onChange: refresh, select: i => select(i), follow: () => act("chain"),
-      chainable: () => S.sel >= 0 && S.chain.size(S.chain.root[S.sel]) > 1 });
+    I18n.onChange(() => { LinkIO.note(""); LinkIO.fillDemos(); saved.fill(); fillTypes(); ChainPick.fill($("chains")); ColView.set(ColView.get()); refresh(); });
+    ColView.init({ columns: () => Timeline.columns(ctx()), onChange: refresh, select: i => select(i),
+      extras: () => [
+        ...(ChainPick.chainSize(S.sel) > 1 ? [{ label: "⛓ " + T("Theo chuỗi lệnh"), run: () => act("chain") }] : []),
+        ...(ChainPick.familySize(S.sel) > ChainPick.chainSize(S.sel) ? [{ label: "🌳 " + T("Theo lệnh cha + con"), run: () => act("family") }] : []),
+      ] });
     ColView.bindTable($("grid"));
     Settings.init({ mask, dictChanged: () => { if (S.chain) parse(true); } });
     InputView.init((mi, fi) => { const m = S.msgs[mi], f = m && m.fields[fi]; return f && f.tag !== null ? TagInfo.tooltip(S.dict, m, f, opts().tz) : ""; });

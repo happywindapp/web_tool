@@ -45,7 +45,7 @@ const LinkIO = (() => {
     if (!p || typeof p.text !== "string" || (p.opts != null && typeof p.opts !== "object"))
       return note(T("✖ Link không chứa dữ liệu của FIX Parser."), "bad");
     keep();
-    app.open({ text: p.text, opts: p.opts || {}, sel: Number.isInteger(p.sel) ? p.sel : 0, chain: Number.isInteger(p.chain) ? p.chain : null, notes: p.notes, filters: p.filters, layout: p.layout });
+    app.open({ text: p.text, opts: p.opts || {}, sel: Number.isInteger(p.sel) ? p.sel : 0, chain: Number.isInteger(p.chain) || typeof p.chain === "string" ? p.chain : null, notes: p.notes, filters: p.filters, layout: p.layout });
     note(backup ? T("Đã nạp dữ liệu từ link — bấm “↶ Khôi phục bản trước” để lấy lại bài đang soạn.") : T("Đã nạp dữ liệu từ link."));
   }
 

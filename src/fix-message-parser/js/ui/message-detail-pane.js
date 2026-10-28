@@ -41,6 +41,7 @@ const Detail = (() => {
       (m.prefix ? `<div class="prefix">${esc(m.prefix)}</div>` : "") +
       `<div class="dacts">` +
         (ctx.chainSize > 1 ? `<button data-act="chain">⛓ ${esc(T("Theo chuỗi lệnh ({n} message)", { n: ctx.chainSize }))}</button>` : "") +
+        (ctx.familySize > ctx.chainSize ? `<button data-act="family">🌳 ${esc(T("Theo lệnh cha + con ({n} message)", { n: ctx.familySize }))}</button>` : "") +
         `<button data-act="pipe">${esc(T("Chép (|)"))}</button><button data-act="soh">${esc(T("Chép (SOH)"))}</button><button data-act="json">${esc(T("Chép JSON"))}</button>` +
         (resign ? `<button data-act="fix" title="${esc(T("Tính lại BodyLength (9) và CheckSum (10) rồi chép"))}">${esc(T("Chép bản sửa 9/10"))}</button>` : "") +
       `</div>` +

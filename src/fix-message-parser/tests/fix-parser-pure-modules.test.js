@@ -10,14 +10,14 @@ const FILES = [
   "js/dictionary/fix44-standard-dictionary-data.js", "js/dictionary/venue-fix44-dialect-overlay-data.js", "js/dictionary/fix50sp2-extra-field-names-data.js",
   "js/dictionary/fix44-orchestra-descriptions-data.js", "js/dictionary/venue-fix-spec-notes-data.js",
   "js/dictionary/fix-dictionary.js", "js/dictionary/tag-explanation-lookup.js", "js/parser/fix-wire-codec.js", "js/parser/fix-log-extractor.js", "js/parser/fix-message-validator.js",
-  "js/model/order-chain-linker.js", "js/model/fix-timestamp-time-zone-format.js", "js/model/sensitive-data-mask.js", "js/model/custom-dictionary-csv.js",
+  "js/model/order-chain-linker.js", "js/model/fix-timestamp-time-zone-format.js", "js/model/sensitive-data-mask.js", "js/model/custom-dictionary-csv.js", "js/model/message-annotations-by-content.js", "../data-workbench/js/core/column-filter-popover-and-chips.js",
   "js/samples/venue-trade-report-and-quote-samples.js", "js/samples/fix44-order-and-broken-message-samples.js",
 ];
 const code = FILES.map(f => fs.readFileSync(path.join(root, f), "utf8")).join("\n;\n")
-  + "\n;globalThis.M = { FixCustom, FixKnow, FixDict, FixCodec, FixLog, FixCheck, FixChain, FixTime, FixMask, VenueSamples, StdSamples };";
+  + "\n;globalThis.M = { Notes, ColFilter, FixCustom, FixKnow, FixDict, FixCodec, FixLog, FixCheck, FixChain, FixTime, FixMask, VenueSamples, StdSamples };";
 const ctx = vm.createContext({ TextEncoder, console });
 vm.runInContext(code, ctx);
-const { FixCustom, FixKnow, FixDict, FixCodec, FixLog, FixCheck, FixChain, FixTime, FixMask, VenueSamples, StdSamples } = ctx.M;
+const { Notes, ColFilter, FixCustom, FixKnow, FixDict, FixCodec, FixLog, FixCheck, FixChain, FixTime, FixMask, VenueSamples, StdSamples } = ctx.M;
 
 const parse = (text, dialect = "fix44") => FixLog.extract(text).items.map(it => FixCheck.analyse(it, FixDict.get(dialect)));
 const keys = m => m.issues.map(i => i.key);
@@ -118,7 +118,9 @@ test("custom dictionary CSV: names, value meanings, sensitive + link flags, laye
     + FixCodec.build([["35", "D"], ["34", 2], ["49", "A"], ["52", "20261028-01:00:01"], ["56", "B"], ["11", "C2"], ["9878", "P1"]]);
   const ms = parse(msg);
   assert.ok(!ms[0].issues.some(x => x.params.tag === "9878"));
-  assert.equal(FixChain.link(ms, FixCustom.tags(c, "link")).root[1], 0);
+  const fam = FixChain.link(ms, FixCustom.tags(c, "link"));
+  assert.equal(fam.parentOf(fam.root[1]), "v:P1");
+  assert.equal(fam.family("v:P1").size, 2);
   FixDict.setCustom(null);
   assert.equal(FixDict.name(FixDict.get("fix44"), "9876"), "");
 });
@@ -162,4 +164,47 @@ test("venue name from the data fills {venue} in spec purposes / notes", () => {
   assert.match(p.purpose, /EXCH gửi/);
   assert.doesNotMatch(JSON.stringify(p), /\{venue\}/);
   FixKnow.setVenue("{venue}");
+});
+
+test("order families: child chains under their 583 parent, replace keeps a child's chain, unknown parent becomes virtual", () => {
+  const msgs = parse(StdSamples.algoParentChild());
+  const c = FixChain.link(msgs);
+  const idx = id => msgs.findIndex(m => m.get("11") === id);
+  const parent = c.root[idx("PARENT-7001")];
+  same(c.children(parent).map(r => msgs[r].get("11")), ["CH-7001-1", "CH-7001-2", "CH-7001-3"]);
+  assert.equal(c.root[idx("CH-7001-2R")], c.root[idx("CH-7001-2")]);
+  assert.equal(c.parentOf(c.root[idx("CH-7001-2")]), parent);
+  assert.equal(c.family(parent).size, 15);
+  assert.equal(c.size(parent), 3);
+  same(c.parents(), [parent, "v:PARENT-6999"]);
+  assert.equal(c.family("v:PARENT-6999").size, 2);
+  assert.ok(msgs.every(m => m.level !== "error"));
+});
+
+test("annotations follow message content when lines are added above; legacy index keys still load", () => {
+  const text = VenueSamples.lifecycle();
+  let msgs = parse(text);
+  Notes.load({}); Notes.bind(msgs);
+  const at = msgs.findIndex(m => m.type === "3");
+  Notes.set(at, "Market not open");
+  const saved = Notes.all();
+  const extra = FixCodec.build([["35", "0"], ["34", 99], ["49", "A"], ["52", "20261028-01:00:00"], ["56", "B"]]).split("\x01").join("|");
+  msgs = parse(extra + "\n" + text);
+  Notes.load(saved); Notes.bind(msgs);
+  assert.equal(Notes.get(at + 1), "Market not open");
+  assert.equal(Notes.get(at), "");
+  Notes.load({ [String(at)]: "old link" }); Notes.bind(parse(text));
+  assert.equal(Notes.get(at), "old link");
+  assert.equal(Notes.count(), 1);
+});
+
+test("time-window filter: time only, with dates, and a date lent to the other bound", () => {
+  const f = (v, v2) => ({ col: "time", op: "range", v, v2 });
+  const at = s => ColFilter.match([f.apply(null, s)], () => "2026-10-28 09:15:30.250");
+  assert.equal(at(["09:00", "09:30"]), true);
+  assert.equal(at(["09:16", "09:30"]), false);
+  assert.equal(at(["2026-10-28 09:15:30.000", "2026-10-28 09:15:31"]), true);
+  assert.equal(at(["2026-10-27 09:00", "2026-10-27 09:30"]), false);
+  assert.equal(at(["2026-10-28 09:00", "09:30"]), true);
+  assert.equal(at(["2026-10-28T09:15:30.250", ""]), true);
 });

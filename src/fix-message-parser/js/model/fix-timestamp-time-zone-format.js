@@ -26,5 +26,8 @@ const FixTime = (() => {
   const short = (value, tz) => { const c = convert(value, tz); return c ? c.time : value; };
   const full = (value, tz) => { const c = convert(value, tz); return c ? `${c.date} ${c.time} (${c.zone})` : ""; };
 
-  return { convert, short, full };
+  // "YYYY-MM-DD HH:MM:SS.fff" in the chosen zone, for date-aware time-window filters.
+  const stamp = (value, tz) => { const c = convert(value, tz); return c ? `${c.date} ${c.time}` : ""; };
+
+  return { convert, short, full, stamp };
 })();

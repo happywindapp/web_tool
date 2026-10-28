@@ -7,8 +7,8 @@ const ColView = (() => {
   const changed = () => { chips(); deps.onChange(); };
   function add(f) { filters = filters.filter(x => !(x.col === f.col && (x.op === f.op || f.op === "range"))); filters.push(f); changed(); }
 
-  // Values are the table's own cell text, so filters see exactly what is displayed (time in the chosen zone).
-  const match = cellOf => ColFilter.match(filters, cellOf);
+  // Values are the table's own cell text (time in the chosen zone); a time window gets "YYYY-MM-DD HH:MM:SS.fff" so it can include dates.
+  const match = (cellOf, stampOf) => filters.every(f => ColFilter.match([f], c => f.op === "range" && c === "time" ? stampOf() : cellOf(c)));
 
   // Header drag & drop: the new order covers built-in and extra columns alike.
   function bindTable(table) {
@@ -38,11 +38,11 @@ const ColView = (() => {
       e.preventDefault();
       deps.select(+tr.dataset.i);
       const col = td.dataset.col, v = td.textContent;
-      ColFilter.menu(e.clientX, e.clientY, v, op => add({ col, op, v, v2: "" }), deps.chainable() ? [{ label: "⛓ " + T("Theo chuỗi lệnh"), run: deps.follow }] : []);
+      ColFilter.menu(e.clientX, e.clientY, v, op => add({ col, op, v, v2: "" }), deps.extras());
     });
   }
 
-  // deps: { columns(), onChange(), select(i), follow(), chainable() }
+  // deps: { columns(), onChange(), select(i), extras() → [{ label, run }] for the right-click menu }
   function init(d) { deps = d; layout = Store.get("layout", null); chips(); }
 
   const resetLayout = () => { layout = null; Store.set("layout", null); deps.onChange(); };

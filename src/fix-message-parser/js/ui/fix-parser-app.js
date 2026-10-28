@@ -4,7 +4,7 @@ const FixApp = (() => {
   // Exchange → firm messages carry the venue in 49; firm → exchange order/quote messages carry it in 56.
   const FROM_VENUE = new Set(["8", "9", "h", "f", "j", "AI"]), TO_VENUE = new Set(["D", "F", "G", "s", "t", "u", "S", "Z", "AJ", "R"]);
   let saved = null;
-  const S = { msgs: [], dict: null, dialect: "fix44", chain: null, vis: [], sel: -1, chainRoot: null, skipped: 0, us: "", venueId: "" };
+  const S = { msgs: [], dict: null, dialect: "fix44", chain: null, vis: [], sel: -1, skipped: 0, us: "", venueId: "" };
 
   const opts = () => Dom.readOpts();
   const cols = () => opts().cols.split(/[\s,;]+/).filter(t => /^\d+$/.test(t)).slice(0, 8);
@@ -15,7 +15,7 @@ const FixApp = (() => {
   const venueName = () => S.venueId || T("Server Sàn");
   const dictLabel = () => S.dialect === "venue" ? `${venueName()} FIX 4.4` : "FIX 4.4";
 
-  // keepChain: only open() keeps the chain filter, and only if it still names a chain root after re-parsing.
+  // keepChain: only open() keeps the chain / family pick, and only if it still exists after re-parsing.
   function parse(keepChain = false) {
     const text = $("src").value, ex = FixLog.extract(text), want = opts().dialect;
     S.dialect = want === "auto" ? (ex.items.some(isVenue) ? "venue" : "fix44") : want;
@@ -23,23 +23,16 @@ const FixApp = (() => {
     S.msgs = ex.items.map(it => FixCheck.analyse(it, S.dict));
     S.skipped = ex.skipped;
     S.chain = FixChain.link(S.msgs, Settings.linkTags());
+    Notes.bind(S.msgs);
     const out = S.msgs.find(m => /\b(OUT|outgoing|sent)\b|->|>>/i.test(m.prefix));
     S.us = (out || S.msgs[0] || { get: () => "" }).get("49");
     S.venueId = venueIdOf(S.msgs);
-    if (!keepChain || S.chain.root[S.chainRoot] !== S.chainRoot) S.chainRoot = null;
+    if (!keepChain) ChainPick.clear();
+    ChainPick.bind({ msgs: S.msgs, chain: S.chain, dict: S.dict });
     fillTypes();
-    fillChains();
+    ChainPick.fill($("chains"));
     InputView.paint(S.msgs);
     refresh();
-  }
-
-  // Chains of 2+ messages, labelled by their first order id + symbol.
-  function fillChains() {
-    const seen = new Map();
-    S.chain.root.forEach((r, i) => { if (!seen.has(r) && S.chain.size(r) > 1) seen.set(r, i); });
-    const label = i => { const m = S.msgs[i]; return [m.get("11") || m.get("37") || m.get("117") || m.get("548"), m.get("55")].filter(Boolean).join(" · ") || FixDict.msgName(S.dict, m.type); };
-    $("chains").innerHTML = `<option value="">${Dom.esc(T("⛓ Chuỗi lệnh ({n})", { n: seen.size }))}</option>` +
-      [...seen].slice(0, 500).map(([r, i]) => `<option value="${r}">${Dom.esc(`${label(i)} — ${S.chain.size(r)} msg`)}</option>`).join("");
   }
 
   function fillTypes() {
@@ -53,20 +46,20 @@ const FixApp = (() => {
   function refresh() {
     const o = opts();
     FixKnow.setVenue(venueName());
-    S.vis = Timeline.visible(S.msgs, { ...o, chainRoot: S.chainRoot }, S.chain, ctx());
+    S.vis = Timeline.visible(S.msgs, { ...o, only: ChainPick.members() }, ctx());
     if (!S.vis.includes(S.sel)) S.sel = S.vis.length ? S.vis[0] : -1;
     Timeline.render($("grid"), S.msgs, S.vis, S.sel, ctx());
     $("count").textContent = T("{shown}/{total} message", { shown: I18n.num(S.vis.length), total: I18n.num(S.msgs.length) });
-    const chip = $("chainChip");
-    chip.hidden = S.chainRoot === null;
-    if (S.chainRoot !== null) chip.innerHTML = `⛓ ${Dom.esc(T("Chuỗi lệnh: {n} message", { n: S.chain.size(S.chainRoot) }))}<button title="${Dom.esc(T("Bỏ lọc chuỗi"))}">✕</button>`;
+    const chip = $("chainChip"), text = ChainPick.chip();
+    chip.hidden = !text;
+    if (text) chip.innerHTML = `${Dom.esc(text)}<button title="${Dom.esc(T("Bỏ lọc chuỗi"))}">✕</button>`;
     showDetail();
     status();
   }
 
   function showDetail() {
     const m = S.msgs[S.sel], o = opts();
-    Detail.render($("detail"), m, { ...ctx(), index: S.sel, order: o.order, hideHdr: o.hideHdr, dictLabel: dictLabel(), note: Notes.get(S.sel), chainSize: m ? S.chain.size(S.chain.root[S.sel]) : 0 });
+    Detail.render($("detail"), m, { ...ctx(), index: S.sel, order: o.order, hideHdr: o.hideHdr, dictLabel: dictLabel(), note: Notes.get(S.sel), chainSize: ChainPick.chainSize(S.sel), familySize: ChainPick.familySize(S.sel) });
   }
 
   function status() {
@@ -90,20 +83,20 @@ const FixApp = (() => {
   async function act(name) {
     const m = S.msgs[S.sel];
     if (!m) return;
-    if (name === "chain") { S.chainRoot = S.chain.root[S.sel]; return refresh(); }
+    if (name === "chain" || name === "family") { ChainPick.follow(name, S.sel); return refresh(); }
     const wire = fields => FixCodec.toWire(fields, name === "soh" ? FixCodec.SOH : "|");
     const text = name === "json" ? JSON.stringify(Detail.json(m, S.dict, opts().tz, Notes.get(S.sel)), null, 2) : name === "fix" ? wire(FixCodec.rebuild(m.fields.filter(f => f.tag !== null))) : wire(m.fields);
     LinkIO.note(await Dom.copy(text) ? T("✔ Đã chép.") : T("✖ Trình duyệt chặn sao chép."), "good");
   }
 
   // Payload for share links / saved analyses / ↶ restore; open() is its inverse.
-  const snapshot = () => ({ text: $("src").value, opts: opts(), sel: S.sel, chain: S.chainRoot, notes: Notes.all(), ...ColView.get() });
+  const snapshot = () => ({ text: $("src").value, opts: opts(), sel: S.sel, chain: ChainPick.save(), notes: Notes.all(), ...ColView.get() });
   function open(p) {
     Dom.writeOpts(p.opts);
     Notes.load(p.notes);
     ColView.set(p);
     $("src").value = p.text;
-    S.chainRoot = Number.isInteger(p.chain) ? p.chain : null;
+    ChainPick.load(p.chain);
     parse(true);
     if (Number.isInteger(p.sel) && S.vis.includes(p.sel)) select(p.sel, true);
   }
@@ -122,8 +115,8 @@ const FixApp = (() => {
     for (const id of ["q", "cols"]) $(id).addEventListener("input", Dom.debounce(refresh, 200));
     document.addEventListener("change", e => { if (KEEP.includes(e.target.id)) Store.set("opts", Object.fromEntries(KEEP.map(k => [k, opts()[k]]))); });
     $("grid").addEventListener("click", e => { const tr = e.target.closest("tr[data-i]"); if (tr) select(+tr.dataset.i); });
-    $("chainChip").addEventListener("click", e => { if (e.target.closest("button")) { S.chainRoot = null; refresh(); } });
-    $("chains").onchange = e => { const r = e.target.value; e.target.value = ""; if (r !== "") { S.chainRoot = +r; refresh(); } };
+    $("chainChip").addEventListener("click", e => { if (e.target.closest("button")) { ChainPick.clear(); refresh(); } });
+    $("chains").onchange = e => { const v = e.target.value; e.target.value = ""; if (v) { ChainPick.choose(v); refresh(); } };
     $("resetCols").onclick = () => ColView.resetLayout();
     $("detail").addEventListener("input", e => {
       if (!e.target.matches("textarea.anno") || S.sel < 0) return;
@@ -155,7 +148,10 @@ const FixApp = (() => {
     const r = FixMask.apply($("src").value, FixLog.extract($("src").value).items, S.dialect, cats, extra);
     if (!r.count) return LinkIO.note(T("Không có giá trị nhạy cảm nào để che."));
     LinkIO.keep();
+    const notes = Notes.byIndex();
     open({ ...snapshot(), text: r.text });
+    Notes.setByIndex(notes);
+    refresh();
     LinkIO.note(T("✔ Đã che {n} giá trị (tính lại 9/10 cho message hợp lệ).", { n: r.count }), "good");
   }
 
@@ -164,9 +160,12 @@ const FixApp = (() => {
   function start() {
     I18n.init();
     Dom.writeOpts(Store.get("opts", {}));
-    I18n.onChange(() => { LinkIO.note(""); LinkIO.fillDemos(); saved.fill(); fillTypes(); fillChains(); ColView.set(ColView.get()); refresh(); });
-    ColView.init({ columns: () => Timeline.columns(ctx()), onChange: refresh, select: i => select(i), follow: () => act("chain"),
-      chainable: () => S.sel >= 0 && S.chain.size(S.chain.root[S.sel]) > 1 });
+    I18n.onChange(() => { LinkIO.note(""); LinkIO.fillDemos(); saved.fill(); fillTypes(); ChainPick.fill($("chains")); ColView.set(ColView.get()); refresh(); });
+    ColView.init({ columns: () => Timeline.columns(ctx()), onChange: refresh, select: i => select(i),
+      extras: () => [
+        ...(ChainPick.chainSize(S.sel) > 1 ? [{ label: "⛓ " + T("Theo chuỗi lệnh"), run: () => act("chain") }] : []),
+        ...(ChainPick.familySize(S.sel) > ChainPick.chainSize(S.sel) ? [{ label: "🌳 " + T("Theo lệnh cha + con"), run: () => act("family") }] : []),
+      ] });
     ColView.bindTable($("grid"));
     Settings.init({ mask, dictChanged: () => { if (S.chain) parse(true); } });
     InputView.init((mi, fi) => { const m = S.msgs[mi], f = m && m.fields[fi]; return f && f.tag !== null ? TagInfo.tooltip(S.dict, m, f, opts().tz) : ""; });

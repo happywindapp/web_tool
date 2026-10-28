@@ -29,8 +29,8 @@ lọc theo cột + khoảng giờ, từ điển riêng (CSV), chuỗi lệnh + c
 
 | Giao diện | Hợp đồng |
 |-----------|----------|
-| URL `?demo=<key>` | `bcgd` (vòng đời BCGD trong log theo quy trình CBTS 3.3.10–3.3.17: cùng công ty `s→8`, khác công ty `s→s echo→8`, đối ứng chấp nhận `s 549=3`, sửa `t 549=2`, huỷ `u→8 150=4`, Reject, h/f) · `bcgd-day` (14 báo cáo giao dịch trong ngày: cùng/khác công ty, chờ đối ứng, sửa, huỷ, reject `-31003`) · `ttdt` (ĐTTTT: S → AI → match, huỷ Z `298=4`, chấp nhận AJ) · `order` (FIX 4.4 cổ phiếu, SOH, nhóm Parties, 9/j) · `broken` (mỗi dòng phạm 1 luật, `^A`). Nạp xong xoá `demo` khỏi URL. Mở tool không tham số ⇒ nạp sẵn mẫu `bcgd` |
-| URL hash `#pako:<b64url>` | `base64url(zlib(JSON {text, opts, sel, chain, notes, filters, layout}))` — `opts` = giá trị các control `[data-opt]` (`dialect tz cols q type hideAdmin hideBc onlyBad onlyNotes order hideHdr`), `sel` = index message đang chọn, `chain` = index gốc chuỗi đang lọc hoặc `null`, `notes` = `{index: text}`, `filters` = `[{col, op: has|eq|neq|range, v, v2}]`, `layout` = thứ tự id cột. Đọc thêm `#base64:`. Mở xong xoá hash; nghe `hashchange` |
+| URL `?demo=<key>` | `bcgd` (vòng đời BCGD trong log theo quy trình CBTS 3.3.10–3.3.17: cùng công ty `s→8`, khác công ty `s→s echo→8`, đối ứng chấp nhận `s 549=3`, sửa `t 549=2`, huỷ `u→8 150=4`, Reject, h/f) · `bcgd-day` (14 báo cáo giao dịch trong ngày: cùng/khác công ty, chờ đối ứng, sửa, huỷ, reject `-31003`) · `ttdt` (ĐTTTT: S → AI → match, huỷ Z `298=4`, chấp nhận AJ) · `order` (FIX 4.4 cổ phiếu, SOH, nhóm Parties, 9/j) · `algo` (FIX 4.4: lệnh algo cha từ khách → 3 lệnh con có `583`, 1 con bị sửa, 1 con bị huỷ, 1 con có lệnh cha ngoài log) · `broken` (mỗi dòng phạm 1 luật, `^A`). Nạp xong xoá `demo` khỏi URL. Mở tool không tham số ⇒ nạp sẵn mẫu `bcgd` |
+| URL hash `#pako:<b64url>` | `base64url(zlib(JSON {text, opts, sel, chain, notes, filters, layout}))` — `opts` = giá trị các control `[data-opt]` (`dialect tz cols q type hideAdmin hideBc onlyBad onlyNotes order hideHdr`), `sel` = index message đang chọn, `chain` = số gốc chuỗi đang lọc, `"f:<gốc>"` / `"f:v:<id>"` khi lọc lệnh cha + con, hoặc `null`, `notes` = `{"<hash>.<n>": text}` (khoá theo nội dung message; link cũ dạng `{index: text}` vẫn đọc được), `filters` = `[{col, op: has|eq|neq|range, v, v2}]`, `layout` = thứ tự id cột. Đọc thêm `#base64:`. Mở xong xoá hash; nghe `hashchange` |
 | URL `?data=<text>` | Message/log thô (URL-encode); `pako:`/`base64:` giải như hash. **Đi qua query ⇒ lên server** — chỉ cho dữ liệu ngắn, không nhạy cảm |
 | Input | Dán / `Mở file…` / kéo-thả (UTF-8). Mỗi dòng 0..n message; tiền tố log (giờ, IN/OUT…) giữ lại hiển thị; dòng không có FIX bị bỏ qua (đếm ở status) |
 | Output | `fix-messages.csv` (UTF-8 BOM, các cột đang hiển thị theo thứ tự + Ghi chú + Lỗi/cảnh báo + Raw, **chỉ message đang lọc**; số có 0 đầu / >15 chữ số / số lẻ có 0 cuối / giờ ghi dạng `="…"` để Excel giữ nguyên) · `fix-messages.json` · clipboard: message dạng `\|` / SOH / JSON / bản sửa 9/10 |
@@ -80,10 +80,13 @@ lọc theo cột + khoảng giờ, từ điển riêng (CSV), chuỗi lệnh + c
 - BodyLength/CheckSum tính trên dạng SOH (đổi delimiter khác về SOH), đếm **byte UTF-8**.
 - Repeating group: tag `NoXXX` mở scope gồm các member (gộp từ mọi message trong spec), member đầu = bắt đầu phần tử; hiển thị thụt lề + `#n`.
 
-### Chuỗi lệnh (`FixChain.link`)
-- Union-find các message chia sẻ **giá trị** ở tag `11 41 37 526 548 551 117 131 171 693 583` (`583` ClOrdLinkID nối lệnh cha–con) + các tag `link` của từ điển riêng (vd ParentOrderID của công ty) (Server Sàn: 41 = 526 = 37 = số hiệu lệnh của sàn nên ER nối được với lệnh gốc).
+### Chuỗi lệnh và lệnh cha–con (`FixChain.link`, `ChainPick`)
+- **Chuỗi lệnh** (huỷ/sửa): union-find các message chia sẻ **giá trị** ở tag `11 41 37 526 548 551 117 131 171 693` (Server Sàn: 41 = 526 = 37 = số hiệu lệnh của sàn nên ER nối được với lệnh gốc) — tìm được cả khi ClOrdID đổi mỗi lần sửa/huỷ.
 - `35=3`/`35=j` nối với message mà `45` (RefSeqNum) trỏ tới: cùng `49` = `56` của reject, `34` = `45`, lấy message gần nhất phía trước (seq của sàn reset mỗi ngày).
+- **Lệnh cha–con**: tag liên kết `583` ClOrdLinkID + các tag `link` của từ điển riêng **không gộp** chuỗi; giá trị của tag chỉ ra lệnh cha = chuỗi sở hữu ID đó. Lệnh cha không có trong log ⇒ **lệnh cha ảo** `v:<id>`. Cây nhiều tầng (con của con) được gom theo `family(key)`.
+- Dropdown `⛓ Chuỗi lệnh`: `🌳 lệnh cha — k lệnh con, n message` (chọn ⇒ cả nhà) · `· chỉ lệnh cha` · `└ lệnh con` (chọn ⇒ chỉ chuỗi huỷ/sửa của con đó) · rồi các chuỗi độc lập. Pane chi tiết có thêm nút `🌳 Theo lệnh cha + con (n)`, menu chuột phải có `Theo lệnh cha + con`; chip ghi `🌳 <cha> + k lệnh con: n message`.
 - Giới hạn: QuoteID ĐTTTT và OrderID BCGD cùng format nên có thể trùng giá trị ⇒ gộp nhầm (hiếm).
+- Mẫu `algo`: `PARENT-7001` + 3 lệnh con (15 message), `CH-7001-2` → `CH-7001-2R` vẫn 1 chuỗi; `CH-6999-4` dưới lệnh cha ảo `PARENT-6999`.
 
 ### Che dữ liệu (`FixMask.apply`)
 - Hộp thoại `🕶 Che dữ liệu…` chọn nhóm (nhớ lựa chọn): tài khoản `1 79 440` (+ `2` khi dialect Server Sàn) · đăng nhập `553 554 925` · thành viên `448 449 4488` ·
@@ -96,11 +99,11 @@ lọc theo cột + khoảng giờ, từ điển riêng (CSV), chuỗi lệnh + c
 
 | Tính năng | Cách dùng / luật | Module |
 |-----------|------------------|--------|
-| Lọc theo cột | Bấm tiêu đề cột ⇒ popover `chứa / bằng / khác`; cột **Giờ** ⇒ khoảng `Từ – Đến` (so chuỗi giờ đang hiển thị theo múi giờ đã chọn, tới mili-giây). Chuột phải vào ô ⇒ `Chỉ hiện` / `Loại trừ` giá trị đó, `Theo chuỗi lệnh`. Mỗi bộ lọc là 1 chip có ✕, cộng dồn với bộ lọc thường; lọc được cả cột thêm | `ColView` |
+| Lọc theo cột | Bấm tiêu đề cột ⇒ popover `chứa / bằng / khác`; cột **Giờ** ⇒ khoảng `Từ – Đến` tới mili-giây, theo múi giờ đã chọn; **có thể kèm ngày** `YYYY-MM-DD HH:MM:SS.fff` (so ngày + giờ đầy đủ — log nhiều ngày), bên không ghi ngày mượn ngày của bên kia (`2026-10-28 09:00` – `09:30`); không ghi ngày ⇒ chỉ so giờ như cũ. Chuột phải vào ô ⇒ `Chỉ hiện` / `Loại trừ` giá trị đó, `Theo chuỗi lệnh`. Mỗi bộ lọc là 1 chip có ✕, cộng dồn với bộ lọc thường; lọc được cả cột thêm | `ColView` |
 | Cột tuỳ chọn + thứ tự | `Cột thêm` (≤ 8 tag) như cũ; **kéo-thả tiêu đề** để đổi thứ tự cả cột có sẵn lẫn cột thêm (lưu `layout`); `↺ Cột` về mặc định | `ColView`, `Timeline.columns` |
-| Ghi chú (annotation) | Ô `📝` trong pane chi tiết; dòng có ghi chú hiện 📝 ở cột `#` (tooltip = nội dung); lọc `Có ghi chú`; đi theo link chia sẻ, phân tích đã lưu, CSV (cột Ghi chú) và JSON (`note`) | `Notes` |
+| Ghi chú (annotation) | Ô `📝` trong pane chi tiết; **gắn theo nội dung message** (hash các cặp `tag=value`, không phụ thuộc dấu phân cách, + thứ tự nếu trùng) nên chèn/xoá dòng phía trên vẫn đúng message; che dữ liệu (đổi nội dung) chuyển ghi chú theo vị trí; dòng có ghi chú hiện 📝 ở cột `#` (tooltip = nội dung); lọc `Có ghi chú`; đi theo link chia sẻ, phân tích đã lưu, CSV (cột Ghi chú) và JSON (`note`) | `Notes` |
 | Lưu phân tích | `💾 Lưu phân tích` (đặt tên) lưu `{text, opts, sel, chain, notes, filters, layout}`; chọn ở `📂 Phân tích đã lưu` để mở lại; `🗑` xoá phân tích đang mở. Tối đa 30, báo lỗi khi storage đầy/bị chặn | `Saved` |
-| Chuỗi lệnh | Dropdown `⛓ Chuỗi lệnh (n)` liệt kê mọi chuỗi ≥ 2 message (nhãn = ClOrdID/OrderID đầu + Symbol + số message) ⇒ chọn để chỉ xem chuỗi đó | `FixApp.fillChains` |
+| Chuỗi lệnh + cha–con | Dropdown dạng cây `🌳 lệnh cha → └ lệnh con` + các chuỗi độc lập; chọn lệnh cha ⇒ cả nhà, chọn lệnh con ⇒ chỉ chuỗi huỷ/sửa của nó (xem mục Chuỗi lệnh) | `ChainPick`, `FixChain` |
 | Từ điển riêng | `📖 Từ điển riêng…`: CSV `tag,name,type,value,meaning,flags` (dòng có `value` = thêm ý nghĩa giá trị; flags `sensitive` / `link`), dán hoặc mở file, `Chèn ví dụ`. Áp **trên** mọi dialect (đặt tên tag, enum, không còn báo "không có trong từ điển"); tooltip ghi "từ điển riêng" | `FixCustom`, `FixDict.setCustom`, `Settings` |
 | Ô nhập tô màu + tra tag | `<pre>` nằm dưới `<textarea>` chữ trong suốt: tag xanh, value lục, dòng không phải FIX mờ; **giữ Alt + rê chuột** lên cặp `tag=value` ⇒ tooltip đầy đủ như pane chi tiết. Tắt tô màu khi input > 300 KB | `InputView` |
 | Theme | `Giao diện`: Tự động (theo hệ điều hành) / Sáng / Tối | `Settings` |

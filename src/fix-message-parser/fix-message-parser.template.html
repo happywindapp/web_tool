@@ -54,7 +54,7 @@
         <label class="chk" title="TradingSessionStatus (h) và SecurityStatus (f) — Server Sàn gửi hàng nghìn bản mỗi ngày"><input type="checkbox" id="hideBc" data-opt>Ẩn broadcast h/f</label>
         <label class="chk"><input type="checkbox" id="onlyBad" data-opt>Chỉ message lỗi</label>
         <label class="chk"><input type="checkbox" id="onlyNotes" data-opt>Có ghi chú</label>
-        <select id="chains" title="Chọn 1 chuỗi lệnh (đặt → xác nhận → sửa/huỷ → khớp, lệnh cha–con) để chỉ xem các message của nó"></select>
+        <select id="chains" title="Chọn 1 chuỗi lệnh (đặt → xác nhận → sửa/huỷ → khớp) hoặc 1 lệnh cha 🌳 (kèm mọi lệnh con nối qua 583 / tag link của từ điển riêng) để chỉ xem các message đó"></select>
         <span id="chainChip" class="chip" hidden></span>
         <span id="colChips" class="chips" hidden></span>
         <button id="resetCols" title="Đưa thứ tự cột về mặc định (kéo-thả tiêu đề cột để đổi thứ tự, bấm tiêu đề để lọc, chuột phải vào ô để chỉ hiện / loại trừ giá trị)">↺ Cột</button>
@@ -113,9 +113,10 @@
 // @include js/ui/message-detail-pane.js
 // @include js/ui/share-link-demo-and-backup.js
 // @include js/ui/column-filters-and-layout.js
-// @include js/ui/message-annotations.js
+// @include js/model/message-annotations-by-content.js
 // @include js/ui/settings-dialogs.js
 // @include js/ui/input-highlight-and-alt-hover.js
+// @include js/ui/order-chain-picker.js
 // @include js/ui/fix-parser-app.js
 FixApp.start();
 </script>
