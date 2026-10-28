@@ -49,6 +49,7 @@
   footer { background:var(--panel); border-top:1px solid var(--line); padding:6px 16px 10px; max-height:30vh; overflow:auto; }
   #status { font-weight:600; margin:4px 0; } .good{color:var(--good)} .bad{color:var(--bad)} .muted{color:var(--muted)}
   #err { margin:4px 0; padding:6px 8px; background:#fef2f2; border-radius:6px; color:var(--bad); font:12px/1.4 Consolas, monospace; white-space:pre-wrap; cursor:pointer; }
+  .author { display:flex; flex-wrap:wrap; gap:2px 6px; padding:4px 16px 6px; background:var(--panel); font-size:12px; color:var(--muted); } .author a { color:var(--acc); } .author span:not(:first-child) { margin-left:10px; }
   dialog { width:min(720px, 92vw); max-height:80vh; padding:0; border:1px solid var(--line); border-radius:8px; }
   #hList { margin:0; padding:8px 16px 12px 36px; overflow:auto; max-height:60vh; }
   #hList li { padding:4px 0; border-bottom:1px solid #f1f5f9; }
@@ -93,6 +94,10 @@
   <div class="muted" id="info"></div>
   <div class="muted" style="font-size:12px">Kéo để di chuyển, lăn chuột để phóng to/thu nhỏ. Công cụ chạy hoàn toàn trên máy bạn, không gửi dữ liệu đi đâu; bản nháp và lịch sử chỉ lưu trong trình duyệt này. Link chia sẻ chứa sơ đồ ở phần sau dấu #, không gửi lên máy chủ.</div>
 </footer>
+<div class="author">
+  <span>Tác giả:</span><b>Phan Ngọc Minh Quân</b>
+  <span>GitHub Source:</span><a href="https://github.com/happywindapp/web_tool/">github.com/happywindapp/web_tool</a>
+</div>
 <dialog id="hist">
   <div class="bar"><b>Lịch sử phiên bản (lưu trên trình duyệt này)</b><button id="hSave">Lưu bản hiện tại</button><button id="hClear">Xoá tất cả</button><button id="hClose">Đóng</button></div>
   <ol id="hList"></ol>

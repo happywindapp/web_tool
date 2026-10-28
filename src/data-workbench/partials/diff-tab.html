@@ -1,0 +1,32 @@
+<section class="panel" data-wb-panel="diff" hidden>
+  <div class="toolbar">
+    <select id="df-mode" title="Cách so sánh"><option value="auto">Tự nhận diện</option><option value="text">Văn bản theo dòng</option><option value="json">JSON theo cấu trúc (bỏ qua thứ tự khóa)</option><option value="markup">XML / HTML: format rồi so</option></select>
+    <label class="chk"><input id="df-ws" type="checkbox">Bỏ qua khoảng trắng</label>
+    <label class="chk"><input id="df-case" type="checkbox">Không phân biệt hoa/thường</label>
+    <label class="chk"><input id="df-ctx" type="checkbox" checked>Chỉ hiện vùng khác (±3 dòng)</label>
+    <span class="sep"></span>
+    <button id="df-run" class="main" title="Ctrl+Enter">So sánh</button>
+    <button id="df-swap">⇄ Đổi bên</button>
+    <button id="df-next">↓ Chỗ khác tiếp theo</button>
+    <button id="df-clear">Xoá</button>
+    <select id="df-demo"><option value="">Thử mẫu…</option><option value="json">JSON 2 phiên bản</option><option value="text">File cấu hình</option></select>
+  </div>
+  <div class="diff-body">
+    <div class="work diff-inputs">
+      <section class="pane">
+        <div class="bar"><b>Bên trái (cũ)</b><label class="btn">Mở file…<input id="df-file-a" type="file"></label></div>
+        <div class="ed"><textarea id="df-a" class="code" spellcheck="false" placeholder="Dán nội dung cũ…"></textarea></div>
+      </section>
+      <section class="pane">
+        <div class="bar"><b>Bên phải (mới)</b><label class="btn">Mở file…<input id="df-file-b" type="file"></label></div>
+        <div class="ed"><textarea id="df-b" class="code" spellcheck="false" placeholder="Dán nội dung mới…"></textarea></div>
+      </section>
+    </div>
+    <div class="diff-result" id="df-result"><div class="muted empty">Dán 2 nội dung rồi bấm “So sánh”.</div></div>
+  </div>
+  <footer class="report">
+    <div id="df-status" class="status muted">Chưa có nội dung để so sánh.</div>
+    <ol id="df-msgs" class="msgs"></ol>
+    <div class="muted hint">JSON: so theo cấu trúc nên đổi thứ tự khóa không tính là khác; danh sách bên trên liệt kê từng đường dẫn thay đổi. Kéo thả file: vào bên trái nếu đang trống, ngược lại vào bên phải.</div>
+  </footer>
+</section>

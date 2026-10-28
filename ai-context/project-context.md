@@ -13,7 +13,7 @@ Tool hiện có:
 
 | Tool | File | Việc |
 |------|------|------|
-| Đọc & Format JSON · XML · HTML | `tools/format-json-xml-html.html` | Kiểm tra cú pháp, **tự sửa lỗi** cú pháp phổ biến, format (2/4 space/Tab), minify, xem dạng cây, tải về |
+| Data Workbench | `tools/data-workbench.html` — **file sinh ra** từ `src/data-workbench/` (ADR #7); `tools/format-json-xml-html.html` chỉ chuyển hướng | 5 tab: Format JSON·XML·HTML (**tự sửa lỗi**, sort key, giải JSON lồng) · Chuyển đổi JSON/CSV/TSV/XML/YAML → … + SQL/Markdown/HTML table · Bảng CSV · So sánh (dòng / JSON cấu trúc) · Format CSS·JS |
 | Soạn & xem trước sơ đồ Mermaid | `tools/mermaid-diagram-editor.html` (+ `tools/vendor/mermaid-12.2.0.min.js`) | Live editor kiểu mermaid.live, offline: preview, theme, xuất PNG/SVG, link `#pako:`, lịch sử trong localStorage |
 
 ## Kiến trúc high-level
@@ -32,12 +32,14 @@ Người dùng ─ dán / kéo-thả / mở file ─► <textarea id="src">
                  footer: danh sách lỗi/fix (bấm → nhảy dòng) · Sao chép · Tải về · ← Dùng kết quả
 ```
 
-- 4 module IIFE trong 1 `<script>`: `JsonTool`, `MarkupTool`, `ViewRender`, phần UI wiring.
+- Sơ đồ trên là tab Format của Data Workbench. Module IIFE nằm ở `src/data-workbench/js/**` (mỗi file < 200 dòng),
+  `pwsh scripts/build-data-workbench-single-file.ps1` ghép thành 1 file; **không sửa tay** `tools/data-workbench.html`.
 - **Tolerant parser (bộ phân tích chịu lỗi)**: không dừng ở lỗi đầu tiên mà đoán ý định, sửa, và ghi
-  lại từng sửa đổi `{line, col, msg}` để người dùng duyệt.
-- Không backend, không network request. `localStorage` chỉ cho nháp/lịch sử (ADR #6); thư viện lớn để ở `tools/vendor/` (ADR #5).
+  lại từng sửa đổi `{line, col, msg}` để người dùng duyệt. Converter/bảng CSV/so sánh dùng lại parser này.
+- Không backend, không network request. `localStorage` chỉ cho nháp/lịch sử (ADR #6); thư viện lớn để ở `tools/vendor/` (ADR #5),
+  thư viện nhỏ của workbench nhúng inline lúc build (ADR #7). Test: `node --test src/data-workbench/tests/pure-modules.test.js`.
 
-Chi tiết: [`docs/tools/format-json-xml-html.md`](../docs/tools/format-json-xml-html.md).
+Chi tiết: [`docs/tools/data-workbench.md`](../docs/tools/data-workbench.md).
 
 ## Repos
 
@@ -58,6 +60,8 @@ Không có. Không backend, không API, không DB, không CDN.
   framework hay script CDN nếu chưa hỏi user (xem [ADR](../docs/decisions/README.md)).
 - **Không gửi dữ liệu đi đâu** — đây là cam kết hiển thị ngay trên UI; mọi thay đổi gọi mạng là breaking.
 - **Tự sửa = đoán**: mỗi sửa đổi phải được ghi vào danh sách `fixes`, không sửa âm thầm.
+- **Mọi tool phải có khối tác giả** `<div class="author">` (Tác giả + GitHub Source) — markup/CSS chuẩn ở
+  [`docs/architecture/README.md`](../docs/architecture/README.md) mục 3.
 - UI tiếng Việt. Git commit/push do user tự chạy.
 
 ## Đang vướng

@@ -1,0 +1,19 @@
+  .grid-area { display:flex; flex-direction:column; gap:8px; padding:10px 16px; min-height:0; }
+  .paste { display:grid; grid-template-rows:20vh auto; gap:6px; }
+  .paste textarea { border:1px solid var(--line); border-radius:8px; }
+  .grid-wrap { flex:1; overflow:auto; min-height:0; background:var(--panel); border:1px solid var(--line); border-radius:8px; }
+  .empty { padding:24px; text-align:center; }
+  table.grid { border-collapse:collapse; font:12.5px/1.5 Consolas, "Cascadia Mono", monospace; }
+  table.grid th, table.grid td { border:1px solid var(--line); padding:3px 8px; white-space:pre; max-width:420px; overflow:hidden; text-overflow:ellipsis; vertical-align:top; }
+  table.grid thead th { position:sticky; top:0; z-index:1; background:var(--gut); text-align:left; }
+  table.grid td.num { text-align:right; }
+  table.grid .rn { position:sticky; left:0; background:var(--gut); color:var(--muted); text-align:right; }
+  table.grid thead .rn { z-index:2; }
+  table.grid tbody tr:hover td:not(.rn) { background:var(--hover); }
+  table.grid [contenteditable]:focus { outline:2px solid var(--acc); outline-offset:-2px; background:var(--code); white-space:pre-wrap; text-overflow:clip; }
+  .th { display:flex; gap:2px; align-items:center; }
+  .th .hname { flex:1; min-width:3em; }
+  table.grid button.mini { padding:0 3px; border:0; background:none; color:var(--muted); cursor:pointer; font:inherit; }
+  table.grid button.mini:hover { color:var(--acc); }
+  table.grid button.del:hover { color:var(--bad); }
+  .pager { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }

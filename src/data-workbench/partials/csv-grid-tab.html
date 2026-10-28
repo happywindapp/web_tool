@@ -1,0 +1,31 @@
+<section class="panel" data-wb-panel="csv" hidden>
+  <div class="toolbar">
+    <label class="btn">Mở file…<input id="csv-file" type="file" accept=".csv,.tsv,.tab,.txt,text/csv"></label>
+    <select id="csv-enc" title="Bảng mã của file — đổi để đọc lại file vừa mở"><option value="utf-8">UTF-8</option><option value="utf-16le">UTF-16 LE</option><option value="windows-1258">Windows-1258 (tiếng Việt)</option><option value="windows-1252">Windows-1252</option></select>
+    <select id="csv-delim" title="Dấu phân cách — đổi để đọc lại dữ liệu (mất các chỗ đã sửa)"><option value="auto">Dấu phân cách: tự nhận diện</option><option value=",">Dấu phẩy ,</option><option value=";">Chấm phẩy ;</option><option value="tab">Tab</option><option value="|">Dấu |</option></select>
+    <label class="chk"><input id="csv-header" type="checkbox" checked>Dòng đầu là tiêu đề</label>
+    <input id="csv-filter" type="text" placeholder="Lọc hàng (chứa chữ)…">
+    <button id="csv-add-row">+ Hàng</button><button id="csv-add-col">+ Cột</button>
+    <button id="csv-paste-toggle">Dán dữ liệu…</button>
+    <span class="sep"></span>
+    <button id="csv-save" class="main">Tải CSV</button>
+    <label class="chk" title="Thêm BOM để Excel nhận đúng UTF-8 (tiếng Việt)"><input id="csv-bom" type="checkbox" checked>BOM cho Excel</label>
+    <select id="csv-eol" title="Kiểu xuống dòng khi tải về"><option value="crlf">CRLF (Windows/Excel)</option><option value="lf">LF (Linux/Mac)</option></select>
+    <select id="csv-send"></select>
+    <button id="csv-clear">Xoá</button>
+    <select id="csv-demo"><option value="">Thử file mẫu…</option><option value="csv">CSV có lỗi</option></select>
+  </div>
+  <div class="grid-area">
+    <div id="csv-paste" class="paste" hidden>
+      <textarea id="csv-paste-text" class="code" spellcheck="false" placeholder="Dán CSV / TSV (copy vùng ô từ Excel cũng được)…"></textarea>
+      <div><button id="csv-paste-load" class="main">Nạp vào bảng</button></div>
+    </div>
+    <div class="grid-wrap"><table class="grid" id="csv-table"></table><div id="csv-empty" class="muted empty">Mở file, kéo thả file vào trang, hoặc bấm “Dán dữ liệu…”.</div></div>
+    <div class="pager"><button id="csv-prev">‹ Trước</button><span id="csv-page"></span><button id="csv-next">Sau ›</button><span class="muted" id="csv-info"></span></div>
+  </div>
+  <footer class="report">
+    <div id="csv-status" class="status muted">Chưa có dữ liệu.</div>
+    <ol id="csv-msgs" class="msgs"></ol>
+    <div class="muted hint">Bấm vào ô hoặc tên cột để sửa · Enter xác nhận · Esc huỷ · ⇅ sắp xếp · × xoá hàng/cột. Mỗi trang 500 hàng, dùng ô lọc để thu hẹp. Bảng không lưu nháp — nhớ “Tải CSV” trước khi đóng tab.</div>
+  </footer>
+</section>

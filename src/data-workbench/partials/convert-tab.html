@@ -1,0 +1,37 @@
+<section class="panel" data-wb-panel="convert" hidden>
+  <div class="toolbar">
+    <label class="btn">Mở file…<input id="cv-file" type="file"></label>
+    <label>Từ <select id="cv-from"><option value="auto">Tự nhận diện</option><option value="json">JSON</option><option value="csv">CSV</option><option value="tsv">TSV</option><option value="xml">XML</option><option value="yaml">YAML</option></select></label>
+    <button id="cv-swap" title="Đưa kết quả về ô nguồn và đảo chiều chuyển đổi">⇄</button>
+    <label>Sang <select id="cv-to"><option value="json">JSON</option><option value="csv">CSV</option><option value="tsv">TSV</option><option value="xml">XML</option><option value="yaml">YAML</option><option value="js">JS object</option><option value="sql">SQL INSERT</option><option value="markdown">Bảng Markdown</option><option value="html">Bảng HTML</option></select></label>
+    <select id="cv-indent" title="Thụt lề kết quả"><option value="2">Thụt 2 dấu cách</option><option value="4">Thụt 4 dấu cách</option><option value="tab">Thụt bằng Tab</option></select>
+    <select id="cv-delim" data-show="from:csv|to:csv" title="Dấu phân cách CSV (đọc và ghi)"><option value="auto">Dấu phân cách: tự nhận diện</option><option value=",">Dấu phẩy ,</option><option value=";">Chấm phẩy ;</option><option value="tab">Tab</option><option value="|">Dấu |</option></select>
+    <label class="chk" data-show="from:csv,tsv"><input id="cv-header" type="checkbox" checked>Dòng đầu là tiêu đề</label>
+    <label class="chk" data-show="from:csv,tsv,xml" title="&quot;123&quot; → số, &quot;true&quot; → boolean. Số có 0 ở đầu (mã KH, số TK) vẫn giữ là chuỗi."><input id="cv-infer" type="checkbox" checked>Tự đoán kiểu số / true / false</label>
+    <label class="chk" data-show="from:csv,tsv|to:csv,tsv,sql,markdown,html" title="Object lồng → cột &quot;a.b&quot;; đọc CSV thì cột &quot;a.b&quot; → object lồng"><input id="cv-flatten" type="checkbox" checked>Làm phẳng khóa lồng (a.b)</label>
+    <span data-show="from:xml|to:xml">XML: gốc <input id="cv-root" type="text" class="short" value="root"> mục <input id="cv-item" type="text" class="short" value="item"> tiền tố thuộc tính <input id="cv-attr" type="text" class="short" value="@"></span>
+    <label data-show="to:sql">Tên bảng <input id="cv-table" type="text" class="short" value="my_table"></label>
+    <span class="sep"></span>
+    <button id="cv-run" class="main" title="Ctrl+Enter">Chuyển đổi</button>
+    <button id="cv-clear">Xoá</button>
+    <select id="cv-demo"><option value="">Thử dữ liệu mẫu…</option><option value="json">JSON → CSV</option><option value="csv">CSV → JSON</option><option value="xml">XML → JSON</option><option value="yaml">YAML → JSON</option></select>
+  </div>
+  <div class="work">
+    <section class="pane">
+      <div class="bar"><b>Dữ liệu nguồn</b><span class="muted" id="cv-fname">dán nội dung hoặc kéo thả file vào đây</span></div>
+      <div class="ed"><textarea id="cv-src" class="code" spellcheck="false" placeholder="Dán JSON / CSV / TSV / XML / YAML vào đây…"></textarea></div>
+    </section>
+    <section class="pane">
+      <div class="bar"><b>Kết quả</b>
+        <button id="cv-copy">Sao chép</button><button id="cv-save" title="CSV/TSV tải về có BOM để Excel đọc đúng tiếng Việt">Tải về</button>
+        <select id="cv-send"></select></div>
+      <div class="out-wrap"><pre id="cv-out" class="code"></pre></div>
+    </section>
+  </div>
+  <footer class="report">
+    <div id="cv-status" class="status muted">Chưa có nội dung.</div>
+    <div class="muted" id="cv-info"></div>
+    <ol id="cv-msgs" class="msgs"></ol>
+    <div class="muted hint">JSON lỗi cú pháp vẫn chuyển được (tự sửa, có liệt kê). Số lớn / số tiền giữ nguyên từng chữ số. Tự chuyển khi gõ với dữ liệu dưới 500 KB.</div>
+  </footer>
+</section>

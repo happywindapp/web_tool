@@ -1,0 +1,35 @@
+<section class="panel" data-wb-panel="format" hidden>
+  <div class="toolbar">
+    <label class="btn">Mở file…<input id="fmt-file" type="file"></label>
+    <select id="fmt-kind" title="Định dạng"><option value="auto">Tự nhận diện</option><option value="json">JSON</option><option value="xml">XML</option><option value="html">HTML</option></select>
+    <select id="fmt-indent" title="Thụt lề"><option value="2">Thụt 2 dấu cách</option><option value="3">Thụt 3 dấu cách</option><option value="4">Thụt 4 dấu cách</option><option value="8">Thụt 8 dấu cách</option><option value="tab">Thụt bằng Tab</option></select>
+    <label class="chk" title="Chỉ áp dụng cho JSON"><input id="fmt-sort" type="checkbox">Sắp xếp khóa A→Z</label>
+    <label class="chk" title="JSON bị stringify trong chuỗi (thường gặp trong log/Kafka) → mở ra thành object. Chỉ giải chuỗi đã là JSON hợp lệ."><input id="fmt-nested" type="checkbox">Giải chuỗi JSON lồng</label>
+    <span class="sep"></span>
+    <button id="fmt-check">Kiểm tra</button>
+    <button id="fmt-run" class="main" title="Ctrl+Enter">Format &amp; sửa lỗi</button>
+    <button id="fmt-min">Thu gọn 1 dòng</button>
+    <button id="fmt-escape" title="Thu gọn rồi bọc thành 1 chuỗi JSON (thoát &quot; và xuống dòng) để nhúng vào JSON/code khác">Thành chuỗi JSON</button>
+    <button id="fmt-clear">Xoá</button>
+    <select id="fmt-demo"><option value="">Thử file mẫu…</option><option value="json">JSON lỗi</option><option value="xml">XML lỗi</option><option value="html">HTML lỗi</option><option value="nested">JSON lồng trong log</option></select>
+    <span class="muted" id="fmt-kind-now"></span>
+  </div>
+  <div class="work">
+    <section class="pane">
+      <div class="bar"><b>Nội dung gốc</b><span class="muted" id="fmt-fname">dán nội dung hoặc kéo thả file vào đây</span></div>
+      <div class="ed"><textarea id="fmt-src" class="code" spellcheck="false" placeholder="Dán JSON / XML / HTML vào đây…"></textarea></div>
+    </section>
+    <section class="pane">
+      <div class="bar"><b>Kết quả</b><span class="seg" id="fmt-view"><button data-view="out" class="on">Văn bản</button><button data-view="tree">Cây dữ liệu</button></span>
+        <button id="fmt-copy">Sao chép</button><button id="fmt-save">Tải về</button><button id="fmt-use" title="Đưa kết quả sang ô bên trái để sửa tiếp">← Dùng kết quả</button>
+        <select id="fmt-send"></select></div>
+      <div class="out-wrap"><pre id="fmt-out" class="code"></pre><div id="fmt-tree" class="tree" hidden></div></div>
+    </section>
+  </div>
+  <footer class="report">
+    <div id="fmt-status" class="status muted">Chưa có nội dung.</div>
+    <div class="muted" id="fmt-info"></div>
+    <ol id="fmt-msgs" class="msgs"></ol>
+    <div class="muted hint">Bấm vào một dòng lỗi để nhảy tới vị trí đó. Tự sửa lỗi là “đoán” ý định ban đầu, nên luôn đọc lại danh sách thay đổi. Nháp được lưu trong trình duyệt của máy này.</div>
+  </footer>
+</section>

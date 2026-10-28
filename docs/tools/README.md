@@ -4,7 +4,7 @@ Mỗi tool trong `tools/` có đúng 1 file doc ở đây, cùng tên: `tools/<x
 
 | Tool | Doc |
 |------|-----|
-| Đọc & Format JSON · XML · HTML | [format-json-xml-html.md](format-json-xml-html.md) |
+| Data Workbench (Format JSON·XML·HTML · Chuyển đổi · Bảng CSV · So sánh · Format CSS·JS) — thay `format-json-xml-html` | [data-workbench.md](data-workbench.md) |
 | Soạn & xem trước sơ đồ Mermaid | [mermaid-diagram-editor.md](mermaid-diagram-editor.md) |
 
 ## Khung 1 file doc tool

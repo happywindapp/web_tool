@@ -7,20 +7,24 @@
 
 `c:/_web_tool` **chính là git repo** `happywindapp/web_tool` (nhánh `main`): bộ công cụ web tiện ích,
 mỗi tool là **1 file HTML tự chứa** trong `tools/`, chạy 100% client-side, không gọi mạng.
-Tool hiện có: `tools/format-json-xml-html.html` (kiểm tra · tự sửa lỗi · format · minify JSON/XML/HTML).
+Tool hiện có: `tools/data-workbench.html` (format/tự sửa JSON·XML·HTML · chuyển đổi · bảng CSV · so sánh · CSS/JS) —
+**file sinh ra** từ `src/data-workbench/`, build `pwsh scripts/build-data-workbench-single-file.ps1` (ADR #7); `tools/mermaid-diagram-editor.html`.
 Đọc `ai-context/project-context.md` để nắm toàn cảnh.
 
 ## Tech stack
 
 - **Tool:** HTML5 + CSS + vanilla JS (ES2020) inline trong 1 file. Không framework, không build, không CDN.
-- **Chạy/test:** mở file trong trình duyệt (`?demo=json|xml|html` nạp mẫu lỗi rồi format ngay). Chưa có test tự động.
+- **Chạy/test:** mở file trong trình duyệt (`?demo=json|xml|html` nạp mẫu lỗi rồi format ngay). Test module thuần của workbench:
+  `node --test src/data-workbench/tests/pure-modules.test.js`.
 - **Scaffold AI:** Markdown (`docs/`, `ai-context/`), PowerShell (`scripts/`).
 
 ## Convention riêng của repo
 
 - 1 tool = 1 file `tools/<viec-lam-kebab-case>.html`; module JS dạng IIFE (`const X = (() => {...})()`), UI tiếng Việt.
 - Thêm/đổi tool ⇒ cập nhật đủ 3 chỗ: card trong `index.html`, bảng Tools trong `README.md`, `docs/tools/<tool>.md`.
+- Mọi tool phải có khối tác giả `<div class="author">` (Tác giả + GitHub Source) ngay sau footer trạng thái — chép markup/CSS chuẩn từ `docs/architecture/README.md` mục 3.
 - Ngoại lệ có chủ đích với luật "file < 200 dòng": tool phải tự chứa để mở trực tiếp (xem `docs/decisions/`).
+- Data Workbench: **chỉ sửa `src/data-workbench/`**, không sửa tay `tools/data-workbench.html`; sửa xong chạy build + `-Check` + test node.
 - Mọi sửa lỗi tự động phải đẩy vào `fixes` (`{line, col, msg}`) — không sửa âm thầm.
 
 ## Naming convention

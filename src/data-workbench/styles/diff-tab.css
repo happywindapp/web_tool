@@ -1,0 +1,13 @@
+  .diff-body { display:grid; grid-template-rows:minmax(140px, 34vh) 1fr; min-height:0; }
+  .diff-result { margin:0 16px 10px; overflow:auto; min-height:0; background:var(--panel); border:1px solid var(--line); border-radius:8px; }
+  table.dt { width:100%; border-collapse:collapse; table-layout:fixed; font:12.5px/1.5 Consolas, "Cascadia Mono", monospace; }
+  table.dt col.lnc { width:4.5em; }
+  table.dt td { padding:0 8px; vertical-align:top; white-space:pre-wrap; word-break:break-all; }
+  table.dt td.ln { color:var(--c); background:var(--gut); text-align:right; user-select:none; }
+  table.dt tr.del td.cl, table.dt tr.mod td.cl { background:var(--del); }
+  table.dt tr.ins td.cr, table.dt tr.mod td.cr { background:var(--add); }
+  table.dt tr.del td.cr, table.dt tr.ins td.cl { background:var(--gut); }
+  table.dt del { background:var(--del2); text-decoration:none; }
+  table.dt ins { background:var(--add2); text-decoration:none; }
+  table.dt tr.skip td { text-align:center; color:var(--muted); background:var(--gut); cursor:pointer; padding:2px; }
+  table.dt tr.cur td { box-shadow:inset 0 2px 0 var(--acc); }

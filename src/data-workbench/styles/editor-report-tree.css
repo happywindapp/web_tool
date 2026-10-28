@@ -1,0 +1,11 @@
+  .ed { display:grid; grid-template-columns:auto 1fr; min-height:0; }
+  .gut { margin:0; padding:8px 6px 8px 10px; text-align:right; color:var(--c); background:var(--gut); overflow:hidden; user-select:none;
+         font:12.5px/1.5 Consolas, "Cascadia Mono", monospace; white-space:pre; }
+  .gut b { color:#fff; background:var(--bad); border-radius:3px; padding:0 3px; }
+  .out-wrap { min-height:0; display:grid; }
+  .tree { overflow:auto; padding:8px 12px; font:12.5px/1.6 Consolas, monospace; }
+  .tree details { margin-left:14px; } .tree summary { cursor:pointer; margin-left:-14px; } .tree .leaf { margin-left:0; }
+  footer.report { background:var(--panel); border-top:1px solid var(--line); padding:6px 16px 10px; max-height:28vh; overflow:auto; }
+  .status { font-weight:600; margin:4px 0; }
+  .msgs { margin:0; padding-left:20px; } .msgs li[data-line] { cursor:pointer; padding:1px 0; } .msgs li:hover { background:var(--hover); }
+  .hint { font-size:12px; }

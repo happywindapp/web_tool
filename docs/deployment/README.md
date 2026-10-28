@@ -6,10 +6,12 @@
 
 ```powershell
 start C:\_web_tool\index.html                                  # trang chủ: danh sách tool
-start C:\_web_tool\tools\format-json-xml-html.html             # mở thẳng 1 tool
+start C:\_web_tool\tools\data-workbench.html                    # mở thẳng 1 tool
 ```
 
 - Thử nhanh: thêm `?demo=json` (hoặc `xml`, `html`) vào URL → nạp mẫu lỗi và format ngay.
+- `tools/data-workbench.html` là file sinh ra: sửa `src/data-workbench/` rồi `pwsh scripts/build-data-workbench-single-file.ps1`
+  (`-Check` trước khi commit để chắc không quên build). Pages publish file sinh ra đã commit — không cần build trên server.
 - Trình duyệt: Chromium/Edge/Firefox hiện đại (ES2018+, `DOMParser`, `Blob`, Clipboard API).
 
 ## 2. Phân phối

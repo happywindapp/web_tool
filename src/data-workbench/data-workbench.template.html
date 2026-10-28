@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Data Workbench</title>
+<style>
+/* @include styles/base.css */
+/* @include styles/editor-report-tree.css */
+/* @include styles/csv-grid-tab.css */
+/* @include styles/diff-tab.css */
+</style>
+</head>
+<body>
+<header class="top">
+  <a class="btn" href="../index.html">← Trang chủ</a>
+  <h1>Data Workbench</h1>
+  <nav class="seg wb-nav">
+    <button data-wb-tab="format">Format JSON · XML · HTML</button>
+    <button data-wb-tab="convert">Chuyển đổi</button>
+    <button data-wb-tab="csv">Bảng CSV</button>
+    <button data-wb-tab="diff">So sánh</button>
+    <button data-wb-tab="code">Format CSS · JS</button>
+  </nav>
+  <span class="muted privacy">Chạy 100% trên máy bạn · không gửi dữ liệu đi đâu · Ctrl+Enter = chạy</span>
+</header>
+<!-- @include partials/format-tab.html -->
+<!-- @include partials/convert-tab.html -->
+<!-- @include partials/csv-grid-tab.html -->
+<!-- @include partials/diff-tab.html -->
+<!-- @include partials/code-format-tab.html -->
+<div class="author">
+  <span>Tác giả:</span><b>Phan Ngọc Minh Quân</b>
+  <span>GitHub Source:</span><a href="https://github.com/happywindapp/web_tool/">github.com/happywindapp/web_tool</a>
+</div>
+<script>
+// @include third-party/beautify.min.js
+</script>
+<script>
+// @include third-party/beautify-css.min.js
+</script>
+<script>
+// @include third-party/js-yaml.min.js
+</script>
+<script>
+"use strict";
+// @include js/core/text-utils.js
+// @include js/core/dom-and-storage-helpers.js
+// @include js/core/line-numbered-editor.js
+// @include js/core/report-panel.js
+// @include js/core/workbench-tab-router.js
+// @include js/parsers/format-detect.js
+// @include js/parsers/json-tolerant-parser.js
+// @include js/parsers/json-ast-transforms.js
+// @include js/parsers/markup-tolerant-parser.js
+// @include js/parsers/csv-parser.js
+// @include js/parsers/css-minifier.js
+// @include js/render/syntax-highlight-and-tree.js
+// @include js/converters/value-model.js
+// @include js/converters/table-shape.js
+// @include js/converters/xml-value-mapper.js
+// @include js/converters/output-writers.js
+// @include js/converters/convert-engine.js
+// @include js/diff/myers-sequence-diff.js
+// @include js/diff/json-structural-diff.js
+// @include js/tabs/demo-samples.js
+// @include js/tabs/format-tab.js
+// @include js/tabs/convert-tab.js
+// @include js/tabs/csv-grid-tab.js
+// @include js/tabs/diff-render.js
+// @include js/tabs/diff-tab.js
+// @include js/tabs/code-format-tab.js
+Workbench.start();
+</script>
+</body>
+</html>

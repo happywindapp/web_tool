@@ -1,0 +1,35 @@
+<section class="panel" data-wb-panel="code" hidden>
+  <div class="toolbar">
+    <label class="btn">Mở file…<input id="cf-file" type="file"></label>
+    <select id="cf-lang" title="Ngôn ngữ"><option value="auto">Tự nhận diện</option><option value="css">CSS / SCSS / LESS</option><option value="js">JavaScript / TypeScript</option></select>
+    <select id="cf-indent" title="Thụt lề"><option value="2">Thụt 2 dấu cách</option><option value="4">Thụt 4 dấu cách</option><option value="tab">Thụt bằng Tab</option></select>
+    <select id="cf-brace" title="Vị trí dấu ngoặc {"><option value="collapse">{ cùng dòng</option><option value="expand">{ xuống dòng riêng</option><option value="end-expand">Chỉ } xuống dòng riêng</option><option value="collapse,preserve-inline">{ cùng dòng, giữ khối 1 dòng</option></select>
+    <select id="cf-newlines" title="Số dòng trống liên tiếp được giữ lại"><option value="-1">Bỏ mọi dòng trống</option><option value="2" selected>Giữ tối đa 1 dòng trống</option><option value="3">Giữ tối đa 2 dòng trống</option><option value="0">Giữ nguyên dòng trống</option></select>
+    <select id="cf-wrap" title="Tự ngắt dòng dài"><option value="0">Không tự ngắt dòng</option><option value="80">Ngắt quanh 80 ký tự</option><option value="120">Ngắt quanh 120 ký tự</option></select>
+    <label class="chk" data-js><input id="cf-chain" type="checkbox">Mỗi .method() một dòng</label>
+    <label class="chk" data-js title="Đổi \xNN, \uNNNN in được thành ký tự thật"><input id="cf-unescape" type="checkbox">Giải \xNN \uNNNN</label>
+    <label class="chk" data-js><input id="cf-jsx" type="checkbox">JSX</label>
+    <span class="sep"></span>
+    <button id="cf-run" class="main" title="Ctrl+Enter">Format</button>
+    <button id="cf-min" title="Bỏ chú thích và khoảng trắng thừa (chỉ CSS)">Thu gọn CSS</button>
+    <button id="cf-clear">Xoá</button>
+    <select id="cf-demo"><option value="">Thử mẫu…</option><option value="css">CSS 1 dòng</option><option value="js">JS 1 dòng</option></select>
+    <span class="muted" id="cf-lang-now"></span>
+  </div>
+  <div class="work">
+    <section class="pane">
+      <div class="bar"><b>Mã gốc</b><span class="muted" id="cf-fname">dán mã hoặc kéo thả file vào đây</span></div>
+      <div class="ed"><textarea id="cf-src" class="code" spellcheck="false" placeholder="Dán CSS / SCSS / LESS / JavaScript vào đây…"></textarea></div>
+    </section>
+    <section class="pane">
+      <div class="bar"><b>Kết quả</b><button id="cf-copy">Sao chép</button><button id="cf-save">Tải về</button><button id="cf-use" title="Đưa kết quả sang ô bên trái">← Dùng kết quả</button><select id="cf-send"></select></div>
+      <div class="out-wrap"><pre id="cf-out" class="code"></pre></div>
+    </section>
+  </div>
+  <footer class="report">
+    <div id="cf-status" class="status muted">Chưa có nội dung.</div>
+    <div class="muted" id="cf-info"></div>
+    <ol id="cf-msgs" class="msgs"></ol>
+    <div class="muted hint">Format dùng js-beautify 1.15.1 (nhúng sẵn, không tải gì từ mạng). JS được trình duyệt kiểm tra cú pháp sau khi format (chỉ biên dịch, không chạy mã). Thu gọn JS chưa hỗ trợ.</div>
+  </footer>
+</section>
