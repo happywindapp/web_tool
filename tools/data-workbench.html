@@ -21,11 +21,15 @@
   body { margin:0; height:100vh; display:grid; grid-template-rows:auto 1fr auto; background:var(--bg); color:var(--ink);
          font:14px/1.45 "Segoe UI", Arial, sans-serif; }
   body.drop { outline:3px dashed var(--acc); outline-offset:-6px; }
-  header.top { display:flex; flex-wrap:wrap; gap:8px; align-items:center; padding:8px 16px; background:var(--panel); border-bottom:1px solid var(--line); }
+  header.top { position:relative; display:flex; flex-wrap:wrap; gap:8px; align-items:center; padding:8px 112px 8px 16px; background:var(--panel); border-bottom:1px solid var(--line); }
   header.top h1 { font-size:16px; margin:0 8px 0 0; }
   .seg { display:inline-flex; flex-wrap:wrap; gap:4px; }
   .seg button.on { background:var(--ink); color:var(--bg); border-color:var(--ink); }
-  .privacy { margin-left:auto; font-size:12px; }
+  .lang-switch { position:absolute; top:8px; right:16px; }
+  .lang-switch button { background:#fef3c7; color:#92400e; border-color:#fcd34d; font-weight:600; }
+  .lang-switch button:hover { background:#fde68a; }
+  .lang-switch button.on { background:#c2410c; color:#fff; border-color:#c2410c; }
+  @media (prefers-color-scheme: dark) { .lang-switch button { background:#422006; color:#fcd34d; border-color:#92400e; } .lang-switch button:hover { background:#713f12; } .lang-switch button.on { background:#ea580c; color:#fff; border-color:#ea580c; } }
   a.btn { text-decoration:none; }
   button, select, input[type=text], label.btn, a.btn { font:inherit; padding:5px 10px; border:1px solid var(--line); border-radius:6px; background:var(--btn); color:var(--ink); }
   button, select, label.btn, a.btn { cursor:pointer; }
@@ -48,7 +52,7 @@
   .t{color:var(--muted)} .tn{color:var(--tn);font-weight:600} .an{color:var(--an)} .av{color:var(--av)} .c{color:var(--c);font-style:italic} .d,.cd{color:var(--l)}
   .good{color:var(--good)} .bad{color:var(--bad)} .warn{color:var(--warn)} .muted{color:var(--muted)}
   .author { display:flex; flex-wrap:wrap; gap:2px 6px; padding:4px 16px 6px; background:var(--panel); font-size:12px; color:var(--muted); } .author a { color:var(--acc); } .author span:not(:first-child) { margin-left:10px; }
-  @media (max-width: 900px) { .work { grid-template-columns:1fr; grid-template-rows:45vh 45vh; } .privacy { margin-left:0; } }
+  @media (max-width: 900px) { .work { grid-template-columns:1fr; grid-template-rows:45vh 45vh; } }
   .ed { display:grid; grid-template-columns:auto 1fr; min-height:0; }
   .gut { margin:0; padding:8px 6px 8px 10px; text-align:right; color:var(--c); background:var(--gut); overflow:hidden; user-select:none;
          font:12.5px/1.5 Consolas, "Cascadia Mono", monospace; white-space:pre; }
@@ -105,7 +109,7 @@
     <button data-wb-tab="diff">So sánh</button>
     <button data-wb-tab="code">Format CSS · JS</button>
   </nav>
-  <span class="muted privacy">Chạy 100% trên máy bạn · không gửi dữ liệu đi đâu · Ctrl+Enter = chạy</span>
+  <span class="seg lang-switch" title="Ngôn ngữ"><button data-lang="vi">VI</button><button data-lang="en">EN</button></span>
 </header>
 <section class="panel" data-wb-panel="format" hidden>
   <div class="toolbar">
@@ -132,7 +136,7 @@
       <div class="bar"><b>Kết quả</b><span class="seg" id="fmt-view"><button data-view="out" class="on">Văn bản</button><button data-view="tree">Cây dữ liệu</button></span>
         <button id="fmt-copy">Sao chép</button><button id="fmt-save">Tải về</button><button id="fmt-use" title="Đưa kết quả sang ô bên trái để sửa tiếp">← Dùng kết quả</button>
         <select id="fmt-send"></select></div>
-      <div class="out-wrap"><pre id="fmt-out" class="code"></pre><div id="fmt-tree" class="tree" hidden></div></div>
+      <div class="out-wrap"><pre id="fmt-out" class="code"></pre><div id="fmt-tree" class="tree" data-i18n-skip hidden></div></div>
     </section>
   </div>
   <footer class="report">
@@ -294,6 +298,346 @@
 </script>
 <script>
 "use strict";
+// UI language VI/EN: saved choice (shared by every tool) → browser language; English dictionary is keyed by the Vietnamese text.
+const I18n = (() => {
+  const KEY = "web_tool.lang", EN = {}, listeners = [];
+  const SKIP = "script,style,textarea,pre,code,svg,table,[contenteditable],[data-i18n-skip]";
+  const origText = new WeakMap(), origAttr = new WeakMap();
+  let origTitle = null;
+  let lang = (() => {
+    try { const v = localStorage.getItem(KEY); if (v === "vi" || v === "en") return v; } catch { /* storage blocked */ }
+    const nav = globalThis.navigator;
+    return !nav || /^vi\b/i.test(nav.language || "") ? "vi" : "en";
+  })();
+
+  const word = s => lang === "en" && Object.hasOwn(EN, s) ? EN[s] : s;
+  const t = (vi, params) => params ? word(vi).replace(/\{(\w+)\}/g, (m, k) => Object.hasOwn(params, k) ? String(params[k]) : m) : word(vi);
+  const num = n => n.toLocaleString(lang);
+  const swap = src => { const m = /^(\s*)([\s\S]*?)(\s*)$/.exec(src); return m[1] + word(m[2]) + m[3]; };
+
+  // Static markup keeps its Vietnamese source; the original of each text node / attribute is remembered so switching back is exact.
+  function apply(root = document.body) {
+    document.documentElement.lang = lang;
+    if (origTitle === null) origTitle = document.title;
+    document.title = word(origTitle);
+    for (const el of [root, ...root.querySelectorAll("*")]) {
+      if (el.parentElement && el.parentElement.closest(SKIP)) continue;
+      if (!el.matches(SKIP)) for (const n of el.childNodes) {
+        if (n.nodeType !== 3 || !n.data.trim()) continue;
+        if (!origText.has(n)) origText.set(n, n.data);
+        n.data = swap(origText.get(n));
+      }
+      for (const a of ["title", "placeholder"]) {
+        if (!el.hasAttribute(a)) continue;
+        if (!origAttr.has(el)) origAttr.set(el, {});
+        const o = origAttr.get(el);
+        o[a] ??= el.getAttribute(a);
+        el.setAttribute(a, swap(o[a]));
+      }
+    }
+    document.querySelectorAll("[data-lang]").forEach(b => { b.classList.toggle("on", b.dataset.lang === lang); b.setAttribute("aria-pressed", b.dataset.lang === lang); });
+  }
+
+  function set(l) {
+    if (l === lang) return;
+    lang = l;
+    try { localStorage.setItem(KEY, l); } catch { /* storage blocked → choice lasts until reload */ }
+    apply();
+    listeners.forEach(f => f(l));
+  }
+
+  function init() {
+    document.querySelectorAll("[data-lang]").forEach(b => { b.onclick = () => set(b.dataset.lang); });
+    apply();
+  }
+
+  return { t, num, set, init, add: d => Object.assign(EN, d), onChange: f => listeners.push(f), get lang() { return lang; } };
+})();
+const T = I18n.t;
+// English labels for the static markup (template + partials): buttons, options, tooltips, placeholders, hints.
+I18n.add({
+  "← Trang chủ": "← Home",
+  "Ngôn ngữ": "Language",
+  "Tác giả:": "Author:",
+  "Chuyển đổi": "Convert",
+  "Bảng CSV": "CSV table",
+  "So sánh": "Compare",
+  "Mở file…": "Open file…",
+  "Tự nhận diện": "Auto-detect",
+  "Định dạng": "Format",
+  "Thụt lề": "Indent",
+  "Thụt 2 dấu cách": "Indent 2 spaces",
+  "Thụt 3 dấu cách": "Indent 3 spaces",
+  "Thụt 4 dấu cách": "Indent 4 spaces",
+  "Thụt 8 dấu cách": "Indent 8 spaces",
+  "Thụt bằng Tab": "Indent with Tab",
+  "Chỉ áp dụng cho JSON": "JSON only",
+  "Sắp xếp khóa A→Z": "Sort keys A→Z",
+  "JSON bị stringify trong chuỗi (thường gặp trong log/Kafka) → mở ra thành object. Chỉ giải chuỗi đã là JSON hợp lệ.": "JSON stringified inside a string (common in logs/Kafka) → expanded into objects. Only strings that are valid JSON are decoded.",
+  "Giải chuỗi JSON lồng": "Decode nested JSON",
+  "Kiểm tra": "Validate",
+  "Format & sửa lỗi": "Format & fix",
+  "Thu gọn 1 dòng": "Minify",
+  "Thu gọn rồi bọc thành 1 chuỗi JSON (thoát \" và xuống dòng) để nhúng vào JSON/code khác": "Minify, then wrap as one JSON string (escaping \" and newlines) to embed in other JSON/code",
+  "Thành chuỗi JSON": "To JSON string",
+  "Xoá": "Clear",
+  "Thử file mẫu…": "Try a sample…",
+  "JSON lỗi": "Broken JSON",
+  "XML lỗi": "Broken XML",
+  "HTML lỗi": "Broken HTML",
+  "JSON lồng trong log": "Nested JSON in a log",
+  "Nội dung gốc": "Source",
+  "Dán JSON / XML / HTML vào đây…": "Paste JSON / XML / HTML here…",
+  "Kết quả": "Result",
+  "Văn bản": "Text",
+  "Cây dữ liệu": "Tree",
+  "Sao chép": "Copy",
+  "Tải về": "Download",
+  "Đưa kết quả sang ô bên trái để sửa tiếp": "Move the result to the left pane to keep editing",
+  "← Dùng kết quả": "← Use result",
+  "Bấm vào một dòng lỗi để nhảy tới vị trí đó. Tự sửa lỗi là “đoán” ý định ban đầu, nên luôn đọc lại danh sách thay đổi. Nháp được lưu trong trình duyệt của máy này.": "Click an error line to jump to it. Auto-fixing “guesses” the original intent, so always review the list of changes. Drafts are saved in this browser on this machine.",
+  "Từ": "From",
+  "Sang": "To",
+  "Đưa kết quả về ô nguồn và đảo chiều chuyển đổi": "Move the result back to the source and reverse the conversion",
+  "Bảng Markdown": "Markdown table",
+  "Bảng HTML": "HTML table",
+  "Thụt lề kết quả": "Output indent",
+  "Dấu phân cách CSV (đọc và ghi)": "CSV delimiter (read and write)",
+  "Dấu phân cách: tự nhận diện": "Delimiter: auto-detect",
+  "Dấu phẩy ,": "Comma ,",
+  "Chấm phẩy ;": "Semicolon ;",
+  "Dấu |": "Pipe |",
+  "Dòng đầu là tiêu đề": "First row is header",
+  "\"123\" → số, \"true\" → boolean. Số có 0 ở đầu (mã KH, số TK) vẫn giữ là chuỗi.": "\"123\" → number, \"true\" → boolean. Numbers with leading zeros (IDs, account numbers) stay strings.",
+  "Tự đoán kiểu số / true / false": "Infer numbers / true / false",
+  "Object lồng → cột \"a.b\"; đọc CSV thì cột \"a.b\" → object lồng": "Nested objects → column \"a.b\"; reading CSV, column \"a.b\" → nested object",
+  "Làm phẳng khóa lồng (a.b)": "Flatten nested keys (a.b)",
+  "XML: gốc": "XML: root",
+  "mục": "item",
+  "tiền tố thuộc tính": "attribute prefix",
+  "Hệ quản trị CSDL — quyết định cách đặt nháy tên cột, thoát chuỗi và giá trị boolean": "Database engine — decides column-name quoting, string escaping and boolean values",
+  "Tên bảng": "Table name",
+  "Thử dữ liệu mẫu…": "Try sample data…",
+  "Dữ liệu nguồn": "Source data",
+  "Dán JSON / CSV / TSV / XML / YAML vào đây…": "Paste JSON / CSV / TSV / XML / YAML here…",
+  "CSV/TSV tải về có BOM để Excel đọc đúng tiếng Việt": "Downloaded CSV/TSV includes a BOM so Excel reads Unicode correctly",
+  "JSON lỗi cú pháp vẫn chuyển được (tự sửa, có liệt kê). Số lớn / số tiền giữ nguyên từng chữ số. Tự chuyển khi gõ với dữ liệu dưới 500 KB.": "JSON with syntax errors still converts (auto-fixed, with a list). Big numbers / amounts keep every digit. Converts as you type for data under 500 KB.",
+  "Bảng mã của file — đổi để đọc lại file vừa mở": "File encoding — change it to re-read the opened file",
+  "Windows-1258 (tiếng Việt)": "Windows-1258 (Vietnamese)",
+  "Dấu phân cách — đổi để đọc lại dữ liệu (mất các chỗ đã sửa)": "Delimiter — change it to re-read the data (edits are lost)",
+  "Lọc hàng (chứa chữ)…": "Filter rows (contains)…",
+  "+ Hàng": "+ Row",
+  "+ Cột": "+ Column",
+  "Dán dữ liệu…": "Paste data…",
+  "Tải CSV": "Download CSV",
+  "Thêm BOM để Excel nhận đúng UTF-8 (tiếng Việt)": "Add a BOM so Excel detects UTF-8 correctly",
+  "BOM cho Excel": "BOM for Excel",
+  "Kiểu xuống dòng khi tải về": "Line endings for download",
+  "CSV có lỗi": "Broken CSV",
+  "Dán CSV / TSV (copy vùng ô từ Excel cũng được)…": "Paste CSV / TSV (a cell range copied from Excel works too)…",
+  "Nạp vào bảng": "Load into table",
+  "Mở file, kéo thả file vào trang, hoặc bấm “Dán dữ liệu…”.": "Open a file, drop one onto the page, or click “Paste data…”.",
+  "‹ Trước": "‹ Prev",
+  "Sau ›": "Next ›",
+  "Bấm vào ô hoặc tên cột để sửa · Enter xác nhận · Esc huỷ · ⇅ sắp xếp · × xoá hàng/cột. Mỗi trang 500 hàng, dùng ô lọc để thu hẹp. Bảng không lưu nháp — nhớ “Tải CSV” trước khi đóng tab.": "Click a cell or column name to edit · Enter confirms · Esc cancels · ⇅ sort · × delete row/column. 500 rows per page, use the filter to narrow down. The table is not saved as a draft — remember to “Download CSV” before closing the tab.",
+  "Cách so sánh": "Compare mode",
+  "Văn bản theo dòng": "Line-by-line text",
+  "JSON theo cấu trúc (bỏ qua thứ tự khóa)": "Structural JSON (ignores key order)",
+  "XML / HTML: format rồi so": "XML / HTML: format, then compare",
+  "Bỏ qua khoảng trắng": "Ignore whitespace",
+  "Không phân biệt hoa/thường": "Ignore case",
+  "Chỉ hiện vùng khác (±3 dòng)": "Only show changes (±3 lines)",
+  "⇄ Đổi bên": "⇄ Swap sides",
+  "↓ Chỗ khác tiếp theo": "↓ Next change",
+  "Thử mẫu…": "Try a sample…",
+  "JSON 2 phiên bản": "JSON, 2 versions",
+  "File cấu hình": "Config file",
+  "Bên trái (cũ)": "Left (old)",
+  "Bên phải (mới)": "Right (new)",
+  "Dán nội dung cũ…": "Paste the old content…",
+  "Dán nội dung mới…": "Paste the new content…",
+  "Dán 2 nội dung rồi bấm “So sánh”.": "Paste both contents, then click “Compare”.",
+  "JSON: so theo cấu trúc nên đổi thứ tự khóa không tính là khác; danh sách bên trên liệt kê từng đường dẫn thay đổi. Kéo thả file: vào bên trái nếu đang trống, ngược lại vào bên phải.": "JSON is compared by structure, so reordered keys are not a difference; the list above shows each changed path. Dropped files go to the left side if it is empty, otherwise to the right.",
+  "Vị trí dấu ngoặc {": "Brace position {",
+  "{ cùng dòng": "{ on the same line",
+  "{ xuống dòng riêng": "{ on its own line",
+  "Chỉ } xuống dòng riêng": "Only } on its own line",
+  "{ cùng dòng, giữ khối 1 dòng": "{ on the same line, keep one-line blocks",
+  "Số dòng trống liên tiếp được giữ lại": "Consecutive blank lines kept",
+  "Bỏ mọi dòng trống": "Remove all blank lines",
+  "Giữ tối đa 1 dòng trống": "Keep at most 1 blank line",
+  "Giữ tối đa 2 dòng trống": "Keep at most 2 blank lines",
+  "Giữ nguyên dòng trống": "Keep blank lines as is",
+  "Tự ngắt dòng dài": "Wrap long lines",
+  "Không tự ngắt dòng": "No line wrapping",
+  "Ngắt quanh 80 ký tự": "Wrap at ~80 characters",
+  "Ngắt quanh 120 ký tự": "Wrap at ~120 characters",
+  "Mỗi .method() một dòng": "One .method() per line",
+  "Đổi \\xNN, \\uNNNN in được thành ký tự thật": "Turn printable \\xNN, \\uNNNN into real characters",
+  "Giải \\xNN \\uNNNN": "Unescape \\xNN \\uNNNN",
+  "Bỏ chú thích và khoảng trắng thừa (chỉ CSS)": "Remove comments and extra whitespace (CSS only)",
+  "Thu gọn CSS": "Minify CSS",
+  "CSS 1 dòng": "One-line CSS",
+  "JS 1 dòng": "One-line JS",
+  "Mã gốc": "Source code",
+  "Dán CSS / SCSS / LESS / JavaScript vào đây…": "Paste CSS / SCSS / LESS / JavaScript here…",
+  "Đưa kết quả sang ô bên trái": "Move the result to the left pane",
+  "Format dùng js-beautify 1.15.1 (nhúng sẵn, không tải gì từ mạng). JS được trình duyệt kiểm tra cú pháp sau khi format (chỉ biên dịch, không chạy mã). Thu gọn JS chưa hỗ trợ.": "Formatting uses js-beautify 1.15.1 (embedded, nothing is downloaded). JS is syntax-checked by the browser after formatting (compiled only, never run). JS minify is not supported yet.",
+});
+// English status / info / report texts built by the tabs and shared panels, keyed by the Vietnamese source text.
+I18n.add({
+  "ket-qua": "result",
+  "Dòng {line}, cột {col}": "Line {line}, col {col}",
+  "Dòng {line}": "Line {line}",
+  "… và {n} mục nữa": "… and {n} more",
+  "Gửi kết quả sang…": "Send result to…",
+  "… còn nữa (cây chỉ hiển thị {n} nút đầu tiên)": "… more (the tree shows only the first {n} nodes)",
+  "Chưa có nội dung.": "No content yet.",
+  "✖ Không đọc được file {name}": "✖ Could not read file {name}",
+  "Đã sao chép kết quả.": "Result copied.",
+  "Trình duyệt chặn sao chép — hãy bôi đen kết quả rồi nhấn Ctrl+C.": "The browser blocked copying — select the result and press Ctrl+C.",
+  "dán nội dung hoặc kéo thả file vào đây": "paste content or drop a file here",
+  "dán mã hoặc kéo thả file vào đây": "paste code or drop a file here",
+  "Bấm “Format & sửa lỗi” để tự sửa.": "Click “Format & fix” to repair it.",
+  "Định dạng: {k}": "Format: {k}",
+  "✖ JSON bị lỗi cú pháp (dòng {line}, cột {col}).": "✖ JSON syntax error (line {line}, col {col}).",
+  "✔ JSON hợp lệ.": "✔ Valid JSON.",
+  "✖ XML bị lỗi cú pháp (dòng {line}, cột {col}).": "✖ XML syntax error (line {line}, col {col}).",
+  "✔ XML hợp lệ (well-formed).": "✔ Valid XML (well-formed).",
+  "⚠ HTML có {n} lỗi cấu trúc (trình duyệt vẫn hiển thị được nhưng nên sửa).": "⚠ HTML has {n} structural error(s) (browsers still render it, but it should be fixed).",
+  "✔ HTML có cấu trúc thẻ hợp lệ.": "✔ HTML tag structure is valid.",
+  "Đã giải {n} chuỗi JSON lồng thành object/mảng (theo tuỳ chọn)": "Decoded {n} nested JSON string(s) into objects/arrays (option enabled)",
+  "{nodes} nút · sâu {depth}": "{nodes} nodes · depth {depth}",
+  "{n} thẻ · sâu {depth}": "{n} tags · depth {depth}",
+  "✖ Không xử lý được: {msg}": "✖ Could not process: {msg}",
+  "kết quả {lines} dòng, {kb} KB (gốc {src} KB)": "result {lines} lines, {kb} KB (source {src} KB)",
+  "✔ Đã xử lý. Tự sửa {n} lỗi cú pháp, xem danh sách bên dưới và kiểm tra lại kết quả.": "✔ Done. Auto-fixed {n} syntax error(s) — see the list below and review the result.",
+  "✔ Đã xử lý. Nội dung gốc không có lỗi cú pháp.": "✔ Done. The source has no syntax errors.",
+  "bảng HTML": "HTML table",
+  "✖ Không đọc được dữ liệu: {msg}": "✖ Could not read the data: {msg}",
+  "{lines} dòng · {kb} KB": "{lines} lines · {kb} KB",
+  "✔ Đã chuyển {title}. Tự sửa {n} lỗi ở dữ liệu nguồn, xem danh sách bên dưới.": "✔ Converted {title}. Auto-fixed {n} error(s) in the source data — see the list below.",
+  "✔ Đã chuyển {title}.": "✔ Converted {title}.",
+  "Không thể đảo chiều: {what} không đọc ngược lại được.": "Cannot swap direction: {what} cannot be read back.",
+  "kết quả": "the result",
+  "Cột {n}": "Column {n}",
+  "Chưa có dữ liệu.": "No data yet.",
+  "✔ Đã nạp {n} hàng × {cols} cột · {delim}": "✔ Loaded {n} rows × {cols} columns · {delim}",
+  "Có {n} chỗ không chuẩn, xem bên dưới.": "{n} irregularities, see below.",
+  "Sắp xếp": "Sort",
+  "Xoá cột": "Delete column",
+  "Xoá hàng": "Delete row",
+  "Trang {n}/{total}": "Page {n}/{total}",
+  "{n} hàng × {cols} cột": "{n} rows × {cols} columns",
+  "lọc còn {n}": "{n} after filter",
+  "✖ Bảng CSV chỉ nhận JSON, XML, YAML, CSV hoặc TSV (đang gửi: {kind}).": "✖ The CSV table only accepts JSON, XML, YAML, CSV or TSV (sent: {kind}).",
+  "không rõ": "unknown",
+  "Dữ liệu nguồn: {msg}": "Source data: {msg}",
+  "✖ Không chuyển được sang bảng: {msg}": "✖ Could not convert to a table: {msg}",
+  "… {n} dòng giống nhau (bấm để hiện)": "… {n} identical lines (click to show)",
+  "theo dòng": "line-by-line",
+  "JSON theo cấu trúc": "structural JSON",
+  "XML/HTML đã format": "formatted XML/HTML",
+  "Chưa có nội dung để so sánh.": "Nothing to compare yet.",
+  "Bên {side}: tự sửa {n} lỗi cú pháp JSON trước khi so (xem ở tab Format)": "{side} side: auto-fixed {n} JSON syntax error(s) before comparing (see the Format tab)",
+  "Bên {side}: tự sửa {n} lỗi cấu trúc trước khi so": "{side} side: auto-fixed {n} structural error(s) before comparing",
+  "trái": "Left",
+  "phải": "Right",
+  "✖ Không đọc được nội dung ({msg}) — thử kiểu “Văn bản theo dòng”.": "✖ Could not read the content ({msg}) — try “Line-by-line text”.",
+  "✖ Hai bên khác nhau quá nhiều (hơn 3.000 chỗ) — hãy so từng phần nhỏ hơn.": "✖ The two sides differ too much (over 3,000 changes) — compare smaller parts.",
+  "Chỉ liệt kê {n} đường dẫn khác đầu tiên": "Only the first {n} changed paths are listed",
+  "≠ Có khác biệt (so {how}): {mod} dòng bị sửa, {del} dòng chỉ có bên trái, {ins} dòng chỉ có bên phải.": "≠ Differences found ({how} comparison): {mod} line(s) modified, {del} only on the left, {ins} only on the right.",
+  "✔ Hai bên giống nhau (so {how}).": "✔ Both sides are identical ({how} comparison).",
+  "Ngôn ngữ: {l}": "Language: {l}",
+  "{lines} dòng · {kb} KB (gốc {src} KB)": "{lines} lines · {kb} KB (source {src} KB)",
+  "✖ Không format được: {msg}": "✖ Could not format: {msg}",
+  "✔ Đã format CSS.": "✔ CSS formatted.",
+  "✔ Đã format JavaScript. Trình duyệt không thấy lỗi cú pháp.": "✔ JavaScript formatted. The browser found no syntax errors.",
+  "✔ Đã format JavaScript (bỏ qua kiểm tra cú pháp vì là {what}).": "✔ JavaScript formatted (syntax check skipped for {what}).",
+  "⚠ Đã format, nhưng trình duyệt báo lỗi cú pháp — kết quả có thể chưa đúng.": "⚠ Formatted, but the browser reports a syntax error — the result may be wrong.",
+  "✔ Đã thu gọn CSS, bỏ {n} chú thích.": "✔ CSS minified, {n} comment(s) removed.",
+  "✔ Đã thu gọn CSS.": "✔ CSS minified.",
+});
+// English auto-fix / conversion / diff messages from parsers and converters, keyed by the Vietnamese source text.
+I18n.add({
+  "Có {n} tài liệu YAML (ngăn bởi ---) → gộp thành một mảng": "{n} YAML documents (separated by ---) → merged into one array",
+  "Dấu phân cách tự nhận diện: {d}": "Detected delimiter: {d}",
+  "YAML không cho phép thụt bằng Tab → dùng 2 dấu cách": "YAML does not allow Tab indentation → using 2 spaces",
+  "{n} số giữ dạng chuỗi (số lớn hoặc có số 0 cuối) để không đổi giá trị": "{n} number(s) kept as strings (big or with trailing zeros) so the value is unchanged",
+  "Dùng mảng tại \"{path}\" làm các hàng": "Using the array at \"{path}\" as rows",
+  "Cột \"{key}\" bị trùng sau khi làm phẳng → đổi thành \"{k}\"": "Column \"{key}\" is duplicated after flattening → renamed to \"{k}\"",
+  "Bỏ khoảng trắng đầu/cuối ở tên cột": "Trimmed leading/trailing spaces in column names",
+  "Tiêu đề \"{base}\" bị trùng → đổi thành \"{n}\"": "Header \"{base}\" is duplicated → renamed to \"{n}\"",
+  "Cột \"{n}\" trùng tiền tố với cột khác → giữ nguyên tên, không tách thành object lồng": "Column \"{n}\" shares a prefix with another column → name kept, not split into a nested object",
+  "Khóa \"{k}\" bị trùng → khi chuyển đổi chỉ giữ giá trị sau": "Duplicate key \"{k}\" → only the last value is kept when converting",
+  "{n} chú thích": "{n} comment(s)",
+  "{n} khai báo <?…?>": "{n} <?…?> declaration(s)",
+  "Bỏ {list} (JSON không có chỗ chứa)": "Dropped {list} (JSON has no place for them)",
+  "Tên \"{k}\" không hợp lệ trong XML → \"{f}\"": "Name \"{k}\" is not valid in XML → \"{f}\"",
+  "Mảng lồng mảng ở <{name}> → mỗi mảng con bọc trong <{name}>, phần tử là <{item}>": "Nested array at <{name}> → each inner array wrapped in <{name}>, items as <{item}>",
+  "+ {path} thêm mới: {v}": "+ {path} added: {v}",
+  "− {path} bị xoá (giá trị cũ: {v})": "− {path} removed (old value: {v})",
+  "{n} phần tử": "{n} items",
+  "{n} khóa": "{n} keys",
+  "dấu phẩy": "comma",
+  "dấu chấm phẩy": "semicolon",
+  "dấu |": "pipe |",
+  "Có ký tự ngay sau dấu nháy đóng của ô → nối vào nội dung ô": "Characters right after a cell's closing quote → appended to the cell",
+  "Ô mở dấu nháy nhưng không có nháy đóng → tự đóng ở cuối file": "Cell opens a quote that is never closed → closed at end of file",
+  "Bỏ {n} dòng trống": "Skipped {n} blank line(s)",
+  "Hàng có {n} cột, hàng đầu có {w0} cột → {fix}": "Row has {n} columns, the first row has {w0} → {fix}",
+  "ô thiếu để trống": "missing cells left empty",
+  "thêm cột cho ô thừa": "extra cells get new columns",
+  "… và {n} chỗ không chuẩn khác (chỉ liệt kê 1.000 chỗ đầu)": "… and {n} more issues (only the first 1,000 are listed)",
+  "Bỏ chú thích (JSON không cho phép chú thích)": "Removed comment (JSON does not allow comments)",
+  "Bỏ chú thích /* */": "Removed /* */ comment",
+  "Chuỗi dùng nháy đơn → đổi sang nháy kép": "String uses single quotes → changed to double quotes",
+  "Chuỗi thiếu dấu đóng nháy → tự đóng ở cuối dòng": "String is missing its closing quote → closed at end of line",
+  "Ký tự thoát không hợp lệ \"\\{n}\" → giữ nguyên dấu \\": "Invalid escape \"\\{n}\" → backslash kept as \\",
+  "Ký tự Tab trong chuỗi → thay bằng \\t": "Tab character inside a string → replaced with \\t",
+  "Chuỗi chưa đóng đến cuối file → tự đóng": "String not closed before end of file → closed",
+  "Số không hợp lệ \"{orig}\" → null": "Invalid number \"{orig}\" → null",
+  "Số \"{orig}\" sai định dạng JSON → \"{raw}\"": "Number \"{orig}\" is not valid JSON → \"{raw}\"",
+  "Thiếu giá trị ở cuối file → null": "Missing value at end of file → null",
+  "\"{w}\" không có trong JSON → {lit}": "\"{w}\" does not exist in JSON → {lit}",
+  "Giá trị \"{w}\" chưa đặt trong nháy kép → chuyển thành chuỗi": "Value \"{w}\" is not in double quotes → converted to a string",
+  "Ký tự không hợp lệ \"{c}\" → bỏ qua": "Invalid character \"{c}\" → skipped",
+  "Thiếu dấu \"{close}\" để đóng \"{open}\" mở ở đây → tự thêm": "Missing \"{close}\" to close the \"{open}\" opened here → added",
+  "Dấu \"{c}\" không khớp với \"{open}\" → đổi thành \"{close}\"": "\"{c}\" does not match \"{open}\" → changed to \"{close}\"",
+  "Dấu phẩy thừa → bỏ": "Extra comma → removed",
+  "Dấu phẩy thừa trước dấu đóng → bỏ": "Trailing comma before closing bracket → removed",
+  "Thiếu dấu phẩy giữa hai phần tử → tự thêm": "Missing comma between two items → added",
+  "Tên khóa {k} chưa đặt trong nháy kép → thêm nháy": "Key {k} is not in double quotes → quoted",
+  "Dùng \"=\" thay cho \":\" → sửa": "\"=\" used instead of \":\" → fixed",
+  "Thiếu dấu \":\" sau khóa \"{k}\" → tự thêm": "Missing \":\" after key \"{k}\" → added",
+  "Khóa \"{k}\" bị trùng (giữ nguyên cả hai, nên kiểm tra lại)": "Duplicate key \"{k}\" (both kept, please review)",
+  "Nội dung trống": "Content is empty",
+  "Nội dung thừa sau giá trị gốc \"{s}…\" → bỏ": "Extra content after the root value \"{s}…\" → removed",
+  "Có {n} giá trị gốc liền nhau (kiểu NDJSON) → gộp thành một mảng": "{n} consecutive root values (NDJSON style) → merged into one array",
+  "Ký tự \"&\" chưa được thoát → &amp;": "Unescaped \"&\" → &amp;",
+  "Thẻ <{name}> chưa được đóng → tự đóng": "Tag <{name}> is not closed → closed",
+  "Ký tự \"<\" đứng riêng → &lt;": "Stray \"<\" → &lt;",
+  "{label} chưa đóng đến cuối file → tự đóng": "{label} not closed before end of file → closed",
+  "Chú thích <!--": "Comment <!--",
+  "Khối CDATA": "CDATA block",
+  "Khai báo <?": "Declaration <?",
+  "Thẻ đóng </{name}> thiếu dấu \">\" → tự thêm": "Closing tag </{name}> is missing \">\" → added",
+  "Thẻ </{name}> không cần thiết (thẻ rỗng) → bỏ": "Tag </{name}> is not needed (void element) → removed",
+  "Thẻ đóng </{name}> thừa, không có thẻ mở tương ứng → bỏ": "Closing tag </{name}> has no matching opening tag → removed",
+  " (gặp </{name}>)": " (at </{name}>)",
+  "Giá trị thuộc tính {an} thiếu dấu đóng nháy → tự đóng": "Value of attribute {an} is missing its closing quote → closed",
+  "Giá trị thuộc tính {an}={v} chưa đặt trong nháy → thêm nháy": "Attribute value {an}={v} is not quoted → quoted",
+  "Thuộc tính {an} chứa ký tự \"<\" → &lt;": "Attribute {an} contains \"<\" → &lt;",
+  "Thuộc tính {an} không có giá trị → {an}=\"{an}\"": "Attribute {an} has no value → {an}=\"{an}\"",
+  "Thuộc tính {an} bị trùng trong <{nm}> → bỏ bản sau": "Duplicate attribute {an} in <{nm}> → later one removed",
+  "Thẻ <{nm}> thiếu dấu \">\" → tự thêm": "Tag <{nm}> is missing \">\" → added",
+  "<{name}/> không hợp lệ trong HTML → <{name}></{name}>": "<{name}/> is not valid in HTML → <{name}></{name}>",
+  "Thẻ <{name}> chưa đóng → tự đóng ở cuối file": "Tag <{name}> is not closed → closed at end of file",
+  " (hết file)": " (end of file)",
+  "Không có phần tử XML nào → bọc nội dung trong <root>": "No XML element found → content wrapped in <root>",
+  "XML phải có đúng 1 phần tử gốc (đang có {n} và có chữ nằm ngoài) → bọc trong <root>": "XML must have exactly 1 root element (found {n}, plus text outside) → wrapped in <root>",
+  "XML phải có đúng 1 phần tử gốc (đang có {n}) → bọc trong <root>": "XML must have exactly 1 root element (found {n}) → wrapped in <root>",
+});
 // Pure text helpers shared by parsers and tabs (no DOM, so node tests can load them).
 const TextUtil = (() => {
   const stripBom = s => s.charCodeAt(0) === 0xfeff ? s.slice(1) : s;
@@ -341,7 +685,7 @@ const Dom = (() => {
     r.readAsText(file, encoding);
   }
 
-  const baseName = name => name ? name.replace(/(\.[^.]+)?$/, "") : "ket-qua";
+  const baseName = name => name ? name.replace(/(\.[^.]+)?$/, "") : T("ket-qua");
 
   return { esc, debounce, copy, download, readFile, baseName };
 })();
@@ -411,23 +755,23 @@ function ReportPanel(statusEl, listEl, editor = null) {
     const li = e.target.closest("li[data-line]");
     if (li && editor) editor.jump(+li.dataset.line);
   });
-  const where = x => x.line ? `<b>Dòng ${x.line}${x.col ? `, cột ${x.col}` : ""}</b> · ` : "";
+  const where = x => x.line ? `<b>${x.col ? T("Dòng {line}, cột {col}", x) : T("Dòng {line}", x)}</b> · ` : "";
   return {
     show(status, cls, items = []) {
       statusEl.className = "status " + cls;
       statusEl.textContent = status;
       listEl.innerHTML = items.slice(0, MAX).map(x => `<li${x.line ? ` data-line="${x.line}"` : ""}>${where(x)}${Dom.esc(x.msg)}</li>`).join("")
-        + (items.length > MAX ? `<li class="muted">… và ${items.length - MAX} mục nữa</li>` : "");
+        + (items.length > MAX ? `<li class="muted">${T("… và {n} mục nữa", { n: items.length - MAX })}</li>` : "");
       if (editor) editor.mark(items.map(x => x.line));
     },
   };
 }
-// Tab registry: lazy init on first open, ?tab= deep link, Ctrl+Enter → active tab's primary action, file drop → active tab.
+// Tab registry: lazy init on first open, ?tab= deep link, Ctrl+Enter → active tab's primary action, file drop → active tab, language switch → relang().
 const Workbench = (() => {
-  const tabs = {};
+  const tabs = {}, sendSelects = [];
   let active = "";
 
-  // def: { label, init(), primary?(), receive?(text, meta), onFile?(file), demo?(name) }
+  // def: { label, init(), primary?(), receive?(text, meta), onFile?(file), demo?(name), relang?() }
   const register = (id, def) => { tabs[id] = { ...def, ready: false }; };
 
   function show(id) {
@@ -451,9 +795,13 @@ const Workbench = (() => {
   }
 
   // Fills a <select> with every other tab that can receive data; getPayload() → { text, kind } | null.
+  const fillSendTo = (select, from) => {
+    select.innerHTML = `<option value="">${T("Gửi kết quả sang…")}</option>` + Object.entries(tabs)
+      .filter(([id, t]) => id !== from && t.receive).map(([id, t]) => `<option value="${id}">${T(t.label)}</option>`).join("");
+  };
   function bindSendTo(select, from, getPayload) {
-    select.innerHTML = `<option value="">Gửi kết quả sang…</option>` + Object.entries(tabs)
-      .filter(([id, t]) => id !== from && t.receive).map(([id, t]) => `<option value="${id}">${t.label}</option>`).join("");
+    sendSelects.push([select, from]);
+    fillSendTo(select, from);
     select.onchange = () => {
       const id = select.value;
       select.value = "";
@@ -463,6 +811,11 @@ const Workbench = (() => {
   }
 
   function start() {
+    I18n.init();
+    I18n.onChange(() => {
+      sendSelects.forEach(([select, from]) => fillSendTo(select, from));
+      Object.values(tabs).forEach(t => { if (t.ready && t.relang) t.relang(); });
+    });
     document.querySelectorAll("[data-wb-tab]").forEach(b => { b.onclick = () => show(b.dataset.wbTab); });
     document.addEventListener("keydown", e => {
       if ((e.ctrlKey || e.metaKey) && e.key === "Enter" && tabs[active].primary) { e.preventDefault(); tabs[active].primary(); }
@@ -555,8 +908,8 @@ const JsonTool = (() => {
     const ws = () => {
       for (;;) {
         while (i < s.length && /\s/.test(s[i])) i++;
-        if (s.startsWith("//", i) || s[i] === "#") { fix("Bỏ chú thích (JSON không cho phép chú thích)"); while (i < s.length && s[i] !== "\n") i++; }
-        else if (s.startsWith("/*", i)) { fix("Bỏ chú thích /* */"); const e = s.indexOf("*/", i + 2); i = e < 0 ? s.length : e + 2; }
+        if (s.startsWith("//", i) || s[i] === "#") { fix(T("Bỏ chú thích (JSON không cho phép chú thích)")); while (i < s.length && s[i] !== "\n") i++; }
+        else if (s.startsWith("/*", i)) { fix(T("Bỏ chú thích /* */")); const e = s.indexOf("*/", i + 2); i = e < 0 ? s.length : e + 2; }
         else return;
       }
     };
@@ -565,24 +918,24 @@ const JsonTool = (() => {
 
     function str() {
       const q = s[i], start = i;
-      if (q === "'") fix("Chuỗi dùng nháy đơn → đổi sang nháy kép");
+      if (q === "'") fix(T("Chuỗi dùng nháy đơn → đổi sang nháy kép"));
       i++;
       let out = "";
       while (i < s.length) {
         const c = s[i];
         if (c === q) { i++; return out; }
-        if (c === "\n" || c === "\r") { fix("Chuỗi thiếu dấu đóng nháy → tự đóng ở cuối dòng", start); return out; }
+        if (c === "\n" || c === "\r") { fix(T("Chuỗi thiếu dấu đóng nháy → tự đóng ở cuối dòng"), start); return out; }
         if (c === "\\") {
           const n = s[i + 1];
           const map = { n: "\n", t: "\t", r: "\r", b: "\b", f: "\f", "/": "/", "\\": "\\", '"': '"', "'": "'" };
           if (n === "u" && /^[0-9a-fA-F]{4}$/.test(s.substr(i + 2, 4))) { out += String.fromCharCode(parseInt(s.substr(i + 2, 4), 16)); i += 6; continue; }
           if (n in map) { out += map[n]; i += 2; continue; }
-          fix(`Ký tự thoát không hợp lệ "\\${n}" → giữ nguyên dấu \\`); out += "\\"; i++; continue;
+          fix(T('Ký tự thoát không hợp lệ "\\{n}" → giữ nguyên dấu \\', { n })); out += "\\"; i++; continue;
         }
-        if (c === "\t") fix("Ký tự Tab trong chuỗi → thay bằng \\t");
+        if (c === "\t") fix(T("Ký tự Tab trong chuỗi → thay bằng \\t"));
         out += c; i++;
       }
-      fix("Chuỗi chưa đóng đến cuối file → tự đóng", start);
+      fix(T("Chuỗi chưa đóng đến cuối file → tự đóng"), start);
       return out;
     }
 
@@ -599,15 +952,15 @@ const JsonTool = (() => {
       const orig = raw;
       if (/^[+\-]?0[xX]/.test(raw)) raw = String(parseInt(raw, 16));
       raw = raw.replace(/^\+/, "").replace(/^(-?)\./, "$10.").replace(/\.(?=$|[eE])/, "").replace(/^(-?)0+(?=\d)/, "$1");
-      if (!/^-?\d/.test(raw)) { fix(`Số không hợp lệ "${orig}" → null`); return { t: "lit", v: "null" }; }
-      if (raw !== orig) fix(`Số "${orig}" sai định dạng JSON → "${raw}"`);
+      if (!/^-?\d/.test(raw)) { fix(T('Số không hợp lệ "{orig}" → null', { orig })); return { t: "lit", v: "null" }; }
+      if (raw !== orig) fix(T('Số "{orig}" sai định dạng JSON → "{raw}"', { orig, raw }));
       return { t: "num", raw };
     }
 
     function value(depth) {
       ws();
       const c = s[i];
-      if (c === undefined) { fix("Thiếu giá trị ở cuối file → null"); return { t: "lit", v: "null" }; }
+      if (c === undefined) { fix(T("Thiếu giá trị ở cuối file → null")); return { t: "lit", v: "null" }; }
       if (c === "{") return obj(depth);
       if (c === "[") return arr(depth);
       if (c === '"' || c === "'") return { t: "str", v: str() };
@@ -616,11 +969,11 @@ const JsonTool = (() => {
         const at = i, w = word();
         const lit = { true: "true", false: "false", null: "null", True: "true", False: "false", None: "null",
                       undefined: "null", NaN: "null", Infinity: "null", TRUE: "true", FALSE: "false", NULL: "null" }[w];
-        if (lit) { if (lit !== w) fix(`"${w}" không có trong JSON → ${lit}`, at); return { t: "lit", v: lit }; }
-        fix(`Giá trị "${w}" chưa đặt trong nháy kép → chuyển thành chuỗi`, at);
+        if (lit) { if (lit !== w) fix(T('"{w}" không có trong JSON → {lit}', { w, lit }), at); return { t: "lit", v: lit }; }
+        fix(T('Giá trị "{w}" chưa đặt trong nháy kép → chuyển thành chuỗi', { w }), at);
         return { t: "str", v: w };
       }
-      fix(`Ký tự không hợp lệ "${c}" → bỏ qua`); i++;
+      fix(T('Ký tự không hợp lệ "{c}" → bỏ qua', { c })); i++;
       return value(depth);
     }
 
@@ -632,18 +985,18 @@ const JsonTool = (() => {
       for (;;) {
         ws();
         const c = s[i];
-        if (c === undefined) { fix(`Thiếu dấu "${close}" để đóng "${open}" mở ở đây → tự thêm`, start); return items; }
+        if (c === undefined) { fix(T('Thiếu dấu "{close}" để đóng "{open}" mở ở đây → tự thêm', { close, open }), start); return items; }
         if (c === close) { i++; return items; }
-        if (c === "}" || c === "]") { fix(`Dấu "${c}" không khớp với "${open}" → đổi thành "${close}"`); i++; return items; }
+        if (c === "}" || c === "]") { fix(T('Dấu "{c}" không khớp với "{open}" → đổi thành "{close}"', { c, open, close })); i++; return items; }
         if (c === ",") {
-          if (!needComma) fix("Dấu phẩy thừa → bỏ");
+          if (!needComma) fix(T("Dấu phẩy thừa → bỏ"));
           i++; ws();
-          if (s[i] === close) fix("Dấu phẩy thừa trước dấu đóng → bỏ", i - 1);
+          if (s[i] === close) fix(T("Dấu phẩy thừa trước dấu đóng → bỏ"), i - 1);
           needComma = false; continue;
         }
         if (needComma) {
-          if ((open === "{" && isKeyStart(c)) || (open === "[" && isValStart(c))) fix("Thiếu dấu phẩy giữa hai phần tử → tự thêm");
-          else { fix(`Ký tự không hợp lệ "${c}" → bỏ qua`); i++; continue; }
+          if ((open === "{" && isKeyStart(c)) || (open === "[" && isValStart(c))) fix(T("Thiếu dấu phẩy giữa hai phần tử → tự thêm"));
+          else { fix(T('Ký tự không hợp lệ "{c}" → bỏ qua', { c })); i++; continue; }
         }
         const it = readItem();
         if (it !== null) { items.push(it); needComma = true; }
@@ -655,29 +1008,29 @@ const JsonTool = (() => {
         let k;
         const at = i;
         if (s[i] === '"' || s[i] === "'") k = str();
-        else if (/[A-Za-z_$À-￿\d]/.test(s[i])) { k = s.slice(i).match(/^[^\s:=,{}\[\]"']+/)[0]; i += k.length; fix(`Tên khóa ${k} chưa đặt trong nháy kép → thêm nháy`, at); }
-        else { fix(`Ký tự không hợp lệ "${s[i]}" → bỏ qua`); i++; return null; }
+        else if (/[A-Za-z_$À-￿\d]/.test(s[i])) { k = s.slice(i).match(/^[^\s:=,{}\[\]"']+/)[0]; i += k.length; fix(T("Tên khóa {k} chưa đặt trong nháy kép → thêm nháy", { k }), at); }
+        else { fix(T('Ký tự không hợp lệ "{c}" → bỏ qua', { c: s[i] })); i++; return null; }
         ws();
         if (s[i] === ":") i++;
-        else if (s[i] === "=") { fix('Dùng "=" thay cho ":" → sửa'); i++; }
-        else fix(`Thiếu dấu ":" sau khóa "${k}" → tự thêm`);
+        else if (s[i] === "=") { fix(T('Dùng "=" thay cho ":" → sửa')); i++; }
+        else fix(T('Thiếu dấu ":" sau khóa "{k}" → tự thêm', { k }));
         return { k, v: value(depth + 1) };
       });
       const seen = new Set();
-      for (const it of items) if (it) { if (seen.has(it.k)) fixes.push({ line: 0, col: 0, msg: `Khóa "${it.k}" bị trùng (giữ nguyên cả hai, nên kiểm tra lại)` }); seen.add(it.k); }
+      for (const it of items) if (it) { if (seen.has(it.k)) fixes.push({ line: 0, col: 0, msg: T('Khóa "{k}" bị trùng (giữ nguyên cả hai, nên kiểm tra lại)', it) }); seen.add(it.k); }
       return { t: "obj", items: items.filter(Boolean) };
     }
     const arr = depth => ({ t: "arr", items: container("[", "]", depth, () => value(depth + 1)) });
 
     ws();
-    if (i >= s.length) throw new Error("Nội dung trống");
+    if (i >= s.length) throw new Error(T("Nội dung trống"));
     const roots = [value(0)];
     for (ws(); i < s.length; ws()) {
       if (s[i] === ",") { i++; continue; }
-      if (!isValStart(s[i])) { fix(`Nội dung thừa sau giá trị gốc "${s.slice(i, i + 20)}…" → bỏ`); break; }
+      if (!isValStart(s[i])) { fix(T('Nội dung thừa sau giá trị gốc "{s}…" → bỏ', { s: s.slice(i, i + 20) })); break; }
       roots.push(value(0));
     }
-    if (roots.length > 1) fix(`Có ${roots.length} giá trị gốc liền nhau (kiểu NDJSON) → gộp thành một mảng`, 0);
+    if (roots.length > 1) fix(T("Có {n} giá trị gốc liền nhau (kiểu NDJSON) → gộp thành một mảng", { n: roots.length }), 0);
     return { ast: roots.length > 1 ? { t: "arr", items: roots } : roots[0], fixes };
   }
 
@@ -756,13 +1109,13 @@ const MarkupTool = (() => {
     // HTML tolerates a bare "&" (browsers render it as-is), so only XML gets it escaped — and always reported.
     const escText = (t, at) => {
       if (html || !BARE_AMP.test(t)) return t;
-      fix(`Ký tự "&" chưa được thoát → &amp;`, at);
+      fix(T('Ký tự "&" chưa được thoát → &amp;'), at);
       return t.replace(BARE_AMP_ALL, "&amp;");
     };
     const closeTo = (idx, at, reason) => {
       while (stack.length - 1 > idx) {
         const n = stack.pop();
-        if (!(html && OPTIONAL_END.has(n.name))) fix(`Thẻ <${n.name}> chưa được đóng → tự đóng${reason}`, n.at);
+        if (!(html && OPTIONAL_END.has(n.name))) fix(T("Thẻ <{name}> chưa được đóng → tự đóng", n) + reason(), n.at);
       }
     };
     let i = 0;
@@ -772,14 +1125,14 @@ const MarkupTool = (() => {
         let j = s.indexOf("<", i + 1);
         while (j >= 0 && !/[A-Za-z_!?\/:]/.test(s[j + 1] || "")) j = s.indexOf("<", j + 1);
         const raw = s.slice(i, j < 0 ? s.length : j);
-        if (/<(?![A-Za-z_!?\/:])/.test(raw)) fix(`Ký tự "<" đứng riêng → &lt;`, at);
+        if (/<(?![A-Za-z_!?\/:])/.test(raw)) fix(T('Ký tự "<" đứng riêng → &lt;'), at);
         add({ text: escText(raw.replace(/<(?![A-Za-z_!?\/:])/g, "&lt;"), at) });
         i = j < 0 ? s.length : j;
         continue;
       }
       const grab = (endTok, label) => {
         const e = s.indexOf(endTok, i);
-        if (e < 0) { fix(`${label} chưa đóng đến cuối file → tự đóng`, at); i = s.length; return s.slice(at) + endTok; }
+        if (e < 0) { fix(T("{label} chưa đóng đến cuối file → tự đóng", { label: T(label) }), at); i = s.length; return s.slice(at) + endTok; }
         i = e + endTok.length; return s.slice(at, i);
       };
       if (s.startsWith("<!--", i)) { add({ comment: grab("-->", "Chú thích <!--") }); continue; }
@@ -793,12 +1146,12 @@ const MarkupTool = (() => {
       if (s[i + 1] === "/") {
         const m = s.slice(i).match(/^<\/\s*([^\s>\/<]*)\s*(>?)/);
         i += m[0].length;
-        if (!m[2]) fix(`Thẻ đóng </${m[1]}> thiếu dấu ">" → tự thêm`, at);
+        if (!m[2]) fix(T('Thẻ đóng </{name}> thiếu dấu ">" → tự thêm', { name: m[1] }), at);
         const name = norm(m[1]);
         let idx = -1;
         for (let k = stack.length - 1; k > 0; k--) if (stack[k].name === name) { idx = k; break; }
-        if (idx < 0) { fix(html && VOID.has(name) ? `Thẻ </${name}> không cần thiết (thẻ rỗng) → bỏ` : `Thẻ đóng </${m[1]}> thừa, không có thẻ mở tương ứng → bỏ`, at); continue; }
-        closeTo(idx, at, ` (gặp </${m[1]}>)`);
+        if (idx < 0) { fix(html && VOID.has(name) ? T("Thẻ </{name}> không cần thiết (thẻ rỗng) → bỏ", { name }) : T("Thẻ đóng </{name}> thừa, không có thẻ mở tương ứng → bỏ", { name: m[1] }), at); continue; }
+        closeTo(idx, at, () => T(" (gặp </{name}>)", { name: m[1] }));
         stack.pop();
         continue;
       }
@@ -823,26 +1176,26 @@ const MarkupTool = (() => {
           const qc = s[i];
           if (qc === '"' || qc === "'") {
             const e = s.indexOf(qc, i + 1), gt = s.indexOf(">", i + 1);
-            if (e < 0 || (gt >= 0 && s.slice(i + 1, e).includes("\n") && gt < e)) { fix(`Giá trị thuộc tính ${an} thiếu dấu đóng nháy → tự đóng`, aAt); const stop = gt < 0 ? s.length : gt; v = s.slice(i + 1, stop); i = stop; }
+            if (e < 0 || (gt >= 0 && s.slice(i + 1, e).includes("\n") && gt < e)) { fix(T("Giá trị thuộc tính {an} thiếu dấu đóng nháy → tự đóng", { an }), aAt); const stop = gt < 0 ? s.length : gt; v = s.slice(i + 1, stop); i = stop; }
             else { v = s.slice(i + 1, e); i = e + 1; }
           } else {
             const m = s.slice(i).match(/^[^\s>]*/)[0];
             v = m.replace(/\/$/, ""); i += v.length;
-            if (!html) fix(`Giá trị thuộc tính ${an}=${v} chưa đặt trong nháy → thêm nháy`, aAt);
+            if (!html) fix(T("Giá trị thuộc tính {an}={v} chưa đặt trong nháy → thêm nháy", { an, v }), aAt);
           }
-          if (/</.test(v) && !html) fix(`Thuộc tính ${an} chứa ký tự "<" → &lt;`, aAt);
+          if (/</.test(v) && !html) fix(T('Thuộc tính {an} chứa ký tự "<" → &lt;', { an }), aAt);
           v = escText(html ? v : v.replace(/</g, "&lt;"), aAt);
-        } else if (!html) { fix(`Thuộc tính ${an} không có giá trị → ${an}="${an}"`, aAt); v = an; }
-        if (attrs.some(a => a.n === an)) { fix(`Thuộc tính ${an} bị trùng trong <${nm}> → bỏ bản sau`, aAt); continue; }
+        } else if (!html) { fix(T('Thuộc tính {an} không có giá trị → {an}="{an}"', { an }), aAt); v = an; }
+        if (attrs.some(a => a.n === an)) { fix(T("Thuộc tính {an} bị trùng trong <{nm}> → bỏ bản sau", { an, nm }), aAt); continue; }
         attrs.push({ n: html ? an.toLowerCase() : an, v });
       }
-      if (!closed) fix(`Thẻ <${nm}> thiếu dấu ">" → tự thêm`, at);
+      if (!closed) fix(T('Thẻ <{nm}> thiếu dấu ">" → tự thêm', { nm }), at);
       if (html) {
         if (name === "p" || AUTO_CLOSE[name] || P_CLOSERS.has(name)) {
           const closes = name === "p" || P_CLOSERS.has(name) ? ["p", ...(AUTO_CLOSE[name] || [])] : AUTO_CLOSE[name];
           if (closes.includes(top().name)) stack.pop();
         }
-        if (self && !VOID.has(name)) fix(`<${name}/> không hợp lệ trong HTML → <${name}></${name}>`, at);
+        if (self && !VOID.has(name)) fix(T("<{name}/> không hợp lệ trong HTML → <{name}></{name}>", { name }), at);
         if (VOID.has(name)) self = true;
       }
       const node = { name, attrs, children: [], self, at };
@@ -851,17 +1204,18 @@ const MarkupTool = (() => {
       if (html && RAW.has(name) && name !== "pre") {
         const re = new RegExp(`</\\s*${name}\\s*>`, "i"), rest = s.slice(i), m = rest.match(re);
         node.raw = m ? rest.slice(0, m.index) : rest;
-        if (!m) fix(`Thẻ <${name}> chưa đóng → tự đóng ở cuối file`, at);
+        if (!m) fix(T("Thẻ <{name}> chưa đóng → tự đóng ở cuối file", { name }), at);
         i += m ? m.index + m[0].length : rest.length;
         continue;
       }
       stack.push(node);
     }
-    closeTo(0, s.length, " (hết file)");
+    closeTo(0, s.length, () => T(" (hết file)"));
     if (!html) {
       const els = root.children.filter(n => n.name), stray = root.children.filter(n => n.text && n.text.trim());
       if (els.length !== 1 || stray.length) {
-        fix(els.length ? `XML phải có đúng 1 phần tử gốc (đang có ${els.length}${stray.length ? " và có chữ nằm ngoài" : ""}) → bọc trong <root>` : "Không có phần tử XML nào → bọc nội dung trong <root>", 0);
+        fix(!els.length ? T("Không có phần tử XML nào → bọc nội dung trong <root>") : stray.length ? T("XML phải có đúng 1 phần tử gốc (đang có {n} và có chữ nằm ngoài) → bọc trong <root>", { n: els.length })
+          : T("XML phải có đúng 1 phần tử gốc (đang có {n}) → bọc trong <root>", { n: els.length }), 0);
         const head = root.children.filter(n => n.pi || n.doctype);
         root.children = [...head, { name: "root", attrs: [], children: root.children.filter(n => !n.pi && !n.doctype) }];
       }
@@ -975,7 +1329,7 @@ const CsvTool = (() => {
         if (c === '"' && s[i + 1] === '"') { field += '"'; i += 2; continue; }
         if (c === '"') {
           quoted = false; i++;
-          if (i < s.length && s[i] !== d && s[i] !== "\n" && s[i] !== "\r") fix("Có ký tự ngay sau dấu nháy đóng của ô → nối vào nội dung ô", line);
+          if (i < s.length && s[i] !== d && s[i] !== "\n" && s[i] !== "\r") fix(T("Có ký tự ngay sau dấu nháy đóng của ô → nối vào nội dung ô"), line);
           continue;
         }
         if (c === "\n") line++;
@@ -986,15 +1340,15 @@ const CsvTool = (() => {
       if (c === "\r" || c === "\n") { endRow(); i += c === "\r" && s[i + 1] === "\n" ? 2 : 1; line++; rowLine = line; continue; }
       field += c; i++;
     }
-    if (quoted) fix("Ô mở dấu nháy nhưng không có nháy đóng → tự đóng ở cuối file", quoteLine);
+    if (quoted) fix(T("Ô mở dấu nháy nhưng không có nháy đóng → tự đóng ở cuối file"), quoteLine);
     if (field !== "" || row.length) endRow();
-    if (blank) fix(`Bỏ ${blank} dòng trống`, 0);
+    if (blank) fix(T("Bỏ {n} dòng trống", { n: blank }), 0);
     const width = rows.reduce((w, r) => Math.max(w, r.length), 0);
     rows.forEach((r, k) => {
       const w0 = rows[0].length;
-      if (r.length !== w0) fix(`Hàng có ${r.length} cột, hàng đầu có ${w0} cột → ${r.length < w0 ? "ô thiếu để trống" : "thêm cột cho ô thừa"}`, rowLines[k]);
+      if (r.length !== w0) fix(T("Hàng có {n} cột, hàng đầu có {w0} cột → {fix}", { n: r.length, w0, fix: T(r.length < w0 ? "ô thiếu để trống" : "thêm cột cho ô thừa") }), rowLines[k]);
     });
-    if (dropped) fixes.push({ line: 0, col: 0, msg: `… và ${dropped} chỗ không chuẩn khác (chỉ liệt kê 1.000 chỗ đầu)` });
+    if (dropped) fixes.push({ line: 0, col: 0, msg: T("… và {n} chỗ không chuẩn khác (chỉ liệt kê 1.000 chỗ đầu)", { n: dropped }) });
     return { rows, fixes, delimiter: d, delimiterName: NAMES[d] || d, width };
   }
 
@@ -1065,7 +1419,7 @@ const ViewRender = (() => {
 
   function tree(model, kind, limit = 4000) {
     let count = 0;
-    const more = () => `<div class="muted">… còn nữa (cây chỉ hiển thị ${limit} nút đầu tiên)</div>`;
+    const more = () => `<div class="muted">${T("… còn nữa (cây chỉ hiển thị {n} nút đầu tiên)", { n: limit })}</div>`;
     const leaf = (k, v, cls) => `<div class="leaf">${k}${span(cls, v)}</div>`;
     function jnode(n, key) {
       if (++count > limit) return count === limit + 1 ? more() : "";
@@ -1073,7 +1427,7 @@ const ViewRender = (() => {
       if (n.t === "str") return leaf(k, JSON.stringify(n.v), "s");
       if (n.t === "num") return leaf(k, n.raw, "n");
       if (n.t === "lit") return leaf(k, n.v, "l");
-      const sum = n.t === "obj" ? `{ ${n.items.length} khóa }` : `[ ${n.items.length} phần tử ]`;
+      const sum = n.t === "obj" ? `{ ${T("{n} khóa", { n: n.items.length })} }` : `[ ${T("{n} phần tử", { n: n.items.length })} ]`;
       const inner = n.items.map((it, i) => n.t === "obj" ? jnode(it.v, JSON.stringify(it.k)) : jnode(it, String(i))).join("");
       return `<details ${count < 60 ? "open" : ""}><summary>${k}<span class="muted">${sum}</span></summary>${inner}</details>`;
     }
@@ -1110,7 +1464,7 @@ const Val = (() => {
     if (n.t === "arr") return n.items.map(x => fromAst(x, notes));
     const o = {};
     for (const it of n.items) {
-      if (notes && Object.hasOwn(o, it.k)) notes.push(`Khóa "${it.k}" bị trùng → khi chuyển đổi chỉ giữ giá trị sau`);
+      if (notes && Object.hasOwn(o, it.k)) notes.push(T('Khóa "{k}" bị trùng → khi chuyển đổi chỉ giữ giá trị sau', it));
       put(o, it.k, fromAst(it.v, notes));
     }
     return o;
@@ -1162,7 +1516,7 @@ const TableShape = (() => {
       if (arrs.length === 1) { path.push(arrs[0]); cur = cur[arrs[0]]; }
     }
     if (!Array.isArray(cur)) return [v];
-    if (path.length) notes.push(`Dùng mảng tại "${path.join(".")}" làm các hàng`);
+    if (path.length) notes.push(T('Dùng mảng tại "{path}" làm các hàng', { path: path.join(".") }));
     return cur;
   }
 
@@ -1174,7 +1528,7 @@ const TableShape = (() => {
     }
     let k = key;
     for (let i = 2; row.has(k); i++) k = `${key}_${i}`;
-    if (k !== key) notes.add(`Cột "${key}" bị trùng sau khi làm phẳng → đổi thành "${k}"`);
+    if (k !== key) notes.add(T('Cột "{key}" bị trùng sau khi làm phẳng → đổi thành "{k}"', { key, k }));
     row.set(k, Val.isScalar(v) ? v : asJson(v));
   }
 
@@ -1209,12 +1563,12 @@ const TableShape = (() => {
     const [head = [], ...body] = rows, notes = [];
     const width = body.reduce((w, r) => Math.max(w, r.length), head.length);
     const taken = new Set();
-    if (head.some(h => h !== h.trim())) notes.push("Bỏ khoảng trắng đầu/cuối ở tên cột");
+    if (head.some(h => h !== h.trim())) notes.push(T("Bỏ khoảng trắng đầu/cuối ở tên cột"));
     const names = Array.from({ length: width }, (_, i) => {
       const base = (head[i] || "").trim() || `col${i + 1}`;
       let n = base;
       for (let k = 2; taken.has(n); k++) n = `${base}_${k}`;
-      if (n !== base) notes.push(`Tiêu đề "${base}" bị trùng → đổi thành "${n}"`);
+      if (n !== base) notes.push(T('Tiêu đề "{base}" bị trùng → đổi thành "{n}"', { base, n }));
       taken.add(n);
       return n;
     });
@@ -1222,7 +1576,7 @@ const TableShape = (() => {
     const nestable = n => {
       if (!unflatten || !n.includes(".") || n.startsWith(".") || n.endsWith(".")) return false;
       const parts = n.split(".");
-      for (let i = 1; i < parts.length; i++) if (taken.has(parts.slice(0, i).join("."))) { notes.push(`Cột "${n}" trùng tiền tố với cột khác → giữ nguyên tên, không tách thành object lồng`); return false; }
+      for (let i = 1; i < parts.length; i++) if (taken.has(parts.slice(0, i).join("."))) { notes.push(T('Cột "{n}" trùng tiền tố với cột khác → giữ nguyên tên, không tách thành object lồng', { n })); return false; }
       return true;
     };
     const nested = names.map(nestable);
@@ -1257,8 +1611,8 @@ const XmlMap = (() => {
   function droppedNotes(root) {
     const n = { comment: 0, pi: 0, doctype: 0 };
     (function walk(x) { for (const k in n) if (x[k]) n[k]++; (x.children || []).forEach(walk); })(root);
-    const parts = [n.comment && `${n.comment} chú thích`, n.pi && `${n.pi} khai báo <?…?>`, n.doctype && `${n.doctype} DOCTYPE`].filter(Boolean);
-    return parts.length ? [`Bỏ ${parts.join(", ")} (JSON không có chỗ chứa)`] : [];
+    const parts = [n.comment && T("{n} chú thích", { n: n.comment }), n.pi && T("{n} khai báo <?…?>", { n: n.pi }), n.doctype && `${n.doctype} DOCTYPE`].filter(Boolean);
+    return parts.length ? [T("Bỏ {list} (JSON không có chỗ chứa)", { list: parts.join(", ") })] : [];
   }
 
   function fromXml(text,{ attrPrefix = "@", infer = true } = {}) {
@@ -1294,7 +1648,7 @@ const XmlMap = (() => {
       if (NAME_OK.test(k)) return k;
       let f = k.replace(/[^\w.\-À-￿]/g, "_");
       if (!/^[A-Za-z_À-￿]/.test(f)) f = "_" + f;
-      notes.add(`Tên "${k}" không hợp lệ trong XML → "${f}"`);
+      notes.add(T('Tên "{k}" không hợp lệ trong XML → "{f}"', { k, f }));
       return f;
     };
     function node(name, v, lvl) {
@@ -1302,7 +1656,7 @@ const XmlMap = (() => {
       if (Array.isArray(v)) {
         v.forEach(x => {
           if (!Array.isArray(x)) return node(name, x, lvl);
-          notes.add(`Mảng lồng mảng ở <${name}> → mỗi mảng con bọc trong <${name}>, phần tử là <${item}>`);
+          notes.add(T("Mảng lồng mảng ở <{name}> → mỗi mảng con bọc trong <{name}>, phần tử là <{item}>", { name, item }));
           node(name, { [item]: x }, lvl);
         });
         return;
@@ -1353,8 +1707,8 @@ const Writers = (() => {
   function yaml(v, indent, notes) {
     const counter = {};
     const text = jsyaml.dump(Val.toPlain(v, counter), { indent: indent === "\t" ? 2 : indent.length || 2, lineWidth: -1, noRefs: true });
-    if (indent === "\t") notes.push("YAML không cho phép thụt bằng Tab → dùng 2 dấu cách");
-    if (counter.keptAsText) notes.push(`${counter.keptAsText} số giữ dạng chuỗi (số lớn hoặc có số 0 cuối) để không đổi giá trị`);
+    if (indent === "\t") notes.push(T("YAML không cho phép thụt bằng Tab → dùng 2 dấu cách"));
+    if (counter.keptAsText) notes.push(T("{n} số giữ dạng chuỗi (số lớn hoặc có số 0 cuối) để không đổi giá trị", { n: counter.keptAsText }));
     return text.replace(/\n$/, "");
   }
 
@@ -1410,11 +1764,11 @@ const Convert = (() => {
       let docs;
       try { docs = jsyaml.loadAll(TextUtil.stripBom(text), null, { schema: jsyaml.CORE_SCHEMA }); }
       catch (e) { const err = new Error(e.reason || e.message); err.line = e.mark ? e.mark.line + 1 : 0; err.col = e.mark ? e.mark.column + 1 : 0; throw err; }
-      if (docs.length > 1) notes.push(`Có ${docs.length} tài liệu YAML (ngăn bởi ---) → gộp thành một mảng`);
+      if (docs.length > 1) notes.push(T("Có {n} tài liệu YAML (ngăn bởi ---) → gộp thành một mảng", { n: docs.length }));
       return { value: docs.length === 1 ? Val.fromPlain(docs[0]) : docs.map(Val.fromPlain), fixes: [] };
     }
     const p = CsvTool.parse(text, from === "tsv" ? "\t" : o.delimiter === "auto" ? "" : o.delimiter);
-    if (from === "csv" && o.delimiter === "auto") notes.push(`Dấu phân cách tự nhận diện: ${p.delimiterName}`);
+    if (from === "csv" && o.delimiter === "auto") notes.push(T("Dấu phân cách tự nhận diện: {d}", { d: T(p.delimiterName) }));
     const t = TableShape.fromTable(p.rows, { header: o.header, infer: o.infer, unflatten: o.flatten });
     notes.push(...t.notes);
     return { value: t.value, fixes: p.fixes };
@@ -1499,7 +1853,7 @@ const JsonDiff = (() => {
   }
   const keyPath = (p, k) => /^[A-Za-z_$][\w$]*$/.test(k) ? `${p}.${k}` : `${p}[${JSON.stringify(k)}]`;
   const show = v => {
-    const t = Val.isScalar(v) ? JsonTool.stringify(Val.toAst(v), "") : Array.isArray(v) ? `[${v.length} phần tử]` : `{${Object.keys(v).length} khóa}`;
+    const t = Val.isScalar(v) ? JsonTool.stringify(Val.toAst(v), "") : Array.isArray(v) ? `[${T("{n} phần tử", { n: v.length })}]` : `{${T("{n} khóa", { n: Object.keys(v).length })}}`;
     return t.length > 80 ? t.slice(0, 77) + "…" : t;
   };
 
@@ -1524,8 +1878,8 @@ const JsonDiff = (() => {
     return out.slice(0, max);
   }
 
-  const describe = d => d.type === "add" ? `+ ${d.path} thêm mới: ${show(d.b)}`
-    : d.type === "del" ? `− ${d.path} bị xoá (giá trị cũ: ${show(d.a)})` : `~ ${d.path}: ${show(d.a)} → ${show(d.b)}`;
+  const describe = d => d.type === "add" ? T("+ {path} thêm mới: {v}", { path: d.path, v: show(d.b) })
+    : d.type === "del" ? T("− {path} bị xoá (giá trị cũ: {v})", { path: d.path, v: show(d.a) }) : `~ ${d.path}: ${show(d.a)} → ${show(d.b)}`;
 
   return { compare, describe };
 })();
@@ -1565,30 +1919,32 @@ const DEMOS = {
 (() => {
   const KIND_LABEL = { json: "JSON", xml: "XML", html: "HTML" };
   const HINT = "Bấm “Format & sửa lỗi” để tự sửa.";
-  let ed, report, fileName = "", lastOut = "", lastKind = "";
+  let ed, report, fileName = "", lastOut = "", lastKind = "", redo = () => check();
 
   const kind = () => $("fmt-kind").value === "auto" ? Detect.markup(ed.value, fileName) : $("fmt-kind").value;
 
   function check() {
     const text = ed.value, k = kind();
-    $("fmt-kind-now").textContent = text.trim() ? `Định dạng: ${KIND_LABEL[k]}` : "";
-    if (!text.trim()) return report.show("Chưa có nội dung.", "muted");
+    redo = check;
+    $("fmt-kind-now").textContent = text.trim() ? T("Định dạng: {k}", { k: KIND_LABEL[k] }) : "";
+    if (!text.trim()) return report.show(T("Chưa có nội dung."), "muted");
     if (k === "json") {
       const e = JsonTool.check(text);
-      return report.show(e ? `✖ JSON bị lỗi cú pháp (dòng ${e.line}, cột ${e.col}). ${HINT}` : "✔ JSON hợp lệ.", e ? "bad" : "good", e ? [e] : []);
+      return report.show(e ? `${T("✖ JSON bị lỗi cú pháp (dòng {line}, cột {col}).", e)} ${T(HINT)}` : T("✔ JSON hợp lệ."), e ? "bad" : "good", e ? [e] : []);
     }
     if (k === "xml") {
       const e = MarkupTool.checkXml(text);
-      return report.show(e ? `✖ XML bị lỗi cú pháp (dòng ${e.line}, cột ${e.col}). ${HINT}` : "✔ XML hợp lệ (well-formed).", e ? "bad" : "good", e ? [e] : []);
+      return report.show(e ? `${T("✖ XML bị lỗi cú pháp (dòng {line}, cột {col}).", e)} ${T(HINT)}` : T("✔ XML hợp lệ (well-formed)."), e ? "bad" : "good", e ? [e] : []);
     }
     const { fixes } = MarkupTool.build(text, true);
-    report.show(fixes.length ? `⚠ HTML có ${fixes.length} lỗi cấu trúc (trình duyệt vẫn hiển thị được nhưng nên sửa).` : "✔ HTML có cấu trúc thẻ hợp lệ.", fixes.length ? "warn" : "good", fixes);
+    report.show(fixes.length ? T("⚠ HTML có {n} lỗi cấu trúc (trình duyệt vẫn hiển thị được nhưng nên sửa).", { n: fixes.length }) : T("✔ HTML có cấu trúc thẻ hợp lệ."), fixes.length ? "warn" : "good", fixes);
   }
 
   // mode: "pretty" | "min" | "escape" (minified output wrapped as one JSON string literal)
   function run(mode) {
     const text = ed.value, k = kind(), indent = TextUtil.indentUnit($("fmt-indent").value);
     if (!text.trim()) return check();
+    redo = () => run(mode);
     let out, model, stat, fixes = [];
     const notes = [];
     try {
@@ -1598,37 +1954,39 @@ const DEMOS = {
         if ($("fmt-nested").checked) {
           const d = JsonAst.decodeNested(model);
           model = d.ast;
-          if (d.count) notes.push({ line: 0, msg: `Đã giải ${d.count} chuỗi JSON lồng thành object/mảng (theo tuỳ chọn)` });
+          if (d.count) notes.push({ line: 0, msg: T("Đã giải {n} chuỗi JSON lồng thành object/mảng (theo tuỳ chọn)", { n: d.count }) });
         }
         if ($("fmt-sort").checked) model = JsonAst.sortKeys(model);
         out = JsonTool.stringify(model, mode === "pretty" ? indent : "");
         const s = JsonAst.stats(model);
-        stat = `${s.nodes.toLocaleString("vi")} nút · sâu ${s.depth}`;
+        stat = T("{nodes} nút · sâu {depth}", { nodes: I18n.num(s.nodes), depth: s.depth });
       } else {
         const html = k === "html", r = MarkupTool.build(text, html);
         fixes = r.fixes; model = r.root;
         out = mode === "pretty" ? MarkupTool.serialize(model, indent, html) : MarkupTool.minify(model, html);
         const s = MarkupTool.stats(model);
-        stat = `${s.elements.toLocaleString("vi")} thẻ · sâu ${s.depth}`;
+        stat = T("{n} thẻ · sâu {depth}", { n: I18n.num(s.elements), depth: s.depth });
       }
-    } catch (e) { return report.show("✖ Không xử lý được: " + e.message, "bad"); }
+    } catch (e) { return report.show(T("✖ Không xử lý được: {msg}", { msg: e.message }), "bad"); }
     if (mode === "escape") out = JSON.stringify(out);
     lastOut = out; lastKind = mode === "escape" ? "json" : k;
     $("fmt-out").innerHTML = ViewRender.highlight(out, lastKind);
     $("fmt-tree").innerHTML = ViewRender.tree(model, k);
-    $("fmt-info").textContent = `${KIND_LABEL[k]} · ${stat} · kết quả ${TextUtil.countLines(out).toLocaleString("vi")} dòng, ${TextUtil.sizeKb(out)} KB (gốc ${TextUtil.sizeKb(text)} KB)`;
-    report.show(fixes.length ? `✔ Đã xử lý. Tự sửa ${fixes.length} lỗi cú pháp, xem danh sách bên dưới và kiểm tra lại kết quả.`
-                             : "✔ Đã xử lý. Nội dung gốc không có lỗi cú pháp.", fixes.length ? "warn" : "good", [...fixes, ...notes]);
+    $("fmt-info").textContent = `${KIND_LABEL[k]} · ${stat} · ` + T("kết quả {lines} dòng, {kb} KB (gốc {src} KB)", { lines: I18n.num(TextUtil.countLines(out)), kb: TextUtil.sizeKb(out), src: TextUtil.sizeKb(text) });
+    report.show(fixes.length ? T("✔ Đã xử lý. Tự sửa {n} lỗi cú pháp, xem danh sách bên dưới và kiểm tra lại kết quả.", { n: fixes.length })
+                             : T("✔ Đã xử lý. Nội dung gốc không có lỗi cú pháp."), fixes.length ? "warn" : "good", [...fixes, ...notes]);
   }
+
+  const showName = () => { $("fmt-fname").textContent = fileName || T("dán nội dung hoặc kéo thả file vào đây"); };
 
   function load(name, text) {
     fileName = name;
     ed.set(text);
-    $("fmt-fname").textContent = name || "dán nội dung hoặc kéo thả file vào đây";
+    showName();
     check();
   }
 
-  const onFile = f => Dom.readFile(f, (name, text) => text === null ? report.show(`✖ Không đọc được file ${name}`, "bad") : load(name, text));
+  const onFile = f => Dom.readFile(f, (name, text) => text === null ? report.show(T("✖ Không đọc được file {name}", { name }), "bad") : load(name, text));
 
   function demo(name) {
     const d = DEMOS.format[name];
@@ -1655,7 +2013,7 @@ const DEMOS = {
     $("fmt-clear").onclick = clear;
     $("fmt-kind").onchange = check;
     $("fmt-copy").onclick = () => lastOut && Dom.copy(lastOut).then(ok => {
-      $("fmt-info").textContent = ok ? "Đã sao chép kết quả." : "Trình duyệt chặn sao chép — hãy bôi đen kết quả rồi nhấn Ctrl+C.";
+      $("fmt-info").textContent = ok ? T("Đã sao chép kết quả.") : T("Trình duyệt chặn sao chép — hãy bôi đen kết quả rồi nhấn Ctrl+C.");
     });
     $("fmt-use").onclick = () => { if (lastOut) { ed.set(lastOut); check(); } };
     $("fmt-save").onclick = () => {
@@ -1678,11 +2036,13 @@ const DEMOS = {
     label: "Format JSON · XML · HTML", init, onFile, demo,
     primary: () => run("pretty"),
     receive: (text, meta) => { load("", text); if (KIND_LABEL[meta.kind]) run("pretty"); },
+    relang: () => { showName(); redo(); },
   });
 })();
 // Tab "Chuyển đổi": JSON / CSV / TSV / XML / YAML → JSON, CSV, TSV, XML, YAML, JS object, SQL INSERT, Markdown / HTML table.
 (() => {
   const LABEL = { json: "JSON", csv: "CSV", tsv: "TSV", xml: "XML", yaml: "YAML", js: "JS object", sql: "SQL", markdown: "Markdown", html: "bảng HTML" };
+  const label = k => T(LABEL[k]);
   const FROM = Convert.FROM;
   const DEMO_TO = { json: "csv", csv: "json", xml: "json", yaml: "json" };
   const AUTO_LIMIT = 500 * 1024;
@@ -1710,30 +2070,32 @@ const DEMOS = {
     const text = ed.value, to = $("cv-to").value;
     detected = text.trim() ? Detect.data(text, fileName) : "";
     refreshOptions();
-    if (!text.trim()) return report.show("Chưa có nội dung.", "muted");
+    if (!text.trim()) return report.show(T("Chưa có nội dung."), "muted");
     let r;
     try { r = Convert.run(text, $("cv-from").value, to, opts()); }
-    catch (e) { return report.show(`✖ Không đọc được dữ liệu: ${e.message}`, "bad", e.line ? [{ line: e.line, col: e.col, msg: e.message }] : []); }
+    catch (e) { return report.show(T("✖ Không đọc được dữ liệu: {msg}", { msg: e.message }), "bad", e.line ? [{ line: e.line, col: e.col, msg: e.message }] : []); }
     lastOut = r.out; lastTo = to;
     $("cv-out").innerHTML = ViewRender.highlight(r.out, ["json", "xml", "html"].includes(to) ? to : "");
-    $("cv-info").textContent = `${LABEL[r.from]} → ${LABEL[to]} · ${TextUtil.countLines(r.out).toLocaleString("vi")} dòng · ${TextUtil.sizeKb(r.out)} KB`;
-    const title = `${LABEL[r.from]} → ${LABEL[to]}`;
-    report.show(r.fixes.length ? `✔ Đã chuyển ${title}. Tự sửa ${r.fixes.length} lỗi ở dữ liệu nguồn, xem danh sách bên dưới.` : `✔ Đã chuyển ${title}.`,
+    const title = `${label(r.from)} → ${label(to)}`;
+    $("cv-info").textContent = `${title} · ` + T("{lines} dòng · {kb} KB", { lines: I18n.num(TextUtil.countLines(r.out)), kb: TextUtil.sizeKb(r.out) });
+    report.show(r.fixes.length ? T("✔ Đã chuyển {title}. Tự sửa {n} lỗi ở dữ liệu nguồn, xem danh sách bên dưới.", { title, n: r.fixes.length }) : T("✔ Đã chuyển {title}.", { title }),
       r.fixes.length ? "warn" : "good", [...r.fixes, ...r.notes.map(msg => ({ line: 0, msg }))]);
   }
+
+  const showName = () => { $("cv-fname").textContent = fileName || T("dán nội dung hoặc kéo thả file vào đây"); };
 
   function load(name, text, from = "auto") {
     fileName = name;
     $("cv-from").value = from;
     ed.set(text);
-    $("cv-fname").textContent = name || "dán nội dung hoặc kéo thả file vào đây";
+    showName();
     run();
   }
 
-  const onFile = f => Dom.readFile(f, (name, text) => text === null ? report.show(`✖ Không đọc được file ${name}`, "bad") : load(name, text));
+  const onFile = f => Dom.readFile(f, (name, text) => text === null ? report.show(T("✖ Không đọc được file {name}", { name }), "bad") : load(name, text));
 
   function swap() {
-    if (!lastOut || !FROM.includes(lastTo)) return report.show(`Không thể đảo chiều: ${LABEL[lastTo] || "kết quả"} không đọc ngược lại được.`, "muted");
+    if (!lastOut || !FROM.includes(lastTo)) return report.show(T("Không thể đảo chiều: {what} không đọc ngược lại được.", { what: LABEL[lastTo] ? label(lastTo) : T("kết quả") }), "muted");
     const prevFrom = $("cv-from").value === "auto" ? detected : $("cv-from").value;
     $("cv-to").value = prevFrom;
     load("", lastOut, lastTo);
@@ -1756,7 +2118,7 @@ const DEMOS = {
     document.querySelectorAll('[data-wb-panel="convert"] .toolbar select:not(#cv-demo), [data-wb-panel="convert"] .toolbar input:not([type=file])')
       .forEach(el => el.addEventListener("change", () => { if (ed.value.length < AUTO_LIMIT) run(); else refreshOptions(); }));
     $("cv-copy").onclick = () => lastOut && Dom.copy(lastOut).then(ok => {
-      $("cv-info").textContent = ok ? "Đã sao chép kết quả." : "Trình duyệt chặn sao chép — hãy bôi đen kết quả rồi nhấn Ctrl+C.";
+      $("cv-info").textContent = ok ? T("Đã sao chép kết quả.") : T("Trình duyệt chặn sao chép — hãy bôi đen kết quả rồi nhấn Ctrl+C.");
     });
     $("cv-save").onclick = () => {
       if (!lastOut) return;
@@ -1771,6 +2133,7 @@ const DEMOS = {
   Workbench.register("convert", {
     label: "Chuyển đổi", init, onFile, demo, primary: run,
     receive: (text, meta) => load("", text, FROM.includes(meta.kind) ? meta.kind : "auto"),
+    relang: () => { showName(); run(); },
   });
 })();
 // Tab "Bảng CSV": view/edit CSV-TSV in a grid — encoding, delimiter sniffing, sort, filter, edit cells, add/remove rows & columns, export.
@@ -1778,13 +2141,14 @@ const DEMOS = {
   const PAGE = 500, DECIMAL = /^-?\d+(\.\d+)?$/, NUMERIC_CELL = /^-?\d+(?:[.,]\d+)*$/;
   const collator = new Intl.Collator("vi", { numeric: true, sensitivity: "base" });
   let report, head = [], rows = [], sort = { col: -1, dir: 1 }, page = 0, editBefore = "";
-  let lastFile = null, lastText = "", fileName = "", delimUsed = ",";
+  let lastFile = null, lastText = "", fileName = "", delimUsed = ",", lastShow = () => {};
 
   const delimSel = () => ({ auto: "", tab: "\t" }[$("csv-delim").value] ?? $("csv-delim").value);
-  const genHead = n => Array.from({ length: n }, (_, i) => `Cột ${i + 1}`);
+  const genHead = n => Array.from({ length: n }, (_, i) => T("Cột {n}", { n: i + 1 }));
   const cmp = (a = "", b = "") => DECIMAL.test(a.trim()) && DECIMAL.test(b.trim()) ? a - b : collator.compare(a, b);
 
-  function loadText(text, name = "", extra = []) {
+  // On a language switch lastShow re-parses the source only to re-word the report; grid edits are kept.
+  function loadText(text, name = "", extra = () => []) {
     fileName = name; lastText = text;
     const p = CsvTool.parse(text, delimSel());
     delimUsed = p.delimiter;
@@ -1792,9 +2156,13 @@ const DEMOS = {
     if ($("csv-header").checked && all.length) { head = all[0]; rows = all.slice(1); } else { head = genHead(p.width); rows = all; }
     sort = { col: -1, dir: 1 }; page = 0; $("csv-filter").value = "";
     render();
-    if (!text.trim()) return report.show("Chưa có dữ liệu.", "muted");
-    report.show(`✔ Đã nạp ${rows.length.toLocaleString("vi")} hàng × ${head.length} cột · ${p.delimiterName}${name ? " · " + name : ""}.`
-      + (p.fixes.length ? ` Có ${p.fixes.length} chỗ không chuẩn, xem bên dưới.` : ""), p.fixes.length || extra.length ? "warn" : "good", [...extra, ...p.fixes]);
+    const n = rows.length, cols = head.length, delimiter = delimSel();
+    lastShow = (q = CsvTool.parse(text, delimiter), ex = extra(true)) => {
+      if (!text.trim()) return report.show(T("Chưa có dữ liệu."), "muted");
+      report.show(T("✔ Đã nạp {n} hàng × {cols} cột · {delim}", { n: I18n.num(n), cols, delim: T(q.delimiterName) }) + (name ? " · " + name : "") + "."
+        + (q.fixes.length ? " " + T("Có {n} chỗ không chuẩn, xem bên dưới.", { n: q.fixes.length }) : ""), q.fixes.length || ex.length ? "warn" : "good", [...ex, ...q.fixes]);
+    };
+    lastShow(p, extra(false));
   }
 
   function viewIdx() {
@@ -1812,15 +2180,17 @@ const DEMOS = {
     const shown = idx.slice(page * PAGE, (page + 1) * PAGE);
     const numCol = head.map((_, c) => shown.some(r => rows[r][c]) && shown.every(r => !rows[r][c] || NUMERIC_CELL.test(rows[r][c].trim())));
     const arrow = c => sort.col !== c ? "⇅" : sort.dir > 0 ? "▲" : "▼";
+    const tip = { sort: T("Sắp xếp"), delCol: T("Xoá cột"), delRow: T("Xoá hàng") };
     const th = (h, c) => `<th><div class="th"><span class="hname" contenteditable="true" data-h="${c}">${Dom.esc(h)}</span>`
-      + `<button class="mini" data-sort="${c}" title="Sắp xếp">${arrow(c)}</button><button class="mini del" data-delc="${c}" title="Xoá cột">×</button></div></th>`;
-    const tr = r => `<tr><td class="rn"><button class="mini del" data-delr="${r}" title="Xoá hàng">×</button>${r + 1}</td>`
+      + `<button class="mini" data-sort="${c}" title="${tip.sort}">${arrow(c)}</button><button class="mini del" data-delc="${c}" title="${tip.delCol}">×</button></div></th>`;
+    const tr = r => `<tr><td class="rn"><button class="mini del" data-delr="${r}" title="${tip.delRow}">×</button>${r + 1}</td>`
       + head.map((_, c) => `<td contenteditable="true" data-r="${r}" data-c="${c}"${numCol[c] ? ' class="num"' : ""}>${Dom.esc(rows[r][c] ?? "")}</td>`).join("") + "</tr>";
     $("csv-table").innerHTML = head.length ? `<thead><tr><th class="rn">#</th>${head.map(th).join("")}</tr></thead><tbody>${shown.map(tr).join("")}</tbody>` : "";
-    $("csv-page").textContent = `Trang ${page + 1}/${pages}`;
+    $("csv-page").textContent = T("Trang {n}/{total}", { n: page + 1, total: pages });
     $("csv-prev").disabled = page === 0;
     $("csv-next").disabled = page >= pages - 1;
-    $("csv-info").textContent = head.length ? `${rows.length.toLocaleString("vi")} hàng × ${head.length} cột${idx.length !== rows.length ? ` · lọc còn ${idx.length.toLocaleString("vi")}` : ""}` : "";
+    $("csv-info").textContent = head.length ? T("{n} hàng × {cols} cột", { n: I18n.num(rows.length), cols: head.length })
+      + (idx.length !== rows.length ? " · " + T("lọc còn {n}", { n: I18n.num(idx.length) }) : "") : "";
   }
 
   const outDelim = () => delimSel() || delimUsed;
@@ -1828,19 +2198,23 @@ const DEMOS = {
 
   function readCurrentFile() {
     if (!lastFile) return;
-    Dom.readFile(lastFile, (name, text) => text === null ? report.show(`✖ Không đọc được file ${name}`, "bad") : loadText(text, name), $("csv-enc").value);
+    Dom.readFile(lastFile, (name, text) => text === null ? report.show(T("✖ Không đọc được file {name}", { name }), "bad") : loadText(text, name), $("csv-enc").value);
   }
   const onFile = f => { lastFile = f; readCurrentFile(); };
 
   // JSON / XML / YAML sent from another tab goes through the converter first; code or markup output is refused.
   function receive(text, meta) {
     if (meta.kind === "csv" || meta.kind === "tsv") return loadText(text);
-    if (!Convert.FROM.includes(meta.kind)) return report.show(`✖ Bảng CSV chỉ nhận JSON, XML, YAML, CSV hoặc TSV (đang gửi: ${meta.kind || "không rõ"}).`, "bad");
+    if (!Convert.FROM.includes(meta.kind)) return report.show(T("✖ Bảng CSV chỉ nhận JSON, XML, YAML, CSV hoặc TSV (đang gửi: {kind}).", { kind: meta.kind || T("không rõ") }), "bad");
     try {
       $("csv-header").checked = true;
       const r = Convert.run(text, meta.kind, "csv");
-      loadText(r.out, "", [...r.fixes.map(f => ({ ...f, line: 0, msg: `Dữ liệu nguồn: ${f.msg}` })), ...r.notes.map(msg => ({ line: 0, msg }))]);
-    } catch (e) { report.show(`✖ Không chuyển được sang bảng: ${e.message}`, "bad"); }
+      const notes = again => {
+        const x = again ? Convert.run(text, meta.kind, "csv") : r;
+        return [...x.fixes.map(f => ({ ...f, line: 0, msg: T("Dữ liệu nguồn: {msg}", f) })), ...x.notes.map(msg => ({ line: 0, msg }))];
+      };
+      loadText(r.out, "", notes);
+    } catch (e) { report.show(T("✖ Không chuyển được sang bảng: {msg}", { msg: e.message }), "bad"); }
   }
 
   function toggleHeader() {
@@ -1887,7 +2261,7 @@ const DEMOS = {
     $("csv-filter").oninput = Dom.debounce(() => { page = 0; render(); }, 200);
     $("csv-prev").onclick = () => { page--; render(); };
     $("csv-next").onclick = () => { page++; render(); };
-    $("csv-add-col").onclick = () => { head.push(`Cột ${head.length + 1}`); rows.forEach(r => r.push("")); render(); };
+    $("csv-add-col").onclick = () => { head.push(T("Cột {n}", { n: head.length + 1 })); rows.forEach(r => r.push("")); render(); };
     $("csv-add-row").onclick = () => {
       if (!head.length) head = genHead(1);
       rows.push(head.map(() => ""));
@@ -1915,7 +2289,7 @@ const DEMOS = {
     if (d) { lastFile = null; loadText(d.text, d.name); }
   }
 
-  Workbench.register("csv", { label: "Bảng CSV", init, onFile, receive, demo });
+  Workbench.register("csv", { label: "Bảng CSV", init, onFile, receive, demo, relang: () => { render(); lastShow(); } });
 })();
 // Line ops → side-by-side table; paired del/ins become "modified" rows with character-level highlight, long equal runs collapse.
 const DiffRender = (() => {
@@ -1965,7 +2339,7 @@ const DiffRender = (() => {
       let j = i;
       while (j < rows.length && !near[j]) j++;
       hidden.push(rows.slice(i, j).map(tr).join(""));
-      html += `<tr class="skip" data-skip="${hidden.length - 1}"><td colspan="4">… ${(j - i).toLocaleString("vi")} dòng giống nhau (bấm để hiện)</td></tr>`;
+      html += `<tr class="skip" data-skip="${hidden.length - 1}"><td colspan="4">${T("… {n} dòng giống nhau (bấm để hiện)", { n: I18n.num(j - i) })}</td></tr>`;
       i = j;
     }
     return { html: `<table class="dt"><colgroup><col class="lnc"><col><col class="lnc"><col></colgroup>${html}</table>`, hidden, stats };
@@ -1976,6 +2350,7 @@ const DiffRender = (() => {
 // Tab "So sánh": line diff (Myers), JSON structural diff (key order ignored + changed paths), or XML/HTML formatted-then-diff.
 (() => {
   const LABEL = { text: "theo dòng", json: "JSON theo cấu trúc", markup: "XML/HTML đã format" };
+  const EMPTY = "Chưa có nội dung để so sánh.";
   const AUTO_LIMIT = 200 * 1024, JSON_LIST_MAX = 500;
   let edA, edB, report, hidden = [], cursor = -1;
 
@@ -1989,12 +2364,12 @@ const DiffRender = (() => {
   function prepare(text, m, side, notes) {
     if (m === "json") {
       const r = JsonTool.parse(text);
-      if (r.fixes.length) notes.push({ line: 0, msg: `Bên ${side}: tự sửa ${r.fixes.length} lỗi cú pháp JSON trước khi so (xem ở tab Format)` });
+      if (r.fixes.length) notes.push({ line: 0, msg: T("Bên {side}: tự sửa {n} lỗi cú pháp JSON trước khi so (xem ở tab Format)", { side: T(side), n: r.fixes.length }) });
       return { lines: JsonTool.stringify(JsonAst.sortKeys(r.ast), "  ").split("\n"), value: Val.fromAst(r.ast) };
     }
     if (m === "markup") {
       const html = Detect.markup(text) === "html", r = MarkupTool.build(text, html);
-      if (r.fixes.length) notes.push({ line: 0, msg: `Bên ${side}: tự sửa ${r.fixes.length} lỗi cấu trúc trước khi so` });
+      if (r.fixes.length) notes.push({ line: 0, msg: T("Bên {side}: tự sửa {n} lỗi cấu trúc trước khi so", { side: T(side), n: r.fixes.length }) });
       return { lines: MarkupTool.serialize(r.root, "  ", html).split("\n") };
     }
     return { lines: text.split(/\r?\n/) };
@@ -2009,13 +2384,13 @@ const DiffRender = (() => {
 
   function run() {
     const a = edA.value, b = edB.value;
-    if (!a.trim() && !b.trim()) return report.show("Chưa có nội dung để so sánh.", "muted");
+    if (!a.trim() && !b.trim()) return report.show(T(EMPTY), "muted");
     const m = mode(a, b), notes = [];
     let A, B;
     try { A = prepare(a, m, "trái", notes); B = prepare(b, m, "phải", notes); }
-    catch (e) { return report.show(`✖ Không đọc được nội dung (${e.message}) — thử kiểu “Văn bản theo dòng”.`, "bad"); }
+    catch (e) { return report.show(T("✖ Không đọc được nội dung ({msg}) — thử kiểu “Văn bản theo dòng”.", { msg: e.message }), "bad"); }
     const ops = SeqDiff.diff(A.lines.map(key), B.lines.map(key));
-    if (!ops) return report.show("✖ Hai bên khác nhau quá nhiều (hơn 3.000 chỗ) — hãy so từng phần nhỏ hơn.", "bad");
+    if (!ops) return report.show(T("✖ Hai bên khác nhau quá nhiều (hơn 3.000 chỗ) — hãy so từng phần nhỏ hơn."), "bad");
     const r = DiffRender.render(A.lines, B.lines, ops, $("df-ctx").checked);
     hidden = r.hidden; cursor = -1;
     $("df-result").innerHTML = r.html;
@@ -2023,12 +2398,12 @@ const DiffRender = (() => {
     if (m === "json") {
       const diffs = JsonDiff.compare(A.value, B.value, JSON_LIST_MAX);
       items.push(...diffs.map(d => ({ line: 0, msg: JsonDiff.describe(d) })));
-      if (diffs.length === JSON_LIST_MAX) items.push({ line: 0, msg: `Chỉ liệt kê ${JSON_LIST_MAX} đường dẫn khác đầu tiên` });
+      if (diffs.length === JSON_LIST_MAX) items.push({ line: 0, msg: T("Chỉ liệt kê {n} đường dẫn khác đầu tiên", { n: JSON_LIST_MAX }) });
     }
     const { del, ins, mod } = r.stats;
     report.show(del + ins + mod
-      ? `≠ Có khác biệt (so ${LABEL[m]}): ${mod} dòng bị sửa, ${del} dòng chỉ có bên trái, ${ins} dòng chỉ có bên phải.`
-      : `✔ Hai bên giống nhau (so ${LABEL[m]}).`, del + ins + mod ? "warn" : "good", items);
+      ? T("≠ Có khác biệt (so {how}): {mod} dòng bị sửa, {del} dòng chỉ có bên trái, {ins} dòng chỉ có bên phải.", { how: T(LABEL[m]), mod, del, ins })
+      : T("✔ Hai bên giống nhau (so {how}).", { how: T(LABEL[m]) }), del + ins + mod ? "warn" : "good", items);
   }
 
   function nextChange() {
@@ -2042,7 +2417,7 @@ const DiffRender = (() => {
   }
 
   const autoRun = () => { if (edA.value && edB.value && edA.value.length + edB.value.length < AUTO_LIMIT) run(); };
-  const readInto = (ed, f) => Dom.readFile(f, (name, text) => { if (text === null) report.show(`✖ Không đọc được file ${name}`, "bad"); else { ed.set(text); autoRun(); } });
+  const readInto = (ed, f) => Dom.readFile(f, (name, text) => { if (text === null) report.show(T("✖ Không đọc được file {name}", { name }), "bad"); else { ed.set(text); autoRun(); } });
   const intoFreeSide = (fill) => fill(edA.value.trim() ? edB : edA);
 
   function demo(name) {
@@ -2061,7 +2436,7 @@ const DiffRender = (() => {
     $("df-run").onclick = run;
     $("df-next").onclick = nextChange;
     $("df-swap").onclick = () => { const t = edA.value; edA.set(edB.value); edB.set(t); autoRun(); };
-    $("df-clear").onclick = () => { edA.set(""); edB.set(""); $("df-result").innerHTML = ""; report.show("Chưa có nội dung để so sánh.", "muted"); };
+    $("df-clear").onclick = () => { edA.set(""); edB.set(""); $("df-result").innerHTML = ""; report.show(T(EMPTY), "muted"); };
     document.querySelectorAll("#df-mode, #df-ws, #df-case, #df-ctx").forEach(el => el.addEventListener("change", autoRun));
     $("df-result").onclick = e => { const tr = e.target.closest("tr.skip"); if (tr) tr.outerHTML = hidden[+tr.dataset.skip]; };
     $("df-demo").onchange = e => { demo(e.target.value); e.target.value = ""; };
@@ -2072,12 +2447,13 @@ const DiffRender = (() => {
     label: "So sánh", init, demo, primary: run,
     onFile: f => intoFreeSide(ed => readInto(ed, f)),
     receive: text => intoFreeSide(ed => { ed.set(text); autoRun(); }),
+    relang: run,
   });
 })();
 // Tab "Format CSS · JS": js-beautify (embedded) with common options, conservative CSS minify, browser syntax check for JS.
 (() => {
   const LABEL = { css: "CSS", js: "JavaScript" };
-  let ed, report, fileName = "", lastOut = "", lastLang = "";
+  let ed, report, fileName = "", lastOut = "", lastLang = "", redo = null;
 
   const lang = () => $("cf-lang").value === "auto" ? Detect.code(ed.value, fileName) : $("cf-lang").value;
 
@@ -2091,7 +2467,7 @@ const DiffRender = (() => {
   }
 
   function syncLangUi(l) {
-    $("cf-lang-now").textContent = ed.value.trim() ? `Ngôn ngữ: ${LABEL[l]}` : "";
+    $("cf-lang-now").textContent = ed.value.trim() ? T("Ngôn ngữ: {l}", { l: LABEL[l] }) : "";
     $("cf-min").disabled = l !== "css";
     document.querySelectorAll('[data-wb-panel="code"] [data-js]').forEach(el => { el.hidden = l !== "js"; });
   }
@@ -2107,39 +2483,43 @@ const DiffRender = (() => {
   function show(out, l, status, cls, items = []) {
     lastOut = out; lastLang = l;
     $("cf-out").textContent = out;
-    $("cf-info").textContent = `${LABEL[l]} · ${TextUtil.countLines(out).toLocaleString("vi")} dòng · ${TextUtil.sizeKb(out)} KB (gốc ${TextUtil.sizeKb(ed.value)} KB)`;
+    $("cf-info").textContent = `${LABEL[l]} · ` + T("{lines} dòng · {kb} KB (gốc {src} KB)", { lines: I18n.num(TextUtil.countLines(out)), kb: TextUtil.sizeKb(out), src: TextUtil.sizeKb(ed.value) });
     report.show(status, cls, items);
   }
 
   function run() {
     const text = ed.value, l = lang();
+    redo = run;
     syncLangUi(l);
-    if (!text.trim()) return report.show("Chưa có nội dung.", "muted");
+    if (!text.trim()) return report.show(T("Chưa có nội dung."), "muted");
     let out;
     try { out = l === "css" ? css_beautify(text, options(l)) : js_beautify(text, options(l)); }
-    catch (e) { return report.show(`✖ Không format được: ${e.message}`, "bad"); }
-    if (l === "css") return show(out, l, "✔ Đã format CSS.", "good");
+    catch (e) { return report.show(T("✖ Không format được: {msg}", { msg: e.message }), "bad"); }
+    if (l === "css") return show(out, l, T("✔ Đã format CSS."), "good");
     const s = jsSyntax(text);
-    if (!s) return show(out, l, "✔ Đã format JavaScript. Trình duyệt không thấy lỗi cú pháp.", "good");
-    if (s.skip) return show(out, l, `✔ Đã format JavaScript (bỏ qua kiểm tra cú pháp vì là ${s.skip}).`, "good");
-    show(out, l, "⚠ Đã format, nhưng trình duyệt báo lỗi cú pháp — kết quả có thể chưa đúng.", "warn", [{ line: 0, msg: s.error }]);
+    if (!s) return show(out, l, T("✔ Đã format JavaScript. Trình duyệt không thấy lỗi cú pháp."), "good");
+    if (s.skip) return show(out, l, T("✔ Đã format JavaScript (bỏ qua kiểm tra cú pháp vì là {what}).", { what: s.skip }), "good");
+    show(out, l, T("⚠ Đã format, nhưng trình duyệt báo lỗi cú pháp — kết quả có thể chưa đúng."), "warn", [{ line: 0, msg: s.error }]);
   }
 
   function minify() {
     const text = ed.value;
-    if (!text.trim()) return report.show("Chưa có nội dung.", "muted");
+    redo = minify;
+    if (!text.trim()) return report.show(T("Chưa có nội dung."), "muted");
     const r = CssMin.minify(text);
-    show(r.text, "css", `✔ Đã thu gọn CSS${r.comments ? `, bỏ ${r.comments} chú thích` : ""}.`, "good");
+    show(r.text, "css", r.comments ? T("✔ Đã thu gọn CSS, bỏ {n} chú thích.", { n: r.comments }) : T("✔ Đã thu gọn CSS."), "good");
   }
+
+  const showName = () => { $("cf-fname").textContent = fileName || T("dán mã hoặc kéo thả file vào đây"); };
 
   function load(name, text) {
     fileName = name;
     ed.set(text);
-    $("cf-fname").textContent = name || "dán mã hoặc kéo thả file vào đây";
+    showName();
     syncLangUi(lang());
   }
 
-  const onFile = f => Dom.readFile(f, (name, text) => text === null ? report.show(`✖ Không đọc được file ${name}`, "bad") : load(name, text));
+  const onFile = f => Dom.readFile(f, (name, text) => text === null ? report.show(T("✖ Không đọc được file {name}", { name }), "bad") : load(name, text));
 
   function demo(name) {
     const d = DEMOS.code[name];
@@ -2154,10 +2534,10 @@ const DiffRender = (() => {
     $("cf-file").onchange = e => { if (e.target.files[0]) onFile(e.target.files[0]); e.target.value = ""; };
     $("cf-run").onclick = run;
     $("cf-min").onclick = minify;
-    $("cf-clear").onclick = () => { lastOut = ""; $("cf-out").textContent = ""; $("cf-info").textContent = ""; load("", ""); report.show("Chưa có nội dung.", "muted"); };
+    $("cf-clear").onclick = () => { lastOut = ""; $("cf-out").textContent = ""; $("cf-info").textContent = ""; load("", ""); report.show(T("Chưa có nội dung."), "muted"); };
     $("cf-lang").onchange = () => syncLangUi(lang());
     $("cf-copy").onclick = () => lastOut && Dom.copy(lastOut).then(ok => {
-      $("cf-info").textContent = ok ? "Đã sao chép kết quả." : "Trình duyệt chặn sao chép — hãy bôi đen kết quả rồi nhấn Ctrl+C.";
+      $("cf-info").textContent = ok ? T("Đã sao chép kết quả.") : T("Trình duyệt chặn sao chép — hãy bôi đen kết quả rồi nhấn Ctrl+C.");
     });
     $("cf-use").onclick = () => { if (lastOut) ed.set(lastOut); };
     $("cf-save").onclick = () => {
@@ -2170,7 +2550,10 @@ const DiffRender = (() => {
     syncLangUi(lang());
   }
 
-  Workbench.register("code", { label: "Format CSS · JS", init, onFile, demo, primary: run, receive: text => { load("", text); run(); } });
+  Workbench.register("code", {
+    label: "Format CSS · JS", init, onFile, demo, primary: run, receive: text => { load("", text); run(); },
+    relang: () => { showName(); syncLangUi(lang()); if (redo) redo(); },
+  });
 })();
 Workbench.start();
 </script>

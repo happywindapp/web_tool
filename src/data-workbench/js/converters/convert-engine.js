@@ -10,11 +10,11 @@ const Convert = (() => {
       let docs;
       try { docs = jsyaml.loadAll(TextUtil.stripBom(text), null, { schema: jsyaml.CORE_SCHEMA }); }
       catch (e) { const err = new Error(e.reason || e.message); err.line = e.mark ? e.mark.line + 1 : 0; err.col = e.mark ? e.mark.column + 1 : 0; throw err; }
-      if (docs.length > 1) notes.push(`Có ${docs.length} tài liệu YAML (ngăn bởi ---) → gộp thành một mảng`);
+      if (docs.length > 1) notes.push(T("Có {n} tài liệu YAML (ngăn bởi ---) → gộp thành một mảng", { n: docs.length }));
       return { value: docs.length === 1 ? Val.fromPlain(docs[0]) : docs.map(Val.fromPlain), fixes: [] };
     }
     const p = CsvTool.parse(text, from === "tsv" ? "\t" : o.delimiter === "auto" ? "" : o.delimiter);
-    if (from === "csv" && o.delimiter === "auto") notes.push(`Dấu phân cách tự nhận diện: ${p.delimiterName}`);
+    if (from === "csv" && o.delimiter === "auto") notes.push(T("Dấu phân cách tự nhận diện: {d}", { d: T(p.delimiterName) }));
     const t = TableShape.fromTable(p.rows, { header: o.header, infer: o.infer, unflatten: o.flatten });
     notes.push(...t.notes);
     return { value: t.value, fixes: p.fixes };

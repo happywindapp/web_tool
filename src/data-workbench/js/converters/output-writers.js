@@ -20,8 +20,8 @@ const Writers = (() => {
   function yaml(v, indent, notes) {
     const counter = {};
     const text = jsyaml.dump(Val.toPlain(v, counter), { indent: indent === "\t" ? 2 : indent.length || 2, lineWidth: -1, noRefs: true });
-    if (indent === "\t") notes.push("YAML không cho phép thụt bằng Tab → dùng 2 dấu cách");
-    if (counter.keptAsText) notes.push(`${counter.keptAsText} số giữ dạng chuỗi (số lớn hoặc có số 0 cuối) để không đổi giá trị`);
+    if (indent === "\t") notes.push(T("YAML không cho phép thụt bằng Tab → dùng 2 dấu cách"));
+    if (counter.keptAsText) notes.push(T("{n} số giữ dạng chuỗi (số lớn hoặc có số 0 cuối) để không đổi giá trị", { n: counter.keptAsText }));
     return text.replace(/\n$/, "");
   }
 

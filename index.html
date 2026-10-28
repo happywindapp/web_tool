@@ -20,10 +20,15 @@
            display:grid; grid-template-columns:auto 1fr auto 1fr; gap:4px 12px; }
   @media (max-width:600px) { footer { grid-template-columns:auto 1fr; } }
   footer a { color:var(--acc); }
+  .lang-switch { float:right; margin-top:16px; display:inline-flex; gap:4px; }
+  .lang-switch button { font:inherit; font-weight:600; padding:4px 10px; border:1px solid #fcd34d; border-radius:6px; background:#fef3c7; color:#92400e; cursor:pointer; }
+  .lang-switch button:hover { background:#fde68a; }
+  .lang-switch button.on { background:#c2410c; color:#fff; border-color:#c2410c; }
 </style>
 </head>
 <body>
 <header>
+  <span class="lang-switch" title="Ngôn ngữ"><button data-lang="vi">VI</button><button data-lang="en">EN</button></span>
   <h1>Web Tools</h1>
   <div class="muted">Bộ công cụ xử lý dữ liệu ngay trong trình duyệt — không cần cài đặt, dữ liệu không gửi lên máy chủ nào. Tải file HTML về máy là dùng được cả offline.</div>
 </header>
@@ -43,5 +48,73 @@
   <span>GitHub Source:</span><a href="https://github.com/happywindapp/web_tool/">github.com/happywindapp/web_tool</a>
   <span>LinkedIn:</span><a href="https://www.linkedin.com/in/phanquan111">linkedin.com/in/phanquan111</a>
 </footer>
+<script>
+// UI language VI/EN: saved choice (shared by every tool) → browser language; English dictionary is keyed by the Vietnamese text.
+const I18n = (() => {
+  const KEY = "web_tool.lang", EN = {}, listeners = [];
+  const SKIP = "script,style,textarea,pre,code,svg,table,[contenteditable],[data-i18n-skip]";
+  const origText = new WeakMap(), origAttr = new WeakMap();
+  let origTitle = null;
+  let lang = (() => {
+    try { const v = localStorage.getItem(KEY); if (v === "vi" || v === "en") return v; } catch { /* storage blocked */ }
+    const nav = globalThis.navigator;
+    return !nav || /^vi\b/i.test(nav.language || "") ? "vi" : "en";
+  })();
+
+  const word = s => lang === "en" && Object.hasOwn(EN, s) ? EN[s] : s;
+  const t = (vi, params) => params ? word(vi).replace(/\{(\w+)\}/g, (m, k) => Object.hasOwn(params, k) ? String(params[k]) : m) : word(vi);
+  const num = n => n.toLocaleString(lang);
+  const swap = src => { const m = /^(\s*)([\s\S]*?)(\s*)$/.exec(src); return m[1] + word(m[2]) + m[3]; };
+
+  // Static markup keeps its Vietnamese source; the original of each text node / attribute is remembered so switching back is exact.
+  function apply(root = document.body) {
+    document.documentElement.lang = lang;
+    if (origTitle === null) origTitle = document.title;
+    document.title = word(origTitle);
+    for (const el of [root, ...root.querySelectorAll("*")]) {
+      if (el.parentElement && el.parentElement.closest(SKIP)) continue;
+      if (!el.matches(SKIP)) for (const n of el.childNodes) {
+        if (n.nodeType !== 3 || !n.data.trim()) continue;
+        if (!origText.has(n)) origText.set(n, n.data);
+        n.data = swap(origText.get(n));
+      }
+      for (const a of ["title", "placeholder"]) {
+        if (!el.hasAttribute(a)) continue;
+        if (!origAttr.has(el)) origAttr.set(el, {});
+        const o = origAttr.get(el);
+        o[a] ??= el.getAttribute(a);
+        el.setAttribute(a, swap(o[a]));
+      }
+    }
+    document.querySelectorAll("[data-lang]").forEach(b => { b.classList.toggle("on", b.dataset.lang === lang); b.setAttribute("aria-pressed", b.dataset.lang === lang); });
+  }
+
+  function set(l) {
+    if (l === lang) return;
+    lang = l;
+    try { localStorage.setItem(KEY, l); } catch { /* storage blocked → choice lasts until reload */ }
+    apply();
+    listeners.forEach(f => f(l));
+  }
+
+  function init() {
+    document.querySelectorAll("[data-lang]").forEach(b => { b.onclick = () => set(b.dataset.lang); });
+    apply();
+  }
+
+  return { t, num, set, init, add: d => Object.assign(EN, d), onChange: f => listeners.push(f), get lang() { return lang; } };
+})();
+const T = I18n.t;
+// English UI strings, keyed by the Vietnamese source text.
+I18n.add({
+  "Ngôn ngữ": "Language",
+  "Bộ công cụ xử lý dữ liệu ngay trong trình duyệt — không cần cài đặt, dữ liệu không gửi lên máy chủ nào. Tải file HTML về máy là dùng được cả offline.": "Data tools that run right in your browser — nothing to install, no data is sent to any server. Download the HTML file and it works offline too.",
+  "Kiểm tra & tự sửa lỗi JSON/XML/HTML, chuyển JSON ⇄ CSV ⇄ XML ⇄ YAML (+ SQL, Markdown), xem/sửa bảng CSV, so sánh 2 file, format CSS/JS.": "Validate & auto-fix JSON/XML/HTML, convert JSON ⇄ CSV ⇄ XML ⇄ YAML (+ SQL, Markdown), view/edit CSV tables, compare 2 files, format CSS/JS.",
+  "Sơ đồ Mermaid": "Mermaid diagrams",
+  "Gõ mã Mermaid, xem sơ đồ ngay, 22 mẫu, đổi theme, xuất PNG/SVG, chia sẻ link (mở được cả link mermaid.live), lịch sử phiên bản.": "Type Mermaid code and see the diagram instantly, 22 samples, themes, PNG/SVG export, share links (mermaid.live links open too), version history.",
+  "Tác giả:": "Author:",
+});
+I18n.init();
+</script>
 </body>
 </html>

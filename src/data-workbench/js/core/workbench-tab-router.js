@@ -1,9 +1,9 @@
-// Tab registry: lazy init on first open, ?tab= deep link, Ctrl+Enter → active tab's primary action, file drop → active tab.
+// Tab registry: lazy init on first open, ?tab= deep link, Ctrl+Enter → active tab's primary action, file drop → active tab, language switch → relang().
 const Workbench = (() => {
-  const tabs = {};
+  const tabs = {}, sendSelects = [];
   let active = "";
 
-  // def: { label, init(), primary?(), receive?(text, meta), onFile?(file), demo?(name) }
+  // def: { label, init(), primary?(), receive?(text, meta), onFile?(file), demo?(name), relang?() }
   const register = (id, def) => { tabs[id] = { ...def, ready: false }; };
 
   function show(id) {
@@ -27,9 +27,13 @@ const Workbench = (() => {
   }
 
   // Fills a <select> with every other tab that can receive data; getPayload() → { text, kind } | null.
+  const fillSendTo = (select, from) => {
+    select.innerHTML = `<option value="">${T("Gửi kết quả sang…")}</option>` + Object.entries(tabs)
+      .filter(([id, t]) => id !== from && t.receive).map(([id, t]) => `<option value="${id}">${T(t.label)}</option>`).join("");
+  };
   function bindSendTo(select, from, getPayload) {
-    select.innerHTML = `<option value="">Gửi kết quả sang…</option>` + Object.entries(tabs)
-      .filter(([id, t]) => id !== from && t.receive).map(([id, t]) => `<option value="${id}">${t.label}</option>`).join("");
+    sendSelects.push([select, from]);
+    fillSendTo(select, from);
     select.onchange = () => {
       const id = select.value;
       select.value = "";
@@ -39,6 +43,11 @@ const Workbench = (() => {
   }
 
   function start() {
+    I18n.init();
+    I18n.onChange(() => {
+      sendSelects.forEach(([select, from]) => fillSendTo(select, from));
+      Object.values(tabs).forEach(t => { if (t.ready && t.relang) t.relang(); });
+    });
     document.querySelectorAll("[data-wb-tab]").forEach(b => { b.onclick = () => show(b.dataset.wbTab); });
     document.addEventListener("keydown", e => {
       if ((e.ctrlKey || e.metaKey) && e.key === "Enter" && tabs[active].primary) { e.preventDefault(); tabs[active].primary(); }

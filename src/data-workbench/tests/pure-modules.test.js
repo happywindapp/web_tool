@@ -7,7 +7,7 @@ const vm = require("node:vm");
 
 const root = path.join(__dirname, "..");
 const FILES = [
-  "third-party/js-yaml.min.js", "js/core/text-utils.js", "js/parsers/format-detect.js", "js/parsers/json-tolerant-parser.js",
+  "third-party/js-yaml.min.js", "js/core/i18n-ui-language-vi-en.js", "js/core/text-utils.js", "js/parsers/format-detect.js", "js/parsers/json-tolerant-parser.js",
   "js/parsers/json-ast-transforms.js", "js/parsers/markup-tolerant-parser.js", "js/parsers/csv-parser.js", "js/parsers/css-minifier.js",
   "js/converters/value-model.js", "js/converters/table-shape.js", "js/converters/xml-value-mapper.js", "js/converters/output-writers.js",
   "js/converters/convert-engine.js", "js/diff/myers-sequence-diff.js", "js/diff/json-structural-diff.js",

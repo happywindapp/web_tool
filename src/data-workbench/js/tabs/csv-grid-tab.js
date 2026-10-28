@@ -3,13 +3,14 @@
   const PAGE = 500, DECIMAL = /^-?\d+(\.\d+)?$/, NUMERIC_CELL = /^-?\d+(?:[.,]\d+)*$/;
   const collator = new Intl.Collator("vi", { numeric: true, sensitivity: "base" });
   let report, head = [], rows = [], sort = { col: -1, dir: 1 }, page = 0, editBefore = "";
-  let lastFile = null, lastText = "", fileName = "", delimUsed = ",";
+  let lastFile = null, lastText = "", fileName = "", delimUsed = ",", lastShow = () => {};
 
   const delimSel = () => ({ auto: "", tab: "\t" }[$("csv-delim").value] ?? $("csv-delim").value);
-  const genHead = n => Array.from({ length: n }, (_, i) => `Cột ${i + 1}`);
+  const genHead = n => Array.from({ length: n }, (_, i) => T("Cột {n}", { n: i + 1 }));
   const cmp = (a = "", b = "") => DECIMAL.test(a.trim()) && DECIMAL.test(b.trim()) ? a - b : collator.compare(a, b);
 
-  function loadText(text, name = "", extra = []) {
+  // On a language switch lastShow re-parses the source only to re-word the report; grid edits are kept.
+  function loadText(text, name = "", extra = () => []) {
     fileName = name; lastText = text;
     const p = CsvTool.parse(text, delimSel());
     delimUsed = p.delimiter;
@@ -17,9 +18,13 @@
     if ($("csv-header").checked && all.length) { head = all[0]; rows = all.slice(1); } else { head = genHead(p.width); rows = all; }
     sort = { col: -1, dir: 1 }; page = 0; $("csv-filter").value = "";
     render();
-    if (!text.trim()) return report.show("Chưa có dữ liệu.", "muted");
-    report.show(`✔ Đã nạp ${rows.length.toLocaleString("vi")} hàng × ${head.length} cột · ${p.delimiterName}${name ? " · " + name : ""}.`
-      + (p.fixes.length ? ` Có ${p.fixes.length} chỗ không chuẩn, xem bên dưới.` : ""), p.fixes.length || extra.length ? "warn" : "good", [...extra, ...p.fixes]);
+    const n = rows.length, cols = head.length, delimiter = delimSel();
+    lastShow = (q = CsvTool.parse(text, delimiter), ex = extra(true)) => {
+      if (!text.trim()) return report.show(T("Chưa có dữ liệu."), "muted");
+      report.show(T("✔ Đã nạp {n} hàng × {cols} cột · {delim}", { n: I18n.num(n), cols, delim: T(q.delimiterName) }) + (name ? " · " + name : "") + "."
+        + (q.fixes.length ? " " + T("Có {n} chỗ không chuẩn, xem bên dưới.", { n: q.fixes.length }) : ""), q.fixes.length || ex.length ? "warn" : "good", [...ex, ...q.fixes]);
+    };
+    lastShow(p, extra(false));
   }
 
   function viewIdx() {
@@ -37,15 +42,17 @@
     const shown = idx.slice(page * PAGE, (page + 1) * PAGE);
     const numCol = head.map((_, c) => shown.some(r => rows[r][c]) && shown.every(r => !rows[r][c] || NUMERIC_CELL.test(rows[r][c].trim())));
     const arrow = c => sort.col !== c ? "⇅" : sort.dir > 0 ? "▲" : "▼";
+    const tip = { sort: T("Sắp xếp"), delCol: T("Xoá cột"), delRow: T("Xoá hàng") };
     const th = (h, c) => `<th><div class="th"><span class="hname" contenteditable="true" data-h="${c}">${Dom.esc(h)}</span>`
-      + `<button class="mini" data-sort="${c}" title="Sắp xếp">${arrow(c)}</button><button class="mini del" data-delc="${c}" title="Xoá cột">×</button></div></th>`;
-    const tr = r => `<tr><td class="rn"><button class="mini del" data-delr="${r}" title="Xoá hàng">×</button>${r + 1}</td>`
+      + `<button class="mini" data-sort="${c}" title="${tip.sort}">${arrow(c)}</button><button class="mini del" data-delc="${c}" title="${tip.delCol}">×</button></div></th>`;
+    const tr = r => `<tr><td class="rn"><button class="mini del" data-delr="${r}" title="${tip.delRow}">×</button>${r + 1}</td>`
       + head.map((_, c) => `<td contenteditable="true" data-r="${r}" data-c="${c}"${numCol[c] ? ' class="num"' : ""}>${Dom.esc(rows[r][c] ?? "")}</td>`).join("") + "</tr>";
     $("csv-table").innerHTML = head.length ? `<thead><tr><th class="rn">#</th>${head.map(th).join("")}</tr></thead><tbody>${shown.map(tr).join("")}</tbody>` : "";
-    $("csv-page").textContent = `Trang ${page + 1}/${pages}`;
+    $("csv-page").textContent = T("Trang {n}/{total}", { n: page + 1, total: pages });
     $("csv-prev").disabled = page === 0;
     $("csv-next").disabled = page >= pages - 1;
-    $("csv-info").textContent = head.length ? `${rows.length.toLocaleString("vi")} hàng × ${head.length} cột${idx.length !== rows.length ? ` · lọc còn ${idx.length.toLocaleString("vi")}` : ""}` : "";
+    $("csv-info").textContent = head.length ? T("{n} hàng × {cols} cột", { n: I18n.num(rows.length), cols: head.length })
+      + (idx.length !== rows.length ? " · " + T("lọc còn {n}", { n: I18n.num(idx.length) }) : "") : "";
   }
 
   const outDelim = () => delimSel() || delimUsed;
@@ -53,19 +60,23 @@
 
   function readCurrentFile() {
     if (!lastFile) return;
-    Dom.readFile(lastFile, (name, text) => text === null ? report.show(`✖ Không đọc được file ${name}`, "bad") : loadText(text, name), $("csv-enc").value);
+    Dom.readFile(lastFile, (name, text) => text === null ? report.show(T("✖ Không đọc được file {name}", { name }), "bad") : loadText(text, name), $("csv-enc").value);
   }
   const onFile = f => { lastFile = f; readCurrentFile(); };
 
   // JSON / XML / YAML sent from another tab goes through the converter first; code or markup output is refused.
   function receive(text, meta) {
     if (meta.kind === "csv" || meta.kind === "tsv") return loadText(text);
-    if (!Convert.FROM.includes(meta.kind)) return report.show(`✖ Bảng CSV chỉ nhận JSON, XML, YAML, CSV hoặc TSV (đang gửi: ${meta.kind || "không rõ"}).`, "bad");
+    if (!Convert.FROM.includes(meta.kind)) return report.show(T("✖ Bảng CSV chỉ nhận JSON, XML, YAML, CSV hoặc TSV (đang gửi: {kind}).", { kind: meta.kind || T("không rõ") }), "bad");
     try {
       $("csv-header").checked = true;
       const r = Convert.run(text, meta.kind, "csv");
-      loadText(r.out, "", [...r.fixes.map(f => ({ ...f, line: 0, msg: `Dữ liệu nguồn: ${f.msg}` })), ...r.notes.map(msg => ({ line: 0, msg }))]);
-    } catch (e) { report.show(`✖ Không chuyển được sang bảng: ${e.message}`, "bad"); }
+      const notes = again => {
+        const x = again ? Convert.run(text, meta.kind, "csv") : r;
+        return [...x.fixes.map(f => ({ ...f, line: 0, msg: T("Dữ liệu nguồn: {msg}", f) })), ...x.notes.map(msg => ({ line: 0, msg }))];
+      };
+      loadText(r.out, "", notes);
+    } catch (e) { report.show(T("✖ Không chuyển được sang bảng: {msg}", { msg: e.message }), "bad"); }
   }
 
   function toggleHeader() {
@@ -112,7 +123,7 @@
     $("csv-filter").oninput = Dom.debounce(() => { page = 0; render(); }, 200);
     $("csv-prev").onclick = () => { page--; render(); };
     $("csv-next").onclick = () => { page++; render(); };
-    $("csv-add-col").onclick = () => { head.push(`Cột ${head.length + 1}`); rows.forEach(r => r.push("")); render(); };
+    $("csv-add-col").onclick = () => { head.push(T("Cột {n}", { n: head.length + 1 })); rows.forEach(r => r.push("")); render(); };
     $("csv-add-row").onclick = () => {
       if (!head.length) head = genHead(1);
       rows.push(head.map(() => ""));
@@ -140,5 +151,5 @@
     if (d) { lastFile = null; loadText(d.text, d.name); }
   }
 
-  Workbench.register("csv", { label: "Bảng CSV", init, onFile, receive, demo });
+  Workbench.register("csv", { label: "Bảng CSV", init, onFile, receive, demo, relang: () => { render(); lastShow(); } });
 })();

@@ -13,11 +13,15 @@
   body { margin:0; height:100vh; display:grid; grid-template-rows:auto 1fr auto; background:var(--bg); color:var(--ink);
          font:14px/1.45 "Segoe UI", Arial, sans-serif; }
   body.drop { outline:3px dashed var(--acc); outline-offset:-6px; }
-  header.top { display:flex; flex-wrap:wrap; gap:8px; align-items:center; padding:8px 16px; background:var(--panel); border-bottom:1px solid var(--line); }
+  header.top { position:relative; display:flex; flex-wrap:wrap; gap:8px; align-items:center; padding:8px 112px 8px 16px; background:var(--panel); border-bottom:1px solid var(--line); }
   header.top h1 { font-size:16px; margin:0 8px 0 0; }
   .seg { display:inline-flex; flex-wrap:wrap; gap:4px; }
   .seg button.on { background:var(--ink); color:var(--bg); border-color:var(--ink); }
-  .privacy { margin-left:auto; font-size:12px; }
+  .lang-switch { position:absolute; top:8px; right:16px; }
+  .lang-switch button { background:#fef3c7; color:#92400e; border-color:#fcd34d; font-weight:600; }
+  .lang-switch button:hover { background:#fde68a; }
+  .lang-switch button.on { background:#c2410c; color:#fff; border-color:#c2410c; }
+  @media (prefers-color-scheme: dark) { .lang-switch button { background:#422006; color:#fcd34d; border-color:#92400e; } .lang-switch button:hover { background:#713f12; } .lang-switch button.on { background:#ea580c; color:#fff; border-color:#ea580c; } }
   a.btn { text-decoration:none; }
   button, select, input[type=text], label.btn, a.btn { font:inherit; padding:5px 10px; border:1px solid var(--line); border-radius:6px; background:var(--btn); color:var(--ink); }
   button, select, label.btn, a.btn { cursor:pointer; }
@@ -40,4 +44,4 @@
   .t{color:var(--muted)} .tn{color:var(--tn);font-weight:600} .an{color:var(--an)} .av{color:var(--av)} .c{color:var(--c);font-style:italic} .d,.cd{color:var(--l)}
   .good{color:var(--good)} .bad{color:var(--bad)} .warn{color:var(--warn)} .muted{color:var(--muted)}
   .author { display:flex; flex-wrap:wrap; gap:2px 6px; padding:4px 16px 6px; background:var(--panel); font-size:12px; color:var(--muted); } .author a { color:var(--acc); } .author span:not(:first-child) { margin-left:10px; }
-  @media (max-width: 900px) { .work { grid-template-columns:1fr; grid-template-rows:45vh 45vh; } .privacy { margin-left:0; } }
+  @media (max-width: 900px) { .work { grid-template-columns:1fr; grid-template-rows:45vh 45vh; } }

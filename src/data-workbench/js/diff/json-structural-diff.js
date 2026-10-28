@@ -7,7 +7,7 @@ const JsonDiff = (() => {
   }
   const keyPath = (p, k) => /^[A-Za-z_$][\w$]*$/.test(k) ? `${p}.${k}` : `${p}[${JSON.stringify(k)}]`;
   const show = v => {
-    const t = Val.isScalar(v) ? JsonTool.stringify(Val.toAst(v), "") : Array.isArray(v) ? `[${v.length} phần tử]` : `{${Object.keys(v).length} khóa}`;
+    const t = Val.isScalar(v) ? JsonTool.stringify(Val.toAst(v), "") : Array.isArray(v) ? `[${T("{n} phần tử", { n: v.length })}]` : `{${T("{n} khóa", { n: Object.keys(v).length })}}`;
     return t.length > 80 ? t.slice(0, 77) + "…" : t;
   };
 
@@ -32,8 +32,8 @@ const JsonDiff = (() => {
     return out.slice(0, max);
   }
 
-  const describe = d => d.type === "add" ? `+ ${d.path} thêm mới: ${show(d.b)}`
-    : d.type === "del" ? `− ${d.path} bị xoá (giá trị cũ: ${show(d.a)})` : `~ ${d.path}: ${show(d.a)} → ${show(d.b)}`;
+  const describe = d => d.type === "add" ? T("+ {path} thêm mới: {v}", { path: d.path, v: show(d.b) })
+    : d.type === "del" ? T("− {path} bị xoá (giá trị cũ: {v})", { path: d.path, v: show(d.a) }) : `~ ${d.path}: ${show(d.a)} → ${show(d.b)}`;
 
   return { compare, describe };
 })();

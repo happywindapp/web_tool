@@ -1,6 +1,7 @@
 // Tab "Chuyển đổi": JSON / CSV / TSV / XML / YAML → JSON, CSV, TSV, XML, YAML, JS object, SQL INSERT, Markdown / HTML table.
 (() => {
   const LABEL = { json: "JSON", csv: "CSV", tsv: "TSV", xml: "XML", yaml: "YAML", js: "JS object", sql: "SQL", markdown: "Markdown", html: "bảng HTML" };
+  const label = k => T(LABEL[k]);
   const FROM = Convert.FROM;
   const DEMO_TO = { json: "csv", csv: "json", xml: "json", yaml: "json" };
   const AUTO_LIMIT = 500 * 1024;
@@ -28,30 +29,32 @@
     const text = ed.value, to = $("cv-to").value;
     detected = text.trim() ? Detect.data(text, fileName) : "";
     refreshOptions();
-    if (!text.trim()) return report.show("Chưa có nội dung.", "muted");
+    if (!text.trim()) return report.show(T("Chưa có nội dung."), "muted");
     let r;
     try { r = Convert.run(text, $("cv-from").value, to, opts()); }
-    catch (e) { return report.show(`✖ Không đọc được dữ liệu: ${e.message}`, "bad", e.line ? [{ line: e.line, col: e.col, msg: e.message }] : []); }
+    catch (e) { return report.show(T("✖ Không đọc được dữ liệu: {msg}", { msg: e.message }), "bad", e.line ? [{ line: e.line, col: e.col, msg: e.message }] : []); }
     lastOut = r.out; lastTo = to;
     $("cv-out").innerHTML = ViewRender.highlight(r.out, ["json", "xml", "html"].includes(to) ? to : "");
-    $("cv-info").textContent = `${LABEL[r.from]} → ${LABEL[to]} · ${TextUtil.countLines(r.out).toLocaleString("vi")} dòng · ${TextUtil.sizeKb(r.out)} KB`;
-    const title = `${LABEL[r.from]} → ${LABEL[to]}`;
-    report.show(r.fixes.length ? `✔ Đã chuyển ${title}. Tự sửa ${r.fixes.length} lỗi ở dữ liệu nguồn, xem danh sách bên dưới.` : `✔ Đã chuyển ${title}.`,
+    const title = `${label(r.from)} → ${label(to)}`;
+    $("cv-info").textContent = `${title} · ` + T("{lines} dòng · {kb} KB", { lines: I18n.num(TextUtil.countLines(r.out)), kb: TextUtil.sizeKb(r.out) });
+    report.show(r.fixes.length ? T("✔ Đã chuyển {title}. Tự sửa {n} lỗi ở dữ liệu nguồn, xem danh sách bên dưới.", { title, n: r.fixes.length }) : T("✔ Đã chuyển {title}.", { title }),
       r.fixes.length ? "warn" : "good", [...r.fixes, ...r.notes.map(msg => ({ line: 0, msg }))]);
   }
+
+  const showName = () => { $("cv-fname").textContent = fileName || T("dán nội dung hoặc kéo thả file vào đây"); };
 
   function load(name, text, from = "auto") {
     fileName = name;
     $("cv-from").value = from;
     ed.set(text);
-    $("cv-fname").textContent = name || "dán nội dung hoặc kéo thả file vào đây";
+    showName();
     run();
   }
 
-  const onFile = f => Dom.readFile(f, (name, text) => text === null ? report.show(`✖ Không đọc được file ${name}`, "bad") : load(name, text));
+  const onFile = f => Dom.readFile(f, (name, text) => text === null ? report.show(T("✖ Không đọc được file {name}", { name }), "bad") : load(name, text));
 
   function swap() {
-    if (!lastOut || !FROM.includes(lastTo)) return report.show(`Không thể đảo chiều: ${LABEL[lastTo] || "kết quả"} không đọc ngược lại được.`, "muted");
+    if (!lastOut || !FROM.includes(lastTo)) return report.show(T("Không thể đảo chiều: {what} không đọc ngược lại được.", { what: LABEL[lastTo] ? label(lastTo) : T("kết quả") }), "muted");
     const prevFrom = $("cv-from").value === "auto" ? detected : $("cv-from").value;
     $("cv-to").value = prevFrom;
     load("", lastOut, lastTo);
@@ -74,7 +77,7 @@
     document.querySelectorAll('[data-wb-panel="convert"] .toolbar select:not(#cv-demo), [data-wb-panel="convert"] .toolbar input:not([type=file])')
       .forEach(el => el.addEventListener("change", () => { if (ed.value.length < AUTO_LIMIT) run(); else refreshOptions(); }));
     $("cv-copy").onclick = () => lastOut && Dom.copy(lastOut).then(ok => {
-      $("cv-info").textContent = ok ? "Đã sao chép kết quả." : "Trình duyệt chặn sao chép — hãy bôi đen kết quả rồi nhấn Ctrl+C.";
+      $("cv-info").textContent = ok ? T("Đã sao chép kết quả.") : T("Trình duyệt chặn sao chép — hãy bôi đen kết quả rồi nhấn Ctrl+C.");
     });
     $("cv-save").onclick = () => {
       if (!lastOut) return;
@@ -89,5 +92,6 @@
   Workbench.register("convert", {
     label: "Chuyển đổi", init, onFile, demo, primary: run,
     receive: (text, meta) => load("", text, FROM.includes(meta.kind) ? meta.kind : "auto"),
+    relang: () => { showName(); run(); },
   });
 })();

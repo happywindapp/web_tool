@@ -16,8 +16,8 @@ const XmlMap = (() => {
   function droppedNotes(root) {
     const n = { comment: 0, pi: 0, doctype: 0 };
     (function walk(x) { for (const k in n) if (x[k]) n[k]++; (x.children || []).forEach(walk); })(root);
-    const parts = [n.comment && `${n.comment} chú thích`, n.pi && `${n.pi} khai báo <?…?>`, n.doctype && `${n.doctype} DOCTYPE`].filter(Boolean);
-    return parts.length ? [`Bỏ ${parts.join(", ")} (JSON không có chỗ chứa)`] : [];
+    const parts = [n.comment && T("{n} chú thích", { n: n.comment }), n.pi && T("{n} khai báo <?…?>", { n: n.pi }), n.doctype && `${n.doctype} DOCTYPE`].filter(Boolean);
+    return parts.length ? [T("Bỏ {list} (JSON không có chỗ chứa)", { list: parts.join(", ") })] : [];
   }
 
   function fromXml(text,{ attrPrefix = "@", infer = true } = {}) {
@@ -53,7 +53,7 @@ const XmlMap = (() => {
       if (NAME_OK.test(k)) return k;
       let f = k.replace(/[^\w.\-À-￿]/g, "_");
       if (!/^[A-Za-z_À-￿]/.test(f)) f = "_" + f;
-      notes.add(`Tên "${k}" không hợp lệ trong XML → "${f}"`);
+      notes.add(T('Tên "{k}" không hợp lệ trong XML → "{f}"', { k, f }));
       return f;
     };
     function node(name, v, lvl) {
@@ -61,7 +61,7 @@ const XmlMap = (() => {
       if (Array.isArray(v)) {
         v.forEach(x => {
           if (!Array.isArray(x)) return node(name, x, lvl);
-          notes.add(`Mảng lồng mảng ở <${name}> → mỗi mảng con bọc trong <${name}>, phần tử là <${item}>`);
+          notes.add(T("Mảng lồng mảng ở <{name}> → mỗi mảng con bọc trong <{name}>, phần tử là <{item}>", { name, item }));
           node(name, { [item]: x }, lvl);
         });
         return;

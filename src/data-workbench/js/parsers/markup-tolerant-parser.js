@@ -21,13 +21,13 @@ const MarkupTool = (() => {
     // HTML tolerates a bare "&" (browsers render it as-is), so only XML gets it escaped — and always reported.
     const escText = (t, at) => {
       if (html || !BARE_AMP.test(t)) return t;
-      fix(`Ký tự "&" chưa được thoát → &amp;`, at);
+      fix(T('Ký tự "&" chưa được thoát → &amp;'), at);
       return t.replace(BARE_AMP_ALL, "&amp;");
     };
     const closeTo = (idx, at, reason) => {
       while (stack.length - 1 > idx) {
         const n = stack.pop();
-        if (!(html && OPTIONAL_END.has(n.name))) fix(`Thẻ <${n.name}> chưa được đóng → tự đóng${reason}`, n.at);
+        if (!(html && OPTIONAL_END.has(n.name))) fix(T("Thẻ <{name}> chưa được đóng → tự đóng", n) + reason(), n.at);
       }
     };
     let i = 0;
@@ -37,14 +37,14 @@ const MarkupTool = (() => {
         let j = s.indexOf("<", i + 1);
         while (j >= 0 && !/[A-Za-z_!?\/:]/.test(s[j + 1] || "")) j = s.indexOf("<", j + 1);
         const raw = s.slice(i, j < 0 ? s.length : j);
-        if (/<(?![A-Za-z_!?\/:])/.test(raw)) fix(`Ký tự "<" đứng riêng → &lt;`, at);
+        if (/<(?![A-Za-z_!?\/:])/.test(raw)) fix(T('Ký tự "<" đứng riêng → &lt;'), at);
         add({ text: escText(raw.replace(/<(?![A-Za-z_!?\/:])/g, "&lt;"), at) });
         i = j < 0 ? s.length : j;
         continue;
       }
       const grab = (endTok, label) => {
         const e = s.indexOf(endTok, i);
-        if (e < 0) { fix(`${label} chưa đóng đến cuối file → tự đóng`, at); i = s.length; return s.slice(at) + endTok; }
+        if (e < 0) { fix(T("{label} chưa đóng đến cuối file → tự đóng", { label: T(label) }), at); i = s.length; return s.slice(at) + endTok; }
         i = e + endTok.length; return s.slice(at, i);
       };
       if (s.startsWith("<!--", i)) { add({ comment: grab("-->", "Chú thích <!--") }); continue; }
@@ -58,12 +58,12 @@ const MarkupTool = (() => {
       if (s[i + 1] === "/") {
         const m = s.slice(i).match(/^<\/\s*([^\s>\/<]*)\s*(>?)/);
         i += m[0].length;
-        if (!m[2]) fix(`Thẻ đóng </${m[1]}> thiếu dấu ">" → tự thêm`, at);
+        if (!m[2]) fix(T('Thẻ đóng </{name}> thiếu dấu ">" → tự thêm', { name: m[1] }), at);
         const name = norm(m[1]);
         let idx = -1;
         for (let k = stack.length - 1; k > 0; k--) if (stack[k].name === name) { idx = k; break; }
-        if (idx < 0) { fix(html && VOID.has(name) ? `Thẻ </${name}> không cần thiết (thẻ rỗng) → bỏ` : `Thẻ đóng </${m[1]}> thừa, không có thẻ mở tương ứng → bỏ`, at); continue; }
-        closeTo(idx, at, ` (gặp </${m[1]}>)`);
+        if (idx < 0) { fix(html && VOID.has(name) ? T("Thẻ </{name}> không cần thiết (thẻ rỗng) → bỏ", { name }) : T("Thẻ đóng </{name}> thừa, không có thẻ mở tương ứng → bỏ", { name: m[1] }), at); continue; }
+        closeTo(idx, at, () => T(" (gặp </{name}>)", { name: m[1] }));
         stack.pop();
         continue;
       }
@@ -88,26 +88,26 @@ const MarkupTool = (() => {
           const qc = s[i];
           if (qc === '"' || qc === "'") {
             const e = s.indexOf(qc, i + 1), gt = s.indexOf(">", i + 1);
-            if (e < 0 || (gt >= 0 && s.slice(i + 1, e).includes("\n") && gt < e)) { fix(`Giá trị thuộc tính ${an} thiếu dấu đóng nháy → tự đóng`, aAt); const stop = gt < 0 ? s.length : gt; v = s.slice(i + 1, stop); i = stop; }
+            if (e < 0 || (gt >= 0 && s.slice(i + 1, e).includes("\n") && gt < e)) { fix(T("Giá trị thuộc tính {an} thiếu dấu đóng nháy → tự đóng", { an }), aAt); const stop = gt < 0 ? s.length : gt; v = s.slice(i + 1, stop); i = stop; }
             else { v = s.slice(i + 1, e); i = e + 1; }
           } else {
             const m = s.slice(i).match(/^[^\s>]*/)[0];
             v = m.replace(/\/$/, ""); i += v.length;
-            if (!html) fix(`Giá trị thuộc tính ${an}=${v} chưa đặt trong nháy → thêm nháy`, aAt);
+            if (!html) fix(T("Giá trị thuộc tính {an}={v} chưa đặt trong nháy → thêm nháy", { an, v }), aAt);
           }
-          if (/</.test(v) && !html) fix(`Thuộc tính ${an} chứa ký tự "<" → &lt;`, aAt);
+          if (/</.test(v) && !html) fix(T('Thuộc tính {an} chứa ký tự "<" → &lt;', { an }), aAt);
           v = escText(html ? v : v.replace(/</g, "&lt;"), aAt);
-        } else if (!html) { fix(`Thuộc tính ${an} không có giá trị → ${an}="${an}"`, aAt); v = an; }
-        if (attrs.some(a => a.n === an)) { fix(`Thuộc tính ${an} bị trùng trong <${nm}> → bỏ bản sau`, aAt); continue; }
+        } else if (!html) { fix(T('Thuộc tính {an} không có giá trị → {an}="{an}"', { an }), aAt); v = an; }
+        if (attrs.some(a => a.n === an)) { fix(T("Thuộc tính {an} bị trùng trong <{nm}> → bỏ bản sau", { an, nm }), aAt); continue; }
         attrs.push({ n: html ? an.toLowerCase() : an, v });
       }
-      if (!closed) fix(`Thẻ <${nm}> thiếu dấu ">" → tự thêm`, at);
+      if (!closed) fix(T('Thẻ <{nm}> thiếu dấu ">" → tự thêm', { nm }), at);
       if (html) {
         if (name === "p" || AUTO_CLOSE[name] || P_CLOSERS.has(name)) {
           const closes = name === "p" || P_CLOSERS.has(name) ? ["p", ...(AUTO_CLOSE[name] || [])] : AUTO_CLOSE[name];
           if (closes.includes(top().name)) stack.pop();
         }
-        if (self && !VOID.has(name)) fix(`<${name}/> không hợp lệ trong HTML → <${name}></${name}>`, at);
+        if (self && !VOID.has(name)) fix(T("<{name}/> không hợp lệ trong HTML → <{name}></{name}>", { name }), at);
         if (VOID.has(name)) self = true;
       }
       const node = { name, attrs, children: [], self, at };
@@ -116,17 +116,18 @@ const MarkupTool = (() => {
       if (html && RAW.has(name) && name !== "pre") {
         const re = new RegExp(`</\\s*${name}\\s*>`, "i"), rest = s.slice(i), m = rest.match(re);
         node.raw = m ? rest.slice(0, m.index) : rest;
-        if (!m) fix(`Thẻ <${name}> chưa đóng → tự đóng ở cuối file`, at);
+        if (!m) fix(T("Thẻ <{name}> chưa đóng → tự đóng ở cuối file", { name }), at);
         i += m ? m.index + m[0].length : rest.length;
         continue;
       }
       stack.push(node);
     }
-    closeTo(0, s.length, " (hết file)");
+    closeTo(0, s.length, () => T(" (hết file)"));
     if (!html) {
       const els = root.children.filter(n => n.name), stray = root.children.filter(n => n.text && n.text.trim());
       if (els.length !== 1 || stray.length) {
-        fix(els.length ? `XML phải có đúng 1 phần tử gốc (đang có ${els.length}${stray.length ? " và có chữ nằm ngoài" : ""}) → bọc trong <root>` : "Không có phần tử XML nào → bọc nội dung trong <root>", 0);
+        fix(!els.length ? T("Không có phần tử XML nào → bọc nội dung trong <root>") : stray.length ? T("XML phải có đúng 1 phần tử gốc (đang có {n} và có chữ nằm ngoài) → bọc trong <root>", { n: els.length })
+          : T("XML phải có đúng 1 phần tử gốc (đang có {n}) → bọc trong <root>", { n: els.length }), 0);
         const head = root.children.filter(n => n.pi || n.doctype);
         root.children = [...head, { name: "root", attrs: [], children: root.children.filter(n => !n.pi && !n.doctype) }];
       }

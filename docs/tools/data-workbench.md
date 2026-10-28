@@ -19,10 +19,11 @@ giữa JSON/CSV/XML/YAML/SQL; xem-sửa CSV dạng bảng; so 2 phiên bản; fo
 | URL `?tab=format\|convert\|csv\|diff\|code` | Mở thẳng tab; không có thì mở tab dùng lần trước (localStorage) |
 | URL `?demo=json\|xml\|html\|nested` | Tab Format: nạp mẫu lỗi rồi chạy "Format & sửa lỗi" ngay. Không kèm `tab` ⇒ tab Format |
 | Input | Dán text · `<input type=file>` · kéo-thả file vào trang (vào tab đang mở); UTF-8, bỏ BOM. Tab CSV chọn được bảng mã |
-| Tên file tải về | Format/CSS·JS: `<base>.formatted.<ext>` · Chuyển đổi: `<base>.<ext đích>` · Bảng CSV: `<base>.edited.csv\|tsv`; dán tay ⇒ base `ket-qua` |
+| Tên file tải về | Format/CSS·JS: `<base>.formatted.<ext>` · Chuyển đổi: `<base>.<ext đích>` · Bảng CSV: `<base>.edited.csv\|tsv`; dán tay ⇒ base `ket-qua` (EN: `result`) |
 | CSV tải về | Có BOM (Excel đọc đúng tiếng Việt) — tab CSV cho tắt; xuống dòng CRLF/LF tuỳ chọn |
 | Clipboard | `navigator.clipboard` khi secure context, ngược lại fallback `execCommand("copy")`; thất bại thì báo |
-| localStorage | Khoá `web_tool.data-workbench.*`: tab cuối + nháp từng ô nhập (≤ 1 MB/ô). Bảng CSV **không** lưu nháp |
+| localStorage | Khoá `web_tool.data-workbench.*`: tab cuối + nháp từng ô nhập (≤ 1 MB/ô). Bảng CSV **không** lưu nháp. `web_tool.lang` = ngôn ngữ UI (chung mọi tool) |
+| Ngôn ngữ UI | Nút `VI \| EN` góc trên-phải (ADR #8). Đổi là dịch ngay: markup tĩnh + mỗi tab đã mở chạy lại hành động cuối (`relang`) để status/danh sách sửa lỗi đổi ngôn ngữ; Bảng CSV chỉ dựng lại báo cáo, **giữ nguyên chỗ đã sửa**. Message `fixes` sinh theo ngôn ngữ lúc parse |
 | Mạng | **Không có request nào** — thư viện nhúng sẵn trong file (js-beautify, js-yaml) |
 
 ## 3. Nhận diện định dạng (`Detect`)
@@ -182,16 +183,18 @@ Vùng giống nhau > ±3 dòng thu gọn, bấm để mở. Giới hạn: > 3.00
 src/data-workbench/
   data-workbench.template.html  # khung trang + marker @include (thứ tự include = thứ tự chạy)
   styles/*.css  partials/*.html  third-party/ (js-beautify, js-yaml + LICENSE)
-  js/core/        TextUtil · Dom/Store · LineEditor (gutter + nháp) · ReportPanel · Workbench (router tab)
+  js/core/        I18n + T() (song ngữ, nạp đầu tiên) · TextUtil · Dom/Store · LineEditor (gutter + nháp) · ReportPanel · Workbench (router tab)
+  js/i18n/        từ điển English: en-markup-labels · en-tab-status-messages · en-parser-converter-messages (khoá = chuỗi VI)
   js/parsers/     Detect · JsonTool · JsonAst · MarkupTool · CsvTool · CssMin
   js/render/      ViewRender
   js/converters/  Val · TableShape · XmlMap · Writers · Convert
   js/diff/        SeqDiff · JsonDiff
   js/tabs/        DEMOS · format · convert · csv-grid · diff-render · diff · code-format (mỗi tab tự Workbench.register)
-  tests/pure-modules.test.js    # node --test, nạp module thuần qua vm
+  tests/pure-modules.test.js    # node --test, nạp module thuần qua vm (không localStorage/navigator ⇒ VI)
+  tests/i18n-dictionary-coverage.test.js  # mọi chuỗi VI ở markup / literal / T() phải có English, placeholder {x} khớp
 ```
 
-- `Workbench.register(id, {label, init, primary, receive, onFile, demo})`: tab khởi tạo lười khi mở lần đầu; Ctrl+Enter gọi `primary`;
+- `Workbench.register(id, {label, init, primary, receive, onFile, demo, relang})`: tab khởi tạo lười khi mở lần đầu; Ctrl+Enter gọi `primary`; đổi ngôn ngữ gọi `relang` của tab đã mở;
   "Gửi kết quả sang…" gọi `receive(text, {kind})` của tab đích; kéo-thả file gọi `onFile` của tab đang mở.
 - Build: thay mỗi dòng `@include <file>` bằng nội dung file; JS có `</script` được đổi thành `<\/script`, có `<script` thì build dừng.
 

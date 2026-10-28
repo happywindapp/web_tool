@@ -46,7 +46,7 @@ const DiffRender = (() => {
       let j = i;
       while (j < rows.length && !near[j]) j++;
       hidden.push(rows.slice(i, j).map(tr).join(""));
-      html += `<tr class="skip" data-skip="${hidden.length - 1}"><td colspan="4">… ${(j - i).toLocaleString("vi")} dòng giống nhau (bấm để hiện)</td></tr>`;
+      html += `<tr class="skip" data-skip="${hidden.length - 1}"><td colspan="4">${T("… {n} dòng giống nhau (bấm để hiện)", { n: I18n.num(j - i) })}</td></tr>`;
       i = j;
     }
     return { html: `<table class="dt"><colgroup><col class="lnc"><col><col class="lnc"><col></colgroup>${html}</table>`, hidden, stats };

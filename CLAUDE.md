@@ -20,7 +20,7 @@ Tool hiện có: `tools/data-workbench.html` (format/tự sửa JSON·XML·HTML 
 
 ## Convention riêng của repo
 
-- 1 tool = 1 file `tools/<viec-lam-kebab-case>.html`; module JS dạng IIFE (`const X = (() => {...})()`), UI tiếng Việt.
+- 1 tool = 1 file `tools/<viec-lam-kebab-case>.html`; module JS dạng IIFE (`const X = (() => {...})()`), UI song ngữ VI/EN: chuỗi gốc tiếng Việt bọc `T()` + thêm bản English vào từ điển (ADR #8).
 - Thêm/đổi tool ⇒ cập nhật đủ 3 chỗ: card trong `index.html`, bảng Tools trong `README.md`, `docs/tools/<tool>.md`.
 - Mọi tool phải có khối tác giả `<div class="author">` (Tác giả + GitHub Source) ngay sau footer trạng thái — chép markup/CSS chuẩn từ `docs/architecture/README.md` mục 3.
 - Ngoại lệ có chủ đích với luật "file < 200 dòng": tool phải tự chứa để mở trực tiếp (xem `docs/decisions/`).

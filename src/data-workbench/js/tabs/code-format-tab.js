@@ -1,7 +1,7 @@
 // Tab "Format CSS · JS": js-beautify (embedded) with common options, conservative CSS minify, browser syntax check for JS.
 (() => {
   const LABEL = { css: "CSS", js: "JavaScript" };
-  let ed, report, fileName = "", lastOut = "", lastLang = "";
+  let ed, report, fileName = "", lastOut = "", lastLang = "", redo = null;
 
   const lang = () => $("cf-lang").value === "auto" ? Detect.code(ed.value, fileName) : $("cf-lang").value;
 
@@ -15,7 +15,7 @@
   }
 
   function syncLangUi(l) {
-    $("cf-lang-now").textContent = ed.value.trim() ? `Ngôn ngữ: ${LABEL[l]}` : "";
+    $("cf-lang-now").textContent = ed.value.trim() ? T("Ngôn ngữ: {l}", { l: LABEL[l] }) : "";
     $("cf-min").disabled = l !== "css";
     document.querySelectorAll('[data-wb-panel="code"] [data-js]').forEach(el => { el.hidden = l !== "js"; });
   }
@@ -31,39 +31,43 @@
   function show(out, l, status, cls, items = []) {
     lastOut = out; lastLang = l;
     $("cf-out").textContent = out;
-    $("cf-info").textContent = `${LABEL[l]} · ${TextUtil.countLines(out).toLocaleString("vi")} dòng · ${TextUtil.sizeKb(out)} KB (gốc ${TextUtil.sizeKb(ed.value)} KB)`;
+    $("cf-info").textContent = `${LABEL[l]} · ` + T("{lines} dòng · {kb} KB (gốc {src} KB)", { lines: I18n.num(TextUtil.countLines(out)), kb: TextUtil.sizeKb(out), src: TextUtil.sizeKb(ed.value) });
     report.show(status, cls, items);
   }
 
   function run() {
     const text = ed.value, l = lang();
+    redo = run;
     syncLangUi(l);
-    if (!text.trim()) return report.show("Chưa có nội dung.", "muted");
+    if (!text.trim()) return report.show(T("Chưa có nội dung."), "muted");
     let out;
     try { out = l === "css" ? css_beautify(text, options(l)) : js_beautify(text, options(l)); }
-    catch (e) { return report.show(`✖ Không format được: ${e.message}`, "bad"); }
-    if (l === "css") return show(out, l, "✔ Đã format CSS.", "good");
+    catch (e) { return report.show(T("✖ Không format được: {msg}", { msg: e.message }), "bad"); }
+    if (l === "css") return show(out, l, T("✔ Đã format CSS."), "good");
     const s = jsSyntax(text);
-    if (!s) return show(out, l, "✔ Đã format JavaScript. Trình duyệt không thấy lỗi cú pháp.", "good");
-    if (s.skip) return show(out, l, `✔ Đã format JavaScript (bỏ qua kiểm tra cú pháp vì là ${s.skip}).`, "good");
-    show(out, l, "⚠ Đã format, nhưng trình duyệt báo lỗi cú pháp — kết quả có thể chưa đúng.", "warn", [{ line: 0, msg: s.error }]);
+    if (!s) return show(out, l, T("✔ Đã format JavaScript. Trình duyệt không thấy lỗi cú pháp."), "good");
+    if (s.skip) return show(out, l, T("✔ Đã format JavaScript (bỏ qua kiểm tra cú pháp vì là {what}).", { what: s.skip }), "good");
+    show(out, l, T("⚠ Đã format, nhưng trình duyệt báo lỗi cú pháp — kết quả có thể chưa đúng."), "warn", [{ line: 0, msg: s.error }]);
   }
 
   function minify() {
     const text = ed.value;
-    if (!text.trim()) return report.show("Chưa có nội dung.", "muted");
+    redo = minify;
+    if (!text.trim()) return report.show(T("Chưa có nội dung."), "muted");
     const r = CssMin.minify(text);
-    show(r.text, "css", `✔ Đã thu gọn CSS${r.comments ? `, bỏ ${r.comments} chú thích` : ""}.`, "good");
+    show(r.text, "css", r.comments ? T("✔ Đã thu gọn CSS, bỏ {n} chú thích.", { n: r.comments }) : T("✔ Đã thu gọn CSS."), "good");
   }
+
+  const showName = () => { $("cf-fname").textContent = fileName || T("dán mã hoặc kéo thả file vào đây"); };
 
   function load(name, text) {
     fileName = name;
     ed.set(text);
-    $("cf-fname").textContent = name || "dán mã hoặc kéo thả file vào đây";
+    showName();
     syncLangUi(lang());
   }
 
-  const onFile = f => Dom.readFile(f, (name, text) => text === null ? report.show(`✖ Không đọc được file ${name}`, "bad") : load(name, text));
+  const onFile = f => Dom.readFile(f, (name, text) => text === null ? report.show(T("✖ Không đọc được file {name}", { name }), "bad") : load(name, text));
 
   function demo(name) {
     const d = DEMOS.code[name];
@@ -78,10 +82,10 @@
     $("cf-file").onchange = e => { if (e.target.files[0]) onFile(e.target.files[0]); e.target.value = ""; };
     $("cf-run").onclick = run;
     $("cf-min").onclick = minify;
-    $("cf-clear").onclick = () => { lastOut = ""; $("cf-out").textContent = ""; $("cf-info").textContent = ""; load("", ""); report.show("Chưa có nội dung.", "muted"); };
+    $("cf-clear").onclick = () => { lastOut = ""; $("cf-out").textContent = ""; $("cf-info").textContent = ""; load("", ""); report.show(T("Chưa có nội dung."), "muted"); };
     $("cf-lang").onchange = () => syncLangUi(lang());
     $("cf-copy").onclick = () => lastOut && Dom.copy(lastOut).then(ok => {
-      $("cf-info").textContent = ok ? "Đã sao chép kết quả." : "Trình duyệt chặn sao chép — hãy bôi đen kết quả rồi nhấn Ctrl+C.";
+      $("cf-info").textContent = ok ? T("Đã sao chép kết quả.") : T("Trình duyệt chặn sao chép — hãy bôi đen kết quả rồi nhấn Ctrl+C.");
     });
     $("cf-use").onclick = () => { if (lastOut) ed.set(lastOut); };
     $("cf-save").onclick = () => {
@@ -94,5 +98,8 @@
     syncLangUi(lang());
   }
 
-  Workbench.register("code", { label: "Format CSS · JS", init, onFile, demo, primary: run, receive: text => { load("", text); run(); } });
+  Workbench.register("code", {
+    label: "Format CSS · JS", init, onFile, demo, primary: run, receive: text => { load("", text); run(); },
+    relang: () => { showName(); syncLangUi(lang()); if (redo) redo(); },
+  });
 })();

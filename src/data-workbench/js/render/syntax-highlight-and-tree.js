@@ -25,7 +25,7 @@ const ViewRender = (() => {
 
   function tree(model, kind, limit = 4000) {
     let count = 0;
-    const more = () => `<div class="muted">… còn nữa (cây chỉ hiển thị ${limit} nút đầu tiên)</div>`;
+    const more = () => `<div class="muted">${T("… còn nữa (cây chỉ hiển thị {n} nút đầu tiên)", { n: limit })}</div>`;
     const leaf = (k, v, cls) => `<div class="leaf">${k}${span(cls, v)}</div>`;
     function jnode(n, key) {
       if (++count > limit) return count === limit + 1 ? more() : "";
@@ -33,7 +33,7 @@ const ViewRender = (() => {
       if (n.t === "str") return leaf(k, JSON.stringify(n.v), "s");
       if (n.t === "num") return leaf(k, n.raw, "n");
       if (n.t === "lit") return leaf(k, n.v, "l");
-      const sum = n.t === "obj" ? `{ ${n.items.length} khóa }` : `[ ${n.items.length} phần tử ]`;
+      const sum = n.t === "obj" ? `{ ${T("{n} khóa", { n: n.items.length })} }` : `[ ${T("{n} phần tử", { n: n.items.length })} ]`;
       const inner = n.items.map((it, i) => n.t === "obj" ? jnode(it.v, JSON.stringify(it.k)) : jnode(it, String(i))).join("");
       return `<details ${count < 60 ? "open" : ""}><summary>${k}<span class="muted">${sum}</span></summary>${inner}</details>`;
     }

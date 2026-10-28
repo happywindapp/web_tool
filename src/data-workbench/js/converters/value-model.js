@@ -16,7 +16,7 @@ const Val = (() => {
     if (n.t === "arr") return n.items.map(x => fromAst(x, notes));
     const o = {};
     for (const it of n.items) {
-      if (notes && Object.hasOwn(o, it.k)) notes.push(`Khóa "${it.k}" bị trùng → khi chuyển đổi chỉ giữ giá trị sau`);
+      if (notes && Object.hasOwn(o, it.k)) notes.push(T('Khóa "{k}" bị trùng → khi chuyển đổi chỉ giữ giá trị sau', it));
       put(o, it.k, fromAst(it.v, notes));
     }
     return o;

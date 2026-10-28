@@ -20,8 +20,8 @@ const JsonTool = (() => {
     const ws = () => {
       for (;;) {
         while (i < s.length && /\s/.test(s[i])) i++;
-        if (s.startsWith("//", i) || s[i] === "#") { fix("Bỏ chú thích (JSON không cho phép chú thích)"); while (i < s.length && s[i] !== "\n") i++; }
-        else if (s.startsWith("/*", i)) { fix("Bỏ chú thích /* */"); const e = s.indexOf("*/", i + 2); i = e < 0 ? s.length : e + 2; }
+        if (s.startsWith("//", i) || s[i] === "#") { fix(T("Bỏ chú thích (JSON không cho phép chú thích)")); while (i < s.length && s[i] !== "\n") i++; }
+        else if (s.startsWith("/*", i)) { fix(T("Bỏ chú thích /* */")); const e = s.indexOf("*/", i + 2); i = e < 0 ? s.length : e + 2; }
         else return;
       }
     };
@@ -30,24 +30,24 @@ const JsonTool = (() => {
 
     function str() {
       const q = s[i], start = i;
-      if (q === "'") fix("Chuỗi dùng nháy đơn → đổi sang nháy kép");
+      if (q === "'") fix(T("Chuỗi dùng nháy đơn → đổi sang nháy kép"));
       i++;
       let out = "";
       while (i < s.length) {
         const c = s[i];
         if (c === q) { i++; return out; }
-        if (c === "\n" || c === "\r") { fix("Chuỗi thiếu dấu đóng nháy → tự đóng ở cuối dòng", start); return out; }
+        if (c === "\n" || c === "\r") { fix(T("Chuỗi thiếu dấu đóng nháy → tự đóng ở cuối dòng"), start); return out; }
         if (c === "\\") {
           const n = s[i + 1];
           const map = { n: "\n", t: "\t", r: "\r", b: "\b", f: "\f", "/": "/", "\\": "\\", '"': '"', "'": "'" };
           if (n === "u" && /^[0-9a-fA-F]{4}$/.test(s.substr(i + 2, 4))) { out += String.fromCharCode(parseInt(s.substr(i + 2, 4), 16)); i += 6; continue; }
           if (n in map) { out += map[n]; i += 2; continue; }
-          fix(`Ký tự thoát không hợp lệ "\\${n}" → giữ nguyên dấu \\`); out += "\\"; i++; continue;
+          fix(T('Ký tự thoát không hợp lệ "\\{n}" → giữ nguyên dấu \\', { n })); out += "\\"; i++; continue;
         }
-        if (c === "\t") fix("Ký tự Tab trong chuỗi → thay bằng \\t");
+        if (c === "\t") fix(T("Ký tự Tab trong chuỗi → thay bằng \\t"));
         out += c; i++;
       }
-      fix("Chuỗi chưa đóng đến cuối file → tự đóng", start);
+      fix(T("Chuỗi chưa đóng đến cuối file → tự đóng"), start);
       return out;
     }
 
@@ -64,15 +64,15 @@ const JsonTool = (() => {
       const orig = raw;
       if (/^[+\-]?0[xX]/.test(raw)) raw = String(parseInt(raw, 16));
       raw = raw.replace(/^\+/, "").replace(/^(-?)\./, "$10.").replace(/\.(?=$|[eE])/, "").replace(/^(-?)0+(?=\d)/, "$1");
-      if (!/^-?\d/.test(raw)) { fix(`Số không hợp lệ "${orig}" → null`); return { t: "lit", v: "null" }; }
-      if (raw !== orig) fix(`Số "${orig}" sai định dạng JSON → "${raw}"`);
+      if (!/^-?\d/.test(raw)) { fix(T('Số không hợp lệ "{orig}" → null', { orig })); return { t: "lit", v: "null" }; }
+      if (raw !== orig) fix(T('Số "{orig}" sai định dạng JSON → "{raw}"', { orig, raw }));
       return { t: "num", raw };
     }
 
     function value(depth) {
       ws();
       const c = s[i];
-      if (c === undefined) { fix("Thiếu giá trị ở cuối file → null"); return { t: "lit", v: "null" }; }
+      if (c === undefined) { fix(T("Thiếu giá trị ở cuối file → null")); return { t: "lit", v: "null" }; }
       if (c === "{") return obj(depth);
       if (c === "[") return arr(depth);
       if (c === '"' || c === "'") return { t: "str", v: str() };
@@ -81,11 +81,11 @@ const JsonTool = (() => {
         const at = i, w = word();
         const lit = { true: "true", false: "false", null: "null", True: "true", False: "false", None: "null",
                       undefined: "null", NaN: "null", Infinity: "null", TRUE: "true", FALSE: "false", NULL: "null" }[w];
-        if (lit) { if (lit !== w) fix(`"${w}" không có trong JSON → ${lit}`, at); return { t: "lit", v: lit }; }
-        fix(`Giá trị "${w}" chưa đặt trong nháy kép → chuyển thành chuỗi`, at);
+        if (lit) { if (lit !== w) fix(T('"{w}" không có trong JSON → {lit}', { w, lit }), at); return { t: "lit", v: lit }; }
+        fix(T('Giá trị "{w}" chưa đặt trong nháy kép → chuyển thành chuỗi', { w }), at);
         return { t: "str", v: w };
       }
-      fix(`Ký tự không hợp lệ "${c}" → bỏ qua`); i++;
+      fix(T('Ký tự không hợp lệ "{c}" → bỏ qua', { c })); i++;
       return value(depth);
     }
 
@@ -97,18 +97,18 @@ const JsonTool = (() => {
       for (;;) {
         ws();
         const c = s[i];
-        if (c === undefined) { fix(`Thiếu dấu "${close}" để đóng "${open}" mở ở đây → tự thêm`, start); return items; }
+        if (c === undefined) { fix(T('Thiếu dấu "{close}" để đóng "{open}" mở ở đây → tự thêm', { close, open }), start); return items; }
         if (c === close) { i++; return items; }
-        if (c === "}" || c === "]") { fix(`Dấu "${c}" không khớp với "${open}" → đổi thành "${close}"`); i++; return items; }
+        if (c === "}" || c === "]") { fix(T('Dấu "{c}" không khớp với "{open}" → đổi thành "{close}"', { c, open, close })); i++; return items; }
         if (c === ",") {
-          if (!needComma) fix("Dấu phẩy thừa → bỏ");
+          if (!needComma) fix(T("Dấu phẩy thừa → bỏ"));
           i++; ws();
-          if (s[i] === close) fix("Dấu phẩy thừa trước dấu đóng → bỏ", i - 1);
+          if (s[i] === close) fix(T("Dấu phẩy thừa trước dấu đóng → bỏ"), i - 1);
           needComma = false; continue;
         }
         if (needComma) {
-          if ((open === "{" && isKeyStart(c)) || (open === "[" && isValStart(c))) fix("Thiếu dấu phẩy giữa hai phần tử → tự thêm");
-          else { fix(`Ký tự không hợp lệ "${c}" → bỏ qua`); i++; continue; }
+          if ((open === "{" && isKeyStart(c)) || (open === "[" && isValStart(c))) fix(T("Thiếu dấu phẩy giữa hai phần tử → tự thêm"));
+          else { fix(T('Ký tự không hợp lệ "{c}" → bỏ qua', { c })); i++; continue; }
         }
         const it = readItem();
         if (it !== null) { items.push(it); needComma = true; }
@@ -120,29 +120,29 @@ const JsonTool = (() => {
         let k;
         const at = i;
         if (s[i] === '"' || s[i] === "'") k = str();
-        else if (/[A-Za-z_$À-￿\d]/.test(s[i])) { k = s.slice(i).match(/^[^\s:=,{}\[\]"']+/)[0]; i += k.length; fix(`Tên khóa ${k} chưa đặt trong nháy kép → thêm nháy`, at); }
-        else { fix(`Ký tự không hợp lệ "${s[i]}" → bỏ qua`); i++; return null; }
+        else if (/[A-Za-z_$À-￿\d]/.test(s[i])) { k = s.slice(i).match(/^[^\s:=,{}\[\]"']+/)[0]; i += k.length; fix(T("Tên khóa {k} chưa đặt trong nháy kép → thêm nháy", { k }), at); }
+        else { fix(T('Ký tự không hợp lệ "{c}" → bỏ qua', { c: s[i] })); i++; return null; }
         ws();
         if (s[i] === ":") i++;
-        else if (s[i] === "=") { fix('Dùng "=" thay cho ":" → sửa'); i++; }
-        else fix(`Thiếu dấu ":" sau khóa "${k}" → tự thêm`);
+        else if (s[i] === "=") { fix(T('Dùng "=" thay cho ":" → sửa')); i++; }
+        else fix(T('Thiếu dấu ":" sau khóa "{k}" → tự thêm', { k }));
         return { k, v: value(depth + 1) };
       });
       const seen = new Set();
-      for (const it of items) if (it) { if (seen.has(it.k)) fixes.push({ line: 0, col: 0, msg: `Khóa "${it.k}" bị trùng (giữ nguyên cả hai, nên kiểm tra lại)` }); seen.add(it.k); }
+      for (const it of items) if (it) { if (seen.has(it.k)) fixes.push({ line: 0, col: 0, msg: T('Khóa "{k}" bị trùng (giữ nguyên cả hai, nên kiểm tra lại)', it) }); seen.add(it.k); }
       return { t: "obj", items: items.filter(Boolean) };
     }
     const arr = depth => ({ t: "arr", items: container("[", "]", depth, () => value(depth + 1)) });
 
     ws();
-    if (i >= s.length) throw new Error("Nội dung trống");
+    if (i >= s.length) throw new Error(T("Nội dung trống"));
     const roots = [value(0)];
     for (ws(); i < s.length; ws()) {
       if (s[i] === ",") { i++; continue; }
-      if (!isValStart(s[i])) { fix(`Nội dung thừa sau giá trị gốc "${s.slice(i, i + 20)}…" → bỏ`); break; }
+      if (!isValStart(s[i])) { fix(T('Nội dung thừa sau giá trị gốc "{s}…" → bỏ', { s: s.slice(i, i + 20) })); break; }
       roots.push(value(0));
     }
-    if (roots.length > 1) fix(`Có ${roots.length} giá trị gốc liền nhau (kiểu NDJSON) → gộp thành một mảng`, 0);
+    if (roots.length > 1) fix(T("Có {n} giá trị gốc liền nhau (kiểu NDJSON) → gộp thành một mảng", { n: roots.length }), 0);
     return { ast: roots.length > 1 ? { t: "arr", items: roots } : roots[0], fixes };
   }
 

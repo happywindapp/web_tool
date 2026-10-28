@@ -62,7 +62,7 @@ Không có. Không backend, không API, không DB, không CDN.
 - **Tự sửa = đoán**: mỗi sửa đổi phải được ghi vào danh sách `fixes`, không sửa âm thầm.
 - **Mọi tool phải có khối tác giả** `<div class="author">` (Tác giả + GitHub Source) — markup/CSS chuẩn ở
   [`docs/architecture/README.md`](../docs/architecture/README.md) mục 3.
-- UI tiếng Việt. Git commit/push do user tự chạy.
+- UI song ngữ VI/EN (nút góc trên-phải, chuỗi gốc tiếng Việt + từ điển English — ADR #8, `docs/architecture/` mục 3). Git commit/push do user tự chạy.
 
 ## Đang vướng
 

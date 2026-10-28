@@ -36,7 +36,7 @@ const CsvTool = (() => {
         if (c === '"' && s[i + 1] === '"') { field += '"'; i += 2; continue; }
         if (c === '"') {
           quoted = false; i++;
-          if (i < s.length && s[i] !== d && s[i] !== "\n" && s[i] !== "\r") fix("Có ký tự ngay sau dấu nháy đóng của ô → nối vào nội dung ô", line);
+          if (i < s.length && s[i] !== d && s[i] !== "\n" && s[i] !== "\r") fix(T("Có ký tự ngay sau dấu nháy đóng của ô → nối vào nội dung ô"), line);
           continue;
         }
         if (c === "\n") line++;
@@ -47,15 +47,15 @@ const CsvTool = (() => {
       if (c === "\r" || c === "\n") { endRow(); i += c === "\r" && s[i + 1] === "\n" ? 2 : 1; line++; rowLine = line; continue; }
       field += c; i++;
     }
-    if (quoted) fix("Ô mở dấu nháy nhưng không có nháy đóng → tự đóng ở cuối file", quoteLine);
+    if (quoted) fix(T("Ô mở dấu nháy nhưng không có nháy đóng → tự đóng ở cuối file"), quoteLine);
     if (field !== "" || row.length) endRow();
-    if (blank) fix(`Bỏ ${blank} dòng trống`, 0);
+    if (blank) fix(T("Bỏ {n} dòng trống", { n: blank }), 0);
     const width = rows.reduce((w, r) => Math.max(w, r.length), 0);
     rows.forEach((r, k) => {
       const w0 = rows[0].length;
-      if (r.length !== w0) fix(`Hàng có ${r.length} cột, hàng đầu có ${w0} cột → ${r.length < w0 ? "ô thiếu để trống" : "thêm cột cho ô thừa"}`, rowLines[k]);
+      if (r.length !== w0) fix(T("Hàng có {n} cột, hàng đầu có {w0} cột → {fix}", { n: r.length, w0, fix: T(r.length < w0 ? "ô thiếu để trống" : "thêm cột cho ô thừa") }), rowLines[k]);
     });
-    if (dropped) fixes.push({ line: 0, col: 0, msg: `… và ${dropped} chỗ không chuẩn khác (chỉ liệt kê 1.000 chỗ đầu)` });
+    if (dropped) fixes.push({ line: 0, col: 0, msg: T("… và {n} chỗ không chuẩn khác (chỉ liệt kê 1.000 chỗ đầu)", { n: dropped }) });
     return { rows, fixes, delimiter: d, delimiterName: NAMES[d] || d, width };
   }
 

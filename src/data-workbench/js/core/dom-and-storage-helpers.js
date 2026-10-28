@@ -35,7 +35,7 @@ const Dom = (() => {
     r.readAsText(file, encoding);
   }
 
-  const baseName = name => name ? name.replace(/(\.[^.]+)?$/, "") : "ket-qua";
+  const baseName = name => name ? name.replace(/(\.[^.]+)?$/, "") : T("ket-qua");
 
   return { esc, debounce, copy, download, readFile, baseName };
 })();

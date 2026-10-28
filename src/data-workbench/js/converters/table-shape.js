@@ -12,7 +12,7 @@ const TableShape = (() => {
       if (arrs.length === 1) { path.push(arrs[0]); cur = cur[arrs[0]]; }
     }
     if (!Array.isArray(cur)) return [v];
-    if (path.length) notes.push(`Dùng mảng tại "${path.join(".")}" làm các hàng`);
+    if (path.length) notes.push(T('Dùng mảng tại "{path}" làm các hàng', { path: path.join(".") }));
     return cur;
   }
 
@@ -24,7 +24,7 @@ const TableShape = (() => {
     }
     let k = key;
     for (let i = 2; row.has(k); i++) k = `${key}_${i}`;
-    if (k !== key) notes.add(`Cột "${key}" bị trùng sau khi làm phẳng → đổi thành "${k}"`);
+    if (k !== key) notes.add(T('Cột "{key}" bị trùng sau khi làm phẳng → đổi thành "{k}"', { key, k }));
     row.set(k, Val.isScalar(v) ? v : asJson(v));
   }
 
@@ -59,12 +59,12 @@ const TableShape = (() => {
     const [head = [], ...body] = rows, notes = [];
     const width = body.reduce((w, r) => Math.max(w, r.length), head.length);
     const taken = new Set();
-    if (head.some(h => h !== h.trim())) notes.push("Bỏ khoảng trắng đầu/cuối ở tên cột");
+    if (head.some(h => h !== h.trim())) notes.push(T("Bỏ khoảng trắng đầu/cuối ở tên cột"));
     const names = Array.from({ length: width }, (_, i) => {
       const base = (head[i] || "").trim() || `col${i + 1}`;
       let n = base;
       for (let k = 2; taken.has(n); k++) n = `${base}_${k}`;
-      if (n !== base) notes.push(`Tiêu đề "${base}" bị trùng → đổi thành "${n}"`);
+      if (n !== base) notes.push(T('Tiêu đề "{base}" bị trùng → đổi thành "{n}"', { base, n }));
       taken.add(n);
       return n;
     });
@@ -72,7 +72,7 @@ const TableShape = (() => {
     const nestable = n => {
       if (!unflatten || !n.includes(".") || n.startsWith(".") || n.endsWith(".")) return false;
       const parts = n.split(".");
-      for (let i = 1; i < parts.length; i++) if (taken.has(parts.slice(0, i).join("."))) { notes.push(`Cột "${n}" trùng tiền tố với cột khác → giữ nguyên tên, không tách thành object lồng`); return false; }
+      for (let i = 1; i < parts.length; i++) if (taken.has(parts.slice(0, i).join("."))) { notes.push(T('Cột "{n}" trùng tiền tố với cột khác → giữ nguyên tên, không tách thành object lồng', { n })); return false; }
       return true;
     };
     const nested = names.map(nestable);
