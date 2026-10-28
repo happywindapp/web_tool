@@ -5,6 +5,7 @@ Mỗi tool trong `tools/` có đúng 1 file doc ở đây, cùng tên: `tools/<x
 | Tool | Doc |
 |------|-----|
 | Đọc & Format JSON · XML · HTML | [format-json-xml-html.md](format-json-xml-html.md) |
+| Soạn & xem trước sơ đồ Mermaid | [mermaid-diagram-editor.md](mermaid-diagram-editor.md) |
 
 ## Khung 1 file doc tool
 

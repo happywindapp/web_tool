@@ -14,6 +14,8 @@
 - [x] Chốt publish GitHub Pages: nhánh `main`, root (2026-10-27)
 - [x] Bật Pages (bật tay ở Settings → Pages) → https://happywindapp.github.io/web_tool/ (2026-10-27)
 
+- [x] Tool Soạn & xem trước sơ đồ Mermaid (review mermaid.live + tool khác, vendor Mermaid 12.2.0, ADR #5 #6) (2026-10-28)
+
 ## Đang làm (in progress)
 
 - _(trống)_

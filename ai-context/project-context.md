@@ -14,6 +14,7 @@ Tool hiện có:
 | Tool | File | Việc |
 |------|------|------|
 | Đọc & Format JSON · XML · HTML | `tools/format-json-xml-html.html` | Kiểm tra cú pháp, **tự sửa lỗi** cú pháp phổ biến, format (2/4 space/Tab), minify, xem dạng cây, tải về |
+| Soạn & xem trước sơ đồ Mermaid | `tools/mermaid-diagram-editor.html` (+ `tools/vendor/mermaid-12.2.0.min.js`) | Live editor kiểu mermaid.live, offline: preview, theme, xuất PNG/SVG, link `#pako:`, lịch sử trong localStorage |
 
 ## Kiến trúc high-level
 
@@ -34,7 +35,7 @@ Người dùng ─ dán / kéo-thả / mở file ─► <textarea id="src">
 - 4 module IIFE trong 1 `<script>`: `JsonTool`, `MarkupTool`, `ViewRender`, phần UI wiring.
 - **Tolerant parser (bộ phân tích chịu lỗi)**: không dừng ở lỗi đầu tiên mà đoán ý định, sửa, và ghi
   lại từng sửa đổi `{line, col, msg}` để người dùng duyệt.
-- Không backend, không storage, không network request.
+- Không backend, không network request. `localStorage` chỉ cho nháp/lịch sử (ADR #6); thư viện lớn để ở `tools/vendor/` (ADR #5).
 
 Chi tiết: [`docs/tools/format-json-xml-html.md`](../docs/tools/format-json-xml-html.md).
 

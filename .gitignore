@@ -27,6 +27,7 @@ build/
 venv/
 __pycache__/
 vendor/
+!tools/vendor/
 target/
 
 # Junction skills đa-AI (tạo bởi scripts/link-shared-skills.ps1) — KHÔNG commit, nguồn thật ở ai-context/skills/

@@ -1,0 +1,1 @@
+- [Vendor path blocked by scout hook](vendor-path-blocked-by-scout-hook.md) — printf trick to grep tools/vendor/mermaid; headless Chrome + local http server to test "no network"

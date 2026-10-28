@@ -8,6 +8,7 @@ không cài đặt, không build, không gửi dữ liệu đi đâu. Mở file 
 | Tool | File | Làm gì |
 |------|------|--------|
 | Đọc & Format JSON · XML · HTML | [`tools/format-json-xml-html.html`](tools/format-json-xml-html.html) | Kiểm tra cú pháp (báo dòng/cột), tự sửa lỗi phổ biến (thiếu dấu phẩy, nháy đơn, chú thích, thẻ chưa đóng…), format 2/4 space/Tab, thu gọn 1 dòng, xem dạng cây, sao chép/tải về |
+| Soạn & xem trước sơ đồ Mermaid | [`tools/mermaid-diagram-editor.html`](tools/mermaid-diagram-editor.html) | Live editor như mermaid.live nhưng offline: tô màu cú pháp, báo dòng lỗi, 22 sơ đồ mẫu, theme/kiểu nét, pan-zoom, xuất PNG (1–4x)/SVG/.mmd, chép ảnh/Markdown, link chia sẻ `#pako:` (tương thích mermaid.live), nháp + lịch sử trong trình duyệt. Cần kèm `tools/vendor/` |
 
 ## Dùng
 

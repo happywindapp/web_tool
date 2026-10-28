@@ -1,0 +1,657 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'unsafe-inline'; img-src data: blob:; font-src data:">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Soạn & xem trước sơ đồ Mermaid</title>
+<style>
+  :root { --bg:#f8fafc; --panel:#fff; --line:#cbd5e1; --ink:#0f172a; --muted:#64748b; --acc:#0e7490;
+          --good:#15803d; --bad:#b91c1c; --code:#f8fafc;
+          --k:#7c3aed; --s:#047857; --a:#be185d; --c:#94a3b8; }
+  * { box-sizing:border-box; }
+  [hidden] { display:none !important; }
+  body { margin:0; height:100vh; display:grid; grid-template-rows:auto 1fr auto; background:var(--bg); color:var(--ink);
+         font:14px/1.45 "Segoe UI", Arial, sans-serif; }
+  body.drop { outline:3px dashed var(--acc); outline-offset:-6px; }
+  header { display:flex; flex-wrap:wrap; gap:8px; align-items:center; padding:8px 16px; background:var(--panel); border-bottom:1px solid var(--line); }
+  header h1 { font-size:16px; margin:0 8px 0 0; }
+  a.btn { text-decoration:none; }
+  button, select, label.btn, a.btn { font:inherit; padding:5px 10px; border:1px solid var(--line); border-radius:6px; background:#fff; color:var(--ink); cursor:pointer; }
+  button.main { background:var(--acc); color:#fff; border-color:var(--acc); font-weight:600; }
+  label.btn input { display:none; }
+  label.chk { display:inline-flex; gap:4px; align-items:center; cursor:pointer; }
+  main { display:grid; grid-template-columns:var(--split, 40%) 8px minmax(0, 1fr); padding:10px 16px; min-height:0; }
+  #split { cursor:col-resize; margin:0 2px; border-radius:3px; touch-action:none; }
+  #split:hover { background:var(--line); }
+  .pane { display:grid; grid-template-rows:auto 1fr; min-height:0; min-width:0; background:var(--panel); border:1px solid var(--line); border-radius:8px; overflow:hidden; }
+  .bar { display:flex; gap:6px; align-items:center; padding:6px 10px; border-bottom:1px solid var(--line); flex-wrap:wrap; }
+  .bar b { margin-right:auto; }
+  .tabs button.on { background:var(--ink); color:#fff; border-color:var(--ink); }
+  .ed { display:grid; grid-template-columns:auto 1fr; min-height:0; }
+  #gut { margin:0; padding:8px 6px 40px 10px; text-align:right; color:#94a3b8; background:#f1f5f9; overflow:hidden; user-select:none;
+         font:12.5px/1.5 Consolas, "Cascadia Mono", monospace; white-space:pre; }
+  #gut b { color:#fff; background:var(--bad); border-radius:3px; padding:0 3px; }
+  .code { position:relative; min-height:0; }
+  .code > *, #cfg { position:absolute; inset:0; margin:0; padding:8px 10px; border:0; outline:0; resize:none; width:100%; height:100%; overflow:auto;
+         font:12.5px/1.5 Consolas, "Cascadia Mono", monospace; white-space:pre; tab-size:4; color:var(--ink); }
+  #hl { overflow:hidden; pointer-events:none; background:var(--code); padding-bottom:40px; padding-right:40px; }
+  #src { background:transparent; color:transparent; caret-color:var(--ink); }
+  #src::selection { background:rgba(14,116,144,.25); }
+  #cfg { position:static; background:var(--code); }
+  .k{color:var(--k);font-weight:600} .s{color:var(--s)} .a{color:var(--a);font-weight:600} .c{color:var(--c);font-style:italic}
+  #view { position:relative; overflow:hidden; cursor:grab; user-select:none; touch-action:none; }
+  #view.grab { cursor:grabbing; }
+  #stage { position:absolute; left:0; top:0; transform-origin:0 0; }
+  #stage.stale { opacity:.35; }
+  #stage svg { display:block; }
+  #zPct { min-width:58px; }
+  footer { background:var(--panel); border-top:1px solid var(--line); padding:6px 16px 10px; max-height:30vh; overflow:auto; }
+  #status { font-weight:600; margin:4px 0; } .good{color:var(--good)} .bad{color:var(--bad)} .muted{color:var(--muted)}
+  #err { margin:4px 0; padding:6px 8px; background:#fef2f2; border-radius:6px; color:var(--bad); font:12px/1.4 Consolas, monospace; white-space:pre-wrap; cursor:pointer; }
+  dialog { width:min(720px, 92vw); max-height:80vh; padding:0; border:1px solid var(--line); border-radius:8px; }
+  #hList { margin:0; padding:8px 16px 12px 36px; overflow:auto; max-height:60vh; }
+  #hList li { padding:4px 0; border-bottom:1px solid #f1f5f9; }
+  #hList code { display:block; color:var(--muted); font-size:12px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  @media (max-width: 900px) { main { grid-template-columns:1fr; grid-template-rows:45vh 0 50vh; gap:10px; } #split { display:none; } }
+</style>
+</head>
+<body>
+<header>
+  <a class="btn" href="../index.html">← Trang chủ</a>
+  <h1>Soạn &amp; xem trước sơ đồ Mermaid</h1>
+  <label class="btn">Mở file…<input id="file" type="file" accept=".mmd,.mermaid,.md,.txt"></label>
+  <select id="demo" title="Nạp sơ đồ mẫu"><option value="">Sơ đồ mẫu…</option></select>
+  <select id="theme" title="Theme (ghi vào cấu hình)"></select>
+  <select id="look" title="Kiểu nét"><option value="classic">Nét chuẩn</option><option value="handDrawn">Vẽ tay</option><option value="neo">Neo</option></select>
+  <label class="chk" title="Tự vẽ lại khi gõ"><input id="auto" type="checkbox" checked> Tự vẽ</label>
+  <button id="btnRender" class="main" title="Ctrl+Enter">Vẽ</button>
+  <button id="btnShare" title="Chép link chứa toàn bộ sơ đồ (tương thích mermaid.live)">Chia sẻ link</button>
+  <button id="btnOpenLink" title="Mở link chia sẻ của tool này hoặc của mermaid.live">Mở link…</button>
+  <button id="btnHist">Lịch sử</button>
+</header>
+<main>
+  <section class="pane">
+    <div class="bar"><b class="tabs"><button data-tab="code" class="on">Mã</button> <button data-tab="cfg">Cấu hình</button></b>
+      <span class="muted" id="fname"></span><button id="btnMd" title="Chép khối ```mermaid để dán vào Markdown">Chép Markdown</button><button id="btnMmd" title="Ctrl+S">Tải .mmd</button></div>
+    <div class="ed" id="edCode"><pre id="gut">1</pre><div class="code"><pre id="hl"></pre><textarea id="src" spellcheck="false" placeholder="Gõ mã Mermaid, ví dụ: flowchart LR&#10;    A --> B"></textarea></div></div>
+    <textarea id="cfg" spellcheck="false" hidden></textarea>
+  </section>
+  <div id="split" title="Kéo để đổi độ rộng"></div>
+  <section class="pane" id="pvPane">
+    <div class="bar"><b>Xem trước</b>
+      <button id="zOut" title="Thu nhỏ">−</button><button id="zPct" title="Về 100%">100%</button><button id="zIn" title="Phóng to">+</button>
+      <button id="zFit">Vừa khung</button><button id="btnFull" title="Toàn màn hình">⛶</button>
+      <select id="pngScale" title="Độ phân giải PNG"><option value="1">PNG 1x</option><option value="2" selected>PNG 2x</option><option value="3">PNG 3x</option><option value="4">PNG 4x</option></select>
+      <button id="btnPng">Tải PNG</button><button id="btnSvg">Tải SVG</button><button id="btnCopyPng">Chép ảnh</button></div>
+    <div id="view"><div id="stage"></div></div>
+  </section>
+</main>
+<footer>
+  <div id="status" class="muted">Đang tải thư viện Mermaid…</div>
+  <pre id="err" hidden title="Bấm để nhảy tới dòng lỗi"></pre>
+  <div class="muted" id="info"></div>
+  <div class="muted" style="font-size:12px">Kéo để di chuyển, lăn chuột để phóng to/thu nhỏ. Công cụ chạy hoàn toàn trên máy bạn, không gửi dữ liệu đi đâu; bản nháp và lịch sử chỉ lưu trong trình duyệt này. Link chia sẻ chứa sơ đồ ở phần sau dấu #, không gửi lên máy chủ.</div>
+</footer>
+<dialog id="hist">
+  <div class="bar"><b>Lịch sử phiên bản (lưu trên trình duyệt này)</b><button id="hSave">Lưu bản hiện tại</button><button id="hClear">Xoá tất cả</button><button id="hClose">Đóng</button></div>
+  <ol id="hList"></ol>
+</dialog>
+<script src="vendor/mermaid-12.2.0.min.js"></script>
+<script>
+const $ = id => document.getElementById(id);
+const esc = s => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+// localStorage may be blocked (private mode, browser policy) → every access degrades to "not saved".
+const Store = (() => {
+  const P = "mermaid-editor:";
+  const get = (k, d) => { try { const v = localStorage.getItem(P + k); return v == null ? d : JSON.parse(v); } catch { return d; } };
+  const set = (k, v) => { try { localStorage.setItem(P + k, JSON.stringify(v)); return true; } catch { return false; } };
+  const del = k => { try { localStorage.removeItem(P + k); } catch {} };
+  return { get, set, del };
+})();
+
+// Hash format of mermaid.live: "#pako:" + base64url(zlib(JSON {code, mermaid})) — links open in both tools.
+const ShareLink = (() => {
+  const b64url = u8 => { let s = ""; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode(...u8.subarray(i, i + 0x8000));
+                         return btoa(s).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, ""); };
+  const unb64 = s => { s = s.replace(/-/g, "+").replace(/_/g, "/"); return Uint8Array.from(atob(s + "===".slice((s.length + 3) % 4)), c => c.charCodeAt(0)); };
+  const pipe = async (u8, stream) => new Uint8Array(await new Response(new Blob([u8]).stream().pipeThrough(stream)).arrayBuffer());
+  async function encode(code, config) {
+    const json = new TextEncoder().encode(JSON.stringify({ code, mermaid: config, autoSync: true, updateDiagram: true }));
+    return "pako:" + b64url(await pipe(json, new CompressionStream("deflate")));
+  }
+  async function decode(hash) {
+    const h = decodeURIComponent(hash.replace(/^#/, ""));
+    let bytes;
+    if (h.startsWith("pako:")) bytes = await pipe(unb64(h.slice(5)), new DecompressionStream("deflate"));
+    else if (h.startsWith("base64:")) bytes = unb64(h.slice(7));
+    else return null;
+    const st = JSON.parse(new TextDecoder().decode(bytes));
+    return { code: String(st.code ?? ""), config: typeof st.mermaid === "string" ? st.mermaid : JSON.stringify(st.mermaid ?? {}, null, 2) };
+  }
+  return { encode, decode };
+})();
+
+// Approximate colouring for the overlay <pre> (no grammar): comments, strings, arrows, keywords.
+const Highlight = (() => {
+  const KW = new Set(("graph flowchart sequenceDiagram classDiagram stateDiagram stateDiagram-v2 erDiagram gantt pie journey gitGraph mindmap timeline " +
+    "quadrantChart xychart xychart-beta sankey sankey-beta block block-beta architecture architecture-beta kanban requirementDiagram packet packet-beta " +
+    "radar-beta treemap-beta C4Context C4Container C4Component C4Dynamic C4Deployment subgraph end direction participant actor loop alt else opt par and " +
+    "critical break rect note over activate deactivate autonumber box class classDef style linkStyle click state section title dateFormat axisFormat " +
+    "excludes todayMarker commit branch checkout merge requirement element accTitle accDescr columns group service junction in").split(" "));
+  const TOKEN = /(%%.*$)|(^---[ \t]*$)|("[^"\n]*")|((?:<\|?|[ox*](?=[-=.]))?[-=.~]{2,}(?:\|?>{1,2}|[x)o*](?!\w))?)|([A-Za-z_]\w*(?:-[A-Za-z0-9]+)*)/gm;
+  function html(text) {
+    let out = "", last = 0;
+    for (const m of text.matchAll(TOKEN)) {
+      const cls = m[1] || m[2] ? "c" : m[3] ? "s" : m[4] ? "a" : KW.has(m[5]) ? "k" : "";
+      out += esc(text.slice(last, m.index)) + (cls ? `<span class="${cls}">${esc(m[0])}</span>` : esc(m[0]));
+      last = m.index + m[0].length;
+    }
+    return out + esc(text.slice(last));
+  }
+  return { html };
+})();
+
+// Pan (drag) + zoom (wheel around cursor); the transform lives on #stage only, never on body/html.
+const PanZoom = (() => {
+  const view = $("view"), stage = $("stage");
+  let s = 1, x = 0, y = 0, drag = null;
+  const apply = () => { stage.style.transform = `translate(${x}px,${y}px) scale(${s})`; $("zPct").textContent = Math.round(s * 100) + "%"; };
+  function zoomAt(f, cx, cy) { const n = Math.min(20, Math.max(0.05, s * f)); x = cx - (cx - x) * n / s; y = cy - (cy - y) * n / s; s = n; apply(); }
+  function center(scale) {
+    const r = view.getBoundingClientRect(), w = stage.offsetWidth, h = stage.offsetHeight;
+    if (!w || !h || !r.width) return;
+    s = scale ?? Math.min((r.width - 32) / w, (r.height - 32) / h);
+    x = (r.width - w * s) / 2; y = Math.max(16, (r.height - h * s) / 2); apply();
+  }
+  const mid = f => { const r = view.getBoundingClientRect(); zoomAt(f, r.width / 2, r.height / 2); };
+  view.addEventListener("wheel", e => { e.preventDefault(); const r = view.getBoundingClientRect(); zoomAt(Math.exp(-e.deltaY * 0.0015), e.clientX - r.left, e.clientY - r.top); }, { passive: false });
+  view.addEventListener("pointerdown", e => { if (e.button) return; drag = { dx: e.clientX - x, dy: e.clientY - y }; view.setPointerCapture(e.pointerId); view.classList.add("grab"); });
+  view.addEventListener("pointermove", e => { if (drag) { x = e.clientX - drag.dx; y = e.clientY - drag.dy; apply(); } });
+  const stop = () => { drag = null; view.classList.remove("grab"); };
+  view.addEventListener("pointerup", stop); view.addEventListener("pointercancel", stop);
+  $("zIn").onclick = () => mid(1.25); $("zOut").onclick = () => mid(0.8);
+  $("zPct").onclick = () => center(1); $("zFit").onclick = () => center();
+  return { center };
+})();
+
+// PNG goes through a data: URL (not blob:) so the canvas stays untainted even with <foreignObject> labels.
+const Exporter = (() => {
+  const size = svg => { const vb = svg.viewBox.baseVal; return vb && vb.width ? [vb.width, vb.height] : [svg.clientWidth, svg.clientHeight]; };
+  function svgText(svg, bg) {
+    const c = svg.cloneNode(true), [w, h] = size(svg);
+    c.setAttribute("xmlns", "http://www.w3.org/2000/svg"); c.setAttribute("width", w); c.setAttribute("height", h);
+    c.style.backgroundColor = bg;
+    return '<?xml version="1.0" encoding="UTF-8"?>\n' + new XMLSerializer().serializeToString(c);
+  }
+  async function png(svg, bg, scale) {
+    const [w, h] = size(svg), img = new Image();
+    img.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svgText(svg, bg));
+    await img.decode();
+    const cv = document.createElement("canvas");
+    cv.width = Math.ceil(w * scale); cv.height = Math.ceil(h * scale);
+    const g = cv.getContext("2d");
+    g.fillStyle = bg; g.fillRect(0, 0, cv.width, cv.height); g.drawImage(img, 0, 0, cv.width, cv.height);
+    return new Promise((ok, no) => cv.toBlob(b => b ? ok(b) : no(new Error("ảnh quá lớn, hãy giảm độ phân giải")), "image/png"));
+  }
+  return { svgText, png };
+})();
+
+// Version history: auto snapshot at most once a minute on a successful render; newest first, capped.
+const History = (() => {
+  const MAX = 30, list = () => Store.get("history", []);
+  function add(code, config, force) {
+    const h = list(), top = h[0];
+    if (!code.trim() || (top && top.code === code && top.config === config)) return false;
+    if (!force && top && Date.now() - top.t < 60000) return false;
+    h.unshift({ t: Date.now(), code, config });
+    for (let n = MAX; n >= 1; n >>= 1) if (Store.set("history", h.slice(0, n))) return true;
+    return false;
+  }
+  const remove = t => Store.set("history", list().filter(v => v.t !== t));
+  return { list, add, remove, clear: () => Store.del("history") };
+})();
+
+const THEMES = ["default", "neutral", "dark", "forest", "base", "neo", "neo-dark", "redux", "redux-dark", "redux-color", "redux-dark-color"];
+const DEFAULT_CONFIG = '{\n  "theme": "default"\n}';
+let renderSeq = 0, errLine = 0, fitNext = true, fileName = "", lastBg = "#ffffff", timer;
+
+function report(text, cls, detail = "", line = 0) {
+  $("status").textContent = text; $("status").className = cls;
+  $("err").textContent = detail; $("err").hidden = !detail; $("err").dataset.line = line;
+  errLine = line; gutter();
+}
+const flash = (msg, bad) => { $("info").textContent = msg; $("info").className = bad ? "bad" : "muted"; };
+
+function gutter() {
+  const n = $("src").value.split("\n").length;
+  let h = ""; for (let i = 1; i <= n; i++) h += (i === errLine ? `<b>${i}</b>` : i) + "\n";
+  $("gut").innerHTML = h;
+}
+function syncScroll() { const t = $("src"); $("hl").scrollTop = $("gut").scrollTop = t.scrollTop; $("hl").scrollLeft = t.scrollLeft; }
+function paint() { const v = $("src").value; $("hl").innerHTML = (v.length < 2e5 ? Highlight.html(v) : esc(v)) + "\n"; gutter(); syncScroll(); }
+
+function readConfig() { const t = $("cfg").value.trim(); const c = t ? JSON.parse(t) : {}; if (typeof c !== "object" || Array.isArray(c)) throw new Error("cấu hình phải là 1 object JSON"); return c; }
+const bgOf = c => c.themeVariables?.background || (/dark/.test(c.theme || "") ? "#333333" : "#ffffff");
+const currentSvg = () => $("stage").querySelector("svg");
+
+// Mermaid drops front-matter, "%% …" lines and leading blanks before parsing → map its line N back to the editor line.
+function editorLine(code, n) {
+  const lines = code.split("\n"), fence = l => /^-{3}\s*$/.test(l);
+  let i = 0, seen = 0, started = false;
+  if (fence(lines[0])) { const end = lines.findIndex((l, k) => k > 0 && fence(l)); if (end > 0) i = end + 1; }
+  for (; i < lines.length; i++) {
+    if (/^\s*%%(?!\{)[^\n]+/.test(lines[i])) continue;
+    if (!started && (!lines[i].trim() || /^\s*%%\{.*\}%%\s*$/.test(lines[i]))) continue;
+    started = true;
+    if (++seen === n) break;
+  }
+  // EOF errors land on trailing blank lines → point at the last line with content
+  let at = Math.min(i, lines.length - 1);
+  while (at > 0 && !lines[at].trim()) at--;
+  return at + 1;
+}
+
+async function render() {
+  const seq = ++renderSeq, code = $("src").value, cfgText = $("cfg").value;
+  let cfg;
+  try { cfg = readConfig(); } catch (e) { return report(`✖ Cấu hình JSON lỗi: ${e.message}`, "bad"); }
+  if (!code.trim()) { $("stage").innerHTML = ""; return report("Chưa có nội dung.", "muted"); }
+  const t0 = performance.now();
+  try {
+    mermaid.initialize({ ...cfg, startOnLoad: false, securityLevel: "strict", suppressErrorRendering: true });
+    const { svg, diagramType } = await mermaid.render("mmd-" + seq, code);
+    if (seq !== renderSeq) return;
+    const stage = $("stage");
+    stage.innerHTML = svg; stage.classList.remove("stale");
+    const el = currentSvg(), vb = el.viewBox.baseVal;
+    el.style.maxWidth = "none";
+    if (vb && vb.width) { el.setAttribute("width", vb.width); el.setAttribute("height", vb.height); }
+    $("view").style.background = lastBg = bgOf(cfg);
+    if (fitNext) { fitNext = false; PanZoom.center(); }
+    report(`✔ Đã vẽ sơ đồ ${diagramType} · ${Math.round(performance.now() - t0)} ms`, "good");
+    History.add(code, cfgText);
+  } catch (e) {
+    if (seq !== renderSeq) return;
+    const msg = String(e?.message || e), syntax = /Parse error|Lexer error|Parsing failed|Expecting/i.test(msg);
+    const m = syntax && msg.match(/line\s+(\d+)/i), line = m ? editorLine(code, +m[1]) : 0;
+    $("stage").classList.toggle("stale", !!currentSvg());
+    const what = /No diagram type detected/i.test(msg) ? "Không nhận ra loại sơ đồ (dòng đầu phải là flowchart, sequenceDiagram…)"
+      : syntax ? `Lỗi cú pháp${line ? ` ở dòng ${line}` : ""}` : "Lỗi khi vẽ";
+    report(`✖ ${what}${currentSvg() ? " — đang hiện bản vẽ hợp lệ gần nhất (mờ)." : "."}`, "bad", msg, line);
+  }
+}
+
+function saveDraft() { if (!Store.set("draft", { code: $("src").value, config: $("cfg").value })) flash("✖ Không lưu được nháp (trình duyệt chặn hoặc đầy bộ nhớ) — hãy Tải .mmd để giữ bài.", true); }
+function syncSelects() {
+  let c = {}; try { c = readConfig(); } catch {}
+  $("theme").value = THEMES.includes(c.theme) ? c.theme : "default";
+  $("look").value = ["handDrawn", "neo"].includes(c.look) ? c.look : "classic";
+}
+function edited() { clearTimeout(timer); timer = setTimeout(() => { saveDraft(); if ($("auto").checked) render(); }, 500); }
+
+function setState({ code, config }, name = "") {
+  History.add($("src").value, $("cfg").value, true);
+  $("src").value = code; $("cfg").value = config || DEFAULT_CONFIG;
+  fileName = name; $("fname").textContent = name;
+  syncSelects(); paint(); saveDraft(); fitNext = true; render();
+}
+function patchConfig(key, val, dflt) {
+  let c; try { c = readConfig(); } catch (e) { syncSelects(); return report("✖ Sửa lỗi JSON ở tab Cấu hình trước khi đổi giao diện: " + e.message, "bad"); }
+  if (val === dflt && key !== "theme") delete c[key]; else c[key] = val;
+  $("cfg").value = JSON.stringify(c, null, 2); saveDraft(); render();
+}
+
+function download(name, blob) {
+  const a = document.createElement("a"), u = URL.createObjectURL(blob);
+  a.href = u; a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(u), 2000);
+}
+const baseName = () => (fileName || "so-do-mermaid").replace(/\.[^.]+$/, "");
+function copy(data, okMsg) {
+  return Promise.resolve()
+    .then(() => typeof data === "string" ? navigator.clipboard.writeText(data) : navigator.clipboard.write([new ClipboardItem({ "image/png": data })]))
+    .then(() => flash(okMsg), e => flash(`✖ Không sao chép được (${e.message}). Trình duyệt chặn clipboard — hãy dùng nút Tải về.`, true));
+}
+function needSvg() { const s = currentSvg(); if (!s) flash("Chưa có sơ đồ để xuất.", true); return s; }
+async function openHash(hash, from) {
+  try {
+    const st = await ShareLink.decode(hash);
+    if (!st) return false;
+    setState(st, from);
+    return true;
+  } catch (e) { flash("✖ Link chia sẻ bị hỏng hoặc không đúng định dạng: " + e.message, true); return false; }
+}
+
+function readFile(f) {
+  const r = new FileReader();
+  r.onload = () => { const t = String(r.result), m = t.match(/```mermaid\s*\n([\s\S]*?)```/); setState({ code: m ? m[1].replace(/\n$/, "") : t, config: $("cfg").value }, f.name); };
+  r.onerror = () => flash(`✖ Không đọc được file ${f.name}: ${r.error?.message || "lỗi không rõ"}`, true);
+  r.readAsText(f, "utf-8");
+}
+
+function showHistory() {
+  const h = History.list();
+  $("hList").innerHTML = h.length ? h.map(v => `<li data-t="${v.t}"><b>${new Date(v.t).toLocaleString("vi")}</b> · ${v.code.split("\n").length} dòng
+      <button data-act="restore">Khôi phục</button> <button data-act="del">Xoá</button><code>${esc(v.code.split("\n").find(l => l.trim() && !/^(---|%%)/.test(l.trim())) || "")}</code></li>`).join("")
+    : '<li class="muted">Chưa có phiên bản nào (hoặc trình duyệt chặn lưu trữ).</li>';
+  if (!$("hist").open) $("hist").showModal();
+}
+
+$("src").addEventListener("input", () => { paint(); edited(); });
+$("src").addEventListener("scroll", syncScroll);
+$("src").addEventListener("keydown", e => { if (e.key === "Tab" && !e.ctrlKey && !e.altKey) { e.preventDefault(); document.execCommand("insertText", false, "    "); } });
+$("cfg").addEventListener("input", () => { syncSelects(); edited(); });
+document.addEventListener("keydown", e => {
+  if ((e.ctrlKey || e.metaKey) && e.key === "Enter") { e.preventDefault(); saveDraft(); render(); }
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "s") { e.preventDefault(); $("btnMmd").click(); }
+});
+$("btnRender").onclick = () => { saveDraft(); render(); };
+$("auto").onchange = () => { Store.set("auto", $("auto").checked); if ($("auto").checked) render(); };
+$("theme").onchange = e => patchConfig("theme", e.target.value, "default");
+$("look").onchange = e => patchConfig("look", e.target.value, "classic");
+for (const t of document.querySelectorAll("[data-tab]")) t.onclick = () => {
+  document.querySelectorAll("[data-tab]").forEach(x => x.classList.toggle("on", x === t));
+  $("edCode").hidden = t.dataset.tab !== "code"; $("cfg").hidden = t.dataset.tab !== "cfg";
+};
+$("err").onclick = () => {
+  const line = +$("err").dataset.line, ta = $("src"), lines = ta.value.split("\n");
+  if (!line || line > lines.length) return;
+  document.querySelector('[data-tab="code"]').click();
+  const start = lines.slice(0, line - 1).join("\n").length + (line > 1 ? 1 : 0);
+  ta.focus(); ta.setSelectionRange(start, start + lines[line - 1].length);
+  ta.scrollTop = Math.max(0, (line - 5) * parseFloat(getComputedStyle(ta).lineHeight)); syncScroll();
+};
+$("file").onchange = e => { e.target.files[0] && readFile(e.target.files[0]); e.target.value = ""; };
+$("btnMmd").onclick = () => download(baseName() + ".mmd", new Blob([$("src").value], { type: "text/plain;charset=utf-8" }));
+$("btnMd").onclick = () => copy("```mermaid\n" + $("src").value.replace(/\s+$/, "") + "\n```\n", "Đã chép khối Markdown.");
+$("btnSvg").onclick = () => { const s = needSvg(); s && download(baseName() + ".svg", new Blob([Exporter.svgText(s, lastBg)], { type: "image/svg+xml" })); };
+$("btnPng").onclick = async () => {
+  const s = needSvg(); if (!s) return;
+  try { download(`${baseName()}@${$("pngScale").value}x.png`, await Exporter.png(s, lastBg, +$("pngScale").value)); }
+  catch (e) { flash("✖ Không xuất được PNG: " + e.message, true); }
+};
+$("btnCopyPng").onclick = () => { const s = needSvg(); s && copy(Exporter.png(s, lastBg, +$("pngScale").value), "Đã chép ảnh PNG vào clipboard."); };
+$("btnShare").onclick = async () => {
+  try {
+    const link = location.href.split("#")[0] + "#" + await ShareLink.encode($("src").value, $("cfg").value);
+    const local = location.protocol === "file:" ? " Đang mở bằng file:// nên link chỉ dùng được trên máy này." : "";
+    copy(link, `Đã chép link chia sẻ (${link.length.toLocaleString("vi")} ký tự).${local}`);
+  } catch (e) { flash("✖ Không tạo được link: " + e.message, true); }
+};
+$("btnOpenLink").onclick = async () => {
+  const s = prompt("Dán link chia sẻ (của tool này hoặc mermaid.live, dạng …#pako:…):");
+  if (!s) return;
+  const hash = s.slice(s.indexOf("#"));
+  if (s.includes("#") && /^#(pako|base64):/.test(hash)) openHash(hash, "từ link");
+  else flash("✖ Không thấy dữ liệu #pako: / #base64: trong link.", true);
+};
+$("btnHist").onclick = showHistory;
+$("hClose").onclick = () => $("hist").close();
+$("hSave").onclick = () => { flash(History.add($("src").value, $("cfg").value, true) ? "Đã lưu phiên bản." : "Không lưu: bản này trùng bản mới nhất, rỗng hoặc trình duyệt chặn lưu trữ."); showHistory(); };
+$("hClear").onclick = () => { if (confirm("Xoá toàn bộ lịch sử phiên bản?")) { History.clear(); showHistory(); } };
+$("hList").onclick = e => {
+  const b = e.target.closest("button"), t = +e.target.closest("li")?.dataset.t, v = History.list().find(x => x.t === t);
+  if (!b || !v) return;
+  if (b.dataset.act === "del") { History.remove(t); return showHistory(); }
+  setState({ code: v.code, config: v.config }, "");
+  $("hist").close(); flash(`Đã khôi phục bản ${new Date(v.t).toLocaleString("vi")} (bản đang sửa trước đó đã được lưu vào lịch sử).`);
+};
+$("btnFull").onclick = () => document.fullscreenElement ? document.exitFullscreen() : $("pvPane").requestFullscreen();
+document.addEventListener("fullscreenchange", () => setTimeout(() => PanZoom.center(), 50));
+$("split").onpointerdown = e => {
+  const sp = $("split"), main = document.querySelector("main");
+  sp.setPointerCapture(e.pointerId);
+  sp.onpointermove = ev => { const r = main.getBoundingClientRect(); main.style.setProperty("--split", Math.min(80, Math.max(20, (ev.clientX - r.left) / r.width * 100)) + "%"); };
+  sp.onpointerup = () => { sp.onpointermove = sp.onpointerup = null; };
+};
+$("demo").onchange = e => { const d = SAMPLES[e.target.value]; if (d) setState({ code: d[1], config: $("cfg").value }, ""); e.target.value = ""; };
+window.addEventListener("hashchange", async () => { if (await openHash(location.hash, "từ link chia sẻ")) history.replaceState(null, "", location.pathname + location.search); });
+window.addEventListener("pagehide", () => { if (!$("src").readOnly) saveDraft(); });
+document.body.ondragover = e => { e.preventDefault(); document.body.classList.add("drop"); };
+document.body.ondragleave = e => { if (!e.relatedTarget) document.body.classList.remove("drop"); };
+document.body.ondrop = e => { e.preventDefault(); document.body.classList.remove("drop"); e.dataTransfer.files[0] && readFile(e.dataTransfer.files[0]); };
+
+const SAMPLES = {
+  flowchart: ["Flowchart — sơ đồ luồng", `---
+title: Quy trình đặt lệnh
+---
+flowchart LR
+    A([Khách hàng]) --> B[Nhập lệnh]
+    B --> C{Đủ số dư?}
+    C -- Có --> D[Gửi lên sàn]
+    C -- Không --> E[Từ chối]:::bad
+    D --> F[(CSDL lệnh)]
+    D -.-> G>Thông báo]
+    classDef bad fill:#fee2e2,stroke:#b91c1c`],
+  sequence: ["Sequence — tuần tự", `sequenceDiagram
+    autonumber
+    actor KH as Khách hàng
+    participant FE as Web
+    participant API
+    participant DB as Cơ sở dữ liệu
+    KH->>FE: Đăng nhập
+    FE->>+API: POST /login
+    API->>DB: Kiểm tra tài khoản
+    DB-->>API: OK
+    alt Mật khẩu đúng
+        API-->>FE: token
+    else Sai mật khẩu
+        API-->>FE: 401
+    end
+    deactivate API
+    Note over FE,API: Token hết hạn sau 15 phút`],
+  class: ["Class — lớp", `classDiagram
+    class KhachHang {
+        +String hoTen
+        +String email
+    }
+    class TaiKhoan {
+        +String soTK
+        +decimal soDu
+        +napTien(soTien) bool
+        +rutTien(soTien) bool
+    }
+    class TaiKhoanTietKiem {
+        +float laiSuat
+    }
+    KhachHang "1" --> "*" TaiKhoan : sở hữu
+    TaiKhoan <|-- TaiKhoanTietKiem`],
+  state: ["State — trạng thái", `stateDiagram-v2
+    state "Mới" as Moi
+    state "Chờ khớp" as ChoKhop
+    state "Khớp một phần" as KhopMotPhan
+    state "Đã khớp" as DaKhop
+    state "Đã huỷ" as DaHuy
+    [*] --> Moi
+    Moi --> ChoKhop : Gửi lệnh
+    ChoKhop --> KhopMotPhan : Khớp 1 phần
+    KhopMotPhan --> DaKhop : Khớp hết
+    ChoKhop --> DaKhop : Khớp hết
+    ChoKhop --> DaHuy : Huỷ
+    DaKhop --> [*]
+    DaHuy --> [*]
+    note right of ChoKhop : Có thể sửa giá`],
+  er: ["ER — thực thể quan hệ", `erDiagram
+    KHACH_HANG ||--o{ DON_HANG : "đặt"
+    DON_HANG ||--|{ CHI_TIET : "gồm"
+    SAN_PHAM ||--o{ CHI_TIET : "thuộc"
+    KHACH_HANG {
+        int id PK
+        string ho_ten
+        string email UK
+    }
+    DON_HANG {
+        int id PK
+        int khach_hang_id FK
+        date ngay_dat
+    }`],
+  gantt: ["Gantt — kế hoạch", `gantt
+    title Kế hoạch dự án
+    dateFormat YYYY-MM-DD
+    section Phân tích
+        Thu thập yêu cầu :done, a1, 2026-11-02, 5d
+        Thiết kế         :active, a2, after a1, 7d
+    section Phát triển
+        Backend          :b1, after a2, 10d
+        Frontend         :b2, after a2, 12d
+    section Kiểm thử
+        UAT              :crit, c1, after b2, 5d
+        Go-live          :milestone, m1, after c1, 0d`],
+  pie: ["Pie — biểu đồ tròn", `pie showData
+    title Tỷ trọng danh mục
+    "Cổ phiếu" : 45
+    "Trái phiếu" : 30
+    "Tiền gửi" : 15
+    "Vàng" : 10`],
+  journey: ["User journey — hành trình", `journey
+    title Mở tài khoản online
+    section Đăng ký
+      Tải app: 5: Khách hàng
+      Nhập thông tin: 3: Khách hàng
+      Chụp CCCD: 2: Khách hàng
+    section Xác thực
+      eKYC: 4: Khách hàng, Hệ thống
+      Ký hợp đồng: 4: Khách hàng`],
+  git: ["Git graph — nhánh git", `gitGraph
+    commit id: "init"
+    branch develop
+    checkout develop
+    commit id: "feat-a"
+    branch feature-login
+    checkout feature-login
+    commit id: "login"
+    checkout develop
+    merge feature-login
+    checkout main
+    merge develop tag: "v1.0"
+    commit id: "hotfix"`],
+  mindmap: ["Mindmap — sơ đồ tư duy", `mindmap
+  root((Mermaid))
+    Luồng
+      flowchart
+      sequence
+    Dữ liệu
+      ER
+      class
+    Kế hoạch
+      gantt
+      timeline
+    Biểu đồ
+      pie
+      xychart`],
+  timeline: ["Timeline — dòng thời gian", `timeline
+    title Lộ trình sản phẩm 2026
+    Q1 : Khảo sát người dùng
+    Q2 : Bản thử nghiệm
+       : Thu phản hồi
+    Q3 : Ra mắt chính thức
+    Q4 : Mở rộng tính năng`],
+  quadrant: ["Quadrant — ma trận 4 ô", `quadrantChart
+    title Ưu tiên tính năng
+    x-axis Ít công sức --> Nhiều công sức
+    y-axis Giá trị thấp --> Giá trị cao
+    quadrant-1 Lên kế hoạch
+    quadrant-2 Làm ngay
+    quadrant-3 Cân nhắc
+    quadrant-4 Bỏ qua
+    Xuất PNG: [0.2, 0.85]
+    Chia sẻ link: [0.35, 0.7]
+    Cộng tác: [0.85, 0.75]
+    Đổi màu nút: [0.15, 0.2]`],
+  xychart: ["XY chart — cột & đường", `xychart-beta
+    title "Doanh thu 2026 (tỷ đồng)"
+    x-axis [T1, T2, T3, T4, T5, T6]
+    y-axis "Tỷ đồng" 0 --> 120
+    bar [52, 60, 75, 82, 95, 110]
+    line [50, 58, 70, 85, 90, 105]`],
+  sankey: ["Sankey — dòng chảy", `%% parser sankey chưa nhận chữ có dấu → viết không dấu
+sankey-beta
+
+Luong,Chi tieu,60
+Luong,Tiet kiem,25
+Luong,Dau tu,15
+Dau tu,Co phieu,10
+Dau tu,Trai phieu,5`],
+  block: ["Block — khối", `block-beta
+    columns 3
+    FE["Frontend"] space BE["Backend"]
+    space DB[("Database")] space
+    FE --> BE
+    BE --> DB`],
+  architecture: ["Architecture — kiến trúc", `architecture-beta
+    group sys(cloud)[He thong]
+    service web(internet)[Web] in sys
+    service api(server)[API] in sys
+    service db(database)[CSDL] in sys
+    service disk(disk)[Luu tru] in sys
+    web:R --> L:api
+    api:R --> L:db
+    db:B --> T:disk`],
+  kanban: ["Kanban — bảng công việc", `kanban
+  todo[Cần làm]
+    t1[Viết tài liệu]
+    t2[Thiết kế UI]
+  doing[Đang làm]
+    t3[Tool Mermaid]
+  done[Xong]
+    t4[Tool format JSON]`],
+  requirement: ["Requirement — yêu cầu", `requirementDiagram
+    requirement xuat_anh {
+        id: 1
+        text: "Xuất PNG/SVG"
+        risk: low
+        verifymethod: test
+    }
+    element tool {
+        type: "html"
+    }
+    tool - satisfies -> xuat_anh`],
+  c4: ["C4 — ngữ cảnh hệ thống", `C4Context
+    title Ngữ cảnh hệ thống
+    Person(user, "Người dùng")
+    System(tool, "Web Tools", "HTML chạy trong trình duyệt")
+    System_Ext(gh, "GitHub Pages", "Host file tĩnh")
+    Rel(user, tool, "Dùng")
+    Rel(gh, tool, "Phục vụ")`],
+  packet: ["Packet — cấu trúc gói tin", `packet-beta
+    title Gói tin UDP
+    0-15: "Source Port"
+    16-31: "Destination Port"
+    32-47: "Length"
+    48-63: "Checksum"
+    64-95: "Data (variable)"`],
+  radar: ["Radar — mạng nhện", `radar-beta
+    title So sánh công cụ
+    axis e["Dễ dùng"], o["Offline"], x["Xuất ảnh"], s["Chia sẻ"], c["Cộng tác"]
+    curve a["Tool này"]{4, 5, 4, 4, 1}
+    curve b["Công cụ online"]{5, 2, 5, 5, 3}
+    max 5`],
+  treemap: ["Treemap — cây tỷ trọng", `treemap-beta
+"Danh mục"
+    "Cổ phiếu"
+        "Ngân hàng": 30
+        "Bất động sản": 15
+    "Trái phiếu": 35
+    "Tiền mặt": 20`],
+};
+
+(async function boot() {
+  $("theme").innerHTML = THEMES.map(t => `<option value="${t}">Theme: ${t}</option>`).join("");
+  $("demo").innerHTML += Object.entries(SAMPLES).map(([k, v]) => `<option value="${k}">${v[0]}</option>`).join("");
+  $("auto").checked = Store.get("auto", true);
+  const draft = Store.get("draft", null);
+  $("src").value = draft?.code ?? SAMPLES.flowchart[1]; $("cfg").value = draft?.config || DEFAULT_CONFIG;
+  syncSelects(); paint();
+  if (typeof mermaid === "undefined") {
+    $("src").readOnly = $("cfg").readOnly = true;
+    return report("✖ Không nạp được thư viện tools/vendor/mermaid-12.2.0.min.js — hãy tải cả thư mục vendor/ cùng file HTML.", "bad");
+  }
+  const demo = new URLSearchParams(location.search).get("demo");
+  if (location.hash.length > 1 && await openHash(location.hash, "từ link chia sẻ")) history.replaceState(null, "", location.pathname + location.search);
+  else if (SAMPLES[demo]) { setState({ code: SAMPLES[demo][1], config: $("cfg").value }, ""); history.replaceState(null, "", location.pathname); }
+  else render();
+})();
+</script>
+</body>
+</html>
