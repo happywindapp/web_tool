@@ -7,17 +7,17 @@ const vm = require("node:vm");
 
 const root = path.join(__dirname, "..");
 const FILES = [
-  "third-party/js-yaml.min.js", "js/core/i18n-ui-language-vi-en.js", "js/core/text-utils.js", "js/parsers/format-detect.js", "js/parsers/json-tolerant-parser.js",
+  "third-party/js-yaml.min.js", "js/core/i18n-ui-language-vi-en.js", "js/core/text-utils.js", "js/core/share-link-codec.js", "js/parsers/format-detect.js", "js/parsers/json-tolerant-parser.js",
   "js/parsers/json-ast-transforms.js", "js/parsers/markup-tolerant-parser.js", "js/parsers/csv-parser.js", "js/parsers/css-minifier.js",
   "js/converters/value-model.js", "js/converters/table-shape.js", "js/converters/xml-value-mapper.js", "js/converters/output-writers.js",
   "js/converters/convert-engine.js", "js/diff/myers-sequence-diff.js", "js/diff/json-structural-diff.js",
 ];
 // Top-level const of a script is not a context property, so export the modules explicitly.
 const code = FILES.map(f => fs.readFileSync(path.join(root, f), "utf8")).join("\n;\n")
-  + "\n;globalThis.M = { Detect, JsonTool, JsonAst, MarkupTool, CsvTool, CssMin, Val, Convert, SeqDiff, JsonDiff };";
-const ctx = vm.createContext({ Blob, console });
+  + "\n;globalThis.M = { ShareCodec, Detect, JsonTool, JsonAst, MarkupTool, CsvTool, CssMin, Val, Convert, SeqDiff, JsonDiff };";
+const ctx = vm.createContext({ Blob, Response, TextEncoder, TextDecoder, CompressionStream, DecompressionStream, btoa, atob, console });
 vm.runInContext(code, ctx);
-const { Detect, JsonTool, JsonAst, MarkupTool, CsvTool, CssMin, Val, Convert, SeqDiff, JsonDiff } = ctx.M;
+const { ShareCodec, Detect, JsonTool, JsonAst, MarkupTool, CsvTool, CssMin, Val, Convert, SeqDiff, JsonDiff } = ctx.M;
 // Objects from the vm realm have another Object.prototype → compare through JSON.
 const same = (a, b) => assert.equal(JSON.stringify(a), JSON.stringify(b));
 
@@ -146,4 +146,14 @@ test("xml → json notes dropped comments / <?…?> / DOCTYPE", () => {
   assert.equal(r.out, '{"a":{"b":1}}');
   same(r.notes, ["Bỏ 2 chú thích, 1 khai báo <?…?>, 1 DOCTYPE (JSON không có chỗ chứa)"]);
   same(Convert.run("<a>1</a>", "xml", "json").notes, []);
+});
+
+test("share link codec: pako round trip, base64, raw text → null", async () => {
+  const p = { tab: "diff", text: "Tiếng Việt ✔ " + "x".repeat(70000), text2: "{}", opts: { "df-ws": true } };
+  const link = await ShareCodec.encode(p);
+  assert.match(link, /^pako:[A-Za-z0-9_-]+$/);
+  same(await ShareCodec.decode(link), p);
+  same(await ShareCodec.decode("base64:" + Buffer.from('{"tab":"format","text":"a"}').toString("base64url")), { tab: "format", text: "a" });
+  assert.equal(await ShareCodec.decode("hello"), null);
+  await assert.rejects(ShareCodec.decode("pako:not-zlib"));
 });

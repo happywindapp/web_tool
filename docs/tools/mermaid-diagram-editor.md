@@ -29,6 +29,7 @@ Dev/BA cần vẽ nhanh flowchart, sequence, ER… bằng mã Mermaid để dán
 |-----------|----------|
 | URL query `?demo=<key>` | Nạp sơ đồ mẫu (`flowchart sequence class state er gantt pie journey git mindmap timeline quadrant xychart sankey block architecture kanban requirement c4 packet radar treemap`) rồi vẽ |
 | URL hash `#pako:<b64url>` | `base64url(zlib(JSON {code, mermaid, autoSync, updateDiagram}))`, `mermaid` = chuỗi JSON cấu hình. **Cùng định dạng mermaid.live** → link 2 chiều dùng được. Nhận thêm `#base64:` (định dạng cũ). Mở xong thì xoá hash khỏi URL |
+| URL `?data=<mã>` | Mã Mermaid thô tự soạn (URL-encode) → nạp + vẽ; giá trị `pako:`/`base64:` giải như hash. Đi qua query ⇒ có gửi lên server — chỉ cho sơ đồ ngắn, không nhạy cảm. Ưu tiên hash khi có cả hai |
 | Input | Gõ/dán · `<input type=file>` · kéo-thả (`.mmd .mermaid .md .txt`, UTF-8); file có khối ` ```mermaid ` → lấy khối đầu |
 | Output | `<ten>.mmd` · `<ten>.svg` · `<ten>@<N>x.png`; chép PNG / khối Markdown vào clipboard |
 | localStorage | Khoá `mermaid-editor:draft` `{code, config}` · `mermaid-editor:history` `[{t, code, config}]` (≤ 30) · `mermaid-editor:auto` · `web_tool.lang` (ngôn ngữ UI, chung mọi tool) |

@@ -71,7 +71,7 @@
   <select id="look" title="Kiểu nét"><option value="classic">Nét chuẩn</option><option value="handDrawn">Vẽ tay</option><option value="neo">Neo</option></select>
   <label class="chk" title="Tự vẽ lại khi gõ"><input id="auto" type="checkbox" checked> Tự vẽ</label>
   <button id="btnRender" class="main" title="Ctrl+Enter">Vẽ</button>
-  <button id="btnShare" title="Chép link chứa toàn bộ sơ đồ (tương thích mermaid.live)">Chia sẻ link</button>
+  <button id="btnShare" title="Chép link chứa sơ đồ + cấu hình (dữ liệu nằm sau dấu #, không gửi lên máy chủ; tương thích mermaid.live)">🔗 Chia sẻ link</button>
   <button id="btnOpenLink" title="Mở link chia sẻ của tool này hoặc của mermaid.live">Mở link…</button>
   <button id="btnHist">Lịch sử</button>
   <span class="lang-switch" title="Ngôn ngữ"><button data-lang="vi">VI</button><button data-lang="en">EN</button></span>
@@ -180,8 +180,8 @@ I18n.add({
   "Tự vẽ lại khi gõ": "Re-render while typing",
   "Tự vẽ": "Auto render",
   "Vẽ": "Render",
-  "Chép link chứa toàn bộ sơ đồ (tương thích mermaid.live)": "Copy a link containing the whole diagram (mermaid.live compatible)",
-  "Chia sẻ link": "Share link",
+  "Chép link chứa sơ đồ + cấu hình (dữ liệu nằm sau dấu #, không gửi lên máy chủ; tương thích mermaid.live)": "Copy a link holding the diagram + config (the data sits after the #, never sent to a server; mermaid.live compatible)",
+  "🔗 Chia sẻ link": "🔗 Share link",
   "Mở link chia sẻ của tool này hoặc của mermaid.live": "Open a share link from this tool or from mermaid.live",
   "Mở link…": "Open link…",
   "Lịch sử": "History",
@@ -237,6 +237,7 @@ I18n.add({
   "Đã chép ảnh PNG vào clipboard.": "PNG image copied to the clipboard.",
   "Đang mở bằng file:// nên link chỉ dùng được trên máy này.": "Opened via file://, so the link only works on this machine.",
   "Đã chép link chia sẻ ({n} ký tự).": "Share link copied ({n} characters).",
+  "Trình duyệt chặn sao chép — hãy tự chép link này:": "The browser blocked copying — copy this link yourself:",
   "✖ Không tạo được link: {msg}": "✖ Could not create the link: {msg}",
   "Dán link chia sẻ (của tool này hoặc mermaid.live, dạng …#pako:…):": "Paste a share link (from this tool or mermaid.live, like …#pako:…):",
   "từ link": "from link",
@@ -548,7 +549,9 @@ $("btnShare").onclick = async () => {
   try {
     const link = location.href.split("#")[0] + "#" + await ShareLink.encode($("src").value, $("cfg").value);
     const local = location.protocol === "file:" ? " " + T("Đang mở bằng file:// nên link chỉ dùng được trên máy này.") : "";
-    copy(link, T("Đã chép link chia sẻ ({n} ký tự).", { n: I18n.num(link.length) }) + local);
+    const msg = T("Đã chép link chia sẻ ({n} ký tự).", { n: I18n.num(link.length) }) + local;
+    Promise.resolve().then(() => navigator.clipboard.writeText(link))
+      .then(() => flash(msg), () => prompt(T("Trình duyệt chặn sao chép — hãy tự chép link này:"), link));
   } catch (e) { flash(T("✖ Không tạo được link: {msg}", { msg: e.message }), true); }
 };
 $("btnOpenLink").onclick = async () => {
@@ -827,8 +830,13 @@ I18n.onChange(() => {
     $("src").readOnly = $("cfg").readOnly = true;
     return report(T(LOAD_ERROR), "bad");
   }
-  const demo = new URLSearchParams(location.search).get("demo");
+  const q = new URLSearchParams(location.search), demo = q.get("demo"), data = q.get("data");
   if (location.hash.length > 1 && await openHash(location.hash, "từ link chia sẻ")) history.replaceState(null, "", location.pathname + location.search);
+  else if (data) {
+    if (/^(pako|base64):/.test(data)) await openHash("#" + data, "từ link chia sẻ");
+    else setState({ code: data, config: $("cfg").value }, "từ link chia sẻ");
+    history.replaceState(null, "", location.pathname);
+  }
   else if (SAMPLES[demo]) { setState({ code: SAMPLES[demo][1], config: $("cfg").value }, ""); history.replaceState(null, "", location.pathname); }
   else render();
 })();

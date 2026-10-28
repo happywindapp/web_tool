@@ -13,7 +13,7 @@ không cài đặt, không build, không gửi dữ liệu đi đâu. Mở file 
 ## Dùng
 
 1. Mở `index.html` (trang chủ) hoặc thẳng `tools/data-workbench.html` bằng Chrome/Edge/Firefox.
-2. Chọn tab, dán nội dung, bấm **Mở file…** hoặc kéo-thả file vào trang. **Ctrl+Enter** = chạy. Nút **VI | EN** góc trên-phải đổi ngôn ngữ giao diện.
+2. Chọn tab, dán nội dung, bấm **Mở file…** hoặc kéo-thả file vào trang. **Ctrl+Enter** = chạy. Nút **VI | EN** góc trên-phải đổi ngôn ngữ giao diện; **🔗 Chia sẻ link** chép link chứa dữ liệu + tuỳ chọn (sau dấu `#`, không gửi lên server).
 3. Xem kết quả + danh sách thay đổi (bấm dòng để nhảy tới vị trí); **Gửi kết quả sang…** để chuyển sang tab khác.
 
 Thử nhanh với mẫu lỗi: thêm `?demo=json`, `?demo=xml` hoặc `?demo=html` vào URL (tab Format); `?tab=convert|csv|diff|code` mở thẳng tab.
@@ -50,7 +50,9 @@ Sau khi clone, chạy `pwsh scripts/link-shared-skills.ps1` một lần để t�
    checklist song ngữ ở [`docs/architecture/README.md`](docs/architecture/README.md) mục 3.
 3. **Dữ liệu mẫu để test nhanh (bắt buộc):** dropdown `Thử mẫu…` (chọn là nạp + chạy) + URL `?demo=<key>`; có mẫu hợp lệ
    và mẫu lỗi/ca khó, dữ liệu giả, nội dung bằng English — checklist "Dữ liệu mẫu" cùng mục 3 ở trên.
-4. Thêm 1 card vào `index.html` (kèm bản English của tên + mô tả trong `I18n.add` của `index.html`) và 1 dòng vào bảng **Tools** ở trên.
-5. Viết `docs/tools/<ten-viec-kebab-case>.md` (ghi các key `?demo=`) theo khung trong [`docs/tools/README.md`](docs/tools/README.md).
+4. **Link chia sẻ (bắt buộc):** nút `🔗 Chia sẻ link` tạo link `#pako:` mang dữ liệu + tuỳ chọn, mở link là nạp + chạy; đọc thêm `?data=` —
+   checklist "Link chia sẻ" cùng mục 3 ở trên (ADR #9).
+5. Thêm 1 card vào `index.html` (kèm bản English của tên + mô tả trong `I18n.add` của `index.html`) và 1 dòng vào bảng **Tools** ở trên.
+6. Viết `docs/tools/<ten-viec-kebab-case>.md` (ghi các key `?demo=` và contract link chia sẻ) theo khung trong [`docs/tools/README.md`](docs/tools/README.md).
 
 Quy ước chi tiết: [`docs/decisions/README.md`](docs/decisions/README.md).

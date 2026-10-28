@@ -27,6 +27,8 @@ Tool hiện có: `tools/data-workbench.html` (format/tự sửa JSON·XML·HTML 
   Làm đủ **checklist song ngữ** ở `docs/architecture/README.md` mục 3 trước khi báo xong (ADR #8).
 - **Mọi tool BẮT BUỘC có dữ liệu mẫu để test nhanh**: dropdown `Thử mẫu…` (chọn là nạp + chạy) + URL `?demo=<key>`;
   có mẫu hợp lệ và mẫu lỗi/ca khó, dữ liệu giả, nội dung bằng English — checklist "Dữ liệu mẫu" ở `docs/architecture/README.md` mục 3.
+- **Mọi tool BẮT BUỘC có nút `🔗 Chia sẻ link`**: link `#pako:` (dữ liệu + tuỳ chọn, chỉ ở hash — không đưa dữ liệu vào query),
+  mở link là nạp + chạy, đọc thêm `?data=`, không làm mất bài đang sửa — checklist "Link chia sẻ" ở `docs/architecture/README.md` mục 3 (ADR #9).
 - Mọi tool phải có khối tác giả `<div class="author">` (Tác giả + GitHub Source) ngay sau footer trạng thái — chép markup/CSS chuẩn từ `docs/architecture/README.md` mục 3.
 - Ngoại lệ có chủ đích với luật "file < 200 dòng": tool phải tự chứa để mở trực tiếp (xem `docs/decisions/`).
 - Data Workbench: **chỉ sửa `src/data-workbench/`**, không sửa tay `tools/data-workbench.html`; sửa xong chạy build + `-Check` + test node.

@@ -93,7 +93,7 @@
       const ext = fileName.includes(".") ? fileName.split(".").pop() : lastLang;
       Dom.download(lastOut, `${Dom.baseName(fileName)}.formatted.${ext}`);
     };
-    $("cf-demo").onchange = e => { demo(e.target.value); e.target.value = ""; };
+    $("cf-demo").onchange = e => { Workbench.demo("code", e.target.value); e.target.value = ""; };
     Workbench.bindSendTo($("cf-send"), "code", () => lastOut ? { text: lastOut, kind: lastLang } : null);
     if (ed.value.trim()) syncLangUi(lang()); else demo("css");
   }
@@ -101,5 +101,7 @@
   Workbench.register("code", {
     label: "Format CSS · JS", init, onFile, demo, primary: run, receive: text => { load("", text); run(); },
     relang: () => { showName(); syncLangUi(lang()); if (redo) redo(); },
+    snapshot: () => ({ text: ed.value }),
+    open: p => { load("", p.text); run(); },
   });
 })();

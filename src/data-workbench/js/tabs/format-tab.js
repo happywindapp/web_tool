@@ -111,7 +111,7 @@
         $("fmt-out").hidden = b.dataset.view !== "out"; $("fmt-tree").hidden = b.dataset.view !== "tree";
       };
     });
-    $("fmt-demo").onchange = e => { demo(e.target.value); e.target.value = ""; };
+    $("fmt-demo").onchange = e => { Workbench.demo("format", e.target.value); e.target.value = ""; };
     Workbench.bindSendTo($("fmt-send"), "format", () => lastOut ? { text: lastOut, kind: lastKind } : null);
     if (ed.value.trim()) check(); else demo("json");
   }
@@ -121,5 +121,7 @@
     primary: () => run("pretty"),
     receive: (text, meta) => { load("", text); if (KIND_LABEL[meta.kind]) run("pretty"); },
     relang: () => { showName(); showKind(); redo(); },
+    snapshot: () => ({ text: ed.value }),
+    open: p => { load("", p.text); run("pretty"); },
   });
 })();

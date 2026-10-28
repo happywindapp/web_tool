@@ -18,6 +18,9 @@ giữa JSON/CSV/XML/YAML/SQL; xem-sửa CSV dạng bảng; so 2 phiên bản; fo
 |-----------|----------|
 | URL `?tab=format\|convert\|csv\|diff\|code` | Mở thẳng tab; không có thì mở tab dùng lần trước (localStorage) |
 | URL `?demo=json\|xml\|html\|nested` | Tab Format: nạp mẫu lỗi rồi chạy "Format & sửa lỗi" ngay. Không kèm `tab` ⇒ tab Format |
+| Link chia sẻ `?tab=<id>#pako:<b64url>` | Nút **🔗 Chia sẻ link** (header) chép link của tab đang mở: `base64url(zlib(JSON {tab, text, text2?, opts}))` — `text2` = bên phải tab So sánh, `opts` = giá trị mọi `select`/`input` trong toolbar tab (trừ mẫu, gửi sang, file); Bảng CSV gửi bảng hiện tại (đã sửa) dạng CSV. Dữ liệu nằm **sau `#` ⇒ không gửi lên server** (ADR #9). Nhận thêm `#base64:` (không nén). Mở link ⇒ nạp + chạy ngay, rồi xoá hash khỏi URL (F5 không đè bài). Dán link mới vào thanh địa chỉ (`hashchange`) cũng nạp |
+| URL `?data=<text>` | Dữ liệu thô tự soạn (URL-encode), vào tab `?tab=` (mặc định Format) rồi chạy; giá trị bắt đầu `pako:`/`base64:` được giải như link chia sẻ. Đi qua query ⇒ **có gửi lên server** và dễ lỗi 414 khi dài — chỉ dùng cho dữ liệu ngắn, không nhạy cảm |
+| Khôi phục bản trước | Nạp link hoặc chọn mẫu khi tab đang có nội dung khác (không phải mẫu) ⇒ giữ bản cũ (nội dung + tuỳ chọn) trong bộ nhớ trang, hiện nút **↶ Khôi phục bản trước**; bấm là trả lại và ẩn nút. Mất khi đóng/F5 trang |
 | Dữ liệu mẫu khởi đầu | Tab mở lần đầu mà ô nhập trống (không có nháp) ⇒ tự nạp mẫu `DEMOS` rồi chạy luôn: Format = JSON lỗi · Chuyển đổi = JSON → CSV · Bảng CSV = CSV có lỗi · So sánh = JSON 2 phiên bản · CSS·JS = CSS 1 dòng. Bảng CSV không lưu nháp ⇒ lần nào mở cũng có mẫu. So sánh: dữ liệu gửi sang / thả file vào thay hẳn cặp mẫu chưa sửa (không so với nửa mẫu) |
 | Input | Dán text · `<input type=file>` · kéo-thả file vào trang (vào tab đang mở); UTF-8, bỏ BOM. Tab CSV chọn được bảng mã |
 | Tên file tải về | Format/CSS·JS: `<base>.formatted.<ext>` · Chuyển đổi: `<base>.<ext đích>` · Bảng CSV: `<base>.edited.csv\|tsv`; dán tay ⇒ base `ket-qua` (EN: `result`) |
@@ -184,7 +187,7 @@ Vùng giống nhau > ±3 dòng thu gọn, bấm để mở. Giới hạn: > 3.00
 src/data-workbench/
   data-workbench.template.html  # khung trang + marker @include (thứ tự include = thứ tự chạy)
   styles/*.css  partials/*.html  third-party/ (js-beautify, js-yaml + LICENSE)
-  js/core/        I18n + T() (song ngữ, nạp đầu tiên) · TextUtil · Dom/Store · LineEditor (gutter + nháp) · ReportPanel · Workbench (router tab)
+  js/core/        I18n + T() (song ngữ, nạp đầu tiên) · TextUtil · ShareCodec (link pako:) · Dom/Store · LineEditor (gutter + nháp) · ReportPanel · Workbench (router tab)
   js/i18n/        từ điển English: en-markup-labels · en-tab-status-messages · en-parser-converter-messages (khoá = chuỗi VI)
   js/parsers/     Detect · JsonTool · JsonAst · MarkupTool · CsvTool · CssMin
   js/render/      ViewRender
@@ -195,7 +198,8 @@ src/data-workbench/
   tests/i18n-dictionary-coverage.test.js  # mọi chuỗi VI ở markup / literal / T() phải có English, placeholder {x} khớp
 ```
 
-- `Workbench.register(id, {label, init, primary, receive, onFile, demo, relang})`: tab khởi tạo lười khi mở lần đầu; Ctrl+Enter gọi `primary`; đổi ngôn ngữ gọi `relang` của tab đã mở;
+- `Workbench.register(id, {label, init, primary, receive, onFile, demo, relang, snapshot, open})`: tab khởi tạo lười khi mở lần đầu; Ctrl+Enter gọi `primary`; đổi ngôn ngữ gọi `relang` của tab đã mở;
+  `snapshot()` → `{text, text2?}` (chia sẻ link + giữ bản cũ), `open(p)` nạp + chạy; dropdown mẫu gọi `Workbench.demo(id, key)` để giữ bản cũ trước khi nạp mẫu;
   "Gửi kết quả sang…" gọi `receive(text, {kind})` của tab đích; kéo-thả file gọi `onFile` của tab đang mở.
 - Build: thay mỗi dòng `@include <file>` bằng nội dung file; JS có `</script` được đổi thành `<\/script`, có `<script` thì build dừng.
 

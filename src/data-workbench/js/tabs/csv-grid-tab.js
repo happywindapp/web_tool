@@ -141,7 +141,7 @@
         `${Dom.baseName(fileName)}.edited.${d === "\t" ? "tsv" : "csv"}`, "text/csv;charset=utf-8");
     };
     $("csv-clear").onclick = () => { lastFile = null; head = []; rows = []; loadText(""); };
-    $("csv-demo").onchange = e => { demo(e.target.value); e.target.value = ""; };
+    $("csv-demo").onchange = e => { Workbench.demo("csv", e.target.value); e.target.value = ""; };
     Workbench.bindSendTo($("csv-send"), "csv", () => head.length ? { text: csvText(), kind: outDelim() === "\t" ? "tsv" : "csv" } : null);
     demo("csv");
   }
@@ -151,5 +151,9 @@
     if (d) { lastFile = null; loadText(d.text, d.name); }
   }
 
-  Workbench.register("csv", { label: "Bảng CSV", init, onFile, receive, demo, relang: () => { render(); lastShow(); } });
+  Workbench.register("csv", {
+    label: "Bảng CSV", init, onFile, receive, demo, relang: () => { render(); lastShow(); },
+    snapshot: () => ({ text: head.length ? csvText() : "" }),
+    open: p => { lastFile = null; loadText(p.text); },
+  });
 })();

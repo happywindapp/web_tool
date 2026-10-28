@@ -66,6 +66,8 @@ Không có. Không backend, không API, không DB, không CDN.
   tool mới/sửa tool làm đủ checklist song ngữ ở [`docs/architecture/README.md`](../docs/architecture/README.md) mục 3 (ADR #8).
 - **Mọi tool phải có dữ liệu mẫu để test nhanh**: dropdown `Thử mẫu…` (chọn là nạp + chạy) + `?demo=<key>`; mẫu hợp lệ + mẫu lỗi,
   dữ liệu giả, nội dung bằng English — checklist "Dữ liệu mẫu" cùng mục 3.
+- **Mọi tool phải có nút `🔗 Chia sẻ link`**: link `…#pako:<payload>` mang dữ liệu + tuỳ chọn (chỉ ở hash, không gửi lên server), mở là nạp + chạy;
+  đọc thêm `?data=` — checklist "Link chia sẻ" cùng mục 3 (ADR #9).
 - Git commit/push do user tự chạy.
 
 ## Đang vướng

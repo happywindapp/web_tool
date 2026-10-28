@@ -93,7 +93,7 @@
     $("df-clear").onclick = clear;
     document.querySelectorAll("#df-mode, #df-ws, #df-case, #df-ctx").forEach(el => el.addEventListener("change", autoRun));
     $("df-result").onclick = e => { const tr = e.target.closest("tr.skip"); if (tr) tr.outerHTML = hidden[+tr.dataset.skip]; };
-    $("df-demo").onchange = e => { demo(e.target.value); e.target.value = ""; };
+    $("df-demo").onchange = e => { Workbench.demo("diff", e.target.value); e.target.value = ""; };
     if (edA.value.trim() || edB.value.trim()) autoRun(); else demo("json");
   }
 
@@ -102,5 +102,7 @@
     onFile: f => intoFreeSide(ed => readInto(ed, f)),
     receive: text => intoFreeSide(ed => { ed.set(text); autoRun(); }),
     relang: run,
+    snapshot: () => ({ text: edA.value, text2: edB.value }),
+    open: p => { edA.set(p.text); edB.set(p.text2 || ""); run(); },
   });
 })();

@@ -84,7 +84,7 @@
       const bom = lastTo === "csv" || lastTo === "tsv" ? "﻿" : "";
       Dom.download(bom + lastOut, `${Dom.baseName(fileName)}.${Convert.EXT[lastTo]}`);
     };
-    $("cv-demo").onchange = e => { demo(e.target.value); e.target.value = ""; };
+    $("cv-demo").onchange = e => { Workbench.demo("convert", e.target.value); e.target.value = ""; };
     Workbench.bindSendTo($("cv-send"), "convert", () => lastOut ? { text: lastOut, kind: lastTo } : null);
     if (ed.value.trim()) run(); else demo("json");
   }
@@ -93,5 +93,7 @@
     label: "Chuyển đổi", init, onFile, demo, primary: run,
     receive: (text, meta) => load("", text, FROM.includes(meta.kind) ? meta.kind : "auto"),
     relang: () => { showName(); run(); },
+    snapshot: () => ({ text: ed.value }),
+    open: p => load("", p.text, $("cv-from").value),
   });
 })();

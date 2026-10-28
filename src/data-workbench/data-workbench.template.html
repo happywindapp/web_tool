@@ -22,6 +22,9 @@
     <button data-wb-tab="diff">So sánh</button>
     <button data-wb-tab="code">Format CSS · JS</button>
   </nav>
+  <button id="wb-share" title="Chép link chứa dữ liệu + tuỳ chọn của tab đang mở (dữ liệu nằm sau dấu #, không gửi lên máy chủ)">🔗 Chia sẻ link</button>
+  <button id="wb-undo" title="Lấy lại nội dung đang soạn trước khi nạp mẫu / link" hidden>↶ Khôi phục bản trước</button>
+  <span id="wb-note" class="muted"></span>
   <span class="seg lang-switch" title="Ngôn ngữ"><button data-lang="vi">VI</button><button data-lang="en">EN</button></span>
 </header>
 <!-- @include partials/format-tab.html -->
@@ -49,6 +52,7 @@
 // @include js/i18n/en-tab-status-messages.js
 // @include js/i18n/en-parser-converter-messages.js
 // @include js/core/text-utils.js
+// @include js/core/share-link-codec.js
 // @include js/core/dom-and-storage-helpers.js
 // @include js/core/line-numbered-editor.js
 // @include js/core/report-panel.js

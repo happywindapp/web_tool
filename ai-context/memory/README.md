@@ -33,4 +33,8 @@
   **bắt buộc mọi AI khi thêm/sửa tool:** dropdown `Thử mẫu…` + `?demo=<key>`, mẫu hợp lệ + mẫu lỗi, dữ liệu giả;
   checklist ở `docs/architecture/README.md` mục 3.
 
+- [new-tool-must-have-share-link-button.md](new-tool-must-have-share-link-button.md) —
+  **bắt buộc mọi AI khi thêm/sửa tool:** nút `🔗 Chia sẻ link`, link `#pako:` (dữ liệu chỉ ở hash), mở link là nạp + chạy, đọc `?data=`,
+  không mất bài đang sửa; checklist ở `docs/architecture/README.md` mục 3.
+
 - [scaffold-robocopy-copies-skill-junctions.md](scaffold-robocopy-copies-skill-junctions.md) — robocopy cần `/XJ` khi copy template

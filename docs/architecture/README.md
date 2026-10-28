@@ -19,8 +19,8 @@ Xem `docs/tools/<tool>.md` — danh sách ở [`docs/tools/`](../tools/README.md
 
 ## 3. Nguyên tắc kiến trúc
 
-- Thêm tool mới = thêm 1 file `tools/<ten-kebab>.html`, cùng khuôn: header toolbar (có dropdown dữ liệu mẫu) · nút `VI | EN` · 2 pane · footer trạng thái · khối tác giả.
-  Tool chưa song ngữ hoặc chưa có dữ liệu mẫu = **chưa xong** (xem 2 checklist bên dưới).
+- Thêm tool mới = thêm 1 file `tools/<ten-kebab>.html`, cùng khuôn: header toolbar (có dropdown dữ liệu mẫu + nút `🔗 Chia sẻ link`) · nút `VI | EN` · 2 pane · footer trạng thái · khối tác giả.
+  Tool chưa song ngữ, chưa có dữ liệu mẫu hoặc chưa có link chia sẻ = **chưa xong** (xem 3 checklist bên dưới).
 - **Dữ liệu mẫu để test nhanh (bắt buộc mọi tool):** người dùng phải thử được tool trong 1 cú bấm, không cần chuẩn bị input.
   1. Toolbar có `<select>` mẫu, option đầu rỗng `Thử mẫu…` (tên mẫu ngắn, mô tả tình huống: "JSON lỗi", "CSV có lỗi"…).
      Chọn xong là **nạp + chạy luôn** rồi trả dropdown về option rỗng. Tool nhiều tab ⇒ mỗi tab 1 dropdown mẫu riêng.
@@ -33,6 +33,20 @@ Xem `docs/tools/<tool>.md` — danh sách ở [`docs/tools/`](../tools/README.md
   5. Tên mẫu trong dropdown dịch theo VI/EN; **nội dung mẫu viết bằng English** (tên, ghi chú, nhãn sơ đồ…), cố định, không đổi theo ngôn ngữ UI.
   6. Tool có nháp/lịch sử: nạp mẫu không được âm thầm làm mất bài đang sửa (lưu vào lịch sử trước, như Mermaid `setState`).
   7. Ghi danh sách key `?demo=` vào mục Contract của `docs/tools/<tool>.md`.
+- **Link chia sẻ dữ liệu (bắt buộc mọi tool) — ADR #9:** người dùng gửi được đúng dữ liệu + kết quả cho người khác bằng 1 link.
+  1. Header có nút `🔗 Chia sẻ link` (tooltip: "dữ liệu nằm sau dấu #, không gửi lên máy chủ"). Bấm ⇒ chép link, báo số ký tự;
+     mở bằng `file://` ⇒ báo thêm "link chỉ dùng được trên máy này"; trình duyệt chặn clipboard ⇒ `prompt()` hiện link để tự chép.
+  2. Định dạng: `<tool>.html[?tab=<id>]#pako:<base64url(zlib(JSON payload))>`, cùng định dạng mermaid.live; đọc thêm `#base64:` (không nén).
+     Dùng codec `src/data-workbench/js/core/share-link-codec.js` (`ShareCodec.encode/decode`) — tool 1 file thì **chép nguyên văn**.
+     Dữ liệu **luôn ở hash**, không bao giờ tạo link đưa dữ liệu vào query (query đi lên server/log, lỗi 414 khi dài).
+  3. Payload = dữ liệu người dùng + mọi tuỳ chọn ảnh hưởng kết quả (+ tab nếu nhiều tab) ⇒ người nhận thấy **đúng kết quả** như người gửi.
+  4. Mở link ⇒ nạp + chạy ngay, rồi xoá hash/`data` khỏi URL (`history.replaceState`) để F5 không đè bài; nghe `hashchange` để dán link mới vào thanh địa chỉ cũng nạp.
+  5. Đọc thêm `?data=<text>` (dữ liệu thô tự soạn; giá trị `pako:`/`base64:` giải như hash). Doc tool ghi rõ dạng này đi lên server, chỉ cho dữ liệu ngắn.
+  6. Nạp link không âm thầm làm mất bài đang sửa: giữ bản cũ + nút `↶ Khôi phục bản trước` (Data Workbench) hoặc lưu vào lịch sử (Mermaid).
+  7. Payload là dữ liệu không tin cậy: chỉ gán vào field đã biết của tool, kiểm kiểu (`text` là string…), kết quả vẫn escape như input thường;
+     link hỏng ⇒ báo lỗi rõ, không đụng nháp.
+  8. Ghi contract link (định dạng, payload, `?data=`) vào `docs/tools/<tool>.md`.
+  9. Kiểm: tạo link → mở ở trang mới → ra cùng dữ liệu, tuỳ chọn, kết quả; thử link hỏng và `?data=` thô.
 - **Khối tác giả (bắt buộc mọi tool):** đặt ngay sau `</footer>` trạng thái, chép nguyên văn markup + CSS dưới đây:
 
   ```html
