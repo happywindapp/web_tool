@@ -7,7 +7,7 @@ không cài đặt, không build, không gửi dữ liệu đi đâu. Mở file 
 
 | Tool | File | Làm gì |
 |------|------|--------|
-| Data Workbench | [`tools/data-workbench.html`](tools/data-workbench.html) (sinh từ `src/data-workbench/`) | 5 tab: **Format JSON·XML·HTML** (kiểm tra, tự sửa lỗi, format 2/3/4/8/Tab, thu gọn, sắp khóa, giải JSON lồng, thành chuỗi JSON, cây) · **Chuyển đổi** JSON/CSV/TSV/XML/YAML → JSON/CSV/TSV/XML/YAML/JS object/SQL INSERT/Markdown/HTML table · **Bảng CSV** (bảng mã, sort, lọc, sửa ô, thêm/xoá hàng-cột, xuất có BOM) · **So sánh** (theo dòng, JSON theo cấu trúc) · **Format CSS·JS**. `tools/format-json-xml-html.html` chuyển hướng về đây |
+| Data Workbench | [`tools/data-workbench.html`](tools/data-workbench.html) (sinh từ `src/data-workbench/`) | 5 tab: **Format JSON·XML·HTML** (kiểm tra, tự sửa lỗi, format 2/3/4/8/Tab, thu gọn, sắp khóa, giải JSON lồng, thành chuỗi JSON, cây) · **Chuyển đổi** JSON/CSV/TSV/XML/YAML → JSON/CSV/TSV/XML/YAML/JS object/SQL INSERT/Markdown/HTML table · **Bảng CSV** (bảng mã, sort, lọc, sửa ô, thêm/xoá hàng-cột, xuất có BOM) · **So sánh** (theo dòng, JSON theo cấu trúc) · **Format CSS·JS** |
 | Soạn & xem trước sơ đồ Mermaid | [`tools/mermaid-diagram-editor.html`](tools/mermaid-diagram-editor.html) | Live editor như mermaid.live nhưng offline: tô màu cú pháp, báo dòng lỗi, 22 sơ đồ mẫu, theme/kiểu nét, pan-zoom, xuất PNG (1–4x)/SVG/.mmd, chép ảnh/Markdown, link chia sẻ `#pako:` (tương thích mermaid.live), nháp + lịch sử trong trình duyệt. Cần kèm `tools/vendor/` |
 
 ## Dùng

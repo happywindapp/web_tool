@@ -11,6 +11,8 @@
 | WT-4 | low | `navigator.clipboard.writeText` không có `.catch` → host qua `http://` (không secure) thì "Sao chép" thất bại im lặng | `Dom.copy` | closed 2026-10-28: fallback `execCommand` + báo khi thất bại |
 | WT-5 | low | HTML: `&` chưa thoát được đổi thành `&amp;` nhưng không ghi vào `fixes` (XML thì có) — lệch nguyên tắc "không sửa âm thầm" | `MarkupTool.build` / `escText` | closed 2026-10-28: HTML giữ nguyên `&` (hợp lệ HTML), XML vẫn sửa + báo |
 | WT-6 | low | Tab CSV đoán kiểu số theo chuẩn JSON: `27.500` (kiểu VN = 27500) bị hiểu là 27.5 khi chuyển sang JSON/SQL. Người dùng tắt "Tự đoán kiểu" khi dữ liệu dùng dấu chấm ngăn nghìn | `Val.infer` | open — cân nhắc tuỳ chọn locale số |
+| WT-7 | low | (có từ tool cũ) `fix()` tính `lineCol` bằng slice từ đầu chuỗi mỗi lần → O(n × số fix), XML vài MB nhiều `&` trần có thể đứng tab; HTML không phát hiện thuộc tính trùng khác hoa/thường (`ID`/`id`) | `JsonTool.parse` / `MarkupTool.build` | open |
+| WT-8 | low | SQL INSERT chỉ nhân đôi `'` (chuẩn ANSI/PostgreSQL/SQL Server); MySQL mặc định coi `\` là escape → giá trị kết thúc bằng `\` làm vỡ câu lệnh | `Writers.sql` | closed 2026-10-28: chọn PostgreSQL (mặc định) / MySQL / SQL Server / SQLite |
 
 ## Blockers
 

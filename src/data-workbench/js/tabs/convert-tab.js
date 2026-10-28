@@ -10,7 +10,7 @@
   const opts = () => ({
     delimiter: delim(), header: $("cv-header").checked, infer: $("cv-infer").checked, flatten: $("cv-flatten").checked,
     indent: TextUtil.indentUnit($("cv-indent").value), root: $("cv-root").value.trim() || "root", item: $("cv-item").value.trim() || "item",
-    attrPrefix: $("cv-attr").value, table: $("cv-table").value.trim() || "my_table", fileName,
+    attrPrefix: $("cv-attr").value, table: $("cv-table").value.trim() || "my_table", sqlDialect: $("cv-sql").value, fileName,
   });
 
   // data-show="from:csv,tsv|to:sql" → visible when the source or target kind matches one rule.

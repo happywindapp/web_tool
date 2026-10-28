@@ -2,7 +2,7 @@
 
 > File chạy: [`tools/data-workbench.html`](../../tools/data-workbench.html) — **FILE SINH RA** từ
 > [`src/data-workbench/`](../../src/data-workbench/) bằng `pwsh scripts/build-data-workbench-single-file.ps1` (ADR #7).
-> `tools/format-json-xml-html.html` (tool cũ) giờ chỉ chuyển hướng sang tab Format, giữ `?demo=`.
+> Thay tool cũ `tools/format-json-xml-html.html` (đã xoá 2026-10-28 — link cũ trả 404, dùng `data-workbench.html?tab=format`).
 > Luật chung mọi tool: `docs/architecture/`, `docs/security/`, `docs/decisions/`.
 
 ## 1. Người dùng & mục đích
@@ -18,7 +18,6 @@ giữa JSON/CSV/XML/YAML/SQL; xem-sửa CSV dạng bảng; so 2 phiên bản; fo
 |-----------|----------|
 | URL `?tab=format\|convert\|csv\|diff\|code` | Mở thẳng tab; không có thì mở tab dùng lần trước (localStorage) |
 | URL `?demo=json\|xml\|html\|nested` | Tab Format: nạp mẫu lỗi rồi chạy "Format & sửa lỗi" ngay. Không kèm `tab` ⇒ tab Format |
-| `tools/format-json-xml-html.html?demo=…` | Chuyển hướng → `data-workbench.html?tab=format&demo=…` (giữ link cũ) |
 | Input | Dán text · `<input type=file>` · kéo-thả file vào trang (vào tab đang mở); UTF-8, bỏ BOM. Tab CSV chọn được bảng mã |
 | Tên file tải về | Format/CSS·JS: `<base>.formatted.<ext>` · Chuyển đổi: `<base>.<ext đích>` · Bảng CSV: `<base>.edited.csv\|tsv`; dán tay ⇒ base `ket-qua` |
 | CSV tải về | Có BOM (Excel đọc đúng tiếng Việt) — tab CSV cho tắt; xuống dòng CRLF/LF tuỳ chọn |
@@ -142,7 +141,9 @@ nguồn ──read──► value model ──write──► đích
 | Làm phẳng | Object lồng → cột `a.b`; mảng/object rỗng → JSON text. CSV → JSON thì cột `a.b` → object lồng |
 | Chọn hàng | Bóc các wrapper 1 khoá (`{"data": …}`), hoặc lấy mảng object duy nhất trong object → ghi chú "Dùng mảng tại …" |
 | Tiêu đề | Rỗng → `colN`; trùng → `ten_2` + ghi chú. Không có tiêu đề → mảng các mảng |
-| SQL INSERT | Định danh không hợp lệ → `"tên"`; chuỗi `'…'` (nhân đôi `'`), `NULL`, `TRUE/FALSE`, số giữ nguyên; **1000 hàng / câu INSERT** (giới hạn SQL Server) |
+| SQL INSERT | Chọn hệ quản trị (mặc định **PostgreSQL**). Định danh không hợp lệ được đặt nháy: PostgreSQL/SQLite `"x"`, MySQL `` `x` ``, SQL Server `[x]`; `schema.bang` đặt nháy từng phần. Chuỗi nhân đôi `'` (MySQL thêm nhân đôi `\`, SQL Server dùng `N'…'` để giữ Unicode). Boolean: `TRUE/FALSE` (PostgreSQL, MySQL), `1/0` (SQL Server, SQLite). `NULL`, số giữ nguyên; **1000 hàng / câu INSERT** (giới hạn SQL Server) |
+| XML → giá trị | Chú thích, `<?…?>`, DOCTYPE bị bỏ (JSON không có chỗ chứa) → 1 dòng note đếm số lượng |
+| Trùng tên | Khóa JSON trùng → giữ giá trị sau + note. Cột `a` cạnh `a.b` → giữ `a.b` phẳng + note. Khóa `"a.b"` cạnh `a:{b}` khi làm phẳng → `a.b_2` + note. **Không bao giờ đè dữ liệu âm thầm** |
 | Markdown | Dấu gạch đứng trong ô được thoát bằng gạch chéo ngược, xuống dòng → thẻ br, cột toàn số căn phải |
 | Lỗi YAML | Báo dòng/cột từ `e.mark` |
 

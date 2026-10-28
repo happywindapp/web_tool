@@ -12,7 +12,15 @@ const XmlMap = (() => {
   const escT = s => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
   const escA = s => escT(s).replace(/"/g, "&quot;");
 
-  function fromXml(text, { attrPrefix = "@", infer = true } = {}) {
+  // JSON has no place for comments, <?…?> or DOCTYPE — say how many were dropped.
+  function droppedNotes(root) {
+    const n = { comment: 0, pi: 0, doctype: 0 };
+    (function walk(x) { for (const k in n) if (x[k]) n[k]++; (x.children || []).forEach(walk); })(root);
+    const parts = [n.comment && `${n.comment} chú thích`, n.pi && `${n.pi} khai báo <?…?>`, n.doctype && `${n.doctype} DOCTYPE`].filter(Boolean);
+    return parts.length ? [`Bỏ ${parts.join(", ")} (JSON không có chỗ chứa)`] : [];
+  }
+
+  function fromXml(text,{ attrPrefix = "@", infer = true } = {}) {
     const { root, fixes } = MarkupTool.build(text, false);
     const conv = s => infer ? Val.infer(s) : s;
     function el(n) {
@@ -36,7 +44,7 @@ const XmlMap = (() => {
     }
     const value = {};
     for (const c of root.children.filter(c => c.name)) Val.put(value, c.name, el(c));
-    return { value, fixes };
+    return { value, fixes, notes: droppedNotes(root) };
   }
 
   function toXml(value, { root = "root", item = "item", attrPrefix = "@", indent = "  " } = {}) {

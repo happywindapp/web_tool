@@ -128,3 +128,22 @@ test("review fixes: duplicate keys noted, wrapper kept, nested arrays in xml, cs
   assert.equal(JsonDiff.compare(p('{"p":0.30000000000000001}'), p('{"p":0.3}')).length, 1);
   assert.equal(JsonDiff.compare(p('{"p":1.0}'), p('{"p":1}')).length, 0);
 });
+
+test("sql dialects: quoting, string escape, booleans, schema.table", () => {
+  const src = '[{"tên KH":"O\'Hara\\\\","ok":true}]';
+  const sql = d => Convert.run(src, "json", "sql", { table: "app.khach hang", sqlDialect: d }).out.split("\n")[1];
+  assert.equal(Convert.run(src, "json", "sql", { table: "app.khach hang" }).out.split("\n")[0], 'INSERT INTO app."khach hang" ("tên KH", ok) VALUES');
+  assert.equal(sql("postgresql"), "  ('O''Hara\\', TRUE);");
+  assert.equal(sql("mysql"), "  ('O''Hara\\\\', TRUE);");
+  assert.equal(sql("sqlserver"), "  (N'O''Hara\\', 1);");
+  assert.equal(sql("sqlite"), "  ('O''Hara\\', 1);");
+  assert.match(Convert.run(src, "json", "sql", { sqlDialect: "sqlserver" }).out, /\[tên KH\]/);
+  assert.match(Convert.run(src, "json", "sql", { sqlDialect: "mysql" }).out, /`tên KH`/);
+});
+
+test("xml → json notes dropped comments / <?…?> / DOCTYPE", () => {
+  const r = Convert.run('<?xml version="1.0"?>\n<!DOCTYPE a>\n<!-- c1 -->\n<a><!-- c2 --><b>1</b></a>', "xml", "json", { indent: "" });
+  assert.equal(r.out, '{"a":{"b":1}}');
+  same(r.notes, ["Bỏ 2 chú thích, 1 khai báo <?…?>, 1 DOCTYPE (JSON không có chỗ chứa)"]);
+  same(Convert.run("<a>1</a>", "xml", "json").notes, []);
+});

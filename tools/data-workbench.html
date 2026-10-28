@@ -154,6 +154,7 @@
     <label class="chk" data-show="from:csv,tsv,xml" title="&quot;123&quot; → số, &quot;true&quot; → boolean. Số có 0 ở đầu (mã KH, số TK) vẫn giữ là chuỗi."><input id="cv-infer" type="checkbox" checked>Tự đoán kiểu số / true / false</label>
     <label class="chk" data-show="from:csv,tsv|to:csv,tsv,sql,markdown,html" title="Object lồng → cột &quot;a.b&quot;; đọc CSV thì cột &quot;a.b&quot; → object lồng"><input id="cv-flatten" type="checkbox" checked>Làm phẳng khóa lồng (a.b)</label>
     <span data-show="from:xml|to:xml">XML: gốc <input id="cv-root" type="text" class="short" value="root"> mục <input id="cv-item" type="text" class="short" value="item"> tiền tố thuộc tính <input id="cv-attr" type="text" class="short" value="@"></span>
+    <select id="cv-sql" data-show="to:sql" title="Hệ quản trị CSDL — quyết định cách đặt nháy tên cột, thoát chuỗi và giá trị boolean"><option value="postgresql">PostgreSQL</option><option value="mysql">MySQL / MariaDB</option><option value="sqlserver">SQL Server</option><option value="sqlite">SQLite</option></select>
     <label data-show="to:sql">Tên bảng <input id="cv-table" type="text" class="short" value="my_table"></label>
     <span class="sep"></span>
     <button id="cv-run" class="main" title="Ctrl+Enter">Chuyển đổi</button>
@@ -1252,7 +1253,15 @@ const XmlMap = (() => {
   const escT = s => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
   const escA = s => escT(s).replace(/"/g, "&quot;");
 
-  function fromXml(text, { attrPrefix = "@", infer = true } = {}) {
+  // JSON has no place for comments, <?…?> or DOCTYPE — say how many were dropped.
+  function droppedNotes(root) {
+    const n = { comment: 0, pi: 0, doctype: 0 };
+    (function walk(x) { for (const k in n) if (x[k]) n[k]++; (x.children || []).forEach(walk); })(root);
+    const parts = [n.comment && `${n.comment} chú thích`, n.pi && `${n.pi} khai báo <?…?>`, n.doctype && `${n.doctype} DOCTYPE`].filter(Boolean);
+    return parts.length ? [`Bỏ ${parts.join(", ")} (JSON không có chỗ chứa)`] : [];
+  }
+
+  function fromXml(text,{ attrPrefix = "@", infer = true } = {}) {
     const { root, fixes } = MarkupTool.build(text, false);
     const conv = s => infer ? Val.infer(s) : s;
     function el(n) {
@@ -1276,7 +1285,7 @@ const XmlMap = (() => {
     }
     const value = {};
     for (const c of root.children.filter(c => c.name)) Val.put(value, c.name, el(c));
-    return { value, fixes };
+    return { value, fixes, notes: droppedNotes(root) };
   }
 
   function toXml(value, { root = "root", item = "item", attrPrefix = "@", indent = "  " } = {}) {
@@ -1367,13 +1376,22 @@ const Writers = (() => {
       ...t.rows.map(r => `${i2}<tr>${head.map((_, c) => `<td>${e(r[c])}</td>`).join("")}</tr>`), `${i1}</tbody>`, "</table>"].join("\n");
   }
 
-  function sql(t, table = "my_table") {
-    const id = n => SQL_IDENT.test(n) ? n : `"${n.replace(/"/g, '""')}"`;
-    const lit = v => v === null || v === undefined ? "NULL" : Val.isNum(v) ? v.raw : typeof v === "boolean" ? (v ? "TRUE" : "FALSE") : `'${String(v).replace(/'/g, "''")}'`;
+  // MySQL treats "\" as an escape char; SQL Server needs N'' for Unicode and has no boolean literal.
+  const DIALECT = {
+    postgresql: { q: n => `"${n.replace(/"/g, '""')}"`, str: s => `'${s.replace(/'/g, "''")}'`, bool: b => b ? "TRUE" : "FALSE" },
+    mysql: { q: n => `\`${n.replace(/`/g, "``")}\``, str: s => `'${s.replace(/\\/g, "\\\\").replace(/'/g, "''")}'`, bool: b => b ? "TRUE" : "FALSE" },
+    sqlserver: { q: n => `[${n.replace(/]/g, "]]")}]`, str: s => `N'${s.replace(/'/g, "''")}'`, bool: b => b ? "1" : "0" },
+    sqlite: { q: n => `"${n.replace(/"/g, '""')}"`, str: s => `'${s.replace(/'/g, "''")}'`, bool: b => b ? "1" : "0" },
+  };
+
+  function sql(t, table = "my_table", dialect = "postgresql") {
+    const d = DIALECT[dialect] || DIALECT.postgresql;
+    const id = n => SQL_IDENT.test(n) ? n : d.q(n);
+    const lit = v => v === null || v === undefined ? "NULL" : Val.isNum(v) ? v.raw : typeof v === "boolean" ? d.bool(v) : d.str(String(v));
     const head = headerOf(t), cols = head.map(id).join(", "), out = [];
     for (let i = 0; i < t.rows.length; i += SQL_BATCH) {
       const vals = t.rows.slice(i, i + SQL_BATCH).map(r => `  (${head.map((_, c) => lit(r[c])).join(", ")})`);
-      out.push(`INSERT INTO ${id(table)} (${cols}) VALUES\n${vals.join(",\n")};`);
+      out.push(`INSERT INTO ${table.split(".").map(id).join(".")} (${cols}) VALUES\n${vals.join(",\n")};`);
     }
     return out.join("\n\n");
   }
@@ -1383,11 +1401,11 @@ const Writers = (() => {
 // Convert pipeline: parse input (tolerant where possible) → value model → writer. Returns text + fixes (with lines) + notes.
 const Convert = (() => {
   const EXT = { json: "json", js: "js", yaml: "yaml", xml: "xml", csv: "csv", tsv: "tsv", sql: "sql", markdown: "md", html: "html" };
-  const DEFAULTS = { delimiter: "auto", header: true, infer: true, flatten: true, indent: "  ", root: "root", item: "item", attrPrefix: "@", table: "my_table" };
+  const DEFAULTS = { delimiter: "auto", header: true, infer: true, flatten: true, indent: "  ", root: "root", item: "item", attrPrefix: "@", table: "my_table", sqlDialect: "postgresql" };
 
   function read(text, from, o, notes) {
     if (from === "json") { const r = JsonTool.parse(text); return { value: Val.fromAst(r.ast, notes), fixes: r.fixes }; }
-    if (from === "xml") return XmlMap.fromXml(text, o);
+    if (from === "xml") { const r = XmlMap.fromXml(text, o); notes.push(...r.notes); return r; }
     if (from === "yaml") {
       let docs;
       try { docs = jsyaml.loadAll(TextUtil.stripBom(text), null, { schema: jsyaml.CORE_SCHEMA }); }
@@ -1413,7 +1431,7 @@ const Convert = (() => {
     if (to === "tsv") return Writers.csv(t, "\t");
     if (to === "markdown") return Writers.markdown(t);
     if (to === "html") return Writers.html(t, o.indent);
-    return Writers.sql(t, o.table || "my_table");
+    return Writers.sql(t, o.table || "my_table", o.sqlDialect);
   }
 
   function run(text, from, to, opts = {}) {
@@ -1674,7 +1692,7 @@ const DEMOS = {
   const opts = () => ({
     delimiter: delim(), header: $("cv-header").checked, infer: $("cv-infer").checked, flatten: $("cv-flatten").checked,
     indent: TextUtil.indentUnit($("cv-indent").value), root: $("cv-root").value.trim() || "root", item: $("cv-item").value.trim() || "item",
-    attrPrefix: $("cv-attr").value, table: $("cv-table").value.trim() || "my_table", fileName,
+    attrPrefix: $("cv-attr").value, table: $("cv-table").value.trim() || "my_table", sqlDialect: $("cv-sql").value, fileName,
   });
 
   // data-show="from:csv,tsv|to:sql" → visible when the source or target kind matches one rule.

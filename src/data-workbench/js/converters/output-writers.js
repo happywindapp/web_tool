@@ -43,13 +43,22 @@ const Writers = (() => {
       ...t.rows.map(r => `${i2}<tr>${head.map((_, c) => `<td>${e(r[c])}</td>`).join("")}</tr>`), `${i1}</tbody>`, "</table>"].join("\n");
   }
 
-  function sql(t, table = "my_table") {
-    const id = n => SQL_IDENT.test(n) ? n : `"${n.replace(/"/g, '""')}"`;
-    const lit = v => v === null || v === undefined ? "NULL" : Val.isNum(v) ? v.raw : typeof v === "boolean" ? (v ? "TRUE" : "FALSE") : `'${String(v).replace(/'/g, "''")}'`;
+  // MySQL treats "\" as an escape char; SQL Server needs N'' for Unicode and has no boolean literal.
+  const DIALECT = {
+    postgresql: { q: n => `"${n.replace(/"/g, '""')}"`, str: s => `'${s.replace(/'/g, "''")}'`, bool: b => b ? "TRUE" : "FALSE" },
+    mysql: { q: n => `\`${n.replace(/`/g, "``")}\``, str: s => `'${s.replace(/\\/g, "\\\\").replace(/'/g, "''")}'`, bool: b => b ? "TRUE" : "FALSE" },
+    sqlserver: { q: n => `[${n.replace(/]/g, "]]")}]`, str: s => `N'${s.replace(/'/g, "''")}'`, bool: b => b ? "1" : "0" },
+    sqlite: { q: n => `"${n.replace(/"/g, '""')}"`, str: s => `'${s.replace(/'/g, "''")}'`, bool: b => b ? "1" : "0" },
+  };
+
+  function sql(t, table = "my_table", dialect = "postgresql") {
+    const d = DIALECT[dialect] || DIALECT.postgresql;
+    const id = n => SQL_IDENT.test(n) ? n : d.q(n);
+    const lit = v => v === null || v === undefined ? "NULL" : Val.isNum(v) ? v.raw : typeof v === "boolean" ? d.bool(v) : d.str(String(v));
     const head = headerOf(t), cols = head.map(id).join(", "), out = [];
     for (let i = 0; i < t.rows.length; i += SQL_BATCH) {
       const vals = t.rows.slice(i, i + SQL_BATCH).map(r => `  (${head.map((_, c) => lit(r[c])).join(", ")})`);
-      out.push(`INSERT INTO ${id(table)} (${cols}) VALUES\n${vals.join(",\n")};`);
+      out.push(`INSERT INTO ${table.split(".").map(id).join(".")} (${cols}) VALUES\n${vals.join(",\n")};`);
     }
     return out.join("\n\n");
   }

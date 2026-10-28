@@ -13,7 +13,7 @@ Tool hiện có:
 
 | Tool | File | Việc |
 |------|------|------|
-| Data Workbench | `tools/data-workbench.html` — **file sinh ra** từ `src/data-workbench/` (ADR #7); `tools/format-json-xml-html.html` chỉ chuyển hướng | 5 tab: Format JSON·XML·HTML (**tự sửa lỗi**, sort key, giải JSON lồng) · Chuyển đổi JSON/CSV/TSV/XML/YAML → … + SQL/Markdown/HTML table · Bảng CSV · So sánh (dòng / JSON cấu trúc) · Format CSS·JS |
+| Data Workbench | `tools/data-workbench.html` — **file sinh ra** từ `src/data-workbench/` (ADR #7); thay tool cũ `format-json-xml-html.html` (đã xoá) | 5 tab: Format JSON·XML·HTML (**tự sửa lỗi**, sort key, giải JSON lồng) · Chuyển đổi JSON/CSV/TSV/XML/YAML → … + SQL/Markdown/HTML table · Bảng CSV · So sánh (dòng / JSON cấu trúc) · Format CSS·JS |
 | Soạn & xem trước sơ đồ Mermaid | `tools/mermaid-diagram-editor.html` (+ `tools/vendor/mermaid-12.2.0.min.js`) | Live editor kiểu mermaid.live, offline: preview, theme, xuất PNG/SVG, link `#pako:`, lịch sử trong localStorage |
 
 ## Kiến trúc high-level

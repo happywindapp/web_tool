@@ -10,6 +10,7 @@
     <label class="chk" data-show="from:csv,tsv,xml" title="&quot;123&quot; → số, &quot;true&quot; → boolean. Số có 0 ở đầu (mã KH, số TK) vẫn giữ là chuỗi."><input id="cv-infer" type="checkbox" checked>Tự đoán kiểu số / true / false</label>
     <label class="chk" data-show="from:csv,tsv|to:csv,tsv,sql,markdown,html" title="Object lồng → cột &quot;a.b&quot;; đọc CSV thì cột &quot;a.b&quot; → object lồng"><input id="cv-flatten" type="checkbox" checked>Làm phẳng khóa lồng (a.b)</label>
     <span data-show="from:xml|to:xml">XML: gốc <input id="cv-root" type="text" class="short" value="root"> mục <input id="cv-item" type="text" class="short" value="item"> tiền tố thuộc tính <input id="cv-attr" type="text" class="short" value="@"></span>
+    <select id="cv-sql" data-show="to:sql" title="Hệ quản trị CSDL — quyết định cách đặt nháy tên cột, thoát chuỗi và giá trị boolean"><option value="postgresql">PostgreSQL</option><option value="mysql">MySQL / MariaDB</option><option value="sqlserver">SQL Server</option><option value="sqlite">SQLite</option></select>
     <label data-show="to:sql">Tên bảng <input id="cv-table" type="text" class="short" value="my_table"></label>
     <span class="sep"></span>
     <button id="cv-run" class="main" title="Ctrl+Enter">Chuyển đổi</button>
