@@ -8,7 +8,7 @@
 `c:/_web_tool` **chính là git repo** `happywindapp/web_tool` (nhánh `main`): bộ công cụ web tiện ích,
 mỗi tool là **1 file HTML tự chứa** trong `tools/`, chạy 100% client-side, không gọi mạng.
 Tool hiện có: `tools/data-workbench.html` (format/tự sửa JSON·XML·HTML · chuyển đổi · bảng CSV · so sánh · CSS/JS) —
-**file sinh ra** từ `src/data-workbench/`, build `pwsh scripts/build-data-workbench-single-file.ps1` (ADR #7); `tools/mermaid-diagram-editor.html`.
+**file sinh ra** từ `src/data-workbench/`, build `pwsh scripts/build-data-workbench-single-file.ps1` (ADR #7); `tools/fix-message-parser.html` (FIX 4.4 + Server Sàn) — **file sinh ra** từ `src/fix-message-parser/`, build `pwsh scripts/build-single-file-tool.ps1 -Tool fix-message-parser`; `tools/mermaid-diagram-editor.html`.
 Đọc `ai-context/project-context.md` để nắm toàn cảnh.
 
 ## Tech stack
@@ -31,7 +31,7 @@ Tool hiện có: `tools/data-workbench.html` (format/tự sửa JSON·XML·HTML 
   mở link là nạp + chạy, đọc thêm `?data=`, không làm mất bài đang sửa — checklist "Link chia sẻ" ở `docs/architecture/README.md` mục 3 (ADR #9).
 - Mọi tool phải có khối tác giả `<div class="author">` (Tác giả + GitHub Source) ngay sau footer trạng thái — chép markup/CSS chuẩn từ `docs/architecture/README.md` mục 3.
 - Ngoại lệ có chủ đích với luật "file < 200 dòng": tool phải tự chứa để mở trực tiếp (xem `docs/decisions/`).
-- Data Workbench: **chỉ sửa `src/data-workbench/`**, không sửa tay `tools/data-workbench.html`; sửa xong chạy build + `-Check` + test node.
+- Data Workbench / FIX Parser: **chỉ sửa `src/<tool>/`**, không sửa tay `tools/<tool>.html`; sửa xong chạy build + `-Check` + test node.
 - Mọi sửa lỗi tự động phải đẩy vào `fixes` (`{line, col, msg}`) — không sửa âm thầm.
 
 ## Naming convention

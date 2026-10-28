@@ -6,6 +6,7 @@ Mỗi tool trong `tools/` có đúng 1 file doc ở đây, cùng tên: `tools/<x
 |------|-----|
 | Data Workbench (Format JSON·XML·HTML · Chuyển đổi · Bảng CSV · So sánh · Format CSS·JS) — thay `format-json-xml-html` | [data-workbench.md](data-workbench.md) |
 | Soạn & xem trước sơ đồ Mermaid | [mermaid-diagram-editor.md](mermaid-diagram-editor.md) |
+| FIX Parser (message/log FIX 4.4 + Server Sàn: BCGD, ĐTTTT) | [fix-message-parser.md](fix-message-parser.md) |
 
 ## Khung 1 file doc tool
 

@@ -16,6 +16,7 @@
            color:inherit; text-decoration:none; }
   a.card:hover { border-color:var(--acc); }
   a.card b { display:block; color:var(--acc); font-size:15px; margin-bottom:4px; }
+  a.card strong { color:var(--ink); }
   footer { margin-top:24px; border-top:1px solid var(--line);
            display:grid; grid-template-columns:auto 1fr auto 1fr; gap:4px 12px; }
   @media (max-width:600px) { footer { grid-template-columns:auto 1fr; } }
@@ -35,11 +36,15 @@
 <main>
   <a class="card" href="tools/data-workbench.html">
     <b>Data Workbench</b>
-    <span class="muted">Kiểm tra &amp; tự sửa lỗi JSON/XML/HTML, chuyển JSON ⇄ CSV ⇄ XML ⇄ YAML (+ SQL, Markdown), xem/sửa bảng CSV, so sánh 2 file, format CSS/JS.</span>
+    <span class="muted">Kiểm tra &amp; tự sửa lỗi <strong>JSON/XML/HTML</strong>, chuyển <strong>JSON ⇄ CSV ⇄ XML ⇄ YAML</strong> (+ <strong>SQL, Markdown</strong>), xem/sửa bảng CSV, so sánh 2 file, format CSS/JS.</span>
   </a>
   <a class="card" href="tools/mermaid-diagram-editor.html">
     <b>Sơ đồ Mermaid</b>
-    <span class="muted">Gõ mã Mermaid, xem sơ đồ ngay, 22 mẫu, đổi theme, xuất PNG/SVG, chia sẻ link (mở được cả link mermaid.live), lịch sử phiên bản.</span>
+    <span class="muted">Gõ mã <strong>Mermaid</strong>, xem sơ đồ ngay, 22 mẫu, đổi theme, xuất <strong>PNG/SVG</strong>, chia sẻ link (mở được cả link mermaid.live), lịch sử phiên bản.</span>
+  </a>
+  <a class="card" href="tools/fix-message-parser.html">
+    <b>FIX Parser</b>
+    <span class="muted">Đọc <strong>message/log FIX</strong> theo tên tag và ý nghĩa, kiểm BodyLength/CheckSum + tag bắt buộc, lọc, theo chuỗi lệnh, từ điển FIX 4.4, che dữ liệu, xuất CSV/JSON.</span>
   </a>
 </main>
 <footer class="muted">
@@ -109,9 +114,16 @@ const T = I18n.t;
 I18n.add({
   "Ngôn ngữ": "Language",
   "Bộ công cụ xử lý dữ liệu ngay trong trình duyệt — không cần cài đặt, dữ liệu không gửi lên máy chủ nào. Tải file HTML về máy là dùng được cả offline.": "Data tools that run right in your browser — nothing to install, no data is sent to any server. Download the HTML file and it works offline too.",
-  "Kiểm tra & tự sửa lỗi JSON/XML/HTML, chuyển JSON ⇄ CSV ⇄ XML ⇄ YAML (+ SQL, Markdown), xem/sửa bảng CSV, so sánh 2 file, format CSS/JS.": "Validate & auto-fix JSON/XML/HTML, convert JSON ⇄ CSV ⇄ XML ⇄ YAML (+ SQL, Markdown), view/edit CSV tables, compare 2 files, format CSS/JS.",
+  "Kiểm tra & tự sửa lỗi": "Validate & auto-fix",
+  ", chuyển": ", convert",
+  "), xem/sửa bảng CSV, so sánh 2 file, format CSS/JS.": "), view/edit CSV tables, compare 2 files, format CSS/JS.",
   "Sơ đồ Mermaid": "Mermaid diagrams",
-  "Gõ mã Mermaid, xem sơ đồ ngay, 22 mẫu, đổi theme, xuất PNG/SVG, chia sẻ link (mở được cả link mermaid.live), lịch sử phiên bản.": "Type Mermaid code and see the diagram instantly, 22 samples, themes, PNG/SVG export, share links (mermaid.live links open too), version history.",
+  "Gõ mã": "Type",
+  ", xem sơ đồ ngay, 22 mẫu, đổi theme, xuất": " code and see the diagram instantly, 22 samples, themes, export",
+  ", chia sẻ link (mở được cả link mermaid.live), lịch sử phiên bản.": ", share links (mermaid.live links open too), version history.",
+  "Đọc": "Read",
+  "message/log FIX": "FIX messages",
+  "theo tên tag và ý nghĩa, kiểm BodyLength/CheckSum + tag bắt buộc, lọc, theo chuỗi lệnh, từ điển FIX 4.4, che dữ liệu, xuất CSV/JSON.": "and logs by tag name and meaning, check BodyLength/CheckSum + required tags, filter, follow order chains, FIX 4.4 dictionary, mask data, export CSV/JSON.",
   "Tác giả:": "Author:",
 });
 I18n.init();

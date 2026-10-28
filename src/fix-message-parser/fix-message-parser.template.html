@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:">
+<title>FIX Parser</title>
+<style>
+/* @include ../data-workbench/styles/base.css */
+/* @include styles/fix-message-parser.css */
+</style>
+</head>
+<body>
+<header class="top">
+  <a class="btn" href="../index.html">← Trang chủ</a>
+  <h1>FIX Parser</h1>
+  <select id="demo" title="Nạp dữ liệu mẫu rồi phân tích ngay"></select>
+  <label class="btn" title="Mở file log / message FIX (hoặc kéo-thả file vào trang)">Mở file…<input type="file" id="file" accept=".log,.txt,.fix,.out,.messages,.csv"></label>
+  <button id="share" title="Chép link chứa dữ liệu + tuỳ chọn (dữ liệu nằm sau dấu #, không gửi lên máy chủ)">🔗 Chia sẻ link</button>
+  <button id="undo" title="Lấy lại nội dung đang soạn trước khi nạp mẫu / link / che dữ liệu" hidden>↶ Khôi phục bản trước</button>
+  <button id="saveBtn" title="Lưu dữ liệu + bộ lọc + ghi chú + chuỗi lệnh + bố cục cột vào trình duyệt này">💾 Lưu phân tích</button>
+  <select id="saved" title="Mở lại một phân tích đã lưu trong trình duyệt này"></select>
+  <button id="delSaved" title="Xoá phân tích đang mở khỏi trình duyệt" hidden>🗑</button>
+  <span id="note" class="muted"></span>
+  <span class="seg lang-switch" title="Ngôn ngữ"><button data-lang="vi">VI</button><button data-lang="en">EN</button></span>
+</header>
+<div class="toolbar">
+  <label class="chk" title="Tự nhận: dùng từ điển Server Sàn khi message có tag 369/4488/6363/6464; tên sàn lấy từ CompID trong dữ liệu">Từ điển
+    <select id="dialect" data-opt><option value="auto">Tự nhận</option><option value="fix44">FIX 4.4 chuẩn</option><option value="venue">Server Sàn (FIX 4.4 + tag riêng)</option></select></label>
+  <label class="chk" title="Múi giờ hiển thị SendingTime và các tag thời gian (FIX gửi theo UTC)">Giờ
+    <select id="tz" data-opt><option value="utc">UTC (chuẩn FIX)</option><option value="vn">Việt Nam (UTC+7)</option><option value="local">Giờ máy</option></select></label>
+  <label class="chk" title="Thêm cột vào bảng message: số tag, cách nhau bằng dấu phẩy">Cột thêm
+    <input type="text" id="cols" class="short" data-opt placeholder="6464,448"></label>
+  <label class="chk" title="Giao diện sáng / tối">Giao diện
+    <select id="theme"><option value="auto">Tự động</option><option value="light">Sáng</option><option value="dark">Tối</option></select></label>
+  <span class="sep"></span>
+  <button id="dictBtn" title="Đặt tên cho tag riêng của công ty, ý nghĩa giá trị, tag nhạy cảm, tag nối lệnh cha–con (CSV, lưu trong trình duyệt)">📖 Từ điển riêng…</button>
+  <button id="mask" title="Chọn nhóm dữ liệu cần che (tài khoản, mật khẩu, thành viên, CompID, số hiệu lệnh, Text) — dùng trước khi chia sẻ">🕶 Che dữ liệu…</button>
+  <button id="clear">Xoá</button>
+  <span class="muted hint">Ctrl+↑/↓ chọn message · giữ Alt + rê chuột trên ô nhập để tra tag · dữ liệu không rời khỏi máy</span>
+</div>
+<main class="work">
+  <section class="left">
+    <div class="pane input-pane">
+      <div class="bar"><b>Dữ liệu FIX</b><span id="inInfo" class="muted"></span><button id="toggleIn" title="Thu gọn / mở ô nhập">▴</button></div>
+      <div class="ed"><pre id="srcHl" class="code hl" aria-hidden="true"></pre><textarea id="src" class="code" spellcheck="false" placeholder="Dán message FIX hoặc file log (SOH, |, ^A…). Mỗi dòng 1 hay nhiều message; dòng không phải FIX tự bỏ qua."></textarea></div>
+    </div>
+    <div class="pane timeline-pane">
+      <div class="bar filters">
+        <input type="text" id="q" data-opt placeholder="Tìm: chữ bất kỳ hoặc tag=giá trị (35=8 55=ABC)">
+        <select id="type" data-opt></select>
+        <label class="chk" title="Heartbeat, TestRequest, ResendRequest, SequenceReset, Logout, Logon"><input type="checkbox" id="hideAdmin" data-opt checked>Ẩn session</label>
+        <label class="chk" title="TradingSessionStatus (h) và SecurityStatus (f) — Server Sàn gửi hàng nghìn bản mỗi ngày"><input type="checkbox" id="hideBc" data-opt>Ẩn broadcast h/f</label>
+        <label class="chk"><input type="checkbox" id="onlyBad" data-opt>Chỉ message lỗi</label>
+        <label class="chk"><input type="checkbox" id="onlyNotes" data-opt>Có ghi chú</label>
+        <select id="chains" title="Chọn 1 chuỗi lệnh (đặt → xác nhận → sửa/huỷ → khớp, lệnh cha–con) để chỉ xem các message của nó"></select>
+        <span id="chainChip" class="chip" hidden></span>
+        <span id="colChips" class="chips" hidden></span>
+        <button id="resetCols" title="Đưa thứ tự cột về mặc định (kéo-thả tiêu đề cột để đổi thứ tự, bấm tiêu đề để lọc, chuột phải vào ô để chỉ hiện / loại trừ giá trị)">↺ Cột</button>
+        <span id="count" class="muted"></span>
+        <button id="csv" title="Tải bảng đang lọc thành CSV (mở bằng Excel)">⬇ CSV</button>
+        <button id="json" title="Tải các message đang lọc thành JSON (tag, tên, giá trị, ý nghĩa)">⬇ JSON</button>
+      </div>
+      <div class="scroll" id="gridBox" data-i18n-skip><table id="grid" class="grid"></table></div>
+    </div>
+  </section>
+  <section class="pane detail-pane">
+    <div class="bar">
+      <b>Chi tiết message</b>
+      <select id="order" data-opt title="Thứ tự tag"><option value="msg">Theo message</option><option value="tag">Theo số tag</option><option value="name">Theo tên tag</option></select>
+      <label class="chk"><input type="checkbox" id="hideHdr" data-opt>Ẩn header/trailer</label>
+    </div>
+    <div class="scroll" id="detail" data-i18n-skip></div>
+  </section>
+</main>
+<footer class="status" id="status"></footer>
+<dialog id="dlg"></dialog>
+<div class="author">
+  <span>Tác giả:</span><b>Phan Ngọc Minh Quân</b>
+  <span>GitHub Source:</span><a href="https://github.com/happywindapp/web_tool/">github.com/happywindapp/web_tool</a>
+</div>
+<script>
+"use strict";
+// @include ../data-workbench/js/core/i18n-ui-language-vi-en.js
+// @include js/i18n/en-fix-parser-ui-strings.js
+// @include ../data-workbench/js/core/share-link-codec.js
+// @include js/dictionary/fix44-standard-dictionary-data.js
+// @include js/dictionary/venue-fix44-dialect-overlay-data.js
+// @include js/dictionary/fix50sp2-extra-field-names-data.js
+// @include js/dictionary/fix44-orchestra-descriptions-data.js
+// @include js/dictionary/venue-fix-spec-notes-data.js
+// @include js/dictionary/fix-dictionary.js
+// @include js/dictionary/tag-explanation-lookup.js
+// @include js/parser/fix-wire-codec.js
+// @include js/parser/fix-log-extractor.js
+// @include js/parser/fix-message-validator.js
+// @include js/model/order-chain-linker.js
+// @include js/model/fix-timestamp-time-zone-format.js
+// @include js/model/sensitive-data-mask.js
+// @include js/model/custom-dictionary-csv.js
+// @include js/samples/venue-trade-report-and-quote-samples.js
+// @include js/samples/fix44-order-and-broken-message-samples.js
+// @include js/samples/demo-sample-registry.js
+// @include js/ui/dom-and-option-storage-helpers.js
+// @include js/ui/message-timeline-table.js
+// @include js/ui/tag-meaning-and-tooltip.js
+// @include js/ui/message-detail-pane.js
+// @include js/ui/share-link-demo-and-backup.js
+// @include js/ui/column-filters-and-layout.js
+// @include js/ui/annotations-and-saved-analyses.js
+// @include js/ui/settings-dialogs.js
+// @include js/ui/input-highlight-and-alt-hover.js
+// @include js/ui/fix-parser-app.js
+FixApp.start();
+</script>
+</body>
+</html>

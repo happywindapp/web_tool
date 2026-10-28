@@ -17,6 +17,13 @@
 | NDJSON | Newline-delimited JSON — nhiều giá trị JSON liền nhau; tool gộp thành mảng |
 | BOM | Byte Order Mark `U+FEFF` đầu file — tool bỏ khi đọc |
 | Minify | Thu gọn về 1 dòng, bỏ khoảng trắng thừa (markup bỏ cả comment) |
+| FIX (Financial Information eXchange) | Giao thức message giao dịch dạng `tag=value` ngăn bởi SOH; tool FIX Parser dùng từ điển FIX 4.4 |
+| SOH | Ký tự `\x01` ngăn các tag FIX; log thường hiện thành `\|`, `^A`, `<SOH>` |
+| BodyLength / CheckSum | Tag `9` = số byte từ sau `9=…` đến trước `10=`; tag `10` = tổng byte tới trước `10=` mod 256 (3 chữ số) |
+| Dialect Server Sàn (`venue`) | Biến thể FIX 4.4 của Server Sàn (QuickFIX fork của sàn): đổi nghĩa vài tag chuẩn (`2`, `449`, `109`…) + tag riêng `640/6363/6464/4488`, header bắt buộc `369` |
+| BCGD | Báo cáo giao dịch (outright) trên Server Sàn — FIX `35=s` đặt / `t` sửa / `u` huỷ, Server Sàn trả `35=8` (khớp `150=3/39=2`) hoặc `35=3` reject |
+| ĐTTTT | Thoả thuận điện tử (chào giá) trên Server Sàn — FIX `S` Quote, `AI` QuoteStatusReport, `AJ` QuoteResponse (chấp nhận), `Z` QuoteCancel |
+| Chuỗi lệnh (order chain) | Các message cùng 1 lệnh, nối qua ClOrdID/OrigClOrdID/OrderID/CrossID/QuoteID và RefSeqNum của reject |
 
 ## AI tooling (scaffold)
 
