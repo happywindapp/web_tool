@@ -36,9 +36,36 @@ const ViewRender = (() => {
         : word ? (colon ? span("an", word) + esc(colon) : esc(word)) : esc(m));
   }
 
+  // One color per column (cycling); quoted fields may span lines, so the column only resets on a newline outside quotes.
+  const COL_CLS = ["k", "s", "n", "l"];
+  function csv(code, kind) {
+    const d = kind === "tsv" ? "\t" : CsvTool.sniff(code), de = d === "|" ? "\\|" : d;
+    let col = 0;
+    return code.replace(new RegExp(`("(?:[^"]|"")*"?|[^"\\n${d}]+)|(${de})|(\\n)`, "g"), (m, val, sep) =>
+      val ? span(COL_CLS[col % COL_CLS.length], val) : sep ? (col++, span("p", sep)) : (col = 0, m));
+  }
+
+  // Line-based: "indent/- " prefix, optional "key:", then one scalar (typed by its text) and an optional " # comment".
+  function yamlValue(v) {
+    const q = /^\s*("(?:\\.|[^"\\])*"|'(?:''|[^'])*')/.exec(v), from = q ? q[0].length : 0;
+    const c = /(^|\s)#/.exec(v.slice(from)), end = c ? from + c.index + c[1].length : v.length;
+    const body = v.slice(0, end), t = body.trim(), lead = body.slice(0, body.length - body.trimStart().length);
+    const cls = !t || /^[\[{]/.test(t) ? "" : q ? "s" : /^[-+]?(\d[\d_]*\.?\d*([eE][-+]?\d+)?|\.inf|\.nan)$/i.test(t) ? "n"
+      : /^(true|false|null|~|yes|no|on|off)$/i.test(t) ? "l" : /^([|>][-+]?\d*|---|\.\.\.|[&*!]\S*)$/.test(t) ? "p" : "s";
+    return esc(lead) + (cls ? span(cls, t) : esc(t)) + esc(body.slice(lead.length + t.length)) + (c ? span("c", v.slice(end)) : "");
+  }
+  function yaml(code) {
+    return code.split("\n").map(line => {
+      const pre = /^\s*(?:-(?=\s|$)\s*)*/.exec(line)[0], rest = line.slice(pre.length);
+      const k = /^("(?:\\.|[^"\\])*"|'(?:''|[^'])*'|[^\s#'"[{][^:#]*?)(\s*:)(?=\s|$)/.exec(rest);
+      return (pre ? span("p", pre) : "") + (k ? span("k", k[1]) + esc(k[2]) + yamlValue(rest.slice(k[0].length)) : yamlValue(rest));
+    }).join("\n");
+  }
+
   const highlight = (code, kind) => code.length > 1500000 ? esc(code)
     : kind === "json" ? json(code) : kind === "xml" || kind === "html" ? markup(code)
-    : kind === "js" ? script(code) : kind === "css" ? css(code) : esc(code);
+    : kind === "js" ? script(code) : kind === "css" ? css(code)
+    : kind === "csv" || kind === "tsv" ? csv(code, kind) : kind === "yaml" ? yaml(code) : esc(code);
 
   function tree(model, kind, limit = 4000) {
     let count = 0;

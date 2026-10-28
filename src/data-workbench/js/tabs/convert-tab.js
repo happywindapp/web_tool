@@ -34,7 +34,7 @@
     try { r = Convert.run(text, $("cv-from").value, to, opts()); }
     catch (e) { return report.show(T("✖ Không đọc được dữ liệu: {msg}", { msg: e.message }), "bad", e.line ? [{ line: e.line, col: e.col, msg: e.message }] : []); }
     lastOut = r.out; lastTo = to;
-    $("cv-out").innerHTML = ViewRender.highlight(r.out, ["json", "xml", "html"].includes(to) ? to : "");
+    $("cv-out").innerHTML = ViewRender.highlight(r.out, to);
     const title = `${label(r.from)} → ${label(to)}`;
     $("cv-info").textContent = `${title} · ` + T("{lines} dòng · {kb} KB", { lines: I18n.num(TextUtil.countLines(r.out)), kb: TextUtil.sizeKb(r.out) });
     report.show(r.fixes.length ? T("✔ Đã chuyển {title}. Tự sửa {n} lỗi ở dữ liệu nguồn, xem danh sách bên dưới.", { title, n: r.fixes.length }) : T("✔ Đã chuyển {title}.", { title }),
