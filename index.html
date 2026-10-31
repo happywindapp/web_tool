@@ -5,53 +5,115 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Web Tools</title>
 <style>
-  :root { --bg:#f8fafc; --panel:#fff; --line:#cbd5e1; --ink:#0f172a; --muted:#64748b; --acc:#0e7490; }
+  :root { color-scheme:light dark; --bg:#f1f5f9; --panel:#fff; --line:#d5e0e7; --ink:#0f172a; --muted:#64748b; --acc:#0e7490;
+          --title:#164e63; --body:#475569; --link:#0e7490; --mark:#164e63; --chip-ink:#155e75; --shadow:rgb(22 78 99 / .10); --shadow-hover:rgb(22 78 99 / .20); }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#0b1220; --panel:#111827; --line:#2a3a4d; --ink:#e2e8f0; --muted:#94a3b8;
+            --title:#a5e8f5; --body:#cbd5e1; --link:#67d5ea; --mark:#1f6b85; --chip-ink:#a5e8f5; --shadow:rgb(0 0 0 / .35); --shadow-hover:rgb(0 0 0 / .5); }
+  }
   * { box-sizing:border-box; }
-  body { margin:0; background:var(--bg); color:var(--ink); font:14px/1.5 "Segoe UI", Arial, sans-serif; }
-  header, main, footer { max-width:960px; margin:0 auto; padding:16px; }
-  h1 { font-size:22px; margin:16px 0 4px; }
-  .muted { color:var(--muted); }
-  main { display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:12px; }
-  a.card { display:block; padding:14px 16px; background:var(--panel); border:1px solid var(--line); border-radius:8px;
-           color:inherit; text-decoration:none; }
-  a.card:hover { border-color:var(--acc); }
-  a.card b { display:block; color:var(--acc); font-size:15px; margin-bottom:4px; }
-  a.card strong { color:var(--ink); }
-  footer { margin-top:24px; border-top:1px solid var(--line);
-           display:grid; grid-template-columns:auto 1fr auto 1fr; gap:4px 12px; }
-  @media (max-width:600px) { footer { grid-template-columns:auto 1fr; } }
-  footer a { color:var(--acc); }
-  .lang-switch { float:right; margin-top:16px; display:inline-flex; gap:4px; }
-  .lang-switch button { font:inherit; font-weight:600; padding:4px 10px; border:1px solid #fcd34d; border-radius:6px; background:#fef3c7; color:#92400e; cursor:pointer; }
+  body { margin:0; min-height:100dvh; display:flex; flex-direction:column; background:var(--bg); color:var(--ink);
+         font:15px/1.55 "Segoe UI", Arial, sans-serif; }
+  .wrap { width:100%; max-width:1120px; margin:0 auto; padding:0 24px; }
+  header { background:#164e63; color:#ecfeff; padding-bottom:64px; }
+  .hero { position:relative; padding-top:40px; }
+  h1 { margin:0; font-size:38px; line-height:1.15; letter-spacing:-.02em; font-weight:700; }
+  .lead { margin:8px 0 0; font-size:17px; color:#c9ecf4; max-width:60ch; }
+  .facts, .tools { display:grid; gap:20px; }
+  .tools { grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); }
+  .facts { grid-template-columns:repeat(3, 1fr); list-style:none; margin:28px 0 0; padding:0; }
+  .facts li { padding-top:12px; border-top:1px solid #4b93aa; font-size:14px; color:#c9ecf4; }
+  .facts b { display:block; color:#ecfeff; font-size:15px; font-weight:600; }
+  main.wrap { flex:1; align-content:start; margin-top:-40px; padding-bottom:40px; }
+  a.card { display:flex; flex-direction:column; overflow:hidden; background:var(--panel); border:1px solid var(--line); border-radius:12px;
+           color:inherit; text-decoration:none; box-shadow:0 8px 24px -8px var(--shadow);
+           transition:transform .2s ease, box-shadow .2s ease, border-color .2s ease; }
+  a.card:hover { transform:translateY(-3px); border-color:var(--acc); box-shadow:0 16px 32px -12px var(--shadow-hover); }
+  a.card:active { transform:translateY(-1px); }
+  a.card:focus-visible { outline:3px solid var(--link); outline-offset:2px; }
+  .card-head { display:flex; align-items:center; gap:12px; padding:14px 20px; background:color-mix(in srgb, var(--acc) 10%, var(--panel));
+               border-bottom:1px solid color-mix(in srgb, var(--acc) 22%, var(--panel)); }
+  .mark { flex:none; display:grid; place-items:center; min-width:48px; height:36px; padding:0 8px; border-radius:8px; background:var(--mark); color:#ecfeff;
+          font:600 13px/1 "Cascadia Mono", Consolas, monospace; white-space:nowrap; }
+  .card-head h2 { margin:0; font-size:18px; line-height:1.25; font-weight:650; letter-spacing:-.01em; color:var(--title); }
+  .card-body { flex:1; display:flex; flex-direction:column; gap:14px; padding:16px 20px 18px; }
+  .card-body p { margin:0; color:var(--body); }
+  .chips { display:flex; flex-wrap:wrap; gap:6px; }
+  .chips span { padding:2px 8px; border-radius:6px; background:color-mix(in srgb, var(--acc) 8%, var(--panel));
+                border:1px solid color-mix(in srgb, var(--acc) 24%, var(--panel)); color:var(--chip-ink);
+                font:500 12px/1.5 "Cascadia Mono", Consolas, monospace; }
+  .open { margin-top:auto; padding-top:2px; color:var(--link); font-weight:600; }
+  .open i { display:inline-block; font-style:normal; transition:transform .2s ease; }
+  a.card:hover .open i { transform:translateX(4px); }
+  footer { background:var(--panel); border-top:1px solid var(--line); color:var(--muted); font-size:13px; }
+  footer .wrap { display:grid; grid-template-columns:auto 1fr auto 1fr; gap:4px 12px; padding-top:16px; padding-bottom:16px; }
+  footer b { color:var(--ink); font-weight:600; }
+  footer a { color:var(--link); overflow-wrap:anywhere; }
+  .lang-switch { position:absolute; top:16px; right:24px; display:inline-flex; gap:4px; }
+  .lang-switch button { font:inherit; font-size:13px; font-weight:600; padding:3px 10px; border:1px solid #fcd34d; border-radius:6px; background:#fef3c7; color:#92400e; cursor:pointer; }
   .lang-switch button:hover { background:#fde68a; }
   .lang-switch button.on { background:#c2410c; color:#fff; border-color:#c2410c; }
+  @media (prefers-color-scheme: dark) { .lang-switch button { background:#422006; color:#fcd34d; border-color:#92400e; } .lang-switch button:hover { background:#713f12; } .lang-switch button.on { background:#ea580c; color:#fff; border-color:#ea580c; } }
+  @media (max-width:640px) {
+    .wrap { padding:0 16px; }
+    .hero { padding-top:56px; }
+    .lang-switch { right:16px; }
+    h1 { font-size:32px; }
+    .facts { grid-template-columns:1fr; gap:12px; }
+    footer .wrap { grid-template-columns:auto 1fr; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    a.card, .open i { transition:none; }
+    a.card:hover, a.card:active, a.card:hover .open i { transform:none; }
+  }
 </style>
 </head>
 <body>
 <header>
-  <span class="lang-switch" title="Ngôn ngữ"><button data-lang="vi">VI</button><button data-lang="en">EN</button></span>
-  <h1>Web Tools</h1>
-  <div class="muted">Bộ công cụ xử lý dữ liệu ngay trong trình duyệt — không cần cài đặt, dữ liệu không gửi lên máy chủ nào (trừ tab draw.io, chỉ khi bạn bấm kết nối). Tải file HTML về máy là dùng được cả offline.</div>
+  <div class="wrap hero">
+    <span class="lang-switch" title="Ngôn ngữ"><button data-lang="vi">VI</button><button data-lang="en">EN</button></span>
+    <h1>Web Tools</h1>
+    <p class="lead">Bộ công cụ xử lý dữ liệu ngay trong trình duyệt.</p>
+    <ul class="facts">
+      <li><b>Không cần cài đặt</b>Mở trang là dùng được.</li>
+      <li><b>Dữ liệu ở lại trên máy</b>Không gửi lên máy chủ nào, trừ tab draw.io và chỉ khi bạn bấm kết nối.</li>
+      <li><b>Dùng được offline</b>Tải file HTML về máy là chạy.</li>
+    </ul>
+  </div>
 </header>
-<main>
+<main class="wrap tools">
   <a class="card" href="tools/data-workbench.html">
-    <b>Data Workbench</b>
-    <span class="muted">Kiểm tra &amp; tự sửa lỗi <strong>JSON/XML/HTML</strong>, chuyển <strong>JSON ⇄ CSV ⇄ XML ⇄ YAML</strong> (+ <strong>SQL, Markdown</strong>), xem/sửa bảng CSV, so sánh 2 file, format CSS/JS.</span>
+    <div class="card-head"><span class="mark" aria-hidden="true">{ }</span><h2>Data Workbench</h2></div>
+    <div class="card-body">
+      <p>Kiểm tra và tự sửa lỗi dữ liệu, chuyển đổi định dạng, xem/sửa bảng CSV, so sánh 2 file, format CSS/JS.</p>
+      <div class="chips"><span>JSON</span><span>XML</span><span>HTML</span><span>CSV</span><span>YAML</span><span>SQL</span><span>Markdown</span></div>
+      <span class="open">Mở công cụ <i aria-hidden="true">→</i></span>
+    </div>
   </a>
   <a class="card" href="tools/diagram-editor.html">
-    <b>Soạn sơ đồ</b>
-    <span class="muted">6 loại trong 1 tool: <strong>Mermaid, PlantUML, draw.io, DBML, D2, Structurizr</strong>. Có mẫu thử, xuất <strong>PNG/SVG</strong>, chia sẻ link, lịch sử phiên bản. Riêng draw.io cần mạng.</span>
+    <div class="card-head"><span class="mark" aria-hidden="true">A→B</span><h2>Soạn sơ đồ</h2></div>
+    <div class="card-body">
+      <p>6 loại sơ đồ trong 1 tool, có mẫu thử, xuất PNG/SVG, chia sẻ link, lịch sử phiên bản. Riêng draw.io cần mạng.</p>
+      <div class="chips"><span>Mermaid</span><span>PlantUML</span><span>draw.io</span><span>DBML</span><span>D2</span><span>Structurizr</span></div>
+      <span class="open">Mở công cụ <i aria-hidden="true">→</i></span>
+    </div>
   </a>
   <a class="card" href="tools/fix-message-parser.html">
-    <b>FIX Parser</b>
-    <span class="muted">Đọc <strong>message/log FIX</strong> theo tên tag và ý nghĩa, kiểm BodyLength/CheckSum + tag bắt buộc, lọc, theo chuỗi lệnh, từ điển FIX 4.4, che dữ liệu, xuất CSV/JSON.</span>
+    <div class="card-head"><span class="mark" aria-hidden="true">35=8</span><h2>FIX Parser</h2></div>
+    <div class="card-body">
+      <p>Đọc message/log FIX theo tên tag và ý nghĩa, kiểm tag bắt buộc, lọc, theo chuỗi lệnh, che dữ liệu, xuất CSV/JSON.</p>
+      <div class="chips"><span>FIX 4.4</span><span>Server Sàn</span><span>BodyLength</span><span>CheckSum</span></div>
+      <span class="open">Mở công cụ <i aria-hidden="true">→</i></span>
+    </div>
   </a>
 </main>
-<footer class="muted">
-  <span>Tác giả:</span><b>Phan Ngọc Minh Quân</b>
-  <span>Email:</span><a href="mailto:quan.phanngocminh.111@gmail.com">quan.phanngocminh.111@gmail.com</a>
-  <span>GitHub Source:</span><a href="https://github.com/happywindapp/web_tool/">github.com/happywindapp/web_tool</a>
-  <span>LinkedIn:</span><a href="https://www.linkedin.com/in/phanquan111">linkedin.com/in/phanquan111</a>
+<footer>
+  <div class="wrap">
+    <span>Tác giả:</span><b>Phan Ngọc Minh Quân</b>
+    <span>Email:</span><a href="mailto:quan.phanngocminh.111@gmail.com">quan.phanngocminh.111@gmail.com</a>
+    <span>GitHub Source:</span><a href="https://github.com/happywindapp/web_tool/">github.com/happywindapp/web_tool</a>
+    <span>LinkedIn:</span><a href="https://www.linkedin.com/in/phanquan111">linkedin.com/in/phanquan111</a>
+  </div>
 </footer>
 <script>
 // UI language VI/EN: saved choice (shared by every tool) → browser language; English dictionary is keyed by the Vietnamese text.
@@ -113,17 +175,19 @@ const T = I18n.t;
 // English UI strings, keyed by the Vietnamese source text.
 I18n.add({
   "Ngôn ngữ": "Language",
-  "Bộ công cụ xử lý dữ liệu ngay trong trình duyệt — không cần cài đặt, dữ liệu không gửi lên máy chủ nào (trừ tab draw.io, chỉ khi bạn bấm kết nối). Tải file HTML về máy là dùng được cả offline.": "Data tools that run right in your browser — nothing to install, no data is sent to any server (except the draw.io tab, and only after you click Connect). Download the HTML file and it works offline too.",
-  "Kiểm tra & tự sửa lỗi": "Validate & auto-fix",
-  ", chuyển": ", convert",
-  "), xem/sửa bảng CSV, so sánh 2 file, format CSS/JS.": "), view/edit CSV tables, compare 2 files, format CSS/JS.",
+  "Bộ công cụ xử lý dữ liệu ngay trong trình duyệt.": "Data tools that run right in your browser.",
+  "Không cần cài đặt": "Nothing to install",
+  "Mở trang là dùng được.": "Open the page and start working.",
+  "Dữ liệu ở lại trên máy": "Your data stays on your device",
+  "Không gửi lên máy chủ nào, trừ tab draw.io và chỉ khi bạn bấm kết nối.": "Nothing is sent to any server, except the draw.io tab and only after you click Connect.",
+  "Dùng được offline": "Works offline",
+  "Tải file HTML về máy là chạy.": "Download the HTML file and run it.",
+  "Mở công cụ": "Open tool",
+  "Kiểm tra và tự sửa lỗi dữ liệu, chuyển đổi định dạng, xem/sửa bảng CSV, so sánh 2 file, format CSS/JS.": "Validate and auto-fix data, convert between formats, view/edit CSV tables, compare 2 files, format CSS/JS.",
   "Soạn sơ đồ": "Diagram editor",
-  "6 loại trong 1 tool:": "6 diagram languages in one tool:",
-  ". Có mẫu thử, xuất": ". Samples included, export",
-  ", chia sẻ link, lịch sử phiên bản. Riêng draw.io cần mạng.": ", share links, version history. Only draw.io needs a network connection.",
-  "Đọc": "Read",
-  "message/log FIX": "FIX messages",
-  "theo tên tag và ý nghĩa, kiểm BodyLength/CheckSum + tag bắt buộc, lọc, theo chuỗi lệnh, từ điển FIX 4.4, che dữ liệu, xuất CSV/JSON.": "and logs by tag name and meaning, check BodyLength/CheckSum + required tags, filter, follow order chains, FIX 4.4 dictionary, mask data, export CSV/JSON.",
+  "6 loại sơ đồ trong 1 tool, có mẫu thử, xuất PNG/SVG, chia sẻ link, lịch sử phiên bản. Riêng draw.io cần mạng.": "6 diagram languages in one tool, with samples, PNG/SVG export, share links and version history. Only draw.io needs a network connection.",
+  "Đọc message/log FIX theo tên tag và ý nghĩa, kiểm tag bắt buộc, lọc, theo chuỗi lệnh, che dữ liệu, xuất CSV/JSON.": "Read FIX messages and logs by tag name and meaning, check required tags, filter, follow order chains, mask data, export CSV/JSON.",
+  "Server Sàn": "Exchange server",
   "Tác giả:": "Author:",
 });
 I18n.init();
