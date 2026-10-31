@@ -124,7 +124,7 @@ dict  { dialect, fields Map<tag,{name,type,enums,fix50?}>, msgs Map<type,{name,c
 `src/fix-message-parser/`: `js/dictionary/*-data.js` (sinh ra) → `fix-dictionary.js` + `tag-explanation-lookup.js` (`FixKnow`) · `js/parser/` (`fix-wire-codec`, `fix-log-extractor`, `fix-message-validator`) ·
 `js/model/` (`order-chain-linker`, `fix-timestamp-time-zone-format`, `sensitive-data-mask`) · `js/samples/` (mẫu Server Sàn, mẫu FIX 4.4/lỗi, registry) ·
 `js/ui/` (`message-timeline-table`, `tag-meaning-and-tooltip` (`TagInfo`), `message-detail-pane`, `share-link-demo-and-backup`, `fix-parser-app`) · `js/i18n/`. Module `I18n` + `ShareCodec` và
-`styles/base.css` được `@include` thẳng từ `src/data-workbench/` (nguồn chung, không chép).
+`styles/base.css` + `styles/app-bar-tabs-toolbar-surfaces.css` được `@include` thẳng từ `src/data-workbench/` (nguồn chung, không chép).
 
 Luồng: input (debounce 250 ms) → `FixLog.extract` → chọn dialect → `FixCheck.analyse` từng message → `FixChain.link` → `Timeline.visible/render` + `Detail.render`.
 

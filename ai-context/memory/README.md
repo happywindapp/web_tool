@@ -37,4 +37,7 @@
   **bắt buộc mọi AI khi thêm/sửa tool:** nút `🔗 Chia sẻ link`, link `#pako:` (dữ liệu chỉ ở hash), mở link là nạp + chạy, đọc `?data=`,
   không mất bài đang sửa; checklist ở `docs/architecture/README.md` mục 3.
 
+- [new-tool-must-use-two-tier-header-toolbar-colors.md](new-tool-must-use-two-tier-header-toolbar-colors.md) —
+  **bắt buộc mọi AI khi thêm/sửa tool:** header teal `#164e63` cho việc cấp ứng dụng + tab, toolbar tint accent 10% cho việc trên dữ liệu; dùng file CSS chung hoặc chép rule; checklist ở `docs/architecture/README.md` mục 3.
+
 - [scaffold-robocopy-copies-skill-junctions.md](scaffold-robocopy-copies-skill-junctions.md) — robocopy cần `/XJ` khi copy template

@@ -190,7 +190,7 @@ Vùng giống nhau > ±3 dòng thu gọn, bấm để mở. Giới hạn: > 3.00
 src/data-workbench/
   data-workbench.template.html  # khung trang + marker @include (thứ tự include = thứ tự chạy)
   styles/*.css  partials/*.html  third-party/ (js-beautify, js-yaml + LICENSE)
-                  · `styles/app-bar-tabs-toolbar-surfaces.css` chỉ của workbench (FIX Parser dùng chung `base.css` nên không để ở đó): header teal đậm = điều hướng + việc cấp ứng dụng, tab bật liền nền với toolbar, toolbar nền tint = việc của tab đang mở; đổi màu bằng biến CSS override ngay tại `header.top` / `.toolbar`
+                  · `styles/app-bar-tabs-toolbar-surfaces.css` dùng chung với FIX Parser: header teal đậm = điều hướng + việc cấp ứng dụng, tab bật liền nền với toolbar, toolbar nền tint = việc của tab đang mở; đổi màu bằng biến CSS override ngay tại `header.top` / `.toolbar`
   js/core/        I18n + T() (song ngữ, nạp đầu tiên) · TextUtil · ShareCodec (link pako:) · Dom/Store · LineEditor (gutter + nháp) · ReportPanel · Workbench (router tab)
                   · dùng chung với tool khác: ThemePicker (giao diện) · SavedSessions (💾 lưu phiên) · ColFilter (lọc cột + chip) — css `styles/theme-filter-popover-chips.css`, EN `js/i18n/en-shared-theme-sessions-filters.js`
   js/i18n/        từ điển English: en-markup-labels · en-tab-status-messages · en-parser-converter-messages (khoá = chuỗi VI)

@@ -69,6 +69,8 @@ Không có. Không backend, không API, không DB, không CDN.
   dữ liệu giả, nội dung bằng English — checklist "Dữ liệu mẫu" cùng mục 3.
 - **Mọi tool phải có nút `🔗 Chia sẻ link`**: link `…#pako:<payload>` mang dữ liệu + tuỳ chọn (chỉ ở hash, không gửi lên server), mở là nạp + chạy;
   đọc thêm `?data=` — checklist "Link chia sẻ" cùng mục 3 (ADR #9).
+- **Mọi tool phải theo hai tầng màu**: header teal `#164e63` = việc cấp ứng dụng + tab điều hướng, toolbar nền tint accent 10% = việc trên dữ liệu đang mở —
+  CSS chung `src/data-workbench/styles/app-bar-tabs-toolbar-surfaces.css`, luật ở [`docs/architecture/README.md`](../docs/architecture/README.md) mục 3 (ADR #10).
 - Git commit/push do user tự chạy.
 
 ## Đang vướng

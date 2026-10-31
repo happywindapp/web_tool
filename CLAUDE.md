@@ -29,6 +29,8 @@ Tool hiện có: `tools/data-workbench.html` (format/tự sửa JSON·XML·HTML 
   có mẫu hợp lệ và mẫu lỗi/ca khó, dữ liệu giả, nội dung bằng English — checklist "Dữ liệu mẫu" ở `docs/architecture/README.md` mục 3.
 - **Mọi tool BẮT BUỘC có nút `🔗 Chia sẻ link`**: link `#pako:` (dữ liệu + tuỳ chọn, chỉ ở hash — không đưa dữ liệu vào query),
   mở link là nạp + chạy, đọc thêm `?data=`, không làm mất bài đang sửa — checklist "Link chia sẻ" ở `docs/architecture/README.md` mục 3 (ADR #9).
+- **Mọi tool BẮT BUỘC theo hai tầng màu**: header teal `#164e63` (việc cấp ứng dụng + tab điều hướng), toolbar nền tint accent 10% (việc trên dữ liệu, nút chính `button.main`);
+  tool build từ `src/` `@include` `src/data-workbench/styles/app-bar-tabs-toolbar-surfaces.css` sau `base.css`, tool 1 file chép rule — mục "Hai tầng màu" ở `docs/architecture/README.md` mục 3 (ADR #10).
 - Mọi tool phải có khối tác giả `<div class="author">` (Tác giả + GitHub Source) ngay sau footer trạng thái — chép markup/CSS chuẩn từ `docs/architecture/README.md` mục 3.
 - Ngoại lệ có chủ đích với luật "file < 200 dòng": tool phải tự chứa để mở trực tiếp (xem `docs/decisions/`).
 - Data Workbench / FIX Parser: **chỉ sửa `src/<tool>/`**, không sửa tay `tools/<tool>.html`; sửa xong chạy build + `-Check` + test node.

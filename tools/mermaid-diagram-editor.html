@@ -15,11 +15,12 @@
           --code:#0f172a; --k:#c4b5fd; --s:#6ee7b7; --a:#f9a8d4; --c:#64748b; --btn:#1e293b; --gut:#0b1220; --errbg:#3f1717; }
   * { box-sizing:border-box; }
   [hidden] { display:none !important; }
-  body { margin:0; height:100vh; display:grid; grid-template-rows:auto 1fr auto; background:var(--bg); color:var(--ink);
+  body { margin:0; height:100vh; display:grid; grid-template-rows:auto auto 1fr auto auto; background:var(--bg); color:var(--ink);
          font:14px/1.45 "Segoe UI", Arial, sans-serif; }
   body.drop { outline:3px dashed var(--acc); outline-offset:-6px; }
-  header { position:relative; display:flex; flex-wrap:wrap; gap:8px; align-items:center; padding:8px 112px 8px 16px; background:var(--panel); border-bottom:1px solid var(--line); }
+  header { position:relative; display:flex; flex-wrap:wrap; gap:8px; align-items:center; padding:8px 112px 8px 16px; background:#164e63; color:var(--ink); color-scheme:dark; --ink:#ecfeff; --btn:#1f6b85; --line:#4b93aa; }
   header h1 { font-size:16px; margin:0 8px 0 0; }
+  .toolbar { display:flex; flex-wrap:wrap; gap:8px; align-items:center; padding:8px 16px; background:color-mix(in srgb, var(--acc) 10%, var(--panel)); --line:color-mix(in srgb, var(--acc) 40%, var(--panel)); border-bottom:1px solid var(--line); }
   a.btn { text-decoration:none; }
   button, select, label.btn, a.btn { font:inherit; padding:5px 10px; border:1px solid var(--line); border-radius:6px; background:var(--btn); color:var(--ink); cursor:pointer; }
   button.main { background:var(--acc); color:#fff; border-color:var(--acc); font-weight:600; }
@@ -70,12 +71,6 @@
 <header>
   <a class="btn" href="../index.html">← Trang chủ</a>
   <h1>Soạn &amp; xem trước sơ đồ Mermaid</h1>
-  <label class="btn">Mở file…<input id="file" type="file" accept=".mmd,.mermaid,.md,.txt"></label>
-  <select id="demo" title="Nạp sơ đồ mẫu"><option value="">Sơ đồ mẫu…</option></select>
-  <select id="theme" title="Theme (ghi vào cấu hình)"></select>
-  <select id="look" title="Kiểu nét"><option value="classic">Nét chuẩn</option><option value="handDrawn">Vẽ tay</option><option value="neo">Neo</option></select>
-  <label class="chk" title="Tự vẽ lại khi gõ"><input id="auto" type="checkbox" checked> Tự vẽ</label>
-  <button id="btnRender" class="main" title="Ctrl+Enter">Vẽ</button>
   <button id="btnShare" title="Chép link chứa sơ đồ + cấu hình (dữ liệu nằm sau dấu #, không gửi lên máy chủ; tương thích mermaid.live)">🔗 Chia sẻ link</button>
   <button id="btnOpenLink" title="Mở link chia sẻ của tool này hoặc của mermaid.live">Mở link…</button>
   <button id="btnHist">Lịch sử</button>
@@ -85,6 +80,14 @@
   <label class="chk" title="Giao diện sáng / tối">Giao diện <select id="uiTheme"><option value="auto">Tự động</option><option value="light">Sáng</option><option value="dark">Tối</option></select></label>
   <span class="lang-switch" title="Ngôn ngữ"><button data-lang="vi">VI</button><button data-lang="en">EN</button></span>
 </header>
+<div class="toolbar">
+  <label class="btn">Mở file…<input id="file" type="file" accept=".mmd,.mermaid,.md,.txt"></label>
+  <select id="demo" title="Nạp sơ đồ mẫu"><option value="">Sơ đồ mẫu…</option></select>
+  <select id="theme" title="Theme (ghi vào cấu hình)"></select>
+  <select id="look" title="Kiểu nét"><option value="classic">Nét chuẩn</option><option value="handDrawn">Vẽ tay</option><option value="neo">Neo</option></select>
+  <label class="chk" title="Tự vẽ lại khi gõ"><input id="auto" type="checkbox" checked> Tự vẽ</label>
+  <button id="btnRender" class="main" title="Ctrl+Enter">Vẽ</button>
+</div>
 <main>
   <section class="pane">
     <div class="bar"><b class="tabs"><button data-tab="code" class="on">Mã</button> <button data-tab="cfg">Cấu hình</button></b>

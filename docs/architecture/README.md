@@ -19,8 +19,8 @@ Xem `docs/tools/<tool>.md` — danh sách ở [`docs/tools/`](../tools/README.md
 
 ## 3. Nguyên tắc kiến trúc
 
-- Thêm tool mới = thêm 1 file `tools/<ten-kebab>.html`, cùng khuôn: header toolbar (có dropdown dữ liệu mẫu + nút `🔗 Chia sẻ link`) · nút `VI | EN` · 2 pane · footer trạng thái · khối tác giả.
-  Tool chưa song ngữ, chưa có dữ liệu mẫu hoặc chưa có link chia sẻ = **chưa xong** (xem 3 checklist bên dưới).
+- Thêm tool mới = thêm 1 file `tools/<ten-kebab>.html`, cùng khuôn: header teal (nút `🔗 Chia sẻ link`, tab nếu có) · toolbar nền tint (dropdown dữ liệu mẫu, nút chính) · nút `VI | EN` · 2 pane · footer trạng thái · khối tác giả.
+  Tool chưa song ngữ, chưa có dữ liệu mẫu, chưa có link chia sẻ hoặc chưa theo hai tầng màu = **chưa xong** (xem các checklist bên dưới).
 - **Dữ liệu mẫu để test nhanh (bắt buộc mọi tool):** người dùng phải thử được tool trong 1 cú bấm, không cần chuẩn bị input.
   1. Toolbar có `<select>` mẫu, option đầu rỗng `Thử mẫu…` (tên mẫu ngắn, mô tả tình huống: "JSON lỗi", "CSV có lỗi"…).
      Chọn xong là **nạp + chạy luôn** rồi trả dropdown về option rỗng. Tool nhiều tab ⇒ mỗi tab 1 dropdown mẫu riêng.
@@ -47,6 +47,21 @@ Xem `docs/tools/<tool>.md` — danh sách ở [`docs/tools/`](../tools/README.md
      link hỏng ⇒ báo lỗi rõ, không đụng nháp.
   8. Ghi contract link (định dạng, payload, `?data=`) vào `docs/tools/<tool>.md`.
   9. Kiểm: tạo link → mở ở trang mới → ra cùng dữ liệu, tuỳ chọn, kết quả; thử link hỏng và `?data=` thô.
+- **Hai tầng màu header/toolbar (bắt buộc mọi tool) — ADR #10:** nhìn màu là biết "đi đâu" hay "làm gì".
+  - **Header** teal đậm `#164e63`: việc cấp ứng dụng (Trang chủ, tên tool, chia sẻ, lưu, giao diện, `VI | EN`).
+  - **Tab điều hướng** (nếu tool có nhiều màn hình): hàng riêng cuối header, không viền, tab bật liền nền với toolbar + chữ đậm. Mẫu: `.wb-nav`.
+  - **Toolbar** nền tint accent 10%: việc trên dữ liệu đang mở (mở file, mẫu, tuỳ chọn, chạy); nút chính `button.main` ở đây, không để ở header.
+  - **Tool build từ `src/`:** `@include ../data-workbench/styles/app-bar-tabs-toolbar-surfaces.css` ngay sau `base.css`, dùng `<header class="top">` + `<div class="toolbar">`. Không sửa file chung cho riêng 1 tool.
+  - **Tool 1 file viết tay:** chép 2 rule dưới đây vào CSS của tool (đã có ở Mermaid), `body` thêm 1 hàng `auto` cho toolbar. Có `.muted` hoặc thông báo `.good/.bad/.warn` trong header ⇒ chép cả phần override biến đó từ file chung.
+
+    ```css
+    header { background:#164e63; border-bottom:0; color:var(--ink); color-scheme:dark; --ink:#ecfeff; --btn:#1f6b85; --line:#4b93aa; }
+    .toolbar { display:flex; flex-wrap:wrap; gap:8px; align-items:center; padding:8px 16px; background:color-mix(in srgb, var(--acc) 10%, var(--panel)); --line:color-mix(in srgb, var(--acc) 40%, var(--panel)); border-bottom:1px solid var(--line); }
+    ```
+
+  - **Không viết lại màu từng nút:** đổi biến CSS ngay tại header/toolbar, control bên trong tự ăn theo. Popover/dialog gắn vào `body`, không đặt trong 2 vùng này, để giữ màu trang.
+  - **Kiểm:** theme sáng + tối (đổi bằng dropdown Giao diện, không dùng cờ `--force-dark-mode` vì Chrome tự đảo màu); chữ đạt 4.5:1 trên nền tint — `.muted` có sẵn chỉ đạt 4.14:1 nên toolbar phải giữ override `--muted` nếu có chữ phụ.
+  - **Ngoại lệ còn lại:** FIX Parser mới áp màu, chưa chia lại control (mẫu + mở file ở header, giao diện ở toolbar).
 - **Khối tác giả (bắt buộc mọi tool):** đặt ngay sau `</footer>` trạng thái, chép nguyên văn markup + CSS dưới đây:
 
   ```html

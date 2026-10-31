@@ -64,7 +64,9 @@ Sau khi clone, chạy `pwsh scripts/link-shared-skills.ps1` một lần để t�
    và mẫu lỗi/ca khó, dữ liệu giả, nội dung bằng English — checklist "Dữ liệu mẫu" cùng mục 3 ở trên.
 4. **Link chia sẻ (bắt buộc):** nút `🔗 Chia sẻ link` tạo link `#pako:` mang dữ liệu + tuỳ chọn, mở link là nạp + chạy; đọc thêm `?data=` —
    checklist "Link chia sẻ" cùng mục 3 ở trên (ADR #9).
-5. Thêm 1 card vào `index.html` (kèm bản English của tên + mô tả trong `I18n.add` của `index.html`) và 1 dòng vào bảng **Tools** ở trên.
-6. Viết `docs/tools/<ten-viec-kebab-case>.md` (ghi các key `?demo=` và contract link chia sẻ) theo khung trong [`docs/tools/README.md`](docs/tools/README.md).
+5. **Hai tầng màu (bắt buộc):** header teal `#164e63` cho việc cấp ứng dụng + tab, toolbar nền tint cho việc trên dữ liệu + nút chính —
+   mục "Hai tầng màu" cùng mục 3 ở trên (ADR #10).
+6. Thêm 1 card vào `index.html` (kèm bản English của tên + mô tả trong `I18n.add` của `index.html`) và 1 dòng vào bảng **Tools** ở trên.
+7. Viết `docs/tools/<ten-viec-kebab-case>.md` (ghi các key `?demo=` và contract link chia sẻ) theo khung trong [`docs/tools/README.md`](docs/tools/README.md).
 
 Quy ước chi tiết: [`docs/decisions/README.md`](docs/decisions/README.md).
