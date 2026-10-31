@@ -1,0 +1,9 @@
+  /* Scoped tokens so every control in a band restyles itself; --tb-ink keeps the page ink for the active tab inside the dark header */
+  :root { --tb:color-mix(in srgb, var(--acc) 10%, var(--panel)); --tb-ink:var(--ink); }
+  header.top { padding-bottom:0; background:#164e63; border-bottom:0; color:var(--ink); color-scheme:dark;
+               --ink:#ecfeff; --muted:#a5d8e6; --btn:#1f6b85; --line:#4b93aa; --good:#86efac; --bad:#fecaca; --warn:#fde68a; }
+  .wb-nav { flex:0 0 100%; gap:2px; }
+  .wb-nav button { padding:6px 14px; border:0; border-radius:6px 6px 0 0; background:transparent; }
+  .wb-nav button:hover { background:var(--btn); }
+  .wb-nav button.on { background:var(--tb); color:var(--tb-ink); font-weight:600; }
+  .toolbar { background:var(--tb); --line:color-mix(in srgb, var(--acc) 40%, var(--panel)); --muted:color-mix(in srgb, var(--ink) 65%, var(--panel)); }

@@ -6,6 +6,7 @@
 <title>Data Workbench</title>
 <style>
 /* @include styles/base.css */
+/* @include styles/app-bar-tabs-toolbar-surfaces.css */
 /* @include styles/editor-report-tree.css */
 /* @include styles/csv-grid-tab.css */
 /* @include styles/diff-tab.css */
@@ -16,13 +17,6 @@
 <header class="top">
   <a class="btn" href="../index.html">← Trang chủ</a>
   <h1>Data Workbench</h1>
-  <nav class="seg wb-nav">
-    <button data-wb-tab="format">Format JSON · XML · HTML</button>
-    <button data-wb-tab="convert">Chuyển đổi</button>
-    <button data-wb-tab="csv">Bảng CSV</button>
-    <button data-wb-tab="diff">So sánh</button>
-    <button data-wb-tab="code">Format CSS · JS</button>
-  </nav>
   <button id="wb-share" title="Chép link chứa dữ liệu + tuỳ chọn của tab đang mở (dữ liệu nằm sau dấu #, không gửi lên máy chủ)">🔗 Chia sẻ link</button>
   <button id="wb-undo" title="Lấy lại nội dung đang soạn trước khi nạp mẫu / link" hidden>↶ Khôi phục bản trước</button>
   <button id="wb-save" title="Lưu dữ liệu + tuỳ chọn của tab đang mở vào trình duyệt này">💾 Lưu phiên</button>
@@ -31,6 +25,13 @@
   <label class="chk" title="Giao diện sáng / tối">Giao diện <select id="wb-theme"><option value="auto">Tự động</option><option value="light">Sáng</option><option value="dark">Tối</option></select></label>
   <span id="wb-note" class="muted"></span>
   <span class="seg lang-switch" title="Ngôn ngữ"><button data-lang="vi">VI</button><button data-lang="en">EN</button></span>
+  <nav class="seg wb-nav">
+    <button data-wb-tab="format">Format JSON · XML · HTML</button>
+    <button data-wb-tab="convert">Chuyển đổi</button>
+    <button data-wb-tab="csv">Bảng CSV</button>
+    <button data-wb-tab="diff">So sánh</button>
+    <button data-wb-tab="code">Format CSS · JS</button>
+  </nav>
 </header>
 <!-- @include partials/format-tab.html -->
 <!-- @include partials/convert-tab.html -->

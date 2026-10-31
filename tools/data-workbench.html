@@ -53,6 +53,15 @@
   .good{color:var(--good)} .bad{color:var(--bad)} .warn{color:var(--warn)} .muted{color:var(--muted)}
   .author { display:flex; flex-wrap:wrap; gap:2px 6px; padding:4px 16px 6px; background:var(--panel); font-size:12px; color:var(--muted); } .author a { color:var(--acc); } .author span:not(:first-child) { margin-left:10px; }
   @media (max-width: 900px) { .work { grid-template-columns:1fr; grid-template-rows:45vh 45vh; } }
+  /* Scoped tokens so every control in a band restyles itself; --tb-ink keeps the page ink for the active tab inside the dark header */
+  :root { --tb:color-mix(in srgb, var(--acc) 10%, var(--panel)); --tb-ink:var(--ink); }
+  header.top { padding-bottom:0; background:#164e63; border-bottom:0; color:var(--ink); color-scheme:dark;
+               --ink:#ecfeff; --muted:#a5d8e6; --btn:#1f6b85; --line:#4b93aa; --good:#86efac; --bad:#fecaca; --warn:#fde68a; }
+  .wb-nav { flex:0 0 100%; gap:2px; }
+  .wb-nav button { padding:6px 14px; border:0; border-radius:6px 6px 0 0; background:transparent; }
+  .wb-nav button:hover { background:var(--btn); }
+  .wb-nav button.on { background:var(--tb); color:var(--tb-ink); font-weight:600; }
+  .toolbar { background:var(--tb); --line:color-mix(in srgb, var(--acc) 40%, var(--panel)); --muted:color-mix(in srgb, var(--ink) 65%, var(--panel)); }
   .ed { display:grid; grid-template-columns:auto 1fr; min-height:0; }
   .gut { margin:0; padding:8px 6px 8px 10px; text-align:right; color:var(--c); background:var(--gut); overflow:hidden; user-select:none;
          font:12.5px/1.5 Consolas, "Cascadia Mono", monospace; white-space:pre; }
@@ -122,13 +131,6 @@
 <header class="top">
   <a class="btn" href="../index.html">← Trang chủ</a>
   <h1>Data Workbench</h1>
-  <nav class="seg wb-nav">
-    <button data-wb-tab="format">Format JSON · XML · HTML</button>
-    <button data-wb-tab="convert">Chuyển đổi</button>
-    <button data-wb-tab="csv">Bảng CSV</button>
-    <button data-wb-tab="diff">So sánh</button>
-    <button data-wb-tab="code">Format CSS · JS</button>
-  </nav>
   <button id="wb-share" title="Chép link chứa dữ liệu + tuỳ chọn của tab đang mở (dữ liệu nằm sau dấu #, không gửi lên máy chủ)">🔗 Chia sẻ link</button>
   <button id="wb-undo" title="Lấy lại nội dung đang soạn trước khi nạp mẫu / link" hidden>↶ Khôi phục bản trước</button>
   <button id="wb-save" title="Lưu dữ liệu + tuỳ chọn của tab đang mở vào trình duyệt này">💾 Lưu phiên</button>
@@ -137,6 +139,13 @@
   <label class="chk" title="Giao diện sáng / tối">Giao diện <select id="wb-theme"><option value="auto">Tự động</option><option value="light">Sáng</option><option value="dark">Tối</option></select></label>
   <span id="wb-note" class="muted"></span>
   <span class="seg lang-switch" title="Ngôn ngữ"><button data-lang="vi">VI</button><button data-lang="en">EN</button></span>
+  <nav class="seg wb-nav">
+    <button data-wb-tab="format">Format JSON · XML · HTML</button>
+    <button data-wb-tab="convert">Chuyển đổi</button>
+    <button data-wb-tab="csv">Bảng CSV</button>
+    <button data-wb-tab="diff">So sánh</button>
+    <button data-wb-tab="code">Format CSS · JS</button>
+  </nav>
 </header>
 <section class="panel" data-wb-panel="format" hidden>
   <div class="toolbar">
