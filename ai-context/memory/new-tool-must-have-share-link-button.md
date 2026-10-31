@@ -14,4 +14,4 @@ hoặc link tự chế đưa dữ liệu vào query `?data=` ⇒ dữ liệu l�
 - Đọc thêm `?data=<text>` cho link tự soạn (đi lên server ⇒ chỉ dữ liệu ngắn, ghi rõ trong doc).
 - Không mất bài đang sửa (nút `↶ Khôi phục bản trước` hoặc lịch sử); payload không tin cậy ⇒ chỉ gán field đã biết, link hỏng báo lỗi.
 - Tham khảo: Data Workbench `src/data-workbench/js/core/workbench-tab-router.js` (`share`, `openLink`, `keep`, `restore`);
-  Mermaid `ShareLink` + `openHash` trong `tools/mermaid-diagram-editor.html`.
+  Diagram Editor `src/diagram-editor/js/ui/share-links.js`.

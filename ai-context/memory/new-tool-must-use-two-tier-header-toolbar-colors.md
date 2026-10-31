@@ -19,4 +19,4 @@
 - `order` trong flex làm phím Tab lệch thứ tự nhìn ⇒ đặt tab cuối header ngay trong DOM.
 - Cờ Chrome `--force-dark-mode` tự đảo màu nên ảnh sai ⇒ đổi theme bằng dropdown Giao diện qua CDP.
 
-**Tham khảo:** Data Workbench (có tab), FIX Parser (dùng file chung, không tab), Mermaid (viết tay).
+**Tham khảo:** Data Workbench (có tab), FIX Parser (dùng file chung, không tab), Diagram Editor (dùng file chung, 6 tab).

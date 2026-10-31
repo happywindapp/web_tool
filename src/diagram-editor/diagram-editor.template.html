@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; worker-src blob:; style-src 'unsafe-inline'; img-src data: blob:; font-src data:; frame-src https://embed.diagrams.net">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Soạn & xem trước sơ đồ</title>
+<style>
+/* @include ../data-workbench/styles/base.css */
+/* @include ../data-workbench/styles/app-bar-tabs-toolbar-surfaces.css */
+/* @include ../data-workbench/styles/theme-filter-popover-chips.css */
+/* @include styles/diagram-editor.css */
+</style>
+</head>
+<body>
+<header class="top">
+  <a class="btn" href="../index.html">← Trang chủ</a>
+  <h1>Soạn &amp; xem trước sơ đồ</h1>
+  <button id="btnShare" title="Chép link chứa sơ đồ + cấu hình (dữ liệu nằm sau dấu #, không gửi lên máy chủ; tab Mermaid tương thích mermaid.live)">🔗 Chia sẻ link</button>
+  <button id="btnOpenLink" title="Mở link chia sẻ của tool này hoặc của mermaid.live">Mở link…</button>
+  <button id="btnHist" title="Lịch sử phiên bản của tab đang mở">Lịch sử</button>
+  <button id="btnSave" title="Lưu sơ đồ + cấu hình với một cái tên, trong trình duyệt này (tách khỏi lịch sử tự động)">💾 Lưu sơ đồ</button>
+  <select id="savedSel" title="Mở lại một sơ đồ đã lưu trong trình duyệt này"></select>
+  <button id="btnDelSaved" title="Xoá sơ đồ đang mở khỏi danh sách đã lưu" hidden>🗑</button>
+  <label class="chk" title="Giao diện sáng / tối">Giao diện <select id="uiTheme"><option value="auto">Tự động</option><option value="light">Sáng</option><option value="dark">Tối</option></select></label>
+  <span class="seg lang-switch" title="Ngôn ngữ"><button data-lang="vi">VI</button><button data-lang="en">EN</button></span>
+  <nav class="seg wb-nav" aria-label="Loại sơ đồ">
+    <button data-engine="mermaid" title="Flowchart, sequence, ER, Gantt… — chạy offline">Mermaid</button>
+    <button data-engine="plantuml" title="UML đầy đủ, C4 — chạy offline">PlantUML</button>
+    <button data-engine="drawio" title="Kéo thả tự do — cần kết nối embed.diagrams.net">draw.io 🌐</button>
+    <button data-engine="dbml" title="Thiết kế ERD / schema database — chạy offline">DBML</button>
+    <button data-engine="d2" title="Sơ đồ kiến trúc đẹp, bố cục tốt — chạy offline">D2</button>
+    <button data-engine="structurizr" title="C4 model: 1 model sinh nhiều view — chạy offline">Structurizr</button>
+  </nav>
+</header>
+<div class="toolbar">
+  <label class="btn" title="Mở file (hoặc kéo-thả file vào trang)">Mở file…<input id="file" type="file"></label>
+  <select id="demo" title="Nạp sơ đồ mẫu rồi vẽ ngay"></select>
+  <span class="sep"></span>
+  <span id="engineOpts" class="opts"></span>
+  <select id="pickSel" hidden></select>
+  <span class="grow"></span>
+  <label class="chk" id="autoWrap" title="Tự vẽ lại khi gõ"><input id="auto" type="checkbox" checked> Tự vẽ</label>
+  <button id="btnRender" class="main" title="Ctrl+Enter">Vẽ</button>
+</div>
+<main id="work" class="studio">
+  <section class="pane">
+    <div class="bar"><b class="seg"><button data-tab="code" class="on">Mã</button><button data-tab="cfg" id="btnCfgTab">Cấu hình</button></b>
+      <span class="muted fname" id="fname"></span><button id="btnMd" title="Chép khối mã để dán vào Markdown">Chép Markdown</button><button id="btnDl" title="Ctrl+S"></button></div>
+    <div class="ed" id="edCode"><pre id="gut">1</pre><div class="code-wrap"><pre id="hl"></pre><textarea id="src" spellcheck="false"></textarea></div></div>
+    <textarea id="cfg" spellcheck="false" hidden></textarea>
+  </section>
+  <div id="split" title="Kéo để đổi độ rộng"></div>
+  <section class="pane" id="pvPane">
+    <div class="bar"><b>Xem trước</b>
+      <span class="seg"><button id="zOut" title="Thu nhỏ">−</button><button id="zPct" title="Về 100%">100%</button><button id="zIn" title="Phóng to">+</button></span>
+      <button id="zFit">Vừa khung</button><button id="btnFull" title="Toàn màn hình">⛶</button>
+      <span class="sep"></span>
+      <select id="pngScale" title="Độ phân giải PNG"><option value="1">PNG 1x</option><option value="2" selected>PNG 2x</option><option value="3">PNG 3x</option><option value="4">PNG 4x</option></select>
+      <button id="btnPng">Tải PNG</button><button id="btnSvg">Tải SVG</button><button id="btnCopyPng">Chép ảnh</button></div>
+    <div id="view"><div id="stage"></div></div>
+  </section>
+</main>
+<section class="pane studio-full" id="drawioPane" hidden>
+  <div class="bar"><b>draw.io</b><button id="dioDl" title="Tải XML của sơ đồ"></button><button id="dioPng">Tải PNG</button><button id="dioSvg">Tải SVG</button></div>
+  <div id="dioFrame" hidden></div>
+  <div id="dioGate" class="gate">
+    <h2>Tab này cần kết nối ra ngoài</h2>
+    <p>Trình soạn kéo thả được tải từ <b>embed.diagrams.net</b>. Khi bấm kết nối, trình duyệt gọi máy chủ đó và sơ đồ đang mở được nạp vào khung của draw.io. Chưa bấm thì không có request nào.</p>
+    <p class="bad" id="dioFail" hidden>Lần kết nối trước không thành công. Sơ đồ vẫn còn nguyên trong trình duyệt.</p>
+    <button id="dioConnect" class="main">🌐 Kết nối draw.io</button>
+    <p class="muted">Đừng dùng tab này cho sơ đồ chứa thông tin nội bộ. Năm tab còn lại chạy hoàn toàn trên máy bạn.</p>
+  </div>
+</section>
+<footer class="statusbar">
+  <div class="status-row"><span id="status" class="muted"></span><span id="info" class="muted"></span></div>
+  <pre id="err" hidden title="Bấm để nhảy tới dòng lỗi"></pre>
+  <div class="muted tiny">Kéo để di chuyển, lăn chuột để phóng to/thu nhỏ. Mermaid, PlantUML, DBML, D2, Structurizr chạy hoàn toàn trên máy bạn, không gửi dữ liệu đi đâu; riêng draw.io cần kết nối embed.diagrams.net sau khi bạn đồng ý. Nháp và lịch sử chỉ lưu trong trình duyệt này.</div>
+</footer>
+<div class="author">
+  <span>Tác giả:</span><b>Phan Ngọc Minh Quân</b>
+  <span>GitHub Source:</span><a href="https://github.com/happywindapp/web_tool/">github.com/happywindapp/web_tool</a>
+</div>
+<dialog id="hist">
+  <div class="bar"><b>Lịch sử phiên bản (lưu trên trình duyệt này)</b><button id="hSave">Lưu bản hiện tại</button><button id="hClear">Xoá tất cả</button><button id="hClose">Đóng</button></div>
+  <ol id="hList"></ol>
+</dialog>
+<script>
+// @include ../data-workbench/js/core/i18n-ui-language-vi-en.js
+const $ = id => document.getElementById(id);
+// @include ../data-workbench/js/i18n/en-shared-theme-sessions-filters.js
+// @include js/i18n/en-diagram-editor-strings.js
+// @include ../data-workbench/js/core/share-link-codec.js
+// @include ../data-workbench/js/core/theme-picker-auto-light-dark.js
+// @include ../data-workbench/js/core/saved-sessions-local-storage.js
+// @include js/core/vendor-script-loader.js
+// @include js/core/engine-store.js
+// @include js/core/svg-output-sanitizer.js
+// @include js/core/svg-png-exporter.js
+// @include js/core/source-highlighter.js
+// @include js/core/preview-pan-zoom.js
+// @include js/core/version-history.js
+// @include js/samples/mermaid-samples.js
+// @include js/samples/plantuml-samples.js
+// @include js/samples/drawio-samples.js
+// @include js/samples/dbml-samples.js
+// @include js/samples/d2-samples.js
+// @include js/samples/structurizr-samples.js
+// @include js/engines/mermaid-engine.js
+// @include js/engines/plantuml-engine.js
+// @include js/engines/graphviz-renderer.js
+// @include js/engines/dbml-schema-to-dot.js
+// @include js/engines/dbml-engine.js
+// @include js/engines/d2-engine.js
+// @include js/engines/structurizr-dsl-parser.js
+// @include js/engines/structurizr-view-to-dot.js
+// @include js/engines/structurizr-engine.js
+// @include js/engines/drawio-embed-engine.js
+// @include js/engines/engine-registry.js
+// @include js/ui/editor-surface.js
+// @include js/ui/engine-session.js
+// @include js/ui/render-pipeline.js
+// @include js/ui/drawio-tab.js
+// @include js/ui/share-links.js
+// @include js/ui/history-dialog.js
+// @include js/ui/action-wiring.js
+// @include js/ui/boot.js
+</script>
+</body>
+</html>

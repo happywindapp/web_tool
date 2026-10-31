@@ -1,0 +1,65 @@
+  body { grid-template-rows:auto auto minmax(0, 1fr) auto auto; }
+  :root[data-theme="dark"] { color-scheme:dark; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { color-scheme:dark; } }
+  .toolbar .opts { display:inline-flex; flex-wrap:wrap; gap:8px; align-items:center; }
+  .toolbar .opts:empty { display:none; }
+  .toolbar .sep:has(+ .opts:empty + select[hidden]) { display:none; }
+  .toolbar .grow { flex:1; }
+  .bar .sep { width:1px; align-self:stretch; background:var(--line); margin:0 2px; }
+  .bar .seg { gap:0; }
+  .bar .seg button { border-radius:0; margin-left:-1px; }
+  .bar .seg button:first-child { border-radius:6px 0 0 6px; margin-left:0; }
+  .bar .seg button:last-child { border-radius:0 6px 6px 0; }
+  .bar .seg button:only-of-type, .bar .seg button:has(+ [hidden]) { border-radius:6px; }
+  .bar .fname { margin-right:auto; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:30ch; }
+  .bar b.seg { margin-right:auto; }
+  .bar b.seg + .fname { margin-left:-2px; }
+
+  .studio { display:grid; grid-template-columns:var(--split, 40%) 8px minmax(0, 1fr); padding:10px 16px; min-height:0; }
+  .studio-full { margin:10px 16px; min-height:0; grid-template-rows:auto minmax(0, 1fr); }
+  .pane { min-width:0; box-shadow:0 1px 2px rgba(15, 23, 42, .06); }
+  #split { cursor:col-resize; margin:0 2px; border-radius:3px; touch-action:none; }
+  #split:hover { background:var(--line); }
+
+  .ed { display:grid; grid-template-columns:auto 1fr; min-height:0; }
+  #gut { margin:0; padding:8px 6px 40px 10px; text-align:right; color:var(--c); background:var(--gut); overflow:hidden; user-select:none;
+         font:12.5px/1.5 Consolas, "Cascadia Mono", monospace; white-space:pre; }
+  #gut b { color:#fff; background:var(--bad); border-radius:3px; padding:0 3px; }
+  .code-wrap { position:relative; min-height:0; }
+  .code-wrap > *, #cfg { position:absolute; inset:0; margin:0; padding:8px 10px; border:0; outline:0; resize:none; width:100%; height:100%; overflow:auto;
+         font:12.5px/1.5 Consolas, "Cascadia Mono", monospace; white-space:pre; tab-size:4; color:var(--ink); }
+  #hl { overflow:hidden; pointer-events:none; background:var(--code); padding-bottom:40px; padding-right:40px; }
+  #src { background:transparent; color:transparent; caret-color:var(--ink); }
+  #src::placeholder { color:var(--muted); }
+  #src::selection { background:rgba(14, 116, 144, .25); }
+  #cfg { position:static; background:var(--code); }
+  .a { color:var(--l); font-weight:600; }
+  .k { font-weight:600; }
+
+  /* The canvas stays light: renderers draw dark lines and text unless a dark theme sets its own background. */
+  #view { position:relative; overflow:hidden; cursor:grab; user-select:none; touch-action:none; background-color:#fff;
+          background-image:radial-gradient(rgba(100, 116, 139, .22) 1px, transparent 1px); background-size:18px 18px; }
+  #view.grab { cursor:grabbing; }
+  #stage { position:absolute; left:0; top:0; transform-origin:0 0; }
+  #stage.stale { opacity:.35; }
+  #stage svg { display:block; }
+  #zPct { min-width:58px; }
+
+  #dioFrame { min-height:0; }
+  #dioFrame iframe { display:block; width:100%; height:100%; border:0; background:#fff; }
+  .gate { align-self:center; justify-self:center; max-width:560px; padding:24px; text-align:center; }
+  .gate h2 { margin:0 0 8px; font-size:18px; }
+  .gate p { margin:0 0 12px; }
+  .gate button { padding:8px 18px; margin-bottom:12px; }
+
+  .statusbar { background:var(--panel); border-top:1px solid var(--line); padding:6px 16px; max-height:30vh; overflow:auto; }
+  .status-row { display:flex; flex-wrap:wrap; gap:4px 14px; align-items:baseline; min-height:20px; }
+  #status { font-weight:600; }
+  .tiny { font-size:12px; }
+  #err { margin:4px 0; padding:6px 8px; background:color-mix(in srgb, var(--bad) 10%, var(--panel)); border-radius:6px; color:var(--bad); font:12px/1.4 Consolas, monospace; white-space:pre-wrap; cursor:pointer; }
+
+  dialog { width:min(720px, 92vw); max-height:80vh; padding:0; border:1px solid var(--line); border-radius:8px; background:var(--panel); color:var(--ink); }
+  #hList { margin:0; padding:8px 16px 12px 36px; overflow:auto; max-height:60vh; }
+  #hList li { padding:4px 0; border-bottom:1px solid var(--gut); }
+  #hList code { display:block; color:var(--muted); font-size:12px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  @media (max-width: 900px) { .studio { grid-template-columns:1fr; grid-template-rows:45vh 0 50vh; gap:10px; overflow:auto; } #split { display:none; } }

@@ -14,7 +14,7 @@ Tool hiện có:
 | Tool | File | Việc |
 |------|------|------|
 | Data Workbench | `tools/data-workbench.html` — **file sinh ra** từ `src/data-workbench/` (ADR #7); thay tool cũ `format-json-xml-html.html` (đã xoá) | 5 tab: Format JSON·XML·HTML (**tự sửa lỗi**, sort key, giải JSON lồng) · Chuyển đổi JSON/CSV/TSV/XML/YAML → … + SQL/Markdown/HTML table · Bảng CSV · So sánh (dòng / JSON cấu trúc) · Format CSS·JS |
-| Soạn & xem trước sơ đồ Mermaid | `tools/mermaid-diagram-editor.html` (+ `tools/vendor/mermaid-12.2.0.min.js`) | Live editor kiểu mermaid.live, offline: preview, theme, xuất PNG/SVG, link `#pako:`, lịch sử trong localStorage |
+| Soạn & xem trước sơ đồ | `tools/diagram-editor.html` — **file sinh ra** từ `src/diagram-editor/` (ADR #11) + renderer ở `tools/vendor/`; `tools/mermaid-diagram-editor.html` chỉ còn chuyển hướng | 6 tab Mermaid · PlantUML · draw.io · DBML · D2 · Structurizr: preview, xuất PNG/SVG, link `#pako:`, nháp + lịch sử riêng từng tab. Năm tab offline; **draw.io là ngoại lệ duy nhất của "không gọi mạng"**, chỉ kết nối `embed.diagrams.net` sau khi người dùng bấm đồng ý |
 | FIX Parser | `tools/fix-message-parser.html` — **file sinh ra** từ `src/fix-message-parser/` (ADR #7, build `scripts/build-single-file-tool.ps1 -Tool fix-message-parser`) | Đọc message/log FIX: bảng message + chi tiết tag, kiểm BodyLength/CheckSum/tag bắt buộc, từ điển FIX 4.4 + Server Sàn (BCGD `35=s/t/u`, ĐTTTT), chuỗi lệnh, che dữ liệu, xuất CSV/JSON; mẫu nhiều báo cáo giao dịch Server Sàn |
 
 ## Kiến trúc high-level
@@ -59,7 +59,7 @@ Không có. Không backend, không API, không DB, không CDN.
 
 - **1 tool = 1 file HTML tự chứa** trong `tools/`, tên kebab-case mô tả việc. Không thêm build step,
   framework hay script CDN nếu chưa hỏi user (xem [ADR](../docs/decisions/README.md)).
-- **Không gửi dữ liệu đi đâu** — đây là cam kết hiển thị ngay trên UI; mọi thay đổi gọi mạng là breaking.
+- **Không gửi dữ liệu đi đâu** — đây là cam kết hiển thị ngay trên UI; mọi thay đổi gọi mạng là breaking. Ngoại lệ duy nhất đã chốt: tab draw.io (ADR #11).
 - **Tự sửa = đoán**: mỗi sửa đổi phải được ghi vào danh sách `fixes`, không sửa âm thầm.
 - **Mọi tool phải có khối tác giả** `<div class="author">` (Tác giả + GitHub Source) — markup/CSS chuẩn ở
   [`docs/architecture/README.md`](../docs/architecture/README.md) mục 3.

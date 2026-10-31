@@ -1,14 +1,14 @@
 # web_tool
 
 Bộ công cụ web tiện ích chạy **100% trong trình duyệt**. Mỗi tool là **1 file HTML tự chứa** trong `tools/` —
-không cài đặt, không build, không gửi dữ liệu đi đâu. Mở file là dùng được, kể cả offline.
+không cài đặt, không build, không gửi dữ liệu đi đâu (ngoại lệ duy nhất: tab draw.io, chỉ khi bấm kết nối). Mở file là dùng được, kể cả offline.
 
 ## Tools
 
 | Tool | File | Làm gì |
 |------|------|--------|
 | Data Workbench | [`tools/data-workbench.html`](tools/data-workbench.html) (sinh từ `src/data-workbench/`) | 5 tab: **Format JSON·XML·HTML** (kiểm tra, tự sửa lỗi, format 2/3/4/8/Tab, thu gọn, sắp khóa, giải JSON lồng, thành chuỗi JSON, cây) · **Chuyển đổi** JSON/CSV/TSV/XML/YAML → JSON/CSV/TSV/XML/YAML/JS object/SQL INSERT/Markdown/HTML table · **Bảng CSV** (bảng mã, sort, lọc chữ + **lọc theo cột dạng chip / chuột phải chỉ hiện-loại trừ**, sửa ô, thêm/xoá + **kéo-thả đổi chỗ cột**, xuất có BOM + **giữ số cho Excel**) · **So sánh** (theo dòng, JSON theo cấu trúc) · **Format CSS·JS**. Chung: **💾 lưu phiên** đặt tên, **giao diện Tự động/Sáng/Tối** |
-| Soạn & xem trước sơ đồ Mermaid | [`tools/mermaid-diagram-editor.html`](tools/mermaid-diagram-editor.html) | Live editor như mermaid.live nhưng offline: tô màu cú pháp, báo dòng lỗi, 22 sơ đồ mẫu, theme/kiểu nét, pan-zoom, xuất PNG (1–4x)/SVG/.mmd, chép ảnh/Markdown, link chia sẻ `#pako:` (tương thích mermaid.live), nháp + lịch sử trong trình duyệt, **💾 lưu sơ đồ đặt tên**, **giao diện Tự động/Sáng/Tối**. Cần kèm `tools/vendor/` |
+| Soạn & xem trước sơ đồ | [`tools/diagram-editor.html`](tools/diagram-editor.html) (file sinh ra từ `src/diagram-editor/`) | 6 tab **Mermaid · PlantUML · draw.io · DBML · D2 · Structurizr**: tô màu cú pháp, báo dòng lỗi, sơ đồ mẫu, pan-zoom, xuất PNG (1–4x)/SVG/mã nguồn, chép ảnh/Markdown, link chia sẻ `#pako:` (tab Mermaid tương thích mermaid.live), nháp + lịch sử + **💾 lưu sơ đồ đặt tên** riêng từng tab, **giao diện Tự động/Sáng/Tối**. Năm tab chạy offline, cần kèm `tools/vendor/`; **riêng draw.io cần mạng** và chỉ kết nối `embed.diagrams.net` sau khi bấm đồng ý |
 | FIX Parser | [`tools/fix-message-parser.html`](tools/fix-message-parser.html) (sinh từ `src/fix-message-parser/`) | Dán message/log FIX (SOH, `\|`, `^A`…, kèm tiền tố log) → bảng message (giờ UTC/VN, gửi→nhận, loại, Symbol, ClOrdID, trạng thái…) + chi tiết từng tag (tên, ý nghĩa giá trị, repeating group; rê chuột = tooltip giải thích theo FIX Orchestra + spec CBTS v1.15 của sàn, mã lỗi Server Sàn). Kiểm BodyLength/CheckSum, thứ tự header, tag bắt buộc, kiểu giá trị; từ điển FIX 4.4 + **Server Sàn** (BCGD `35=s/t/u`, ĐTTTT `S/AI/AJ/Z`); lọc/tìm `tag=value`, **lọc theo cột + khoảng giờ, kéo-thả thứ tự cột, ghi chú từng message, lưu phân tích, từ điển riêng CSV, ẩn danh theo nhóm (bí danh giữ chuỗi lệnh), chọn chuỗi lệnh / cha–con, Alt+rê chuột tra tag trên ô nhập, theme sáng/tối**, xuất CSV (Excel giữ nguyên giá trị)/JSON, chép bản sửa 9/10. Có sẵn mẫu nhiều báo cáo giao dịch Server Sàn |
 
 ## Dùng

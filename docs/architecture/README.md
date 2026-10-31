@@ -4,7 +4,7 @@
 
 - **Static single-file tool (công cụ 1 file tĩnh)**: mỗi tool = 1 file `.html` trong `tools/`, CSS + JS inline.
 - `index.html` ở root = trang chủ tĩnh, chỉ chứa link tới từng tool.
-- Không backend, không build, không dependency, không network request. Mở bằng `file://` hay host tĩnh đều chạy.
+- Không backend, không build, không dependency, không network request (ngoại lệ duy nhất: tab draw.io của Diagram Editor, ADR #11). Mở bằng `file://` hay host tĩnh đều chạy.
 - Trạng thái chỉ sống trong DOM/biến JS của tab — không `localStorage`, không cookie.
 
 ```text
@@ -52,7 +52,7 @@ Xem `docs/tools/<tool>.md` — danh sách ở [`docs/tools/`](../tools/README.md
   - **Tab điều hướng** (nếu tool có nhiều màn hình): hàng riêng cuối header, không viền, tab bật liền nền với toolbar + chữ đậm. Mẫu: `.wb-nav`.
   - **Toolbar** nền tint accent 10%: việc trên dữ liệu đang mở (mở file, mẫu, tuỳ chọn, chạy); nút chính `button.main` ở đây, không để ở header.
   - **Tool build từ `src/`:** `@include ../data-workbench/styles/app-bar-tabs-toolbar-surfaces.css` ngay sau `base.css`, dùng `<header class="top">` + `<div class="toolbar">`. Không sửa file chung cho riêng 1 tool.
-  - **Tool 1 file viết tay:** chép 2 rule dưới đây vào CSS của tool (đã có ở Mermaid), `body` thêm 1 hàng `auto` cho toolbar. Có `.muted` hoặc thông báo `.good/.bad/.warn` trong header ⇒ chép cả phần override biến đó từ file chung.
+  - **Tool 1 file viết tay:** chép 2 rule dưới đây vào CSS của tool, `body` thêm 1 hàng `auto` cho toolbar. Có `.muted` hoặc thông báo `.good/.bad/.warn` trong header ⇒ chép cả phần override biến đó từ file chung.
 
     ```css
     header { background:#164e63; border-bottom:0; color:var(--ink); color-scheme:dark; --ink:#ecfeff; --btn:#1f6b85; --line:#4b93aa; }
@@ -103,7 +103,7 @@ Xem `docs/tools/<tool>.md` — danh sách ở [`docs/tools/`](../tools/README.md
 
        Data Workbench có thêm test tự động `src/data-workbench/tests/i18n-dictionary-coverage.test.js`.
 - Code dùng chung giữa các tool được **chép** vào từng file (chấp nhận trùng lặp để giữ tự chứa — ADR #1).
-  Tool có build (Data Workbench, FIX Parser) `@include ../data-workbench/js/core/…` thay vì chép. Module dùng chung hiện có: `I18n`, `ShareCodec`, `TextUtil`, `ThemePicker` (giao diện Tự động/Sáng/Tối, `:root[data-theme]`), `SavedSessions` (💾 lưu / 📂 mở / 🗑 xoá bản lưu đặt tên trong localStorage, ≤ 30), `ColFilter` (lọc cột: popover, menu chuột phải, chip) + css `styles/theme-filter-popover-chips.css` + EN `js/i18n/en-shared-theme-sessions-filters.js`. Mermaid (tool 1 file) chép nguyên văn `ThemePicker` + `SavedSessions`. Sửa module chung ⇒ `pwsh scripts/build-single-file-tool.ps1` (build mọi tool) và chép lại sang tool 1 file.
-  Ngoại lệ: Data Workbench viết module ở `src/data-workbench/` rồi build ghép thành 1 file (ADR #7).
+  Tool có build (Data Workbench, FIX Parser) `@include ../data-workbench/js/core/…` thay vì chép. Module dùng chung hiện có: `I18n`, `ShareCodec`, `TextUtil`, `ThemePicker` (giao diện Tự động/Sáng/Tối, `:root[data-theme]`), `SavedSessions` (💾 lưu / 📂 mở / 🗑 xoá bản lưu đặt tên trong localStorage, ≤ 30), `ColFilter` (lọc cột: popover, menu chuột phải, chip) + css `styles/theme-filter-popover-chips.css` + EN `js/i18n/en-shared-theme-sessions-filters.js`. Sửa module chung ⇒ `pwsh scripts/build-single-file-tool.ps1` (build mọi tool) và chép lại sang tool 1 file.
+  Ngoại lệ: Data Workbench, FIX Parser, Diagram Editor viết module ở `src/<tool>/` rồi build ghép thành 1 file (ADR #7).
 - Không đưa thư viện ngoài vào; nếu bắt buộc → hỏi user và ghi ADR (đổi cam kết offline/riêng tư).
 - Parser trả `fixes` thay vì throw — chỉ throw khi không thể xử lý (vd nội dung trống).

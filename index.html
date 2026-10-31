@@ -31,16 +31,16 @@
 <header>
   <span class="lang-switch" title="Ngôn ngữ"><button data-lang="vi">VI</button><button data-lang="en">EN</button></span>
   <h1>Web Tools</h1>
-  <div class="muted">Bộ công cụ xử lý dữ liệu ngay trong trình duyệt — không cần cài đặt, dữ liệu không gửi lên máy chủ nào. Tải file HTML về máy là dùng được cả offline.</div>
+  <div class="muted">Bộ công cụ xử lý dữ liệu ngay trong trình duyệt — không cần cài đặt, dữ liệu không gửi lên máy chủ nào (trừ tab draw.io, chỉ khi bạn bấm kết nối). Tải file HTML về máy là dùng được cả offline.</div>
 </header>
 <main>
   <a class="card" href="tools/data-workbench.html">
     <b>Data Workbench</b>
     <span class="muted">Kiểm tra &amp; tự sửa lỗi <strong>JSON/XML/HTML</strong>, chuyển <strong>JSON ⇄ CSV ⇄ XML ⇄ YAML</strong> (+ <strong>SQL, Markdown</strong>), xem/sửa bảng CSV, so sánh 2 file, format CSS/JS.</span>
   </a>
-  <a class="card" href="tools/mermaid-diagram-editor.html">
-    <b>Sơ đồ Mermaid</b>
-    <span class="muted">Gõ mã <strong>Mermaid</strong>, xem sơ đồ ngay, 22 mẫu, đổi theme, xuất <strong>PNG/SVG</strong>, chia sẻ link (mở được cả link mermaid.live), lịch sử phiên bản.</span>
+  <a class="card" href="tools/diagram-editor.html">
+    <b>Soạn sơ đồ</b>
+    <span class="muted">6 loại trong 1 tool: <strong>Mermaid, PlantUML, draw.io, DBML, D2, Structurizr</strong>. Có mẫu thử, xuất <strong>PNG/SVG</strong>, chia sẻ link, lịch sử phiên bản. Riêng draw.io cần mạng.</span>
   </a>
   <a class="card" href="tools/fix-message-parser.html">
     <b>FIX Parser</b>
@@ -113,14 +113,14 @@ const T = I18n.t;
 // English UI strings, keyed by the Vietnamese source text.
 I18n.add({
   "Ngôn ngữ": "Language",
-  "Bộ công cụ xử lý dữ liệu ngay trong trình duyệt — không cần cài đặt, dữ liệu không gửi lên máy chủ nào. Tải file HTML về máy là dùng được cả offline.": "Data tools that run right in your browser — nothing to install, no data is sent to any server. Download the HTML file and it works offline too.",
+  "Bộ công cụ xử lý dữ liệu ngay trong trình duyệt — không cần cài đặt, dữ liệu không gửi lên máy chủ nào (trừ tab draw.io, chỉ khi bạn bấm kết nối). Tải file HTML về máy là dùng được cả offline.": "Data tools that run right in your browser — nothing to install, no data is sent to any server (except the draw.io tab, and only after you click Connect). Download the HTML file and it works offline too.",
   "Kiểm tra & tự sửa lỗi": "Validate & auto-fix",
   ", chuyển": ", convert",
   "), xem/sửa bảng CSV, so sánh 2 file, format CSS/JS.": "), view/edit CSV tables, compare 2 files, format CSS/JS.",
-  "Sơ đồ Mermaid": "Mermaid diagrams",
-  "Gõ mã": "Type",
-  ", xem sơ đồ ngay, 22 mẫu, đổi theme, xuất": " code and see the diagram instantly, 22 samples, themes, export",
-  ", chia sẻ link (mở được cả link mermaid.live), lịch sử phiên bản.": ", share links (mermaid.live links open too), version history.",
+  "Soạn sơ đồ": "Diagram editor",
+  "6 loại trong 1 tool:": "6 diagram languages in one tool:",
+  ". Có mẫu thử, xuất": ". Samples included, export",
+  ", chia sẻ link, lịch sử phiên bản. Riêng draw.io cần mạng.": ", share links, version history. Only draw.io needs a network connection.",
   "Đọc": "Read",
   "message/log FIX": "FIX messages",
   "theo tên tag và ý nghĩa, kiểm BodyLength/CheckSum + tag bắt buộc, lọc, theo chuỗi lệnh, từ điển FIX 4.4, che dữ liệu, xuất CSV/JSON.": "and logs by tag name and meaning, check BodyLength/CheckSum + required tags, filter, follow order chains, FIX 4.4 dictionary, mask data, export CSV/JSON.",

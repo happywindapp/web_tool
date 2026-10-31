@@ -12,4 +12,4 @@ tính năng tự sửa/báo lỗi không ai thấy vì input của họ hợp l�
 - URL `?demo=<key>` nạp + chạy (link thử nhanh, test tự động); xoá `demo` khỏi URL sau khi nạp.
 - ≥ 1 mẫu hợp lệ + ≥ 1 mẫu lỗi/ca khó; mỗi chế độ chính 1 mẫu; dữ liệu giả, nhỏ, gom trong 1 hằng `DEMOS`/`SAMPLES`.
 - Tên mẫu dịch VI/EN, **nội dung mẫu viết bằng English** (cố định); nạp mẫu không âm thầm làm mất nháp; ghi key `?demo=` vào `docs/tools/<tool>.md`.
-- Tham khảo: Data Workbench `src/data-workbench/js/tabs/demo-samples.js`; Mermaid `SAMPLES` trong `tools/mermaid-diagram-editor.html`.
+- Tham khảo: Data Workbench `src/data-workbench/js/tabs/demo-samples.js`; Diagram Editor `src/diagram-editor/js/samples/`.
