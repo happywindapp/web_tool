@@ -1,5 +1,6 @@
 // Adds every system × C4 level to the tabs' samples as ?demo=c4-<system>-<level>; Structurizr gets one workspace with 4 views.
-for (const model of [C4_MODEL_BANKING, C4_MODEL_SECURITIES, C4_MODEL_SHOPPING]) {
+const C4_MODELS = [C4_MODEL_BANKING, C4_MODEL_SECURITIES, C4_MODEL_SHOPPING, C4_MODEL_CRYPTO, C4_MODEL_GAME, C4_MODEL_LOGISTICS];
+for (const model of C4_MODELS) {
   for (const { key, label } of C4Views.LEVELS) {
     const id = `c4-${model.key}-${key}`;
     MERMAID_SAMPLES[id] = [label, C4ToText.mermaid(model, key), model.group];

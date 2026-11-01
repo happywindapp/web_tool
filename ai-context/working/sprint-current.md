@@ -21,6 +21,8 @@
 - [x] Diagram Editor: gộp 6 tab Mermaid · PlantUML · draw.io · DBML · D2 · Structurizr, tách `src/diagram-editor/`, đổi tên `tools/diagram-editor.html`, design mới (ADR #11) (2026-11-01)
 - [x] Diagram Editor: mẫu C4 đủ 4 cấp cho 3 hệ thống microservice (Ngân hàng · Chứng khoán · Mua sắm online), sinh từ model chung `src/diagram-editor/js/samples/c4/`, dropdown mẫu có nhóm (2026-11-02)
 - [x] Diagram Editor: mẫu DDD 5 sơ đồ cho 3 hệ thống microservice (Subdomain map · Context map · Aggregates · Event storming · Hexagonal), sinh từ model chung `src/diagram-editor/js/samples/ddd/` (2026-11-02)
+- [x] Diagram Editor: tab DBML thêm 6 database đầy đủ (Ngân hàng · Chứng khoán · Mua sắm online · Sàn tiền ảo · Game online · Logistics) ở `src/diagram-editor/js/samples/dbml/`, test compile bằng `@dbml/parse` thật (2026-11-02)
+- [x] Diagram Editor: thêm mẫu C4 + DDD cho Sàn tiền ảo, Game online, Logistics; sửa nội dung DDD sau review (2026-11-02)
 - [ ] Data Workbench đợt 2 (chưa chốt): Encode/Base64/JWT/hash · Format SQL · sinh Go struct/TS/C# từ JSON · copy path + JSONPath/XPath trên cây — xem `plans/reports/research-261028-0849-*`
 
 ## Đang làm (in progress)

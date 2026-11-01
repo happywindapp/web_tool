@@ -24,7 +24,7 @@ Dev/BA/kỹ sư kiến trúc cần vẽ flowchart, UML, ERD, kiến trúc C4… 
 | Giao diện | Hợp đồng |
 |-----------|----------|
 | URL `?tab=<id>` | `mermaid plantuml drawio dbml d2 structurizr`. Không có thì mở tab lần trước; có `demo`/`data` mà thiếu `tab` thì là Mermaid (giữ link cũ) |
-| URL `?demo=<key>` | Mermaid: `flowchart sequence class state er gantt pie journey git mindmap timeline quadrant xychart sankey block architecture kanban requirement c4 packet radar treemap` · PlantUML: `sequence class usecase activity state component c4 mindmap gantt theme broken` · draw.io: `flow architecture broken` · DBML: `shop groups broken` · D2: `architecture sequence table class grid broken` · Structurizr: `banking auto broken`. Mẫu C4 ở mục 3: Mermaid, PlantUML, draw.io, D2 thêm `c4-<hệ thống>-<cấp>` (`bank securities shop` × `context container component code`) · DBML thêm `c4-<hệ thống>-code` · Structurizr thêm `c4-<hệ thống>`. Mẫu DDD ở mục 3: Mermaid, PlantUML, draw.io, D2 thêm `ddd-<hệ thống>-<sơ đồ>` (`subdomains context-map aggregates event-flow hexagonal`) · DBML thêm `ddd-<hệ thống>-aggregates` · Structurizr thêm `ddd-<hệ thống>` |
+| URL `?demo=<key>` | Mermaid: `flowchart sequence class state er gantt pie journey git mindmap timeline quadrant xychart sankey block architecture kanban requirement c4 packet radar treemap` · PlantUML: `sequence class usecase activity state component c4 mindmap gantt theme broken` · draw.io: `flow architecture broken` · DBML: `shop groups broken` · D2: `architecture sequence table class grid broken` · Structurizr: `banking auto broken`. Mẫu C4 ở mục 3: Mermaid, PlantUML, draw.io, D2 thêm `c4-<hệ thống>-<cấp>` (`bank securities shop crypto game logistics` × `context container component code`) · DBML thêm `c4-<hệ thống>-code` · Structurizr thêm `c4-<hệ thống>`. Mẫu DDD ở mục 3: Mermaid, PlantUML, draw.io, D2 thêm `ddd-<hệ thống>-<sơ đồ>` (`subdomains context-map aggregates event-flow hexagonal`) · DBML thêm `ddd-<hệ thống>-aggregates` · Structurizr thêm `ddd-<hệ thống>` |
 | URL hash `#pako:<b64url>` | `base64url(zlib(JSON))`. Mermaid: `{code, mermaid, autoSync, updateDiagram}`, **cùng định dạng mermaid.live**. Tab khác: `{tab, code, config}`. Payload không có `tab` hợp lệ ⇒ Mermaid. Nhận thêm `#base64:`. Mở xong xoá hash khỏi URL |
 | URL `?data=<mã>` | Mã thô (URL-encode) → nạp + vẽ ở tab của `?tab=`; giá trị `pako:`/`base64:` giải như hash. Đi qua query ⇒ có gửi lên server, chỉ cho sơ đồ ngắn, không nhạy cảm. Ưu tiên hash khi có cả hai |
 | Input | Gõ/dán · `<input type=file>` · kéo-thả (UTF-8); file có khối mã rào bằng tên ngôn ngữ của tab thì lấy khối đầu |
@@ -51,22 +51,23 @@ Dev/BA/kỹ sư kiến trúc cần vẽ flowchart, UML, ERD, kiến trúc C4… 
 
 ### Mẫu C4 (3 hệ thống microservice)
 
-- Ngân hàng, Chứng khoán, Mua sắm online, mỗi hệ thống 4 cấp: L1 Context · L2 Container · L3 Component · L4 Code. Dropdown `Thử mẫu…` gom theo `optgroup`: mẫu là `[nhãn, mã, nhóm]`, phần tử thứ 3 không bắt buộc.
+- 6 hệ thống: Ngân hàng, Chứng khoán, Mua sắm online, Sàn tiền ảo, Game online, Logistics, mỗi hệ thống 4 cấp: L1 Context · L2 Container · L3 Component · L4 Code. Dropdown `Thử mẫu…` gom theo `optgroup`: mẫu là `[nhãn, mã, nhóm]`, phần tử thứ 3 không bắt buộc.
 - **Một nguồn dữ liệu:** `samples/c4/c4-model-*.js` là model trung lập, `C4Views` dựng view từng cấp, `c4-to-*.js` sinh mã từng ngôn ngữ, `c4-sample-registry.js` gộp vào mẫu của tab. Sửa nội dung thì sửa model. Thêm hệ thống = thêm 1 model + khai báo ở registry.
 - L4 dùng class diagram (Mermaid, PlantUML, D2, draw.io).
 - **Structurizr:** 1 workspace, 4 view, chọn ở dropdown view. Structurizr không có cấp Code nên class là `component` trong một container phụ, chỉ hiện ở view `L4-code`.
-- **DBML:** chỉ vẽ được ERD nên chỉ có L4, viết tay trong `dbml-samples.js`, không sinh từ model.
-- **draw.io:** XML không tự bố trí khi nạp nên `C4ToDrawio` tự xếp tầng: tầng theo độ sâu quan hệ, mỗi ô đặt gần các ô liên quan. Cạnh thẳng không tránh vật cản nên vài cạnh dài vẫn đi qua ô khác, kéo tay trong editor nếu cần.
+- **DBML:** chỉ vẽ được ERD nên chỉ có L4, viết tay trong `dbml-c4-erd-samples.js`, không sinh từ model.
+- **draw.io:** XML không tự bố trí khi nạp nên `C4ToDrawio` tự xếp tầng: tầng theo độ sâu BFS, mỗi ô đặt gần các ô liên quan, cạnh giữa hai ô không kề nhau cùng hàng võng xuống dưới hàng. Đã đo: longest-path làm số lượt cạnh xuyên ô tăng từ 40 lên 56 trên 54 mẫu nên không dùng. Cạnh dài qua nhiều tầng vẫn có thể đi qua ô khác, kéo tay trong editor nếu cần.
 - **Mermaid:** C4 ngắt hàng theo `screen.availWidth`, cạnh không tránh vật cản; sơ đồ L2 sẽ có đường cắt ngang ô. Test headless phải giả lập màn hình đủ rộng, nếu không chỉ ra 2 cột.
 
 ### Mẫu DDD (3 hệ thống microservice)
 
-- Cùng 3 hệ thống với mẫu C4, mỗi hệ thống 5 sơ đồ: Subdomain map · Context map · Aggregates · Event storming · Hexagonal. Strategic design là 2 sơ đồ đầu, tactical design là 3 sơ đồ sau. DDD không có bộ sơ đồ chuẩn cố định, 5 loại này do repo chốt.
+- Cùng 6 hệ thống với mẫu C4, mỗi hệ thống 5 sơ đồ: Subdomain map · Context map · Aggregates · Event storming · Hexagonal. Strategic design là 2 sơ đồ đầu, tactical design là 3 sơ đồ sau. DDD không có bộ sơ đồ chuẩn cố định, 5 loại này do repo chốt.
 - `samples/ddd/ddd-model-*.js` là model trung lập, `DddViews` dựng 2 dạng view: box graph (nhóm + ô + cạnh) và nhóm class của aggregate. `ddd-to-*.js` sinh mã từng ngôn ngữ, `ddd-sample-registry.js` gộp vào mẫu của tab. Bố cục draw.io dùng lại `C4ToDrawio.parts`.
-- Context map vẽ mũi tên từ upstream sang downstream, pattern (OHS, ACL, Conformist, Customer/Supplier, Partnership, Shared Kernel, Published Language) nằm trong nhãn cạnh.
-- Aggregate tham chiếu aggregate khác chỉ qua id; test `an aggregate references another aggregate root only` giữ luật này.
-- **Structurizr:** chỉ có khái niệm C4, nên mỗi sơ đồ là 1 `softwareSystem` phụ, các ô là `container`, nhãn hiện `[Container: …]`. Nội dung vẫn đúng DDD nhưng từ khoá là C4.
-- **DBML:** chỉ có Aggregates, viết tay trong `dbml-samples.js`: mỗi aggregate 1 `TableGroup`, không có FK giữa hai aggregate.
+- Context map vẽ mũi tên từ upstream sang downstream, pattern (OHS, ACL, Conformist, Customer/Supplier, Published Language) nằm trong nhãn cạnh. Partnership và Shared Kernel đối xứng nên vẽ không mũi tên (`DddViews.isSymmetric`); Structurizr bắt buộc có hướng, chỉ phân biệt qua nhãn.
+- Aggregate tham chiếu aggregate khác chỉ qua id; test `an aggregate references another aggregate root only` giữ luật này. Event trong event flow do aggregate root sinh ra phải có trên sơ đồ Aggregates.
+- Hexagonal: mọi phụ thuộc hướng vào domain. Mermaid không có mũi tên một chiều ngược nên cạnh `implements` là nét đứt không đầu mũi tên, để adapter nằm dưới port.
+- **Structurizr:** chỉ có khái niệm C4, nên mỗi sơ đồ là 1 `softwareSystem` phụ, các ô là `container`, nhãn hiện `[Container: …]`. Nội dung vẫn đúng DDD nhưng từ khoá là C4. Tên container trùng trong event flow được đánh số vì Structurizr không cho trùng.
+- **DBML:** chỉ có Aggregates, viết tay trong `dbml-ddd-erd-samples.js`: mỗi aggregate 1 `TableGroup`, không có FK giữa hai aggregate.
 - Tên trùng từ khoá ngôn ngữ làm hỏng sinh mã: D2 không nhận `fill` làm tên class kể cả viết hoa; PlantUML không nhận mã hex sau `text:` nên dùng tên màu.
 
 ### draw.io
@@ -81,6 +82,14 @@ Dev/BA/kỹ sư kiến trúc cần vẽ flowchart, UML, ERD, kiến trúc C4… 
 
 `Compiler.interpretFile` ra schema JSON, `DbmlToDot` dựng bảng HTML-like label với port từng cột, cạnh đi từ phía `*` (FK) sang cột được tham chiếu. `TableGroup` thành cluster, enum thành node riêng + cạnh nét đứt. Dropdown: hướng bố trí, chỉ hiện cột khoá.
 
+### Mẫu Database đầy đủ (DBML, 6 hệ thống)
+
+- Nhóm `Database đầy đủ`: `?tab=dbml&demo=db-<system>` với `banking`, `securities`, `shopping`, `crypto`, `game`, `logistics`. Mỗi hệ thống 1 database hơn 30 bảng, viết tay trong `samples/dbml/dbml-schema-*.js`, mỗi miền nghiệp vụ 1 `TableGroup` cùng màu `headercolor`.
+- Dropdown xếp theo thứ tự đăng ký vào `DBML_SAMPLES`: nhóm này phải nằm trên C4/DDD, nên ERD C4/DDD để ở `dbml-c4-erd-samples.js`, `dbml-ddd-erd-samples.js` và được `@include` sau `samples/dbml/`, test giữ luật này.
+- Khác mẫu C4/DDD: chỉ có ở tab DBML, không sinh từ model. Các file này dài hơn 200 dòng vì là dữ liệu mẫu, không có logic.
+- `dbml-full-schema-samples.test.js` compile bằng `@dbml/parse` thật, kiểm mọi bảng thuộc đúng 1 nhóm, FK cùng kiểu với cột đích, không có enum thừa, không có bảng mồ côi (trừ `audit_logs`, `outbox_events`).
+- Sơ đồ rất lớn nên `Fit` chỉ còn khoảng 10%, phải zoom/pan hoặc xuất SVG. Cỡ sơ đồ `db-crypto`: `LR` khoảng 1600×6000 · `TB` 7000×1600 · `TB` + chỉ cột khoá 6800×1050. "Chỉ cột khoá" gần như không giảm kích thước ở `LR`.
+
 ### Structurizr DSL (tập con)
 
 - **Có**: `workspace` · `model` · `person` · `softwareSystem` · `container` · `component` · `group` · quan hệ `->` kể cả ngầm định và `this` · `tags`, `description`, `technology` · định danh phẳng lẫn `!identifiers hierarchical` · view `systemLandscape`, `systemContext`, `container`, `component` · `include`, `exclude` (`*`, id, `element.tag==X`) · `autoLayout` · `title` · `styles` theo tag (`background`, `color`, `shape`, `dashed`).
@@ -91,7 +100,7 @@ Dev/BA/kỹ sư kiến trúc cần vẽ flowchart, UML, ERD, kiến trúc C4… 
 
 `core/`: `VendorScripts` + `DiagramError` · `EngineStore` · `SvgSanitizer` · `Exporter` · `Highlight` · `PanZoom` · `VersionHistory`.
 `engines/`: 1 file mỗi engine + `graphviz-renderer` · `dbml-schema-to-dot` · `structurizr-dsl-parser` · `structurizr-view-to-dot`.
-`samples/`: mẫu từng tab (nội dung English), `samples/c4/`, `samples/ddd/`: model + builder mẫu C4, DDD. `i18n/`: từ điển EN.
+`samples/`: mẫu từng tab (nội dung English), `samples/c4/`, `samples/ddd/`: model + builder mẫu C4, DDD, `samples/dbml/`: database đầy đủ. `i18n/`: từ điển EN.
 `ui/`: `editor-surface` · `engine-session` · `render-pipeline` · `drawio-tab` · `share-links` · `history-dialog` · `action-wiring` · `boot`.
 Module chung `@include` từ `src/data-workbench/`: `I18n`, `ShareCodec`, `ThemePicker`, `SavedSessions`, CSS nền + hai tầng màu.
 

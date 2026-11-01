@@ -1,0 +1,76 @@
+const DDD_MODEL_CRYPTO = {
+  key: "crypto", group: "DDD — Sàn tiền ảo", name: "Crypto Exchange", tacticalContext: "Spot Trading",
+  contexts: [
+    { id: "spotTrading", name: "Spot Trading", subdomain: "Order Matching", type: "core", desc: "Orders, order books, trades" },
+    { id: "custody", name: "Wallet and Custody", subdomain: "Digital Asset Custody", type: "core", desc: "Balances, deposits, withdrawals" },
+    { id: "accounts", name: "User Accounts", subdomain: "Customer Accounts", type: "supporting", desc: "Tiers, trading permissions" },
+    { id: "compliance", name: "Compliance", subdomain: "AML Monitoring", type: "supporting", desc: "Screens trades and withdrawals" },
+    { id: "marketData", name: "Market Data", subdomain: "Market Information", type: "supporting", desc: "Tickers, depth, candles" },
+    { id: "identity", name: "Identity and Access", subdomain: "Identity", type: "generic", desc: "Sign-in, 2FA, API keys" },
+    { id: "notifications", name: "Notifications", subdomain: "Messaging", type: "generic", desc: "Security and trade alerts" },
+  ],
+  externals: [
+    { id: "kycProvider", name: "KYC Provider", desc: "Identity document checks" },
+    { id: "blockchainNetworks", name: "Blockchain Networks", desc: "Public chains" },
+    { id: "bankingPartner", name: "Fiat Banking Partner", desc: "Fiat in and out" },
+  ],
+  contextRels: [
+    ["kycProvider", "accounts", "Identity checks", "Upstream OHS · Downstream ACL"],
+    ["identity", "accounts", "Authenticated user", "Upstream OHS · Downstream Conformist"],
+    ["blockchainNetworks", "custody", "Transactions and confirmations", "Published Language · Downstream ACL"],
+    ["bankingPartner", "custody", "Fiat transfers", "Upstream OHS · Downstream ACL"],
+    ["accounts", "spotTrading", "Trading permissions", "Customer/Supplier"],
+    ["custody", "spotTrading", "Balance locks", "Customer/Supplier"],
+    ["spotTrading", "marketData", "TradeExecuted", "Published Language (events)"],
+    ["spotTrading", "compliance", "TradeExecuted", "Published Language (events)"],
+    ["compliance", "notifications", "AlertRaised", "Published Language (events)"],
+  ],
+  aggregates: [
+    { id: "orderAggregate", name: "Order aggregate", classes: [
+      { name: "Order", kind: "aggregate root", members: ["-orderId: OrderId", "-status: OrderStatus", "+submit(): void", "+applyTrade(trade): void", "+cancel(): void"] },
+      { name: "Trade", kind: "entity", members: ["-tradeId: TradeId", "-quantity: Decimal", "-price: Decimal"] },
+      { name: "TradingPair", kind: "value object", members: ["-base: Asset", "-quote: Asset", "+minNotional(): Decimal"] },
+      { name: "OrderLimit", kind: "value object", members: ["-quantity: Decimal", "-price: Decimal", "-timeInForce: TimeInForce"] },
+    ] },
+    { id: "bookAggregate", name: "OrderBook aggregate", classes: [
+      { name: "OrderBook", kind: "aggregate root", members: ["-pair: TradingPair", "+place(entry): void", "+remove(orderId): void"] },
+      { name: "PriceLevel", kind: "entity", members: ["-price: Decimal", "-entries: BookEntry[]"] },
+    ] },
+    { id: "tradingEvents", name: "Domain events", classes: [
+      { name: "OrderPlaced", kind: "domain event", members: ["-orderId: OrderId", "-occurredAt: Instant"] },
+      { name: "TradeExecuted", kind: "domain event", members: ["-tradeId: TradeId", "-occurredAt: Instant"] },
+    ] },
+  ],
+  aggregateRels: [
+    ["Order", "Trade", "has many"],
+    ["Order", "TradingPair", "trades"],
+    ["Order", "OrderLimit", "limit"],
+    ["Order", "OrderBook", "references by pair"],
+    ["OrderBook", "PriceLevel", "has many"],
+    ["Order", "OrderPlaced", "raises"],
+    ["OrderBook", "TradeExecuted", "raises"],
+  ],
+  eventFlow: [
+    { actor: "Trader", command: "Place Order", aggregate: "Order", event: "OrderPlaced", policy: "Lock funds for new orders" },
+    { actor: "Wallet and Custody", command: "Lock Funds", aggregate: "Balance", event: "FundsLocked", policy: "Match once funds are locked" },
+    { actor: "Spot Trading", command: "Match Order", aggregate: "OrderBook", event: "TradeExecuted", policy: "Settle every trade" },
+    { actor: "Wallet and Custody", command: "Settle Trade", aggregate: "Balance", event: "TradeSettled", policy: "Publish each settled trade" },
+    { actor: "Market Data", command: "Publish Ticker", aggregate: "Ticker", event: "TickerPublished" },
+  ],
+  hexagonal: {
+    layers: [
+      { name: "Driving adapters", type: "adapter", items: [["orderController", "OrderController", "REST API for clients"], ["matchListener", "MatchResultListener", "Kafka consumer"]] },
+      { name: "Inbound ports", type: "port", items: [["placePort", "PlaceOrderUseCase", "Accepts a new order"], ["tradePort", "ApplyTradeUseCase", "Records matched trades"]] },
+      { name: "Application and domain", type: "domain", items: [["appService", "OrderApplicationService", "Transaction boundary"], ["orderRoot", "Order aggregate", "Business rules and state"], ["feePolicy", "TradingFeePolicy", "Domain service for fees"]] },
+      { name: "Outbound ports", type: "port", items: [["repoPort", "OrderRepository", "Stores aggregates"], ["balancePort", "BalanceLockGateway", "Locks and releases funds"], ["eventPort", "DomainEventPublisher", "Publishes events"]] },
+      { name: "Driven adapters", type: "adapter", items: [["jdbcRepo", "PostgresOrderRepository", "PostgreSQL"], ["custodyAcl", "CustodyAcl", "Anti-corruption layer"], ["outbox", "KafkaOutboxPublisher", "Transactional outbox"]] },
+    ],
+    rels: [
+      ["orderController", "placePort", "calls"], ["matchListener", "tradePort", "calls"],
+      ["appService", "placePort", "implements"], ["appService", "tradePort", "implements"],
+      ["appService", "orderRoot", "loads and invokes"], ["orderRoot", "feePolicy", "checks"],
+      ["appService", "repoPort", "uses"], ["appService", "balancePort", "uses"], ["appService", "eventPort", "uses"],
+      ["jdbcRepo", "repoPort", "implements"], ["custodyAcl", "balancePort", "implements"], ["outbox", "eventPort", "implements"],
+    ],
+  },
+};

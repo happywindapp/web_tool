@@ -10,11 +10,13 @@ const DddViews = (() => {
   const PALETTE = {
     core: ["#b45309", "#ffffff"], supporting: ["#0e7490", "#ffffff"], generic: ["#64748b", "#ffffff"], external: ["#334155", "#ffffff"],
     command: ["#2563eb", "#ffffff"], aggregate: ["#facc15", "#000000"], event: ["#fb923c", "#000000"], policy: ["#a855f7", "#ffffff"],
-    adapter: ["#0e7490", "#ffffff"], port: ["#a5f3fc", "#000000"], domain: ["#facc15", "#000000"],
+    adapter: ["#0e7490", "#ffffff"], port: ["#a5f3fc", "#000000"], domain: ["#facc15", "#000000"], member: ["#fef3c7", "#000000"],
   };
   const TYPE_NAME = { core: "Core", supporting: "Supporting", generic: "Generic" };
   const TIERS = ["core", "supporting", "generic"];
 
+  // Partnership and Shared Kernel have no upstream, so these links are drawn without an arrow.
+  const isSymmetric = note => /^(?:Partnership|Shared Kernel)/.test(note || "");
   const titleOf = (key, subject) => `${VIEWS.find(v => v.key === key).title}: ${subject}`;
 
   function subdomains(m) {
@@ -48,5 +50,5 @@ const DddViews = (() => {
   const graph = (m, key) => ({ subdomains, "context-map": contextMap, "event-flow": eventFlow, hexagonal }[key](m));
   const aggregates = m => ({ title: titleOf("aggregates", m.tacticalContext), groups: m.aggregates, rels: m.aggregateRels });
 
-  return { VIEWS, PALETTE, graph, aggregates };
+  return { VIEWS, PALETTE, isSymmetric, graph, aggregates };
 })();

@@ -3,6 +3,7 @@ const C4ToDrawio = (() => {
   const W = 200, H = 120, GAP_X = 70, GAP_Y = 110, PAD = 40, CLASS_W = 250, LINE_H = 19;
   const FILL = { person: "#08427b", system: "#1168bd", external: "#8a8a8a", container: "#438dd5", db: "#438dd5", queue: "#438dd5", component: "#85bbf0" };
   const SHAPE = { person: "rounded=1;arcSize=30;", db: "shape=cylinder3;size=12;boundedLbl=1;", queue: "shape=cylinder3;direction=south;size=12;boundedLbl=1;" };
+  const FRAME = "rounded=1;arcSize=2;dashed=1;fillColor=none;strokeColor=#666666;fontColor=#444444;verticalAlign=top;align=left;spacingLeft=8;html=1;container=1;collapsible=0;";
   const EDGE = "rounded=1;html=1;jumpStyle=arc;fontSize=10;labelBackgroundColor=#ffffff;strokeColor=#707070;fontColor=#555555;";
 
   const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
@@ -10,7 +11,9 @@ const C4ToDrawio = (() => {
   const label = e => `<b>${e.name}</b><br><font style="font-size:10px">${C4Views.caption(e)}</font><br><br>${e.desc}`;
 
   const vertex = (id, value, css, parent, x, y, w, h) => `        <mxCell id="${id}" value="${esc(value)}" style="${css}" vertex="1" parent="${parent}"><mxGeometry x="${x}" y="${y}" width="${w}" height="${h}" as="geometry"/></mxCell>`;
-  const edge = (i, from, to, value, css) => `        <mxCell id="e${i}" value="${esc(value)}" style="${css}" edge="1" parent="1" source="${from}" target="${to}"><mxGeometry relative="1" as="geometry"/></mxCell>`;
+  const edge = (i, from, to, value, css, via) => `        <mxCell id="e${i}" value="${esc(value)}" style="${css}" edge="1" parent="1" source="${from}" target="${to}"><mxGeometry relative="1" as="geometry"${via ? `><Array as="points"><mxPoint x="${via.x}" y="${via.y}"/></Array></mxGeometry>` : "/>"}</mxCell>`;
+  // A link between non-neighbours of one row dips below it instead of running through the boxes between them.
+  const detour = (a, b, step, height) => (a.y === b.y && Math.abs(a.x - b.x) > step ? { x: (a.x + b.x + W) / 2, y: a.y + height + 45 } : undefined);
   const page = (name, cells) => ["<mxfile>", `  <diagram name="${esc(name)}">`, `    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10">`, "      <root>", `        <mxCell id="0"/>`, `        <mxCell id="1" parent="0"/>`, ...cells, "      </root>", "    </mxGraphModel>", "  </diagram>", "</mxfile>"].join("\n");
 
   // Rows by breadth-first depth from the elements nothing inside calls.
@@ -26,7 +29,6 @@ const C4ToDrawio = (() => {
     for (const e of items) (rows[depth.get(e.id) ?? 0] ??= []).push(e);
     return rows;
   }
-
   // Each row sits under the mean x of its already placed neighbours, then is pushed apart to avoid overlaps.
   function spread(rows, rels, step) {
     const x = new Map();
@@ -53,14 +55,15 @@ const C4ToDrawio = (() => {
     const edgeSpace = v.boundary ? PAD : 0, midY = (top.length ? PAD + H + GAP_Y : PAD) + edgeSpace;
     const innerY = r => midY + r * (H + GAP_Y) + (v.boundary ? PAD : 0), endY = innerY(rows.length - 1) + H + edgeSpace;
     const row = (list, y) => list.map(e => vertex(e.id, label(e), style(e), "1", xOf(e.id), y, W, H));
+    const spot = new Map([...top.map(e => [e.id, PAD]), ...rows.flatMap((list, r) => list.map(e => [e.id, innerY(r)])), ...bottom.map(e => [e.id, endY + GAP_Y])].map(([id, y]) => [id, { x: xOf(id), y }]));
     const cells = row(top, PAD);
     if (v.boundary) {
       const left = Math.min(...v.inside.map(e => xOf(e.id))) - PAD, right = Math.max(...v.inside.map(e => xOf(e.id))) + W + PAD, y = midY - PAD;
-      cells.push(vertex(v.boundary.id, `<b>${v.boundary.name}</b>`, "rounded=1;arcSize=2;dashed=1;fillColor=none;strokeColor=#666666;fontColor=#444444;verticalAlign=top;align=left;spacingLeft=8;html=1;container=1;collapsible=0;", "1", left, y, right - left, endY - y));
+      cells.push(vertex(v.boundary.id, `<b>${v.boundary.name}</b>`, FRAME, "1", left, y, right - left, endY - y));
       rows.forEach((list, r) => list.forEach(e => cells.push(vertex(e.id, label(e), style(e), v.boundary.id, xOf(e.id) - left, innerY(r) - y, W, H))));
     } else rows.forEach((list, r) => cells.push(...row(list, innerY(r))));
     cells.push(...row(bottom, endY + GAP_Y));
-    cells.push(...v.rels.map(([from, to, text, tech], i) => edge(i, from, to, tech ? `${text}<br>[${tech}]` : text, `${EDGE}dashed=1;endArrow=blockThin;endFill=1;`)));
+    cells.push(...v.rels.map(([from, to, text, tech], i) => edge(i, from, to, tech ? `${text}<br>[${tech}]` : text, `${EDGE}dashed=1;endArrow=blockThin;endFill=1;`, detour(spot.get(from), spot.get(to), W + GAP_X, H))));
     return page(v.title, cells);
   }
 
@@ -80,5 +83,5 @@ const C4ToDrawio = (() => {
     return page(v.title, cells);
   }
 
-  return { build, parts: { vertex, edge, page, layers, spread, classLabel, classHeight } };
+  return { build, parts: { FRAME, EDGE, vertex, edge, detour, page, layers, spread, classLabel, classHeight } };
 })();

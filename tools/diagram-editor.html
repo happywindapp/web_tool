@@ -478,6 +478,13 @@ I18n.add({
   "Grid — lưới": "Grid",
   "Cửa hàng online": "Online shop",
   "Nhóm bảng & quan hệ 1-1": "Table groups & 1-1 relations",
+  "Database đầy đủ": "Full databases",
+  "Ngân hàng (core banking)": "Banking (core banking)",
+  "Công ty chứng khoán": "Securities brokerage",
+  "Sàn mua sắm online": "Online shopping marketplace",
+  "Sàn tiền ảo (kiểu Binance)": "Crypto exchange (Binance style)",
+  "Game online (MMORPG)": "Online game (MMORPG)",
+  "Logistics & giao hàng": "Logistics & delivery",
   "Internet banking — 3 view": "Internet banking — 3 views",
   "Tự sinh view (không khai báo views)": "Auto-generated views (no views block)",
   "C4 — Ngân hàng": "C4 — Banking",
@@ -488,6 +495,10 @@ I18n.add({
   "L4 — Mã nguồn (Code)": "L4 — Code",
   "L4 — Mã nguồn (Code): ERD dữ liệu": "L4 — Code: data ERD",
   "L1–L4 — 4 view (chọn view trên toolbar)": "L1–L4 — 4 views (pick one on the toolbar)",
+  "C4 — Sàn tiền ảo": "C4 — Crypto exchange",
+  "C4 — Game online": "C4 — Online game",
+  "DDD — Sàn tiền ảo": "DDD — Crypto exchange",
+  "DDD — Game online": "DDD — Online game",
   "DDD — Ngân hàng": "DDD — Banking",
   "DDD — Chứng khoán": "DDD — Securities",
   "DDD — Mua sắm online": "DDD — Online shopping",
@@ -1248,6 +1259,4393 @@ Ref: trades.symbol_id > symbols.id`],
 }
 
 Ref: users.id > teams.id`],
+};
+DBML_SAMPLES["db-banking"] = ["Ngân hàng (core banking)", `Project core_banking {
+  database_type: 'PostgreSQL'
+  Note: 'Retail core banking: customers and KYC, deposit accounts, double-entry ledger, payments, cards, lending, digital channels and compliance. Fictional schema.'
+}
+
+Enum customer_type {
+  individual
+  corporate
+}
+
+Enum kyc_status {
+  pending
+  verified
+  rejected
+  expired
+}
+
+Enum risk_rating {
+  low
+  medium
+  high
+}
+
+Enum identity_type {
+  national_id
+  passport
+  business_license
+}
+
+Enum account_status {
+  pending
+  active
+  dormant
+  frozen
+  closed
+}
+
+Enum product_type {
+  current
+  savings
+  term_deposit
+}
+
+Enum holder_role {
+  primary
+  joint
+  authorized_signer
+}
+
+Enum hold_status {
+  active
+  captured
+  released
+  expired
+}
+
+Enum entry_direction {
+  debit
+  credit
+}
+
+Enum gl_class {
+  asset
+  liability
+  equity
+  income
+  expense
+}
+
+Enum journal_status {
+  draft
+  posted
+  reversed
+}
+
+Enum business_day_status {
+  open
+  closing
+  closed
+}
+
+Enum payment_rail {
+  internal
+  interbank_instant
+  rtgs
+  swift
+}
+
+Enum payment_status {
+  submitted
+  held
+  debited
+  sent
+  completed
+  failed
+  reversed
+}
+
+Enum schedule_frequency {
+  weekly
+  monthly
+  quarterly
+}
+
+Enum card_type {
+  debit
+  prepaid
+}
+
+Enum card_status {
+  issued
+  active
+  blocked
+  expired
+  closed
+}
+
+Enum authorization_status {
+  approved
+  declined
+  reversed
+  captured
+}
+
+Enum loan_application_status {
+  draft
+  submitted
+  approved
+  rejected
+  cancelled
+}
+
+Enum loan_status {
+  disbursed
+  current
+  overdue
+  restructured
+  written_off
+  closed
+}
+
+Enum installment_status {
+  due
+  partially_paid
+  paid
+  overdue
+}
+
+Enum alert_status {
+  open
+  investigating
+  escalated
+  false_positive
+  reported
+}
+
+Table branches [headercolor: #0e7490] {
+  id int [pk, increment]
+  code varchar(10) [not null, unique]
+  name varchar(120) [not null]
+  parent_id int [ref: > branches.id, note: 'Regional head office']
+  city varchar(60) [not null]
+  is_active boolean [not null, default: true]
+}
+
+Table employees [headercolor: #0e7490] {
+  id int [pk, increment]
+  branch_id int [not null, ref: > branches.id]
+  employee_no varchar(12) [not null, unique]
+  full_name varchar(120) [not null]
+  job_role varchar(40) [not null]
+  is_active boolean [not null, default: true]
+}
+
+Table customers [headercolor: #0e7490] {
+  id bigint [pk, increment]
+  cif_no varchar(20) [not null, unique, note: 'Customer information file number']
+  customer_type customer_type [not null]
+  full_name varchar(160) [not null]
+  date_of_birth date
+  tax_code varchar(20)
+  nationality char(2) [not null]
+  kyc_status kyc_status [not null, default: 'pending']
+  risk_rating risk_rating [not null, default: 'low']
+  home_branch_id int [not null, ref: > branches.id]
+  created_at timestamp [not null]
+  updated_at timestamp [not null]
+}
+
+Table customer_identities [headercolor: #0e7490] {
+  id bigint [pk, increment]
+  customer_id bigint [not null, ref: > customers.id]
+  identity_type identity_type [not null]
+  identity_no varchar(30) [not null]
+  issued_on date [not null]
+  expires_on date
+  issuing_authority varchar(120)
+  is_primary boolean [not null, default: false]
+
+  indexes {
+    (identity_type, identity_no) [unique]
+  }
+}
+
+Table customer_addresses [headercolor: #0e7490] {
+  id bigint [pk, increment]
+  customer_id bigint [not null, ref: > customers.id]
+  address_type varchar(12) [not null, note: 'home, mailing, business']
+  line1 varchar(160) [not null]
+  city varchar(60) [not null]
+  country char(2) [not null]
+  postal_code varchar(12)
+}
+
+Table kyc_reviews [headercolor: #0e7490] {
+  id bigint [pk, increment]
+  customer_id bigint [not null, ref: > customers.id]
+  reviewer_id int [not null, ref: > employees.id]
+  result kyc_status [not null]
+  risk_rating risk_rating [not null]
+  reviewed_at timestamp [not null]
+  next_review_on date [not null]
+}
+
+Table deposit_products [headercolor: #1168bd] {
+  id int [pk, increment]
+  code varchar(12) [not null, unique]
+  name varchar(120) [not null]
+  product_type product_type [not null]
+  currency char(3) [not null]
+  min_balance decimal(18,2) [not null, default: 0]
+  overdraft_allowed boolean [not null, default: false]
+  is_active boolean [not null, default: true]
+}
+
+Table product_interest_rates [headercolor: #1168bd] {
+  id bigint [pk, increment]
+  product_id int [not null, ref: > deposit_products.id]
+  tenor_months int [not null, default: 0]
+  annual_rate decimal(7,4) [not null]
+  effective_from date [not null]
+  effective_to date
+
+  indexes {
+    (product_id, tenor_months, effective_from) [unique]
+  }
+}
+
+Table accounts [headercolor: #1168bd] {
+  id bigint [pk, increment]
+  account_no varchar(20) [not null, unique]
+  product_id int [not null, ref: > deposit_products.id]
+  branch_id int [not null, ref: > branches.id]
+  currency char(3) [not null]
+  status account_status [not null, default: 'pending']
+  ledger_balance decimal(18,2) [not null, default: 0]
+  held_amount decimal(18,2) [not null, default: 0]
+  opened_on date
+  closed_on date
+  version int [not null, default: 0, note: 'Optimistic locking']
+}
+
+Table account_holders [headercolor: #1168bd] {
+  account_id bigint [ref: > accounts.id]
+  customer_id bigint [ref: > customers.id]
+  role holder_role [not null]
+
+  indexes {
+    (account_id, customer_id) [pk]
+    customer_id
+  }
+}
+
+Table account_holds [headercolor: #1168bd] {
+  id bigint [pk, increment]
+  account_id bigint [not null, ref: > accounts.id]
+  amount decimal(18,2) [not null]
+  reason varchar(40) [not null]
+  status hold_status [not null, default: 'active']
+  expires_at timestamp
+  created_at timestamp [not null]
+
+  indexes {
+    (account_id, status)
+    (status, expires_at)
+  }
+}
+
+Table account_transactions [headercolor: #1168bd] {
+  id bigint [pk, increment]
+  account_id bigint [not null, ref: > accounts.id]
+  journal_entry_id bigint [not null, ref: > journal_entries.id]
+  direction entry_direction [not null]
+  amount decimal(18,2) [not null]
+  balance_after decimal(18,2) [not null]
+  value_date date [not null]
+  description varchar(200)
+  posted_at timestamp [not null]
+
+  indexes {
+    (account_id, posted_at)
+  }
+}
+
+Table term_deposits [headercolor: #1168bd] {
+  account_id bigint [pk, ref: - accounts.id]
+  funding_account_id bigint [not null, ref: > accounts.id]
+  principal decimal(18,2) [not null]
+  annual_rate decimal(7,4) [not null]
+  tenor_months int [not null]
+  start_on date [not null]
+  maturity_on date [not null]
+  auto_rollover boolean [not null, default: false]
+
+  indexes {
+    maturity_on
+  }
+}
+
+Table interest_accruals [headercolor: #1168bd] {
+  id bigint [pk, increment]
+  account_id bigint [not null, ref: > accounts.id]
+  accrual_date date [not null]
+  annual_rate decimal(7,4) [not null]
+  amount decimal(18,6) [not null]
+
+  indexes {
+    (account_id, accrual_date) [unique]
+  }
+}
+
+Table business_days [headercolor: #15803d] {
+  business_date date [pk]
+  status business_day_status [not null]
+  opened_at timestamp [not null]
+  closed_at timestamp
+}
+
+Table gl_accounts [headercolor: #15803d] {
+  id int [pk, increment]
+  code varchar(12) [not null, unique]
+  name varchar(120) [not null]
+  gl_class gl_class [not null]
+  parent_id int [ref: > gl_accounts.id]
+  is_postable boolean [not null, default: true]
+}
+
+Table journal_entries [headercolor: #15803d, note: 'Amounts are immutable once posted: corrections are reversal entries'] {
+  id bigint [pk, increment]
+  entry_no varchar(24) [not null, unique]
+  business_date date [not null, ref: > business_days.business_date]
+  status journal_status [not null, default: 'draft']
+  source_module varchar(20) [not null]
+  source_ref varchar(64) [not null]
+  reversal_of_id bigint [unique, ref: > journal_entries.id]
+  maker_id int [ref: > employees.id]
+  checker_id int [ref: > employees.id]
+  posted_at timestamp
+
+  indexes {
+    (source_module, source_ref) [unique]
+    business_date
+  }
+}
+
+Table journal_lines [headercolor: #15803d, note: 'Debits equal credits per entry and currency, cross-currency entries go through FX position accounts'] {
+  id bigint [pk, increment]
+  journal_entry_id bigint [not null, ref: > journal_entries.id]
+  gl_account_id int [not null, ref: > gl_accounts.id]
+  direction entry_direction [not null]
+  amount decimal(18,2) [not null]
+  currency char(3) [not null]
+
+  indexes {
+    journal_entry_id
+    gl_account_id
+  }
+}
+
+Table fx_rates [headercolor: #15803d] {
+  id bigint [pk, increment]
+  base_currency char(3) [not null]
+  quote_currency char(3) [not null]
+  buy_rate decimal(18,6) [not null]
+  sell_rate decimal(18,6) [not null]
+  effective_at timestamp [not null]
+
+  indexes {
+    (base_currency, quote_currency, effective_at) [unique]
+  }
+}
+
+Table beneficiaries [headercolor: #b45309] {
+  id bigint [pk, increment]
+  customer_id bigint [not null, ref: > customers.id]
+  nickname varchar(60)
+  bank_code varchar(11) [not null]
+  account_no varchar(34) [not null]
+  account_name varchar(120) [not null]
+  created_at timestamp [not null]
+
+  indexes {
+    (customer_id, bank_code, account_no) [unique]
+  }
+}
+
+Table payment_orders [headercolor: #b45309] {
+  id uuid [pk]
+  idempotency_key varchar(64) [not null, unique]
+  customer_id bigint [not null, ref: > customers.id]
+  debit_account_id bigint [not null, ref: > accounts.id]
+  beneficiary_id bigint [ref: > beneficiaries.id, note: 'Saved payee, empty for one-off payments']
+  standing_order_id bigint [ref: > standing_orders.id]
+  to_bank_code varchar(11) [not null]
+  to_account_no varchar(34) [not null]
+  to_account_name varchar(120) [not null, note: 'Destination snapshot, later payee edits do not touch old payments']
+  hold_id bigint [ref: > account_holds.id]
+  journal_entry_id bigint [ref: > journal_entries.id]
+  rail payment_rail [not null]
+  amount decimal(18,2) [not null]
+  currency char(3) [not null]
+  fee_amount decimal(18,2) [not null, default: 0]
+  fx_rate_id bigint [ref: > fx_rates.id, note: 'Rate applied when the currency differs from the account']
+  status payment_status [not null, default: 'submitted']
+  external_ref varchar(64)
+  requested_at timestamp [not null]
+  completed_at timestamp
+
+  indexes {
+    (debit_account_id, requested_at)
+    (status, requested_at)
+  }
+}
+
+Table payment_status_history [headercolor: #b45309] {
+  id bigint [pk, increment]
+  payment_id uuid [not null, ref: > payment_orders.id]
+  from_status payment_status
+  to_status payment_status [not null]
+  reason_code varchar(20)
+  changed_at timestamp [not null]
+
+  indexes {
+    payment_id
+  }
+}
+
+Table standing_orders [headercolor: #b45309] {
+  id bigint [pk, increment]
+  debit_account_id bigint [not null, ref: > accounts.id]
+  beneficiary_id bigint [not null, ref: > beneficiaries.id]
+  amount decimal(18,2) [not null]
+  frequency schedule_frequency [not null]
+  next_run_on date [not null]
+  end_on date
+  is_active boolean [not null, default: true]
+
+  indexes {
+    (is_active, next_run_on)
+  }
+}
+
+Table cards [headercolor: #7c3aed] {
+  id bigint [pk, increment]
+  customer_id bigint [not null, ref: > customers.id]
+  account_id bigint [not null, ref: > accounts.id]
+  pan_token varchar(64) [not null, unique, note: 'Vault token, the full PAN is never stored here']
+  last4 char(4) [not null]
+  card_type card_type [not null]
+  status card_status [not null, default: 'issued']
+  daily_limit decimal(18,2) [not null]
+  expires_on date [not null]
+
+  indexes {
+    customer_id
+  }
+}
+
+Table card_authorizations [headercolor: #7c3aed] {
+  id bigint [pk, increment]
+  card_id bigint [not null, ref: > cards.id]
+  hold_id bigint [ref: > account_holds.id]
+  retrieval_ref char(12) [not null]
+  merchant_name varchar(120) [not null]
+  merchant_category char(4) [not null]
+  amount decimal(18,2) [not null]
+  currency char(3) [not null]
+  status authorization_status [not null]
+  response_code char(2) [not null]
+  authorized_at timestamp [not null]
+
+  indexes {
+    (card_id, authorized_at)
+    retrieval_ref
+  }
+}
+
+Table card_settlements [headercolor: #7c3aed] {
+  id bigint [pk, increment]
+  card_id bigint [not null, ref: > cards.id]
+  authorization_id bigint [ref: > card_authorizations.id, note: 'Empty for merchant refunds and force posts']
+  journal_entry_id bigint [not null, ref: > journal_entries.id]
+  settled_amount decimal(18,2) [not null]
+  currency char(3) [not null]
+  settled_on date [not null]
+}
+
+Table loan_products [headercolor: #be123c] {
+  id int [pk, increment]
+  code varchar(12) [not null, unique]
+  name varchar(120) [not null]
+  annual_rate decimal(7,4) [not null]
+  max_tenor_months int [not null]
+  max_amount decimal(18,2) [not null]
+}
+
+Table loan_applications [headercolor: #be123c] {
+  id bigint [pk, increment]
+  customer_id bigint [not null, ref: > customers.id]
+  product_id int [not null, ref: > loan_products.id]
+  officer_id int [not null, ref: > employees.id]
+  approver_id int [ref: > employees.id]
+  requested_amount decimal(18,2) [not null]
+  tenor_months int [not null]
+  status loan_application_status [not null, default: 'draft']
+  submitted_at timestamp
+  decided_at timestamp
+}
+
+Table loans [headercolor: #be123c] {
+  id bigint [pk, increment]
+  loan_no varchar(20) [not null, unique]
+  application_id bigint [not null, unique, ref: - loan_applications.id]
+  customer_id bigint [not null, ref: > customers.id]
+  disbursement_account_id bigint [not null, ref: > accounts.id]
+  principal decimal(18,2) [not null]
+  outstanding_principal decimal(18,2) [not null]
+  annual_rate decimal(7,4) [not null]
+  start_on date [not null]
+  maturity_on date [not null]
+  status loan_status [not null]
+  days_past_due int [not null, default: 0]
+  debt_group smallint [not null, default: 1, note: 'Credit classification group 1 to 5']
+
+  indexes {
+    customer_id
+  }
+}
+
+Table repayment_schedules [headercolor: #be123c] {
+  id bigint [pk, increment]
+  loan_id bigint [not null, ref: > loans.id]
+  schedule_version smallint [not null, default: 1, note: 'Bumped when the loan is restructured']
+  installment_no int [not null]
+  due_on date [not null]
+  principal_due decimal(18,2) [not null]
+  interest_due decimal(18,2) [not null]
+  paid_amount decimal(18,2) [not null, default: 0]
+  status installment_status [not null, default: 'due']
+
+  indexes {
+    (loan_id, schedule_version, installment_no) [unique]
+    (status, due_on)
+  }
+}
+
+Table loan_repayments [headercolor: #be123c] {
+  id bigint [pk, increment]
+  loan_id bigint [not null, ref: > loans.id]
+  schedule_id bigint [not null, ref: > repayment_schedules.id]
+  journal_entry_id bigint [not null, ref: > journal_entries.id]
+  principal_part decimal(18,2) [not null]
+  interest_part decimal(18,2) [not null]
+  penalty_part decimal(18,2) [not null, default: 0]
+  paid_at timestamp [not null]
+
+  indexes {
+    loan_id
+  }
+}
+
+Table collaterals [headercolor: #be123c] {
+  id bigint [pk, increment]
+  owner_id bigint [not null, ref: > customers.id]
+  collateral_type varchar(30) [not null]
+  description varchar(240) [not null]
+  appraised_value decimal(18,2) [not null]
+  appraised_on date [not null]
+}
+
+Table loan_collaterals [headercolor: #be123c] {
+  loan_id bigint [ref: > loans.id]
+  collateral_id bigint [ref: > collaterals.id]
+  pledged_value decimal(18,2) [not null]
+
+  indexes {
+    (loan_id, collateral_id) [pk]
+  }
+}
+
+Table digital_users [headercolor: #0f766e] {
+  id bigint [pk, increment]
+  customer_id bigint [not null, unique, ref: - customers.id]
+  username varchar(60) [not null, unique]
+  password_hash varchar(255) [not null]
+  mfa_enabled boolean [not null, default: true]
+  is_locked boolean [not null, default: false]
+  last_login_at timestamp
+}
+
+Table user_devices [headercolor: #0f766e] {
+  id bigint [pk, increment]
+  user_id bigint [not null, ref: > digital_users.id]
+  device_fingerprint varchar(128) [not null]
+  platform varchar(12) [not null]
+  is_trusted boolean [not null, default: false]
+  last_seen_at timestamp
+
+  indexes {
+    (user_id, device_fingerprint) [unique]
+  }
+}
+
+Table login_sessions [headercolor: #0f766e] {
+  id uuid [pk]
+  user_id bigint [not null, ref: > digital_users.id]
+  device_id bigint [ref: > user_devices.id]
+  ip_address varchar(45) [not null]
+  started_at timestamp [not null]
+  ended_at timestamp
+}
+
+Table aml_alerts [headercolor: #475569] {
+  id bigint [pk, increment]
+  customer_id bigint [not null, ref: > customers.id]
+  payment_id uuid [ref: > payment_orders.id]
+  assignee_id int [ref: > employees.id]
+  rule_code varchar(20) [not null]
+  severity risk_rating [not null]
+  status alert_status [not null, default: 'open']
+  raised_at timestamp [not null]
+  closed_at timestamp
+
+  indexes {
+    (status, raised_at)
+  }
+}
+
+Table audit_logs [headercolor: #475569] {
+  id bigint [pk, increment]
+  actor_id int [ref: > employees.id]
+  entity_type varchar(40) [not null]
+  entity_id varchar(64) [not null]
+  action varchar(40) [not null]
+  before_data jsonb
+  after_data jsonb
+  ip_address varchar(45)
+  created_at timestamp [not null]
+
+  indexes {
+    (entity_type, entity_id)
+  }
+}
+
+Table outbox_events [headercolor: #475569, note: 'Transactional outbox: written with the business row, relayed to the broker'] {
+  id bigint [pk, increment]
+  aggregate_type varchar(40) [not null]
+  aggregate_id varchar(64) [not null]
+  event_type varchar(60) [not null]
+  payload jsonb [not null]
+  created_at timestamp [not null]
+  published_at timestamp
+
+  indexes {
+    (published_at, id)
+  }
+}
+
+TableGroup customer_party [color: #0e7490] {
+  branches
+  employees
+  customers
+  customer_identities
+  customer_addresses
+  kyc_reviews
+}
+
+TableGroup deposit_accounts [color: #1168bd] {
+  deposit_products
+  product_interest_rates
+  accounts
+  account_holders
+  account_holds
+  account_transactions
+  term_deposits
+  interest_accruals
+}
+
+TableGroup general_ledger [color: #15803d] {
+  business_days
+  gl_accounts
+  journal_entries
+  journal_lines
+  fx_rates
+}
+
+TableGroup payments [color: #b45309] {
+  beneficiaries
+  payment_orders
+  payment_status_history
+  standing_orders
+}
+
+TableGroup card_issuing [color: #7c3aed] {
+  cards
+  card_authorizations
+  card_settlements
+}
+
+TableGroup lending [color: #be123c] {
+  loan_products
+  loan_applications
+  loans
+  repayment_schedules
+  loan_repayments
+  collaterals
+  loan_collaterals
+}
+
+TableGroup digital_channels [color: #0f766e] {
+  digital_users
+  user_devices
+  login_sessions
+}
+
+TableGroup compliance_ops [color: #475569] {
+  aml_alerts
+  audit_logs
+  outbox_events
+}`, "Database đầy đủ"];
+DBML_SAMPLES["db-securities"] = ["Công ty chứng khoán", `Project securities_brokerage {
+  database_type: 'PostgreSQL'
+  Note: 'Equity brokerage back office: reference data, clients, order management, cash and stock balances, margin lending, T+2 settlement and fees. Fictional schema.'
+}
+
+Enum instrument_type {
+  stock
+  fund_certificate
+  covered_warrant
+  corporate_bond
+}
+
+Enum corporate_action_type {
+  cash_dividend
+  stock_dividend
+  rights_issue
+  shareholder_meeting
+}
+
+Enum entitlement_status {
+  calculated
+  confirmed
+  paid
+}
+
+Enum client_type {
+  individual
+  institution
+}
+
+Enum kyc_status {
+  pending
+  verified
+  rejected
+  expired
+}
+
+Enum account_status {
+  pending
+  active
+  restricted
+  closed
+}
+
+Enum sub_account_type {
+  normal
+  margin
+  derivative
+}
+
+Enum order_side {
+  buy
+  sell
+}
+
+Enum order_type {
+  limit
+  at_open
+  at_close
+  market_to_limit
+}
+
+Enum order_status {
+  new
+  pending_send
+  accepted
+  partially_filled
+  filled
+  pending_cancel
+  cancelled
+  rejected
+  expired
+}
+
+Enum order_channel {
+  web
+  mobile
+  broker_desk
+  api
+  system
+}
+
+Enum amendment_status {
+  requested
+  accepted
+  rejected
+}
+
+Enum message_direction {
+  inbound
+  outbound
+}
+
+Enum hold_status {
+  active
+  partially_released
+  released
+  consumed
+}
+
+Enum cash_tx_type {
+  deposit
+  withdrawal
+  trade_settlement
+  dividend
+  fee
+  tax
+  interest
+  advance
+  loan_disbursement
+  loan_repayment
+  internal_transfer
+  rights_subscription
+  adjustment
+}
+
+Enum transfer_direction {
+  deposit
+  withdrawal
+}
+
+Enum transfer_status {
+  requested
+  approved
+  completed
+  rejected
+}
+
+Enum advance_status {
+  active
+  settled
+}
+
+Enum stock_movement_type {
+  deposit
+  withdrawal
+  buy_settlement
+  sell_settlement
+  stock_dividend
+  rights_subscription
+  block
+  unblock
+}
+
+Enum contract_status {
+  active
+  suspended
+  expired
+  terminated
+}
+
+Enum loan_status {
+  active
+  overdue
+  repaid
+}
+
+Enum margin_call_status {
+  issued
+  resolved
+  force_sold
+}
+
+Enum settlement_status {
+  pending
+  confirmed
+  settled
+  failed
+}
+
+Enum fee_type {
+  commission
+  exchange_fee
+  depository_fee
+  sale_tax
+}
+
+Table exchanges [headercolor: #0e7490] {
+  id int [pk, increment]
+  code varchar(10) [not null, unique]
+  name varchar(120) [not null]
+  timezone varchar(40) [not null]
+}
+
+Table market_calendars [headercolor: #0e7490] {
+  exchange_id int [ref: > exchanges.id]
+  business_date date
+  is_trading_day boolean [not null]
+  settlement_date date [note: 'Trades of this day settle on this date']
+
+  indexes {
+    (exchange_id, business_date) [pk]
+  }
+}
+
+Table instruments [headercolor: #0e7490] {
+  id int [pk, increment]
+  exchange_id int [not null, ref: > exchanges.id]
+  symbol varchar(12) [not null]
+  isin char(12) [not null, unique]
+  instrument_type instrument_type [not null]
+  name varchar(160) [not null]
+  lot_size int [not null, default: 100]
+  par_value decimal(18,2)
+  listed_shares bigint
+  is_active boolean [not null, default: true]
+
+  indexes {
+    (exchange_id, symbol) [unique]
+  }
+}
+
+Table daily_price_limits [headercolor: #0e7490] {
+  instrument_id int [ref: > instruments.id]
+  business_date date
+  reference_price decimal(18,4) [not null]
+  ceiling_price decimal(18,4) [not null]
+  floor_price decimal(18,4) [not null]
+  close_price decimal(18,4)
+
+  indexes {
+    (instrument_id, business_date) [pk]
+  }
+}
+
+Table corporate_actions [headercolor: #0e7490] {
+  id bigint [pk, increment]
+  instrument_id int [not null, ref: > instruments.id]
+  action_type corporate_action_type [not null]
+  ex_date date [not null]
+  record_date date [not null]
+  pay_date date
+  cash_per_share decimal(18,4)
+  ratio_held int [note: 'Two integers keep a 3:1 ratio exact']
+  ratio_entitled int
+  subscription_price decimal(18,4)
+}
+
+Table corporate_action_entitlements [headercolor: #0e7490] {
+  id bigint [pk, increment]
+  corporate_action_id bigint [not null, ref: > corporate_actions.id]
+  sub_account_id bigint [not null, ref: > sub_accounts.id]
+  record_quantity bigint [not null]
+  entitled_cash decimal(18,2) [not null, default: 0]
+  entitled_quantity bigint [not null, default: 0]
+  subscribed_quantity bigint [not null, default: 0]
+  tax_amount decimal(18,2) [not null, default: 0]
+  status entitlement_status [not null, default: 'calculated']
+
+  indexes {
+    (corporate_action_id, sub_account_id) [unique]
+  }
+}
+
+Table brokers [headercolor: #1168bd] {
+  id int [pk, increment]
+  broker_code varchar(12) [not null, unique]
+  full_name varchar(120) [not null]
+  license_no varchar(20) [not null, unique]
+  branch_name varchar(60) [not null]
+  is_active boolean [not null, default: true]
+}
+
+Table clients [headercolor: #1168bd] {
+  id bigint [pk, increment]
+  client_no varchar(20) [not null, unique]
+  client_type client_type [not null]
+  full_name varchar(160) [not null]
+  identity_no varchar(30) [not null, unique]
+  trading_code varchar(12) [unique, note: 'Issued by the depository to foreign investors']
+  nationality char(2) [not null]
+  tax_code varchar(20)
+  kyc_status kyc_status [not null, default: 'pending']
+  broker_id int [ref: > brokers.id]
+  created_at timestamp [not null]
+}
+
+Table client_documents [headercolor: #1168bd] {
+  id bigint [pk, increment]
+  client_id bigint [not null, ref: > clients.id]
+  doc_type varchar(30) [not null]
+  storage_key varchar(255) [not null]
+  expires_on date
+  verified_at timestamp
+}
+
+Table trading_accounts [headercolor: #1168bd] {
+  id bigint [pk, increment]
+  account_no varchar(20) [not null, unique, note: 'Custody account registered at the depository']
+  client_id bigint [not null, ref: > clients.id]
+  status account_status [not null, default: 'pending']
+  opened_on date
+  closed_on date
+}
+
+Table sub_accounts [headercolor: #1168bd] {
+  id bigint [pk, increment]
+  trading_account_id bigint [not null, ref: > trading_accounts.id]
+  sub_no char(2) [not null]
+  sub_type sub_account_type [not null]
+  status account_status [not null, default: 'active']
+
+  indexes {
+    (trading_account_id, sub_no) [unique]
+  }
+}
+
+Table bank_links [headercolor: #1168bd] {
+  id bigint [pk, increment]
+  client_id bigint [not null, ref: > clients.id]
+  bank_code varchar(11) [not null]
+  bank_account_no varchar(34) [not null]
+  account_name varchar(120) [not null]
+  is_default boolean [not null, default: false]
+  verified_at timestamp
+}
+
+Table orders [headercolor: #15803d] {
+  id uuid [pk]
+  client_order_id varchar(40) [not null, unique, note: 'Idempotency key, sent to the exchange gateway']
+  sub_account_id bigint [not null, ref: > sub_accounts.id]
+  instrument_id int [not null, ref: > instruments.id]
+  broker_id int [ref: > brokers.id]
+  margin_call_id bigint [ref: > margin_calls.id, note: 'Set on force-sell orders']
+  side order_side [not null]
+  order_type order_type [not null]
+  quantity bigint [not null]
+  limit_price decimal(18,4)
+  filled_quantity bigint [not null, default: 0]
+  avg_fill_price decimal(18,4)
+  status order_status [not null, default: 'new']
+  channel order_channel [not null]
+  exchange_order_id varchar(40)
+  reject_reason varchar(120)
+  business_date date [not null]
+  version int [not null, default: 0, note: 'Optimistic locking']
+  created_at timestamp [not null]
+  updated_at timestamp [not null]
+
+  indexes {
+    (sub_account_id, business_date)
+    (instrument_id, business_date, status)
+    exchange_order_id
+  }
+}
+
+Table order_amendments [headercolor: #15803d] {
+  id bigint [pk, increment]
+  order_id uuid [not null, ref: > orders.id]
+  old_quantity bigint [not null]
+  new_quantity bigint [not null]
+  old_price decimal(18,4)
+  new_price decimal(18,4)
+  status amendment_status [not null, default: 'requested']
+  requested_at timestamp [not null]
+}
+
+Table order_status_history [headercolor: #15803d] {
+  id bigint [pk, increment]
+  order_id uuid [not null, ref: > orders.id]
+  from_status order_status
+  to_status order_status [not null]
+  reason varchar(120)
+  changed_at timestamp [not null]
+
+  indexes {
+    order_id
+  }
+}
+
+Table exchange_messages [headercolor: #15803d, note: 'Raw FIX traffic, kept for reconciliation and replay'] {
+  id bigint [pk, increment]
+  order_id uuid [ref: > orders.id]
+  direction message_direction [not null]
+  session_id varchar(40) [not null]
+  session_date date [not null, note: 'Sequence numbers reset every day']
+  msg_type varchar(4) [not null]
+  seq_no bigint [not null]
+  raw_message text [not null]
+  logged_at timestamp [not null]
+
+  indexes {
+    (session_id, session_date, direction, seq_no) [unique]
+    order_id
+  }
+}
+
+Table executions [headercolor: #15803d] {
+  id bigint [pk, increment]
+  order_id uuid [not null, ref: > orders.id]
+  exec_id varchar(40) [not null, note: 'FIX ExecID is unique within a trading day only']
+  quantity bigint [not null]
+  price decimal(18,4) [not null]
+  gross_value decimal(18,2) [not null]
+  business_date date [not null]
+  executed_at timestamp [not null]
+
+  indexes {
+    (order_id, executed_at)
+    (order_id, exec_id) [unique]
+  }
+}
+
+Table cash_balances [headercolor: #b45309] {
+  sub_account_id bigint [pk, ref: - sub_accounts.id]
+  balance decimal(18,2) [not null, default: 0]
+  held_amount decimal(18,2) [not null, default: 0]
+  receivable_t1 decimal(18,2) [not null, default: 0]
+  receivable_t2 decimal(18,2) [not null, default: 0]
+  version int [not null, default: 0]
+  updated_at timestamp [not null]
+}
+
+Table cash_holds [headercolor: #b45309] {
+  id bigint [pk, increment]
+  sub_account_id bigint [not null, ref: > sub_accounts.id]
+  order_id uuid [ref: > orders.id]
+  cash_transfer_id bigint [ref: > cash_transfers.id, note: 'Withdrawal waiting for approval']
+  amount decimal(18,2) [not null]
+  released_amount decimal(18,2) [not null, default: 0]
+  status hold_status [not null, default: 'active']
+  created_at timestamp [not null]
+  released_at timestamp
+
+  indexes {
+    order_id
+  }
+}
+
+Table cash_transactions [headercolor: #b45309, note: 'Append-only cash ledger'] {
+  id bigint [pk, increment]
+  sub_account_id bigint [not null, ref: > sub_accounts.id]
+  tx_type cash_tx_type [not null]
+  amount decimal(18,2) [not null, note: 'Signed: negative leaves the account']
+  balance_after decimal(18,2) [not null]
+  source_ref varchar(64) [not null]
+  business_date date [not null]
+  posted_at timestamp [not null]
+
+  indexes {
+    (sub_account_id, posted_at)
+    (sub_account_id, tx_type, source_ref) [unique]
+  }
+}
+
+Table cash_transfers [headercolor: #b45309] {
+  id bigint [pk, increment]
+  sub_account_id bigint [not null, ref: > sub_accounts.id]
+  bank_link_id bigint [not null, ref: > bank_links.id]
+  direction transfer_direction [not null]
+  amount decimal(18,2) [not null]
+  status transfer_status [not null, default: 'requested']
+  bank_ref varchar(40) [unique]
+  requested_at timestamp [not null]
+  completed_at timestamp
+}
+
+Table cash_advances [headercolor: #b45309, note: 'Advance on sale proceeds before settlement day'] {
+  id bigint [pk, increment]
+  sub_account_id bigint [not null, ref: > sub_accounts.id]
+  amount decimal(18,2) [not null]
+  fee_amount decimal(18,2) [not null]
+  advance_on date [not null]
+  repay_on date [not null]
+  status advance_status [not null, default: 'active']
+}
+
+Table positions [headercolor: #7c3aed] {
+  sub_account_id bigint [ref: > sub_accounts.id]
+  instrument_id int [ref: > instruments.id]
+  total_quantity bigint [not null, default: 0]
+  available_quantity bigint [not null, default: 0]
+  held_quantity bigint [not null, default: 0]
+  receiving_quantity bigint [not null, default: 0, note: 'Bought, not settled yet']
+  blocked_quantity bigint [not null, default: 0]
+  avg_cost decimal(18,4) [not null, default: 0]
+  version int [not null, default: 0]
+  updated_at timestamp [not null]
+
+  indexes {
+    (sub_account_id, instrument_id) [pk]
+    instrument_id
+  }
+}
+
+Table stock_holds [headercolor: #7c3aed] {
+  id bigint [pk, increment]
+  sub_account_id bigint [not null, ref: > sub_accounts.id]
+  instrument_id int [not null, ref: > instruments.id]
+  order_id uuid [not null, ref: > orders.id]
+  quantity bigint [not null]
+  released_quantity bigint [not null, default: 0]
+  status hold_status [not null, default: 'active']
+  created_at timestamp [not null]
+
+  indexes {
+    order_id
+  }
+}
+
+Table stock_movements [headercolor: #7c3aed, note: 'Append-only stock ledger'] {
+  id bigint [pk, increment]
+  sub_account_id bigint [not null, ref: > sub_accounts.id]
+  instrument_id int [not null, ref: > instruments.id]
+  movement_type stock_movement_type [not null]
+  quantity bigint [not null, note: 'Signed: negative leaves the account']
+  source_ref varchar(64) [not null]
+  business_date date [not null]
+  posted_at timestamp [not null]
+
+  indexes {
+    (sub_account_id, instrument_id, posted_at)
+    (sub_account_id, instrument_id, movement_type, source_ref) [unique]
+  }
+}
+
+Table margin_contracts [headercolor: #be123c] {
+  id bigint [pk, increment]
+  sub_account_id bigint [not null, ref: > sub_accounts.id]
+  credit_limit decimal(18,2) [not null]
+  annual_rate decimal(7,4) [not null]
+  maintenance_ratio decimal(5,2) [not null]
+  force_sell_ratio decimal(5,2) [not null]
+  signed_on date [not null]
+  expires_on date [not null]
+  status contract_status [not null, default: 'active']
+
+  indexes {
+    (sub_account_id, signed_on) [unique]
+  }
+}
+
+Table marginable_instruments [headercolor: #be123c] {
+  instrument_id int [ref: > instruments.id]
+  effective_from date
+  loan_ratio decimal(5,2) [not null, note: 'Share of the price the broker lends']
+  price_cap decimal(18,4)
+  effective_to date
+
+  indexes {
+    (instrument_id, effective_from) [pk]
+  }
+}
+
+Table margin_loans [headercolor: #be123c] {
+  id bigint [pk, increment]
+  contract_id bigint [not null, ref: > margin_contracts.id]
+  order_id uuid [not null, ref: > orders.id]
+  principal decimal(18,2) [not null]
+  outstanding decimal(18,2) [not null]
+  annual_rate decimal(7,4) [not null]
+  disbursed_on date [not null]
+  due_on date [not null]
+  status loan_status [not null, default: 'active']
+
+  indexes {
+    (contract_id, status)
+  }
+}
+
+Table margin_repayments [headercolor: #be123c] {
+  id bigint [pk, increment]
+  loan_id bigint [not null, ref: > margin_loans.id]
+  cash_transaction_id bigint [not null, ref: > cash_transactions.id]
+  principal_part decimal(18,2) [not null]
+  interest_part decimal(18,2) [not null]
+  repaid_at timestamp [not null]
+
+  indexes {
+    loan_id
+  }
+}
+
+Table margin_interest_accruals [headercolor: #be123c] {
+  id bigint [pk, increment]
+  loan_id bigint [not null, ref: > margin_loans.id]
+  accrual_date date [not null]
+  amount decimal(18,6) [not null]
+
+  indexes {
+    (loan_id, accrual_date) [unique]
+  }
+}
+
+Table margin_calls [headercolor: #be123c] {
+  id bigint [pk, increment]
+  contract_id bigint [not null, ref: > margin_contracts.id]
+  business_date date [not null]
+  asset_value decimal(18,2) [not null]
+  debt_value decimal(18,2) [not null]
+  margin_ratio decimal(5,2) [not null]
+  required_amount decimal(18,2) [not null]
+  due_on date [not null]
+  status margin_call_status [not null, default: 'issued']
+  resolved_at timestamp
+
+  indexes {
+    contract_id
+  }
+}
+
+Table settlement_batches [headercolor: #0f766e] {
+  id bigint [pk, increment]
+  exchange_id int [not null, ref: > exchanges.id]
+  trade_date date [not null]
+  settlement_date date [not null]
+  net_cash decimal(18,2) [not null, default: 0]
+  status settlement_status [not null, default: 'pending']
+  confirmed_at timestamp
+
+  indexes {
+    (exchange_id, trade_date) [unique]
+  }
+}
+
+Table settlement_instructions [headercolor: #0f766e] {
+  id bigint [pk, increment]
+  batch_id bigint [not null, ref: > settlement_batches.id]
+  execution_id bigint [not null, unique, ref: - executions.id]
+  gross_value decimal(18,2) [not null]
+  total_fees decimal(18,2) [not null, default: 0]
+  net_amount decimal(18,2) [not null]
+  status settlement_status [not null, default: 'pending']
+  settled_at timestamp
+}
+
+Table fee_schedules [headercolor: #0f766e] {
+  id int [pk, increment]
+  fee_type fee_type [not null]
+  channel order_channel
+  min_order_value decimal(18,2) [not null, default: 0]
+  rate decimal(7,5) [not null]
+  effective_from date [not null]
+  effective_to date
+}
+
+Table fee_charges [headercolor: #0f766e] {
+  id bigint [pk, increment]
+  execution_id bigint [not null, ref: > executions.id]
+  schedule_id int [not null, ref: > fee_schedules.id]
+  fee_type fee_type [not null]
+  rate decimal(7,5) [not null]
+  amount decimal(18,2) [not null]
+
+  indexes {
+    (execution_id, fee_type) [unique]
+  }
+}
+
+Table audit_logs [headercolor: #475569] {
+  id bigint [pk, increment]
+  actor varchar(60) [not null]
+  entity_type varchar(40) [not null]
+  entity_id varchar(64) [not null]
+  action varchar(40) [not null]
+  before_data jsonb
+  after_data jsonb
+  created_at timestamp [not null]
+
+  indexes {
+    (entity_type, entity_id)
+  }
+}
+
+Table outbox_events [headercolor: #475569, note: 'Transactional outbox: written with the business row, relayed to the broker'] {
+  id bigint [pk, increment]
+  aggregate_type varchar(40) [not null]
+  aggregate_id varchar(64) [not null]
+  event_type varchar(60) [not null]
+  payload jsonb [not null]
+  created_at timestamp [not null]
+  published_at timestamp
+
+  indexes {
+    (published_at, id)
+  }
+}
+
+TableGroup reference_data [color: #0e7490] {
+  exchanges
+  market_calendars
+  instruments
+  daily_price_limits
+  corporate_actions
+  corporate_action_entitlements
+}
+
+TableGroup clients_accounts [color: #1168bd] {
+  brokers
+  clients
+  client_documents
+  trading_accounts
+  sub_accounts
+  bank_links
+}
+
+TableGroup order_management [color: #15803d] {
+  orders
+  order_amendments
+  order_status_history
+  exchange_messages
+  executions
+}
+
+TableGroup cash_management [color: #b45309] {
+  cash_balances
+  cash_holds
+  cash_transactions
+  cash_transfers
+  cash_advances
+}
+
+TableGroup stock_positions [color: #7c3aed] {
+  positions
+  stock_holds
+  stock_movements
+}
+
+TableGroup margin_lending [color: #be123c] {
+  margin_contracts
+  marginable_instruments
+  margin_loans
+  margin_repayments
+  margin_interest_accruals
+  margin_calls
+}
+
+TableGroup settlement_fees [color: #0f766e] {
+  settlement_batches
+  settlement_instructions
+  fee_schedules
+  fee_charges
+}
+
+TableGroup operations [color: #475569] {
+  audit_logs
+  outbox_events
+}`, "Database đầy đủ"];
+DBML_SAMPLES["db-shopping"] = ["Sàn mua sắm online", `Project online_marketplace {
+  database_type: 'PostgreSQL'
+  Note: 'Multi-seller marketplace: customers and loyalty, seller onboarding and payouts, catalog, inventory, cart and promotions, orders split per seller, payments, fulfilment and returns. Fictional schema.'
+}
+
+Enum customer_status {
+  active
+  suspended
+  deleted
+}
+
+Enum loyalty_tx_type {
+  earn
+  redeem
+  expire
+  adjust
+}
+
+Enum seller_status {
+  applied
+  verified
+  active
+  suspended
+  closed
+}
+
+Enum payout_status {
+  scheduled
+  processing
+  paid
+  failed
+}
+
+Enum product_status {
+  draft
+  pending_review
+  active
+  out_of_stock
+  archived
+}
+
+Enum movement_type {
+  purchase_receipt
+  sale
+  return_restock
+  adjustment
+  transfer
+}
+
+Enum reservation_status {
+  held
+  committed
+  released
+  expired
+}
+
+Enum cart_status {
+  active
+  converted
+  abandoned
+}
+
+Enum discount_type {
+  percentage
+  fixed_amount
+  free_shipping
+}
+
+Enum promotion_scope {
+  platform
+  seller
+}
+
+Enum order_status {
+  pending_payment
+  paid
+  processing
+  completed
+  cancelled
+  refunded
+}
+
+Enum seller_order_status {
+  awaiting_confirmation
+  confirmed
+  packed
+  shipped
+  delivered
+  cancelled
+}
+
+Enum payment_method {
+  card
+  bank_transfer
+  e_wallet
+  cash_on_delivery
+}
+
+Enum payment_status {
+  initiated
+  authorized
+  captured
+  failed
+  voided
+}
+
+Enum refund_status {
+  requested
+  processing
+  completed
+  failed
+}
+
+Enum shipment_status {
+  label_created
+  picked_up
+  in_transit
+  out_for_delivery
+  delivered
+  failed_delivery
+  returned
+}
+
+Enum return_status {
+  requested
+  approved
+  rejected
+  received
+  refunded
+}
+
+Table customers [headercolor: #0e7490] {
+  id bigint [pk, increment]
+  email varchar(255) [not null, unique]
+  phone varchar(20) [unique]
+  password_hash varchar(255) [not null]
+  full_name varchar(120) [not null]
+  status customer_status [not null, default: 'active']
+  created_at timestamp [not null]
+  updated_at timestamp [not null]
+}
+
+Table customer_addresses [headercolor: #0e7490] {
+  id bigint [pk, increment]
+  customer_id bigint [not null, ref: > customers.id]
+  recipient_name varchar(120) [not null]
+  phone varchar(20) [not null]
+  line1 varchar(160) [not null]
+  city varchar(60) [not null]
+  province varchar(60) [not null]
+  country char(2) [not null]
+  postal_code varchar(12)
+  is_default boolean [not null, default: false]
+}
+
+Table loyalty_accounts [headercolor: #0e7490] {
+  customer_id bigint [pk, ref: - customers.id]
+  tier varchar(12) [not null, default: 'bronze']
+  points_balance int [not null, default: 0]
+  updated_at timestamp [not null]
+}
+
+Table loyalty_transactions [headercolor: #0e7490] {
+  id bigint [pk, increment]
+  customer_id bigint [not null, ref: > loyalty_accounts.customer_id]
+  order_id uuid [ref: > orders.id]
+  tx_type loyalty_tx_type [not null]
+  points int [not null]
+  expires_on date
+  created_at timestamp [not null]
+}
+
+Table wishlist_items [headercolor: #0e7490] {
+  customer_id bigint [ref: > customers.id]
+  product_id bigint [ref: > products.id]
+  added_at timestamp [not null]
+
+  indexes {
+    (customer_id, product_id) [pk]
+  }
+}
+
+Table sellers [headercolor: #1168bd] {
+  id bigint [pk, increment]
+  shop_name varchar(120) [not null, unique]
+  legal_name varchar(160) [not null]
+  tax_code varchar(20) [not null]
+  contact_email varchar(255) [not null]
+  commission_rate decimal(5,2) [not null]
+  rating decimal(3,2)
+  status seller_status [not null, default: 'applied']
+  created_at timestamp [not null]
+}
+
+Table seller_bank_accounts [headercolor: #1168bd] {
+  id bigint [pk, increment]
+  seller_id bigint [not null, ref: > sellers.id]
+  bank_code varchar(11) [not null]
+  account_no varchar(34) [not null]
+  account_name varchar(120) [not null]
+  is_default boolean [not null, default: false]
+}
+
+Table seller_payouts [headercolor: #1168bd] {
+  id bigint [pk, increment]
+  seller_id bigint [not null, ref: > sellers.id]
+  bank_account_id bigint [not null, ref: > seller_bank_accounts.id]
+  period_start date [not null]
+  period_end date [not null]
+  gross_amount decimal(14,2) [not null]
+  commission_amount decimal(14,2) [not null]
+  refund_deduction decimal(14,2) [not null, default: 0, note: 'Refunds raised after an earlier payout']
+  net_amount decimal(14,2) [not null]
+  status payout_status [not null, default: 'scheduled']
+  paid_at timestamp
+
+  indexes {
+    (seller_id, period_start) [unique]
+  }
+}
+
+Table brands [headercolor: #15803d] {
+  id int [pk, increment]
+  name varchar(100) [not null, unique]
+  logo_url varchar(255)
+}
+
+Table categories [headercolor: #15803d] {
+  id int [pk, increment]
+  parent_id int [ref: > categories.id]
+  name varchar(100) [not null]
+  slug varchar(120) [not null, unique]
+  sort_rank int [not null, default: 0]
+}
+
+Table products [headercolor: #15803d] {
+  id bigint [pk, increment]
+  seller_id bigint [not null, ref: > sellers.id]
+  category_id int [not null, ref: > categories.id]
+  brand_id int [ref: > brands.id]
+  name varchar(200) [not null]
+  slug varchar(220) [not null, unique]
+  description text
+  status product_status [not null, default: 'draft']
+  rating_average decimal(3,2)
+  rating_count int [not null, default: 0]
+  created_at timestamp [not null]
+  updated_at timestamp [not null]
+
+  indexes {
+    (seller_id, status)
+    (category_id, status)
+  }
+}
+
+Table product_variants [headercolor: #15803d] {
+  id bigint [pk, increment]
+  product_id bigint [not null, ref: > products.id]
+  sku varchar(40) [not null, unique, note: 'Generated by the platform']
+  seller_sku varchar(40)
+  variant_name varchar(120) [not null, note: 'Size M / Blue']
+  list_price decimal(12,2) [not null]
+  sale_price decimal(12,2)
+  weight_grams int [not null]
+  is_active boolean [not null, default: true]
+
+  indexes {
+    product_id
+  }
+}
+
+Table product_images [headercolor: #15803d] {
+  id bigint [pk, increment]
+  product_id bigint [not null, ref: > products.id]
+  variant_id bigint [ref: > product_variants.id]
+  image_url varchar(255) [not null]
+  sort_rank int [not null, default: 0]
+}
+
+Table attributes [headercolor: #15803d] {
+  id int [pk, increment]
+  category_id int [not null, ref: > categories.id]
+  name varchar(60) [not null]
+  is_filterable boolean [not null, default: false]
+}
+
+Table product_attribute_values [headercolor: #15803d] {
+  product_id bigint [ref: > products.id]
+  attribute_id int [ref: > attributes.id]
+  attribute_value varchar(120) [not null]
+
+  indexes {
+    (product_id, attribute_id) [pk]
+    (attribute_id, attribute_value)
+  }
+}
+
+Table product_reviews [headercolor: #15803d] {
+  id bigint [pk, increment]
+  product_id bigint [not null, ref: > products.id]
+  customer_id bigint [not null, ref: > customers.id]
+  order_item_id bigint [not null, unique, ref: - order_items.id, note: 'Verified purchase, one review per line']
+  rating smallint [not null]
+  body text
+  is_published boolean [not null, default: true]
+  created_at timestamp [not null]
+
+  indexes {
+    product_id
+  }
+}
+
+Table warehouses [headercolor: #b45309] {
+  id int [pk, increment]
+  seller_id bigint [ref: > sellers.id, note: 'Empty when run by the platform']
+  code varchar(12) [not null, unique]
+  name varchar(120) [not null]
+  city varchar(60) [not null]
+  is_active boolean [not null, default: true]
+}
+
+Table inventory_levels [headercolor: #b45309] {
+  warehouse_id int [ref: > warehouses.id]
+  variant_id bigint [ref: > product_variants.id]
+  on_hand int [not null, default: 0]
+  reserved int [not null, default: 0]
+  reorder_point int [not null, default: 0]
+  version int [not null, default: 0, note: 'Optimistic locking: stops overselling']
+
+  indexes {
+    (warehouse_id, variant_id) [pk]
+    variant_id
+  }
+}
+
+Table stock_reservations [headercolor: #b45309] {
+  id bigint [pk, increment]
+  order_item_id bigint [not null, ref: > order_items.id]
+  warehouse_id int [not null, ref: > warehouses.id]
+  variant_id bigint [not null, ref: > product_variants.id]
+  quantity int [not null]
+  status reservation_status [not null, default: 'held']
+  expires_at timestamp [not null]
+
+  indexes {
+    (status, expires_at)
+  }
+}
+
+Table stock_movements [headercolor: #b45309] {
+  id bigint [pk, increment]
+  warehouse_id int [not null, ref: > warehouses.id]
+  variant_id bigint [not null, ref: > product_variants.id]
+  movement_type movement_type [not null]
+  quantity int [not null, note: 'Signed: negative leaves the warehouse']
+  source_ref varchar(64) [not null]
+  created_at timestamp [not null]
+
+  indexes {
+    (variant_id, created_at)
+  }
+}
+
+Table carts [headercolor: #7c3aed] {
+  id uuid [pk]
+  customer_id bigint [ref: > customers.id, note: 'Empty for guests until sign-in']
+  status cart_status [not null, default: 'active']
+  updated_at timestamp [not null]
+
+  indexes {
+    (customer_id, status)
+  }
+}
+
+Table cart_items [headercolor: #7c3aed] {
+  cart_id uuid [ref: > carts.id]
+  variant_id bigint [ref: > product_variants.id]
+  quantity int [not null]
+  added_at timestamp [not null]
+
+  indexes {
+    (cart_id, variant_id) [pk]
+  }
+}
+
+Table promotions [headercolor: #7c3aed] {
+  id bigint [pk, increment]
+  seller_id bigint [ref: > sellers.id]
+  name varchar(120) [not null]
+  scope promotion_scope [not null]
+  discount_type discount_type [not null]
+  discount_value decimal(12,2) [not null]
+  max_discount decimal(12,2)
+  min_order_value decimal(12,2) [not null, default: 0]
+  starts_at timestamp [not null]
+  ends_at timestamp [not null]
+}
+
+Table coupons [headercolor: #7c3aed] {
+  id bigint [pk, increment]
+  promotion_id bigint [not null, ref: > promotions.id]
+  code varchar(24) [not null, unique]
+  usage_limit int
+  per_customer_limit int [not null, default: 1]
+  used_count int [not null, default: 0]
+}
+
+Table coupon_redemptions [headercolor: #7c3aed] {
+  id bigint [pk, increment]
+  coupon_id bigint [not null, ref: > coupons.id]
+  customer_id bigint [not null, ref: > customers.id]
+  order_id uuid [not null, ref: > orders.id]
+  discount_amount decimal(12,2) [not null]
+  redeemed_at timestamp [not null]
+
+  indexes {
+    (coupon_id, order_id) [unique]
+    (coupon_id, customer_id)
+  }
+}
+
+Table orders [headercolor: #be123c] {
+  id uuid [pk]
+  order_no varchar(20) [not null, unique]
+  idempotency_key varchar(64) [not null, unique]
+  customer_id bigint [not null, ref: > customers.id]
+  shipping_address jsonb [not null, note: 'Snapshot at checkout, later address edits do not touch old orders']
+  subtotal decimal(14,2) [not null]
+  discount_total decimal(14,2) [not null, default: 0]
+  shipping_total decimal(14,2) [not null, default: 0]
+  tax_total decimal(14,2) [not null, default: 0]
+  grand_total decimal(14,2) [not null]
+  currency char(3) [not null]
+  status order_status [not null, default: 'pending_payment']
+  placed_at timestamp [not null]
+
+  indexes {
+    (customer_id, placed_at)
+    (status, placed_at)
+  }
+}
+
+Table seller_orders [headercolor: #be123c, note: 'One customer order splits into one parcel flow per seller'] {
+  id bigint [pk, increment]
+  order_id uuid [not null, ref: > orders.id]
+  seller_id bigint [not null, ref: > sellers.id]
+  payout_id bigint [ref: > seller_payouts.id]
+  items_total decimal(14,2) [not null]
+  shipping_fee decimal(14,2) [not null, default: 0]
+  commission_amount decimal(14,2) [not null, default: 0]
+  status seller_order_status [not null, default: 'awaiting_confirmation']
+
+  indexes {
+    (order_id, seller_id) [unique]
+    (seller_id, status)
+    payout_id
+  }
+}
+
+Table order_items [headercolor: #be123c, note: 'Name and price are copied so old orders survive catalog edits'] {
+  id bigint [pk, increment]
+  seller_order_id bigint [not null, ref: > seller_orders.id]
+  variant_id bigint [not null, ref: > product_variants.id]
+  product_name varchar(200) [not null]
+  sku varchar(40) [not null]
+  quantity int [not null]
+  unit_price decimal(12,2) [not null]
+  discount_amount decimal(12,2) [not null, default: 0]
+  platform_discount_amount decimal(12,2) [not null, default: 0, note: 'Funded by the platform, not deducted from the seller']
+
+  indexes {
+    seller_order_id
+  }
+}
+
+Table order_status_history [headercolor: #be123c] {
+  id bigint [pk, increment]
+  order_id uuid [not null, ref: > orders.id]
+  from_status order_status
+  to_status order_status [not null]
+  changed_by varchar(60) [not null]
+  changed_at timestamp [not null]
+}
+
+Table payments [headercolor: #0f766e] {
+  id uuid [pk]
+  order_id uuid [not null, ref: > orders.id]
+  method payment_method [not null]
+  provider varchar(30) [not null]
+  provider_ref varchar(64)
+  amount decimal(14,2) [not null]
+  currency char(3) [not null]
+  status payment_status [not null, default: 'initiated']
+  failure_code varchar(30)
+  created_at timestamp [not null]
+  captured_at timestamp
+
+  indexes {
+    (order_id, status)
+    (provider, provider_ref) [unique]
+  }
+}
+
+Table refunds [headercolor: #0f766e] {
+  id uuid [pk]
+  payment_id uuid [not null, ref: > payments.id]
+  seller_order_id bigint [not null, ref: > seller_orders.id]
+  payout_id bigint [ref: > seller_payouts.id, note: 'Payout that deducts this refund']
+  return_id bigint [ref: > return_requests.id]
+  amount decimal(14,2) [not null]
+  reason varchar(120) [not null]
+  status refund_status [not null, default: 'requested']
+  provider_ref varchar(64) [unique]
+  created_at timestamp [not null]
+  completed_at timestamp
+}
+
+Table carriers [headercolor: #475569] {
+  id int [pk, increment]
+  code varchar(12) [not null, unique]
+  name varchar(100) [not null]
+  tracking_url_template varchar(255)
+  is_active boolean [not null, default: true]
+}
+
+Table shipments [headercolor: #475569] {
+  id bigint [pk, increment]
+  seller_order_id bigint [not null, ref: > seller_orders.id]
+  carrier_id int [not null, ref: > carriers.id]
+  warehouse_id int [not null, ref: > warehouses.id]
+  tracking_no varchar(40) [not null, unique]
+  shipping_fee decimal(12,2) [not null]
+  status shipment_status [not null, default: 'label_created']
+  shipped_at timestamp
+  delivered_at timestamp
+
+  indexes {
+    seller_order_id
+  }
+}
+
+Table shipment_items [headercolor: #475569] {
+  shipment_id bigint [ref: > shipments.id]
+  order_item_id bigint [ref: > order_items.id]
+  quantity int [not null]
+
+  indexes {
+    (shipment_id, order_item_id) [pk]
+  }
+}
+
+Table shipment_events [headercolor: #475569] {
+  id bigint [pk, increment]
+  shipment_id bigint [not null, ref: > shipments.id]
+  status shipment_status [not null]
+  location varchar(120)
+  occurred_at timestamp [not null]
+
+  indexes {
+    (shipment_id, occurred_at)
+  }
+}
+
+Table return_requests [headercolor: #475569] {
+  id bigint [pk, increment]
+  seller_order_id bigint [not null, ref: > seller_orders.id]
+  customer_id bigint [not null, ref: > customers.id]
+  reason varchar(120) [not null]
+  status return_status [not null, default: 'requested']
+  requested_at timestamp [not null]
+  resolved_at timestamp
+}
+
+Table return_items [headercolor: #475569] {
+  return_id bigint [ref: > return_requests.id]
+  order_item_id bigint [ref: > order_items.id]
+  quantity int [not null]
+  is_restockable boolean [not null, default: false]
+
+  indexes {
+    (return_id, order_item_id) [pk]
+  }
+}
+
+Table outbox_events [headercolor: #475569, note: 'Transactional outbox: written with the business row, relayed to the broker'] {
+  id bigint [pk, increment]
+  aggregate_type varchar(40) [not null]
+  aggregate_id varchar(64) [not null]
+  event_type varchar(60) [not null]
+  payload jsonb [not null]
+  created_at timestamp [not null]
+  published_at timestamp
+
+  indexes {
+    (published_at, id)
+  }
+}
+
+TableGroup customer_profile [color: #0e7490] {
+  customers
+  customer_addresses
+  loyalty_accounts
+  loyalty_transactions
+  wishlist_items
+}
+
+TableGroup seller_center [color: #1168bd] {
+  sellers
+  seller_bank_accounts
+  seller_payouts
+}
+
+TableGroup catalog [color: #15803d] {
+  brands
+  categories
+  products
+  product_variants
+  product_images
+  attributes
+  product_attribute_values
+  product_reviews
+}
+
+TableGroup inventory [color: #b45309] {
+  warehouses
+  inventory_levels
+  stock_reservations
+  stock_movements
+}
+
+TableGroup cart_promotion [color: #7c3aed] {
+  carts
+  cart_items
+  promotions
+  coupons
+  coupon_redemptions
+}
+
+TableGroup order_processing [color: #be123c] {
+  orders
+  seller_orders
+  order_items
+  order_status_history
+}
+
+TableGroup payment_processing [color: #0f766e] {
+  payments
+  refunds
+}
+
+TableGroup fulfilment_returns [color: #475569] {
+  carriers
+  shipments
+  shipment_items
+  shipment_events
+  return_requests
+  return_items
+  outbox_events
+}`, "Database đầy đủ"];
+DBML_SAMPLES["db-crypto"] = ["Sàn tiền ảo (kiểu Binance)", `Project crypto_exchange {
+  database_type: 'PostgreSQL'
+  Note: 'Centralized crypto exchange: users and KYC, multi-network assets, custodial wallets with an append-only ledger, spot matching, perpetual futures, P2P, staking and compliance. Fictional schema.'
+}
+
+Enum user_status {
+  active
+  withdrawal_locked
+  frozen
+  closed
+}
+
+Enum kyc_level {
+  none
+  basic
+  intermediate
+  advanced
+}
+
+Enum kyc_review_status {
+  submitted
+  approved
+  rejected
+}
+
+Enum network_status {
+  enabled
+  deposit_only
+  withdraw_only
+  suspended
+}
+
+Enum pair_status {
+  pre_trading
+  trading
+  halted
+  delisted
+}
+
+Enum wallet_type {
+  spot
+  funding
+  futures
+  earn
+}
+
+Enum custody_tier {
+  hot
+  warm
+  cold
+}
+
+Enum ledger_reason {
+  deposit
+  withdrawal
+  trade
+  trade_fee
+  transfer
+  funding_fee
+  realized_pnl
+  liquidation
+  p2p_escrow
+  staking
+  staking_redeem
+  staking_reward
+  withdrawal_refund
+  deposit_reversal
+  p2p_escrow_refund
+}
+
+Enum deposit_status {
+  detected
+  confirming
+  credited
+  reorged
+  rejected
+}
+
+Enum withdrawal_status {
+  requested
+  risk_review
+  approved
+  broadcasting
+  confirmed
+  failed
+  cancelled
+}
+
+Enum transfer_status {
+  pending
+  completed
+  failed
+}
+
+Enum order_side {
+  buy
+  sell
+}
+
+Enum order_type {
+  limit
+  market
+  stop_limit
+  take_profit_limit
+}
+
+Enum time_in_force {
+  gtc
+  ioc
+  fok
+  post_only
+}
+
+Enum order_status {
+  accepted
+  partially_filled
+  filled
+  cancelled
+  rejected
+  expired
+}
+
+Enum candle_interval {
+  m1
+  m5
+  m15
+  h1
+  h4
+  d1
+}
+
+Enum margin_mode {
+  cross
+  isolated
+}
+
+Enum position_side {
+  long
+  short
+}
+
+Enum position_status {
+  open
+  closed
+  liquidated
+}
+
+Enum liquidation_type {
+  partial
+  full
+  auto_deleveraged
+}
+
+Enum insurance_entry_type {
+  liquidation_surplus
+  bankruptcy_cover
+}
+
+Enum ad_status {
+  online
+  paused
+  closed
+}
+
+Enum p2p_order_status {
+  created
+  buyer_paid
+  released
+  cancelled
+  disputed
+}
+
+Enum dispute_status {
+  open
+  resolved_for_buyer
+  resolved_for_seller
+}
+
+Enum staking_status {
+  active
+  redeeming
+  redeemed
+}
+
+Enum screening_result {
+  clear
+  flagged
+  blocked
+}
+
+Table vip_tiers [headercolor: #0e7490] {
+  tier smallint [pk]
+  min_30d_volume_usd decimal(24,2) [not null]
+  maker_fee_rate decimal(7,6) [not null]
+  taker_fee_rate decimal(7,6) [not null]
+  daily_withdrawal_limit_usd decimal(24,2) [not null]
+}
+
+Table users [headercolor: #0e7490] {
+  id bigint [pk, increment]
+  uid varchar(12) [not null, unique]
+  email varchar(255) [not null, unique]
+  password_hash varchar(255) [not null]
+  totp_secret_encrypted varchar(255)
+  vip_tier smallint [not null, default: 0, ref: > vip_tiers.tier]
+  kyc_level kyc_level [not null, default: 'none']
+  status user_status [not null, default: 'active']
+  referrer_id bigint [ref: > users.id]
+  created_at timestamp [not null]
+}
+
+Table kyc_submissions [headercolor: #0e7490] {
+  id bigint [pk, increment]
+  user_id bigint [not null, ref: > users.id]
+  requested_level kyc_level [not null]
+  full_name varchar(160) [not null]
+  country char(2) [not null]
+  document_key varchar(255) [not null]
+  selfie_key varchar(255) [not null]
+  status kyc_review_status [not null, default: 'submitted']
+  submitted_at timestamp [not null]
+  reviewed_at timestamp
+}
+
+Table api_keys [headercolor: #0e7490] {
+  id bigint [pk, increment]
+  user_id bigint [not null, ref: > users.id]
+  key_id varchar(64) [not null, unique]
+  secret_encrypted varchar(255) [not null, note: 'HMAC request signing needs the original secret, so a hash cannot verify it']
+  can_trade boolean [not null, default: false]
+  can_withdraw boolean [not null, default: false]
+  ip_allowlist jsonb
+  expires_at timestamp
+  revoked_at timestamp
+}
+
+Table login_history [headercolor: #0e7490] {
+  id bigint [pk, increment]
+  user_id bigint [not null, ref: > users.id]
+  ip_address varchar(45) [not null]
+  device varchar(120)
+  is_success boolean [not null]
+  created_at timestamp [not null]
+
+  indexes {
+    (user_id, created_at)
+  }
+}
+
+Table withdrawal_addresses [headercolor: #0e7490, note: 'Allowlist: a new address waits out a cooling period'] {
+  id bigint [pk, increment]
+  user_id bigint [not null, ref: > users.id]
+  network_id int [not null, ref: > blockchain_networks.id]
+  address varchar(128) [not null]
+  memo varchar(64) [not null, default: '']
+  label varchar(60)
+  active_from timestamp [not null]
+  revoked_at timestamp
+
+  indexes {
+    (user_id, network_id, address, memo) [unique]
+  }
+}
+
+Table assets [headercolor: #1168bd] {
+  id int [pk, increment]
+  symbol varchar(16) [not null, unique]
+  name varchar(80) [not null]
+  decimals smallint [not null, note: 'Internal precision, on-chain decimals live in asset_networks']
+  is_fiat boolean [not null, default: false]
+  is_active boolean [not null, default: true]
+}
+
+Table blockchain_networks [headercolor: #1168bd] {
+  id int [pk, increment]
+  code varchar(16) [not null, unique]
+  name varchar(80) [not null]
+  explorer_url varchar(255)
+  avg_block_seconds int [not null]
+}
+
+Table asset_networks [headercolor: #1168bd] {
+  id int [pk, increment]
+  asset_id int [not null, ref: > assets.id]
+  network_id int [not null, ref: > blockchain_networks.id]
+  contract_address varchar(128)
+  token_decimals smallint [not null, note: 'The same token can use 6 on one chain and 18 on another']
+  min_confirmations int [not null]
+  min_withdrawal decimal(36,18) [not null]
+  withdrawal_fee decimal(36,18) [not null]
+  status network_status [not null, default: 'enabled']
+
+  indexes {
+    (asset_id, network_id) [unique]
+  }
+}
+
+Table trading_pairs [headercolor: #1168bd] {
+  id int [pk, increment]
+  symbol varchar(24) [not null, unique]
+  base_asset_id int [not null, ref: > assets.id]
+  quote_asset_id int [not null, ref: > assets.id]
+  price_tick decimal(36,18) [not null]
+  quantity_step decimal(36,18) [not null]
+  min_notional decimal(36,18) [not null]
+  status pair_status [not null, default: 'pre_trading']
+}
+
+Table wallets [headercolor: #15803d] {
+  id bigint [pk, increment]
+  user_id bigint [not null, ref: > users.id]
+  asset_id int [not null, ref: > assets.id]
+  wallet_type wallet_type [not null]
+  available decimal(36,18) [not null, default: 0]
+  locked decimal(36,18) [not null, default: 0]
+  version bigint [not null, default: 0]
+  updated_at timestamp [not null]
+
+  indexes {
+    (user_id, asset_id, wallet_type) [unique]
+  }
+}
+
+Table ledger_entries [headercolor: #15803d, note: 'Append-only: wallet balance is always the sum of its entries'] {
+  id bigint [pk, increment]
+  wallet_id bigint [not null, ref: > wallets.id]
+  reason ledger_reason [not null]
+  amount decimal(36,18) [not null, note: 'Signed: negative leaves the wallet']
+  balance_after decimal(36,18) [not null]
+  source_ref varchar(64) [not null]
+  created_at timestamp [not null]
+
+  indexes {
+    (wallet_id, created_at)
+    (reason, source_ref, wallet_id) [unique]
+  }
+}
+
+Table internal_transfers [headercolor: #15803d] {
+  id bigint [pk, increment]
+  from_wallet_id bigint [not null, ref: > wallets.id]
+  to_wallet_id bigint [not null, ref: > wallets.id]
+  amount decimal(36,18) [not null]
+  status transfer_status [not null, default: 'pending']
+  created_at timestamp [not null]
+}
+
+Table custody_wallets [headercolor: #b45309] {
+  id int [pk, increment]
+  network_id int [not null, ref: > blockchain_networks.id]
+  tier custody_tier [not null]
+  address varchar(128) [not null]
+  signer_policy varchar(40) [not null, note: 'Multisig or MPC threshold such as 3-of-5']
+  is_active boolean [not null, default: true]
+
+  indexes {
+    (network_id, address) [unique]
+  }
+}
+
+Table deposit_addresses [headercolor: #b45309] {
+  id bigint [pk, increment]
+  user_id bigint [not null, ref: > users.id]
+  network_id int [not null, ref: > blockchain_networks.id]
+  address varchar(128) [not null]
+  memo varchar(64) [not null, default: '']
+  created_at timestamp [not null]
+
+  indexes {
+    (network_id, address, memo) [unique]
+    (user_id, network_id)
+  }
+}
+
+Table deposits [headercolor: #b45309] {
+  id bigint [pk, increment]
+  deposit_address_id bigint [not null, ref: > deposit_addresses.id]
+  asset_network_id int [not null, ref: > asset_networks.id]
+  tx_hash varchar(128) [not null]
+  log_index int [not null, default: 0]
+  amount decimal(36,18) [not null]
+  block_height bigint [not null]
+  confirmations int [not null, default: 0]
+  status deposit_status [not null, default: 'detected']
+  detected_at timestamp [not null]
+  credited_at timestamp
+
+  indexes {
+    (asset_network_id, tx_hash, log_index) [unique, note: 'Idempotent chain scan']
+    (status, detected_at)
+  }
+}
+
+Table withdrawals [headercolor: #b45309] {
+  id bigint [pk, increment]
+  user_id bigint [not null, ref: > users.id]
+  address_id bigint [not null, ref: > withdrawal_addresses.id]
+  to_address varchar(128) [not null, note: 'Snapshot for on-chain audit']
+  to_memo varchar(64) [not null, default: '']
+  asset_network_id int [not null, ref: > asset_networks.id]
+  hot_wallet_id int [ref: > custody_wallets.id]
+  idempotency_key varchar(64) [not null, unique]
+  amount decimal(36,18) [not null]
+  network_fee decimal(36,18) [not null]
+  tx_hash varchar(128)
+  status withdrawal_status [not null, default: 'requested']
+  requested_at timestamp [not null]
+  confirmed_at timestamp
+
+  indexes {
+    (user_id, requested_at)
+    (status, requested_at)
+  }
+}
+
+Table spot_orders [headercolor: #7c3aed] {
+  id bigint [pk]
+  client_order_id varchar(40)
+  user_id bigint [not null, ref: > users.id]
+  pair_id int [not null, ref: > trading_pairs.id]
+  side order_side [not null]
+  order_type order_type [not null]
+  time_in_force time_in_force [not null, default: 'gtc']
+  price decimal(36,18)
+  stop_price decimal(36,18)
+  quantity decimal(36,18) [note: 'Empty for market buys sized by quote_quantity']
+  quote_quantity decimal(36,18)
+  filled_quantity decimal(36,18) [not null, default: 0]
+  filled_quote decimal(36,18) [not null, default: 0]
+  status order_status [not null, default: 'accepted']
+  created_at timestamp [not null]
+  updated_at timestamp [not null]
+
+  indexes {
+    (user_id, client_order_id) [unique]
+    (user_id, pair_id, status)
+    (pair_id, created_at)
+  }
+}
+
+Table spot_trades [headercolor: #7c3aed, note: 'One row per match, written from the engine event stream'] {
+  id bigint [pk]
+  pair_id int [not null, ref: > trading_pairs.id]
+  maker_order_id bigint [not null, ref: > spot_orders.id]
+  taker_order_id bigint [not null, ref: > spot_orders.id]
+  taker_side order_side [not null]
+  price decimal(36,18) [not null]
+  quantity decimal(36,18) [not null]
+  quote_amount decimal(36,18) [not null]
+  sequence_no bigint [not null]
+  executed_at timestamp [not null]
+
+  indexes {
+    (pair_id, sequence_no) [unique]
+    (pair_id, executed_at)
+    maker_order_id
+    taker_order_id
+  }
+}
+
+Table trade_fees [headercolor: #7c3aed] {
+  id bigint [pk, increment]
+  trade_id bigint [not null, ref: > spot_trades.id]
+  user_id bigint [not null, ref: > users.id]
+  fee_asset_id int [not null, ref: > assets.id]
+  amount decimal(36,18) [not null]
+  fee_rate decimal(7,6) [not null]
+  is_maker boolean [not null]
+
+  indexes {
+    (trade_id, is_maker) [unique]
+  }
+}
+
+Table candles [headercolor: #7c3aed] {
+  pair_id int [ref: > trading_pairs.id]
+  interval candle_interval
+  open_time timestamp
+  open_price decimal(36,18) [not null]
+  high_price decimal(36,18) [not null]
+  low_price decimal(36,18) [not null]
+  close_price decimal(36,18) [not null]
+  base_volume decimal(36,18) [not null]
+  quote_volume decimal(36,18) [not null]
+  trade_count int [not null]
+
+  indexes {
+    (pair_id, interval, open_time) [pk]
+  }
+}
+
+Table perpetual_contracts [headercolor: #be123c] {
+  id int [pk, increment]
+  symbol varchar(24) [not null, unique]
+  underlying_asset_id int [not null, ref: > assets.id]
+  margin_asset_id int [not null, ref: > assets.id]
+  max_leverage smallint [not null]
+  maintenance_margin_rate decimal(7,6) [not null]
+  funding_interval_hours smallint [not null, default: 8]
+  status pair_status [not null, default: 'pre_trading']
+}
+
+Table futures_positions [headercolor: #be123c] {
+  id bigint [pk, increment]
+  user_id bigint [not null, ref: > users.id]
+  contract_id int [not null, ref: > perpetual_contracts.id]
+  side position_side [not null]
+  margin_mode margin_mode [not null]
+  leverage smallint [not null]
+  quantity decimal(36,18) [not null]
+  entry_price decimal(36,18) [not null]
+  isolated_margin decimal(36,18) [not null, default: 0]
+  realized_pnl decimal(36,18) [not null, default: 0]
+  liquidation_price decimal(36,18)
+  status position_status [not null, default: 'open']
+  opened_at timestamp [not null]
+  closed_at timestamp
+
+  indexes {
+    (user_id, contract_id, status)
+    (contract_id, status)
+  }
+}
+
+Table futures_orders [headercolor: #be123c] {
+  id bigint [pk]
+  user_id bigint [not null, ref: > users.id]
+  contract_id int [not null, ref: > perpetual_contracts.id]
+  position_id bigint [ref: > futures_positions.id]
+  side order_side [not null]
+  order_type order_type [not null]
+  price decimal(36,18)
+  quantity decimal(36,18) [not null]
+  filled_quantity decimal(36,18) [not null, default: 0]
+  reduce_only boolean [not null, default: false]
+  status order_status [not null, default: 'accepted']
+  created_at timestamp [not null]
+
+  indexes {
+    (user_id, contract_id, status)
+  }
+}
+
+Table futures_fills [headercolor: #be123c] {
+  id bigint [pk, increment]
+  order_id bigint [not null, ref: > futures_orders.id]
+  position_id bigint [not null, ref: > futures_positions.id]
+  fee_asset_id int [not null, ref: > assets.id]
+  price decimal(36,18) [not null]
+  quantity decimal(36,18) [not null]
+  fee_amount decimal(36,18) [not null]
+  realized_pnl decimal(36,18) [not null, default: 0]
+  is_maker boolean [not null]
+  sequence_no bigint [not null]
+  executed_at timestamp [not null]
+
+  indexes {
+    (order_id, sequence_no) [unique]
+    position_id
+  }
+}
+
+Table funding_rates [headercolor: #be123c] {
+  id bigint [pk, increment]
+  contract_id int [not null, ref: > perpetual_contracts.id]
+  funding_time timestamp [not null]
+  funding_rate decimal(12,8) [not null]
+  mark_price decimal(36,18) [not null]
+
+  indexes {
+    (contract_id, funding_time) [unique]
+  }
+}
+
+Table funding_payments [headercolor: #be123c] {
+  id bigint [pk, increment]
+  position_id bigint [not null, ref: > futures_positions.id]
+  funding_rate_id bigint [not null, ref: > funding_rates.id]
+  amount decimal(36,18) [not null, note: 'Positive: received, negative: paid']
+
+  indexes {
+    (position_id, funding_rate_id) [unique]
+  }
+}
+
+Table liquidations [headercolor: #be123c] {
+  id bigint [pk, increment]
+  position_id bigint [not null, ref: > futures_positions.id]
+  liquidation_type liquidation_type [not null]
+  mark_price decimal(36,18) [not null]
+  quantity decimal(36,18) [not null]
+  bankruptcy_price decimal(36,18) [not null]
+  executed_at timestamp [not null]
+}
+
+Table insurance_fund_entries [headercolor: #be123c] {
+  id bigint [pk, increment]
+  asset_id int [not null, ref: > assets.id]
+  liquidation_id bigint [ref: > liquidations.id]
+  entry_type insurance_entry_type [not null]
+  amount decimal(36,18) [not null]
+  balance_after decimal(36,18) [not null]
+  created_at timestamp [not null]
+}
+
+Table p2p_ads [headercolor: #0f766e] {
+  id bigint [pk, increment]
+  merchant_id bigint [not null, ref: > users.id]
+  asset_id int [not null, ref: > assets.id]
+  fiat_asset_id int [not null, ref: > assets.id]
+  side order_side [not null]
+  unit_price decimal(36,18) [not null]
+  available_quantity decimal(36,18) [not null]
+  min_fiat decimal(24,2) [not null]
+  max_fiat decimal(24,2) [not null]
+  payment_window_minutes int [not null, default: 15]
+  status ad_status [not null, default: 'online']
+}
+
+Table p2p_orders [headercolor: #0f766e] {
+  id bigint [pk, increment]
+  ad_id bigint [not null, ref: > p2p_ads.id]
+  buyer_id bigint [not null, ref: > users.id]
+  seller_id bigint [not null, ref: > users.id]
+  quantity decimal(36,18) [not null, note: 'Held in escrow from the seller funding wallet']
+  fiat_amount decimal(24,2) [not null]
+  status p2p_order_status [not null, default: 'created']
+  expires_at timestamp [not null]
+  created_at timestamp [not null]
+  released_at timestamp
+
+  indexes {
+    buyer_id
+    seller_id
+  }
+}
+
+Table p2p_disputes [headercolor: #0f766e] {
+  id bigint [pk, increment]
+  order_id bigint [not null, unique, ref: - p2p_orders.id]
+  opened_by bigint [not null, ref: > users.id]
+  reason varchar(200) [not null]
+  status dispute_status [not null, default: 'open']
+  opened_at timestamp [not null]
+  resolved_at timestamp
+}
+
+Table staking_products [headercolor: #0f766e] {
+  id int [pk, increment]
+  asset_id int [not null, ref: > assets.id]
+  annual_rate decimal(7,4) [not null]
+  lock_days int [not null, default: 0]
+  min_amount decimal(36,18) [not null]
+  total_quota decimal(36,18) [not null]
+  is_active boolean [not null, default: true]
+}
+
+Table staking_subscriptions [headercolor: #0f766e] {
+  id bigint [pk, increment]
+  user_id bigint [not null, ref: > users.id]
+  product_id int [not null, ref: > staking_products.id]
+  annual_rate decimal(7,4) [not null, note: 'Rate locked at subscription']
+  amount decimal(36,18) [not null]
+  status staking_status [not null, default: 'active']
+  started_at timestamp [not null]
+  unlock_at timestamp
+
+  indexes {
+    user_id
+  }
+}
+
+Table staking_rewards [headercolor: #0f766e] {
+  id bigint [pk, increment]
+  subscription_id bigint [not null, ref: > staking_subscriptions.id]
+  reward_date date [not null]
+  amount decimal(36,18) [not null]
+
+  indexes {
+    (subscription_id, reward_date) [unique]
+  }
+}
+
+Table aml_screenings [headercolor: #475569] {
+  id bigint [pk, increment]
+  user_id bigint [not null, ref: > users.id]
+  deposit_id bigint [ref: > deposits.id]
+  withdrawal_id bigint [ref: > withdrawals.id]
+  provider varchar(30) [not null]
+  risk_score smallint [not null]
+  result screening_result [not null]
+  screened_at timestamp [not null]
+}
+
+Table audit_logs [headercolor: #475569] {
+  id bigint [pk, increment]
+  actor varchar(60) [not null]
+  entity_type varchar(40) [not null]
+  entity_id varchar(64) [not null]
+  action varchar(40) [not null]
+  ip_address varchar(45)
+  created_at timestamp [not null]
+
+  indexes {
+    (entity_type, entity_id)
+  }
+}
+
+Table outbox_events [headercolor: #475569, note: 'Transactional outbox: written with the business row, relayed to the broker'] {
+  id bigint [pk, increment]
+  aggregate_type varchar(40) [not null]
+  aggregate_id varchar(64) [not null]
+  event_type varchar(60) [not null]
+  payload jsonb [not null]
+  created_at timestamp [not null]
+  published_at timestamp
+
+  indexes {
+    (published_at, id)
+  }
+}
+
+TableGroup users_security [color: #0e7490] {
+  vip_tiers
+  users
+  kyc_submissions
+  api_keys
+  login_history
+  withdrawal_addresses
+}
+
+TableGroup asset_registry [color: #1168bd] {
+  assets
+  blockchain_networks
+  asset_networks
+  trading_pairs
+}
+
+TableGroup wallet_ledger [color: #15803d] {
+  wallets
+  ledger_entries
+  internal_transfers
+}
+
+TableGroup on_chain_custody [color: #b45309] {
+  custody_wallets
+  deposit_addresses
+  deposits
+  withdrawals
+}
+
+TableGroup spot_market [color: #7c3aed] {
+  spot_orders
+  spot_trades
+  trade_fees
+  candles
+}
+
+TableGroup perpetual_futures [color: #be123c] {
+  perpetual_contracts
+  futures_positions
+  futures_orders
+  futures_fills
+  funding_rates
+  funding_payments
+  liquidations
+  insurance_fund_entries
+}
+
+TableGroup p2p_and_earn [color: #0f766e] {
+  p2p_ads
+  p2p_orders
+  p2p_disputes
+  staking_products
+  staking_subscriptions
+  staking_rewards
+}
+
+TableGroup compliance_ops [color: #475569] {
+  aml_screenings
+  audit_logs
+  outbox_events
+}`, "Database đầy đủ"];
+DBML_SAMPLES["db-game"] = ["Game online (MMORPG)", `Project online_game {
+  database_type: 'PostgreSQL'
+  Note: 'MMORPG backend: player accounts and moderation, characters and skills, item instances, virtual economy, quests, guilds, PvP seasons and live events. Fictional schema.'
+}
+
+Enum player_status {
+  active
+  suspended
+  banned
+  deleted
+}
+
+Enum friendship_status {
+  pending
+  accepted
+  blocked
+}
+
+Enum report_status {
+  open
+  reviewing
+  actioned
+  dismissed
+}
+
+Enum server_status {
+  online
+  maintenance
+  merged
+  closed
+}
+
+Enum skill_type {
+  active
+  passive
+  ultimate
+}
+
+Enum item_category {
+  weapon
+  armor
+  accessory
+  consumable
+  material
+  cosmetic
+  quest_item
+}
+
+Enum item_rarity {
+  common
+  uncommon
+  rare
+  epic
+  legendary
+}
+
+Enum equipment_slot {
+  head
+  chest
+  legs
+  feet
+  main_hand
+  off_hand
+  ring
+  necklace
+}
+
+Enum item_source {
+  monster_drop
+  quest_reward
+  crafted
+  shop_purchase
+  auction
+  player_trade
+  mail
+}
+
+Enum currency_kind {
+  soft
+  premium
+}
+
+Enum currency_reason {
+  quest_reward
+  monster_drop
+  shop_purchase
+  auction_sale
+  auction_fee
+  player_trade
+  top_up
+  refund
+  repair
+  crafting
+  vendor_sale
+  mail
+  auction_bid
+  guild_treasury
+}
+
+Enum purchase_status {
+  pending
+  paid
+  delivered
+  refunded
+  charged_back
+}
+
+Enum auction_status {
+  active
+  sold
+  expired
+  cancelled
+}
+
+Enum trade_status {
+  proposed
+  completed
+  cancelled
+}
+
+Enum quest_type {
+  main_story
+  side
+  daily
+  guild
+}
+
+Enum objective_type {
+  kill
+  collect
+  talk
+  reach_location
+}
+
+Enum quest_progress_status {
+  accepted
+  completed
+  rewarded
+  abandoned
+}
+
+Enum guild_role {
+  leader
+  officer
+  member
+  recruit
+}
+
+Enum mail_status {
+  unread
+  read
+  claimed
+  deleted
+}
+
+Enum match_mode {
+  duel
+  arena_3v3
+  battleground_10v10
+}
+
+Enum match_status {
+  queued
+  in_progress
+  finished
+  aborted
+}
+
+Enum match_result {
+  win
+  loss
+  draw
+  left_early
+}
+
+Table players [headercolor: #0e7490] {
+  id bigint [pk, increment]
+  username varchar(40) [not null, unique]
+  email varchar(255) [not null, unique]
+  password_hash varchar(255) [not null]
+  country char(2)
+  birth_date date [note: 'Drives parental control and play-time limits']
+  status player_status [not null, default: 'active']
+  created_at timestamp [not null]
+  last_login_at timestamp
+}
+
+Table player_sessions [headercolor: #0e7490] {
+  id uuid [pk]
+  player_id bigint [not null, ref: > players.id]
+  server_id int [ref: > game_servers.id]
+  ip_address varchar(45) [not null]
+  client_version varchar(20) [not null]
+  started_at timestamp [not null]
+  ended_at timestamp
+
+  indexes {
+    (player_id, started_at)
+  }
+}
+
+Table friendships [headercolor: #0e7490] {
+  player_id bigint [ref: > players.id]
+  friend_id bigint [ref: > players.id]
+  status friendship_status [not null, default: 'pending']
+  created_at timestamp [not null]
+
+  indexes {
+    (player_id, friend_id) [pk]
+    friend_id
+  }
+}
+
+Table player_reports [headercolor: #0e7490] {
+  id bigint [pk, increment]
+  reporter_id bigint [not null, ref: > players.id]
+  accused_id bigint [not null, ref: > players.id]
+  category varchar(30) [not null, note: 'cheating, toxicity, botting']
+  evidence text
+  status report_status [not null, default: 'open']
+  created_at timestamp [not null]
+}
+
+Table player_bans [headercolor: #0e7490] {
+  id bigint [pk, increment]
+  player_id bigint [not null, ref: > players.id]
+  report_id bigint [ref: > player_reports.id]
+  reason varchar(200) [not null]
+  issued_by varchar(60) [not null]
+  starts_at timestamp [not null]
+  ends_at timestamp [note: 'Empty means permanent']
+}
+
+Table game_servers [headercolor: #1168bd] {
+  id int [pk, increment]
+  code varchar(12) [not null, unique]
+  name varchar(60) [not null]
+  region varchar(12) [not null]
+  max_online int [not null]
+  status server_status [not null, default: 'online']
+  merged_into_id int [ref: > game_servers.id]
+  opened_on date [not null]
+}
+
+Table character_classes [headercolor: #1168bd] {
+  id int [pk, increment]
+  code varchar(20) [not null, unique]
+  name varchar(60) [not null]
+  base_health int [not null]
+  base_mana int [not null]
+  base_attack int [not null]
+  base_defense int [not null]
+}
+
+Table characters [headercolor: #1168bd] {
+  id bigint [pk, increment]
+  player_id bigint [not null, ref: > players.id]
+  server_id int [not null, ref: > game_servers.id]
+  class_id int [not null, ref: > character_classes.id]
+  name varchar(24) [not null]
+  level int [not null, default: 1]
+  experience bigint [not null, default: 0]
+  zone_code varchar(30) [not null]
+  pos_x real [not null]
+  pos_y real [not null]
+  pos_z real [not null]
+  play_time_seconds bigint [not null, default: 0]
+  is_deleted boolean [not null, default: false]
+  created_at timestamp [not null]
+  last_saved_at timestamp [not null]
+
+  indexes {
+    (server_id, name) [unique]
+    player_id
+  }
+}
+
+Table character_stats [headercolor: #1168bd] {
+  character_id bigint [pk, ref: - characters.id]
+  strength int [not null, default: 0]
+  agility int [not null, default: 0]
+  intellect int [not null, default: 0]
+  vitality int [not null, default: 0]
+  unspent_points int [not null, default: 0]
+}
+
+Table skills [headercolor: #1168bd] {
+  id int [pk, increment]
+  class_id int [not null, ref: > character_classes.id]
+  prerequisite_id int [ref: > skills.id]
+  code varchar(30) [not null, unique]
+  name varchar(60) [not null]
+  skill_type skill_type [not null]
+  max_rank smallint [not null, default: 5]
+  required_level int [not null, default: 1]
+}
+
+Table character_skills [headercolor: #1168bd] {
+  character_id bigint [ref: > characters.id]
+  skill_id int [ref: > skills.id]
+  skill_rank smallint [not null, default: 1]
+  learned_at timestamp [not null]
+
+  indexes {
+    (character_id, skill_id) [pk]
+  }
+}
+
+Table item_definitions [headercolor: #15803d, note: 'Static design data, one row per item kind'] {
+  id int [pk, increment]
+  code varchar(40) [not null, unique]
+  name varchar(80) [not null]
+  category item_category [not null]
+  rarity item_rarity [not null]
+  slot equipment_slot
+  required_level int [not null, default: 1]
+  max_stack int [not null, default: 1]
+  is_tradable boolean [not null, default: true]
+  vendor_price bigint [not null, default: 0]
+  base_attributes jsonb
+}
+
+Table item_instances [headercolor: #15803d, note: 'One row per owned item or stack, so every item can be traced'] {
+  id bigint [pk, increment]
+  definition_id int [not null, ref: > item_definitions.id]
+  parent_instance_id bigint [ref: > item_instances.id, note: 'Stack this one was split from']
+  owner_character_id bigint [ref: > characters.id, note: 'Empty while in mail or on the auction house']
+  quantity int [not null, default: 1]
+  enhancement_level smallint [not null, default: 0]
+  durability int
+  random_attributes jsonb
+  source item_source [not null]
+  created_at timestamp [not null]
+  destroyed_at timestamp
+
+  indexes {
+    owner_character_id
+    definition_id
+  }
+}
+
+Table inventory_slots [headercolor: #15803d] {
+  character_id bigint [ref: > characters.id]
+  slot_no smallint
+  item_instance_id bigint [not null, unique, ref: - item_instances.id]
+
+  indexes {
+    (character_id, slot_no) [pk]
+  }
+}
+
+Table equipped_items [headercolor: #15803d] {
+  character_id bigint [ref: > characters.id]
+  slot equipment_slot
+  item_instance_id bigint [not null, unique, ref: - item_instances.id]
+
+  indexes {
+    (character_id, slot) [pk]
+  }
+}
+
+Table item_transfers [headercolor: #15803d, note: 'Trail used to catch item duplication exploits'] {
+  id bigint [pk, increment]
+  item_instance_id bigint [not null, ref: > item_instances.id]
+  from_character_id bigint [ref: > characters.id]
+  to_character_id bigint [ref: > characters.id]
+  quantity int [not null, default: 1]
+  source item_source [not null]
+  source_ref varchar(64)
+  transferred_at timestamp [not null]
+
+  indexes {
+    (item_instance_id, transferred_at)
+  }
+}
+
+Table crafting_recipes [headercolor: #15803d] {
+  id int [pk, increment]
+  output_item_id int [not null, ref: > item_definitions.id]
+  output_quantity int [not null, default: 1]
+  gold_cost bigint [not null, default: 0]
+  success_rate decimal(5,2) [not null, default: 100]
+}
+
+Table recipe_ingredients [headercolor: #15803d] {
+  recipe_id int [ref: > crafting_recipes.id]
+  item_id int [ref: > item_definitions.id]
+  quantity int [not null]
+
+  indexes {
+    (recipe_id, item_id) [pk]
+  }
+}
+
+Table currencies [headercolor: #b45309] {
+  id smallint [pk]
+  code varchar(12) [not null, unique]
+  name varchar(40) [not null]
+  kind currency_kind [not null]
+}
+
+Table wallets [headercolor: #b45309, note: 'Soft currency per character, premium currency shared across the player'] {
+  id bigint [pk, increment]
+  player_id bigint [not null, ref: > players.id]
+  character_id bigint [not null, default: 0, note: '0 for account-wide premium wallets, no FK so NULL stays out of the unique key']
+  currency_id smallint [not null, ref: > currencies.id]
+  balance bigint [not null, default: 0]
+  version int [not null, default: 0]
+
+  indexes {
+    (player_id, character_id, currency_id) [unique]
+  }
+}
+
+Table currency_ledger [headercolor: #b45309, note: 'Append-only, drives inflation dashboards'] {
+  id bigint [pk, increment]
+  wallet_id bigint [not null, ref: > wallets.id]
+  reason currency_reason [not null]
+  amount bigint [not null, note: 'Signed: negative leaves the wallet']
+  balance_after bigint [not null]
+  source_ref varchar(64)
+  created_at timestamp [not null]
+
+  indexes {
+    (wallet_id, created_at)
+    (reason, created_at)
+  }
+}
+
+Table shop_products [headercolor: #b45309] {
+  id int [pk, increment]
+  item_id int [ref: > item_definitions.id]
+  currency_id smallint [ref: > currencies.id, note: 'Empty for real-money packs']
+  name varchar(80) [not null]
+  store_sku varchar(60) [unique]
+  price decimal(12,2) [not null]
+  grant_premium bigint [not null, default: 0]
+  available_from timestamp
+  available_to timestamp
+}
+
+Table purchases [headercolor: #b45309] {
+  id uuid [pk]
+  player_id bigint [not null, ref: > players.id]
+  product_id int [not null, ref: > shop_products.id]
+  wallet_id bigint [ref: > wallets.id, note: 'Set when paid with in-game currency']
+  store varchar(20)
+  store_receipt_id varchar(128) [unique, note: 'Blocks replayed receipts']
+  amount decimal(12,2) [not null]
+  currency varchar(12) [not null]
+  status purchase_status [not null, default: 'pending']
+  purchased_at timestamp [not null]
+  delivered_at timestamp
+}
+
+Table auction_listings [headercolor: #b45309] {
+  id bigint [pk, increment]
+  server_id int [not null, ref: > game_servers.id]
+  seller_id bigint [not null, ref: > characters.id]
+  item_instance_id bigint [not null, ref: > item_instances.id]
+  definition_id int [not null, ref: > item_definitions.id, note: 'Copied so the market can be searched by item']
+  currency_id smallint [not null, ref: > currencies.id]
+  start_price bigint [not null]
+  buyout_price bigint
+  highest_bid bigint
+  status auction_status [not null, default: 'active']
+  expires_at timestamp [not null]
+
+  indexes {
+    (server_id, status, expires_at)
+    (server_id, definition_id, status)
+    seller_id
+  }
+}
+
+Table auction_bids [headercolor: #b45309] {
+  id bigint [pk, increment]
+  listing_id bigint [not null, ref: > auction_listings.id]
+  bidder_id bigint [not null, ref: > characters.id]
+  amount bigint [not null]
+  created_at timestamp [not null]
+
+  indexes {
+    (listing_id, amount)
+  }
+}
+
+Table player_trades [headercolor: #b45309] {
+  id bigint [pk, increment]
+  initiator_id bigint [not null, ref: > characters.id]
+  partner_id bigint [not null, ref: > characters.id]
+  initiator_gold bigint [not null, default: 0]
+  partner_gold bigint [not null, default: 0]
+  status trade_status [not null, default: 'proposed']
+  created_at timestamp [not null]
+  completed_at timestamp
+}
+
+Table player_trade_items [headercolor: #b45309] {
+  trade_id bigint [ref: > player_trades.id]
+  item_instance_id bigint [ref: > item_instances.id]
+  given_by_id bigint [not null, ref: > characters.id]
+
+  indexes {
+    (trade_id, item_instance_id) [pk]
+  }
+}
+
+Table quests [headercolor: #7c3aed] {
+  id int [pk, increment]
+  code varchar(40) [not null, unique]
+  title varchar(120) [not null]
+  quest_type quest_type [not null]
+  required_level int [not null, default: 1]
+  prerequisite_id int [ref: > quests.id]
+  reward_experience bigint [not null, default: 0]
+  reward_gold bigint [not null, default: 0]
+  reward_item_id int [ref: > item_definitions.id]
+  is_repeatable boolean [not null, default: false]
+}
+
+Table quest_objectives [headercolor: #7c3aed] {
+  id int [pk, increment]
+  quest_id int [not null, ref: > quests.id]
+  sequence_no smallint [not null]
+  objective_type objective_type [not null]
+  target_code varchar(40) [not null]
+  required_count int [not null, default: 1]
+
+  indexes {
+    (quest_id, sequence_no) [unique]
+  }
+}
+
+Table character_quests [headercolor: #7c3aed] {
+  id bigint [pk, increment]
+  character_id bigint [not null, ref: > characters.id]
+  quest_id int [not null, ref: > quests.id]
+  cycle_key varchar(10) [not null, default: 'once', note: 'once, or the day for repeatable quests']
+  status quest_progress_status [not null, default: 'accepted']
+  progress jsonb [not null, note: 'Counter per objective']
+  accepted_at timestamp [not null]
+  completed_at timestamp
+
+  indexes {
+    (character_id, status)
+    (character_id, quest_id, cycle_key) [unique]
+  }
+}
+
+Table achievements [headercolor: #7c3aed] {
+  id int [pk, increment]
+  code varchar(40) [not null, unique]
+  title varchar(120) [not null]
+  points int [not null, default: 10]
+  reward_item_id int [ref: > item_definitions.id]
+}
+
+Table character_achievements [headercolor: #7c3aed] {
+  character_id bigint [ref: > characters.id]
+  achievement_id int [ref: > achievements.id]
+  unlocked_at timestamp [not null]
+
+  indexes {
+    (character_id, achievement_id) [pk]
+  }
+}
+
+Table guilds [headercolor: #be123c] {
+  id bigint [pk, increment]
+  server_id int [not null, ref: > game_servers.id]
+  leader_id bigint [not null, ref: > characters.id]
+  name varchar(30) [not null]
+  tag varchar(5) [not null]
+  guild_level int [not null, default: 1]
+  treasury_gold bigint [not null, default: 0, note: 'Moves through currency_ledger with reason guild_treasury']
+  announcement varchar(500)
+  created_at timestamp [not null]
+
+  indexes {
+    (server_id, name) [unique]
+    (server_id, tag) [unique]
+  }
+}
+
+Table guild_members [headercolor: #be123c] {
+  guild_id bigint [not null, ref: > guilds.id]
+  character_id bigint [pk, ref: > characters.id, note: 'A character joins one guild at a time']
+  role guild_role [not null, default: 'recruit']
+  contribution bigint [not null, default: 0]
+  joined_at timestamp [not null]
+
+  indexes {
+    guild_id
+  }
+}
+
+Table mails [headercolor: #be123c] {
+  id bigint [pk, increment]
+  recipient_id bigint [not null, ref: > characters.id]
+  sender_id bigint [ref: > characters.id, note: 'Empty for system mail']
+  subject varchar(120) [not null]
+  body text
+  gold bigint [not null, default: 0]
+  status mail_status [not null, default: 'unread']
+  sent_at timestamp [not null]
+  expires_at timestamp [not null]
+
+  indexes {
+    (recipient_id, status)
+  }
+}
+
+Table mail_attachments [headercolor: #be123c] {
+  mail_id bigint [ref: > mails.id]
+  item_instance_id bigint [ref: > item_instances.id]
+
+  indexes {
+    (mail_id, item_instance_id) [pk]
+  }
+}
+
+Table seasons [headercolor: #0f766e] {
+  id int [pk, increment]
+  name varchar(60) [not null]
+  starts_at timestamp [not null]
+  ends_at timestamp [not null]
+  reward_item_id int [ref: > item_definitions.id]
+}
+
+Table matches [headercolor: #0f766e] {
+  id uuid [pk]
+  season_id int [not null, ref: > seasons.id]
+  server_id int [not null, ref: > game_servers.id]
+  mode match_mode [not null]
+  map_code varchar(30) [not null]
+  status match_status [not null, default: 'queued']
+  started_at timestamp
+  ended_at timestamp
+}
+
+Table match_participants [headercolor: #0f766e] {
+  match_id uuid [ref: > matches.id]
+  character_id bigint [ref: > characters.id]
+  team_no smallint [not null]
+  result match_result
+  kills int [not null, default: 0]
+  deaths int [not null, default: 0]
+  damage_dealt bigint [not null, default: 0]
+  rating_change int [not null, default: 0]
+
+  indexes {
+    (match_id, character_id) [pk]
+    character_id
+  }
+}
+
+Table season_ratings [headercolor: #0f766e, note: 'Leaderboard source of truth, mirrored to a sorted set for reads'] {
+  season_id int [ref: > seasons.id]
+  character_id bigint [ref: > characters.id]
+  mode match_mode
+  rating int [not null, default: 1000]
+  wins int [not null, default: 0]
+  losses int [not null, default: 0]
+
+  indexes {
+    (season_id, character_id, mode) [pk]
+    (season_id, mode, rating)
+  }
+}
+
+Table live_events [headercolor: #0f766e] {
+  id int [pk, increment]
+  name varchar(80) [not null]
+  server_id int [ref: > game_servers.id, note: 'Empty means every server']
+  reward_item_id int [ref: > item_definitions.id]
+  rule_config jsonb [not null]
+  starts_at timestamp [not null]
+  ends_at timestamp [not null]
+}
+
+Table live_event_claims [headercolor: #0f766e] {
+  event_id int [ref: > live_events.id]
+  character_id bigint [ref: > characters.id]
+  claimed_at timestamp [not null]
+
+  indexes {
+    (event_id, character_id) [pk]
+  }
+}
+
+TableGroup player_accounts [color: #0e7490] {
+  players
+  player_sessions
+  friendships
+  player_reports
+  player_bans
+}
+
+TableGroup characters_world [color: #1168bd] {
+  game_servers
+  character_classes
+  characters
+  character_stats
+  skills
+  character_skills
+}
+
+TableGroup items_crafting [color: #15803d] {
+  item_definitions
+  item_instances
+  inventory_slots
+  equipped_items
+  item_transfers
+  crafting_recipes
+  recipe_ingredients
+}
+
+TableGroup virtual_economy [color: #b45309] {
+  currencies
+  wallets
+  currency_ledger
+  shop_products
+  purchases
+  auction_listings
+  auction_bids
+  player_trades
+  player_trade_items
+}
+
+TableGroup quests_progress [color: #7c3aed] {
+  quests
+  quest_objectives
+  character_quests
+  achievements
+  character_achievements
+}
+
+TableGroup guild_social [color: #be123c] {
+  guilds
+  guild_members
+  mails
+  mail_attachments
+}
+
+TableGroup pvp_live_ops [color: #0f766e] {
+  seasons
+  matches
+  match_participants
+  season_ratings
+  live_events
+  live_event_claims
+}`, "Database đầy đủ"];
+DBML_SAMPLES["db-logistics"] = ["Logistics & giao hàng", `Project logistics_delivery {
+  database_type: 'PostgreSQL'
+  Note: 'Express delivery and 3PL carrier: merchants and rate cards, hub network, shipments and tracking, linehaul trips, last-mile runs, fleet, warehouse storage, COD and billing, customs. Fictional schema.'
+}
+
+Enum merchant_status {
+  onboarding
+  active
+  suspended
+  terminated
+}
+
+Enum service_level {
+  same_day
+  express
+  standard
+  economy
+}
+
+Enum facility_type {
+  sorting_hub
+  delivery_station
+  fulfilment_warehouse
+  drop_off_point
+}
+
+Enum shipment_status {
+  created
+  picked_up
+  at_origin_hub
+  in_linehaul
+  at_destination_hub
+  out_for_delivery
+  delivered
+  failed_delivery
+  returning
+  returned
+  cancelled
+}
+
+Enum tracking_event_type {
+  order_created
+  picked_up
+  arrived_facility
+  departed_facility
+  out_for_delivery
+  delivered
+  delivery_failed
+  held_by_customs
+  return_started
+  return_completed
+  customs_cleared
+}
+
+Enum attempt_result {
+  delivered
+  recipient_absent
+  wrong_address
+  refused
+  rescheduled
+}
+
+Enum exception_type {
+  damaged
+  lost
+  delayed
+  address_issue
+  customs_hold
+}
+
+Enum exception_status {
+  open
+  investigating
+  resolved
+  compensated
+}
+
+Enum container_status {
+  open
+  sealed
+  in_transit
+  unloaded
+}
+
+Enum vehicle_type {
+  motorbike
+  van
+  truck_5t
+  truck_15t
+  container_truck
+}
+
+Enum vehicle_status {
+  available
+  on_trip
+  maintenance
+  retired
+}
+
+Enum driver_status {
+  active
+  on_leave
+  suspended
+  terminated
+}
+
+Enum trip_status {
+  planned
+  loading
+  departed
+  arrived
+  completed
+  cancelled
+}
+
+Enum run_status {
+  planned
+  in_progress
+  completed
+  cancelled
+}
+
+Enum stop_status {
+  pending
+  arrived
+  completed
+  skipped
+}
+
+Enum receipt_status {
+  expected
+  receiving
+  put_away
+  closed
+}
+
+Enum pick_status {
+  assigned
+  picked
+  packed
+  cancelled
+}
+
+Enum cod_status {
+  collected
+  deposited
+  remitted
+  disputed
+}
+
+Enum invoice_status {
+  draft
+  issued
+  paid
+  overdue
+  void
+}
+
+Enum customs_status {
+  drafted
+  submitted
+  inspecting
+  cleared
+  rejected
+}
+
+Table merchants [headercolor: #0e7490] {
+  id bigint [pk, increment]
+  merchant_code varchar(12) [not null, unique]
+  legal_name varchar(160) [not null]
+  tax_code varchar(20) [not null]
+  contact_email varchar(255) [not null]
+  api_key_hash varchar(255)
+  status merchant_status [not null, default: 'onboarding']
+  created_at timestamp [not null]
+}
+
+Table merchant_contracts [headercolor: #0e7490] {
+  id bigint [pk, increment]
+  merchant_id bigint [not null, ref: > merchants.id]
+  rate_card_id int [not null, ref: > rate_cards.id]
+  contract_no varchar(20) [not null, unique]
+  credit_days int [not null, default: 15]
+  cod_fee_rate decimal(5,4) [not null, default: 0]
+  starts_on date [not null]
+  ends_on date
+}
+
+Table addresses [headercolor: #0e7490, note: 'Immutable: an edit adds a row, so old shipments keep their address'] {
+  id bigint [pk, increment]
+  merchant_id bigint [ref: > merchants.id, note: 'Set for saved pickup addresses']
+  contact_name varchar(120) [not null]
+  phone varchar(20) [not null]
+  line1 varchar(160) [not null]
+  ward varchar(60)
+  district varchar(60) [not null]
+  province varchar(60) [not null]
+  country char(2) [not null]
+  latitude decimal(9,6)
+  longitude decimal(9,6)
+}
+
+Table delivery_zones [headercolor: #1168bd] {
+  id int [pk, increment]
+  code varchar(12) [not null, unique]
+  name varchar(80) [not null]
+  station_id int [not null, ref: > facilities.id, note: 'Station serving the last mile of this zone']
+  boundary jsonb [note: 'GeoJSON polygon']
+}
+
+Table rate_cards [headercolor: #1168bd] {
+  id int [pk, increment]
+  name varchar(80) [not null]
+  currency char(3) [not null]
+  effective_from date [not null]
+  effective_to date
+}
+
+Table rate_card_lines [headercolor: #1168bd] {
+  id bigint [pk, increment]
+  rate_card_id int [not null, ref: > rate_cards.id]
+  origin_zone_id int [not null, ref: > delivery_zones.id]
+  destination_zone_id int [not null, ref: > delivery_zones.id]
+  service_level service_level [not null]
+  max_weight_kg decimal(8,2) [not null]
+  base_fee decimal(12,2) [not null]
+  extra_per_kg decimal(12,2) [not null, default: 0]
+
+  indexes {
+    (rate_card_id, origin_zone_id, destination_zone_id, service_level, max_weight_kg) [unique]
+  }
+}
+
+Table facilities [headercolor: #1168bd] {
+  id int [pk, increment]
+  code varchar(12) [not null, unique]
+  name varchar(120) [not null]
+  facility_type facility_type [not null]
+  address_id bigint [not null, ref: > addresses.id]
+  parent_hub_id int [ref: > facilities.id]
+  is_active boolean [not null, default: true]
+}
+
+Table routes [headercolor: #1168bd] {
+  id int [pk, increment]
+  code varchar(20) [not null, unique]
+  name varchar(120) [not null]
+  origin_facility_id int [not null, ref: > facilities.id]
+  destination_facility_id int [not null, ref: > facilities.id]
+  distance_km decimal(8,1) [not null]
+  transit_minutes int [not null]
+  is_active boolean [not null, default: true]
+}
+
+Table route_stops [headercolor: #1168bd] {
+  route_id int [ref: > routes.id]
+  stop_no smallint
+  facility_id int [not null, ref: > facilities.id]
+  offset_minutes int [not null]
+
+  indexes {
+    (route_id, stop_no) [pk]
+  }
+}
+
+Table shipments [headercolor: #15803d] {
+  id bigint [pk, increment]
+  tracking_no varchar(24) [not null, unique]
+  merchant_id bigint [not null, ref: > merchants.id]
+  merchant_order_ref varchar(64) [not null, note: 'Idempotency key of the merchant API']
+  pickup_address_id bigint [not null, ref: > addresses.id]
+  delivery_address_id bigint [not null, ref: > addresses.id]
+  destination_zone_id int [not null, ref: > delivery_zones.id]
+  rate_card_line_id bigint [ref: > rate_card_lines.id, note: 'Line that priced this shipment']
+  current_facility_id int [ref: > facilities.id]
+  service_level service_level [not null]
+  declared_value decimal(14,2) [not null, default: 0]
+  cod_amount decimal(14,2) [not null, default: 0]
+  shipping_fee decimal(12,2) [not null]
+  status shipment_status [not null, default: 'created']
+  promised_on date
+  created_at timestamp [not null]
+  delivered_at timestamp
+
+  indexes {
+    (merchant_id, merchant_order_ref) [unique]
+    (merchant_id, created_at)
+    (status, current_facility_id)
+  }
+}
+
+Table parcels [headercolor: #15803d] {
+  id bigint [pk, increment]
+  shipment_id bigint [not null, ref: > shipments.id]
+  barcode varchar(30) [not null, unique]
+  weight_kg decimal(8,3) [not null]
+  length_cm decimal(6,1)
+  width_cm decimal(6,1)
+  height_cm decimal(6,1)
+  is_fragile boolean [not null, default: false]
+
+  indexes {
+    shipment_id
+  }
+}
+
+Table tracking_events [headercolor: #15803d, note: 'Append-only, fed by scanners and partners, so events can arrive late'] {
+  id bigint [pk, increment]
+  shipment_id bigint [not null, ref: > shipments.id]
+  parcel_id bigint [ref: > parcels.id]
+  facility_id int [ref: > facilities.id]
+  event_type tracking_event_type [not null]
+  description varchar(200)
+  scan_id varchar(64) [unique, note: 'Drops events a scanner sends twice']
+  scanned_by varchar(60)
+  occurred_at timestamp [not null]
+  received_at timestamp [not null]
+
+  indexes {
+    (shipment_id, occurred_at)
+  }
+}
+
+Table delivery_attempts [headercolor: #15803d] {
+  id bigint [pk, increment]
+  shipment_id bigint [not null, ref: > shipments.id]
+  run_stop_id bigint [ref: > delivery_run_stops.id]
+  attempt_no smallint [not null]
+  result attempt_result [not null]
+  failure_reason varchar(120)
+  attempted_at timestamp [not null]
+
+  indexes {
+    (shipment_id, attempt_no) [unique]
+  }
+}
+
+Table proofs_of_delivery [headercolor: #15803d] {
+  id bigint [pk, increment]
+  attempt_id bigint [not null, unique, ref: - delivery_attempts.id]
+  receiver_name varchar(120) [not null]
+  signature_key varchar(255)
+  photo_key varchar(255)
+  latitude decimal(9,6)
+  longitude decimal(9,6)
+  captured_at timestamp [not null]
+}
+
+Table shipment_exceptions [headercolor: #15803d] {
+  id bigint [pk, increment]
+  shipment_id bigint [not null, ref: > shipments.id]
+  facility_id int [ref: > facilities.id]
+  exception_type exception_type [not null]
+  description varchar(240) [not null]
+  compensation_amount decimal(14,2) [not null, default: 0]
+  status exception_status [not null, default: 'open']
+  raised_at timestamp [not null]
+  resolved_at timestamp
+
+  indexes {
+    shipment_id
+  }
+}
+
+Table vehicles [headercolor: #b45309] {
+  id int [pk, increment]
+  plate_no varchar(12) [not null, unique]
+  vehicle_type vehicle_type [not null]
+  home_facility_id int [not null, ref: > facilities.id]
+  payload_kg decimal(9,1) [not null]
+  volume_m3 decimal(6,2) [not null]
+  status vehicle_status [not null, default: 'available']
+  next_service_on date
+}
+
+Table drivers [headercolor: #b45309] {
+  id int [pk, increment]
+  employee_no varchar(12) [not null, unique]
+  full_name varchar(120) [not null]
+  phone varchar(20) [not null]
+  license_no varchar(20) [not null, unique]
+  license_class varchar(4) [not null]
+  license_expires_on date [not null]
+  home_facility_id int [not null, ref: > facilities.id]
+  status driver_status [not null, default: 'active']
+}
+
+Table vehicle_maintenance [headercolor: #b45309] {
+  id bigint [pk, increment]
+  vehicle_id int [not null, ref: > vehicles.id]
+  service_type varchar(40) [not null]
+  odometer_km int [not null]
+  cost decimal(12,2) [not null]
+  serviced_on date [not null]
+}
+
+Table fuel_logs [headercolor: #b45309] {
+  id bigint [pk, increment]
+  vehicle_id int [not null, ref: > vehicles.id]
+  driver_id int [not null, ref: > drivers.id]
+  liters decimal(7,2) [not null]
+  cost decimal(12,2) [not null]
+  odometer_km int [not null]
+  filled_at timestamp [not null]
+}
+
+Table trips [headercolor: #7c3aed, note: 'Linehaul between hubs'] {
+  id bigint [pk, increment]
+  trip_no varchar(20) [not null, unique]
+  route_id int [not null, ref: > routes.id]
+  vehicle_id int [not null, ref: > vehicles.id]
+  driver_id int [not null, ref: > drivers.id]
+  status trip_status [not null, default: 'planned']
+  planned_departure timestamp [not null]
+  departed_at timestamp
+  arrived_at timestamp
+
+  indexes {
+    (status, planned_departure)
+  }
+}
+
+Table trip_stop_logs [headercolor: #7c3aed] {
+  id bigint [pk, increment]
+  trip_id bigint [not null, ref: > trips.id]
+  stop_no smallint [not null]
+  facility_id int [not null, ref: > facilities.id]
+  arrived_at timestamp
+  departed_at timestamp
+
+  indexes {
+    (trip_id, stop_no) [unique]
+  }
+}
+
+Table containers [headercolor: #7c3aed, note: 'Sealed bag or roll cage moved as one unit'] {
+  id bigint [pk, increment]
+  seal_no varchar(20) [unique, note: 'Empty until sealed']
+  origin_facility_id int [not null, ref: > facilities.id]
+  destination_facility_id int [not null, ref: > facilities.id]
+  trip_id bigint [ref: > trips.id]
+  status container_status [not null, default: 'open']
+  sealed_at timestamp
+}
+
+Table container_parcels [headercolor: #7c3aed] {
+  container_id bigint [ref: > containers.id]
+  parcel_id bigint [ref: > parcels.id]
+  scanned_at timestamp [not null]
+
+  indexes {
+    (container_id, parcel_id) [pk]
+    parcel_id
+  }
+}
+
+Table delivery_runs [headercolor: #be123c, note: 'Last-mile route of one driver from a station'] {
+  id bigint [pk, increment]
+  station_id int [not null, ref: > facilities.id]
+  driver_id int [not null, ref: > drivers.id]
+  vehicle_id int [not null, ref: > vehicles.id]
+  run_date date [not null]
+  status run_status [not null, default: 'planned']
+  started_at timestamp
+  finished_at timestamp
+
+  indexes {
+    (station_id, run_date)
+    (driver_id, run_date)
+  }
+}
+
+Table delivery_run_stops [headercolor: #be123c] {
+  id bigint [pk, increment]
+  run_id bigint [not null, ref: > delivery_runs.id]
+  shipment_id bigint [not null, ref: > shipments.id]
+  stop_no smallint [not null]
+  eta timestamp
+  status stop_status [not null, default: 'pending']
+
+  indexes {
+    (run_id, stop_no) [unique]
+    shipment_id
+  }
+}
+
+Table storage_bins [headercolor: #0f766e] {
+  id bigint [pk, increment]
+  facility_id int [not null, ref: > facilities.id]
+  bin_code varchar(16) [not null]
+  zone_code varchar(8) [not null, note: 'ambient, chilled, high-value']
+  max_weight_kg decimal(8,2) [not null]
+
+  indexes {
+    (facility_id, bin_code) [unique]
+  }
+}
+
+Table merchant_skus [headercolor: #0f766e] {
+  id bigint [pk, increment]
+  merchant_id bigint [not null, ref: > merchants.id]
+  sku varchar(40) [not null]
+  name varchar(160) [not null]
+  unit_weight_kg decimal(8,3) [not null]
+  is_lot_tracked boolean [not null, default: false]
+
+  indexes {
+    (merchant_id, sku) [unique]
+  }
+}
+
+Table bin_stock [headercolor: #0f766e] {
+  bin_id bigint [ref: > storage_bins.id]
+  sku_id bigint [ref: > merchant_skus.id]
+  lot_no varchar(24) [not null, default: '']
+  quantity int [not null, default: 0]
+  allocated int [not null, default: 0]
+  expires_on date
+
+  indexes {
+    (bin_id, sku_id, lot_no) [pk]
+    sku_id
+  }
+}
+
+Table inbound_receipts [headercolor: #0f766e] {
+  id bigint [pk, increment]
+  receipt_no varchar(20) [not null, unique]
+  merchant_id bigint [not null, ref: > merchants.id]
+  facility_id int [not null, ref: > facilities.id]
+  status receipt_status [not null, default: 'expected']
+  expected_on date [not null]
+  received_at timestamp
+}
+
+Table inbound_receipt_lines [headercolor: #0f766e] {
+  id bigint [pk, increment]
+  receipt_id bigint [not null, ref: > inbound_receipts.id]
+  sku_id bigint [not null, ref: > merchant_skus.id]
+  lot_no varchar(24) [not null, default: '']
+  expires_on date
+  expected_quantity int [not null]
+  received_quantity int [not null, default: 0]
+  damaged_quantity int [not null, default: 0]
+}
+
+Table pick_tasks [headercolor: #0f766e] {
+  id bigint [pk, increment]
+  shipment_id bigint [not null, ref: > shipments.id]
+  bin_id bigint [not null, ref: > storage_bins.id]
+  sku_id bigint [not null, ref: > merchant_skus.id]
+  lot_no varchar(24) [not null, default: '']
+  quantity int [not null]
+  picker varchar(60)
+  status pick_status [not null, default: 'assigned']
+  completed_at timestamp
+
+  indexes {
+    (status, bin_id)
+    shipment_id
+  }
+}
+
+Table cod_remittances [headercolor: #475569] {
+  id bigint [pk, increment]
+  merchant_id bigint [not null, ref: > merchants.id]
+  period_end date [not null]
+  gross_amount decimal(14,2) [not null]
+  fee_amount decimal(14,2) [not null]
+  net_amount decimal(14,2) [not null]
+  bank_code varchar(11) [not null]
+  bank_account_no varchar(34) [not null]
+  account_name varchar(120) [not null]
+  bank_ref varchar(40) [unique]
+  paid_at timestamp
+
+  indexes {
+    (merchant_id, period_end) [unique]
+  }
+}
+
+Table cod_collections [headercolor: #475569] {
+  id bigint [pk, increment]
+  shipment_id bigint [not null, unique, ref: - shipments.id]
+  driver_id int [not null, ref: > drivers.id]
+  remittance_id bigint [ref: > cod_remittances.id]
+  amount decimal(14,2) [not null]
+  status cod_status [not null, default: 'collected']
+  collected_at timestamp [not null]
+  deposited_at timestamp
+
+  indexes {
+    (driver_id, status)
+  }
+}
+
+Table invoices [headercolor: #475569] {
+  id bigint [pk, increment]
+  invoice_no varchar(20) [not null, unique]
+  merchant_id bigint [not null, ref: > merchants.id]
+  contract_id bigint [not null, ref: > merchant_contracts.id]
+  period_start date [not null]
+  period_end date [not null]
+  subtotal decimal(14,2) [not null]
+  tax_amount decimal(14,2) [not null]
+  total_amount decimal(14,2) [not null]
+  status invoice_status [not null, default: 'draft']
+  due_on date [not null]
+  paid_at timestamp
+}
+
+Table invoice_lines [headercolor: #475569] {
+  id bigint [pk, increment]
+  invoice_id bigint [not null, ref: > invoices.id]
+  shipment_id bigint [ref: > shipments.id]
+  charge_type varchar(30) [not null, note: 'freight, cod_fee, storage, surcharge, compensation']
+  amount decimal(12,2) [not null]
+
+  indexes {
+    invoice_id
+  }
+}
+
+Table customs_declarations [headercolor: #475569] {
+  id bigint [pk, increment]
+  shipment_id bigint [not null, ref: > shipments.id]
+  declaration_no varchar(24) [unique]
+  origin_country char(2) [not null]
+  destination_country char(2) [not null]
+  hs_code varchar(12) [not null]
+  declared_value decimal(14,2) [not null]
+  currency char(3) [not null]
+  duty_amount decimal(14,2) [not null, default: 0]
+  status customs_status [not null, default: 'drafted']
+  submitted_at timestamp
+  cleared_at timestamp
+}
+
+Table outbox_events [headercolor: #475569, note: 'Transactional outbox: written with the business row, relayed to the broker'] {
+  id bigint [pk, increment]
+  aggregate_type varchar(40) [not null]
+  aggregate_id varchar(64) [not null]
+  event_type varchar(60) [not null]
+  payload jsonb [not null]
+  created_at timestamp [not null]
+  published_at timestamp
+
+  indexes {
+    (published_at, id)
+  }
+}
+
+TableGroup merchants_contracts [color: #0e7490] {
+  merchants
+  merchant_contracts
+  addresses
+}
+
+TableGroup network_pricing [color: #1168bd] {
+  delivery_zones
+  rate_cards
+  rate_card_lines
+  facilities
+  routes
+  route_stops
+}
+
+TableGroup shipment_tracking [color: #15803d] {
+  shipments
+  parcels
+  tracking_events
+  delivery_attempts
+  proofs_of_delivery
+  shipment_exceptions
+}
+
+TableGroup fleet [color: #b45309] {
+  vehicles
+  drivers
+  vehicle_maintenance
+  fuel_logs
+}
+
+TableGroup linehaul [color: #7c3aed] {
+  trips
+  trip_stop_logs
+  containers
+  container_parcels
+}
+
+TableGroup last_mile [color: #be123c] {
+  delivery_runs
+  delivery_run_stops
+}
+
+TableGroup warehouse_3pl [color: #0f766e] {
+  storage_bins
+  merchant_skus
+  bin_stock
+  inbound_receipts
+  inbound_receipt_lines
+  pick_tasks
+}
+
+TableGroup billing_customs [color: #475569] {
+  cod_remittances
+  cod_collections
+  invoices
+  invoice_lines
+  customs_declarations
+  outbox_events
+}`, "Database đầy đủ"];
+Object.assign(DBML_SAMPLES, {
   "c4-bank-code": ["L4 — Mã nguồn (Code): ERD dữ liệu", `Project transfer_db {
   database_type: 'PostgreSQL'
   Note: 'C4 level 4 of the Transfer Service: saga state and outbox'
@@ -1385,6 +5783,143 @@ Table outbox_events [headercolor: #b45309] {
   payload jsonb [not null]
   published_at timestamp
 }`, "C4 — Mua sắm online"],
+  "c4-crypto-code": ["L4 — Mã nguồn (Code): ERD dữ liệu", `Project ledger_db {
+  database_type: 'PostgreSQL'
+  Note: 'C4 level 4 of the Wallet Service: double-entry ledger'
+}
+
+Enum entry_type {
+  deposit
+  withdrawal
+  trade
+  fee
+}
+
+Table accounts [headercolor: #1168bd] {
+  id uuid [pk]
+  user_id uuid [not null]
+  asset varchar(12) [not null]
+  available decimal(38,18) [not null, default: 0]
+  locked decimal(38,18) [not null, default: 0]
+
+  indexes {
+    (user_id, asset) [unique]
+  }
+}
+
+Table journal_entries {
+  id uuid [pk]
+  entry_type entry_type [not null]
+  reference_id varchar(64) [not null, unique]
+  created_at timestamp [not null]
+}
+
+Table journal_lines {
+  id bigint [pk, increment]
+  entry_id uuid [not null, ref: > journal_entries.id]
+  account_id uuid [not null, ref: > accounts.id]
+  amount decimal(38,18) [not null, note: 'Lines of one entry sum to zero']
+}
+
+Table withdrawals [headercolor: #b45309] {
+  id uuid [pk]
+  account_id uuid [not null, ref: > accounts.id]
+  address varchar(128) [not null]
+  amount decimal(38,18) [not null]
+  tx_hash varchar(128) [unique]
+  status varchar(20) [not null]
+}`, "C4 — Sàn tiền ảo"],
+  "c4-game-code": ["L4 — Mã nguồn (Code): ERD dữ liệu", `Project player_db {
+  database_type: 'PostgreSQL'
+  Note: 'C4 level 4 of the Player Service: profiles and ratings'
+}
+
+Enum platform_type {
+  pc
+  android
+  ios
+}
+
+Table players [headercolor: #1168bd] {
+  id uuid [pk]
+  display_name varchar(32) [not null, unique]
+  platform platform_type [not null]
+  region varchar(8) [not null]
+  created_at timestamp [not null]
+}
+
+Table skill_ratings {
+  player_id uuid [ref: > players.id]
+  queue varchar(16)
+  rating int [not null]
+  deviation int [not null]
+
+  indexes {
+    (player_id, queue) [pk]
+  }
+}
+
+Table match_history {
+  id bigint [pk, increment]
+  player_id uuid [not null, ref: > players.id]
+  match_id uuid [not null]
+  result varchar(8) [not null]
+  rating_change int [not null]
+  played_at timestamp [not null]
+}
+
+Table friendships {
+  player_id uuid [ref: > players.id]
+  friend_id uuid [ref: > players.id]
+  since timestamp [not null]
+
+  indexes {
+    (player_id, friend_id) [pk]
+  }
+}`, "C4 — Game online"],
+  "c4-logistics-code": ["L4 — Mã nguồn (Code): ERD dữ liệu", `Project dispatch_db {
+  database_type: 'PostgreSQL'
+  Note: 'C4 level 4 of the Dispatch Service: runs and stops'
+}
+
+Enum run_status {
+  planned
+  assigned
+  in_progress
+  completed
+}
+
+Table delivery_runs [headercolor: #1168bd] {
+  id uuid [pk]
+  driver_id uuid
+  status run_status [not null]
+  planned_date date [not null]
+  depot_code varchar(12) [not null]
+}
+
+Table stops {
+  id uuid [pk]
+  run_id uuid [not null, ref: > delivery_runs.id]
+  sequence int [not null]
+  parcel_id uuid [not null]
+  latitude decimal(9,6) [not null]
+  longitude decimal(9,6) [not null]
+  window_from timestamp
+  window_to timestamp
+
+  indexes {
+    (run_id, sequence) [unique]
+  }
+}
+
+Table driver_positions [headercolor: #b45309] {
+  driver_id uuid [pk]
+  latitude decimal(9,6) [not null]
+  longitude decimal(9,6) [not null]
+  reported_at timestamp [not null]
+}`, "C4 — Logistics"],
+});
+Object.assign(DBML_SAMPLES, {
   "ddd-bank-aggregates": ["Aggregate → ERD theo bounded context", `Project transfers_context {
   database_type: 'PostgreSQL'
   Note: 'One schema per bounded context. Aggregates reference each other by id only, so there is no FK between them.'
@@ -1444,9 +5979,10 @@ TableGroup beneficiary_aggregate [color: #0e7490] {
 
 Enum order_status {
   placed
-  accepted
+  routed
   partially_filled
   filled
+  rejected
   cancelled
 }
 
@@ -1455,13 +5991,14 @@ Table orders [headercolor: #b45309] {
   account_no varchar(20) [not null, note: 'Other aggregate: id only, no FK']
   symbol varchar(12) [not null]
   board varchar(8) [not null]
+  side varchar(4) [not null]
   quantity bigint [not null]
   limit_price decimal(18,4)
   status order_status [not null]
   version int [not null, note: 'Optimistic locking']
 }
 
-Table fills {
+Table executions {
   id uuid [pk]
   order_id uuid [not null, ref: > orders.id]
   exec_id varchar(40) [not null, unique]
@@ -1484,7 +6021,7 @@ Table domain_events [headercolor: #0e7490] {
 
 TableGroup order_aggregate [color: #b45309] {
   orders
-  fills
+  executions
 }
 
 TableGroup account_aggregate [color: #0e7490] {
@@ -1497,7 +6034,6 @@ TableGroup account_aggregate [color: #0e7490] {
 
 Enum order_status {
   placed
-  paid
   confirmed
   cancelled
 }
@@ -1554,7 +6090,186 @@ TableGroup cart_aggregate [color: #0e7490] {
   carts
   cart_items
 }`, "DDD — Mua sắm online"],
-};
+  "ddd-crypto-aggregates": ["Aggregate → ERD theo bounded context", `Project spot_trading_context {
+  database_type: 'PostgreSQL'
+  Note: 'One schema per bounded context. Aggregates reference each other by id only, so there is no FK between them.'
+}
+
+Enum order_status {
+  placed
+  open
+  partially_filled
+  filled
+  cancelled
+}
+
+Table orders [headercolor: #b45309] {
+  id uuid [pk, note: 'Aggregate root']
+  account_id uuid [not null]
+  pair varchar(20) [not null, note: 'Other aggregate: key only, no FK']
+  side varchar(4) [not null]
+  quantity decimal(38,18) [not null]
+  price decimal(38,18)
+  status order_status [not null]
+  version int [not null, note: 'Optimistic locking']
+}
+
+Table trades {
+  id uuid [pk]
+  order_id uuid [not null, ref: > orders.id]
+  quantity decimal(38,18) [not null]
+  price decimal(38,18) [not null]
+}
+
+Table order_books [headercolor: #b45309] {
+  pair varchar(20) [pk, note: 'Aggregate root']
+  last_sequence bigint [not null]
+}
+
+Table price_levels {
+  pair varchar(20) [ref: > order_books.pair]
+  side varchar(4)
+  price decimal(38,18)
+  total_quantity decimal(38,18) [not null]
+
+  indexes {
+    (pair, side, price) [pk]
+  }
+}
+
+Table domain_events [headercolor: #0e7490] {
+  id uuid [pk]
+  aggregate_id varchar(64) [not null]
+  event_type varchar(60) [not null]
+  payload jsonb [not null]
+  published_at timestamp
+}
+
+TableGroup order_aggregate [color: #b45309] {
+  orders
+  trades
+}
+
+TableGroup order_book_aggregate [color: #0e7490] {
+  order_books
+  price_levels
+}`, "DDD — Sàn tiền ảo"],
+  "ddd-game-aggregates": ["Aggregate → ERD theo bounded context", `Project matchmaking_context {
+  database_type: 'PostgreSQL'
+  Note: 'One schema per bounded context. Aggregates reference each other by id only, so there is no FK between them.'
+}
+
+Enum ticket_status {
+  queued
+  matched
+  cancelled
+  expired
+}
+
+Table match_tickets [headercolor: #b45309] {
+  id uuid [pk, note: 'Aggregate root']
+  region varchar(8) [not null]
+  max_latency_ms int [not null]
+  status ticket_status [not null]
+  version int [not null, note: 'Optimistic locking']
+}
+
+Table ticket_members {
+  ticket_id uuid [ref: > match_tickets.id]
+  player_id uuid
+  rating int [not null]
+  deviation int [not null]
+
+  indexes {
+    (ticket_id, player_id) [pk]
+  }
+}
+
+Table game_matches [headercolor: #b45309] {
+  id uuid [pk, note: 'Aggregate root']
+  server_id varchar(40)
+  status varchar(16) [not null]
+  created_at timestamp [not null]
+}
+
+Table match_teams {
+  id uuid [pk]
+  match_id uuid [not null, ref: > game_matches.id]
+  ticket_ids uuid[] [not null, note: 'Other aggregate: ids only, no FK']
+}
+
+Table domain_events [headercolor: #0e7490] {
+  id uuid [pk]
+  aggregate_id uuid [not null]
+  event_type varchar(60) [not null]
+  payload jsonb [not null]
+  published_at timestamp
+}
+
+TableGroup ticket_aggregate [color: #b45309] {
+  match_tickets
+  ticket_members
+}
+
+TableGroup game_match_aggregate [color: #0e7490] {
+  game_matches
+  match_teams
+}`, "DDD — Game online"],
+  "ddd-logistics-aggregates": ["Aggregate → ERD theo bounded context", `Project dispatch_context {
+  database_type: 'PostgreSQL'
+  Note: 'One schema per bounded context. Aggregates reference each other by id only, so there is no FK between them.'
+}
+
+Enum run_status {
+  planned
+  assigned
+  in_progress
+  completed
+}
+
+Table delivery_runs [headercolor: #b45309] {
+  id uuid [pk, note: 'Aggregate root']
+  driver_id uuid
+  status run_status [not null]
+  version int [not null, note: 'Optimistic locking']
+}
+
+Table stops {
+  id uuid [pk]
+  run_id uuid [not null, ref: > delivery_runs.id]
+  sequence int [not null]
+  parcel_id uuid [not null, note: 'Other aggregate: id only, no FK']
+  latitude decimal(9,6) [not null, note: 'GeoPoint value object']
+  longitude decimal(9,6) [not null]
+  window_from timestamp [note: 'TimeWindow value object']
+  window_to timestamp
+}
+
+Table parcels [headercolor: #b45309] {
+  id uuid [pk, note: 'Aggregate root']
+  status varchar(16) [not null]
+  weight_kg decimal(8,3) [not null, note: 'ParcelSize value object']
+  volume_litres decimal(8,2) [not null]
+  version int [not null, note: 'Optimistic locking']
+}
+
+Table domain_events [headercolor: #0e7490] {
+  id uuid [pk]
+  aggregate_id uuid [not null]
+  event_type varchar(60) [not null]
+  payload jsonb [not null]
+  published_at timestamp
+}
+
+TableGroup run_aggregate [color: #b45309] {
+  delivery_runs
+  stops
+}
+
+TableGroup parcel_aggregate [color: #0e7490] {
+  parcels
+}`, "DDD — Logistics"],
+});
 const D2_SAMPLES = {
   architecture: ["Kiến trúc hệ thống", `direction: right
 
@@ -2024,6 +6739,323 @@ const C4_MODEL_SHOPPING = {
     ],
   },
 };
+const C4_MODEL_CRYPTO = {
+  key: "crypto", group: "C4 — Sàn tiền ảo", systemId: "exchangePlatform",
+  name: "Crypto Exchange Platform", description: "Lets traders buy, sell and hold digital assets",
+  people: [
+    { id: "trader", name: "Retail Trader", desc: "Trades pairs, deposits and withdraws" },
+    { id: "complianceOfficer", name: "Compliance Officer", desc: "Reviews flagged accounts and withdrawals" },
+  ],
+  externals: [
+    { id: "alertGateway", name: "Email and Push Gateway", desc: "Delivers security alerts" },
+    { id: "blockchainNetworks", name: "Blockchain Networks", desc: "Bitcoin, Ethereum and other chains" },
+    { id: "kycProvider", name: "KYC Provider", desc: "Verifies identity documents" },
+    { id: "bankingPartner", name: "Fiat Banking Partner", desc: "Moves fiat in and out" },
+  ],
+  containers: [
+    { id: "tradingWeb", name: "Trading Web", tech: "React", desc: "Charts, order entry, wallets" },
+    { id: "mobileApp", name: "Mobile App", tech: "Flutter", desc: "Trading on the phone" },
+    { id: "adminPortal", name: "Compliance Console", tech: "React", desc: "Case handling for staff" },
+    { id: "apiGateway", name: "API Gateway", tech: "Kong", desc: "Routing, API keys, rate limits" },
+    { id: "accountService", name: "Account Service", tech: "Go", desc: "Users, KYC status, API keys" },
+    { id: "orderService", name: "Order Service", tech: "Go", desc: "Validates orders, locks balances" },
+    { id: "matchingEngine", name: "Matching Engine", tech: "Rust", desc: "In-memory order books per pair" },
+    { id: "walletService", name: "Wallet Service", tech: "Java, Spring Boot", desc: "Balances, deposits, withdrawals" },
+    { id: "custodySigner", name: "Custody Signer", tech: "Rust, HSM", desc: "Signs transactions from hot wallets" },
+    { id: "marketDataService", name: "Market Data Service", tech: "Go, WebSocket", desc: "Streams tickers and depth" },
+    { id: "riskService", name: "Risk Service", tech: "Python, FastAPI", desc: "Limits and AML screening" },
+    { id: "eventBus", name: "Event Bus", tech: "Apache Kafka", desc: "Commands and trade events", kind: "queue" },
+    { id: "ledgerDb", name: "Ledger DB", tech: "PostgreSQL", desc: "Double-entry balances", kind: "db" },
+  ],
+  focus: "matchingEngine",
+  components: [
+    { id: "commandConsumer", name: "Command Consumer", tech: "rdkafka", desc: "Reads commands in offset order" },
+    { id: "pairSequencer", name: "Pair Sequencer", tech: "Rust module", desc: "One single-threaded queue per pair" },
+    { id: "matcher", name: "Matcher", tech: "Rust module", desc: "Crosses orders against the book" },
+    { id: "bookStore", name: "Order Book Store", tech: "Rust module", desc: "Price-time levels in memory" },
+    { id: "tradeEmitter", name: "Trade Emitter", tech: "Rust module", desc: "Builds trade and depth events" },
+    { id: "eventProducer", name: "Event Producer", tech: "rdkafka", desc: "Publishes matching results" },
+  ],
+  codeFocus: { id: "matcherCode", name: "Matcher", tech: "Rust", desc: "Types behind the matcher" },
+  classes: [
+    { name: "Matcher", members: ["+submit(order): MatchResult", "-cross(order): void"] },
+    { name: "OrderBook", members: ["-pair: String", "+best(side): PriceLevel", "+rest(order): void", "+cancel(orderId): void"] },
+    { name: "PriceLevel", members: ["-price: Decimal", "-queue: BookOrder[]", "+popFront(): BookOrder"] },
+    { name: "BookOrder", members: ["-orderId: OrderId", "-side: Side", "-remaining: Decimal"] },
+    { name: "Side", kind: "enum", members: ["BUY", "SELL"] },
+    { name: "MatchResult", members: ["-trades: Trade[]", "-remainder: Decimal"] },
+    { name: "AllocationRule", kind: "interface", members: ["+allocate(level, quantity): Trade[]"] },
+    { name: "PriceTimeRule", members: ["+allocate(level, quantity): Trade[]"] },
+  ],
+  rels: {
+    context: [
+      ["trader", "exchangePlatform", "Trades, deposits, withdraws", "HTTPS"],
+      ["complianceOfficer", "exchangePlatform", "Reviews flagged activity", "HTTPS"],
+      ["exchangePlatform", "blockchainNetworks", "Broadcasts and watches transactions", "JSON-RPC"],
+      ["exchangePlatform", "kycProvider", "Verifies identity", "HTTPS"],
+      ["exchangePlatform", "bankingPartner", "Moves fiat", "ISO 20022"],
+      ["exchangePlatform", "alertGateway", "Sends security alerts", "REST"],
+      ["alertGateway", "trader", "Delivers alerts", "Email/Push"],
+    ],
+    container: [
+      ["trader", "tradingWeb", "Uses", "HTTPS"],
+      ["trader", "mobileApp", "Uses", "HTTPS"],
+      ["complianceOfficer", "adminPortal", "Uses", "HTTPS"],
+      ["tradingWeb", "apiGateway", "Calls", "REST/WebSocket"],
+      ["mobileApp", "apiGateway", "Calls", "REST/WebSocket"],
+      ["adminPortal", "apiGateway", "Calls", "REST"],
+      ["apiGateway", "accountService", "Routes account calls", "REST"],
+      ["apiGateway", "orderService", "Routes orders", "gRPC"],
+      ["apiGateway", "walletService", "Routes withdrawals", "REST"],
+      ["apiGateway", "marketDataService", "Streams prices", "WebSocket"],
+      ["apiGateway", "riskService", "Routes compliance cases", "REST"],
+      ["accountService", "kycProvider", "Verifies identity", "HTTPS"],
+      ["accountService", "alertGateway", "Sends security alerts", "REST"],
+      ["orderService", "riskService", "Checks limits", "gRPC"],
+      ["orderService", "walletService", "Locks balances", "gRPC"],
+      ["orderService", "eventBus", "Publishes order commands", "Kafka"],
+      ["matchingEngine", "eventBus", "Consumes commands, publishes trades", "Kafka"],
+      ["eventBus", "walletService", "Delivers trades", "Kafka"],
+      ["eventBus", "marketDataService", "Delivers trades and depth", "Kafka"],
+      ["walletService", "ledgerDb", "Reads and writes", "JDBC"],
+      ["walletService", "custodySigner", "Requests signatures", "gRPC"],
+      ["walletService", "bankingPartner", "Moves fiat", "ISO 20022"],
+      ["walletService", "blockchainNetworks", "Watches deposits", "JSON-RPC"],
+      ["custodySigner", "blockchainNetworks", "Broadcasts withdrawals", "JSON-RPC"],
+    ],
+    component: [
+      ["eventBus", "commandConsumer", "Delivers order commands", "Kafka"],
+      ["commandConsumer", "pairSequencer", "Queues commands"],
+      ["pairSequencer", "matcher", "Feeds one pair"],
+      ["matcher", "bookStore", "Reads and updates"],
+      ["matcher", "tradeEmitter", "Reports results"],
+      ["tradeEmitter", "eventProducer", "Hands over events"],
+      ["eventProducer", "eventBus", "Publishes trades", "Kafka"],
+    ],
+    code: [
+      ["Matcher", "OrderBook", "updates"],
+      ["Matcher", "AllocationRule", "allocates with"],
+      ["Matcher", "MatchResult", "returns"],
+      ["OrderBook", "PriceLevel", "holds"],
+      ["PriceLevel", "BookOrder", "queues"],
+      ["BookOrder", "Side", "has"],
+      ["PriceTimeRule", "AllocationRule", "implements"],
+    ],
+  },
+};
+const C4_MODEL_GAME = {
+  key: "game", group: "C4 — Game online", systemId: "gamePlatform",
+  name: "Online Game Platform", description: "Runs multiplayer matches and the player economy",
+  people: [
+    { id: "player", name: "Player", desc: "Joins matches, buys items, climbs rankings" },
+    { id: "liveOperator", name: "Live Ops Operator", desc: "Runs events and promotions" },
+  ],
+  externals: [
+    { id: "pushService", name: "Push Notification Service", desc: "Delivers match alerts" },
+    { id: "storeBilling", name: "App Store Billing", desc: "Processes in-app purchases" },
+    { id: "contentCdn", name: "Content CDN", desc: "Serves patches and assets" },
+    { id: "antiCheat", name: "Anti-cheat Provider", desc: "Scores suspicious play" },
+  ],
+  containers: [
+    { id: "gameClient", name: "Game Client", tech: "Unity, C#", desc: "Runs on PC and phone" },
+    { id: "liveOpsConsole", name: "Live Ops Console", tech: "React", desc: "Events and promotion setup" },
+    { id: "apiGateway", name: "API Gateway", tech: "Envoy", desc: "Routing, auth and throttling" },
+    { id: "playerService", name: "Player Service", tech: "Go", desc: "Profiles, ratings, friends" },
+    { id: "matchmakingService", name: "Matchmaking Service", tech: "Go", desc: "Groups players by skill and region" },
+    { id: "fleetManager", name: "Fleet Manager", tech: "Go, Agones", desc: "Allocates game servers" },
+    { id: "gameServer", name: "Dedicated Game Server", tech: "C++, UDP", desc: "Runs authoritative matches" },
+    { id: "inventoryService", name: "Inventory Service", tech: "Java, Spring Boot", desc: "Items, currency, purchases" },
+    { id: "leaderboardService", name: "Leaderboard Service", tech: "Go, Redis", desc: "Seasonal rankings" },
+    { id: "eventBus", name: "Event Bus", tech: "Apache Kafka", desc: "Match and reward events", kind: "queue" },
+    { id: "playerDb", name: "Player DB", tech: "PostgreSQL", desc: "Profiles and ratings", kind: "db" },
+    { id: "ticketStore", name: "Ticket Store", tech: "Redis", desc: "Open matchmaking tickets", kind: "db" },
+  ],
+  focus: "matchmakingService",
+  components: [
+    { id: "queueApi", name: "Queue API", tech: "gRPC server", desc: "Accepts join and leave requests" },
+    { id: "ticketClient", name: "Ticket Client", tech: "go-redis", desc: "Stores open tickets" },
+    { id: "matchFunction", name: "Match Function", tech: "Go module", desc: "Builds balanced teams each tick" },
+    { id: "skillReader", name: "Skill Reader", tech: "gRPC stub", desc: "Reads player ratings" },
+    { id: "fleetClient", name: "Fleet Client", tech: "gRPC stub", desc: "Requests a game server" },
+    { id: "matchPublisher", name: "Match Publisher", tech: "Kafka producer", desc: "Announces found matches" },
+  ],
+  codeFocus: { id: "matchFunctionCode", name: "Match Function", tech: "Go", desc: "Types behind the match function" },
+  classes: [
+    { name: "MatchFunction", members: ["+run(pool): Match[]", "-fits(team, ticket): bool"] },
+    { name: "TicketPool", members: ["+open(region): Ticket[]", "+remove(ticket): void"] },
+    { name: "Ticket", members: ["-ticketId: TicketId", "-playerIds: PlayerId[]", "-rating: int", "-region: Region"] },
+    { name: "Team", members: ["-tickets: Ticket[]", "+averageRating(): int"] },
+    { name: "Match", members: ["-matchId: MatchId", "-teams: Team[]"] },
+    { name: "BalanceRule", kind: "interface", members: ["+accepts(teamA, teamB): bool"] },
+    { name: "SkillGapRule", members: ["+accepts(teamA, teamB): bool"] },
+  ],
+  rels: {
+    context: [
+      ["player", "gamePlatform", "Plays matches, buys items", "UDP/HTTPS"],
+      ["liveOperator", "gamePlatform", "Runs events and promotions", "HTTPS"],
+      ["gamePlatform", "storeBilling", "Verifies purchases", "HTTPS"],
+      ["gamePlatform", "contentCdn", "Downloads patches and assets", "HTTPS"],
+      ["gamePlatform", "antiCheat", "Reports suspicious play", "HTTPS"],
+      ["gamePlatform", "pushService", "Sends match alerts", "HTTPS"],
+      ["pushService", "player", "Delivers alerts", "Push"],
+    ],
+    container: [
+      ["player", "gameClient", "Plays", "Desktop/Mobile"],
+      ["liveOperator", "liveOpsConsole", "Uses", "HTTPS"],
+      ["gameClient", "contentCdn", "Downloads patches and assets", "HTTPS"],
+      ["gameClient", "apiGateway", "Calls", "gRPC/HTTPS"],
+      ["gameClient", "gameServer", "Sends inputs, receives state", "UDP"],
+      ["liveOpsConsole", "apiGateway", "Calls", "HTTPS"],
+      ["apiGateway", "playerService", "Routes profile calls", "gRPC"],
+      ["apiGateway", "matchmakingService", "Routes queue requests", "gRPC"],
+      ["apiGateway", "inventoryService", "Routes purchases", "gRPC"],
+      ["apiGateway", "leaderboardService", "Reads rankings", "gRPC"],
+      ["playerService", "playerDb", "Reads and writes", "JDBC"],
+      ["playerService", "pushService", "Sends match alerts", "HTTPS"],
+      ["matchmakingService", "ticketStore", "Reads and writes tickets", "Redis"],
+      ["matchmakingService", "playerService", "Reads ratings", "gRPC"],
+      ["matchmakingService", "fleetManager", "Requests a server", "gRPC"],
+      ["matchmakingService", "eventBus", "Publishes MatchFound", "Kafka"],
+      ["fleetManager", "gameServer", "Allocates", "Kubernetes API"],
+      ["gameServer", "eventBus", "Publishes MatchFinished", "Kafka"],
+      ["gameServer", "antiCheat", "Reports suspicious play", "HTTPS"],
+      ["inventoryService", "storeBilling", "Verifies purchases", "HTTPS"],
+      ["eventBus", "playerService", "Delivers match events", "Kafka"],
+      ["eventBus", "leaderboardService", "Delivers results", "Kafka"],
+      ["eventBus", "inventoryService", "Delivers rewards", "Kafka"],
+    ],
+    component: [
+      ["apiGateway", "queueApi", "Routes queue requests", "gRPC"],
+      ["queueApi", "ticketClient", "Saves tickets"],
+      ["ticketClient", "ticketStore", "Reads and writes tickets", "Redis"],
+      ["matchFunction", "ticketClient", "Polls open tickets"],
+      ["matchFunction", "skillReader", "Reads ratings"],
+      ["skillReader", "playerService", "Reads ratings", "gRPC"],
+      ["matchFunction", "fleetClient", "Requests a server"],
+      ["fleetClient", "fleetManager", "Requests a server", "gRPC"],
+      ["matchFunction", "matchPublisher", "Announces matches"],
+      ["matchPublisher", "eventBus", "Publishes MatchFound", "Kafka"],
+    ],
+    code: [
+      ["MatchFunction", "TicketPool", "reads"],
+      ["MatchFunction", "BalanceRule", "checks"],
+      ["MatchFunction", "Match", "creates"],
+      ["Match", "Team", "has"],
+      ["Team", "Ticket", "groups"],
+      ["TicketPool", "Ticket", "holds"],
+      ["SkillGapRule", "BalanceRule", "implements"],
+    ],
+  },
+};
+const C4_MODEL_LOGISTICS = {
+  key: "logistics", group: "C4 — Logistics", systemId: "logisticsPlatform",
+  name: "Logistics Platform", description: "Moves parcels from merchants to recipients",
+  people: [
+    { id: "merchantShipper", name: "Merchant Shipper", desc: "Books shipments and prints labels" },
+    { id: "deliveryDriver", name: "Delivery Driver", desc: "Follows runs and confirms delivery" },
+    { id: "recipient", name: "Recipient", desc: "Tracks incoming parcels" },
+  ],
+  externals: [
+    { id: "smsGateway", name: "SMS Gateway", desc: "Delivers status updates" },
+    { id: "mapProvider", name: "Maps Provider", desc: "Geocoding and travel times" },
+    { id: "carrierPartners", name: "Partner Carriers", desc: "Line-haul and remote delivery" },
+    { id: "customsBroker", name: "Customs Broker", desc: "Clears cross-border parcels" },
+  ],
+  containers: [
+    { id: "shipperPortal", name: "Shipper Portal", tech: "React", desc: "Booking and labels" },
+    { id: "driverApp", name: "Driver App", tech: "Flutter", desc: "Runs, scans, proof of delivery" },
+    { id: "trackingPage", name: "Tracking Page", tech: "Next.js", desc: "Public parcel status" },
+    { id: "apiGateway", name: "API Gateway", tech: "NGINX", desc: "Routing, auth and throttling" },
+    { id: "shipmentService", name: "Shipment Service", tech: "Java, Spring Boot", desc: "Books shipments, owns status" },
+    { id: "warehouseService", name: "Warehouse Service", tech: "Java, Spring Boot", desc: "Inbound, sorting, outbound" },
+    { id: "dispatchService", name: "Dispatch Service", tech: "Go", desc: "Assigns parcels to driver runs" },
+    { id: "routingService", name: "Route Planning Service", tech: "Python, OR-Tools", desc: "Plans vehicle routes" },
+    { id: "trackingService", name: "Tracking Service", tech: "Go, WebSocket", desc: "Collects scans and GPS points" },
+    { id: "notificationService", name: "Notification Service", tech: "Node.js", desc: "Sends status updates" },
+    { id: "eventBus", name: "Event Bus", tech: "Apache Kafka", desc: "Parcel lifecycle events", kind: "queue" },
+    { id: "shipmentDb", name: "Shipment DB", tech: "PostgreSQL", desc: "Shipments and parcels", kind: "db" },
+    { id: "dispatchDb", name: "Dispatch DB", tech: "PostGIS", desc: "Runs, stops, driver positions", kind: "db" },
+  ],
+  focus: "dispatchService",
+  components: [
+    { id: "dispatchApi", name: "Dispatch API", tech: "chi router", desc: "Run updates from drivers" },
+    { id: "parcelConsumer", name: "Parcel Consumer", tech: "Kafka consumer", desc: "Picks up sorted parcels" },
+    { id: "assignmentEngine", name: "Assignment Engine", tech: "Go module", desc: "Fits parcels into driver runs" },
+    { id: "driverLocator", name: "Driver Locator", tech: "Go module", desc: "Finds available drivers nearby" },
+    { id: "routeClient", name: "Route Client", tech: "gRPC stub", desc: "Requests planned routes" },
+    { id: "carrierClient", name: "Carrier Client", tech: "REST client", desc: "Hands off remote parcels" },
+    { id: "runRepository", name: "Run Repository", tech: "pgx", desc: "Stores runs and stops" },
+    { id: "eventPublisher", name: "Event Publisher", tech: "Kafka producer", desc: "Publishes run events" },
+  ],
+  codeFocus: { id: "assignmentEngineCode", name: "Assignment Engine", tech: "Go", desc: "Types behind the assignment engine" },
+  classes: [
+    { name: "AssignmentEngine", members: ["+assign(parcels): DeliveryRun[]", "-bestRun(parcel): DeliveryRun"] },
+    { name: "DeliveryRun", members: ["-runId: RunId", "-driverId: DriverId", "-status: RunStatus", "+addStop(parcel): void"] },
+    { name: "Stop", members: ["-sequence: int", "-parcelId: ParcelId", "-window: TimeWindow"] },
+    { name: "Parcel", members: ["-parcelId: ParcelId", "-weightKg: Decimal", "-destination: GeoPoint"] },
+    { name: "RunStatus", kind: "enum", members: ["PLANNED", "ASSIGNED", "IN_PROGRESS", "COMPLETED"] },
+    { name: "CapacityRule", kind: "interface", members: ["+fits(run, parcel): bool"] },
+    { name: "WeightCapacityRule", members: ["+fits(run, parcel): bool"] },
+  ],
+  rels: {
+    context: [
+      ["merchantShipper", "logisticsPlatform", "Books shipments, tracks parcels", "HTTPS"],
+      ["deliveryDriver", "logisticsPlatform", "Receives runs, confirms delivery", "HTTPS"],
+      ["recipient", "logisticsPlatform", "Tracks deliveries", "HTTPS"],
+      ["logisticsPlatform", "smsGateway", "Sends status updates", "REST"],
+      ["logisticsPlatform", "mapProvider", "Reads travel times", "HTTPS"],
+      ["logisticsPlatform", "carrierPartners", "Hands over parcels", "REST"],
+      ["logisticsPlatform", "customsBroker", "Files declarations", "EDI"],
+      ["smsGateway", "recipient", "Delivers updates", "SMS"],
+    ],
+    container: [
+      ["merchantShipper", "shipperPortal", "Uses", "HTTPS"],
+      ["deliveryDriver", "driverApp", "Uses", "HTTPS"],
+      ["recipient", "trackingPage", "Uses", "HTTPS"],
+      ["shipperPortal", "apiGateway", "Calls", "JSON/HTTPS"],
+      ["driverApp", "apiGateway", "Calls", "JSON/HTTPS"],
+      ["trackingPage", "apiGateway", "Calls", "JSON/HTTPS"],
+      ["apiGateway", "shipmentService", "Routes bookings", "REST"],
+      ["apiGateway", "dispatchService", "Routes run updates", "REST"],
+      ["apiGateway", "trackingService", "Streams status", "WebSocket"],
+      ["shipmentService", "shipmentDb", "Reads and writes", "JDBC"],
+      ["shipmentService", "customsBroker", "Files declarations", "EDI"],
+      ["shipmentService", "eventBus", "Publishes ShipmentBooked", "Kafka"],
+      ["warehouseService", "eventBus", "Consumes bookings, publishes ParcelSorted", "Kafka"],
+      ["dispatchService", "eventBus", "Consumes ParcelSorted, publishes RunAssigned", "Kafka"],
+      ["dispatchService", "routingService", "Requests routes", "gRPC"],
+      ["dispatchService", "dispatchDb", "Reads and writes", "PostgreSQL"],
+      ["dispatchService", "carrierPartners", "Hands over parcels", "REST"],
+      ["routingService", "mapProvider", "Reads travel times", "HTTPS"],
+      ["eventBus", "trackingService", "Delivers status changes", "Kafka"],
+      ["eventBus", "notificationService", "Delivers status changes", "Kafka"],
+      ["notificationService", "smsGateway", "Sends status updates", "REST"],
+    ],
+    component: [
+      ["apiGateway", "dispatchApi", "Routes run updates", "REST"],
+      ["eventBus", "parcelConsumer", "Delivers ParcelSorted", "Kafka"],
+      ["dispatchApi", "assignmentEngine", "Updates runs"],
+      ["parcelConsumer", "assignmentEngine", "Queues parcels"],
+      ["assignmentEngine", "driverLocator", "Finds drivers"],
+      ["assignmentEngine", "routeClient", "Asks for routes"],
+      ["routeClient", "routingService", "Requests routes", "gRPC"],
+      ["assignmentEngine", "carrierClient", "Hands off remote parcels"],
+      ["carrierClient", "carrierPartners", "Hands over parcels", "REST"],
+      ["assignmentEngine", "runRepository", "Saves runs"],
+      ["runRepository", "dispatchDb", "Reads and writes", "PostgreSQL"],
+      ["assignmentEngine", "eventPublisher", "Emits events"],
+      ["eventPublisher", "eventBus", "Publishes RunAssigned", "Kafka"],
+    ],
+    code: [
+      ["AssignmentEngine", "DeliveryRun", "fills"],
+      ["AssignmentEngine", "CapacityRule", "checks"],
+      ["AssignmentEngine", "Parcel", "places"],
+      ["DeliveryRun", "Stop", "has"],
+      ["DeliveryRun", "RunStatus", "has"],
+      ["WeightCapacityRule", "CapacityRule", "implements"],
+    ],
+  },
+};
 // Neutral C4 model (c4-model-*.js) → one drawable view per level; every language builder renders these views.
 const C4Views = (() => {
   const LEVELS = [
@@ -2151,6 +7183,7 @@ const C4ToDrawio = (() => {
   const W = 200, H = 120, GAP_X = 70, GAP_Y = 110, PAD = 40, CLASS_W = 250, LINE_H = 19;
   const FILL = { person: "#08427b", system: "#1168bd", external: "#8a8a8a", container: "#438dd5", db: "#438dd5", queue: "#438dd5", component: "#85bbf0" };
   const SHAPE = { person: "rounded=1;arcSize=30;", db: "shape=cylinder3;size=12;boundedLbl=1;", queue: "shape=cylinder3;direction=south;size=12;boundedLbl=1;" };
+  const FRAME = "rounded=1;arcSize=2;dashed=1;fillColor=none;strokeColor=#666666;fontColor=#444444;verticalAlign=top;align=left;spacingLeft=8;html=1;container=1;collapsible=0;";
   const EDGE = "rounded=1;html=1;jumpStyle=arc;fontSize=10;labelBackgroundColor=#ffffff;strokeColor=#707070;fontColor=#555555;";
 
   const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
@@ -2158,7 +7191,9 @@ const C4ToDrawio = (() => {
   const label = e => `<b>${e.name}</b><br><font style="font-size:10px">${C4Views.caption(e)}</font><br><br>${e.desc}`;
 
   const vertex = (id, value, css, parent, x, y, w, h) => `        <mxCell id="${id}" value="${esc(value)}" style="${css}" vertex="1" parent="${parent}"><mxGeometry x="${x}" y="${y}" width="${w}" height="${h}" as="geometry"/></mxCell>`;
-  const edge = (i, from, to, value, css) => `        <mxCell id="e${i}" value="${esc(value)}" style="${css}" edge="1" parent="1" source="${from}" target="${to}"><mxGeometry relative="1" as="geometry"/></mxCell>`;
+  const edge = (i, from, to, value, css, via) => `        <mxCell id="e${i}" value="${esc(value)}" style="${css}" edge="1" parent="1" source="${from}" target="${to}"><mxGeometry relative="1" as="geometry"${via ? `><Array as="points"><mxPoint x="${via.x}" y="${via.y}"/></Array></mxGeometry>` : "/>"}</mxCell>`;
+  // A link between non-neighbours of one row dips below it instead of running through the boxes between them.
+  const detour = (a, b, step, height) => (a.y === b.y && Math.abs(a.x - b.x) > step ? { x: (a.x + b.x + W) / 2, y: a.y + height + 45 } : undefined);
   const page = (name, cells) => ["<mxfile>", `  <diagram name="${esc(name)}">`, `    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10">`, "      <root>", `        <mxCell id="0"/>`, `        <mxCell id="1" parent="0"/>`, ...cells, "      </root>", "    </mxGraphModel>", "  </diagram>", "</mxfile>"].join("\n");
 
   // Rows by breadth-first depth from the elements nothing inside calls.
@@ -2174,7 +7209,6 @@ const C4ToDrawio = (() => {
     for (const e of items) (rows[depth.get(e.id) ?? 0] ??= []).push(e);
     return rows;
   }
-
   // Each row sits under the mean x of its already placed neighbours, then is pushed apart to avoid overlaps.
   function spread(rows, rels, step) {
     const x = new Map();
@@ -2201,14 +7235,15 @@ const C4ToDrawio = (() => {
     const edgeSpace = v.boundary ? PAD : 0, midY = (top.length ? PAD + H + GAP_Y : PAD) + edgeSpace;
     const innerY = r => midY + r * (H + GAP_Y) + (v.boundary ? PAD : 0), endY = innerY(rows.length - 1) + H + edgeSpace;
     const row = (list, y) => list.map(e => vertex(e.id, label(e), style(e), "1", xOf(e.id), y, W, H));
+    const spot = new Map([...top.map(e => [e.id, PAD]), ...rows.flatMap((list, r) => list.map(e => [e.id, innerY(r)])), ...bottom.map(e => [e.id, endY + GAP_Y])].map(([id, y]) => [id, { x: xOf(id), y }]));
     const cells = row(top, PAD);
     if (v.boundary) {
       const left = Math.min(...v.inside.map(e => xOf(e.id))) - PAD, right = Math.max(...v.inside.map(e => xOf(e.id))) + W + PAD, y = midY - PAD;
-      cells.push(vertex(v.boundary.id, `<b>${v.boundary.name}</b>`, "rounded=1;arcSize=2;dashed=1;fillColor=none;strokeColor=#666666;fontColor=#444444;verticalAlign=top;align=left;spacingLeft=8;html=1;container=1;collapsible=0;", "1", left, y, right - left, endY - y));
+      cells.push(vertex(v.boundary.id, `<b>${v.boundary.name}</b>`, FRAME, "1", left, y, right - left, endY - y));
       rows.forEach((list, r) => list.forEach(e => cells.push(vertex(e.id, label(e), style(e), v.boundary.id, xOf(e.id) - left, innerY(r) - y, W, H))));
     } else rows.forEach((list, r) => cells.push(...row(list, innerY(r))));
     cells.push(...row(bottom, endY + GAP_Y));
-    cells.push(...v.rels.map(([from, to, text, tech], i) => edge(i, from, to, tech ? `${text}<br>[${tech}]` : text, `${EDGE}dashed=1;endArrow=blockThin;endFill=1;`)));
+    cells.push(...v.rels.map(([from, to, text, tech], i) => edge(i, from, to, tech ? `${text}<br>[${tech}]` : text, `${EDGE}dashed=1;endArrow=blockThin;endFill=1;`, detour(spot.get(from), spot.get(to), W + GAP_X, H))));
     return page(v.title, cells);
   }
 
@@ -2228,7 +7263,7 @@ const C4ToDrawio = (() => {
     return page(v.title, cells);
   }
 
-  return { build, parts: { vertex, edge, page, layers, spread, classLabel, classHeight } };
+  return { build, parts: { FRAME, EDGE, vertex, edge, detour, page, layers, spread, classLabel, classHeight } };
 })();
 // One workspace per system, four views. Structurizr has no code level, so classes live as components of a helper container shown only at L4.
 const C4ToStructurizr = (() => {
@@ -2278,7 +7313,8 @@ const C4ToStructurizr = (() => {
   return { build };
 })();
 // Adds every system × C4 level to the tabs' samples as ?demo=c4-<system>-<level>; Structurizr gets one workspace with 4 views.
-for (const model of [C4_MODEL_BANKING, C4_MODEL_SECURITIES, C4_MODEL_SHOPPING]) {
+const C4_MODELS = [C4_MODEL_BANKING, C4_MODEL_SECURITIES, C4_MODEL_SHOPPING, C4_MODEL_CRYPTO, C4_MODEL_GAME, C4_MODEL_LOGISTICS];
+for (const model of C4_MODELS) {
   for (const { key, label } of C4Views.LEVELS) {
     const id = `c4-${model.key}-${key}`;
     MERMAID_SAMPLES[id] = [label, C4ToText.mermaid(model, key), model.group];
@@ -2306,7 +7342,7 @@ const DDD_MODEL_BANKING = {
   contextRels: [
     ["coreBanking", "accounts", "Account and ledger data", "Upstream legacy · Downstream ACL"],
     ["coreBanking", "transfers", "Ledger postings", "Upstream legacy · Downstream ACL"],
-    ["paymentSwitch", "transfers", "Interbank messages", "Published Language · Downstream Conformist"],
+    ["paymentSwitch", "transfers", "Interbank messages", "Published Language · Downstream ACL"],
     ["kycProvider", "onboarding", "Document checks", "Upstream OHS · Downstream ACL"],
     ["accounts", "transfers", "Balances and limits", "Customer/Supplier"],
     ["identity", "transfers", "Authenticated customer", "Upstream OHS · Downstream Conformist"],
@@ -2316,7 +7352,7 @@ const DDD_MODEL_BANKING = {
   ],
   aggregates: [
     { id: "transferAggregate", name: "Transfer aggregate", classes: [
-      { name: "Transfer", kind: "aggregate root", members: ["-transferId: TransferId", "-status: TransferStatus", "+submit(): void", "+markDebited(): void", "+complete(): void", "+fail(reason): void"] },
+      { name: "Transfer", kind: "aggregate root", members: ["-transferId: TransferId", "-beneficiaryId: BeneficiaryId", "-status: TransferStatus", "+submit(): void", "+hold(): void", "+markDebited(): void", "+complete(): void", "+fail(reason): void"] },
       { name: "TransferLeg", kind: "entity", members: ["-legId: LegId", "-account: AccountRef", "-direction: Direction"] },
       { name: "Money", kind: "value object", members: ["-amount: BigDecimal", "-currency: Currency", "+add(other): Money"] },
       { name: "TransferStatus", kind: "value object", members: ["SUBMITTED", "HELD", "DEBITED", "COMPLETED", "FAILED"] },
@@ -2327,6 +7363,7 @@ const DDD_MODEL_BANKING = {
     ] },
     { id: "transferEvents", name: "Domain events", classes: [
       { name: "TransferSubmitted", kind: "domain event", members: ["-transferId: TransferId", "-occurredAt: Instant"] },
+      { name: "AccountDebited", kind: "domain event", members: ["-transferId: TransferId", "-occurredAt: Instant"] },
       { name: "TransferCompleted", kind: "domain event", members: ["-transferId: TransferId", "-occurredAt: Instant"] },
     ] },
   ],
@@ -2337,6 +7374,7 @@ const DDD_MODEL_BANKING = {
     ["Transfer", "Beneficiary", "references by id"],
     ["Beneficiary", "BankAccountNumber", "account"],
     ["Transfer", "TransferSubmitted", "raises"],
+    ["Transfer", "AccountDebited", "raises"],
     ["Transfer", "TransferCompleted", "raises"],
   ],
   eventFlow: [
@@ -2351,15 +7389,15 @@ const DDD_MODEL_BANKING = {
       { name: "Driving adapters", type: "adapter", items: [["restController", "TransferController", "REST API for clients"], ["fraudListener", "FraudResultListener", "Kafka consumer"]] },
       { name: "Inbound ports", type: "port", items: [["submitPort", "SubmitTransferUseCase", "Starts a transfer"], ["resumePort", "ResumeTransferUseCase", "Continues after screening"]] },
       { name: "Application and domain", type: "domain", items: [["appService", "TransferApplicationService", "Transaction boundary"], ["transferRoot", "Transfer aggregate", "Business rules and state"], ["limitPolicy", "LimitPolicy", "Domain service for limits"]] },
-      { name: "Outbound ports", type: "port", items: [["repoPort", "TransferRepository", "Stores aggregates"], ["ledgerPort", "LedgerGateway", "Posts debits and credits"], ["eventPort", "DomainEventPublisher", "Publishes events"]] },
-      { name: "Driven adapters", type: "adapter", items: [["jpaRepo", "JpaTransferRepository", "PostgreSQL"], ["coreAcl", "CoreBankingAcl", "Anti-corruption layer"], ["outbox", "KafkaOutboxPublisher", "Transactional outbox"]] },
+      { name: "Outbound ports", type: "port", items: [["repoPort", "TransferRepository", "Stores aggregates"], ["ledgerPort", "LedgerGateway", "Posts debits and credits"], ["switchPort", "SwitchGateway", "Sends interbank messages"], ["eventPort", "DomainEventPublisher", "Publishes events"]] },
+      { name: "Driven adapters", type: "adapter", items: [["jpaRepo", "JpaTransferRepository", "PostgreSQL"], ["coreAcl", "CoreBankingAcl", "Anti-corruption layer"], ["switchAcl", "PaymentSwitchAcl", "Anti-corruption layer"], ["outbox", "KafkaOutboxPublisher", "Transactional outbox"]] },
     ],
     rels: [
       ["restController", "submitPort", "calls"], ["fraudListener", "resumePort", "calls"],
-      ["submitPort", "appService", "implemented by"], ["resumePort", "appService", "implemented by"],
+      ["appService", "submitPort", "implements"], ["appService", "resumePort", "implements"],
       ["appService", "transferRoot", "loads and invokes"], ["transferRoot", "limitPolicy", "checks"],
-      ["appService", "repoPort", "uses"], ["appService", "ledgerPort", "uses"], ["appService", "eventPort", "uses"],
-      ["jpaRepo", "repoPort", "implements"], ["coreAcl", "ledgerPort", "implements"], ["outbox", "eventPort", "implements"],
+      ["appService", "repoPort", "uses"], ["appService", "ledgerPort", "uses"], ["appService", "switchPort", "uses"], ["appService", "eventPort", "uses"],
+      ["jpaRepo", "repoPort", "implements"], ["coreAcl", "ledgerPort", "implements"], ["switchAcl", "switchPort", "implements"], ["outbox", "eventPort", "implements"],
     ],
   },
 };
@@ -2386,13 +7424,13 @@ const DDD_MODEL_SECURITIES = {
     ["risk", "orders", "Pre-trade decisions", "Partnership"],
     ["identity", "orders", "Authenticated account", "Upstream OHS · Downstream Conformist"],
     ["orders", "portfolio", "OrderFilled", "Published Language (events)"],
-    ["orders", "settlement", "TradeExecuted", "Published Language (events)"],
+    ["orders", "settlement", "OrderFilled", "Published Language (events)"],
     ["depository", "settlement", "Settlement confirmations", "Upstream legacy · Downstream ACL"],
     ["settlementBank", "settlement", "Payment confirmations", "Upstream legacy · Downstream ACL"],
   ],
   aggregates: [
     { id: "orderAggregate", name: "Order aggregate", classes: [
-      { name: "Order", kind: "aggregate root", members: ["-orderId: OrderId", "-status: OrderStatus", "+accept(): void", "+applyFill(fill): void", "+cancel(): void", "+remaining(): Quantity"] },
+      { name: "Order", kind: "aggregate root", members: ["-orderId: OrderId", "-accountNo: AccountNo", "-status: OrderStatus", "+route(): void", "+applyFill(fill): void", "+cancel(): void", "+remaining(): Quantity"] },
       { name: "Execution", kind: "entity", members: ["-execId: ExecId", "-quantity: Quantity", "-price: Price"] },
       { name: "Instrument", kind: "value object", members: ["-symbol: String", "-board: String"] },
       { name: "Quantity", kind: "value object", members: ["-lots: long", "+minus(other): Quantity"] },
@@ -2402,7 +7440,8 @@ const DDD_MODEL_SECURITIES = {
       { name: "TradingAccount", kind: "aggregate root", members: ["-accountNo: AccountNo", "-status: AccountStatus", "+canTrade(): boolean"] },
     ] },
     { id: "orderEvents", name: "Domain events", classes: [
-      { name: "OrderAccepted", kind: "domain event", members: ["-orderId: OrderId", "-occurredAt: Instant"] },
+      { name: "OrderPlaced", kind: "domain event", members: ["-orderId: OrderId", "-occurredAt: Instant"] },
+      { name: "OrderRouted", kind: "domain event", members: ["-orderId: OrderId", "-occurredAt: Instant"] },
       { name: "OrderFilled", kind: "domain event", members: ["-orderId: OrderId", "-execId: ExecId", "-occurredAt: Instant"] },
     ] },
   ],
@@ -2412,15 +7451,15 @@ const DDD_MODEL_SECURITIES = {
     ["Order", "Quantity", "quantity"],
     ["Order", "Price", "limit price"],
     ["Order", "TradingAccount", "references by id"],
-    ["Order", "OrderAccepted", "raises"],
+    ["Order", "OrderPlaced", "raises"],
+    ["Order", "OrderRouted", "raises"],
     ["Order", "OrderFilled", "raises"],
   ],
   eventFlow: [
     { actor: "Investor", command: "Place Order", aggregate: "Order", event: "OrderPlaced", policy: "Check risk before routing" },
     { actor: "Pre-trade Risk", command: "Reserve Buying Power", aggregate: "RiskAccount", event: "BuyingPowerReserved", policy: "Route once reserved" },
-    { actor: "Order Management", command: "Route To Exchange", aggregate: "Order", event: "OrderAccepted", policy: "Apply each execution report" },
-    { actor: "Stock Exchange", command: "Record Fill", aggregate: "Order", event: "OrderFilled", policy: "Update positions after a fill" },
-    { actor: "Portfolio", command: "Update Position", aggregate: "Position", event: "PositionUpdated", policy: "Settle at end of day" },
+    { actor: "Order Management", command: "Route To Exchange", aggregate: "Order", event: "OrderRouted" },
+    { actor: "Stock Exchange", command: "Record Fill", aggregate: "Order", event: "OrderFilled", policy: "Settle every fill at end of day" },
     { actor: "Settlement", command: "Settle Trade", aggregate: "SettlementInstruction", event: "TradeSettled" },
   ],
   hexagonal: {
@@ -2433,7 +7472,7 @@ const DDD_MODEL_SECURITIES = {
     ],
     rels: [
       ["orderController", "placePort", "calls"], ["fixListener", "fillPort", "calls"],
-      ["placePort", "appService", "implemented by"], ["fillPort", "appService", "implemented by"],
+      ["appService", "placePort", "implements"], ["appService", "fillPort", "implements"],
       ["appService", "orderRoot", "loads and invokes"], ["orderRoot", "tickPolicy", "checks"],
       ["appService", "repoPort", "uses"], ["appService", "riskPort", "uses"], ["appService", "routePort", "uses"], ["appService", "eventPort", "uses"],
       ["jpaRepo", "repoPort", "implements"], ["riskClient", "riskPort", "implements"], ["fixAcl", "routePort", "implements"], ["outbox", "eventPort", "implements"],
@@ -2468,7 +7507,7 @@ const DDD_MODEL_SHOPPING = {
   ],
   aggregates: [
     { id: "orderAggregate", name: "Order aggregate", classes: [
-      { name: "Order", kind: "aggregate root", members: ["-orderId: OrderId", "-status: OrderStatus", "+place(lines): void", "+confirm(): void", "+cancel(reason): void", "+total(): Money"] },
+      { name: "Order", kind: "aggregate root", members: ["-orderId: OrderId", "-cartId: CartId", "-status: OrderStatus", "+place(lines): void", "+confirm(): void", "+cancel(reason): void", "+total(): Money"] },
       { name: "OrderLine", kind: "entity", members: ["-lineId: LineId", "-sku: Sku", "-quantity: int"] },
       { name: "Money", kind: "value object", members: ["-amount: BigDecimal", "-currency: Currency"] },
       { name: "ShippingAddress", kind: "value object", members: ["-street: String", "-city: String", "-postalCode: String"] },
@@ -2493,8 +7532,8 @@ const DDD_MODEL_SHOPPING = {
   ],
   eventFlow: [
     { actor: "Shopper", command: "Place Order", aggregate: "Order", event: "OrderPlaced", policy: "Reserve stock for new orders" },
-    { actor: "Inventory", command: "Reserve Stock", aggregate: "StockItem", event: "StockReserved", policy: "Charge once stock is held" },
-    { actor: "Payment", command: "Charge Order", aggregate: "Payment", event: "PaymentCaptured", policy: "Confirm paid orders" },
+    { actor: "Ordering", command: "Reserve Stock", aggregate: "StockItem", event: "StockReserved", policy: "Charge once stock is held" },
+    { actor: "Ordering", command: "Charge Order", aggregate: "Payment", event: "PaymentCaptured", policy: "Confirm paid orders" },
     { actor: "Ordering", command: "Confirm Order", aggregate: "Order", event: "OrderConfirmed", policy: "Ship confirmed orders" },
     { actor: "Fulfilment", command: "Create Shipment", aggregate: "Shipment", event: "ShipmentDispatched" },
   ],
@@ -2508,10 +7547,245 @@ const DDD_MODEL_SHOPPING = {
     ],
     rels: [
       ["checkoutController", "placePort", "calls"], ["paymentListener", "confirmPort", "calls"],
-      ["placePort", "appService", "implemented by"], ["confirmPort", "appService", "implemented by"],
+      ["appService", "placePort", "implements"], ["appService", "confirmPort", "implements"],
       ["appService", "orderRoot", "loads and invokes"], ["orderRoot", "pricingService", "checks"],
       ["appService", "repoPort", "uses"], ["appService", "stockPort", "uses"], ["appService", "eventPort", "uses"],
       ["jpaRepo", "repoPort", "implements"], ["stockClient", "stockPort", "implements"], ["outbox", "eventPort", "implements"],
+    ],
+  },
+};
+const DDD_MODEL_CRYPTO = {
+  key: "crypto", group: "DDD — Sàn tiền ảo", name: "Crypto Exchange", tacticalContext: "Spot Trading",
+  contexts: [
+    { id: "spotTrading", name: "Spot Trading", subdomain: "Order Matching", type: "core", desc: "Orders, order books, trades" },
+    { id: "custody", name: "Wallet and Custody", subdomain: "Digital Asset Custody", type: "core", desc: "Balances, deposits, withdrawals" },
+    { id: "accounts", name: "User Accounts", subdomain: "Customer Accounts", type: "supporting", desc: "Tiers, trading permissions" },
+    { id: "compliance", name: "Compliance", subdomain: "AML Monitoring", type: "supporting", desc: "Screens trades and withdrawals" },
+    { id: "marketData", name: "Market Data", subdomain: "Market Information", type: "supporting", desc: "Tickers, depth, candles" },
+    { id: "identity", name: "Identity and Access", subdomain: "Identity", type: "generic", desc: "Sign-in, 2FA, API keys" },
+    { id: "notifications", name: "Notifications", subdomain: "Messaging", type: "generic", desc: "Security and trade alerts" },
+  ],
+  externals: [
+    { id: "kycProvider", name: "KYC Provider", desc: "Identity document checks" },
+    { id: "blockchainNetworks", name: "Blockchain Networks", desc: "Public chains" },
+    { id: "bankingPartner", name: "Fiat Banking Partner", desc: "Fiat in and out" },
+  ],
+  contextRels: [
+    ["kycProvider", "accounts", "Identity checks", "Upstream OHS · Downstream ACL"],
+    ["identity", "accounts", "Authenticated user", "Upstream OHS · Downstream Conformist"],
+    ["blockchainNetworks", "custody", "Transactions and confirmations", "Published Language · Downstream ACL"],
+    ["bankingPartner", "custody", "Fiat transfers", "Upstream OHS · Downstream ACL"],
+    ["accounts", "spotTrading", "Trading permissions", "Customer/Supplier"],
+    ["custody", "spotTrading", "Balance locks", "Customer/Supplier"],
+    ["spotTrading", "marketData", "TradeExecuted", "Published Language (events)"],
+    ["spotTrading", "compliance", "TradeExecuted", "Published Language (events)"],
+    ["compliance", "notifications", "AlertRaised", "Published Language (events)"],
+  ],
+  aggregates: [
+    { id: "orderAggregate", name: "Order aggregate", classes: [
+      { name: "Order", kind: "aggregate root", members: ["-orderId: OrderId", "-status: OrderStatus", "+submit(): void", "+applyTrade(trade): void", "+cancel(): void"] },
+      { name: "Trade", kind: "entity", members: ["-tradeId: TradeId", "-quantity: Decimal", "-price: Decimal"] },
+      { name: "TradingPair", kind: "value object", members: ["-base: Asset", "-quote: Asset", "+minNotional(): Decimal"] },
+      { name: "OrderLimit", kind: "value object", members: ["-quantity: Decimal", "-price: Decimal", "-timeInForce: TimeInForce"] },
+    ] },
+    { id: "bookAggregate", name: "OrderBook aggregate", classes: [
+      { name: "OrderBook", kind: "aggregate root", members: ["-pair: TradingPair", "+place(entry): void", "+remove(orderId): void"] },
+      { name: "PriceLevel", kind: "entity", members: ["-price: Decimal", "-entries: BookEntry[]"] },
+    ] },
+    { id: "tradingEvents", name: "Domain events", classes: [
+      { name: "OrderPlaced", kind: "domain event", members: ["-orderId: OrderId", "-occurredAt: Instant"] },
+      { name: "TradeExecuted", kind: "domain event", members: ["-tradeId: TradeId", "-occurredAt: Instant"] },
+    ] },
+  ],
+  aggregateRels: [
+    ["Order", "Trade", "has many"],
+    ["Order", "TradingPair", "trades"],
+    ["Order", "OrderLimit", "limit"],
+    ["Order", "OrderBook", "references by pair"],
+    ["OrderBook", "PriceLevel", "has many"],
+    ["Order", "OrderPlaced", "raises"],
+    ["OrderBook", "TradeExecuted", "raises"],
+  ],
+  eventFlow: [
+    { actor: "Trader", command: "Place Order", aggregate: "Order", event: "OrderPlaced", policy: "Lock funds for new orders" },
+    { actor: "Wallet and Custody", command: "Lock Funds", aggregate: "Balance", event: "FundsLocked", policy: "Match once funds are locked" },
+    { actor: "Spot Trading", command: "Match Order", aggregate: "OrderBook", event: "TradeExecuted", policy: "Settle every trade" },
+    { actor: "Wallet and Custody", command: "Settle Trade", aggregate: "Balance", event: "TradeSettled", policy: "Publish each settled trade" },
+    { actor: "Market Data", command: "Publish Ticker", aggregate: "Ticker", event: "TickerPublished" },
+  ],
+  hexagonal: {
+    layers: [
+      { name: "Driving adapters", type: "adapter", items: [["orderController", "OrderController", "REST API for clients"], ["matchListener", "MatchResultListener", "Kafka consumer"]] },
+      { name: "Inbound ports", type: "port", items: [["placePort", "PlaceOrderUseCase", "Accepts a new order"], ["tradePort", "ApplyTradeUseCase", "Records matched trades"]] },
+      { name: "Application and domain", type: "domain", items: [["appService", "OrderApplicationService", "Transaction boundary"], ["orderRoot", "Order aggregate", "Business rules and state"], ["feePolicy", "TradingFeePolicy", "Domain service for fees"]] },
+      { name: "Outbound ports", type: "port", items: [["repoPort", "OrderRepository", "Stores aggregates"], ["balancePort", "BalanceLockGateway", "Locks and releases funds"], ["eventPort", "DomainEventPublisher", "Publishes events"]] },
+      { name: "Driven adapters", type: "adapter", items: [["jdbcRepo", "PostgresOrderRepository", "PostgreSQL"], ["custodyAcl", "CustodyAcl", "Anti-corruption layer"], ["outbox", "KafkaOutboxPublisher", "Transactional outbox"]] },
+    ],
+    rels: [
+      ["orderController", "placePort", "calls"], ["matchListener", "tradePort", "calls"],
+      ["appService", "placePort", "implements"], ["appService", "tradePort", "implements"],
+      ["appService", "orderRoot", "loads and invokes"], ["orderRoot", "feePolicy", "checks"],
+      ["appService", "repoPort", "uses"], ["appService", "balancePort", "uses"], ["appService", "eventPort", "uses"],
+      ["jdbcRepo", "repoPort", "implements"], ["custodyAcl", "balancePort", "implements"], ["outbox", "eventPort", "implements"],
+    ],
+  },
+};
+const DDD_MODEL_GAME = {
+  key: "game", group: "DDD — Game online", name: "Online Game", tacticalContext: "Matchmaking",
+  contexts: [
+    { id: "matchmaking", name: "Matchmaking", subdomain: "Fair Matches", type: "core", desc: "Builds balanced matches quickly" },
+    { id: "liveMatch", name: "Live Match", subdomain: "Gameplay Sessions", type: "core", desc: "Runs matches, decides results" },
+    { id: "progression", name: "Player Progression", subdomain: "Progression", type: "supporting", desc: "Ratings, levels, seasons" },
+    { id: "economy", name: "In-game Economy", subdomain: "Economy", type: "supporting", desc: "Items, currency, rewards" },
+    { id: "liveOps", name: "Live Operations", subdomain: "Events and Promotions", type: "supporting", desc: "Seasonal events, offers" },
+    { id: "identity", name: "Identity and Access", subdomain: "Identity", type: "generic", desc: "Accounts and sign-in" },
+    { id: "notifications", name: "Notifications", subdomain: "Messaging", type: "generic", desc: "Push alerts" },
+  ],
+  externals: [
+    { id: "cloudFleet", name: "Cloud Fleet", desc: "Game server capacity" },
+    { id: "antiCheat", name: "Anti-cheat Provider", desc: "Scores suspicious play" },
+    { id: "storeBilling", name: "App Store Billing", desc: "In-app purchases" },
+  ],
+  contextRels: [
+    ["cloudFleet", "matchmaking", "Server allocations", "Upstream OHS · Downstream ACL"],
+    ["identity", "matchmaking", "Authenticated player", "Upstream OHS · Downstream Conformist"],
+    ["progression", "matchmaking", "Skill ratings", "Customer/Supplier"],
+    ["antiCheat", "liveMatch", "Cheat verdicts", "Upstream OHS · Downstream ACL"],
+    ["matchmaking", "liveMatch", "MatchFound", "Published Language (events)"],
+    ["matchmaking", "notifications", "MatchFound", "Published Language (events)"],
+    ["liveMatch", "progression", "MatchFinished", "Published Language (events)"],
+    ["liveMatch", "economy", "RewardsEarned", "Published Language (events)"],
+    ["liveOps", "economy", "Promotion rules", "Customer/Supplier"],
+    ["storeBilling", "economy", "Purchase receipts", "Upstream OHS · Downstream ACL"],
+  ],
+  aggregates: [
+    { id: "ticketAggregate", name: "MatchTicket aggregate", classes: [
+      { name: "MatchTicket", kind: "aggregate root", members: ["-ticketId: TicketId", "-status: TicketStatus", "+join(): void", "+cancel(): void", "+expire(): void"] },
+      { name: "TicketMember", kind: "entity", members: ["-playerId: PlayerId", "-rating: SkillRating"] },
+      { name: "SkillRating", kind: "value object", members: ["-value: int", "-deviation: int", "+gapTo(other): int"] },
+      { name: "Region", kind: "value object", members: ["-code: String", "-maxLatencyMs: int"] },
+    ] },
+    { id: "gameMatchAggregate", name: "GameMatch aggregate", classes: [
+      { name: "GameMatch", kind: "aggregate root", members: ["-matchId: MatchId", "-status: MatchStatus", "+assignServer(serverId): void", "+finish(score): void"] },
+      { name: "MatchTeam", kind: "entity", members: ["-teamId: TeamId", "-ticketIds: TicketId[]"] },
+    ] },
+    { id: "matchEvents", name: "Domain events", classes: [
+      { name: "TicketQueued", kind: "domain event", members: ["-ticketId: TicketId", "-occurredAt: Instant"] },
+      { name: "TicketExpired", kind: "domain event", members: ["-ticketId: TicketId", "-occurredAt: Instant"] },
+      { name: "MatchFound", kind: "domain event", members: ["-matchId: MatchId", "-occurredAt: Instant"] },
+    ] },
+  ],
+  aggregateRels: [
+    ["MatchTicket", "TicketMember", "has many"],
+    ["MatchTicket", "Region", "plays in"],
+    ["TicketMember", "SkillRating", "rated"],
+    ["GameMatch", "MatchTeam", "has 2 teams"],
+    ["GameMatch", "MatchTicket", "references by id"],
+    ["MatchTicket", "TicketQueued", "raises"],
+    ["MatchTicket", "TicketExpired", "raises"],
+    ["GameMatch", "MatchFound", "raises"],
+  ],
+  eventFlow: [
+    { actor: "Player", command: "Join Queue", aggregate: "MatchTicket", event: "TicketQueued", policy: "Match queued tickets each tick" },
+    { actor: "Matchmaking", command: "Build Match", aggregate: "GameMatch", event: "MatchFound", policy: "Start a session per match" },
+    { actor: "Live Match", command: "Start Session", aggregate: "GameSession", event: "SessionStarted", policy: "Close on the final score" },
+    { actor: "Game Server", command: "Finish Session", aggregate: "GameSession", event: "MatchFinished", policy: "Update ratings after a match" },
+    { actor: "Player Progression", command: "Apply Result", aggregate: "PlayerProfile", event: "RatingUpdated" },
+  ],
+  hexagonal: {
+    layers: [
+      { name: "Driving adapters", type: "adapter", items: [["queueController", "QueueController", "gRPC API for clients"], ["tickScheduler", "MatchTickScheduler", "Runs every few seconds"]] },
+      { name: "Inbound ports", type: "port", items: [["joinPort", "JoinQueueUseCase", "Opens a ticket"], ["buildPort", "BuildMatchesUseCase", "Turns tickets into matches"]] },
+      { name: "Application and domain", type: "domain", items: [["appService", "MatchmakingApplicationService", "Transaction boundary"], ["ticketRoot", "MatchTicket aggregate", "Ticket rules and state"], ["balancePolicy", "TeamBalancePolicy", "Domain service for fair teams"]] },
+      { name: "Outbound ports", type: "port", items: [["repoPort", "TicketRepository", "Stores aggregates"], ["ratingPort", "RatingGateway", "Reads skill ratings"], ["eventPort", "DomainEventPublisher", "Publishes events"]] },
+      { name: "Driven adapters", type: "adapter", items: [["redisRepo", "RedisTicketRepository", "Redis"], ["ratingClient", "ProgressionGrpcClient", "gRPC"], ["outbox", "KafkaEventPublisher", "Kafka producer"]] },
+    ],
+    rels: [
+      ["queueController", "joinPort", "calls"], ["tickScheduler", "buildPort", "calls"],
+      ["appService", "joinPort", "implements"], ["appService", "buildPort", "implements"],
+      ["appService", "ticketRoot", "loads and invokes"], ["ticketRoot", "balancePolicy", "checks"],
+      ["appService", "repoPort", "uses"], ["appService", "ratingPort", "uses"], ["appService", "eventPort", "uses"],
+      ["redisRepo", "repoPort", "implements"], ["ratingClient", "ratingPort", "implements"], ["outbox", "eventPort", "implements"],
+    ],
+  },
+};
+const DDD_MODEL_LOGISTICS = {
+  key: "logistics", group: "DDD — Logistics", name: "Logistics", tacticalContext: "Dispatch",
+  contexts: [
+    { id: "dispatch", name: "Dispatch", subdomain: "Last-mile Delivery", type: "core", desc: "Fits parcels into driver runs" },
+    { id: "routePlanning", name: "Route Planning", subdomain: "Route Optimisation", type: "core", desc: "Cheapest routes within time windows" },
+    { id: "booking", name: "Shipment Booking", subdomain: "Shipment Management", type: "supporting", desc: "Orders from merchants" },
+    { id: "warehouse", name: "Warehouse Operations", subdomain: "Warehousing", type: "supporting", desc: "Inbound, sorting, outbound" },
+    { id: "tracking", name: "Tracking", subdomain: "Shipment Visibility", type: "supporting", desc: "Status timeline per parcel" },
+    { id: "billing", name: "Billing", subdomain: "Invoicing", type: "generic", desc: "Rates and invoices" },
+    { id: "notifications", name: "Notifications", subdomain: "Messaging", type: "generic", desc: "SMS status updates" },
+  ],
+  externals: [
+    { id: "customsBroker", name: "Customs Broker", desc: "Cross-border clearance" },
+    { id: "mapProvider", name: "Maps Provider", desc: "Travel times" },
+    { id: "carrierPartners", name: "Partner Carriers", desc: "Line-haul partners" },
+  ],
+  contextRels: [
+    ["customsBroker", "booking", "Declaration results", "Upstream legacy · Downstream ACL"],
+    ["booking", "warehouse", "ShipmentBooked", "Published Language (events)"],
+    ["booking", "billing", "ShipmentBooked", "Published Language (events)"],
+    ["warehouse", "dispatch", "ParcelSorted", "Published Language (events)"],
+    ["mapProvider", "routePlanning", "Travel times", "Upstream OHS · Downstream ACL"],
+    ["routePlanning", "dispatch", "Planned routes", "Customer/Supplier"],
+    ["dispatch", "tracking", "RunAssigned", "Published Language (events)"],
+    ["carrierPartners", "tracking", "Partner scan events", "Upstream OHS · Downstream ACL"],
+    ["tracking", "notifications", "StatusChanged", "Published Language (events)"],
+  ],
+  aggregates: [
+    { id: "runAggregate", name: "DeliveryRun aggregate", classes: [
+      { name: "DeliveryRun", kind: "aggregate root", members: ["-runId: RunId", "-status: RunStatus", "+addStop(parcelId, window): void", "+assign(driverId): void", "+complete(): void"] },
+      { name: "Stop", kind: "entity", members: ["-stopId: StopId", "-sequence: int", "-parcelId: ParcelId"] },
+      { name: "TimeWindow", kind: "value object", members: ["-from: Instant", "-to: Instant", "+contains(time): boolean"] },
+      { name: "GeoPoint", kind: "value object", members: ["-latitude: Decimal", "-longitude: Decimal"] },
+    ] },
+    { id: "parcelAggregate", name: "Parcel aggregate", classes: [
+      { name: "Parcel", kind: "aggregate root", members: ["-parcelId: ParcelId", "-status: ParcelStatus", "+markDelivered(proof): void"] },
+      { name: "ParcelSize", kind: "value object", members: ["-weightKg: Decimal", "-volumeLitres: Decimal"] },
+    ] },
+    { id: "runEvents", name: "Domain events", classes: [
+      { name: "RunPlanned", kind: "domain event", members: ["-runId: RunId", "-occurredAt: Instant"] },
+      { name: "RunAssigned", kind: "domain event", members: ["-runId: RunId", "-occurredAt: Instant"] },
+      { name: "ParcelSorted", kind: "domain event", members: ["-parcelId: ParcelId", "-occurredAt: Instant"] },
+      { name: "ParcelDelivered", kind: "domain event", members: ["-parcelId: ParcelId", "-occurredAt: Instant"] },
+    ] },
+  ],
+  aggregateRels: [
+    ["DeliveryRun", "Stop", "has many"],
+    ["Stop", "TimeWindow", "due within"],
+    ["Stop", "GeoPoint", "located at"],
+    ["Stop", "Parcel", "references by id"],
+    ["Parcel", "ParcelSize", "measures"],
+    ["DeliveryRun", "RunPlanned", "raises"],
+    ["DeliveryRun", "RunAssigned", "raises"],
+    ["Parcel", "ParcelSorted", "raises"],
+    ["Parcel", "ParcelDelivered", "raises"],
+  ],
+  eventFlow: [
+    { actor: "Warehouse Operations", command: "Sort Parcel", aggregate: "Parcel", event: "ParcelSorted", policy: "Plan a run for sorted parcels" },
+    { actor: "Dispatch", command: "Plan Run", aggregate: "DeliveryRun", event: "RunPlanned", policy: "Assign a driver to each run" },
+    { actor: "Dispatch", command: "Assign Driver", aggregate: "DeliveryRun", event: "RunAssigned", policy: "Driver works each assigned run" },
+    { actor: "Driver", command: "Confirm Delivery", aggregate: "Parcel", event: "ParcelDelivered", policy: "Tell the recipient" },
+    { actor: "Notifications", command: "Send Update", aggregate: "Message", event: "UpdateSent" },
+  ],
+  hexagonal: {
+    layers: [
+      { name: "Driving adapters", type: "adapter", items: [["runController", "RunController", "REST API for drivers"], ["parcelListener", "ParcelSortedListener", "Kafka consumer"]] },
+      { name: "Inbound ports", type: "port", items: [["planPort", "PlanRunUseCase", "Builds a new run"], ["confirmPort", "CompleteStopUseCase", "Closes a delivered stop"]] },
+      { name: "Application and domain", type: "domain", items: [["appService", "DispatchApplicationService", "Transaction boundary"], ["runRoot", "DeliveryRun aggregate", "Business rules and state"], ["capacityPolicy", "VehicleCapacityPolicy", "Domain service for load limits"]] },
+      { name: "Outbound ports", type: "port", items: [["repoPort", "DeliveryRunRepository", "Stores aggregates"], ["routePort", "RoutePlannerGateway", "Requests planned routes"], ["eventPort", "DomainEventPublisher", "Publishes events"]] },
+      { name: "Driven adapters", type: "adapter", items: [["pgRepo", "PostgresRunRepository", "PostGIS"], ["routeClient", "RoutePlanningGrpcClient", "gRPC"], ["outbox", "KafkaOutboxPublisher", "Transactional outbox"]] },
+    ],
+    rels: [
+      ["runController", "confirmPort", "calls"], ["parcelListener", "planPort", "calls"],
+      ["appService", "planPort", "implements"], ["appService", "confirmPort", "implements"],
+      ["appService", "runRoot", "loads and invokes"], ["runRoot", "capacityPolicy", "checks"],
+      ["appService", "repoPort", "uses"], ["appService", "routePort", "uses"], ["appService", "eventPort", "uses"],
+      ["pgRepo", "repoPort", "implements"], ["routeClient", "routePort", "implements"], ["outbox", "eventPort", "implements"],
     ],
   },
 };
@@ -2527,11 +7801,13 @@ const DddViews = (() => {
   const PALETTE = {
     core: ["#b45309", "#ffffff"], supporting: ["#0e7490", "#ffffff"], generic: ["#64748b", "#ffffff"], external: ["#334155", "#ffffff"],
     command: ["#2563eb", "#ffffff"], aggregate: ["#facc15", "#000000"], event: ["#fb923c", "#000000"], policy: ["#a855f7", "#ffffff"],
-    adapter: ["#0e7490", "#ffffff"], port: ["#a5f3fc", "#000000"], domain: ["#facc15", "#000000"],
+    adapter: ["#0e7490", "#ffffff"], port: ["#a5f3fc", "#000000"], domain: ["#facc15", "#000000"], member: ["#fef3c7", "#000000"],
   };
   const TYPE_NAME = { core: "Core", supporting: "Supporting", generic: "Generic" };
   const TIERS = ["core", "supporting", "generic"];
 
+  // Partnership and Shared Kernel have no upstream, so these links are drawn without an arrow.
+  const isSymmetric = note => /^(?:Partnership|Shared Kernel)/.test(note || "");
   const titleOf = (key, subject) => `${VIEWS.find(v => v.key === key).title}: ${subject}`;
 
   function subdomains(m) {
@@ -2565,7 +7841,7 @@ const DddViews = (() => {
   const graph = (m, key) => ({ subdomains, "context-map": contextMap, "event-flow": eventFlow, hexagonal }[key](m));
   const aggregates = m => ({ title: titleOf("aggregates", m.tacticalContext), groups: m.aggregates, rels: m.aggregateRels });
 
-  return { VIEWS, PALETTE, graph, aggregates };
+  return { VIEWS, PALETTE, isSymmetric, graph, aggregates };
 })();
 const DddToText = (() => {
   const wrapped = (n, joiner) => [n.name, n.caption, ...C4Views.wrap(n.desc).filter(Boolean)].join(joiner);
@@ -2581,7 +7857,8 @@ const DddToText = (() => {
       const crossing = v.rowsAreSteps && home.get(from) !== home.get(to), text = edgeText(label, note, "<br/>");
       // Layout ranks follow edge direction, so "implements" is drawn port-first to keep adapters below their ports.
       if (label === "implements") return `${to} -.-|"implements"| ${from}`;
-      return `${crossing ? home.get(from) : from} -->${text ? `|"${text}"|` : ""} ${crossing ? home.get(to) : to}`;
+      const arrow = DddViews.isSymmetric(note) ? "---" : "-->";
+      return `${crossing ? home.get(from) : from} ${arrow}${text ? `|"${text}"|` : ""} ${crossing ? home.get(to) : to}`;
     };
     const styles = [...new Set(allNodes(v).map(n => n.type))].map(t => `classDef ${t} fill:${DddViews.PALETTE[t][0]},stroke:${DddViews.PALETTE[t][0]},color:${DddViews.PALETTE[t][1]}`);
     // Unlinked subgraphs would be placed in reverse order; invisible links keep them top to bottom.
@@ -2602,7 +7879,7 @@ const DddToText = (() => {
     const groups = v.groups.flatMap(g => [`package "${g.name}" {`, ...g.nodes.map(n => `  ${node(n)}`), "}"]);
     const edge = ([from, to, label, note]) => {
       if (label === "implements") return `${to} <.. ${from} : implements`;
-      const arrow = v.rowsAreSteps && home.get(from) === home.get(to) ? "-right->" : "-->", text = edgeText(label, note, "\\n");
+      const arrow = DddViews.isSymmetric(note) ? "--" : v.rowsAreSteps && home.get(from) === home.get(to) ? "-right->" : "-->", text = edgeText(label, note, "\\n");
       return `${from} ${arrow} ${to}${text ? ` : ${text}` : ""}`;
     };
     const order = v.edges.length ? [] : v.groups.slice(1).map((g, i) => `${v.groups[i].nodes[0].id} -[hidden]down- ${g.nodes[0].id}`);
@@ -2630,7 +7907,7 @@ const DddToD2 = (() => {
     const node = n => `${n.id}: "${label(n)}" {class: ${n.type}}`;
     const types = new Set([...v.groups.flatMap(g => g.nodes), ...v.nodes].map(n => n.type));
     const groups = v.groups.flatMap(g => [`${g.id}: "${g.name}" {`, `  ${GROUP}`, `  grid-rows: 1`, `  horizontal-gap: 120`, ...g.nodes.map(n => `  ${node(n)}`), "}"]);
-    const edge = ([from, to, text, note]) => `${ref(from)} -> ${ref(to)}${text ? `: "${text}${note ? `\\n[${note}]` : ""}"` : ""}`;
+    const edge = ([from, to, text, note]) => `${ref(from)} ${DddViews.isSymmetric(note) ? "--" : "->"} ${ref(to)}${text ? `: "${text}${note ? `\\n[${note}]` : ""}"` : ""}`;
     return [title(v.title), v.groups.length ? "grid-columns: 1" : "direction: down", "", "classes: {", ...[...types].map(t => `  ${paint(t)}`), "}", "", ...groups, ...v.nodes.map(node), "", ...v.edges.map(edge)].join("\n");
   }
 
@@ -2651,17 +7928,16 @@ const DddToD2 = (() => {
 })();
 // Grouped views stack one bounded box per row; ungrouped views and aggregates reuse the layered layout of the C4 builder.
 const DddToDrawio = (() => {
-  const { vertex, edge, page, layers, spread, classLabel, classHeight } = C4ToDrawio.parts;
+  const { FRAME, EDGE, vertex, edge, detour, page, layers, spread, classLabel, classHeight } = C4ToDrawio.parts;
   const W = 200, H = 100, CLASS_W = 240, GAP_X = 60, GAP_Y = 90, MAP_GAP_X = 170, MAP_GAP_Y = 150, PAD = 40, HEAD = 30;
-  const FRAME = "rounded=1;arcSize=2;dashed=1;fillColor=none;strokeColor=#666666;fontColor=#444444;verticalAlign=top;align=left;spacingLeft=8;html=1;container=1;collapsible=0;";
-  const EDGE = "rounded=1;html=1;jumpStyle=arc;fontSize=10;labelBackgroundColor=#ffffff;strokeColor=#707070;fontColor=#555555;endArrow=blockThin;endFill=1;";
+  const ARROW = "endArrow=blockThin;endFill=1;";
 
   const style = n => {
     const [fill, ink] = DddViews.PALETTE[n.type];
     return `rounded=1;arcSize=8;whiteSpace=wrap;html=1;fillColor=${fill};strokeColor=${fill};fontColor=${ink};`;
   };
   const label = n => `<b>${n.name}</b><br><font style="font-size:10px">${n.caption}</font>${n.desc ? `<br><br>${n.desc}` : ""}`;
-  const edges = v => v.edges.map(([from, to, text, note], i) => edge(i, from, to, [text, note && `[${note}]`].filter(Boolean).join("<br>"), EDGE));
+  const edges = (v, via = () => undefined) => v.edges.map(([from, to, text, note], i) => edge(i, from, to, [text, note && `[${note}]`].filter(Boolean).join("<br>"), EDGE + (DddViews.isSymmetric(note) ? "endArrow=none;" : ARROW), via(from, to)));
 
   function rows(v) {
     const step = W + GAP_X, cols = Math.max(...v.groups.map(g => g.nodes.length)), width = cols * step - GAP_X + 2 * PAD, cells = [];
@@ -2677,11 +7953,12 @@ const DddToDrawio = (() => {
 
   function layered(v) {
     const grouped = layers(v.nodes, v.edges), xOf = spread(grouped, v.edges, W + MAP_GAP_X);
-    return [...grouped.flatMap((list, r) => list.map(n => vertex(n.id, label(n), style(n), "1", xOf(n.id), PAD + r * (H + MAP_GAP_Y), W, H))), ...edges(v)];
+    const spot = new Map(grouped.flatMap((list, r) => list.map(n => [n.id, { x: xOf(n.id), y: PAD + r * (H + MAP_GAP_Y) }])));
+    return [...grouped.flatMap(list => list.map(n => vertex(n.id, label(n), style(n), "1", spot.get(n.id).x, spot.get(n.id).y, W, H))), ...edges(v, (from, to) => detour(spot.get(from), spot.get(to), W + MAP_GAP_X, H))];
   }
 
   function aggregates(v) {
-    const cells = [], rels = v.rels.map(([a, b, t], i) => edge(i, a, b, t, `${EDGE}dashed=1;`));
+    const cells = [], rels = v.rels.map(([a, b, t], i) => edge(i, a, b, t, `${EDGE}${ARROW}dashed=1;`));
     let left = PAD, top = PAD;
     // The main aggregate sits left and the others stack on its right, so links to one group never cross another.
     v.groups.forEach((g, index) => {
@@ -2711,13 +7988,23 @@ const DddToStructurizr = (() => {
   const q = s => `"${s}"`;
   const scoped = (view, id) => `${view.replace(/\W/g, "")}_${id}`;
 
+  const KIND_TAG = { "domain event": "event", "aggregate root": "aggregate" };
+  // Structurizr rejects two containers with one name in a system, and event storming repeats aggregates.
+  const uniqueNames = nodes => {
+    const seen = new Map();
+    return nodes.map(n => {
+      seen.set(n.name, (seen.get(n.name) || 0) + 1);
+      return seen.get(n.name) > 1 ? { ...n, name: `${n.name} (${seen.get(n.name)})` } : n;
+    });
+  };
+
   function viewOf(m, key) {
     if (key !== "aggregates") {
       const v = DddViews.graph(m, key);
-      return { title: v.title, nodes: [...v.groups.flatMap(g => g.nodes), ...v.nodes].map(n => ({ id: n.id, name: n.name, desc: n.desc, tech: n.caption.slice(1, -1), tag: n.type })), edges: v.edges };
+      return { title: v.title, nodes: uniqueNames([...v.groups.flatMap(g => g.nodes), ...v.nodes].map(n => ({ id: n.id, name: n.name, desc: n.desc, tech: n.caption.slice(1, -1), tag: n.type }))), edges: v.edges };
     }
     const v = DddViews.aggregates(m);
-    return { title: v.title, nodes: v.groups.flatMap(g => g.classes.map(c => ({ id: c.name, name: c.name, desc: c.members.join(" · "), tech: c.kind, tag: c.kind === "domain event" ? "event" : c.kind === "aggregate root" ? "aggregate" : "port" }))), edges: v.rels };
+    return { title: v.title, nodes: v.groups.flatMap(g => g.classes.map(c => ({ id: c.name, name: c.name, desc: c.members.join(" · "), tech: c.kind, tag: KIND_TAG[c.kind] || "member" }))), edges: v.rels };
   }
 
   function build(m) {
@@ -2733,7 +8020,8 @@ const DddToStructurizr = (() => {
   return { build };
 })();
 // Adds every system × DDD diagram to the tabs' samples as ?demo=ddd-<system>-<view>; Structurizr gets one workspace with 5 views.
-for (const model of [DDD_MODEL_BANKING, DDD_MODEL_SECURITIES, DDD_MODEL_SHOPPING]) {
+const DDD_MODELS = [DDD_MODEL_BANKING, DDD_MODEL_SECURITIES, DDD_MODEL_SHOPPING, DDD_MODEL_CRYPTO, DDD_MODEL_GAME, DDD_MODEL_LOGISTICS];
+for (const model of DDD_MODELS) {
   for (const { key, label } of DddViews.VIEWS) {
     const id = `ddd-${model.key}-${key}`;
     MERMAID_SAMPLES[id] = [label, DddToText.mermaid(model, key), model.group];

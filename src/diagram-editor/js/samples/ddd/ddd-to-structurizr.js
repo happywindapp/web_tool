@@ -3,13 +3,23 @@ const DddToStructurizr = (() => {
   const q = s => `"${s}"`;
   const scoped = (view, id) => `${view.replace(/\W/g, "")}_${id}`;
 
+  const KIND_TAG = { "domain event": "event", "aggregate root": "aggregate" };
+  // Structurizr rejects two containers with one name in a system, and event storming repeats aggregates.
+  const uniqueNames = nodes => {
+    const seen = new Map();
+    return nodes.map(n => {
+      seen.set(n.name, (seen.get(n.name) || 0) + 1);
+      return seen.get(n.name) > 1 ? { ...n, name: `${n.name} (${seen.get(n.name)})` } : n;
+    });
+  };
+
   function viewOf(m, key) {
     if (key !== "aggregates") {
       const v = DddViews.graph(m, key);
-      return { title: v.title, nodes: [...v.groups.flatMap(g => g.nodes), ...v.nodes].map(n => ({ id: n.id, name: n.name, desc: n.desc, tech: n.caption.slice(1, -1), tag: n.type })), edges: v.edges };
+      return { title: v.title, nodes: uniqueNames([...v.groups.flatMap(g => g.nodes), ...v.nodes].map(n => ({ id: n.id, name: n.name, desc: n.desc, tech: n.caption.slice(1, -1), tag: n.type }))), edges: v.edges };
     }
     const v = DddViews.aggregates(m);
-    return { title: v.title, nodes: v.groups.flatMap(g => g.classes.map(c => ({ id: c.name, name: c.name, desc: c.members.join(" · "), tech: c.kind, tag: c.kind === "domain event" ? "event" : c.kind === "aggregate root" ? "aggregate" : "port" }))), edges: v.rels };
+    return { title: v.title, nodes: v.groups.flatMap(g => g.classes.map(c => ({ id: c.name, name: c.name, desc: c.members.join(" · "), tech: c.kind, tag: KIND_TAG[c.kind] || "member" }))), edges: v.rels };
   }
 
   function build(m) {

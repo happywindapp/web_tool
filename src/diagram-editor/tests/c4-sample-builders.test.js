@@ -6,20 +6,20 @@ const path = require("node:path");
 const vm = require("node:vm");
 
 const root = path.join(__dirname, "..", "js");
-const FILES = ["samples/mermaid-samples.js", "samples/plantuml-samples.js", "samples/drawio-samples.js", "samples/dbml-samples.js", "samples/d2-samples.js", "samples/structurizr-samples.js",
-  "samples/c4/c4-model-digital-banking.js", "samples/c4/c4-model-securities-trading.js", "samples/c4/c4-model-online-shopping.js", "samples/c4/c4-level-views.js",
+const FILES = ["samples/mermaid-samples.js", "samples/plantuml-samples.js", "samples/drawio-samples.js", "samples/dbml-samples.js", "samples/dbml-c4-erd-samples.js", "samples/d2-samples.js", "samples/structurizr-samples.js",
+  "samples/c4/c4-model-digital-banking.js", "samples/c4/c4-model-securities-trading.js", "samples/c4/c4-model-online-shopping.js", "samples/c4/c4-model-crypto-exchange.js", "samples/c4/c4-model-online-game.js", "samples/c4/c4-model-logistics.js", "samples/c4/c4-level-views.js",
   "samples/c4/c4-to-mermaid-plantuml.js", "samples/c4/c4-to-d2.js", "samples/c4/c4-to-drawio.js", "samples/c4/c4-to-structurizr.js", "samples/c4/c4-sample-registry.js",
   "engines/structurizr-dsl-parser.js", "engines/structurizr-view-to-dot.js"];
 const ctx = vm.createContext({ T: s => s });
 vm.runInContext(FILES.map(f => fs.readFileSync(path.join(root, f), "utf8")).join("\n;\n") +
-  "\n;Object.assign(globalThis, { MERMAID_SAMPLES, PLANTUML_SAMPLES, DRAWIO_SAMPLES, DBML_SAMPLES, D2_SAMPLES, STRUCTURIZR_SAMPLES, C4Views, StructurizrParser, StructurizrViews, MODELS: [C4_MODEL_BANKING, C4_MODEL_SECURITIES, C4_MODEL_SHOPPING] });", ctx);
+  "\n;Object.assign(globalThis, { MERMAID_SAMPLES, PLANTUML_SAMPLES, DRAWIO_SAMPLES, DBML_SAMPLES, D2_SAMPLES, STRUCTURIZR_SAMPLES, C4Views, StructurizrParser, StructurizrViews, MODELS: C4_MODELS });", ctx);
 const { MERMAID_SAMPLES, PLANTUML_SAMPLES, DRAWIO_SAMPLES, DBML_SAMPLES, D2_SAMPLES, STRUCTURIZR_SAMPLES, C4Views, StructurizrParser, StructurizrViews, MODELS } = ctx;
 
 const KEYS = MODELS.flatMap(m => C4Views.LEVELS.map(l => `c4-${m.key}-${l.key}`));
 
-test("c4: 3 systems × 4 levels exist on every text tab", () => {
-  assert.deepEqual([...MODELS.map(m => m.key)], ["bank", "securities", "shop"]);
-  assert.equal(KEYS.length, 12);
+test("c4: 6 systems × 4 levels exist on every text tab", () => {
+  assert.deepEqual([...MODELS.map(m => m.key)], ["bank", "securities", "shop", "crypto", "game", "logistics"]);
+  assert.equal(KEYS.length, 24);
   for (const samples of [MERMAID_SAMPLES, PLANTUML_SAMPLES, DRAWIO_SAMPLES, D2_SAMPLES]) for (const k of KEYS) assert.ok(samples[k]?.[1], k);
   for (const m of MODELS) {
     assert.ok(STRUCTURIZR_SAMPLES[`c4-${m.key}`]);
@@ -73,6 +73,11 @@ test("c4: draw.io samples have resolved edges and no overlapping siblings", () =
       assert.ok(a.x + a.w <= b.x || b.x + b.w <= a.x || a.y + a.h <= b.y || b.y + b.h <= a.y, `${k}: overlap`);
     }
   }
+});
+
+test("c4: a draw.io link between non-neighbours of one row dips below the row", () => {
+  const xml = DRAWIO_SAMPLES["c4-game-container"][1];
+  assert.match(xml, /<Array as="points"><mxPoint x="[\d.]+" y="[\d.]+"\/><\/Array>/);
 });
 
 test("c4: sample text stays free of quotes that would break the macro syntax", () => {

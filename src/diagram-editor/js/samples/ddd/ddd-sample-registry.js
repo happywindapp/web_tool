@@ -1,5 +1,6 @@
 // Adds every system × DDD diagram to the tabs' samples as ?demo=ddd-<system>-<view>; Structurizr gets one workspace with 5 views.
-for (const model of [DDD_MODEL_BANKING, DDD_MODEL_SECURITIES, DDD_MODEL_SHOPPING]) {
+const DDD_MODELS = [DDD_MODEL_BANKING, DDD_MODEL_SECURITIES, DDD_MODEL_SHOPPING, DDD_MODEL_CRYPTO, DDD_MODEL_GAME, DDD_MODEL_LOGISTICS];
+for (const model of DDD_MODELS) {
   for (const { key, label } of DddViews.VIEWS) {
     const id = `ddd-${model.key}-${key}`;
     MERMAID_SAMPLES[id] = [label, DddToText.mermaid(model, key), model.group];

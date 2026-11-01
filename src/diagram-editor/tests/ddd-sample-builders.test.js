@@ -6,20 +6,20 @@ const path = require("node:path");
 const vm = require("node:vm");
 
 const root = path.join(__dirname, "..", "js");
-const c4 = ["c4-model-digital-banking", "c4-model-securities-trading", "c4-model-online-shopping", "c4-level-views", "c4-to-mermaid-plantuml", "c4-to-d2", "c4-to-drawio", "c4-to-structurizr", "c4-sample-registry"];
-const ddd = ["ddd-model-digital-banking", "ddd-model-securities-trading", "ddd-model-online-shopping", "ddd-diagram-views", "ddd-to-mermaid-plantuml", "ddd-to-d2", "ddd-to-drawio", "ddd-to-structurizr", "ddd-sample-registry"];
-const FILES = [...["mermaid", "plantuml", "drawio", "dbml", "d2", "structurizr"].map(n => `samples/${n}-samples.js`), ...c4.map(f => `samples/c4/${f}.js`), ...ddd.map(f => `samples/ddd/${f}.js`),
+const c4 = ["c4-model-digital-banking", "c4-model-securities-trading", "c4-model-online-shopping", "c4-model-crypto-exchange", "c4-model-online-game", "c4-model-logistics", "c4-level-views", "c4-to-mermaid-plantuml", "c4-to-d2", "c4-to-drawio", "c4-to-structurizr", "c4-sample-registry"];
+const ddd = ["ddd-model-digital-banking", "ddd-model-securities-trading", "ddd-model-online-shopping", "ddd-model-crypto-exchange", "ddd-model-online-game", "ddd-model-logistics", "ddd-diagram-views", "ddd-to-mermaid-plantuml", "ddd-to-d2", "ddd-to-drawio", "ddd-to-structurizr", "ddd-sample-registry"];
+const FILES = [...["mermaid", "plantuml", "drawio", "dbml", "dbml-c4-erd", "dbml-ddd-erd", "d2", "structurizr"].map(n => `samples/${n}-samples.js`), ...c4.map(f => `samples/c4/${f}.js`), ...ddd.map(f => `samples/ddd/${f}.js`),
   "engines/structurizr-dsl-parser.js", "engines/structurizr-view-to-dot.js"];
 const ctx = vm.createContext({ T: s => s });
 vm.runInContext(FILES.map(f => fs.readFileSync(path.join(root, f), "utf8")).join("\n;\n") +
-  "\n;Object.assign(globalThis, { MERMAID_SAMPLES, PLANTUML_SAMPLES, DRAWIO_SAMPLES, DBML_SAMPLES, D2_SAMPLES, STRUCTURIZR_SAMPLES, DddViews, StructurizrParser, StructurizrViews, MODELS: [DDD_MODEL_BANKING, DDD_MODEL_SECURITIES, DDD_MODEL_SHOPPING] });", ctx);
+  "\n;Object.assign(globalThis, { MERMAID_SAMPLES, PLANTUML_SAMPLES, DRAWIO_SAMPLES, DBML_SAMPLES, D2_SAMPLES, STRUCTURIZR_SAMPLES, DddViews, StructurizrParser, StructurizrViews, MODELS: DDD_MODELS });", ctx);
 const { MERMAID_SAMPLES, PLANTUML_SAMPLES, DRAWIO_SAMPLES, DBML_SAMPLES, D2_SAMPLES, STRUCTURIZR_SAMPLES, DddViews, StructurizrParser, StructurizrViews, MODELS } = ctx;
 
 const KEYS = MODELS.flatMap(m => DddViews.VIEWS.map(v => `ddd-${m.key}-${v.key}`));
 const GRAPHS = ["subdomains", "context-map", "event-flow", "hexagonal"];
 
-test("ddd: 3 systems × 5 diagrams exist on every tab", () => {
-  assert.equal(KEYS.length, 15);
+test("ddd: 6 systems × 5 diagrams exist on every tab", () => {
+  assert.equal(KEYS.length, 30);
   for (const samples of [MERMAID_SAMPLES, PLANTUML_SAMPLES, DRAWIO_SAMPLES, D2_SAMPLES]) for (const k of KEYS) assert.ok(samples[k]?.[1], k);
   for (const m of MODELS) {
     assert.ok(STRUCTURIZR_SAMPLES[`ddd-${m.key}`]);
@@ -27,7 +27,7 @@ test("ddd: 3 systems × 5 diagrams exist on every tab", () => {
   }
 });
 
-test("ddd: every subdomain tier is populated and contexts map to one tier", () => {
+test("ddd: every subdomain tier is populated", () => {
   for (const m of MODELS) for (const g of DddViews.graph(m, "subdomains").groups) assert.ok(g.nodes.length, `${m.key}: ${g.id}`);
 });
 
@@ -61,6 +61,35 @@ test("ddd: an aggregate references another aggregate root only", () => {
     for (const [from, to] of m.aggregateRels) {
       const a = owner.get(from), b = owner.get(to);
       if (a !== b && b.name !== "Domain events") assert.equal(b.classes.find(c => c.name === to).kind, "aggregate root", `${m.key}: ${from} -> ${to}`);
+    }
+  }
+});
+
+test("ddd: each event an aggregate root produces in the flow is raised on the aggregate diagram", () => {
+  for (const m of MODELS) {
+    const roots = new Set(m.aggregates.flatMap(g => g.classes).filter(c => c.kind === "aggregate root").map(c => c.name));
+    for (const s of m.eventFlow) if (roots.has(s.aggregate)) assert.ok(m.aggregateRels.some(r => r[0] === s.aggregate && r[1] === s.event && r[2] === "raises"), `${m.key}: ${s.aggregate} raises ${s.event}`);
+  }
+});
+
+test("ddd: Partnership and Shared Kernel are drawn without an arrow", () => {
+  const relation = /Partnership|Shared Kernel/;
+  for (const m of MODELS) for (const [up, down, , note] of m.contextRels) {
+    if (!relation.test(note)) continue;
+    assert.match(MERMAID_SAMPLES[`ddd-${m.key}-context-map`][1], new RegExp(`${up} ---`), m.key);
+    assert.match(D2_SAMPLES[`ddd-${m.key}-context-map`][1], new RegExp(`${up} -- ${down}`), m.key);
+    assert.match(PLANTUML_SAMPLES[`ddd-${m.key}-context-map`][1], new RegExp(`${up} -- ${down}`), m.key);
+    assert.match(DRAWIO_SAMPLES[`ddd-${m.key}-context-map`][1], new RegExp(`endArrow=none;" edge="1" parent="1" source="${up}"`), m.key);
+  }
+});
+
+test("ddd: Structurizr containers keep unique names inside each system", () => {
+  for (const m of MODELS) {
+    const ws = StructurizrParser.parse(STRUCTURIZR_SAMPLES[`ddd-${m.key}`][1]), seen = new Set();
+    for (const e of ws.elements.filter(x => x.kind === "container")) {
+      const key = `${e.parent.uid}/${e.name}`;
+      assert.ok(!seen.has(key), `${m.key}: ${e.name}`);
+      seen.add(key);
     }
   }
 });

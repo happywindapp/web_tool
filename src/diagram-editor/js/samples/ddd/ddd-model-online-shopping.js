@@ -26,7 +26,7 @@ const DDD_MODEL_SHOPPING = {
   ],
   aggregates: [
     { id: "orderAggregate", name: "Order aggregate", classes: [
-      { name: "Order", kind: "aggregate root", members: ["-orderId: OrderId", "-status: OrderStatus", "+place(lines): void", "+confirm(): void", "+cancel(reason): void", "+total(): Money"] },
+      { name: "Order", kind: "aggregate root", members: ["-orderId: OrderId", "-cartId: CartId", "-status: OrderStatus", "+place(lines): void", "+confirm(): void", "+cancel(reason): void", "+total(): Money"] },
       { name: "OrderLine", kind: "entity", members: ["-lineId: LineId", "-sku: Sku", "-quantity: int"] },
       { name: "Money", kind: "value object", members: ["-amount: BigDecimal", "-currency: Currency"] },
       { name: "ShippingAddress", kind: "value object", members: ["-street: String", "-city: String", "-postalCode: String"] },
@@ -51,8 +51,8 @@ const DDD_MODEL_SHOPPING = {
   ],
   eventFlow: [
     { actor: "Shopper", command: "Place Order", aggregate: "Order", event: "OrderPlaced", policy: "Reserve stock for new orders" },
-    { actor: "Inventory", command: "Reserve Stock", aggregate: "StockItem", event: "StockReserved", policy: "Charge once stock is held" },
-    { actor: "Payment", command: "Charge Order", aggregate: "Payment", event: "PaymentCaptured", policy: "Confirm paid orders" },
+    { actor: "Ordering", command: "Reserve Stock", aggregate: "StockItem", event: "StockReserved", policy: "Charge once stock is held" },
+    { actor: "Ordering", command: "Charge Order", aggregate: "Payment", event: "PaymentCaptured", policy: "Confirm paid orders" },
     { actor: "Ordering", command: "Confirm Order", aggregate: "Order", event: "OrderConfirmed", policy: "Ship confirmed orders" },
     { actor: "Fulfilment", command: "Create Shipment", aggregate: "Shipment", event: "ShipmentDispatched" },
   ],
@@ -66,7 +66,7 @@ const DDD_MODEL_SHOPPING = {
     ],
     rels: [
       ["checkoutController", "placePort", "calls"], ["paymentListener", "confirmPort", "calls"],
-      ["placePort", "appService", "implemented by"], ["confirmPort", "appService", "implemented by"],
+      ["appService", "placePort", "implements"], ["appService", "confirmPort", "implements"],
       ["appService", "orderRoot", "loads and invokes"], ["orderRoot", "pricingService", "checks"],
       ["appService", "repoPort", "uses"], ["appService", "stockPort", "uses"], ["appService", "eventPort", "uses"],
       ["jpaRepo", "repoPort", "implements"], ["stockClient", "stockPort", "implements"], ["outbox", "eventPort", "implements"],

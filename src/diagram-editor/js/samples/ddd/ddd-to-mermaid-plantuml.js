@@ -12,7 +12,8 @@ const DddToText = (() => {
       const crossing = v.rowsAreSteps && home.get(from) !== home.get(to), text = edgeText(label, note, "<br/>");
       // Layout ranks follow edge direction, so "implements" is drawn port-first to keep adapters below their ports.
       if (label === "implements") return `${to} -.-|"implements"| ${from}`;
-      return `${crossing ? home.get(from) : from} -->${text ? `|"${text}"|` : ""} ${crossing ? home.get(to) : to}`;
+      const arrow = DddViews.isSymmetric(note) ? "---" : "-->";
+      return `${crossing ? home.get(from) : from} ${arrow}${text ? `|"${text}"|` : ""} ${crossing ? home.get(to) : to}`;
     };
     const styles = [...new Set(allNodes(v).map(n => n.type))].map(t => `classDef ${t} fill:${DddViews.PALETTE[t][0]},stroke:${DddViews.PALETTE[t][0]},color:${DddViews.PALETTE[t][1]}`);
     // Unlinked subgraphs would be placed in reverse order; invisible links keep them top to bottom.
@@ -33,7 +34,7 @@ const DddToText = (() => {
     const groups = v.groups.flatMap(g => [`package "${g.name}" {`, ...g.nodes.map(n => `  ${node(n)}`), "}"]);
     const edge = ([from, to, label, note]) => {
       if (label === "implements") return `${to} <.. ${from} : implements`;
-      const arrow = v.rowsAreSteps && home.get(from) === home.get(to) ? "-right->" : "-->", text = edgeText(label, note, "\\n");
+      const arrow = DddViews.isSymmetric(note) ? "--" : v.rowsAreSteps && home.get(from) === home.get(to) ? "-right->" : "-->", text = edgeText(label, note, "\\n");
       return `${from} ${arrow} ${to}${text ? ` : ${text}` : ""}`;
     };
     const order = v.edges.length ? [] : v.groups.slice(1).map((g, i) => `${v.groups[i].nodes[0].id} -[hidden]down- ${g.nodes[0].id}`);

@@ -16,7 +16,7 @@ const DDD_MODEL_BANKING = {
   contextRels: [
     ["coreBanking", "accounts", "Account and ledger data", "Upstream legacy · Downstream ACL"],
     ["coreBanking", "transfers", "Ledger postings", "Upstream legacy · Downstream ACL"],
-    ["paymentSwitch", "transfers", "Interbank messages", "Published Language · Downstream Conformist"],
+    ["paymentSwitch", "transfers", "Interbank messages", "Published Language · Downstream ACL"],
     ["kycProvider", "onboarding", "Document checks", "Upstream OHS · Downstream ACL"],
     ["accounts", "transfers", "Balances and limits", "Customer/Supplier"],
     ["identity", "transfers", "Authenticated customer", "Upstream OHS · Downstream Conformist"],
@@ -26,7 +26,7 @@ const DDD_MODEL_BANKING = {
   ],
   aggregates: [
     { id: "transferAggregate", name: "Transfer aggregate", classes: [
-      { name: "Transfer", kind: "aggregate root", members: ["-transferId: TransferId", "-status: TransferStatus", "+submit(): void", "+markDebited(): void", "+complete(): void", "+fail(reason): void"] },
+      { name: "Transfer", kind: "aggregate root", members: ["-transferId: TransferId", "-beneficiaryId: BeneficiaryId", "-status: TransferStatus", "+submit(): void", "+hold(): void", "+markDebited(): void", "+complete(): void", "+fail(reason): void"] },
       { name: "TransferLeg", kind: "entity", members: ["-legId: LegId", "-account: AccountRef", "-direction: Direction"] },
       { name: "Money", kind: "value object", members: ["-amount: BigDecimal", "-currency: Currency", "+add(other): Money"] },
       { name: "TransferStatus", kind: "value object", members: ["SUBMITTED", "HELD", "DEBITED", "COMPLETED", "FAILED"] },
@@ -37,6 +37,7 @@ const DDD_MODEL_BANKING = {
     ] },
     { id: "transferEvents", name: "Domain events", classes: [
       { name: "TransferSubmitted", kind: "domain event", members: ["-transferId: TransferId", "-occurredAt: Instant"] },
+      { name: "AccountDebited", kind: "domain event", members: ["-transferId: TransferId", "-occurredAt: Instant"] },
       { name: "TransferCompleted", kind: "domain event", members: ["-transferId: TransferId", "-occurredAt: Instant"] },
     ] },
   ],
@@ -47,6 +48,7 @@ const DDD_MODEL_BANKING = {
     ["Transfer", "Beneficiary", "references by id"],
     ["Beneficiary", "BankAccountNumber", "account"],
     ["Transfer", "TransferSubmitted", "raises"],
+    ["Transfer", "AccountDebited", "raises"],
     ["Transfer", "TransferCompleted", "raises"],
   ],
   eventFlow: [
@@ -61,15 +63,15 @@ const DDD_MODEL_BANKING = {
       { name: "Driving adapters", type: "adapter", items: [["restController", "TransferController", "REST API for clients"], ["fraudListener", "FraudResultListener", "Kafka consumer"]] },
       { name: "Inbound ports", type: "port", items: [["submitPort", "SubmitTransferUseCase", "Starts a transfer"], ["resumePort", "ResumeTransferUseCase", "Continues after screening"]] },
       { name: "Application and domain", type: "domain", items: [["appService", "TransferApplicationService", "Transaction boundary"], ["transferRoot", "Transfer aggregate", "Business rules and state"], ["limitPolicy", "LimitPolicy", "Domain service for limits"]] },
-      { name: "Outbound ports", type: "port", items: [["repoPort", "TransferRepository", "Stores aggregates"], ["ledgerPort", "LedgerGateway", "Posts debits and credits"], ["eventPort", "DomainEventPublisher", "Publishes events"]] },
-      { name: "Driven adapters", type: "adapter", items: [["jpaRepo", "JpaTransferRepository", "PostgreSQL"], ["coreAcl", "CoreBankingAcl", "Anti-corruption layer"], ["outbox", "KafkaOutboxPublisher", "Transactional outbox"]] },
+      { name: "Outbound ports", type: "port", items: [["repoPort", "TransferRepository", "Stores aggregates"], ["ledgerPort", "LedgerGateway", "Posts debits and credits"], ["switchPort", "SwitchGateway", "Sends interbank messages"], ["eventPort", "DomainEventPublisher", "Publishes events"]] },
+      { name: "Driven adapters", type: "adapter", items: [["jpaRepo", "JpaTransferRepository", "PostgreSQL"], ["coreAcl", "CoreBankingAcl", "Anti-corruption layer"], ["switchAcl", "PaymentSwitchAcl", "Anti-corruption layer"], ["outbox", "KafkaOutboxPublisher", "Transactional outbox"]] },
     ],
     rels: [
       ["restController", "submitPort", "calls"], ["fraudListener", "resumePort", "calls"],
-      ["submitPort", "appService", "implemented by"], ["resumePort", "appService", "implemented by"],
+      ["appService", "submitPort", "implements"], ["appService", "resumePort", "implements"],
       ["appService", "transferRoot", "loads and invokes"], ["transferRoot", "limitPolicy", "checks"],
-      ["appService", "repoPort", "uses"], ["appService", "ledgerPort", "uses"], ["appService", "eventPort", "uses"],
-      ["jpaRepo", "repoPort", "implements"], ["coreAcl", "ledgerPort", "implements"], ["outbox", "eventPort", "implements"],
+      ["appService", "repoPort", "uses"], ["appService", "ledgerPort", "uses"], ["appService", "switchPort", "uses"], ["appService", "eventPort", "uses"],
+      ["jpaRepo", "repoPort", "implements"], ["coreAcl", "ledgerPort", "implements"], ["switchAcl", "switchPort", "implements"], ["outbox", "eventPort", "implements"],
     ],
   },
 };

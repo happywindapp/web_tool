@@ -9,7 +9,7 @@ const DddToD2 = (() => {
     const node = n => `${n.id}: "${label(n)}" {class: ${n.type}}`;
     const types = new Set([...v.groups.flatMap(g => g.nodes), ...v.nodes].map(n => n.type));
     const groups = v.groups.flatMap(g => [`${g.id}: "${g.name}" {`, `  ${GROUP}`, `  grid-rows: 1`, `  horizontal-gap: 120`, ...g.nodes.map(n => `  ${node(n)}`), "}"]);
-    const edge = ([from, to, text, note]) => `${ref(from)} -> ${ref(to)}${text ? `: "${text}${note ? `\\n[${note}]` : ""}"` : ""}`;
+    const edge = ([from, to, text, note]) => `${ref(from)} ${DddViews.isSymmetric(note) ? "--" : "->"} ${ref(to)}${text ? `: "${text}${note ? `\\n[${note}]` : ""}"` : ""}`;
     return [title(v.title), v.groups.length ? "grid-columns: 1" : "direction: down", "", "classes: {", ...[...types].map(t => `  ${paint(t)}`), "}", "", ...groups, ...v.nodes.map(node), "", ...v.edges.map(edge)].join("\n");
   }
 
