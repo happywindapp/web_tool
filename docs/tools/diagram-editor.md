@@ -24,7 +24,7 @@ Dev/BA/kỹ sư kiến trúc cần vẽ flowchart, UML, ERD, kiến trúc C4… 
 | Giao diện | Hợp đồng |
 |-----------|----------|
 | URL `?tab=<id>` | `mermaid plantuml drawio dbml d2 structurizr`. Không có thì mở tab lần trước; có `demo`/`data` mà thiếu `tab` thì là Mermaid (giữ link cũ) |
-| URL `?demo=<key>` | Mermaid: `flowchart sequence class state er gantt pie journey git mindmap timeline quadrant xychart sankey block architecture kanban requirement c4 packet radar treemap` · PlantUML: `sequence class usecase activity state component c4 mindmap gantt theme broken` · draw.io: `flow architecture broken` · DBML: `shop groups broken` · D2: `architecture sequence table class grid broken` · Structurizr: `banking auto broken` |
+| URL `?demo=<key>` | Mermaid: `flowchart sequence class state er gantt pie journey git mindmap timeline quadrant xychart sankey block architecture kanban requirement c4 packet radar treemap` · PlantUML: `sequence class usecase activity state component c4 mindmap gantt theme broken` · draw.io: `flow architecture broken` · DBML: `shop groups broken` · D2: `architecture sequence table class grid broken` · Structurizr: `banking auto broken`. Mẫu C4 ở mục 3: Mermaid, PlantUML, draw.io, D2 thêm `c4-<hệ thống>-<cấp>` (`bank securities shop` × `context container component code`) · DBML thêm `c4-<hệ thống>-code` · Structurizr thêm `c4-<hệ thống>` |
 | URL hash `#pako:<b64url>` | `base64url(zlib(JSON))`. Mermaid: `{code, mermaid, autoSync, updateDiagram}`, **cùng định dạng mermaid.live**. Tab khác: `{tab, code, config}`. Payload không có `tab` hợp lệ ⇒ Mermaid. Nhận thêm `#base64:`. Mở xong xoá hash khỏi URL |
 | URL `?data=<mã>` | Mã thô (URL-encode) → nạp + vẽ ở tab của `?tab=`; giá trị `pako:`/`base64:` giải như hash. Đi qua query ⇒ có gửi lên server, chỉ cho sơ đồ ngắn, không nhạy cảm. Ưu tiên hash khi có cả hai |
 | Input | Gõ/dán · `<input type=file>` · kéo-thả (UTF-8); file có khối mã rào bằng tên ngôn ngữ của tab thì lấy khối đầu |
@@ -49,6 +49,16 @@ Dev/BA/kỹ sư kiến trúc cần vẽ flowchart, UML, ERD, kiến trúc C4… 
 - **PNG**: SVG → `data:` URL (không dùng `blob:`) → canvas, để nhãn `foreignObject` không làm taint canvas.
 - **Lịch sử**: tự lưu khi vẽ thành công, tối đa 1 bản/phút, bỏ bản trùng, riêng từng tab; mọi lần thay nội dung đều lưu bản đang sửa trước.
 
+### Mẫu C4 (3 hệ thống microservice)
+
+- Ngân hàng, Chứng khoán, Mua sắm online, mỗi hệ thống 4 cấp: L1 Context · L2 Container · L3 Component · L4 Code. Dropdown `Thử mẫu…` gom theo `optgroup`: mẫu là `[nhãn, mã, nhóm]`, phần tử thứ 3 không bắt buộc.
+- **Một nguồn dữ liệu:** `samples/c4/c4-model-*.js` là model trung lập, `C4Views` dựng view từng cấp, `c4-to-*.js` sinh mã từng ngôn ngữ, `c4-sample-registry.js` gộp vào mẫu của tab. Sửa nội dung thì sửa model. Thêm hệ thống = thêm 1 model + khai báo ở registry.
+- L4 dùng class diagram (Mermaid, PlantUML, D2, draw.io).
+- **Structurizr:** 1 workspace, 4 view, chọn ở dropdown view. Structurizr không có cấp Code nên class là `component` trong một container phụ, chỉ hiện ở view `L4-code`.
+- **DBML:** chỉ vẽ được ERD nên chỉ có L4, viết tay trong `dbml-samples.js`, không sinh từ model.
+- **draw.io:** XML không tự bố trí khi nạp nên `C4ToDrawio` tự xếp tầng: tầng theo độ sâu quan hệ, mỗi ô đặt gần các ô liên quan. Cạnh thẳng không tránh vật cản nên vài cạnh dài vẫn đi qua ô khác, kéo tay trong editor nếu cần.
+- **Mermaid:** C4 ngắt hàng theo `screen.availWidth`, cạnh không tránh vật cản; sơ đồ L2 sẽ có đường cắt ngang ô. Test headless phải giả lập màn hình đủ rộng, nếu không chỉ ra 2 cột.
+
 ### draw.io
 
 - Tab mở ra là cổng đồng ý, **chưa có request nào**. Bấm "Kết nối draw.io" mới tạo iframe, mỗi lần mở trang phải bấm lại. Mở link chia sẻ hay chọn mẫu không tự kết nối.
@@ -71,13 +81,13 @@ Dev/BA/kỹ sư kiến trúc cần vẽ flowchart, UML, ERD, kiến trúc C4… 
 
 `core/`: `VendorScripts` + `DiagramError` · `EngineStore` · `SvgSanitizer` · `Exporter` · `Highlight` · `PanZoom` · `VersionHistory`.
 `engines/`: 1 file mỗi engine + `graphviz-renderer` · `dbml-schema-to-dot` · `structurizr-dsl-parser` · `structurizr-view-to-dot`.
-`samples/`: mẫu từng tab (nội dung English). `i18n/`: từ điển EN.
+`samples/`: mẫu từng tab (nội dung English), `samples/c4/`: model + builder mẫu C4. `i18n/`: từ điển EN.
 `ui/`: `editor-surface` · `engine-session` · `render-pipeline` · `drawio-tab` · `share-links` · `history-dialog` · `action-wiring` · `boot`.
 Module chung `@include` từ `src/data-workbench/`: `I18n`, `ShareCodec`, `ThemePicker`, `SavedSessions`, CSS nền + hai tầng màu.
 
 ## 5. Giới hạn đã biết
 
-- draw.io là ngoại lệ của cam kết "không gọi mạng"; không dùng cho sơ đồ nội bộ. Chrome headless bị server trả 403.
+- draw.io là ngoại lệ của cam kết "không gọi mạng"; không dùng cho sơ đồ nội bộ. Chrome headless với User-Agent mặc định bị server trả 403, đặt User-Agent Chrome thường thì kết nối được.
 - PlantUML: `!include` file/URL bị từ chối, stdlib chỉ có `<C4/…>`; muốn thêm thì chép `<lib>.min.js` vào `tools/vendor/plantuml-<ver>/`.
 - D2: không có layout TALA (bản quyền riêng). Không có timeout nếu worker treo.
 - DBML: chỉ ERD, không sinh SQL (`@dbml/core` nặng 36 MB).

@@ -179,4 +179,12 @@ I18n.add({
   "Nhóm bảng & quan hệ 1-1": "Table groups & 1-1 relations",
   "Internet banking — 3 view": "Internet banking — 3 views",
   "Tự sinh view (không khai báo views)": "Auto-generated views (no views block)",
+  "C4 — Ngân hàng": "C4 — Banking",
+  "C4 — Chứng khoán": "C4 — Securities",
+  "C4 — Mua sắm online": "C4 — Online shopping",
+  "L1 — Ngữ cảnh hệ thống (System Context)": "L1 — System Context",
+  "L3 — Thành phần (Component)": "L3 — Component",
+  "L4 — Mã nguồn (Code)": "L4 — Code",
+  "L4 — Mã nguồn (Code): ERD dữ liệu": "L4 — Code: data ERD",
+  "L1–L4 — 4 view (chọn view trên toolbar)": "L1–L4 — 4 views (pick one on the toolbar)",
 });

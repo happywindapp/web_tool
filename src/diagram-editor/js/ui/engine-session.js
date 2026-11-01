@@ -28,7 +28,14 @@ function fillControls() {
 
 const fillDemo = () => {
   $("demo").innerHTML = `<option value="">${T("Thử mẫu…")}</option>`;
-  $("demo").append(...Object.entries(engine.samples).map(([k, v]) => new Option(T(v[0]), k)));
+  const groups = new Map();
+  for (const [key, [label, , group]] of Object.entries(engine.samples)) {
+    if (group && !groups.has(group)) {
+      groups.set(group, $("demo").appendChild(document.createElement("optgroup")));
+      groups.get(group).label = T(group);
+    }
+    (groups.get(group) || $("demo")).append(new Option(T(label), key));
+  }
 };
 
 function applyEngineUi() {
