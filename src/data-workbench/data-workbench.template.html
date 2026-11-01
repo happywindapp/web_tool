@@ -11,12 +11,14 @@
 /* @include styles/csv-grid-tab.css */
 /* @include styles/diff-tab.css */
 /* @include styles/theme-filter-popover-chips.css */
+/* @include styles/phone-portrait-layout.css */
 </style>
 </head>
 <body>
 <header class="top">
   <a class="btn" href="../index.html">← Trang chủ</a>
   <h1>Data Workbench</h1>
+  <button class="more-toggle" title="Thêm thao tác" aria-expanded="false">⋯</button>
   <button id="wb-share" title="Chép link chứa dữ liệu + tuỳ chọn của tab đang mở (dữ liệu nằm sau dấu #, không gửi lên máy chủ)">🔗 Chia sẻ link</button>
   <button id="wb-undo" title="Lấy lại nội dung đang soạn trước khi nạp mẫu / link" hidden>↶ Khôi phục bản trước</button>
   <button id="wb-save" title="Lưu dữ liệu + tuỳ chọn của tab đang mở vào trình duyệt này">💾 Lưu phiên</button>
@@ -66,6 +68,7 @@
 // @include js/core/theme-picker-auto-light-dark.js
 // @include js/core/saved-sessions-local-storage.js
 // @include js/core/column-filter-popover-and-chips.js
+// @include js/core/phone-pane-switcher.js
 // @include js/core/workbench-tab-router.js
 // @include js/parsers/format-detect.js
 // @include js/parsers/json-tolerant-parser.js

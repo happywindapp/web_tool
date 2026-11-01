@@ -5,13 +5,14 @@
     <label class="chk"><input id="df-case" type="checkbox">Không phân biệt hoa/thường</label>
     <label class="chk"><input id="df-ctx" type="checkbox" checked>Chỉ hiện vùng khác (±3 dòng)</label>
     <span class="sep"></span>
-    <button id="df-run" class="main" title="Ctrl+Enter">So sánh</button>
+    <button id="df-run" class="main" title="Ctrl+Enter" data-pane-go="2">So sánh</button>
     <button id="df-swap">⇄ Đổi bên</button>
     <button id="df-next">↓ Chỗ khác tiếp theo</button>
-    <button id="df-clear">Xoá</button>
+    <button id="df-clear" data-pane-go="0">Xoá</button>
     <select id="df-demo"><option value="">Thử mẫu…</option><option value="json">JSON 2 phiên bản</option><option value="text">File cấu hình</option></select>
   </div>
-  <div class="diff-body">
+  <div class="seg pane-switch"><button>Bên trái (cũ)</button><button>Bên phải (mới)</button><button>Kết quả</button></div>
+  <div class="diff-body pane-scroller">
     <div class="work diff-inputs">
       <section class="pane">
         <div class="bar"><b>Bên trái (cũ)</b><label class="btn">Mở file…<input id="df-file-a" type="file"></label></div>

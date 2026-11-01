@@ -96,6 +96,7 @@ function setState({ code, config }, name = "") {
   $("src").value = code; $("cfg").value = config || engine.defaultConfig;
   fileName = name; $("fname").textContent = T(name);
   syncControls(); paint(); saveDraft(); fitNext = true; render();
+  PhoneLayout.show(1);
 }
 
 function patchConfig(ctl, val) {

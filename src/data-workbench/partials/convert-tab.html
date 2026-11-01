@@ -13,11 +13,12 @@
     <select id="cv-sql" data-show="to:sql" title="Hệ quản trị CSDL — quyết định cách đặt nháy tên cột, thoát chuỗi và giá trị boolean"><option value="postgresql">PostgreSQL</option><option value="mysql">MySQL / MariaDB</option><option value="sqlserver">SQL Server</option><option value="sqlite">SQLite</option></select>
     <label data-show="to:sql">Tên bảng <input id="cv-table" type="text" class="short" value="my_table"></label>
     <span class="sep"></span>
-    <button id="cv-run" class="main" title="Ctrl+Enter">Chuyển đổi</button>
-    <button id="cv-clear">Xoá</button>
+    <button id="cv-run" class="main" title="Ctrl+Enter" data-pane-go="1">Chuyển đổi</button>
+    <button id="cv-clear" data-pane-go="0">Xoá</button>
     <select id="cv-demo"><option value="">Thử dữ liệu mẫu…</option><option value="json">JSON → CSV</option><option value="csv">CSV → JSON</option><option value="xml">XML → JSON</option><option value="yaml">YAML → JSON</option></select>
   </div>
-  <div class="work">
+  <div class="seg pane-switch"><button>Dữ liệu nguồn</button><button>Kết quả</button></div>
+  <div class="work pane-scroller">
     <section class="pane">
       <div class="bar"><b>Dữ liệu nguồn</b><span class="muted" id="cv-fname">dán nội dung hoặc kéo thả file vào đây</span></div>
       <div class="ed"><textarea id="cv-src" class="code" spellcheck="false" placeholder="Dán JSON / CSV / TSV / XML / YAML vào đây…"></textarea></div>

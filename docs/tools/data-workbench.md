@@ -241,3 +241,7 @@ nút "Format & sửa lỗi" → run("pretty") · "Thu gọn 1 dòng" → run("mi
 | Bảng CSV | 500 hàng/trang | Phân trang; lọc để thu hẹp |
 | Danh sách lỗi | 500 mục hiển thị · CSV ghi tối đa 1.000 fix | "… và N mục nữa" |
 | Nháp localStorage | ≤ 1 MB/ô | Lớn hơn thì xoá nháp, không lưu |
+
+## Điện thoại
+
+Dưới 640px mỗi tab hiện 1 pane (ADR #12): `Format`/`Chuyển đổi`/`Format CSS · JS` có 2 pane, `So sánh` có 3 pane (trái · phải · kết quả), `Bảng CSV` chỉ có bảng. Nút chạy và chọn mẫu tự sang pane kết quả. Tay nắm kéo đổi cột bị ẩn vì không chạy trên touch.

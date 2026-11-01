@@ -29,6 +29,7 @@ I18n.add({
   "Xoá": "Clear",
   "Ctrl+↑/↓ chọn message · dữ liệu không rời khỏi máy": "Ctrl+↑/↓ select message · data never leaves your machine",
   "Dữ liệu FIX": "FIX data",
+  "Bảng message": "Message table",
   "Thu gọn / mở ô nhập": "Collapse / expand the input box",
   "Dán message FIX hoặc file log (SOH, |, ^A…). Mỗi dòng 1 hay nhiều message; dòng không phải FIX tự bỏ qua.": "Paste FIX messages or a log file (SOH, |, ^A…). One or more messages per line; non-FIX lines are skipped.",
   "Tìm: chữ bất kỳ hoặc tag=giá trị (35=8 55=ABC)": "Search: any text or tag=value (35=8 55=ABC)",

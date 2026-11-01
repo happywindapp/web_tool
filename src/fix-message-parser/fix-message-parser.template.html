@@ -10,14 +10,16 @@
 /* @include ../data-workbench/styles/app-bar-tabs-toolbar-surfaces.css */
 /* @include ../data-workbench/styles/theme-filter-popover-chips.css */
 /* @include styles/fix-message-parser.css */
+/* @include ../data-workbench/styles/phone-portrait-layout.css */
 </style>
 </head>
 <body>
 <header class="top">
   <a class="btn" href="../index.html">← Trang chủ</a>
   <h1>FIX Parser</h1>
+  <button class="more-toggle" title="Thêm thao tác" aria-expanded="false">⋯</button>
   <select id="demo" title="Nạp dữ liệu mẫu rồi phân tích ngay"></select>
-  <label class="btn" title="Mở file log / message FIX (hoặc kéo-thả file vào trang)">Mở file…<input type="file" id="file" accept=".log,.txt,.fix,.out,.messages,.csv"></label>
+  <label class="btn" title="Mở file log / message FIX (hoặc kéo-thả file vào trang)">Mở file…<input type="file" id="file" data-pane-go="1" accept=".log,.txt,.fix,.out,.messages,.csv"></label>
   <button id="share" title="Chép link chứa dữ liệu + tuỳ chọn (dữ liệu nằm sau dấu #, không gửi lên máy chủ)">🔗 Chia sẻ link</button>
   <button id="undo" title="Lấy lại nội dung đang soạn trước khi nạp mẫu / link / che dữ liệu" hidden>↶ Khôi phục bản trước</button>
   <button id="saveBtn" title="Lưu dữ liệu + bộ lọc + ghi chú + chuỗi lệnh + bố cục cột vào trình duyệt này">💾 Lưu phân tích</button>
@@ -38,10 +40,11 @@
   <span class="sep"></span>
   <button id="dictBtn" title="Đặt tên cho tag riêng của công ty, ý nghĩa giá trị, tag nhạy cảm, tag nối lệnh cha–con (CSV, lưu trong trình duyệt)">📖 Từ điển riêng…</button>
   <button id="mask" title="Chọn nhóm dữ liệu cần che (tài khoản, mật khẩu, thành viên, CompID, số hiệu lệnh, Text) — dùng trước khi chia sẻ">🕶 Che dữ liệu…</button>
-  <button id="clear">Xoá</button>
+  <button id="clear" data-pane-go="0">Xoá</button>
   <span class="muted hint">Ctrl+↑/↓ chọn message · giữ Alt + rê chuột trên ô nhập để tra tag · dữ liệu không rời khỏi máy</span>
 </div>
-<main class="work">
+<div class="seg pane-switch"><button>Dữ liệu FIX</button><button>Bảng message</button><button>Chi tiết message</button></div>
+<main class="work pane-scroller">
   <section class="left">
     <div class="pane input-pane">
       <div class="bar"><b>Dữ liệu FIX</b><span id="inInfo" class="muted"></span><button id="toggleIn" title="Thu gọn / mở ô nhập">▴</button></div>
@@ -91,6 +94,7 @@
 // @include ../data-workbench/js/core/theme-picker-auto-light-dark.js
 // @include ../data-workbench/js/core/saved-sessions-local-storage.js
 // @include ../data-workbench/js/core/column-filter-popover-and-chips.js
+// @include ../data-workbench/js/core/phone-pane-switcher.js
 // @include js/dictionary/fix44-standard-dictionary-data.js
 // @include js/dictionary/venue-fix44-dialect-overlay-data.js
 // @include js/dictionary/fix50sp2-extra-field-names-data.js

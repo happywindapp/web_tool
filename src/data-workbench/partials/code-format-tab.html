@@ -10,19 +10,20 @@
     <label class="chk" data-js title="Đổi \xNN, \uNNNN in được thành ký tự thật"><input id="cf-unescape" type="checkbox">Giải \xNN \uNNNN</label>
     <label class="chk" data-js><input id="cf-jsx" type="checkbox">JSX</label>
     <span class="sep"></span>
-    <button id="cf-run" class="main" title="Ctrl+Enter">Format</button>
-    <button id="cf-min" title="Bỏ chú thích và khoảng trắng thừa (chỉ CSS)">Thu gọn CSS</button>
-    <button id="cf-clear">Xoá</button>
+    <button id="cf-run" class="main" title="Ctrl+Enter" data-pane-go="1">Format</button>
+    <button id="cf-min" data-pane-go="1" title="Bỏ chú thích và khoảng trắng thừa (chỉ CSS)">Thu gọn CSS</button>
+    <button id="cf-clear" data-pane-go="0">Xoá</button>
     <select id="cf-demo"><option value="">Thử mẫu…</option><option value="css">CSS 1 dòng</option><option value="js">JS 1 dòng</option></select>
     <span class="muted" id="cf-lang-now"></span>
   </div>
-  <div class="work">
+  <div class="seg pane-switch"><button>Mã gốc</button><button>Kết quả</button></div>
+  <div class="work pane-scroller">
     <section class="pane">
       <div class="bar"><b>Mã gốc</b><span class="muted" id="cf-fname">dán mã hoặc kéo thả file vào đây</span></div>
       <div class="ed"><textarea id="cf-src" class="code" spellcheck="false" placeholder="Dán CSS / SCSS / LESS / JavaScript vào đây…"></textarea></div>
     </section>
     <section class="pane">
-      <div class="bar"><b>Kết quả</b><button id="cf-copy">Sao chép</button><button id="cf-save">Tải về</button><button id="cf-use" title="Đưa kết quả sang ô bên trái">← Dùng kết quả</button><select id="cf-send"></select></div>
+      <div class="bar"><b>Kết quả</b><button id="cf-copy">Sao chép</button><button id="cf-save">Tải về</button><button id="cf-use" data-pane-go="0" title="Đưa kết quả sang ô bên trái">← Dùng kết quả</button><select id="cf-send"></select></div>
       <div class="out-wrap"><pre id="cf-out" class="code"></pre></div>
     </section>
   </div>

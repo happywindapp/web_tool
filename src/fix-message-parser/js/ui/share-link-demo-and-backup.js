@@ -71,7 +71,7 @@ const LinkIO = (() => {
   function init(deps) {
     app = deps;
     fillDemos();
-    $("demo").onchange = e => { const k = e.target.value; e.target.value = ""; if (k) demo(k); };
+    $("demo").onchange = e => { const k = e.target.value; e.target.value = ""; if (k) { demo(k); PhoneLayout.show(1); } };
     $("share").onclick = share;
     $("undo").onclick = restore;
     const fromHash = () => { const h = location.hash.slice(1); try { return decodeURIComponent(h); } catch { return h; } };
@@ -82,6 +82,7 @@ const LinkIO = (() => {
     else if (name) demo(name);
     else app.open({ text: DEMOS.text("bcgd"), opts: {}, chain: null, quiet: true });
     if (raw || name) cleanUrl();
+    PhoneLayout.show(1);
   }
 
   return { init, keep, note, fillDemos };

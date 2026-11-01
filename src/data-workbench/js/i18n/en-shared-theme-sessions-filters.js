@@ -1,5 +1,6 @@
 // English for the shared core modules (ThemePicker markup, SavedSessions, ColFilter) — included by every tool that uses them.
 I18n.add({
+  "Thêm thao tác": "More actions",
   "Giao diện": "Appearance",
   "Giao diện sáng / tối": "Light / dark theme",
   "Tự động": "Auto",

@@ -71,6 +71,8 @@ Không có. Không backend, không API, không DB, không CDN.
   đọc thêm `?data=` — checklist "Link chia sẻ" cùng mục 3 (ADR #9).
 - **Mọi tool phải theo hai tầng màu**: header teal `#164e63` = việc cấp ứng dụng + tab điều hướng, toolbar nền tint accent 10% = việc trên dữ liệu đang mở —
   CSS chung `src/data-workbench/styles/app-bar-tabs-toolbar-surfaces.css`, luật ở [`docs/architecture/README.md`](../docs/architecture/README.md) mục 3 (ADR #10).
+- **Mọi tool phải dùng được trên điện thoại dọc**: ≤640px mỗi lúc 1 pane (carousel `scroll-snap`), header gọn + nút `⋯`, toolbar cuộn ngang —
+  CSS/JS chung `src/data-workbench/styles/phone-portrait-layout.css` + `js/core/phone-pane-switcher.js`, checklist ở [`docs/architecture/README.md`](../docs/architecture/README.md) mục 3 (ADR #12).
 - Git commit/push do user tự chạy.
 
 ## Đang vướng

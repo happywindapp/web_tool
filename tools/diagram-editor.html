@@ -19,7 +19,7 @@
   }
   * { box-sizing:border-box; }
   [hidden] { display:none !important; }
-  body { margin:0; height:100vh; display:grid; grid-template-rows:auto 1fr auto; background:var(--bg); color:var(--ink);
+  body { margin:0; height:100vh; height:100dvh; display:grid; grid-template-rows:auto 1fr auto; background:var(--bg); color:var(--ink);
          font:14px/1.45 "Segoe UI", Arial, sans-serif; }
   body.drop { outline:3px dashed var(--acc); outline-offset:-6px; }
   header.top { position:relative; display:flex; flex-wrap:wrap; gap:8px; align-items:center; padding:8px 112px 8px 16px; background:var(--panel); border-bottom:1px solid var(--line); }
@@ -53,7 +53,7 @@
   .t{color:var(--muted)} .tn{color:var(--tn);font-weight:600} .an{color:var(--an)} .av{color:var(--av)} .c{color:var(--c);font-style:italic} .d,.cd{color:var(--l)}
   .good{color:var(--good)} .bad{color:var(--bad)} .warn{color:var(--warn)} .muted{color:var(--muted)}
   .author { display:flex; flex-wrap:wrap; gap:2px 6px; padding:4px 16px 6px; background:var(--panel); font-size:12px; color:var(--muted); } .author a { color:var(--acc); } .author span:not(:first-child) { margin-left:10px; }
-  @media (max-width: 900px) { .work { grid-template-columns:1fr; grid-template-rows:45vh 45vh; } }
+  @media (max-width: 900px) { .work { grid-template-columns:minmax(0, 1fr); grid-template-rows:repeat(2, minmax(280px, 1fr)); overflow-y:auto; } }
   /* Scoped tokens so every control in a band restyles itself; --tb-ink keeps the page ink for the active tab inside the dark header */
   :root { --tb:color-mix(in srgb, var(--acc) 10%, var(--panel)); --tb-ink:var(--ink); }
   header.top { background:#164e63; border-bottom:0; color:var(--ink); color-scheme:dark;
@@ -138,13 +138,100 @@
   #hList { margin:0; padding:8px 16px 12px 36px; overflow:auto; max-height:60vh; }
   #hList li { padding:4px 0; border-bottom:1px solid var(--gut); }
   #hList code { display:block; color:var(--muted); font-size:12px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-  @media (max-width: 900px) { .studio { grid-template-columns:1fr; grid-template-rows:45vh 0 50vh; gap:10px; overflow:auto; } #split { display:none; } }
+  @media (max-width: 900px) { .studio { grid-template-columns:minmax(0, 1fr); grid-template-rows:repeat(2, minmax(280px, 1fr)); gap:10px; overflow-y:auto; } #split { display:none; } }
+  .pane-switch, .more-toggle { display:none; }
+  /* Phone portrait: one pane at a time in a horizontal snap scroller; control rows scroll sideways instead of wrapping and the primary button stays pinned. */
+  @media (max-width: 640px) {
+    html { -webkit-text-size-adjust:100%; text-size-adjust:100%; }
+    html, body { overscroll-behavior-y:none; }
+    body { display:flex; flex-direction:column; }
+    body > *, .panel > * { flex:none; }
+    .panel { display:flex; flex-direction:column; }
+    .panel, .pane-scroller, .grid-area, .studio-full { flex:1 1 0; min-width:0; min-height:0; }
+
+    button, select, input[type=text], label.btn, a.btn { min-height:38px; }
+    /* iOS zooms the page when a focused field is under 16px. */
+    select, input[type=text], textarea, textarea.anno { font-size:16px; }
+    select, input[type=text] { max-width:62vw; }
+    input[type=checkbox] { width:20px; height:20px; }
+
+    header.top { gap:6px; padding:6px 12px 8px; }
+    header.top > * { order:3; }
+    header.top > a.btn { order:0; flex:none; display:grid; place-items:center; font-size:0; }
+    header.top > a.btn::before { content:"←"; font-size:18px; line-height:1; }
+    header.top > h1 { order:0; flex:1 1 0; min-width:0; margin:0; font-size:15px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    header.top > .more-toggle { order:1; flex:none; display:block; padding:5px 12px; font-weight:700; }
+    header.top > .lang-switch { order:2; flex:none; position:static; flex-wrap:nowrap; }
+    .lang-switch button { padding:5px 9px; }
+    header.top > .wb-nav { order:4; }
+    .wb-nav button { min-height:0; padding:8px 12px; }
+    body:not(.more-open) header.top > :is(button:not(.more-toggle), select, label) { display:none; }
+    body.more-open header.top::after { content:""; order:2; flex:0 0 100%; }
+    #wb-note, #note { flex:0 0 100%; }
+    #wb-note:empty, #note:empty { display:none; }
+
+    .toolbar, .wb-nav, .bar { flex-wrap:nowrap; overflow-x:auto; scrollbar-width:none; overscroll-behavior-x:contain; }
+    .toolbar > *, .wb-nav > *, .bar > * { flex:none; }
+    .toolbar { padding:6px 12px; }
+    .toolbar label, .toolbar span { white-space:nowrap; }
+    .toolbar .opts, .bar > .seg { flex-wrap:nowrap; }
+    .toolbar .sep, .bar .sep, .toolbar .grow { display:none; }
+    .toolbar .main { order:-1; position:sticky; left:0; z-index:1; box-shadow:-12px 0 0 var(--tb), 8px 0 0 var(--tb); }
+    .bar { padding:4px 8px; }
+    .pane > .bar > b:not(.seg), #toggleIn, .th .grip { display:none; }
+    .bar > .muted { flex:0 1 auto; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .filters #q { flex:0 0 200px; min-width:0; }
+
+    .pane-switch { display:flex; flex-wrap:nowrap; gap:0; padding:6px 12px; background:var(--panel); border-bottom:1px solid var(--line); }
+    .pane-switch:has(+ [hidden]) { display:none; }
+    .pane-switch button { flex:1 1 0; min-width:0; padding:5px 4px; border-radius:0; margin-left:-1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .pane-switch button:first-child { border-radius:6px 0 0 6px; margin-left:0; }
+    .pane-switch button:last-child { border-radius:0 6px 6px 0; }
+
+    .pane-scroller { display:grid; grid-auto-flow:column; grid-auto-columns:100%; grid-template-columns:none; grid-template-rows:minmax(0, 1fr); gap:0; padding:0; min-height:0;
+                     overflow:auto hidden; scroll-snap-type:x mandatory; scrollbar-width:none; overscroll-behavior-x:contain; }
+    .pane-scroller .pane, .pane-scroller .diff-result { scroll-snap-align:start; scroll-snap-stop:always; margin:0; border:0; border-radius:0; box-shadow:none; }
+    .pane-scroller .left, .pane-scroller .diff-inputs { display:contents; }
+    #split { display:none; }
+    .code { overscroll-behavior-x:contain; }
+    .code, .gut, #gut, #hl, #src, #cfg { font-size:16px; }
+    pre.code:not(.hl) { font-size:13px; }
+
+    .grid-area { padding:8px 12px; }
+    .paste { grid-template-rows:16dvh auto; }
+    .studio-full { margin:0; border:0; border-radius:0; }
+    footer.report, .statusbar { max-height:20dvh; padding:4px 12px; }
+    footer.report .hint, .statusbar .tiny, .toolbar .hint, #detail .hint { display:none; }
+    .msgs li[data-line] { padding:4px 0; }
+    table.grid button.mini { min-height:0; padding:4px 6px; }
+    .chip button { min-height:0; }
+    .tip, .pop { max-width:calc(100vw - 16px); }
+    .tip { max-height:80dvh; overflow:hidden; }
+    .author { flex-wrap:nowrap; justify-content:space-between; gap:8px; padding:2px 12px 4px; font-size:11px; white-space:nowrap; overflow:hidden; }
+    .author span { display:none; }
+  }
+  @media (max-width: 640px) and (prefers-reduced-motion: no-preference) { .pane-scroller { scroll-behavior:smooth; } }
+  /* Phone landscape is too short for a fixed shell: the page scrolls and the work area keeps a usable height. */
+  @media (max-height: 500px) and (pointer: coarse) {
+    body { height:auto; min-height:100dvh; }
+    .grid-wrap { max-height:75dvh; }
+  }
+  @media (max-height: 500px) and (max-width: 640px) and (pointer: coarse) {
+    .panel { flex:none; }
+    .pane-scroller, .grid-area, .studio-full { flex:none; height:85dvh; }
+  }
+  @media (max-height: 500px) and (min-width: 641px) and (pointer: coarse) {
+    .work, .studio { grid-template-columns:repeat(2, minmax(0, 1fr)); grid-template-rows:85dvh; }
+    .diff-body { grid-template-rows:auto minmax(60dvh, auto); }
+    #split { display:none; }
+  }
 </style>
 </head>
 <body>
 <header class="top">
   <a class="btn" href="../index.html">← Trang chủ</a>
   <h1>Soạn &amp; xem trước sơ đồ</h1>
+  <button class="more-toggle" title="Thêm thao tác" aria-expanded="false">⋯</button>
   <button id="btnShare" title="Chép link chứa sơ đồ + cấu hình (dữ liệu nằm sau dấu #, không gửi lên máy chủ; tab Mermaid tương thích mermaid.live)">🔗 Chia sẻ link</button>
   <button id="btnOpenLink" title="Mở link chia sẻ của tool này hoặc của mermaid.live">Mở link…</button>
   <button id="btnHist" title="Lịch sử phiên bản của tab đang mở">Lịch sử</button>
@@ -170,9 +257,10 @@
   <select id="pickSel" hidden></select>
   <span class="grow"></span>
   <label class="chk" id="autoWrap" title="Tự vẽ lại khi gõ"><input id="auto" type="checkbox" checked> Tự vẽ</label>
-  <button id="btnRender" class="main" title="Ctrl+Enter">Vẽ</button>
+  <button id="btnRender" class="main" title="Ctrl+Enter" data-pane-go="1">Vẽ</button>
 </div>
-<main id="work" class="studio">
+<div class="seg pane-switch"><button>Mã</button><button>Xem trước</button></div>
+<main id="work" class="studio pane-scroller">
   <section class="pane">
     <div class="bar"><b class="seg"><button data-tab="code" class="on">Mã</button><button data-tab="cfg" id="btnCfgTab">Cấu hình</button></b>
       <span class="muted fname" id="fname"></span><button id="btnMd" title="Chép khối mã để dán vào Markdown">Chép Markdown</button><button id="btnDl" title="Ctrl+S"></button></div>
@@ -274,6 +362,7 @@ const T = I18n.t;
 const $ = id => document.getElementById(id);
 // English for the shared core modules (ThemePicker markup, SavedSessions, ColFilter) — included by every tool that uses them.
 I18n.add({
+  "Thêm thao tác": "More actions",
   "Giao diện": "Appearance",
   "Giao diện sáng / tối": "Light / dark theme",
   "Tự động": "Auto",
@@ -598,6 +687,33 @@ const SavedSessions = ({ select, saveBtn, delBtn, store, key = "saved", snapshot
   fill();
   return { fill, forget: () => { current = null; fill(); } };
 };
+// Phone portrait (phone-portrait-layout.css): .pane-switch buttons scroll the .pane-scroller right after them; data-pane-go jumps to a pane; ⋯ opens the header actions.
+const PhoneLayout = (() => {
+  const switches = [...document.querySelectorAll(".pane-switch")];
+  const visible = () => switches.find(sw => sw.offsetParent);
+
+  function sync(sw) {
+    const box = sw.nextElementSibling, i = box.clientWidth ? Math.round(box.scrollLeft / box.clientWidth) : 0;
+    [...sw.children].forEach((b, k) => b.classList.toggle("on", k === i));
+  }
+  function go(sw, i) { const box = sw.nextElementSibling; box.scrollLeft = i * box.clientWidth; }
+  const show = i => { const sw = visible(); if (sw) go(sw, i); };
+  const showLast = () => { const sw = visible(); if (sw) go(sw, sw.children.length - 1); };
+
+  for (const sw of switches) {
+    const box = sw.nextElementSibling;
+    box.addEventListener("scroll", () => sync(sw), { passive: true });
+    new ResizeObserver(() => sync(sw)).observe(box);
+    sw.addEventListener("click", e => { if (e.target !== sw) go(sw, [...sw.children].indexOf(e.target)); });
+  }
+  document.addEventListener("click", e => { const b = e.target.closest("button[data-pane-go]"); if (b) show(+b.dataset.paneGo); });
+  document.addEventListener("change", e => { if (e.target.matches("select[data-pane-go], input[data-pane-go]")) show(+e.target.dataset.paneGo); });
+  const more = document.querySelector(".more-toggle");
+  more.onclick = () => more.setAttribute("aria-expanded", document.body.classList.toggle("more-open"));
+  addEventListener("load", () => { const tab = document.querySelector(".wb-nav .on"); if (tab) tab.scrollIntoView({ block: "nearest", inline: "center" }); });
+
+  return { show, showLast };
+})();
 // Renderers load on first use, each as a classic script tag: file:// blocks ES modules. A failed load can be retried.
 const VendorScripts = (() => {
   const PLANTUML_DIR = "vendor/plantuml-1.2026.9/";
@@ -705,10 +821,11 @@ const Highlight = (() => {
 
   return { html, esc };
 })();
-// Pan (drag) + zoom (wheel around cursor); the transform lives on #stage only, never on body/html.
+// Pan (drag) + zoom (wheel around cursor, two-finger pinch); the transform lives on #stage only, never on body/html.
 const PanZoom = (() => {
   const view = $("view"), stage = $("stage");
-  let s = 1, x = 0, y = 0, drag = null;
+  const touches = new Map();
+  let s = 1, x = 0, y = 0, drag = null, pinch = null;
   const apply = () => { stage.style.transform = `translate(${x}px,${y}px) scale(${s})`; $("zPct").textContent = Math.round(s * 100) + "%"; };
   function zoomAt(f, cx, cy) { const n = Math.min(20, Math.max(0.05, s * f)); x = cx - (cx - x) * n / s; y = cy - (cy - y) * n / s; s = n; apply(); }
   function center(scale) {
@@ -719,9 +836,16 @@ const PanZoom = (() => {
   }
   const mid = f => { const r = view.getBoundingClientRect(); zoomAt(f, r.width / 2, r.height / 2); };
   view.addEventListener("wheel", e => { e.preventDefault(); const r = view.getBoundingClientRect(); zoomAt(Math.exp(-e.deltaY * 0.0015), e.clientX - r.left, e.clientY - r.top); }, { passive: false });
-  view.addEventListener("pointerdown", e => { if (e.button) return; drag = { dx: e.clientX - x, dy: e.clientY - y }; view.setPointerCapture(e.pointerId); view.classList.add("grab"); });
-  view.addEventListener("pointermove", e => { if (drag) { x = e.clientX - drag.dx; y = e.clientY - drag.dy; apply(); } });
-  const stop = () => { drag = null; view.classList.remove("grab"); };
+  const spread = () => { const [a, b] = touches.values(), r = view.getBoundingClientRect(); return { d: Math.hypot(a.x - b.x, a.y - b.y), cx: (a.x + b.x) / 2 - r.left, cy: (a.y + b.y) / 2 - r.top }; };
+  const seat = () => { const [t] = touches.values(); drag = t && { dx: t.x - x, dy: t.y - y }; pinch = touches.size === 2 ? spread() : null; };
+  view.addEventListener("pointerdown", e => { if (e.button) return; touches.set(e.pointerId, { x: e.clientX, y: e.clientY }); seat(); view.setPointerCapture(e.pointerId); view.classList.add("grab"); });
+  view.addEventListener("pointermove", e => {
+    if (!touches.has(e.pointerId)) return;
+    touches.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (pinch) { const p = spread(); x += p.cx - pinch.cx; y += p.cy - pinch.cy; zoomAt(p.d / pinch.d, p.cx, p.cy); pinch = p; }
+    else if (drag && touches.size === 1) { x = e.clientX - drag.dx; y = e.clientY - drag.dy; apply(); }
+  });
+  const stop = e => { touches.delete(e.pointerId); seat(); if (!touches.size) view.classList.remove("grab"); };
   view.addEventListener("pointerup", stop); view.addEventListener("pointercancel", stop);
   $("zIn").onclick = () => mid(1.25); $("zOut").onclick = () => mid(0.8);
   $("zPct").onclick = () => center(1); $("zFit").onclick = () => center();
@@ -8850,6 +8974,7 @@ function setState({ code, config }, name = "") {
   $("src").value = code; $("cfg").value = config || engine.defaultConfig;
   fileName = name; $("fname").textContent = T(name);
   syncControls(); paint(); saveDraft(); fitNext = true; render();
+  PhoneLayout.show(1);
 }
 
 function patchConfig(ctl, val) {
@@ -9090,6 +9215,7 @@ function bindActions() {
   $("demo").onchange = e => { const d = engine.samples[e.target.value]; if (d) setState({ code: d[1], config: $("cfg").value }, ""); e.target.value = ""; };
   $("btnShare").onclick = ShareLink.share;
   $("btnOpenLink").onclick = ShareLink.askAndOpen;
+  $("btnFull").hidden = !document.fullscreenEnabled;
   $("btnFull").onclick = () => document.fullscreenElement ? document.exitFullscreen() : $("pvPane").requestFullscreen();
   document.addEventListener("fullscreenchange", () => setTimeout(() => PanZoom.center(), 50));
   window.addEventListener("hashchange", async () => { if (await ShareLink.open(location.hash, "từ link chia sẻ")) cleanUrl(); });

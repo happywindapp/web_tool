@@ -47,6 +47,12 @@ Xem `docs/tools/<tool>.md` — danh sách ở [`docs/tools/`](../tools/README.md
      link hỏng ⇒ báo lỗi rõ, không đụng nháp.
   8. Ghi contract link (định dạng, payload, `?data=`) vào `docs/tools/<tool>.md`.
   9. Kiểm: tạo link → mở ở trang mới → ra cùng dữ liệu, tuỳ chọn, kết quả; thử link hỏng và `?data=` thô.
+- **Dùng được trên điện thoại dọc (bắt buộc mọi tool) — ADR #12:** ở `max-width:640px` mỗi lúc hiện 1 pane, khung làm việc phải chiếm phần lớn màn hình. Chỉ thêm markup, CSS/JS dùng chung ở `src/data-workbench/styles/phone-portrait-layout.css` + `js/core/phone-pane-switcher.js`:
+  1. Template `@include` file CSS trên **sau cùng**, include JS trước module đầu tiên gọi `PhoneLayout`; `<header class="top">` có `<button class="more-toggle" title="Thêm thao tác" aria-expanded="false">⋯</button>` ngay sau `h1` — việc phụ tự ẩn sau nút này.
+  2. Vùng nhiều pane: `<div class="seg pane-switch">` + nút nhãn ngắn, **ngay trước** vùng có class `pane-scroller`; số nút = số pane. Pane để dạng `.pane` trong scroller (lớp bọc thêm thì khai `display:contents`). Pane nằm trong carousel, không `display:none`, nên `focus()`/đo kích thước vẫn đúng.
+  3. Nút chạy ra kết quả: `data-pane-go="<chỉ số pane kết quả>"`, nút Xoá: `data-pane-go="0"`. Nạp mẫu/link: gọi `PhoneLayout.show(i)` hoặc `showLast()`. Trên desktop các hàm này không làm gì.
+  4. Không đặt nội dung thiết yếu chỉ qua hover hay chuột phải (trên touch dùng tap; `contextmenu` không có trên iOS). Vùng kéo-thả phải có `touch-action:none` và không phủ kín cả màn hình nếu trang cần cuộn.
+  5. Kiểm bằng headless `isMobile + hasTouch` ở 320/390/430: `innerWidth` phải đúng bằng viewport (layout tràn thì trình duyệt mobile tự nới `innerWidth`, không hiện lỗi gì), không có page error, thử đủ luồng nhập → chạy → xem kết quả.
 - **Hai tầng màu header/toolbar (bắt buộc mọi tool) — ADR #10:** nhìn màu là biết "đi đâu" hay "làm gì".
   - **Header** teal đậm `#164e63`: việc cấp ứng dụng (Trang chủ, tên tool, chia sẻ, lưu, giao diện, `VI | EN`).
   - **Tab điều hướng** (nếu tool có nhiều màn hình): hàng riêng cuối header, không viền, tab bật liền nền với toolbar + chữ đậm. Mẫu: `.wb-nav`.

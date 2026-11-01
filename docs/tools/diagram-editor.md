@@ -119,3 +119,7 @@ Module chung `@include` từ `src/data-workbench/`: `I18n`, `ShareCodec`, `Theme
 
 Sửa version ở đầu `scripts/vendor-diagram-renderers.ps1`, chạy script, cập nhật đường dẫn trong `src/diagram-editor/js/core/vendor-script-loader.js`, xoá bản cũ, build, chạy lại mọi `?demo=`.
 Script dừng ngay nếu bản mới đổi đoạn code cần vá. Mermaid vẫn tải tay: `npm pack mermaid@<ver>` → `package/dist/mermaid.min.js` → `tools/vendor/mermaid-<ver>.min.js`.
+
+## Điện thoại
+
+Dưới 640px: 2 pane `Mã | Xem trước` (ADR #12); chọn mẫu, mở link, mở file hoặc bấm Vẽ thì sang Xem trước, bấm dòng lỗi thì về Mã. Xem trước: một ngón kéo, hai ngón pinch-zoom (`PanZoom`). Nút toàn màn hình tự ẩn nếu trình duyệt không hỗ trợ (iPhone).

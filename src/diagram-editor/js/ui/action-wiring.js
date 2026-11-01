@@ -58,6 +58,7 @@ function bindActions() {
   $("demo").onchange = e => { const d = engine.samples[e.target.value]; if (d) setState({ code: d[1], config: $("cfg").value }, ""); e.target.value = ""; };
   $("btnShare").onclick = ShareLink.share;
   $("btnOpenLink").onclick = ShareLink.askAndOpen;
+  $("btnFull").hidden = !document.fullscreenEnabled;
   $("btnFull").onclick = () => document.fullscreenElement ? document.exitFullscreen() : $("pvPane").requestFullscreen();
   document.addEventListener("fullscreenchange", () => setTimeout(() => PanZoom.center(), 50));
   window.addEventListener("hashchange", async () => { if (await ShareLink.open(location.hash, "từ link chia sẻ")) cleanUrl(); });

@@ -11,3 +11,4 @@
   table.dt ins { background:var(--add2); text-decoration:none; }
   table.dt tr.skip td { text-align:center; color:var(--muted); background:var(--gut); cursor:pointer; padding:2px; }
   table.dt tr.cur td { box-shadow:inset 0 2px 0 var(--acc); }
+  @media (max-width: 900px) { .diff-inputs { grid-template-columns:repeat(2, minmax(0, 1fr)); grid-template-rows:minmax(0, 1fr); overflow:visible; } }

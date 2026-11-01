@@ -114,7 +114,7 @@ const FixApp = (() => {
     for (const id of ["tz", "type", "hideAdmin", "hideBc", "onlyBad", "onlyNotes", "order", "hideHdr"]) $(id).addEventListener("change", refresh);
     for (const id of ["q", "cols"]) $(id).addEventListener("input", Dom.debounce(refresh, 200));
     document.addEventListener("change", e => { if (KEEP.includes(e.target.id)) Store.set("opts", Object.fromEntries(KEEP.map(k => [k, opts()[k]]))); });
-    $("grid").addEventListener("click", e => { const tr = e.target.closest("tr[data-i]"); if (tr) select(+tr.dataset.i); });
+    $("grid").addEventListener("click", e => { const tr = e.target.closest("tr[data-i]"); if (tr) { select(+tr.dataset.i); PhoneLayout.show(2); } });
     $("chainChip").addEventListener("click", e => { if (e.target.closest("button")) { ChainPick.clear(); refresh(); } });
     $("chains").onchange = e => { const v = e.target.value; e.target.value = ""; if (v) { ChainPick.choose(v); refresh(); } };
     $("resetCols").onclick = () => ColView.resetLayout();

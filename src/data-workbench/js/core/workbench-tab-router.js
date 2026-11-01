@@ -57,11 +57,13 @@ const Workbench = (() => {
     keep(p.tab);
     writeOpts(p.tab, p.opts);
     tabs[p.tab].open(p);
+    PhoneLayout.showLast();
   }
 
   function demo(id, name) {
     keep(id);
     tabs[id].demo(name);
+    PhoneLayout.showLast();
   }
 
   function restore() {

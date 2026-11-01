@@ -23,6 +23,7 @@
 - [x] Diagram Editor: mẫu DDD 5 sơ đồ cho 3 hệ thống microservice (Subdomain map · Context map · Aggregates · Event storming · Hexagonal), sinh từ model chung `src/diagram-editor/js/samples/ddd/` (2026-11-02)
 - [x] Diagram Editor: tab DBML thêm 6 database đầy đủ (Ngân hàng · Chứng khoán · Mua sắm online · Sàn tiền ảo · Game online · Logistics) ở `src/diagram-editor/js/samples/dbml/`, test compile bằng `@dbml/parse` thật (2026-11-02)
 - [x] Diagram Editor: thêm mẫu C4 + DDD cho Sàn tiền ảo, Game online, Logistics; sửa nội dung DDD sau review (2026-11-02)
+- [x] Hỗ trợ điện thoại dọc cho `index.html` + 3 tool: carousel 1 pane, header `⋯`, toolbar cuộn ngang, pinch-zoom preview, sửa tràn viewport và lỗi preview cao 2px dưới 900px (ADR #12) (2026-11-02)
 - [ ] Data Workbench đợt 2 (chưa chốt): Encode/Base64/JWT/hash · Format SQL · sinh Go struct/TS/C# từ JSON · copy path + JSONPath/XPath trên cây — xem `plans/reports/research-261028-0849-*`
 
 ## Đang làm (in progress)

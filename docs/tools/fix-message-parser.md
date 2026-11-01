@@ -151,3 +151,7 @@ Build: bỏ trống `-Tool` ⇒ build/kiểm **mọi** tool (tool dùng chung mo
 - Bảng hiện tối đa **3.000** dòng (lọc để thu hẹp); phân tích toàn bộ input mỗi lần sửa — log vài chục nghìn message vẫn ổn, file hàng trăm MB thì không (không streaming).
 - Delimiter là dấu cách ⇒ giá trị có dấu cách (vd `58=Text`) bị tách sai.
 - Không kiểm conditional required, không kiểm thứ tự field trong group, không kiểm tag thuộc message nào.
+
+## Điện thoại
+
+Dưới 640px: 3 pane `Dữ liệu FIX | Bảng message | Chi tiết message` (ADR #12), mở vào Bảng message; chạm 1 hàng thì sang Chi tiết, chạm 1 tag thì hiện tooltip. Kéo-thả đổi cột không chạy trên touch (dùng được `↺ Cột` để đặt lại); menu chuột phải chỉ có khi nhấn giữ trên Android.

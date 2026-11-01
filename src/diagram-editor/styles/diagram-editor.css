@@ -62,4 +62,4 @@
   #hList { margin:0; padding:8px 16px 12px 36px; overflow:auto; max-height:60vh; }
   #hList li { padding:4px 0; border-bottom:1px solid var(--gut); }
   #hList code { display:block; color:var(--muted); font-size:12px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-  @media (max-width: 900px) { .studio { grid-template-columns:1fr; grid-template-rows:45vh 0 50vh; gap:10px; overflow:auto; } #split { display:none; } }
+  @media (max-width: 900px) { .studio { grid-template-columns:minmax(0, 1fr); grid-template-rows:repeat(2, minmax(280px, 1fr)); gap:10px; overflow-y:auto; } #split { display:none; } }

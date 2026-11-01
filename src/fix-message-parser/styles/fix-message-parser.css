@@ -69,4 +69,4 @@
   pre.raw .d { color:var(--muted); }
   .empty { padding:24px 12px; color:var(--muted); text-align:center; }
   footer.status { padding:4px 16px; background:var(--panel); border-top:1px solid var(--line); font-size:12.5px; }
-  @media (max-width: 900px) { .work { grid-template-columns:1fr; grid-template-rows:70vh 60vh; } .toolbar .hint { display:none; } }
+  @media (max-width: 900px) { .work { grid-template-columns:minmax(0, 1fr); grid-template-rows:minmax(480px, 3fr) minmax(300px, 2fr); overflow-y:auto; } .toolbar .hint { display:none; } }
