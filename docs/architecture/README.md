@@ -66,7 +66,7 @@ Xem `docs/tools/<tool>.md` — danh sách ở [`docs/tools/`](../tools/README.md
 
   ```html
   <div class="author">
-    <span>Tác giả:</span><b>Phan Ngọc Minh Quân</b>
+    <span>Tác giả:</span><b><a href="https://happywindapp.github.io/CV/cv_quan_phan.html">Phan Ngọc Minh Quân</a></b>
     <span>GitHub Source:</span><a href="https://github.com/happywindapp/web_tool/">github.com/happywindapp/web_tool</a>
   </div>
   ```
