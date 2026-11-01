@@ -24,7 +24,7 @@ Dev/BA/kỹ sư kiến trúc cần vẽ flowchart, UML, ERD, kiến trúc C4… 
 | Giao diện | Hợp đồng |
 |-----------|----------|
 | URL `?tab=<id>` | `mermaid plantuml drawio dbml d2 structurizr`. Không có thì mở tab lần trước; có `demo`/`data` mà thiếu `tab` thì là Mermaid (giữ link cũ) |
-| URL `?demo=<key>` | Mermaid: `flowchart sequence class state er gantt pie journey git mindmap timeline quadrant xychart sankey block architecture kanban requirement c4 packet radar treemap` · PlantUML: `sequence class usecase activity state component c4 mindmap gantt theme broken` · draw.io: `flow architecture broken` · DBML: `shop groups broken` · D2: `architecture sequence table class grid broken` · Structurizr: `banking auto broken`. Mẫu C4 ở mục 3: Mermaid, PlantUML, draw.io, D2 thêm `c4-<hệ thống>-<cấp>` (`bank securities shop` × `context container component code`) · DBML thêm `c4-<hệ thống>-code` · Structurizr thêm `c4-<hệ thống>` |
+| URL `?demo=<key>` | Mermaid: `flowchart sequence class state er gantt pie journey git mindmap timeline quadrant xychart sankey block architecture kanban requirement c4 packet radar treemap` · PlantUML: `sequence class usecase activity state component c4 mindmap gantt theme broken` · draw.io: `flow architecture broken` · DBML: `shop groups broken` · D2: `architecture sequence table class grid broken` · Structurizr: `banking auto broken`. Mẫu C4 ở mục 3: Mermaid, PlantUML, draw.io, D2 thêm `c4-<hệ thống>-<cấp>` (`bank securities shop` × `context container component code`) · DBML thêm `c4-<hệ thống>-code` · Structurizr thêm `c4-<hệ thống>`. Mẫu DDD ở mục 3: Mermaid, PlantUML, draw.io, D2 thêm `ddd-<hệ thống>-<sơ đồ>` (`subdomains context-map aggregates event-flow hexagonal`) · DBML thêm `ddd-<hệ thống>-aggregates` · Structurizr thêm `ddd-<hệ thống>` |
 | URL hash `#pako:<b64url>` | `base64url(zlib(JSON))`. Mermaid: `{code, mermaid, autoSync, updateDiagram}`, **cùng định dạng mermaid.live**. Tab khác: `{tab, code, config}`. Payload không có `tab` hợp lệ ⇒ Mermaid. Nhận thêm `#base64:`. Mở xong xoá hash khỏi URL |
 | URL `?data=<mã>` | Mã thô (URL-encode) → nạp + vẽ ở tab của `?tab=`; giá trị `pako:`/`base64:` giải như hash. Đi qua query ⇒ có gửi lên server, chỉ cho sơ đồ ngắn, không nhạy cảm. Ưu tiên hash khi có cả hai |
 | Input | Gõ/dán · `<input type=file>` · kéo-thả (UTF-8); file có khối mã rào bằng tên ngôn ngữ của tab thì lấy khối đầu |
@@ -59,6 +59,16 @@ Dev/BA/kỹ sư kiến trúc cần vẽ flowchart, UML, ERD, kiến trúc C4… 
 - **draw.io:** XML không tự bố trí khi nạp nên `C4ToDrawio` tự xếp tầng: tầng theo độ sâu quan hệ, mỗi ô đặt gần các ô liên quan. Cạnh thẳng không tránh vật cản nên vài cạnh dài vẫn đi qua ô khác, kéo tay trong editor nếu cần.
 - **Mermaid:** C4 ngắt hàng theo `screen.availWidth`, cạnh không tránh vật cản; sơ đồ L2 sẽ có đường cắt ngang ô. Test headless phải giả lập màn hình đủ rộng, nếu không chỉ ra 2 cột.
 
+### Mẫu DDD (3 hệ thống microservice)
+
+- Cùng 3 hệ thống với mẫu C4, mỗi hệ thống 5 sơ đồ: Subdomain map · Context map · Aggregates · Event storming · Hexagonal. Strategic design là 2 sơ đồ đầu, tactical design là 3 sơ đồ sau. DDD không có bộ sơ đồ chuẩn cố định, 5 loại này do repo chốt.
+- `samples/ddd/ddd-model-*.js` là model trung lập, `DddViews` dựng 2 dạng view: box graph (nhóm + ô + cạnh) và nhóm class của aggregate. `ddd-to-*.js` sinh mã từng ngôn ngữ, `ddd-sample-registry.js` gộp vào mẫu của tab. Bố cục draw.io dùng lại `C4ToDrawio.parts`.
+- Context map vẽ mũi tên từ upstream sang downstream, pattern (OHS, ACL, Conformist, Customer/Supplier, Partnership, Shared Kernel, Published Language) nằm trong nhãn cạnh.
+- Aggregate tham chiếu aggregate khác chỉ qua id; test `an aggregate references another aggregate root only` giữ luật này.
+- **Structurizr:** chỉ có khái niệm C4, nên mỗi sơ đồ là 1 `softwareSystem` phụ, các ô là `container`, nhãn hiện `[Container: …]`. Nội dung vẫn đúng DDD nhưng từ khoá là C4.
+- **DBML:** chỉ có Aggregates, viết tay trong `dbml-samples.js`: mỗi aggregate 1 `TableGroup`, không có FK giữa hai aggregate.
+- Tên trùng từ khoá ngôn ngữ làm hỏng sinh mã: D2 không nhận `fill` làm tên class kể cả viết hoa; PlantUML không nhận mã hex sau `text:` nên dùng tên màu.
+
 ### draw.io
 
 - Tab mở ra là cổng đồng ý, **chưa có request nào**. Bấm "Kết nối draw.io" mới tạo iframe, mỗi lần mở trang phải bấm lại. Mở link chia sẻ hay chọn mẫu không tự kết nối.
@@ -81,7 +91,7 @@ Dev/BA/kỹ sư kiến trúc cần vẽ flowchart, UML, ERD, kiến trúc C4… 
 
 `core/`: `VendorScripts` + `DiagramError` · `EngineStore` · `SvgSanitizer` · `Exporter` · `Highlight` · `PanZoom` · `VersionHistory`.
 `engines/`: 1 file mỗi engine + `graphviz-renderer` · `dbml-schema-to-dot` · `structurizr-dsl-parser` · `structurizr-view-to-dot`.
-`samples/`: mẫu từng tab (nội dung English), `samples/c4/`: model + builder mẫu C4. `i18n/`: từ điển EN.
+`samples/`: mẫu từng tab (nội dung English), `samples/c4/`, `samples/ddd/`: model + builder mẫu C4, DDD. `i18n/`: từ điển EN.
 `ui/`: `editor-surface` · `engine-session` · `render-pipeline` · `drawio-tab` · `share-links` · `history-dialog` · `action-wiring` · `boot`.
 Module chung `@include` từ `src/data-workbench/`: `I18n`, `ShareCodec`, `ThemePicker`, `SavedSessions`, CSS nền + hai tầng màu.
 

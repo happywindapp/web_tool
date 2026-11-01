@@ -1,0 +1,75 @@
+const DDD_MODEL_BANKING = {
+  key: "bank", group: "DDD — Ngân hàng", name: "Digital Banking", tacticalContext: "Transfers",
+  contexts: [
+    { id: "transfers", name: "Transfers", subdomain: "Money Movement", type: "core", desc: "Moves money between accounts and banks" },
+    { id: "fraud", name: "Fraud Screening", subdomain: "Fraud Risk", type: "core", desc: "Scores transfers, holds suspicious ones" },
+    { id: "accounts", name: "Accounts", subdomain: "Account Servicing", type: "supporting", desc: "Balances, statements, limits" },
+    { id: "onboarding", name: "Customer Onboarding", subdomain: "Customer Onboarding", type: "supporting", desc: "Opens customers after eKYC" },
+    { id: "identity", name: "Identity and Access", subdomain: "Identity", type: "generic", desc: "Sign-in, MFA, tokens" },
+    { id: "notifications", name: "Notifications", subdomain: "Messaging", type: "generic", desc: "OTPs and alerts" },
+  ],
+  externals: [
+    { id: "kycProvider", name: "eKYC Provider", desc: "Identity document checks" },
+    { id: "coreBanking", name: "Core Banking", desc: "Legacy ledger" },
+    { id: "paymentSwitch", name: "Payment Switch", desc: "National interbank network" },
+  ],
+  contextRels: [
+    ["coreBanking", "accounts", "Account and ledger data", "Upstream legacy · Downstream ACL"],
+    ["coreBanking", "transfers", "Ledger postings", "Upstream legacy · Downstream ACL"],
+    ["paymentSwitch", "transfers", "Interbank messages", "Published Language · Downstream Conformist"],
+    ["kycProvider", "onboarding", "Document checks", "Upstream OHS · Downstream ACL"],
+    ["accounts", "transfers", "Balances and limits", "Customer/Supplier"],
+    ["identity", "transfers", "Authenticated customer", "Upstream OHS · Downstream Conformist"],
+    ["transfers", "fraud", "Transfer details and scores", "Partnership"],
+    ["onboarding", "accounts", "New customer profile", "Customer/Supplier"],
+    ["transfers", "notifications", "TransferCompleted", "Published Language (events)"],
+  ],
+  aggregates: [
+    { id: "transferAggregate", name: "Transfer aggregate", classes: [
+      { name: "Transfer", kind: "aggregate root", members: ["-transferId: TransferId", "-status: TransferStatus", "+submit(): void", "+markDebited(): void", "+complete(): void", "+fail(reason): void"] },
+      { name: "TransferLeg", kind: "entity", members: ["-legId: LegId", "-account: AccountRef", "-direction: Direction"] },
+      { name: "Money", kind: "value object", members: ["-amount: BigDecimal", "-currency: Currency", "+add(other): Money"] },
+      { name: "TransferStatus", kind: "value object", members: ["SUBMITTED", "HELD", "DEBITED", "COMPLETED", "FAILED"] },
+    ] },
+    { id: "beneficiaryAggregate", name: "Beneficiary aggregate", classes: [
+      { name: "Beneficiary", kind: "aggregate root", members: ["-beneficiaryId: BeneficiaryId", "-nickname: String", "+rename(nickname): void"] },
+      { name: "BankAccountNumber", kind: "value object", members: ["-bankCode: String", "-number: String"] },
+    ] },
+    { id: "transferEvents", name: "Domain events", classes: [
+      { name: "TransferSubmitted", kind: "domain event", members: ["-transferId: TransferId", "-occurredAt: Instant"] },
+      { name: "TransferCompleted", kind: "domain event", members: ["-transferId: TransferId", "-occurredAt: Instant"] },
+    ] },
+  ],
+  aggregateRels: [
+    ["Transfer", "TransferLeg", "has 2 legs"],
+    ["Transfer", "Money", "amount"],
+    ["Transfer", "TransferStatus", "status"],
+    ["Transfer", "Beneficiary", "references by id"],
+    ["Beneficiary", "BankAccountNumber", "account"],
+    ["Transfer", "TransferSubmitted", "raises"],
+    ["Transfer", "TransferCompleted", "raises"],
+  ],
+  eventFlow: [
+    { actor: "Customer", command: "Submit Transfer", aggregate: "Transfer", event: "TransferSubmitted", policy: "Screen every new transfer" },
+    { actor: "Fraud Screening", command: "Screen Transfer", aggregate: "FraudCase", event: "TransferCleared", policy: "Debit once cleared" },
+    { actor: "Transfers", command: "Debit Source Account", aggregate: "Transfer", event: "AccountDebited", policy: "Send when debited" },
+    { actor: "Transfers", command: "Send To Switch", aggregate: "Transfer", event: "TransferCompleted", policy: "Alert the customer" },
+    { actor: "Notifications", command: "Send Alert", aggregate: "Message", event: "AlertSent" },
+  ],
+  hexagonal: {
+    layers: [
+      { name: "Driving adapters", type: "adapter", items: [["restController", "TransferController", "REST API for clients"], ["fraudListener", "FraudResultListener", "Kafka consumer"]] },
+      { name: "Inbound ports", type: "port", items: [["submitPort", "SubmitTransferUseCase", "Starts a transfer"], ["resumePort", "ResumeTransferUseCase", "Continues after screening"]] },
+      { name: "Application and domain", type: "domain", items: [["appService", "TransferApplicationService", "Transaction boundary"], ["transferRoot", "Transfer aggregate", "Business rules and state"], ["limitPolicy", "LimitPolicy", "Domain service for limits"]] },
+      { name: "Outbound ports", type: "port", items: [["repoPort", "TransferRepository", "Stores aggregates"], ["ledgerPort", "LedgerGateway", "Posts debits and credits"], ["eventPort", "DomainEventPublisher", "Publishes events"]] },
+      { name: "Driven adapters", type: "adapter", items: [["jpaRepo", "JpaTransferRepository", "PostgreSQL"], ["coreAcl", "CoreBankingAcl", "Anti-corruption layer"], ["outbox", "KafkaOutboxPublisher", "Transactional outbox"]] },
+    ],
+    rels: [
+      ["restController", "submitPort", "calls"], ["fraudListener", "resumePort", "calls"],
+      ["submitPort", "appService", "implemented by"], ["resumePort", "appService", "implemented by"],
+      ["appService", "transferRoot", "loads and invokes"], ["transferRoot", "limitPolicy", "checks"],
+      ["appService", "repoPort", "uses"], ["appService", "ledgerPort", "uses"], ["appService", "eventPort", "uses"],
+      ["jpaRepo", "repoPort", "implements"], ["coreAcl", "ledgerPort", "implements"], ["outbox", "eventPort", "implements"],
+    ],
+  },
+};

@@ -1,0 +1,75 @@
+const DDD_MODEL_SHOPPING = {
+  key: "shop", group: "DDD — Mua sắm online", name: "Online Shopping", tacticalContext: "Ordering",
+  contexts: [
+    { id: "ordering", name: "Ordering", subdomain: "Checkout and Orders", type: "core", desc: "Turns a cart into a confirmed order" },
+    { id: "pricing", name: "Pricing and Promotions", subdomain: "Pricing", type: "core", desc: "Discounts, vouchers, shipping fees" },
+    { id: "catalog", name: "Catalog", subdomain: "Product Information", type: "supporting", desc: "Products and search" },
+    { id: "inventory", name: "Inventory", subdomain: "Stock", type: "supporting", desc: "Stock levels and reservations" },
+    { id: "fulfilment", name: "Fulfilment", subdomain: "Delivery", type: "supporting", desc: "Picking, packing, shipping" },
+    { id: "payment", name: "Payment", subdomain: "Payments", type: "generic", desc: "Charges and refunds" },
+    { id: "notifications", name: "Notifications", subdomain: "Messaging", type: "generic", desc: "Order emails" },
+  ],
+  externals: [
+    { id: "paymentProvider", name: "Payment Provider", desc: "Card payments" },
+    { id: "shippingCarrier", name: "Shipping Carrier", desc: "Parcel delivery" },
+  ],
+  contextRels: [
+    ["catalog", "ordering", "Product snapshot", "Upstream OHS · Downstream Conformist"],
+    ["pricing", "ordering", "Price quotes", "Customer/Supplier"],
+    ["inventory", "ordering", "Stock reservations", "Customer/Supplier"],
+    ["catalog", "pricing", "Product categories", "Shared Kernel"],
+    ["paymentProvider", "payment", "Card charges", "Upstream OHS · Downstream ACL"],
+    ["payment", "ordering", "Payment results", "Upstream OHS · Downstream ACL"],
+    ["ordering", "fulfilment", "OrderConfirmed", "Published Language (events)"],
+    ["ordering", "notifications", "OrderConfirmed", "Published Language (events)"],
+    ["shippingCarrier", "fulfilment", "Tracking updates", "Upstream OHS · Downstream ACL"],
+  ],
+  aggregates: [
+    { id: "orderAggregate", name: "Order aggregate", classes: [
+      { name: "Order", kind: "aggregate root", members: ["-orderId: OrderId", "-status: OrderStatus", "+place(lines): void", "+confirm(): void", "+cancel(reason): void", "+total(): Money"] },
+      { name: "OrderLine", kind: "entity", members: ["-lineId: LineId", "-sku: Sku", "-quantity: int"] },
+      { name: "Money", kind: "value object", members: ["-amount: BigDecimal", "-currency: Currency"] },
+      { name: "ShippingAddress", kind: "value object", members: ["-street: String", "-city: String", "-postalCode: String"] },
+    ] },
+    { id: "cartAggregate", name: "Cart aggregate", classes: [
+      { name: "Cart", kind: "aggregate root", members: ["-cartId: CartId", "+addItem(sku, quantity): void", "+removeItem(sku): void"] },
+      { name: "CartItem", kind: "entity", members: ["-sku: Sku", "-quantity: int"] },
+    ] },
+    { id: "orderEvents", name: "Domain events", classes: [
+      { name: "OrderPlaced", kind: "domain event", members: ["-orderId: OrderId", "-occurredAt: Instant"] },
+      { name: "OrderConfirmed", kind: "domain event", members: ["-orderId: OrderId", "-occurredAt: Instant"] },
+    ] },
+  ],
+  aggregateRels: [
+    ["Order", "OrderLine", "has many"],
+    ["OrderLine", "Money", "unit price"],
+    ["Order", "ShippingAddress", "ships to"],
+    ["Order", "Cart", "created from, by id"],
+    ["Cart", "CartItem", "has many"],
+    ["Order", "OrderPlaced", "raises"],
+    ["Order", "OrderConfirmed", "raises"],
+  ],
+  eventFlow: [
+    { actor: "Shopper", command: "Place Order", aggregate: "Order", event: "OrderPlaced", policy: "Reserve stock for new orders" },
+    { actor: "Inventory", command: "Reserve Stock", aggregate: "StockItem", event: "StockReserved", policy: "Charge once stock is held" },
+    { actor: "Payment", command: "Charge Order", aggregate: "Payment", event: "PaymentCaptured", policy: "Confirm paid orders" },
+    { actor: "Ordering", command: "Confirm Order", aggregate: "Order", event: "OrderConfirmed", policy: "Ship confirmed orders" },
+    { actor: "Fulfilment", command: "Create Shipment", aggregate: "Shipment", event: "ShipmentDispatched" },
+  ],
+  hexagonal: {
+    layers: [
+      { name: "Driving adapters", type: "adapter", items: [["checkoutController", "CheckoutController", "REST API for clients"], ["paymentListener", "PaymentResultListener", "Kafka consumer"]] },
+      { name: "Inbound ports", type: "port", items: [["placePort", "PlaceOrderUseCase", "Starts checkout"], ["confirmPort", "ConfirmOrderUseCase", "Continues after payment"]] },
+      { name: "Application and domain", type: "domain", items: [["appService", "OrderApplicationService", "Transaction boundary"], ["orderRoot", "Order aggregate", "Business rules and state"], ["pricingService", "OrderPricingService", "Domain service for totals"]] },
+      { name: "Outbound ports", type: "port", items: [["repoPort", "OrderRepository", "Stores aggregates"], ["stockPort", "StockGateway", "Reserves stock"], ["eventPort", "DomainEventPublisher", "Publishes events"]] },
+      { name: "Driven adapters", type: "adapter", items: [["jpaRepo", "JpaOrderRepository", "PostgreSQL"], ["stockClient", "InventoryGrpcClient", "gRPC"], ["outbox", "KafkaOutboxPublisher", "Transactional outbox"]] },
+    ],
+    rels: [
+      ["checkoutController", "placePort", "calls"], ["paymentListener", "confirmPort", "calls"],
+      ["placePort", "appService", "implemented by"], ["confirmPort", "appService", "implemented by"],
+      ["appService", "orderRoot", "loads and invokes"], ["orderRoot", "pricingService", "checks"],
+      ["appService", "repoPort", "uses"], ["appService", "stockPort", "uses"], ["appService", "eventPort", "uses"],
+      ["jpaRepo", "repoPort", "implements"], ["stockClient", "stockPort", "implements"], ["outbox", "eventPort", "implements"],
+    ],
+  },
+};

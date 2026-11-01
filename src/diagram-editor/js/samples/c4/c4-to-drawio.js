@@ -80,5 +80,5 @@ const C4ToDrawio = (() => {
     return page(v.title, cells);
   }
 
-  return { build };
+  return { build, parts: { vertex, edge, page, layers, spread, classLabel, classHeight } };
 })();

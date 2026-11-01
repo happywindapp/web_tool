@@ -1,0 +1,77 @@
+const DDD_MODEL_SECURITIES = {
+  key: "securities", group: "DDD — Chứng khoán", name: "Securities Trading", tacticalContext: "Order Management",
+  contexts: [
+    { id: "orders", name: "Order Management", subdomain: "Order Lifecycle", type: "core", desc: "Owns orders from entry to final fill" },
+    { id: "risk", name: "Pre-trade Risk", subdomain: "Trading Risk", type: "core", desc: "Buying power and position limits" },
+    { id: "portfolio", name: "Portfolio", subdomain: "Positions", type: "supporting", desc: "Positions and cash balances" },
+    { id: "settlement", name: "Settlement", subdomain: "Post-trade", type: "supporting", desc: "End-of-day cash and securities" },
+    { id: "marketData", name: "Market Data", subdomain: "Market Information", type: "generic", desc: "Prices and reference data" },
+    { id: "identity", name: "Identity and Access", subdomain: "Identity", type: "generic", desc: "Sign-in and permissions" },
+  ],
+  externals: [
+    { id: "stockExchange", name: "Stock Exchange", desc: "Matches orders" },
+    { id: "depository", name: "Securities Depository", desc: "Holds securities" },
+    { id: "settlementBank", name: "Settlement Bank", desc: "Moves cash" },
+  ],
+  contextRels: [
+    ["stockExchange", "orders", "Orders and execution reports", "Published Language (FIX) · Downstream ACL"],
+    ["stockExchange", "marketData", "Market feed", "Published Language · Downstream Conformist"],
+    ["marketData", "risk", "Reference prices", "Upstream OHS · Downstream Conformist"],
+    ["portfolio", "risk", "Positions and cash", "Customer/Supplier"],
+    ["risk", "orders", "Pre-trade decisions", "Partnership"],
+    ["identity", "orders", "Authenticated account", "Upstream OHS · Downstream Conformist"],
+    ["orders", "portfolio", "OrderFilled", "Published Language (events)"],
+    ["orders", "settlement", "TradeExecuted", "Published Language (events)"],
+    ["depository", "settlement", "Settlement confirmations", "Upstream legacy · Downstream ACL"],
+    ["settlementBank", "settlement", "Payment confirmations", "Upstream legacy · Downstream ACL"],
+  ],
+  aggregates: [
+    { id: "orderAggregate", name: "Order aggregate", classes: [
+      { name: "Order", kind: "aggregate root", members: ["-orderId: OrderId", "-status: OrderStatus", "+accept(): void", "+applyFill(fill): void", "+cancel(): void", "+remaining(): Quantity"] },
+      { name: "Execution", kind: "entity", members: ["-execId: ExecId", "-quantity: Quantity", "-price: Price"] },
+      { name: "Instrument", kind: "value object", members: ["-symbol: String", "-board: String"] },
+      { name: "Quantity", kind: "value object", members: ["-lots: long", "+minus(other): Quantity"] },
+      { name: "Price", kind: "value object", members: ["-value: BigDecimal", "+isOnTick(step): boolean"] },
+    ] },
+    { id: "accountAggregate", name: "TradingAccount aggregate", classes: [
+      { name: "TradingAccount", kind: "aggregate root", members: ["-accountNo: AccountNo", "-status: AccountStatus", "+canTrade(): boolean"] },
+    ] },
+    { id: "orderEvents", name: "Domain events", classes: [
+      { name: "OrderAccepted", kind: "domain event", members: ["-orderId: OrderId", "-occurredAt: Instant"] },
+      { name: "OrderFilled", kind: "domain event", members: ["-orderId: OrderId", "-execId: ExecId", "-occurredAt: Instant"] },
+    ] },
+  ],
+  aggregateRels: [
+    ["Order", "Execution", "has many"],
+    ["Order", "Instrument", "trades"],
+    ["Order", "Quantity", "quantity"],
+    ["Order", "Price", "limit price"],
+    ["Order", "TradingAccount", "references by id"],
+    ["Order", "OrderAccepted", "raises"],
+    ["Order", "OrderFilled", "raises"],
+  ],
+  eventFlow: [
+    { actor: "Investor", command: "Place Order", aggregate: "Order", event: "OrderPlaced", policy: "Check risk before routing" },
+    { actor: "Pre-trade Risk", command: "Reserve Buying Power", aggregate: "RiskAccount", event: "BuyingPowerReserved", policy: "Route once reserved" },
+    { actor: "Order Management", command: "Route To Exchange", aggregate: "Order", event: "OrderAccepted", policy: "Apply each execution report" },
+    { actor: "Stock Exchange", command: "Record Fill", aggregate: "Order", event: "OrderFilled", policy: "Update positions after a fill" },
+    { actor: "Portfolio", command: "Update Position", aggregate: "Position", event: "PositionUpdated", policy: "Settle at end of day" },
+    { actor: "Settlement", command: "Settle Trade", aggregate: "SettlementInstruction", event: "TradeSettled" },
+  ],
+  hexagonal: {
+    layers: [
+      { name: "Driving adapters", type: "adapter", items: [["orderController", "OrderController", "REST API for clients"], ["fixListener", "ExecutionReportListener", "Reports from the FIX gateway"]] },
+      { name: "Inbound ports", type: "port", items: [["placePort", "PlaceOrderUseCase", "Accepts a new order"], ["fillPort", "ApplyExecutionUseCase", "Records fills and rejects"]] },
+      { name: "Application and domain", type: "domain", items: [["appService", "OrderApplicationService", "Transaction boundary"], ["orderRoot", "Order aggregate", "Order state machine"], ["tickPolicy", "PriceTickPolicy", "Domain service for price steps"]] },
+      { name: "Outbound ports", type: "port", items: [["repoPort", "OrderRepository", "Stores aggregates"], ["riskPort", "RiskCheckGateway", "Asks for a pre-trade decision"], ["routePort", "ExchangeGateway", "Routes orders"], ["eventPort", "DomainEventPublisher", "Publishes events"]] },
+      { name: "Driven adapters", type: "adapter", items: [["jpaRepo", "JpaOrderRepository", "PostgreSQL"], ["riskClient", "RiskGrpcClient", "gRPC"], ["fixAcl", "FixGatewayAcl", "Anti-corruption layer for FIX"], ["outbox", "KafkaOutboxPublisher", "Transactional outbox"]] },
+    ],
+    rels: [
+      ["orderController", "placePort", "calls"], ["fixListener", "fillPort", "calls"],
+      ["placePort", "appService", "implemented by"], ["fillPort", "appService", "implemented by"],
+      ["appService", "orderRoot", "loads and invokes"], ["orderRoot", "tickPolicy", "checks"],
+      ["appService", "repoPort", "uses"], ["appService", "riskPort", "uses"], ["appService", "routePort", "uses"], ["appService", "eventPort", "uses"],
+      ["jpaRepo", "repoPort", "implements"], ["riskClient", "riskPort", "implements"], ["fixAcl", "routePort", "implements"], ["outbox", "eventPort", "implements"],
+    ],
+  },
+};
