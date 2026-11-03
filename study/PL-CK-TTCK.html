@@ -1,0 +1,677 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Thi thử: Pháp luật về chứng khoán và TTCK</title>
+<style>
+  :root { color-scheme:light dark;
+          --bg:#eef2f7; --panel:#fff; --soft:#f6f8fb; --line:#d6dee8; --line-strong:#b6c3d3; --ink:#0f172a; --muted:#5b6b80;
+          --acc:#0e7490; --acc-hover:#155e75; --acc-text:#0e6178; --acc-soft:#e1f2f6; --acc-line:#9fd3e0;
+          --ok:#15803d; --ok-solid:#16a34a; --ok-bg:#dcfce7; --ok-line:#86efac;
+          --bad:#b91c1c; --bad-solid:#dc2626; --bad-bg:#fee2e2; --bad-line:#fca5a5;
+          --warn:#a16207; --warn-solid:#f59e0b; --warn-bg:#fef3c7; --warn-line:#fcd34d;
+          --shadow:0 1px 2px rgb(15 23 42 / .05), 0 6px 16px -8px rgb(15 23 42 / .14); }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#0b1220; --panel:#131c2b; --soft:#1a2538; --line:#27364c; --line-strong:#3b4f6b; --ink:#e2e8f0; --muted:#94a3b8;
+            --acc:#0e7f9c; --acc-hover:#1393b4; --acc-text:#67d5ea; --acc-soft:#10303c; --acc-line:#1f6b85;
+            --ok:#4ade80; --ok-bg:#12331f; --ok-line:#166534; --bad:#f87171; --bad-bg:#3b1414; --bad-line:#7f1d1d;
+            --warn:#fbbf24; --warn-bg:#3a2a0a; --warn-line:#92400e; --shadow:0 1px 2px rgb(0 0 0 / .4), 0 8px 20px -10px rgb(0 0 0 / .7); }
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; min-height:100dvh; display:flex; flex-direction:column; background:var(--bg); color:var(--ink); font:15px/1.55 "Segoe UI", Arial, sans-serif; }
+  button { font:inherit; font-weight:600; cursor:pointer; min-height:40px; padding:8px 16px; border:1px solid var(--acc-line); border-radius:10px;
+           background:var(--acc-soft); color:var(--acc-text); transition:background .15s, border-color .15s, box-shadow .15s; }
+  button:active { transform:translateY(1px); }
+  button.main { background:var(--acc); border-color:var(--acc); color:#fff; box-shadow:0 3px 8px -3px rgb(14 116 144 / .7); }
+  button.danger { background:var(--bad-bg); border-color:var(--bad-line); color:var(--bad); }
+  button.sm { min-height:32px; padding:4px 12px; font-size:13px; border-radius:8px; }
+  button.lg { min-height:48px; padding:10px 24px; font-size:16px; }
+  button:disabled { opacity:.4; cursor:not-allowed; transform:none; }
+  button:focus-visible { outline:3px solid color-mix(in srgb, var(--acc) 55%, transparent); outline-offset:2px; }
+  .top { position:sticky; top:0; z-index:5; box-shadow:0 2px 10px rgb(15 23 42 / .12); }
+  header { background:#164e63; color:#ecfeff; }
+  .bar { display:flex; align-items:center; gap:12px; max-width:1100px; margin:0 auto; padding:10px 20px; }
+  .bar a { color:#c9ecf4; text-decoration:none; font-size:14px; white-space:nowrap; padding:4px 8px; margin-left:-8px; border-radius:6px; }
+  .bar h1 { flex:1; margin:0; font-size:17px; font-weight:650; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  #timer { display:inline-flex; align-items:center; gap:6px; padding:6px 14px; border-radius:99px; border:1px solid rgb(255 255 255 / .28); background:rgb(255 255 255 / .14);
+           font:700 18px/1 "Cascadia Mono", Consolas, monospace; }
+  #timer.warn { background:#f59e0b; border-color:#fcd34d; color:#1c1917; }
+  #timer.low { background:#dc2626; border-color:#fca5a5; color:#fff; animation:pulse 1s ease-in-out infinite; }
+  @keyframes pulse { 50% { box-shadow:0 0 0 6px rgb(220 38 38 / .3); } }
+  .toolbar { background:color-mix(in srgb, var(--acc) 10%, var(--panel)); border-bottom:1px solid var(--line); }
+  .toolbar .bar { padding:8px 20px; font-size:14px; }
+  .prog { flex:1; display:flex; align-items:center; gap:12px; min-width:0; color:var(--muted); font-weight:600; }
+  .prog-track { flex:1; max-width:320px; height:8px; border-radius:99px; background:color-mix(in srgb, var(--acc) 16%, var(--panel)); overflow:hidden; }
+  .prog-fill { height:100%; width:0; background:var(--acc); border-radius:inherit; transition:width .25s; }
+  .flag-count { color:var(--warn); white-space:nowrap; }
+  main { flex:1; width:100%; max-width:1100px; margin:0 auto; padding:24px 20px; }
+  .card { background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:22px; margin-bottom:18px; box-shadow:var(--shadow); }
+  .card h2 { margin:0 0 4px; font-size:22px; line-height:1.3; }
+  .card h3 { margin:0 0 12px; font-size:16px; }
+  .muted { color:var(--muted); }
+  .chip { display:inline-block; padding:2px 10px; border-radius:99px; font-size:12px; font-weight:600; background:var(--acc-soft); color:var(--acc-text); border:1px solid var(--acc-line); }
+  .tiles { display:grid; grid-template-columns:repeat(auto-fit, minmax(130px, 1fr)); gap:12px; margin:16px 0; }
+  .tile { padding:12px 14px; border-radius:12px; background:var(--soft); border:1px solid var(--line); border-left:4px solid var(--line-strong); }
+  .tile b { display:block; font-size:24px; line-height:1.25; }
+  .tile span { font-size:13px; color:var(--muted); }
+  .tile.acc { border-left-color:var(--acc); } .tile.acc b { color:var(--acc-text); }
+  .tile.ok { border-left-color:var(--ok-solid); } .tile.ok b { color:var(--ok); }
+  .tile.bad { border-left-color:var(--bad-solid); } .tile.bad b { color:var(--bad); }
+  .tile.warn { border-left-color:var(--warn-solid); } .tile.warn b { color:var(--warn); }
+  ul.rules { margin:0 0 20px; padding-left:20px; color:var(--muted); } ul.rules b { color:var(--ink); }
+  ul.rules li { margin:4px 0; }
+  .actions { display:flex; flex-wrap:wrap; gap:10px; }
+  .exam-grid { display:grid; grid-template-columns:minmax(0, 1fr) 300px; gap:18px; align-items:start; }
+  .side { position:sticky; top:118px; }
+  .q-head { display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:14px; }
+  .q-no { padding:3px 12px; border-radius:99px; background:var(--acc); color:#fff; font-weight:700; font-size:14px; }
+  #flag { margin-left:auto; }
+  #flag.on { background:var(--warn-bg); border-color:var(--warn-solid); color:var(--warn); }
+  .q-text { font-size:18px; font-weight:600; line-height:1.5; margin:0 0 18px; white-space:pre-line; }
+  .opts { display:grid; gap:10px; }
+  .opt { display:flex; gap:12px; align-items:center; width:100%; min-height:52px; padding:11px 14px; text-align:left; font-weight:500; color:var(--ink);
+         background:var(--soft); border:1.5px solid var(--line-strong); border-radius:12px; }
+  .opt b { flex:none; display:grid; place-items:center; width:30px; height:30px; border-radius:50%; background:var(--panel); border:1.5px solid var(--line-strong); color:var(--muted); font-size:14px; }
+  .opt.on { background:color-mix(in srgb, var(--acc) 16%, var(--panel)); border:2px solid var(--acc); font-weight:600; box-shadow:0 0 0 3px color-mix(in srgb, var(--acc) 20%, transparent); }
+  .opt.on::after { content:"✓"; margin-left:auto; padding-left:8px; color:var(--acc-text); font-size:18px; font-weight:700; }
+  .opt.on b { background:var(--acc); border-color:var(--acc); color:#fff; }
+  .nav { display:flex; justify-content:space-between; gap:10px; margin-top:20px; padding-top:16px; border-top:1px solid var(--line); }
+  .palette { display:grid; grid-template-columns:repeat(auto-fill, minmax(42px, 1fr)); gap:8px; }
+  .palette button { min-height:40px; padding:0; font-size:14px; border-radius:8px; background:var(--soft); border-color:var(--line-strong); color:var(--muted); }
+  .palette .done, .legend .done { background:var(--acc); border-color:var(--acc); color:#fff; }
+  .palette .flag, .legend .flag { background:var(--warn-solid); border-color:var(--warn-solid); color:#1c1917; }
+  .palette .cur { box-shadow:0 0 0 2px var(--panel), 0 0 0 4px var(--ink); }
+  .palette .right, .legend .right { background:var(--ok-solid); border-color:var(--ok-solid); color:#fff; }
+  .palette .wrong, .legend .wrong { background:var(--bad-solid); border-color:var(--bad-solid); color:#fff; }
+  .palette .skip, .legend .skip { background:var(--warn-bg); border-color:var(--warn-solid); color:var(--warn); }
+  .legend { display:flex; flex-wrap:wrap; gap:6px 14px; margin-top:14px; font-size:12.5px; color:var(--muted); }
+  .legend i { display:inline-block; width:14px; height:14px; margin-right:5px; vertical-align:-2px; border-radius:4px; border:1px solid var(--line-strong); background:var(--soft); }
+  .legend i.cur { box-shadow:0 0 0 1px var(--panel), 0 0 0 3px var(--ink); }
+  .result-head { display:flex; flex-wrap:wrap; align-items:center; gap:28px; }
+  .result-sum { flex:1; min-width:260px; }
+  .result-sum .tiles { margin-bottom:0; }
+  .ring { --p:0; --c:var(--bad-solid); flex:none; display:grid; place-items:center; width:140px; height:140px; border-radius:50%;
+          background:conic-gradient(var(--c) calc(var(--p) * 1%), color-mix(in srgb, var(--line) 80%, var(--panel)) 0); }
+  .ring > div { display:grid; place-content:center; width:112px; height:112px; border-radius:50%; background:var(--panel); text-align:center; }
+  .ring b { font-size:36px; line-height:1; } .ring span { font-size:12px; color:var(--muted); }
+  .badge { display:inline-block; margin-left:6px; padding:2px 12px; border-radius:99px; font-size:13px; font-weight:700; vertical-align:middle; }
+  .badge.pass { background:var(--ok-bg); color:var(--ok); border:1px solid var(--ok-line); }
+  .badge.fail { background:var(--bad-bg); color:var(--bad); border:1px solid var(--bad-line); }
+  .pass { color:var(--ok); } .fail { color:var(--bad); }
+  table { width:100%; border-collapse:collapse; font-size:14px; }
+  td, th { padding:8px; border-bottom:1px solid var(--line); text-align:left; } td:last-child, th:last-child { text-align:right; }
+  th { font-size:12px; text-transform:uppercase; letter-spacing:.04em; color:var(--muted); font-weight:600; }
+  .topics-title { margin-top:24px !important; }
+  .bar-track { height:6px; margin-top:5px; border-radius:99px; background:color-mix(in srgb, var(--line) 80%, var(--panel)); overflow:hidden; }
+  .bar-track i { display:block; height:100%; border-radius:inherit; }
+  .score-pill { display:inline-block; min-width:44px; padding:1px 10px; border-radius:99px; font-weight:700; text-align:center; }
+  .score-pill.pass { background:var(--ok-bg); } .score-pill.fail { background:var(--bad-bg); }
+  #history td:last-child { white-space:nowrap; }
+  #history td button { margin-left:6px; }
+  .filters { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:14px; }
+  .filters .on { background:var(--acc); border-color:var(--acc); color:#fff; }
+  .review { border-left:5px solid var(--line-strong); }
+  .review.right { border-left-color:var(--ok-solid); } .review.wrong { border-left-color:var(--bad-solid); } .review.skip { border-left-color:var(--warn-solid); }
+  .review .opt { cursor:default; }
+  .review .opt.correct { background:var(--ok-bg); border-color:var(--ok-solid); }
+  .review .opt.correct b { background:var(--ok-solid); border-color:var(--ok-solid); color:#fff; }
+  .review .opt.picked:not(.correct) { background:var(--bad-bg); border-color:var(--bad-solid); }
+  .review .opt.picked:not(.correct) b { background:var(--bad-solid); border-color:var(--bad-solid); color:#fff; }
+  .tag { margin-left:auto; font-size:12px; font-weight:700; white-space:nowrap; }
+  .explain { margin-top:12px; padding:10px 14px; border-radius:10px; border:1px solid var(--acc-line); background:var(--acc-soft); font-size:14px; }
+  .print-only { display:none; }
+  [hidden] { display:none !important; }
+  .author { display:flex; flex-wrap:wrap; gap:2px 6px; padding:4px 16px 6px; background:var(--panel); font-size:12px; color:var(--muted); } .author a { color:var(--acc-text); } .author span:not(:first-child) { margin-left:10px; }
+  @media (hover:hover) {
+    button:hover { background:color-mix(in srgb, var(--acc) 22%, var(--panel)); border-color:var(--acc); }
+    button.main:hover { background:var(--acc-hover); border-color:var(--acc-hover); }
+    button.danger:hover { background:color-mix(in srgb, var(--bad-solid) 22%, var(--panel)); border-color:var(--bad-solid); }
+    .opt:not(.on):hover { background:var(--acc-soft); border-color:var(--acc-line); }
+    .palette button:not(.done):not(.flag):not(.right):not(.wrong):not(.skip):hover { border-color:var(--acc); color:var(--acc-text); }
+    .bar a:hover { background:rgb(255 255 255 / .12); }
+  }
+  @media (max-width:900px) {
+    .exam-grid { grid-template-columns:1fr; }
+    .side { position:static; }
+  }
+  @media (max-width:640px) {
+    .bar, .toolbar .bar { padding-left:12px; padding-right:12px; gap:8px; }
+    .bar h1 { font-size:15px; }
+    #timer { font-size:16px; padding:5px 10px; }
+    main { padding:12px; }
+    .card { padding:16px; border-radius:12px; }
+    .q-text { font-size:16.5px; }
+    .tiles { grid-template-columns:repeat(2, 1fr); gap:8px; }
+    .tile b { font-size:20px; }
+    .result-head { gap:16px; justify-content:center; }
+    #flag { margin-left:0; }
+    #history td, #history th { padding:6px 4px; }
+    #history td button { display:block; width:100%; margin:4px 0 0; }
+  }
+  @media (prefers-reduced-motion: reduce) { #timer.low { animation:none; } button, .prog-fill { transition:none; } }
+  @media print {
+    :root { --bg:#fff; --panel:#fff; --soft:#fff; --line:#cbd5e1; --line-strong:#94a3b8; --ink:#0f172a; --muted:#475569; --acc:#0e7490; --acc-text:#0e6178; --acc-soft:#ecf7fa; --acc-line:#9fd3e0;
+            --ok:#15803d; --ok-bg:#dcfce7; --ok-line:#86efac; --bad:#b91c1c; --bad-bg:#fee2e2; --bad-line:#fca5a5; --warn:#a16207; --warn-bg:#fef3c7; --warn-line:#fcd34d; --shadow:none; }
+    * { -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+    .top, .no-print, .author { display:none !important; }
+    .print-only { display:block; }
+    main { padding:0; max-width:none; }
+    .card { break-inside:avoid; }
+    #r-list .review[hidden] { display:block !important; }
+  }
+</style>
+</head>
+<body>
+<div class="top">
+  <header>
+    <div class="bar">
+      <a href="../study.html" title="Về trang Ôn tập">← Ôn tập</a>
+      <h1>Pháp luật về chứng khoán và TTCK</h1>
+      <span id="timer" hidden title="Thời gian còn lại">60:00</span>
+    </div>
+  </header>
+  <div class="toolbar" id="toolbar" hidden>
+    <div class="bar">
+      <div class="prog"><span id="progress"></span><div class="prog-track"><div class="prog-fill" id="prog-fill"></div></div><span class="flag-count" id="flag-count"></span></div>
+      <button class="main" id="submit">Nộp bài</button>
+    </div>
+  </div>
+</div>
+<main>
+  <section id="start">
+    <div class="card">
+      <h2>Bài thi trắc nghiệm</h2>
+      <p class="muted" style="margin:0">Pháp luật về chứng khoán và thị trường chứng khoán</p>
+      <div class="tiles">
+        <div class="tile acc"><b id="bank-count"></b><span>câu trong ngân hàng đề</span></div>
+        <div class="tile acc"><b>30</b><span>câu mỗi đề</span></div>
+        <div class="tile acc"><b>60</b><span>phút làm bài</span></div>
+        <div class="tile acc"><b id="topic-count"></b><span>chủ đề</span></div>
+      </div>
+      <ul class="rules">
+        <li>Câu hỏi lấy <b>ngẫu nhiên</b> từ ngân hàng đề, thứ tự phương án được xáo trộn (trừ câu có phương án dạng "Câu A, B").</li>
+        <li>Hết giờ hệ thống <b>tự nộp bài</b>. Mỗi câu chỉ có 1 đáp án đúng, được đổi đáp án và quay lại câu trước bất cứ lúc nào.</li>
+        <li>Câu còn phân vân: bấm <b>⚑ Đánh dấu xem lại</b> để dễ tìm lại trước khi nộp.</li>
+        <li>Phím tắt: phím số <b>1, 2, 3…</b> hoặc chữ <b>A, B, C…</b> chọn đáp án, <b>←/→</b> chuyển câu.</li>
+        <li>Bài đang làm và kết quả sau khi nộp được lưu trên trình duyệt này — tải lại trang vẫn làm tiếp, xem lại hoặc lưu PDF.</li>
+      </ul>
+      <div class="actions"><button class="main lg" id="begin">Bắt đầu làm bài</button><button class="lg" id="resume" hidden>Tiếp tục bài đang làm</button></div>
+    </div>
+    <div class="card" id="history" hidden>
+      <h3>Kết quả đã làm</h3>
+      <table><thead><tr><th>Ngày làm</th><th>Điểm</th><th>Đúng</th><th>Thời gian</th><th></th></tr></thead><tbody id="h-rows"></tbody></table>
+    </div>
+  </section>
+
+  <section id="exam" hidden>
+    <div class="exam-grid">
+      <div class="card">
+        <div class="q-head"><span class="q-no" id="q-no"></span><span class="chip" id="q-topic"></span><button class="sm" id="flag" title="Đánh dấu câu này để xem lại trước khi nộp">⚑ Đánh dấu xem lại</button></div>
+        <p class="q-text" id="q-text"></p>
+        <div class="opts" id="q-opts"></div>
+        <div class="nav"><button id="prev">← Câu trước</button><button class="main" id="next">Câu sau →</button></div>
+      </div>
+      <aside class="card side">
+        <h3>Danh sách câu hỏi</h3>
+        <div class="palette" id="palette"></div>
+        <div class="legend"><span><i class="done"></i>Đã trả lời</span><span><i class="flag"></i>Đánh dấu</span><span><i></i>Chưa trả lời</span><span><i class="cur"></i>Đang xem</span></div>
+      </aside>
+    </div>
+  </section>
+
+  <section id="result" hidden>
+    <div class="card">
+      <p class="print-only muted">Bài thi: Pháp luật về chứng khoán và thị trường chứng khoán</p>
+      <div class="result-head">
+        <div class="ring" id="r-ring"><div><b id="r-score"></b><span>điểm / 10</span></div></div>
+        <div class="result-sum">
+          <h2>Kết quả bài thi <span class="badge" id="r-badge"></span></h2>
+          <p class="muted" style="margin:0" id="r-date"></p>
+          <div class="tiles">
+            <div class="tile ok"><b id="r-right"></b><span>Câu đúng</span></div>
+            <div class="tile bad"><b id="r-wrong"></b><span>Câu sai</span></div>
+            <div class="tile warn"><b id="r-skip"></b><span>Bỏ trống</span></div>
+            <div class="tile acc"><b id="r-time"></b><span>Thời gian làm</span></div>
+          </div>
+        </div>
+      </div>
+      <h3 class="topics-title">Theo chủ đề</h3>
+      <table><tbody id="r-topics"></tbody></table>
+      <div class="actions no-print" style="margin-top:20px"><button class="main" id="again">Làm đề mới</button><button id="pdf">Lưu PDF</button><button id="home">Về trang đầu</button></div>
+    </div>
+    <div class="card no-print">
+      <h3>Bảng câu hỏi</h3>
+      <div class="palette" id="r-palette"></div>
+      <div class="legend"><span><i class="right"></i>Đúng</span><span><i class="wrong"></i>Sai</span><span><i class="skip"></i>Bỏ trống</span></div>
+    </div>
+    <div class="filters no-print" id="filters">
+      <button data-f="all" class="on">Tất cả</button><button data-f="wrong">Sai</button><button data-f="skip">Bỏ trống</button><button data-f="right">Đúng</button>
+    </div>
+    <div id="r-list"></div>
+  </section>
+</main>
+<div class="author">
+  <span>Tác giả:</span><b><a href="https://happywindapp.github.io/CV/cv_quan_phan.html">Phan Ngọc Minh Quân</a></b>
+  <span>GitHub Source:</span><a href="https://github.com/happywindapp/web_tool/">github.com/happywindapp/web_tool</a>
+</div>
+<script>
+// Ngân hàng đề soạn từ tài liệu "Pháp luật về chứng khoán và thị trường chứng khoán"; answer = chỉ số phương án đúng trong options gốc.
+const BANK = [
+  {"topic":"Khái niệm & hành vi bị cấm","q":"Theo Luật Chứng khoán 2019, cổ đông lớn là cổ đông sở hữu từ bao nhiêu phần trăm trở lên?","options":["Từ 5% số cổ phiếu có quyền biểu quyết","Từ 5% tổng số cổ phiếu đã phát hành, kể cả cổ phiếu ưu đãi","Từ 10% số cổ phiếu có quyền biểu quyết","Từ 3% số cổ phiếu có quyền biểu quyết"],"answer":0,"explain":"Cổ đông lớn sở hữu từ 5% trở lên số cổ phiếu có quyền biểu quyết; không tính cổ phiếu ưu đãi không có quyền biểu quyết."},
+  {"topic":"Khái niệm & hành vi bị cấm","q":"Theo Luật Chứng khoán 2019, công ty cổ phần trở thành công ty đại chúng (không qua IPO) khi đáp ứng điều kiện nào?","options":["Vốn điều lệ đã góp từ 10 tỷ đồng và có tối thiểu 100 nhà đầu tư bất kỳ nắm giữ cổ phiếu của công ty","Vốn điều lệ đã góp từ 30 tỷ đồng và ≥ 10% cổ phiếu có quyền biểu quyết do ≥ 100 nhà đầu tư không phải cổ đông lớn nắm giữ","Vốn điều lệ đã góp từ 30 tỷ đồng và ≥ 15% cổ phiếu có quyền biểu quyết do ≥ 300 cổ đông bất kỳ nắm giữ","Vốn điều lệ đã góp từ 50 tỷ đồng và ≥ 10% cổ phiếu có quyền biểu quyết do ≥ 100 nhà đầu tư nắm giữ"],"answer":1,"explain":"Công thức 30 - 10 - 100: vốn điều lệ đã góp ≥ 30 tỷ đồng và ≥ 10% cổ phiếu có quyền biểu quyết do ít nhất 100 nhà đầu tư không phải cổ đông lớn nắm giữ. Mốc 10 tỷ là luật cũ."},
+  {"topic":"Khái niệm & hành vi bị cấm","q":"Loại nào sau đây KHÔNG phải là chứng khoán theo Luật Chứng khoán 2019?","options":["Chứng quyền có bảo đảm","Chứng chỉ lưu ký","Hối phiếu","Quyền mua cổ phần"],"answer":2,"explain":"Chứng khoán gồm cổ phiếu, trái phiếu, chứng chỉ quỹ; chứng quyền, chứng quyền có bảo đảm, quyền mua cổ phần, chứng chỉ lưu ký; chứng khoán phái sinh. Hối phiếu không thuộc danh mục này."},
+  {"topic":"Khái niệm & hành vi bị cấm","q":"Loại nào sau đây là chứng khoán theo Luật Chứng khoán 2019?","options":["Tiền ảo (tiền mã hóa)","Hợp đồng vay nợ dân sự","Hối phiếu nhận nợ","Chứng khoán phái sinh"],"answer":3,"explain":"Chứng khoán phái sinh nằm trong danh mục chứng khoán; tiền ảo, hợp đồng vay dân sự, hối phiếu không phải chứng khoán."},
+  {"topic":"Khái niệm & hành vi bị cấm","q":"Chức danh nào sau đây thuộc nhóm người nội bộ của công ty đại chúng?","options":["Kế toán trưởng","Nhân viên phòng kế toán","Cổ đông sở hữu 3% cổ phần","Nhân viên môi giới của công ty chứng khoán quản lý tài khoản cổ đông"],"answer":0,"explain":"Người nội bộ gồm Chủ tịch, thành viên HĐQT, Ban Giám đốc, Kế toán trưởng, Trưởng ban kiểm soát…"},
+  {"topic":"Khái niệm & hành vi bị cấm","q":"Người có liên quan của người nội bộ có thuộc phạm vi điều chỉnh về công bố thông tin giao dịch hay không?","options":["Không, chỉ người nội bộ phải công bố thông tin","Chỉ khi người có liên quan là cổ đông lớn","Có, người có liên quan của người nội bộ cũng bị điều chỉnh","Chỉ khi người có liên quan là tổ chức"],"answer":2,"explain":"Người nội bộ và người có liên quan của người nội bộ đều thuộc đối tượng phải công bố thông tin giao dịch."},
+  {"topic":"Khái niệm & hành vi bị cấm","q":"Hành vi tự mua tự bán, thông đồng tạo cung cầu giả tạo để đẩy giá cổ phiếu thuộc nhóm hành vi bị cấm nào?","options":["Giao dịch nội gián","Thao túng thị trường chứng khoán","Tạo thông tin sai lệch","Vi phạm quy định tài khoản khách hàng"],"answer":1,"explain":"Thông đồng tạo cung/cầu giả tạo (wash trading), ép giá, đẩy giá là thao túng thị trường (Điều 12 Luật CK 2019)."},
+  {"topic":"Khái niệm & hành vi bị cấm","q":"Sử dụng thông tin chưa được công bố công khai để mua bán chứng khoán trục lợi hoặc xúi giục người khác mua bán là hành vi gì?","options":["Thao túng thị trường","Gian lận trong hồ sơ chào bán","Giao dịch nội gián","Che giấu thông tin"],"answer":2,"explain":"Giao dịch nội gián là sử dụng thông tin nội bộ chưa công bố để giao dịch hoặc xúi giục, tiết lộ cho người khác giao dịch."},
+  {"topic":"Khái niệm & hành vi bị cấm","q":"Tung tin đồn thất thiệt làm ảnh hưởng đến giá cổ phiếu thuộc hành vi bị cấm nào theo Điều 12 Luật Chứng khoán 2019?","options":["Tạo thông tin sai lệch hoặc che giấu thông tin","Giao dịch nội gián","Làm giả tài liệu trong hồ sơ niêm yết","Vi phạm quy định quản lý tài khoản khách hàng"],"answer":0,"explain":"Đưa tin đồn thất thiệt ảnh hưởng giá chứng khoán thuộc nhóm tạo thông tin sai lệch hoặc che giấu thông tin."},
+  {"topic":"Khái niệm & hành vi bị cấm","q":"Nhân viên môi giới sử dụng tiền, chứng khoán trên tài khoản của khách hàng khi nào thì vi phạm điều cấm?","options":["Khi đã có ủy quyền bằng văn bản của khách hàng","Khi chưa có sự ủy quyền bằng văn bản của khách hàng","Khi khách hàng đồng ý qua điện thoại có ghi âm","Khi giao dịch mang lại lợi nhuận cho khách hàng"],"answer":1,"explain":"Điều 12 cấm sử dụng tiền, chứng khoán của khách hàng khi chưa có sự ủy quyền bằng văn bản của khách hàng."},
+  {"topic":"Khái niệm & hành vi bị cấm","q":"Hành vi nào sau đây thuộc 6 nhóm hành vi bị nghiêm cấm tại Điều 12 Luật Chứng khoán 2019?","options":["Công ty chứng khoán cho khách hàng vay ký quỹ đúng hạn mức","Cổ đông lớn bán cổ phiếu sau khi đã báo cáo","Làm giả tài liệu trong hồ sơ chào bán, niêm yết","Công ty đại chúng mua lại cổ phiếu quỹ đúng quy định"],"answer":2,"explain":"Làm giả tài liệu trong hồ sơ chào bán, niêm yết là một trong 6 nhóm hành vi bị cấm."},
+  {"topic":"Khái niệm & hành vi bị cấm","q":"Một cổ đông nắm 6% tổng số cổ phiếu của công ty, nhưng toàn bộ là cổ phiếu ưu đãi cổ tức. Cổ đông này có phải cổ đông lớn không?","options":["Có, vì sở hữu trên 5% tổng số cổ phiếu đã phát hành","Có, nếu cổ phiếu của công ty đang được niêm yết","Chỉ khi cổ đông đó là tổ chức, không áp cho cá nhân","Không, vì cổ phiếu ưu đãi cổ tức không có quyền biểu quyết"],"answer":3,"explain":"Cổ đông lớn tính trên số cổ phiếu có quyền biểu quyết; cổ phiếu ưu đãi cổ tức không có quyền biểu quyết nên không được tính."},
+  {"topic":"Khái niệm & hành vi bị cấm","q":"Trong định nghĩa công ty đại chúng (vốn ≥ 30 tỷ đồng), tối thiểu 10% cổ phiếu có quyền biểu quyết phải do ai nắm giữ?","options":["Ít nhất 100 nhà đầu tư không phải cổ đông lớn","Ít nhất 100 nhà đầu tư bất kỳ, kể cả cổ đông lớn","Ít nhất 300 nhà đầu tư không phải cổ đông lớn","Ít nhất 50 nhà đầu tư chứng khoán chuyên nghiệp"],"answer":0,"explain":"Phải do ít nhất 100 nhà đầu tư không phải cổ đông lớn nắm giữ; đề thường bỏ cụm \"không phải cổ đông lớn\" để gài bẫy."},
+  {"topic":"Khái niệm & hành vi bị cấm","q":"Danh mục chứng khoán theo Luật Chứng khoán 2019 có bao gồm chứng chỉ quỹ không?","options":["Không, chứng chỉ quỹ là công cụ của công ty quản lý quỹ","Chỉ chứng chỉ quỹ đóng","Có, chứng chỉ quỹ là một loại chứng khoán","Chỉ chứng chỉ quỹ ETF niêm yết"],"answer":2,"explain":"Chứng khoán gồm cổ phiếu, trái phiếu, chứng chỉ quỹ và các loại khác theo Luật Chứng khoán 2019."},
+  {"topic":"Công bố thông tin","q":"Đối tượng nào sau đây KHÔNG thuộc nhóm có nghĩa vụ công bố thông tin trên thị trường chứng khoán?","options":["Công ty quản lý quỹ","Cổ đông lớn sở hữu từ 5%","Tổng công ty Lưu ký và Bù trừ chứng khoán (VSDC)","Nhà đầu tư cá nhân sở hữu 1% cổ phiếu, không phải người nội bộ"],"answer":3,"explain":"Đối tượng CBTT gồm công ty đại chúng, tổ chức phát hành trái phiếu, CTCK, CTQLQ, Sở GDCK, VSDC, người nội bộ & người có liên quan, cổ đông lớn."},
+  {"topic":"Công bố thông tin","q":"Công ty đại chúng được ủy quyền thực hiện công bố thông tin cho ai?","options":["01 tổ chức tư vấn công bố thông tin","01 cá nhân","Tối đa 03 cá nhân","Công ty chứng khoán nơi công ty mở tài khoản"],"answer":1,"explain":"Công ty đại chúng chỉ được ủy quyền cho 01 cá nhân thực hiện CBTT, không ủy quyền cho tổ chức hay nhiều người."},
+  {"topic":"Công bố thông tin","q":"Ngôn ngữ bắt buộc của thông tin công bố trên thị trường chứng khoán Việt Nam là gì?","options":["Tiếng Việt hoặc tiếng Anh","Tiếng Anh đối với công ty có vốn nước ngoài","Tiếng Việt","Tiếng Việt và tiếng Anh song song"],"answer":2,"explain":"Ngôn ngữ CBTT bắt buộc là tiếng Việt; \"tiếng Việt hoặc tiếng Anh\" là phương án sai thường gặp."},
+  {"topic":"Công bố thông tin","q":"Khi có tin đồn ảnh hưởng đến giá chứng khoán, tổ chức phải xác nhận hoặc đính chính trong thời hạn nào?","options":["24 giờ kể từ khi nhận được yêu cầu của UBCKNN hoặc Sở GDCK","72 giờ kể từ khi tin đồn xuất hiện","05 ngày làm việc kể từ khi nhận yêu cầu","24 giờ kể từ khi tin đồn xuất hiện trên báo chí"],"answer":0,"explain":"CBTT theo yêu cầu: trong 24 giờ kể từ khi nhận được yêu cầu của UBCKNN hoặc Sở GDCK."},
+  {"topic":"Công bố thông tin","q":"Theo Thông tư 96/2020/TT-BTC, công ty (không phải công ty mẹ) phải công bố BCTC quý trong thời hạn bao lâu?","options":["10 ngày kể từ ngày kết thúc quý","30 ngày kể từ ngày kết thúc quý","45 ngày kể từ ngày kết thúc quý","20 ngày kể từ ngày kết thúc quý"],"answer":3,"explain":"BCTC quý: 20 ngày kể từ ngày kết thúc quý; 30 ngày nếu là công ty mẹ hoặc BCTC tổng hợp/hợp nhất."},
+  {"topic":"Công bố thông tin","q":"Công ty đại chúng nào KHÔNG bắt buộc công bố BCTC quý theo Thông tư 96/2020/TT-BTC?","options":["Tổ chức niêm yết vốn điều lệ 50 tỷ đồng","Công ty đại chúng quy mô lớn, vốn điều lệ 200 tỷ đồng","Công ty đại chúng chưa niêm yết, vốn điều lệ 80 tỷ đồng","Công ty chứng khoán chưa niêm yết"],"answer":2,"explain":"BCTC quý áp dụng cho tổ chức niêm yết, CTĐC quy mô lớn (≥ 120 tỷ), CTCK, CTQLQ; CTĐC thường chưa niêm yết và vốn < 120 tỷ thì không bắt buộc."},
+  {"topic":"Công bố thông tin","q":"BCTC bán niên đã soát xét (không phải công ty mẹ) phải công bố trong thời hạn nào?","options":["45 ngày kể từ ngày kết thúc 6 tháng đầu năm","30 ngày kể từ ngày kết thúc 6 tháng đầu năm","60 ngày kể từ ngày kết thúc 6 tháng đầu năm","90 ngày kể từ ngày kết thúc 6 tháng đầu năm"],"answer":0,"explain":"BCTC bán niên đã soát xét: 45 ngày; 60 ngày nếu là công ty mẹ hoặc BCTC tổng hợp/hợp nhất."},
+  {"topic":"Công bố thông tin","q":"Yêu cầu về BCTC bán niên mà công ty đại chúng phải công bố là gì?","options":["Phải được kiểm toán toàn phần bởi tổ chức kiểm toán","Phải được soát xét bởi tổ chức kiểm toán được chấp thuận","Chỉ cần Kế toán trưởng và Tổng giám đốc ký","Phải được Ban kiểm soát thẩm định trước khi công bố"],"answer":1,"explain":"BCTC bán niên bắt buộc là báo cáo đã được soát xét bởi tổ chức kiểm toán được chấp thuận."},
+  {"topic":"Công bố thông tin","q":"Thời hạn công bố BCTC năm đã kiểm toán của công ty đại chúng là gì?","options":["90 ngày kể từ ngày kết thúc năm tài chính, không phụ thuộc ngày ký báo cáo kiểm toán","10 ngày kể từ ngày kiểm toán ký báo cáo, không giới hạn thời gian tối đa","10 ngày kể từ ngày kiểm toán ký báo cáo, nhưng không quá 90 ngày kể từ ngày kết thúc năm tài chính","20 ngày kể từ ngày kiểm toán ký báo cáo, nhưng không quá 110 ngày kể từ ngày kết thúc năm tài chính"],"answer":2,"explain":"BCTC năm: trong 10 ngày kể từ ngày tổ chức kiểm toán ký báo cáo kiểm toán, nhưng không vượt quá 90 ngày kể từ ngày kết thúc năm tài chính."},
+  {"topic":"Công bố thông tin","q":"Năm tài chính kết thúc ngày 31/12. Tổ chức kiểm toán ký báo cáo kiểm toán vào ngày thứ 50 sau khi kết thúc năm. Hạn chót công bố BCTC năm đã kiểm toán là ngày thứ bao nhiêu?","options":["Ngày thứ 90","Ngày thứ 70","Ngày thứ 110","Ngày thứ 60"],"answer":3,"explain":"Hạn là 10 ngày kể từ ngày ký báo cáo kiểm toán (50 + 10 = ngày thứ 60), chưa chạm trần 90 ngày."},
+  {"topic":"Công bố thông tin","q":"Báo cáo thường niên của công ty đại chúng phải công bố trong thời hạn nào?","options":["Chậm nhất 20 ngày kể từ ngày công bố BCTC năm được kiểm toán, nhưng không quá 110 ngày kể từ ngày kết thúc năm tài chính","Chậm nhất 10 ngày kể từ ngày công bố BCTC năm, nhưng không quá 90 ngày kể từ ngày kết thúc năm tài chính","Chậm nhất 30 ngày kể từ ngày công bố BCTC năm, nhưng không quá 120 ngày kể từ ngày kết thúc năm tài chính","Chậm nhất 45 ngày kể từ ngày kết thúc năm tài chính"],"answer":0,"explain":"Báo cáo thường niên: chậm nhất 20 ngày kể từ ngày công bố BCTC năm kiểm toán và không vượt quá 110 ngày kể từ ngày kết thúc năm tài chính."},
+  {"topic":"Công bố thông tin","q":"Báo cáo tình hình quản trị công ty (6 tháng và năm) phải công bố trong thời hạn nào?","options":["20 ngày kể từ ngày kết thúc kỳ báo cáo 6 tháng và năm","30 ngày kể từ ngày kết thúc 6 tháng đầu năm và kết thúc năm","45 ngày kể từ ngày kết thúc kỳ báo cáo 6 tháng và năm","10 ngày kể từ ngày kết thúc họp ĐHĐCĐ thường niên"],"answer":1,"explain":"Báo cáo tình hình quản trị công ty định kỳ 6 tháng và năm có cùng hạn chót 30 ngày."},
+  {"topic":"Công bố thông tin","q":"Công ty đại chúng phải công bố thông tin bất thường trong thời hạn nào kể từ khi xảy ra sự kiện?","options":["72 giờ","05 ngày làm việc","24 giờ","48 giờ"],"answer":2,"explain":"CBTT bất thường (Điều 11 TT 96): trong vòng 24 giờ kể từ khi xảy ra sự kiện."},
+  {"topic":"Công bố thông tin","q":"Sự kiện nào sau đây thuộc diện công bố thông tin bất thường trong 24 giờ?","options":["Công ty bị phong tỏa tài khoản ngân hàng","Công ty thay đổi nhân viên lễ tân","Công ty ký hợp đồng mua văn phòng phẩm","Cổ đông nhỏ lẻ bán 100 cổ phiếu"],"answer":0,"explain":"Phong tỏa tài khoản ngân hàng, tạm ngừng kinh doanh, nghị quyết ĐHĐCĐ, bổ nhiệm/miễn nhiệm/khởi tố người nội bộ… là sự kiện CBTT bất thường."},
+  {"topic":"Công bố thông tin","q":"Công ty phải CBTT bất thường khi khoản vay hoặc phát hành trái phiếu làm tổng vay đạt từ bao nhiêu trở lên?","options":["10% vốn chủ sở hữu","20% vốn chủ sở hữu","50% vốn chủ sở hữu","30% vốn chủ sở hữu"],"answer":3,"explain":"Vay hoặc phát hành trái phiếu làm tổng vay ≥ 30% VCSH là sự kiện CBTT bất thường."},
+  {"topic":"Công bố thông tin","q":"Cổ đông lớn phải báo cáo, công bố thông tin về giao dịch làm thay đổi tỷ lệ sở hữu qua các ngưỡng 1% trong thời hạn nào?","options":["03 ngày làm việc trước ngày giao dịch","05 ngày làm việc kể từ ngày hoàn tất giao dịch","24 giờ kể từ khi hoàn tất giao dịch","07 ngày làm việc kể từ ngày đặt lệnh"],"answer":1,"explain":"Cổ đông lớn báo cáo trong 05 ngày làm việc kể từ ngày hoàn tất giao dịch; chỉ báo cáo sau giao dịch, không báo trước."},
+  {"topic":"Công bố thông tin","q":"Người nội bộ muốn giao dịch cổ phiếu của công ty phải công bố thông tin trước ngày dự kiến giao dịch tối thiểu bao lâu?","options":["01 ngày làm việc","05 ngày làm việc","03 ngày làm việc","10 ngày làm việc"],"answer":2,"explain":"Người nội bộ và người có liên quan phải công bố tối thiểu 03 ngày làm việc trước ngày giao dịch."},
+  {"topic":"Công bố thông tin","q":"Thời hạn thực hiện giao dịch tối đa của người nội bộ kể từ ngày đăng ký giao dịch là bao lâu?","options":["30 ngày","15 ngày","60 ngày","90 ngày"],"answer":0,"explain":"Thời hạn giao dịch của người nội bộ tối đa 30 ngày từ ngày đăng ký; sau giao dịch báo cáo trong 05 ngày làm việc."},
+  {"topic":"Công bố thông tin","q":"Người nội bộ được miễn công bố thông tin giao dịch khi tổng giá trị giao dịch dự kiến tính theo mệnh giá dưới mức nào?","options":["10 triệu đồng","100 triệu đồng","200 triệu đồng","50 triệu đồng"],"answer":3,"explain":"Miễn CBTT nếu giá trị giao dịch dự kiến theo mệnh giá dưới 50 triệu đồng (dưới 5.000 cổ phiếu), hoặc theo giá trị giao dịch dưới 200 triệu đồng trong từng tháng."},
+  {"topic":"Công bố thông tin","q":"Công ty đại chúng có nghĩa vụ công bố BCTC tháng không?","options":["Có, trong 10 ngày kể từ ngày kết thúc mỗi tháng","Có, nếu công ty là tổ chức niêm yết trên Sở GDCK","Không, chỉ công bố BCTC quý, bán niên và năm","Có, nếu vốn điều lệ từ 120 tỷ đồng trở lên"],"answer":2,"explain":"Công ty đại chúng không có nghĩa vụ công bố BCTC tháng; báo cáo hoạt động hằng tháng thuộc về CTCK, CTQLQ."},
+  {"topic":"Công bố thông tin","q":"Thông tin đã công bố phải được duy trì trên trang thông tin điện tử của công ty tối thiểu bao lâu?","options":["05 năm","10 năm","03 năm","02 năm"],"answer":0,"explain":"Duy trì trên website tối thiểu 05 năm; lưu trữ bản gốc tại trụ sở tối thiểu 10 năm."},
+  {"topic":"Công bố thông tin","q":"Công ty đại chúng phải công bố thông tin về việc lập danh sách cổ đông có quyền dự họp ĐHĐCĐ tối thiểu bao lâu trước ngày đăng ký cuối cùng?","options":["10 ngày","15 ngày","20 ngày","30 ngày"],"answer":2,"explain":"Phải công bố tối thiểu 20 ngày trước ngày đăng ký cuối cùng."},
+  {"topic":"Công ty đại chúng & chào mua công khai","q":"Khi đáp ứng điều kiện công ty đại chúng (30 - 10 - 100), công ty phải nộp hồ sơ đăng ký công ty đại chúng lên UBCKNN trong thời hạn nào?","options":["30 ngày","60 ngày","90 ngày","120 ngày"],"answer":2,"explain":"Thời hạn nộp hồ sơ đăng ký CTĐC là 90 ngày; đề hay đổi thành 30 hoặc 60 ngày."},
+  {"topic":"Công ty đại chúng & chào mua công khai","q":"Công ty trở thành công ty đại chúng khi đáp ứng một trong hai nhóm điều kiện. Nhóm điều kiện thứ nhất là gì?","options":["Đã niêm yết trái phiếu doanh nghiệp trên Sở GDCK","Đã chào bán cổ phiếu lần đầu ra công chúng thành công","Có ít nhất 300 cổ đông không phải cổ đông lớn","Có vốn chủ sở hữu từ 120 tỷ đồng trở lên"],"answer":1,"explain":"Điều kiện 1: đã IPO thành công; Điều kiện 2: công thức 30 - 10 - 100."},
+  {"topic":"Công ty đại chúng & chào mua công khai","q":"Trường hợp nào sau đây bắt buộc phải chào mua công khai?","options":["Mua dẫn đến sở hữu từ 25% trở lên số cổ phiếu có quyền biểu quyết","Mua dẫn đến sở hữu từ 5% số cổ phiếu có quyền biểu quyết","Mua dẫn đến sở hữu từ 20% số cổ phiếu có quyền biểu quyết","Mua dẫn đến sở hữu từ 15% số cổ phiếu có quyền biểu quyết"],"answer":0,"explain":"Ngưỡng 25 - 10 - 80: mua để sở hữu từ 25% trở lên số cổ phiếu có quyền biểu quyết phải chào mua công khai."},
+  {"topic":"Công ty đại chúng & chào mua công khai","q":"Nhà đầu tư đang sở hữu 30% cổ phiếu có quyền biểu quyết, muốn mua thêm trong vòng 6 tháng. Mua thêm từ mức nào thì phải chào mua công khai?","options":["Từ 5% trở lên","Từ 20% trở lên","Từ 1% trở lên","Từ 10% trở lên"],"answer":3,"explain":"Người đã sở hữu ≥ 25% mua thêm từ 10% trở lên trong thời gian dưới 01 năm phải chào mua công khai."},
+  {"topic":"Công ty đại chúng & chào mua công khai","q":"Người đang sở hữu từ 25% trở lên mua thêm để đạt mốc nào thì bắt buộc chào mua công khai?","options":["Từ 51% trở lên","Từ 65% trở lên","Từ 80% trở lên","Từ 75% trở lên"],"answer":2,"explain":"Chuỗi 25 - 10 - 80: người đã có ≥ 25% mua để đạt ≥ 80% phải chào mua công khai."},
+  {"topic":"Công ty đại chúng & chào mua công khai","q":"Thời gian thực hiện một đợt chào mua công khai là bao lâu?","options":["Không ngắn hơn 15 ngày và không quá 45 ngày","Không ngắn hơn 30 ngày và không quá 60 ngày","Không ngắn hơn 30 ngày và không quá 90 ngày","Không ngắn hơn 60 ngày và không quá 90 ngày"],"answer":1,"explain":"Đợt chào mua công khai không ngắn hơn 30 ngày và không vượt quá 60 ngày; \"tối đa 90 ngày\" là phương án gài."},
+  {"topic":"Công ty đại chúng & chào mua công khai","q":"Trường hợp nào sau đây KHÔNG phải thực hiện chào mua công khai?","options":["Mua cổ phiếu dẫn đến sở hữu 26% không qua phê duyệt nào","Người sở hữu 30% mua thêm 12% trong 8 tháng","Nhận chuyển nhượng cổ phiếu giữa các công ty trong cùng tập đoàn","Người sở hữu 40% mua thêm để đạt 85%"],"answer":2,"explain":"Ngoại lệ: được ĐHĐCĐ thông qua việc mua không qua chào mua công khai; chuyển nhượng giữa các công ty trong cùng tập đoàn; được cho, tặng, thừa kế."},
+  {"topic":"Công ty đại chúng & chào mua công khai","q":"Nhận cổ phiếu do được thừa kế dẫn đến sở hữu 30% cổ phiếu có quyền biểu quyết thì có phải chào mua công khai không?","options":["Có, vì tỷ lệ sở hữu đã vượt ngưỡng 25%","Có, nếu cổ phiếu của công ty đang niêm yết","Chỉ phải chào mua đối với phần vượt 25%","Không, vì nhận thừa kế là trường hợp ngoại lệ"],"answer":3,"explain":"Được cho, tặng, thừa kế cổ phiếu là trường hợp không phải chào mua công khai."},
+  {"topic":"Công ty đại chúng & chào mua công khai","q":"Công ty đại chúng KHÔNG được mua lại cổ phiếu của chính mình từ đối tượng nào?","options":["Cổ đông lớn của công ty","Nhà đầu tư cá nhân không phải người nội bộ","Nhà đầu tư tổ chức sở hữu 1% cổ phiếu","Nhà đầu tư nước ngoài sở hữu 2% cổ phiếu"],"answer":0,"explain":"Cấm mua lại cổ phiếu từ người nội bộ và người có liên quan, cổ đông lớn, người đang nắm giữ cổ phiếu bị hạn chế chuyển nhượng."},
+  {"topic":"Công ty đại chúng & chào mua công khai","q":"Nhà đầu tư chiến lược đang trong thời hạn hạn chế chuyển nhượng 3 năm có được bán lại cổ phiếu cho chính công ty đại chúng để làm cổ phiếu quỹ không?","options":["Được, nếu giá mua lại không cao hơn mệnh giá","Được, nếu HĐQT công ty chấp thuận giao dịch","Không, cổ phiếu đang hạn chế chuyển nhượng","Được, sau 01 năm kể từ ngày kết thúc chào bán"],"answer":2,"explain":"Người đang nắm giữ cổ phiếu bị hạn chế chuyển nhượng thuộc nhóm công ty bị cấm mua lại cổ phiếu."},
+  {"topic":"Công ty đại chúng & chào mua công khai","q":"Điều kiện nào sau đây khiến công ty đại chúng KHÔNG được mua lại cổ phiếu của chính mình?","options":["Công ty có lãi năm trước","Công ty đang có nợ phải trả quá hạn","Giá cổ phiếu đang thấp hơn giá trị sổ sách","Công ty có thặng dư vốn cổ phần dương"],"answer":1,"explain":"Công ty tuyệt đối không được mua lại cổ phiếu khi đang có nợ phải trả quá hạn."},
+  {"topic":"Công ty đại chúng & chào mua công khai","q":"Mục đích thường gặp khi công ty đại chúng mua lại cổ phiếu của chính mình (cổ phiếu quỹ) là gì?","options":["Giảm số cổ phiếu lưu hành, qua đó tăng EPS","Tăng vốn điều lệ và vốn chủ sở hữu của công ty","Tăng số lượng cổ đông nhỏ lẻ của công ty","Đáp ứng điều kiện niêm yết trên Sở GDCK"],"answer":0,"explain":"Mua lại cổ phiếu quỹ làm giảm số cổ phiếu đang lưu hành, giúp tăng lợi nhuận trên mỗi cổ phiếu (EPS)."},
+  {"topic":"Công ty đại chúng & chào mua công khai","q":"Công ty không còn đáp ứng điều kiện công ty đại chúng (30 - 10 - 100) thì bị hủy tư cách khi tình trạng này kéo dài bao lâu?","options":["06 tháng liên tục","02 năm liên tục","03 tháng liên tục","01 năm liên tục"],"answer":3,"explain":"Tình trạng không đáp ứng điều kiện phải kéo dài trong 01 năm liên tục thì mới làm thủ tục hủy tư cách CTĐC."},
+  {"topic":"Công ty đại chúng & chào mua công khai","q":"Trường hợp nào sau đây có thể dẫn đến hủy tư cách công ty đại chúng?","options":["Công ty bị lỗ trong 01 năm tài chính gần nhất","Vốn điều lệ đã góp dưới 30 tỷ đồng suốt 01 năm liên tục","Công ty thay đổi Tổng giám đốc hai lần trong năm","Công ty chậm công bố BCTC quý từ hai lần trở lên"],"answer":1,"explain":"Không đáp ứng điều kiện vốn ≥ 30 tỷ hoặc tỷ lệ 10% do 100 nhà đầu tư nhỏ lẻ nắm giữ trong 01 năm liên tục dẫn đến hủy tư cách CTĐC."},
+  {"topic":"Công ty đại chúng & chào mua công khai","q":"Chào mua công khai áp dụng cho việc mua loại chứng khoán nào?","options":["Trái phiếu doanh nghiệp đang niêm yết trên Sở GDCK","Chứng quyền có bảo đảm do công ty chứng khoán phát hành","Cổ phiếu có quyền biểu quyết hoặc chứng chỉ quỹ đóng","Chứng chỉ quỹ mở và chứng chỉ quỹ ETF"],"answer":2,"explain":"Ngưỡng chào mua công khai tính trên cổ phiếu có quyền biểu quyết của CTĐC hoặc chứng chỉ quỹ đóng."},
+  {"topic":"Công ty đại chúng & chào mua công khai","q":"Việc mua cổ phiếu dẫn đến sở hữu 30% không phải chào mua công khai trong trường hợp nào?","options":["Đã được ĐHĐCĐ thông qua việc mua không qua chào mua","Đã được HĐQT của công ty mục tiêu đồng ý bằng văn bản","Bên mua là nhà đầu tư nước ngoài đủ điều kiện","Bên mua cam kết nắm giữ cổ phiếu tối thiểu 01 năm"],"answer":0,"explain":"Một ngoại lệ của chào mua công khai là việc mua đã được ĐHĐCĐ thông qua."},
+  {"topic":"Chào bán chứng khoán","q":"Mệnh giá cổ phiếu, chứng chỉ quỹ chào bán tại Việt Nam là bao nhiêu?","options":["1.000 đồng","100.000 đồng","10.000 đồng","5.000 đồng"],"answer":2,"explain":"Cổ phiếu, chứng chỉ quỹ có mệnh giá 10.000 đồng."},
+  {"topic":"Chào bán chứng khoán","q":"Mệnh giá trái phiếu chào bán ra công chúng là bao nhiêu?","options":["100.000 đồng và bội số của 100.000 đồng","10.000 đồng và bội số của 10.000 đồng","1.000.000 đồng và bội số của 1.000.000 đồng","100.000.000 đồng"],"answer":0,"explain":"Trái phiếu chào bán ra công chúng có mệnh giá 100.000 đồng và bội số của 100.000 đồng."},
+  {"topic":"Chào bán chứng khoán","q":"Công ty đại chúng chỉ được chào bán cổ phiếu ra công chúng với giá thấp hơn mệnh giá khi nào?","options":["Khi công ty đang có lỗ lũy kế trên BCTC kiểm toán","Khi thị giá cổ phiếu trên sàn thấp hơn mệnh giá","Khi phương án chào bán được HĐQT thông qua","Khi chỉ chào bán cho cổ đông hiện hữu của công ty"],"answer":1,"explain":"Chào bán ra công chúng dưới mệnh giá chỉ được phép khi thị giá cổ phiếu trên sàn đang thấp hơn mệnh giá (dưới 10.000 đồng)."},
+  {"topic":"Chào bán chứng khoán","q":"Trường hợp chào bán chứng khoán ra công chúng nào sau đây KHÔNG phải đăng ký với UBCKNN?","options":["Chào bán thêm cổ phiếu của công ty niêm yết","Chào bán chứng chỉ quỹ đóng lần đầu","Chào bán trái phiếu chính quyền địa phương","Chào bán trái phiếu chuyển đổi của công ty đại chúng"],"answer":2,"explain":"Công cụ nợ của Chính phủ, trái phiếu được Chính phủ bảo lãnh, trái phiếu chính quyền địa phương thuộc trường hợp không phải đăng ký chào bán với UBCKNN."},
+  {"topic":"Chào bán chứng khoán","q":"Trường hợp nào sau đây KHÔNG phải đăng ký chào bán với UBCKNN?","options":["Bán chứng khoán theo bản án, quyết định của Tòa án","IPO của công ty cổ phần tư nhân","Chào bán trái phiếu doanh nghiệp ra công chúng","Chào bán thêm cổ phiếu để thực hiện dự án"],"answer":0,"explain":"Bán chứng khoán theo bản án/quyết định của Tòa án, Trọng tài, hoặc bán tài sản khi phá sản thuộc 4 trường hợp không phải đăng ký."},
+  {"topic":"Chào bán chứng khoán","q":"Điều kiện về lợi nhuận khi chào bán cổ phiếu lần đầu ra công chúng (IPO) theo Luật Chứng khoán 2019 là gì?","options":["Có lãi năm liền trước, không có lỗ lũy kế","Có lãi 02 năm liên tục liền trước, không có lỗ lũy kế","Có lãi 03 năm liên tục liền trước","Không yêu cầu có lãi nếu có phương án khả thi"],"answer":1,"explain":"IPO bắt buộc có lãi 02 năm liên tục liền trước năm đăng ký chào bán và không có lỗ lũy kế."},
+  {"topic":"Chào bán chứng khoán","q":"Khi IPO, tổ chức phát hành phải bán tối thiểu bao nhiêu cổ phiếu có quyền biểu quyết cho ít nhất 100 nhà đầu tư không phải cổ đông lớn (vốn điều lệ dưới 1.000 tỷ đồng)?","options":["15%","10%","20%","25%"],"answer":0,"explain":"Tối thiểu 15% cổ phiếu có quyền biểu quyết cho ≥ 100 nhà đầu tư không phải cổ đông lớn; hạ xuống 10% nếu vốn điều lệ ≥ 1.000 tỷ."},
+  {"topic":"Chào bán chứng khoán","q":"Tổ chức IPO có vốn điều lệ từ 1.000 tỷ đồng trở lên phải bán tối thiểu bao nhiêu cổ phiếu có quyền biểu quyết cho nhà đầu tư không phải cổ đông lớn?","options":["5%","15%","20%","10%"],"answer":3,"explain":"Tỷ lệ tối thiểu 15% được hạ xuống 10% khi vốn điều lệ từ 1.000 tỷ đồng trở lên."},
+  {"topic":"Chào bán chứng khoán","q":"Cổ đông lớn trước IPO phải cam kết cùng nhau nắm giữ bao nhiêu cổ phần và trong bao lâu?","options":["100% số cổ phần đang sở hữu, tối thiểu 01 năm kể từ ngày kết thúc chào bán","Ít nhất 20% vốn điều lệ, tối thiểu 01 năm kể từ ngày kết thúc chào bán","Ít nhất 50% vốn điều lệ, tối thiểu 03 năm kể từ ngày kết thúc chào bán","Ít nhất 20% vốn điều lệ, tối thiểu 06 tháng kể từ ngày kết thúc chào bán"],"answer":1,"explain":"Cổ đông lớn trước IPO cam kết cùng nhau nắm giữ ít nhất 20% vốn điều lệ tối thiểu 01 năm từ ngày kết thúc đợt chào bán."},
+  {"topic":"Chào bán chứng khoán","q":"Điều kiện về lợi nhuận khi chào bán thêm cổ phiếu ra công chúng là gì?","options":["Có lãi 02 năm liên tục liền trước","Không yêu cầu có lãi","Có lãi năm liền trước và không có lỗ lũy kế","Có lãi 03 năm liên tục và ROE tối thiểu 5%"],"answer":2,"explain":"Chào bán thêm cổ phiếu: có lãi 01 năm liền trước và không có lỗ lũy kế (IPO mới cần 2 năm)."},
+  {"topic":"Chào bán chứng khoán","q":"Đợt chào bán thêm cổ phiếu ra công chúng nhằm huy động vốn cho dự án phải bán được tối thiểu bao nhiêu?","options":["70% số cổ phiếu dự kiến chào bán","50% số cổ phiếu dự kiến chào bán","80% số cổ phiếu dự kiến chào bán","100% số cổ phiếu dự kiến chào bán"],"answer":0,"explain":"Nếu huy động vốn cho dự án thì phải bán đạt tối thiểu 70% số cổ phiếu dự kiến chào bán."},
+  {"topic":"Chào bán chứng khoán","q":"Điều kiện nào sau đây áp dụng riêng cho chào bán trái phiếu ra công chúng (so với chào bán thêm cổ phiếu)?","options":["Bán tối thiểu 15% cho 100 nhà đầu tư","Cổ đông lớn cam kết nắm giữ 20% vốn điều lệ","Có lãi 02 năm liên tục","Không có nợ phải trả quá hạn trên 01 năm"],"answer":3,"explain":"Chào bán trái phiếu ra công chúng: vốn ≥ 30 tỷ, có lãi năm liền trước, không lỗ lũy kế và không có nợ phải trả quá hạn trên 01 năm."},
+  {"topic":"Chào bán chứng khoán","q":"Tổng giá trị chứng chỉ quỹ đăng ký chào bán lần đầu ra công chúng tối thiểu là bao nhiêu?","options":["30 tỷ đồng","50 tỷ đồng","10 tỷ đồng","100 tỷ đồng"],"answer":1,"explain":"Chứng chỉ quỹ lần đầu ra công chúng: tổng giá trị đăng ký chào bán tối thiểu 50 tỷ đồng."},
+  {"topic":"Chào bán chứng khoán","q":"Điều kiện chào bán trái phiếu chuyển đổi ra công chúng được áp dụng giống với trường hợp nào?","options":["Chào bán cổ phiếu lần đầu ra công chúng (IPO)","Chào bán trái phiếu riêng lẻ không chuyển đổi","Chào bán thêm cổ phiếu ra công chúng","Chào bán chứng chỉ quỹ lần đầu ra công chúng"],"answer":2,"explain":"Trái phiếu chuyển đổi sẽ thành cổ phiếu nên điều kiện giống chào bán thêm cổ phiếu ra công chúng, cộng cam kết thực hiện nghĩa vụ của trái phiếu."},
+  {"topic":"Chào bán chứng khoán","q":"Chào bán riêng lẻ là chào bán không qua phương tiện thông tin đại chúng cho đối tượng nào?","options":["Dưới 100 nhà đầu tư (không kể NĐT chuyên nghiệp) hoặc chỉ NĐT chuyên nghiệp","Dưới 50 nhà đầu tư bất kỳ, kể cả nhà đầu tư chứng khoán chuyên nghiệp","Dưới 300 nhà đầu tư, kể cả nhà đầu tư chứng khoán chuyên nghiệp","Chỉ cổ đông hiện hữu và người lao động của tổ chức phát hành"],"answer":0,"explain":"Chào bán riêng lẻ: cho dưới 100 nhà đầu tư (không kể NĐT chứng khoán chuyên nghiệp) hoặc chỉ cho NĐT chứng khoán chuyên nghiệp."},
+  {"topic":"Chào bán chứng khoán","q":"Đối tượng được mua cổ phiếu chào bán riêng lẻ của công ty đại chúng gồm những ai?","options":["Mọi nhà đầu tư cá nhân trong nước có tài khoản","Cổ đông hiện hữu và người lao động trong công ty","Chỉ nhà đầu tư nước ngoài đủ điều kiện","Nhà đầu tư chiến lược và NĐT chứng khoán chuyên nghiệp"],"answer":3,"explain":"Cổ phiếu riêng lẻ chỉ chào bán cho nhà đầu tư chiến lược và nhà đầu tư chứng khoán chuyên nghiệp."},
+  {"topic":"Chào bán chứng khoán","q":"Cổ phiếu chào bán riêng lẻ cho nhà đầu tư chiến lược bị hạn chế chuyển nhượng tối thiểu bao lâu?","options":["01 năm","03 năm","06 tháng","05 năm"],"answer":1,"explain":"Nhà đầu tư chiến lược bị hạn chế chuyển nhượng tối thiểu 03 năm; NĐT chứng khoán chuyên nghiệp tối thiểu 01 năm."},
+  {"topic":"Chào bán chứng khoán","q":"Các đợt chào bán cổ phiếu riêng lẻ phải cách nhau tối thiểu bao lâu?","options":["03 tháng kể từ ngày kết thúc đợt gần nhất","12 tháng kể từ ngày kết thúc đợt gần nhất","06 tháng kể từ ngày kết thúc đợt gần nhất","Không giới hạn khoảng cách giữa các đợt"],"answer":2,"explain":"Các đợt chào bán cổ phiếu riêng lẻ phải cách nhau ít nhất 06 tháng kể từ ngày kết thúc đợt gần nhất."},
+  {"topic":"Chào bán chứng khoán","q":"Sau khi Giấy chứng nhận đăng ký chào bán ra công chúng có hiệu lực, tổ chức phát hành phải công bố Bản thông báo phát hành trong thời hạn nào?","options":["07 ngày làm việc","15 ngày làm việc","30 ngày","24 giờ"],"answer":0,"explain":"Trong 07 ngày làm việc kể từ ngày Giấy chứng nhận có hiệu lực phải công bố Bản thông báo phát hành."},
+  {"topic":"Chào bán chứng khoán","q":"Chứng khoán chào bán ra công chúng phải được phân phối xong trong thời hạn nào kể từ ngày Giấy chứng nhận có hiệu lực?","options":["60 ngày, được gia hạn tối đa 60 ngày","90 ngày, không được gia hạn","45 ngày, được gia hạn tối đa 15 ngày","90 ngày, UBCKNN có thể gia hạn tối đa 30 ngày"],"answer":3,"explain":"Thời hạn phân phối 90 ngày; nếu không kịp UBCKNN có thể gia hạn tối đa 30 ngày."},
+  {"topic":"Chào bán chứng khoán","q":"Khi đợt chào bán bị hủy bỏ, tổ chức phát hành phải thu hồi chứng khoán và hoàn trả tiền cho nhà đầu tư trong thời hạn nào?","options":["07 ngày làm việc","15 ngày","30 ngày","60 ngày"],"answer":1,"explain":"Khi đợt chào bán bị hủy bỏ, phải hoàn trả tiền cho nhà đầu tư trong thời hạn 15 ngày."},
+  {"topic":"Chào bán chứng khoán","q":"UBCKNN có quyền đình chỉ đợt chào bán tối đa bao lâu khi phát hiện hồ sơ có thông tin sai lệch?","options":["30 ngày","90 ngày","60 ngày","12 tháng"],"answer":2,"explain":"UBCKNN có quyền đình chỉ đợt chào bán (công chúng lẫn riêng lẻ) tối đa 60 ngày."},
+  {"topic":"Chào bán chứng khoán","q":"Cổ phiếu của đợt chào bán đã được đưa vào niêm yết trên hệ thống giao dịch. Sau đó phát hiện vi phạm trong đợt chào bán. Theo VBHN 2026 của Luật Chứng khoán, đợt chào bán có bị hủy bỏ không?","options":["Không hủy bỏ, nhằm bảo vệ nhà đầu tư ngay tình đã mua trên sàn","Bị hủy bỏ và hoàn tiền trong 15 ngày","Bị hủy bỏ nếu UBCKNN yêu cầu","Bị hủy bỏ nếu vi phạm được phát hiện trong 90 ngày"],"answer":0,"explain":"Quy tắc \"đã lên sàn là không hủy bỏ\": cổ phiếu đã niêm yết/đăng ký giao dịch thì không hủy bỏ đợt chào bán nữa."},
+  {"topic":"Chào bán chứng khoán","q":"Cấp nào phê duyệt phương án chào bán trái phiếu riêng lẻ thường (không chuyển đổi, không kèm chứng quyền)?","options":["Bắt buộc ĐHĐCĐ thông qua","UBCKNN phê duyệt phương án","Tổng giám đốc quyết định","ĐHĐCĐ hoặc HĐQT theo Điều lệ"],"answer":3,"explain":"Trái phiếu riêng lẻ thường do ĐHĐCĐ hoặc HĐQT thông qua theo Điều lệ; trái phiếu chuyển đổi/kèm chứng quyền riêng lẻ bắt buộc ĐHĐCĐ."},
+  {"topic":"Trái phiếu, room ngoại, niêm yết","q":"Theo NĐ 155/2020 (sửa đổi bởi NĐ 245/2025), nợ phải trả (kể cả trái phiếu dự kiến phát hành) của tổ chức chào bán trái phiếu ra công chúng không được vượt quá bao nhiêu?","options":["03 lần vốn chủ sở hữu","05 lần vốn chủ sở hữu","10 lần vốn chủ sở hữu","02 lần vốn chủ sở hữu"],"answer":1,"explain":"Nợ phải trả (đã gồm trái phiếu dự kiến phát hành) không vượt quá 05 lần VCSH theo BCTC kỳ gần nhất được kiểm toán."},
+  {"topic":"Trái phiếu, room ngoại, niêm yết","q":"Công ty A có vốn chủ sở hữu 100 tỷ đồng, tổng nợ phải trả hiện tại 400 tỷ đồng. Theo trần nợ 05 lần VCSH, công ty A được chào bán trái phiếu ra công chúng tối đa bao nhiêu?","options":["500 tỷ đồng","400 tỷ đồng","100 tỷ đồng","50 tỷ đồng"],"answer":2,"explain":"Trần nợ = 5 × 100 = 500 tỷ đồng; đã nợ 400 tỷ nên chỉ được phát hành thêm tối đa 100 tỷ đồng."},
+  {"topic":"Trái phiếu, room ngoại, niêm yết","q":"Công ty B có vốn chủ sở hữu 200 tỷ đồng, nợ phải trả 700 tỷ đồng, không thuộc ngành đặc thù. Giá trị trái phiếu tối đa được chào bán ra công chúng trong một đợt là bao nhiêu?","options":["200 tỷ đồng","300 tỷ đồng","1.000 tỷ đồng","100 tỷ đồng"],"answer":0,"explain":"Trần nợ 5 × 200 = 1.000 tỷ ⇒ còn dư 300 tỷ; nhưng mỗi đợt không vượt quá 1 lần VCSH (200 tỷ). Lấy mức thấp hơn: 200 tỷ đồng."},
+  {"topic":"Trái phiếu, room ngoại, niêm yết","q":"Chủ thể nào sau đây KHÔNG bị áp trần nợ phải trả 05 lần vốn chủ sở hữu khi chào bán trái phiếu ra công chúng?","options":["Công ty sản xuất hàng tiêu dùng","Công ty thương mại bán lẻ","Công ty vận tải tư nhân","Tổ chức tín dụng (ngân hàng)"],"answer":3,"explain":"Trần 05 lần không áp dụng với DNNN, doanh nghiệp phát hành trái phiếu thực hiện dự án BĐS, tổ chức tín dụng, doanh nghiệp bảo hiểm, CTCK, CTQLQ."},
+  {"topic":"Trái phiếu, room ngoại, niêm yết","q":"Khi phát hành trái phiếu ra công chúng để cơ cấu lại nợ, chỉ tiêu nợ phải trả được tính như thế nào?","options":["Tính gấp đôi giá trị trái phiếu dự kiến phát hành","Không bao gồm giá trị trái phiếu dự kiến phát hành đợt đó","Bao gồm toàn bộ giá trị trái phiếu dự kiến phát hành","Chỉ tính 50% giá trị trái phiếu dự kiến phát hành"],"answer":1,"explain":"Phát hành để cơ cấu lại nợ (vay mới trả cũ) thì nợ phải trả không bao gồm giá trị trái phiếu dự kiến phát hành đợt đó, và không được đổi mục đích sử dụng vốn."},
+  {"topic":"Trái phiếu, room ngoại, niêm yết","q":"Trái phiếu ra công chúng được miễn cả trần nợ 05 lần VCSH và trần 01 lần VCSH mỗi đợt khi nào?","options":["Khi được cổ đông lớn bảo lãnh thanh toán toàn bộ gốc và lãi","Khi có tài sản bảo đảm là bất động sản đủ giá trị","Khi được TCTD hoặc tổ chức tài chính quốc tế bảo lãnh toàn bộ gốc, lãi","Khi được xếp hạng tín nhiệm ở mức đầu tư trở lên"],"answer":2,"explain":"Trái phiếu được TCTD, chi nhánh NH nước ngoài, tổ chức tài chính nước ngoài/quốc tế bảo lãnh thanh toán toàn bộ gốc và lãi được miễn cả hai trần."},
+  {"topic":"Trái phiếu, room ngoại, niêm yết","q":"Khi chào bán trái phiếu ra công chúng thành nhiều đợt, giá trị trái phiếu theo mệnh giá dự kiến phát hành mỗi đợt không được lớn hơn bao nhiêu?","options":["Vốn chủ sở hữu","Vốn điều lệ","50% vốn chủ sở hữu","02 lần vốn chủ sở hữu"],"answer":0,"explain":"Mỗi đợt không lớn hơn vốn chủ sở hữu (≤ 100% VCSH)."},
+  {"topic":"Trái phiếu, room ngoại, niêm yết","q":"Theo NĐ 245/2025, yêu cầu xếp hạng tín nhiệm đối với trái phiếu chào bán ra công chúng là gì?","options":["Chỉ khi huy động trên 500 tỷ đồng trong mỗi 12 tháng","Không bắt buộc, do tổ chức phát hành tự quyết định","Chỉ khi dư nợ trái phiếu vượt 100% vốn chủ sở hữu","Bắt buộc mọi trường hợp, trừ TP của TCTD hoặc được bảo lãnh toàn bộ"],"answer":3,"explain":"NĐ 245/2025 bắt buộc xếp hạng tín nhiệm trong mọi trường hợp, trừ trái phiếu của TCTD hoặc được bảo lãnh thanh toán toàn bộ gốc lãi."},
+  {"topic":"Trái phiếu, room ngoại, niêm yết","q":"Tổ chức nào được làm đại diện người sở hữu trái phiếu theo NĐ 155/2020?","options":["Tổ chức kiểm toán được UBCKNN chấp thuận","Sở Giao dịch Chứng khoán Việt Nam","Thành viên lưu ký hoặc công ty quản lý quỹ","Cổ đông lớn của tổ chức phát hành trái phiếu"],"answer":2,"explain":"Đại diện người sở hữu trái phiếu là thành viên lưu ký (CTCK, NHTM có phép lưu ký) hoặc công ty quản lý quỹ."},
+  {"topic":"Trái phiếu, room ngoại, niêm yết","q":"Chào bán cổ phiếu riêng lẻ với giá thấp hơn mệnh giá chỉ được bán cho đối tượng nào?","options":["Nhà đầu tư chứng khoán chuyên nghiệp","Cổ đông hiện hữu","Người lao động trong công ty","Nhà đầu tư chiến lược"],"answer":3,"explain":"Chào bán riêng lẻ dưới mệnh giá chỉ được bán cho nhà đầu tư chiến lược (hạn chế chuyển nhượng tối thiểu 03 năm), và phải có đủ thặng dư vốn cổ phần bù đắp."},
+  {"topic":"Trái phiếu, room ngoại, niêm yết","q":"Điều kiện tài chính để chào bán cổ phiếu riêng lẻ dưới mệnh giá theo NĐ 155/2020 là gì?","options":["Có lãi 03 năm liên tục và không có lỗ lũy kế","Có đủ thặng dư vốn cổ phần để bù đắp thặng dư âm","Vốn điều lệ đã góp từ 1.000 tỷ đồng trở lên","Thị giá cổ phiếu trên sàn cao hơn mệnh giá"],"answer":1,"explain":"Phải có đủ thặng dư vốn cổ phần căn cứ BCTC năm gần nhất được kiểm toán để bù đắp phần thặng dư âm."},
+  {"topic":"Trái phiếu, room ngoại, niêm yết","q":"Cổ phiếu phát hành riêng lẻ để hoán đổi nợ bị hạn chế chuyển nhượng tối thiểu bao lâu?","options":["03 năm kể từ ngày kết thúc đợt phát hành","06 tháng kể từ ngày kết thúc đợt phát hành","01 năm kể từ ngày kết thúc đợt phát hành","Không bị hạn chế chuyển nhượng"],"answer":2,"explain":"Cổ phiếu hoán đổi nợ bị hạn chế chuyển nhượng tối thiểu 01 năm; chủ nợ không bắt buộc là NĐT chiến lược."},
+  {"topic":"Trái phiếu, room ngoại, niêm yết","q":"Công ty đại chúng hoạt động trong ngành nghề thuộc nhóm nhà đầu tư nước ngoài chưa được tiếp cận thị trường thì tỷ lệ sở hữu nước ngoài tối đa là bao nhiêu?","options":["0%","49%","50%","30%"],"answer":0,"explain":"Ngành nghề thuộc nhóm chưa được tiếp cận thị trường đối với NĐT nước ngoài: room ngoại = 0%."},
+  {"topic":"Trái phiếu, room ngoại, niêm yết","q":"Ngành nghề tiếp cận thị trường có điều kiện nhưng pháp luật chưa quy định cụ thể tỷ lệ sở hữu nước ngoài thì room ngoại tối đa là bao nhiêu?","options":["49% vốn điều lệ","30% vốn điều lệ","100% vốn điều lệ","50% vốn điều lệ"],"answer":3,"explain":"Theo Điều 139 NĐ 155: nhóm tiếp cận có điều kiện chưa có tỷ lệ cụ thể ⇒ room ngoại tối đa 50% vốn điều lệ."},
+  {"topic":"Trái phiếu, room ngoại, niêm yết","q":"Công ty đại chúng hoạt động đa ngành nghề có các mức trần sở hữu nước ngoài khác nhau thì room ngoại xác định thế nào?","options":["Theo ngành nghề có doanh thu lớn nhất của công ty","Không vượt mức thấp nhất trong các ngành có quy định","Theo mức bình quân của các ngành nghề kinh doanh","Do ĐHĐCĐ tự quyết định trong Điều lệ công ty"],"answer":1,"explain":"Đa ngành nghề: room ngoại không vượt quá mức thấp nhất trong các ngành nghề có quy định tỷ lệ sở hữu nước ngoài."},
+  {"topic":"Trái phiếu, room ngoại, niêm yết","q":"Tổ chức nước ngoài đủ điều kiện (hoạt động ngân hàng/chứng khoán/bảo hiểm và có lãi 02 năm liền trước) được sở hữu tối đa bao nhiêu vốn điều lệ của công ty chứng khoán?","options":["Tối đa 49% vốn điều lệ","Tối đa 51% vốn điều lệ","Đến 100% vốn điều lệ","Tối đa 65% vốn điều lệ"],"answer":2,"explain":"Tổ chức nước ngoài đủ điều kiện và người có liên quan được sở hữu đến 100% vốn điều lệ CTCK, CTQLQ."},
+  {"topic":"Trái phiếu, room ngoại, niêm yết","q":"Điều kiện ROE để niêm yết cổ phiếu theo NĐ 155/2020 là gì?","options":["ROE năm gần nhất tối thiểu 5%","ROE bình quân 3 năm tối thiểu 10%","ROE năm gần nhất tối thiểu 15%","Không yêu cầu ROE"],"answer":0,"explain":"Niêm yết cổ phiếu yêu cầu ROE năm gần nhất tối thiểu 5%; UPCoM không yêu cầu ROE."},
+  {"topic":"Trái phiếu, room ngoại, niêm yết","q":"Đối tượng nào sau đây BẮT BUỘC đăng ký giao dịch trên hệ thống UPCoM?","options":["Công ty cổ phần chưa phải công ty đại chúng","Công ty TNHH phát hành trái phiếu riêng lẻ","Công ty đại chúng đã niêm yết trên HOSE","Công ty đại chúng chưa niêm yết trên Sở GDCK"],"answer":3,"explain":"Đăng ký giao dịch UPCoM là nghĩa vụ bắt buộc của CTĐC chưa niêm yết, công ty bị hủy niêm yết nhưng vẫn là CTĐC, DNNN cổ phần hóa chưa niêm yết."},
+  {"topic":"Trái phiếu, room ngoại, niêm yết","q":"Công ty đại chúng đang lỗ lũy kế có được đăng ký giao dịch trên UPCoM không?","options":["Không, phải xử lý hết lỗ lũy kế trước","Được, và bắt buộc phải đăng ký giao dịch","Chỉ được nếu ROE năm gần nhất dương","Chỉ được nếu có lãi năm gần nhất"],"answer":1,"explain":"UPCoM không yêu cầu có lãi, không yêu cầu ROE; công ty lỗ lũy kế vẫn được (và bắt buộc) giao dịch trên UPCoM."},
+  {"topic":"Trái phiếu, room ngoại, niêm yết","q":"Người nội bộ và cổ đông lớn liên quan phải cam kết nắm giữ cổ phiếu như thế nào khi niêm yết?","options":["50% số cổ phiếu trong 01 năm kể từ ngày niêm yết","100% số cổ phiếu trong 03 năm kể từ ngày niêm yết","100% trong 06 tháng đầu và 50% trong 06 tháng tiếp theo","20% vốn điều lệ trong 01 năm kể từ ngày niêm yết"],"answer":2,"explain":"Cam kết nắm giữ 100% cổ phiếu trong 06 tháng đầu kể từ ngày giao dịch đầu tiên và 50% trong 06 tháng tiếp theo."},
+  {"topic":"Trái phiếu, room ngoại, niêm yết","q":"Theo NĐ 155/2020, tổ chức muốn niêm yết cổ phiếu phải đã giao dịch trên UPCoM tối thiểu bao lâu (trừ trường hợp đã chào bán ra công chúng hoặc doanh nghiệp cổ phần hóa)?","options":["02 năm","01 năm","06 tháng","03 năm"],"answer":0,"explain":"Phải giao dịch trên UPCoM tối thiểu 02 năm; miễn cho tổ chức đã IPO hoặc doanh nghiệp cổ phần hóa."},
+  {"topic":"Trái phiếu, room ngoại, niêm yết","q":"Công ty đại chúng phải nộp hồ sơ đăng ký giao dịch trên UPCoM trong thời hạn nào?","options":["90 ngày kể từ ngày kết thúc đợt IPO","07 ngày làm việc kể từ ngày đăng ký doanh nghiệp","60 ngày kể từ ngày được cấp mã chứng khoán","30 ngày kể từ ngày UBCKNN xác nhận đăng ký CTĐC"],"answer":3,"explain":"Nộp hồ sơ đăng ký giao dịch trong 30 ngày kể từ ngày UBCKNN xác nhận hoàn tất đăng ký CTĐC."},
+  {"topic":"Công ty chứng khoán","q":"Công ty chứng khoán được thành lập dưới loại hình doanh nghiệp nào?","options":["Công ty TNHH hoặc công ty cổ phần","Chỉ công ty cổ phần","Công ty hợp danh hoặc công ty cổ phần","Doanh nghiệp tư nhân hoặc công ty TNHH"],"answer":0,"explain":"CTCK chỉ được thành lập dưới 2 loại hình: công ty TNHH hoặc công ty cổ phần."},
+  {"topic":"Công ty chứng khoán","q":"Công ty chứng khoán chỉ được cấp phép nghiệp vụ bảo lãnh phát hành chứng khoán khi đáp ứng điều kiện nào?","options":["Đã có nghiệp vụ môi giới chứng khoán","Đã có hoặc xin cấp đồng thời nghiệp vụ tự doanh","Đã có nghiệp vụ tư vấn đầu tư chứng khoán","Đã có giấy chứng nhận hoạt động lưu ký"],"answer":1,"explain":"Bảo lãnh phát hành chỉ được cấp khi CTCK đã có hoặc xin cấp đồng thời nghiệp vụ tự doanh (để có thể mua phần chứng khoán chưa phân phối hết)."},
+  {"topic":"Công ty chứng khoán","q":"Công ty chứng khoán đương nhiên được thực hiện nghiệp vụ tư vấn đầu tư chứng khoán khi nào?","options":["Khi có vốn điều lệ từ 300 tỷ đồng trở lên","Khi có ít nhất 10 người có chứng chỉ hành nghề","Khi có môi giới, tự doanh hoặc bảo lãnh phát hành","Khi cổ phiếu công ty đã niêm yết trên Sở GDCK"],"answer":2,"explain":"Có ít nhất 01 trong 03 nghiệp vụ môi giới, tự doanh, bảo lãnh phát hành thì đương nhiên được làm tư vấn đầu tư chứng khoán."},
+  {"topic":"Công ty chứng khoán","q":"Mỗi nghiệp vụ kinh doanh chứng khoán xin cấp phép phải có tối thiểu bao nhiêu người có chứng chỉ hành nghề phù hợp?","options":["01 người","02 người","05 người","03 người"],"answer":3,"explain":"Mỗi nghiệp vụ phải có tối thiểu 03 người có CCHN phù hợp."},
+  {"topic":"Công ty chứng khoán","q":"Tổng giám đốc công ty chứng khoán phải có loại chứng chỉ hành nghề nào?","options":["CCHN môi giới chứng khoán","CCHN phân tích tài chính hoặc quản lý quỹ","Chỉ chấp nhận CCHN quản lý quỹ","Không yêu cầu chứng chỉ hành nghề"],"answer":1,"explain":"TGĐ CTCK phải có CCHN Phân tích tài chính hoặc Quản lý quỹ và tối thiểu 02 năm kinh nghiệm; chỉ có CCHN Môi giới thì không được."},
+  {"topic":"Công ty chứng khoán","q":"Vốn điều lệ tối thiểu cho nghiệp vụ môi giới chứng khoán là bao nhiêu?","options":["25 tỷ đồng","10 tỷ đồng","50 tỷ đồng","165 tỷ đồng"],"answer":0,"explain":"Vốn tối thiểu: môi giới 25 tỷ, tự doanh 50 tỷ, bảo lãnh phát hành 165 tỷ, tư vấn đầu tư 10 tỷ đồng."},
+  {"topic":"Công ty chứng khoán","q":"Vốn điều lệ tối thiểu cho nghiệp vụ bảo lãnh phát hành chứng khoán là bao nhiêu?","options":["50 tỷ đồng","120 tỷ đồng","250 tỷ đồng","165 tỷ đồng"],"answer":3,"explain":"Bảo lãnh phát hành chứng khoán yêu cầu vốn tối thiểu 165 tỷ đồng."},
+  {"topic":"Công ty chứng khoán","q":"Vốn điều lệ tối thiểu cho nghiệp vụ tự doanh chứng khoán là bao nhiêu?","options":["25 tỷ đồng","10 tỷ đồng","50 tỷ đồng","165 tỷ đồng"],"answer":2,"explain":"Tự doanh chứng khoán yêu cầu vốn tối thiểu 50 tỷ đồng."},
+  {"topic":"Công ty chứng khoán","q":"Công ty chứng khoán có nghiệp vụ môi giới được nhận ủy thác quản lý tài khoản giao dịch cho đối tượng nào?","options":["Nhà đầu tư cá nhân","Mọi nhà đầu tư tổ chức và cá nhân","Chỉ nhà đầu tư tổ chức","Quỹ đầu tư chứng khoán"],"answer":0,"explain":"CTCK chỉ nhận ủy thác quản lý tài khoản cho NĐT cá nhân; quản lý danh mục đầu tư cho cả tổ chức là nghiệp vụ của công ty quản lý quỹ."},
+  {"topic":"Công ty chứng khoán","q":"Để chào bán, niêm yết và tạo lập thị trường chứng quyền có bảo đảm, công ty chứng khoán phải có nghiệp vụ nào?","options":["Môi giới chứng khoán","Tư vấn đầu tư chứng khoán","Tự doanh chứng khoán","Lưu ký chứng khoán"],"answer":2,"explain":"Tự doanh → được kinh doanh chứng khoán phái sinh và phát hành chứng quyền có bảo đảm (CW); chỉ có môi giới thì không được phát hành CW."},
+  {"topic":"Công ty chứng khoán","q":"Theo Thông tư 121/2020/TT-BTC, bộ phận kiểm toán nội bộ của công ty chứng khoán trực thuộc ai?","options":["Tổng giám đốc (Giám đốc)","Hội đồng quản trị","Bộ phận quản trị rủi ro","Kế toán trưởng"],"answer":1,"explain":"Kiểm toán nội bộ trực thuộc HĐQT, độc lập với Ban Giám đốc."},
+  {"topic":"Công ty chứng khoán","q":"Theo Thông tư 121/2020/TT-BTC, bộ phận quản trị rủi ro và bộ phận kiểm soát nội bộ trực thuộc ai?","options":["Hội đồng quản trị","Ban kiểm soát","Đại hội đồng cổ đông","Tổng giám đốc (Giám đốc)"],"answer":3,"explain":"Bộ phận quản trị rủi ro và kiểm soát nội bộ trực thuộc Tổng giám đốc; HĐQT phê duyệt chính sách quản trị rủi ro và quản lý kiểm toán nội bộ."},
+  {"topic":"Công ty chứng khoán","q":"Ai thiết lập và phê duyệt chính sách quản trị rủi ro (hạn mức rủi ro, cơ cấu tổ chức quản trị rủi ro) tại công ty chứng khoán?","options":["Tổng giám đốc (Giám đốc)","Bộ phận kiểm soát nội bộ","Hội đồng quản trị","Trưởng bộ phận quản trị rủi ro"],"answer":2,"explain":"HĐQT thiết lập, phê duyệt chính sách quản trị rủi ro; TGĐ xây dựng và tổ chức thực hiện quy trình chi tiết."},
+  {"topic":"Công ty chứng khoán","q":"Tỷ lệ vốn khả dụng tối thiểu công ty chứng khoán phải duy trì là bao nhiêu?","options":["180%","150%","120%","260%"],"answer":0,"explain":"Tỷ lệ vốn khả dụng phải duy trì tối thiểu 180% (Thông tư 91/2020/TT-BTC)."},
+  {"topic":"Công ty chứng khoán","q":"Công ty chứng khoán có tỷ lệ vốn khả dụng 160% sẽ bị đặt vào tình trạng nào?","options":["Kiểm soát","Kiểm soát đặc biệt","Đình chỉ hoạt động","Cảnh báo"],"answer":3,"explain":"Từ 150% đến dưới 180%: cảnh báo; 120% đến dưới 150%: kiểm soát; dưới 120%: kiểm soát đặc biệt."},
+  {"topic":"Công ty chứng khoán","q":"Công ty chứng khoán có tỷ lệ vốn khả dụng 130% sẽ bị đặt vào tình trạng nào?","options":["Cảnh báo","Kiểm soát","Kiểm soát đặc biệt","Hoạt động bình thường"],"answer":1,"explain":"Tỷ lệ từ 120% đến dưới 150% thuộc diện kiểm soát (thời hạn tối đa 12 tháng)."},
+  {"topic":"Công ty chứng khoán","q":"Tổng dư nợ cho vay giao dịch ký quỹ (margin) của công ty chứng khoán không được vượt quá bao nhiêu?","options":["100% vốn chủ sở hữu","150% vốn chủ sở hữu","200% vốn chủ sở hữu","300% vốn chủ sở hữu"],"answer":2,"explain":"Tổng dư nợ margin ≤ 200% VCSH; cho vay 01 khách hàng ≤ 3% VCSH; 01 mã chứng khoán ≤ 10% VCSH."},
+  {"topic":"Công ty chứng khoán","q":"Dư nợ cho vay ký quỹ đối với 01 khách hàng không được vượt quá bao nhiêu vốn chủ sở hữu của công ty chứng khoán?","options":["3%","5%","10%","15%"],"answer":0,"explain":"Cho vay 01 khách hàng ≤ 3% VCSH của CTCK."},
+  {"topic":"Công ty chứng khoán","q":"Ngoài cho vay giao dịch ký quỹ, công ty chứng khoán còn được cho khách hàng vay dưới hình thức nào?","options":["Cho vay tiêu dùng có tài sản bảo đảm","Cho vay mua bất động sản","Cho vay góp vốn kinh doanh","Ứng trước tiền bán chứng khoán"],"answer":3,"explain":"Điều 27 TT 121: ngoài cho vay margin và ứng trước tiền bán chứng khoán, CTCK không được cho vay tiền/chứng khoán dưới bất kỳ hình thức nào khác."},
+  {"topic":"Công ty chứng khoán","q":"Công ty chứng khoán được đầu tư mua cổ phiếu của 01 tổ chức niêm yết tối đa bao nhiêu?","options":["15% tổng số cổ phiếu đang lưu hành","20% tổng số cổ phiếu đang lưu hành","25% tổng số cổ phiếu đang lưu hành","5% tổng số cổ phiếu đang lưu hành"],"answer":1,"explain":"Tự doanh: mua CP/CCQ của 01 tổ chức niêm yết ≤ 20% tổng số đang lưu hành; CTCP chưa niêm yết ≤ 15%."},
+  {"topic":"Công ty chứng khoán","q":"Theo Luật Chứng khoán 2019, công ty chứng khoán phải xử lý lệnh của khách hàng và lệnh tự doanh theo nguyên tắc nào?","options":["Lệnh tự doanh được thực hiện trước lệnh khách hàng","Lệnh có giá trị lớn hơn được thực hiện trước","Do Tổng giám đốc quyết định từng trường hợp","Lệnh khách hàng được thực hiện trước lệnh tự doanh"],"answer":3,"explain":"Điều 89: tách biệt môi giới và tự doanh; lệnh của khách hàng phải được xử lý trước lệnh tự doanh của CTCK."},
+  {"topic":"Công ty chứng khoán","q":"Công ty chứng khoán bị cấm cho đối tượng nào vay tiền giao dịch ký quỹ?","options":["Thành viên HĐQT của chính công ty chứng khoán đó","Nhà đầu tư cá nhân có tài sản bảo đảm","Nhà đầu tư tổ chức trong nước","Nhà đầu tư nước ngoài"],"answer":0,"explain":"Điều 91: không cho vay đối với cổ đông lớn, thành viên HĐQT/HĐTV, BKS, Ban Giám đốc, Kế toán trưởng của chính CTCK và người có liên quan."},
+  {"topic":"Công ty chứng khoán","q":"Khi công ty chứng khoán phá sản, tiền và chứng khoán của khách hàng được xử lý thế nào?","options":["Dùng để trả nợ cho chủ nợ của công ty chứng khoán","Chia đều cho chủ nợ và khách hàng","Không được dùng để chia cho chủ nợ của công ty chứng khoán","Chuyển vào Quỹ hỗ trợ thanh toán"],"answer":2,"explain":"Điều 88: tài sản khách hàng quản lý tách biệt với tài sản CTCK; khi phá sản không được dùng để chia cho chủ nợ của CTCK."},
+  {"topic":"Chứng khoán phái sinh","q":"Theo NĐ 158/2020, hoạt động kinh doanh chứng khoán phái sinh gồm những nghiệp vụ nào?","options":["Môi giới, tự doanh, bảo lãnh phát hành chứng khoán phái sinh","Môi giới, tự doanh, tư vấn đầu tư chứng khoán phái sinh","Môi giới, tư vấn, cho vay ký quỹ chứng khoán phái sinh","Tự doanh, tư vấn, quản lý danh mục chứng khoán phái sinh"],"answer":1,"explain":"Kinh doanh CKPS chỉ có đúng 03 nghiệp vụ: môi giới, tự doanh, tư vấn đầu tư CKPS."},
+  {"topic":"Chứng khoán phái sinh","q":"Công ty chứng khoán có được cho khách hàng vay tiền để thực hiện ký quỹ giao dịch chứng khoán phái sinh không?","options":["Được, trong hạn mức 200% vốn chủ sở hữu","Được, nếu khách hàng có tài sản bảo đảm","Không, pháp luật nghiêm cấm","Được, tối đa 3% vốn chủ sở hữu cho mỗi khách hàng"],"answer":2,"explain":"Ký quỹ phái sinh là tài sản của chính khách hàng nộp để đảm bảo nghĩa vụ; CTCK bị cấm cho vay tiền/chứng khoán để ký quỹ phái sinh."},
+  {"topic":"Chứng khoán phái sinh","q":"Công ty quản lý quỹ được cấp phép nghiệp vụ chứng khoán phái sinh nào?","options":["Tư vấn đầu tư chứng khoán phái sinh","Môi giới chứng khoán phái sinh","Tự doanh chứng khoán phái sinh","Cả môi giới và tự doanh chứng khoán phái sinh"],"answer":0,"explain":"CTQLQ chỉ được xin duy nhất nghiệp vụ tư vấn đầu tư CKPS (vốn từ 25 tỷ đồng), không được môi giới hay tự doanh phái sinh."},
+  {"topic":"Chứng khoán phái sinh","q":"Vốn điều lệ và vốn chủ sở hữu tối thiểu để công ty chứng khoán làm môi giới chứng khoán phái sinh là bao nhiêu?","options":["250 tỷ đồng","600 tỷ đồng","1.200 tỷ đồng","800 tỷ đồng"],"answer":3,"explain":"Tư vấn CKPS 250 tỷ, tự doanh CKPS 600 tỷ, môi giới CKPS 800 tỷ đồng."},
+  {"topic":"Chứng khoán phái sinh","q":"Vốn điều lệ và vốn chủ sở hữu tối thiểu để công ty chứng khoán tự doanh chứng khoán phái sinh là bao nhiêu?","options":["250 tỷ đồng","600 tỷ đồng","800 tỷ đồng","900 tỷ đồng"],"answer":1,"explain":"Tự doanh CKPS yêu cầu vốn điều lệ và VCSH từ 600 tỷ đồng trở lên."},
+  {"topic":"Chứng khoán phái sinh","q":"Công ty chứng khoán đăng ký cả 3 hoạt động môi giới, tự doanh và tư vấn chứng khoán phái sinh cần vốn tối thiểu bao nhiêu?","options":["1.650 tỷ đồng (cộng dồn)","1.200 tỷ đồng","800 tỷ đồng (không cộng dồn)","900 tỷ đồng"],"answer":2,"explain":"Không cộng dồn; lấy ngưỡng cao nhất của môi giới CKPS là 800 tỷ đồng."},
+  {"topic":"Chứng khoán phái sinh","q":"Vốn tối thiểu để công ty chứng khoán làm thành viên bù trừ chung chứng khoán phái sinh là bao nhiêu?","options":["1.200 tỷ đồng","900 tỷ đồng","800 tỷ đồng","5.000 tỷ đồng"],"answer":0,"explain":"Thành viên bù trừ trực tiếp 900 tỷ; thành viên bù trừ chung 1.200 tỷ; ngân hàng thương mại 5.000 tỷ đồng."},
+  {"topic":"Chứng khoán phái sinh","q":"Ngân hàng thương mại được làm loại thành viên bù trừ chứng khoán phái sinh nào?","options":["Thành viên bù trừ chung","Cả thành viên bù trừ chung và trực tiếp","Không được làm thành viên bù trừ CKPS","Chỉ thành viên bù trừ trực tiếp"],"answer":3,"explain":"NHTM chỉ được làm thành viên bù trừ trực tiếp (vốn từ 5.000 tỷ), chỉ bù trừ giao dịch của chính ngân hàng và phải có chấp thuận của NHNN."},
+  {"topic":"Chứng khoán phái sinh","q":"Theo NĐ 158/2020, công ty chứng khoán làm thành viên bù trừ chứng khoán phái sinh phải có tỷ lệ vốn khả dụng tối thiểu bao nhiêu liên tục trong 12 tháng gần nhất?","options":["180%","220%","260%","150%"],"answer":2,"explain":"Bù trừ CKPS: tỷ lệ vốn khả dụng tối thiểu 260%; mức duy trì thông thường theo TT 91 là 180%."},
+  {"topic":"Chứng khoán phái sinh","q":"Sau khi được cấp Giấy chứng nhận đủ điều kiện kinh doanh chứng khoán phái sinh, công ty phải hoàn tất đăng ký thành viên giao dịch trong thời hạn nào?","options":["06 tháng","12 tháng","03 tháng","24 tháng"],"answer":1,"explain":"Trong 12 tháng phải đăng ký thành viên giao dịch (Sở GDCK) hoặc thành viên bù trừ (VSDC), quá hạn bị thu hồi Giấy chứng nhận."},
+  {"topic":"Chứng khoán phái sinh","q":"Tổ chức kinh doanh chứng khoán phái sinh khi chưa được UBCKNN cấp Giấy chứng nhận bị phạt tiền ở mức nào?","options":["Từ 50 triệu đến 100 triệu đồng","Từ 100 triệu đến 150 triệu đồng","Từ 1 tỷ đến 1,5 tỷ đồng","Từ 200 triệu đến 300 triệu đồng"],"answer":3,"explain":"Phạt 200–300 triệu đồng và đình chỉ hoạt động từ 01 đến 03 tháng (Điều 29 NĐ 156/2020)."},
+  {"topic":"Chứng khoán phái sinh","q":"Thành viên bù trừ CKPS chỉ được bù trừ, thanh toán cho giao dịch của chính mình và khách hàng của mình là loại thành viên nào?","options":["Thành viên bù trừ trực tiếp","Thành viên bù trừ chung","Thành viên giao dịch đặc biệt","Thành viên lưu ký"],"answer":0,"explain":"Thành viên bù trừ trực tiếp chỉ bù trừ cho chính mình và khách hàng; thành viên bù trừ chung còn cung cấp dịch vụ cho thành viên giao dịch không bù trừ."},
+  {"topic":"Chứng chỉ hành nghề","q":"Người có chứng chỉ hành nghề môi giới chứng khoán được thực hiện những nghiệp vụ nào?","options":["Môi giới, tư vấn đầu tư và tự doanh chứng khoán","Môi giới và tư vấn đầu tư chứng khoán","Chỉ môi giới chứng khoán","Môi giới, tư vấn và bảo lãnh phát hành chứng khoán"],"answer":1,"explain":"CCHN môi giới: môi giới và tư vấn đầu tư chứng khoán."},
+  {"topic":"Chứng chỉ hành nghề","q":"Người có chứng chỉ hành nghề phân tích tài chính được thực hiện thêm những nghiệp vụ nào so với chứng chỉ môi giới?","options":["Quản lý quỹ và quản lý danh mục đầu tư","Lưu ký và bù trừ chứng khoán","Tự doanh và bảo lãnh phát hành chứng khoán","Kiểm toán và định giá doanh nghiệp"],"answer":2,"explain":"CCHN phân tích tài chính: môi giới, tư vấn + tự doanh, bảo lãnh phát hành chứng khoán."},
+  {"topic":"Chứng chỉ hành nghề","q":"Loại chứng chỉ hành nghề nào cho phép thực hiện nghiệp vụ quản lý quỹ và quản lý danh mục đầu tư chứng khoán?","options":["Chứng chỉ hành nghề quản lý quỹ","Chứng chỉ hành nghề phân tích tài chính","Chứng chỉ hành nghề môi giới","Chứng chỉ hành nghề phái sinh"],"answer":0,"explain":"CCHN quản lý quỹ được làm cả 6 việc, gồm quản lý quỹ và quản lý danh mục đầu tư chứng khoán."},
+  {"topic":"Chứng chỉ hành nghề","q":"Trình độ học vấn tối thiểu để được cấp chứng chỉ hành nghề chứng khoán là gì?","options":["Tốt nghiệp trung học phổ thông","Cao đẳng","Thạc sĩ","Đại học"],"answer":3,"explain":"Điều kiện cấp CCHN: có trình độ từ đại học trở lên; cao đẳng là phương án sai."},
+  {"topic":"Chứng chỉ hành nghề","q":"Loại chứng chỉ hành nghề nào yêu cầu tối thiểu 03 năm kinh nghiệm (nếu chưa có chứng chỉ quốc tế như CFA, CPA, CIIA)?","options":["Chứng chỉ hành nghề môi giới","Chứng chỉ hành nghề phân tích tài chính","Chứng chỉ hành nghề quản lý quỹ","Cả 3 loại chứng chỉ đều yêu cầu"],"answer":2,"explain":"Chỉ CCHN quản lý quỹ yêu cầu tối thiểu 03 năm kinh nghiệm; môi giới và phân tích tài chính không yêu cầu số năm kinh nghiệm.","fixed":true},
+  {"topic":"Chứng chỉ hành nghề","q":"Chứng chỉ hành nghề chứng khoán có giá trị sử dụng khi nào?","options":["Ngay khi được UBCKNN cấp chứng chỉ","Khi làm việc tại CTCK/CTQLQ và được thông báo lên UBCKNN","Khi người hành nghề mở tài khoản giao dịch chứng khoán","Khi được Hiệp hội kinh doanh chứng khoán xác nhận"],"answer":1,"explain":"CCHN chỉ có giá trị khi người hành nghề làm việc tại 01 CTCK/CTQLQ và được công ty thông báo danh sách lên UBCKNN."},
+  {"topic":"Chứng chỉ hành nghề","q":"Người hành nghề chứng khoán không hành nghề trong bao lâu liên tục thì bị thu hồi chứng chỉ hành nghề?","options":["01 năm","05 năm","02 năm","03 năm"],"answer":3,"explain":"Không hành nghề chứng khoán trong 03 năm liên tục bị thu hồi CCHN; được xét cấp lại nhưng phải thi sát hạch lại."},
+  {"topic":"Chứng chỉ hành nghề","q":"Người hành nghề bị thu hồi chứng chỉ do vi phạm Điều 12 Luật Chứng khoán (giao dịch nội gián, thao túng thị trường) thì có được cấp lại không?","options":["Được cấp lại sau 03 năm","Được cấp lại sau 05 năm","Không được cấp lại","Được cấp lại nếu thi sát hạch đạt"],"answer":2,"explain":"Vi phạm Điều 12 hoặc khoản 2 Điều 98 thì không được cấp lại CCHN; \"sau 3 năm hoặc 5 năm\" là phương án sai."},
+  {"topic":"Chứng chỉ hành nghề","q":"Người hành nghề chứng khoán đang làm tại công ty chứng khoán có nghiệp vụ môi giới phải mở tài khoản giao dịch chứng khoán cá nhân ở đâu?","options":["Tại chính công ty chứng khoán nơi mình làm việc","Tại bất kỳ công ty chứng khoán nào","Tại ngân hàng lưu ký","Tại công ty chứng khoán có phí thấp nhất"],"answer":0,"explain":"Người hành nghề phải mở tài khoản tại chính CTCK nơi làm việc; chỉ được mở nơi khác khi công ty không có nghiệp vụ môi giới hoặc mình làm ở CTQLQ."},
+  {"topic":"Chứng chỉ hành nghề","q":"Hành vi nào sau đây bị cấm đối với người hành nghề chứng khoán theo khoản 2 Điều 98 Luật Chứng khoán 2019?","options":["Tham gia khóa đào tạo cập nhật kiến thức","Đồng thời làm việc cho 02 công ty chứng khoán","Mở tài khoản tại công ty chứng khoán nơi mình làm việc","Tư vấn đầu tư cho khách hàng theo đúng phạm vi ủy quyền"],"answer":1,"explain":"Người hành nghề không được đồng thời làm việc cho từ 02 CTCK, CTQLQ trở lên."},
+  {"topic":"Chứng chỉ hành nghề","q":"Người hành nghề chứng khoán được ngoại lệ mở tài khoản giao dịch tại công ty chứng khoán khác trong trường hợp nào?","options":["Khi được Tổng giám đốc đồng ý bằng văn bản","Khi tài khoản đó chỉ dùng giao dịch trái phiếu","Khi công ty mình làm không có nghiệp vụ môi giới","Khi đã làm việc tại công ty trên 03 năm"],"answer":2,"explain":"Ngoại lệ duy nhất: CTCK nơi mình làm việc không có nghiệp vụ môi giới (hoặc mình đang làm tại công ty quản lý quỹ)."},
+  {"topic":"Sở GDCK & VSDC","q":"Ai có thẩm quyền quyết định thành lập, giải thể Sở Giao dịch Chứng khoán Việt Nam?","options":["Bộ trưởng Bộ Tài chính","Chủ tịch UBCKNN","Thủ tướng Chính phủ","Quốc hội"],"answer":2,"explain":"Thủ tướng Chính phủ quyết định thành lập, giải thể, chuyển đổi cơ cấu tổ chức Sở GDCK theo đề nghị của Bộ trưởng Bộ Tài chính."},
+  {"topic":"Sở GDCK & VSDC","q":"Sở Giao dịch Chứng khoán Việt Nam được tổ chức dưới hình thức nào?","options":["Đơn vị sự nghiệp công lập trực thuộc UBCKNN","Công ty TNHH MTV hoặc CTCP do Nhà nước nắm trên 50% vốn","Công ty cổ phần do các công ty chứng khoán cùng góp vốn","Hiệp hội nghề nghiệp tự quản của các thành viên"],"answer":1,"explain":"Sở GDCK là công ty TNHH MTV hoặc công ty cổ phần do Nhà nước nắm giữ trên 50% vốn điều lệ hoặc tổng số cổ phần có quyền biểu quyết."},
+  {"topic":"Sở GDCK & VSDC","q":"Ai phê duyệt Điều lệ của Sở Giao dịch Chứng khoán Việt Nam?","options":["Bộ trưởng Bộ Tài chính","Thủ tướng Chính phủ","Hội đồng thành viên Sở GDCK","Chủ tịch UBCKNN"],"answer":0,"explain":"Bộ trưởng Bộ Tài chính phê duyệt Điều lệ Sở GDCK (sau khi có ý kiến Chủ tịch UBCKNN) và bổ nhiệm, miễn nhiệm Chủ tịch HĐTV/HĐQT, Tổng giám đốc."},
+  {"topic":"Sở GDCK & VSDC","q":"Cơ quan nào chấp thuận trước khi Sở GDCK ban hành quy chế niêm yết, quy chế giao dịch, quy chế thành viên?","options":["Bộ Tài chính","Ngân hàng Nhà nước","Thủ tướng Chính phủ","Ủy ban Chứng khoán Nhà nước"],"answer":3,"explain":"UBCKNN chấp thuận các quy chế nghiệp vụ của Sở GDCK và chấp thuận việc niêm yết chứng khoán phái sinh."},
+  {"topic":"Sở GDCK & VSDC","q":"Thành viên giao dịch tại Sở GDCK là tổ chức nào?","options":["Ngân hàng thương mại","Công ty quản lý quỹ","Công ty chứng khoán","Tổ chức niêm yết"],"answer":2,"explain":"Thành viên giao dịch chỉ là công ty chứng khoán được Sở GDCK chấp thuận."},
+  {"topic":"Sở GDCK & VSDC","q":"Ngân hàng thương mại là thành viên giao dịch đặc biệt của Sở GDCK được giao dịch loại chứng khoán nào?","options":["Cổ phiếu niêm yết trên Sở GDCK","Công cụ nợ của Chính phủ và trái phiếu chính quyền địa phương","Hợp đồng tương lai chứng khoán phái sinh","Chứng quyền có bảo đảm và chứng chỉ quỹ ETF"],"answer":1,"explain":"Thành viên giao dịch đặc biệt (NHTM, chi nhánh NH nước ngoài) chỉ giao dịch công cụ nợ Chính phủ, trái phiếu Chính phủ bảo lãnh, trái phiếu chính quyền địa phương."},
+  {"topic":"Sở GDCK & VSDC","q":"Khi Sở GDCK tự ra quyết định tạm ngừng, đình chỉ giao dịch chứng khoán, phải báo cáo UBCKNN trong thời hạn nào?","options":["24 giờ kể từ khi ra quyết định","72 giờ kể từ khi ra quyết định","03 ngày làm việc","07 ngày làm việc"],"answer":0,"explain":"Sở GDCK phải báo cáo UBCKNN trong 24 giờ kể từ khi ra quyết định (trừ trường hợp làm theo yêu cầu của UBCKNN)."},
+  {"topic":"Sở GDCK & VSDC","q":"Trường hợp nào sau đây KHÔNG thuộc căn cứ để Sở GDCK tạm ngừng, đình chỉ giao dịch chứng khoán?","options":["Hệ thống giao dịch gặp sự cố kỹ thuật","Giá và khối lượng giao dịch biến động bất thường","Khi UBCKNN yêu cầu","Khi một công ty chứng khoán đề nghị để bảo vệ lệnh tự doanh"],"answer":3,"explain":"Căn cứ gồm: sự cố kỹ thuật, bất khả kháng, giá/khối lượng biến động bất thường, bảo vệ quyền lợi NĐT và ổn định thị trường, theo yêu cầu UBCKNN."},
+  {"topic":"Sở GDCK & VSDC","q":"Trường hợp nào cổ phiếu bị hủy niêm yết bắt buộc?","options":["Lỗ 02 năm liên tục","Kết quả kinh doanh thua lỗ trong 03 năm liên tục","Lợi nhuận giảm 50% so với năm trước","Thay đổi Tổng giám đốc 2 lần trong năm"],"answer":1,"explain":"Hủy niêm yết bắt buộc khi lỗ 03 năm liên tục, hoặc lỗ lũy kế vượt vốn điều lệ thực góp, hoặc VCSH âm; \"lỗ 2 năm\" là phương án sai."},
+  {"topic":"Sở GDCK & VSDC","q":"Cổ phiếu không có giao dịch tại Sở GDCK trong thời hạn bao lâu thì bị hủy niêm yết bắt buộc?","options":["06 tháng","03 tháng","24 tháng","12 tháng"],"answer":3,"explain":"Không có giao dịch tại Sở GDCK trong thời hạn 12 tháng là một trường hợp hủy niêm yết bắt buộc."},
+  {"topic":"Sở GDCK & VSDC","q":"Tổ chức nào có thẩm quyền cấp mã chứng khoán trong nước và mã ISIN?","options":["Sở Giao dịch Chứng khoán Việt Nam","Ủy ban Chứng khoán Nhà nước","Tổng công ty Lưu ký và Bù trừ CK (VSDC)","Bộ Tài chính"],"answer":2,"explain":"Cấp mã chứng khoán và mã ISIN thuộc chức năng của VSDC; đề hay gài là Sở GDCK hoặc UBCKNN."},
+  {"topic":"Sở GDCK & VSDC","q":"Tổ chức nào KHÔNG được làm thành viên lưu ký của VSDC?","options":["Công ty quản lý quỹ","Công ty chứng khoán","Ngân hàng thương mại","Chi nhánh ngân hàng nước ngoài"],"answer":0,"explain":"Thành viên lưu ký/bù trừ chỉ gồm CTCK và NHTM, chi nhánh NH nước ngoài; công ty quản lý quỹ không được."},
+  {"topic":"Sở GDCK & VSDC","q":"Với giao dịch qua hệ thống giao dịch của Sở GDCK, quyền sở hữu chứng khoán được chuyển giao tại thời điểm nào?","options":["Khi lệnh được khớp","Khi nhà đầu tư đặt lệnh","Khi VSDC cấp mã chứng khoán","Khi hoàn tất việc thanh toán"],"answer":3,"explain":"Giao dịch qua Sở GDCK: quyền sở hữu chuyển giao tại thời điểm hoàn tất thanh toán (Điều 62)."},
+  {"topic":"Sở GDCK & VSDC","q":"Với chuyển nhượng ngoài hệ thống giao dịch (thừa kế, tặng cho…), quyền sở hữu chứng khoán chuyển giao khi nào?","options":["Khi hai bên ký hợp đồng chuyển nhượng","Khi VSDC điều chỉnh sổ đăng ký người sở hữu","Khi công ty phát hành xác nhận bằng văn bản","Khi bên nhận nộp xong thuế thu nhập cá nhân"],"answer":1,"explain":"Chuyển nhượng ngoài hệ thống: quyền sở hữu chuyển giao khi VSDC điều chỉnh sổ đăng ký người sở hữu chứng khoán."},
+  {"topic":"Sở GDCK & VSDC","q":"Quỹ hỗ trợ thanh toán tại VSDC do ai đóng góp?","options":["Các thành viên bù trừ","Nhà đầu tư","Các thành viên lưu ký","Sở Giao dịch Chứng khoán"],"answer":2,"explain":"Quỹ hỗ trợ thanh toán do thành viên lưu ký đóng góp; Quỹ bù trừ do thành viên bù trừ đóng góp."},
+  {"topic":"Sở GDCK & VSDC","q":"Mức đóng góp lũy kế tối đa vào Quỹ hỗ trợ thanh toán của mỗi thành viên lưu ký là bao nhiêu?","options":["20 tỷ đồng","10 tỷ đồng","200 triệu đồng","50 tỷ đồng"],"answer":0,"explain":"Đóng góp ban đầu 120/200 triệu đồng, hằng năm theo giá trị giao dịch, lũy kế tối đa 20 tỷ đồng/thành viên."},
+  {"topic":"Xử phạt VPHC","q":"Theo NĐ 156/2020, mức phạt tiền đối với cá nhân so với tổ chức cho cùng một hành vi vi phạm (trừ Điều 30, 32) là bao nhiêu?","options":["Bằng mức phạt của tổ chức","Bằng 1/3 mức phạt của tổ chức","Gấp đôi mức phạt của tổ chức","Bằng 1/2 mức phạt của tổ chức"],"answer":3,"explain":"Khung phạt trong Nghị định là mức cho tổ chức; cá nhân bằng 1/2 (trừ Điều 30, 32 áp thẳng cho cá nhân)."},
+  {"topic":"Xử phạt VPHC","q":"Thời hiệu xử phạt vi phạm hành chính trong lĩnh vực chứng khoán là bao lâu?","options":["01 năm","02 năm","05 năm","03 năm"],"answer":1,"explain":"Thời hiệu xử phạt VPHC về chứng khoán là 02 năm."},
+  {"topic":"Xử phạt VPHC","q":"Với hành vi vi phạm đang được thực hiện, thời hiệu xử phạt được tính từ thời điểm nào?","options":["Từ ngày bắt đầu thực hiện hành vi","Từ ngày chấm dứt hành vi","Từ ngày người có thẩm quyền phát hiện hành vi vi phạm","Từ ngày UBCKNN ban hành kết luận thanh tra"],"answer":2,"explain":"Hành vi đã kết thúc tính từ ngày chấm dứt; hành vi đang thực hiện tính từ ngày người có thẩm quyền phát hiện."},
+  {"topic":"Xử phạt VPHC","q":"Mức phạt tiền tối đa mà Chủ tịch UBCKNN được áp dụng đối với tổ chức (trường hợp không tính theo khoản thu trái phép) là bao nhiêu?","options":["3 tỷ đồng","1,5 tỷ đồng","500 triệu đồng","100 triệu đồng"],"answer":0,"explain":"Chủ tịch UBCKNN có quyền phạt đến 3 tỷ đồng (tổ chức) / 1,5 tỷ đồng (cá nhân), hoặc theo bội số khoản thu trái phép."},
+  {"topic":"Xử phạt VPHC","q":"Tổ chức thực hiện hành vi thao túng thị trường có khoản thu trái phép bị phạt tiền như thế nào?","options":["05 lần khoản thu trái phép","02 lần khoản thu trái phép","10 lần khoản thu trái phép","Bằng khoản thu trái phép"],"answer":2,"explain":"Thao túng, nội gián có khoản thu trái phép: phạt 10 lần (tổ chức), 05 lần (cá nhân)."},
+  {"topic":"Xử phạt VPHC","q":"Cá nhân thực hiện giao dịch nội gián có khoản thu trái phép bị phạt tiền như thế nào?","options":["10 lần khoản thu trái phép","05 lần khoản thu trái phép","03 lần khoản thu trái phép","01 lần khoản thu trái phép"],"answer":1,"explain":"Cá nhân bằng 1/2 tổ chức: 05 lần khoản thu trái phép."},
+  {"topic":"Xử phạt VPHC","q":"Tổ chức thao túng thị trường nhưng không có khoản thu trái phép bị phạt tiền ở khung nào?","options":["1 tỷ đến 1,5 tỷ đồng","500 triệu đến 1 tỷ đồng","3 tỷ đến 5 tỷ đồng","2 tỷ đến 3 tỷ đồng"],"answer":3,"explain":"Không có khoản thu trái phép: tổ chức 2–3 tỷ đồng, cá nhân 1–1,5 tỷ đồng."},
+  {"topic":"Xử phạt VPHC","q":"Người hành nghề thực hiện thao túng thị trường bị áp dụng hình thức tước chứng chỉ hành nghề trong thời hạn nào (theo NĐ 156)?","options":["01 đến 03 tháng","06 đến 12 tháng","18 đến 24 tháng","24 đến 36 tháng"],"answer":2,"explain":"Thao túng, nội gián: tước CCHN từ 18 đến 24 tháng (và bị thu hồi vĩnh viễn theo Luật CK)."},
+  {"topic":"Xử phạt VPHC","q":"Cho người khác mượn tài khoản dẫn đến hành vi thao túng thị trường bị đình chỉ giao dịch chứng khoán trong thời hạn nào?","options":["Từ 06 tháng đến 12 tháng","Từ 01 tháng đến 03 tháng","Từ 12 tháng đến 24 tháng","Vĩnh viễn"],"answer":0,"explain":"Khoản 1 Điều 34 NĐ 156: đình chỉ hoạt động giao dịch chứng khoán từ 06 đến 12 tháng."},
+  {"topic":"Xử phạt VPHC","q":"Nhân viên môi giới sử dụng tiền, chứng khoán của khách hàng khi chưa được ủy quyền bằng văn bản bị phạt tiền ở mức nào (Điều 32 NĐ 156)?","options":["50 – 70 triệu đồng","70 – 100 triệu đồng","100 – 150 triệu đồng","150 – 250 triệu đồng"],"answer":3,"explain":"Mức nặng nhất của Điều 32: 150–250 triệu đồng kèm tước CCHN 18–24 tháng."},
+  {"topic":"Xử phạt VPHC","q":"Người hành nghề cho mượn, cho thuê chứng chỉ hành nghề bị phạt tiền ở mức nào (Điều 32 NĐ 156)?","options":["50 – 70 triệu đồng","100 – 150 triệu đồng","150 – 250 triệu đồng","20 – 40 triệu đồng"],"answer":1,"explain":"Cho mượn, cho thuê, cầm cố CCHN hoặc làm việc đồng thời cho ≥ 2 CTCK/CTQLQ: 100–150 triệu đồng, tước CCHN 06–12 tháng."},
+  {"topic":"Xử phạt VPHC","q":"Người hành nghề mở tài khoản giao dịch tại công ty chứng khoán khác (khi công ty mình làm có nghiệp vụ môi giới) bị phạt tiền ở mức nào?","options":["70 – 100 triệu đồng","50 – 70 triệu đồng","150 – 250 triệu đồng","100 – 150 triệu đồng"],"answer":0,"explain":"Mở tài khoản tại CTCK khác hoặc hành nghề vượt phạm vi CCHN: 70–100 triệu đồng, tước CCHN 01–03 tháng."},
+  {"topic":"Xử phạt VPHC","q":"Công ty chứng khoán không quản lý tách biệt tiền, chứng khoán của khách hàng với tài sản của công ty bị phạt tiền ở mức nào?","options":["50 – 70 triệu đồng","300 – 400 triệu đồng","150 – 200 triệu đồng","1 – 1,5 tỷ đồng"],"answer":2,"explain":"Điều 26 NĐ 156: không quản lý tách biệt tài sản khách hàng bị phạt 150–200 triệu đồng (tổ chức)."},
+  {"topic":"Xử phạt VPHC","q":"Tổ chức công bố thông tin sai lệch hoặc che giấu sự thật bị phạt tiền ở mức nào (Điều 42 NĐ 156)?","options":["20 – 40 triệu đồng","50 – 70 triệu đồng","70 – 100 triệu đồng","100 – 200 triệu đồng"],"answer":3,"explain":"CBTT sai lệch, che giấu sự thật: 100–200 triệu đồng (tổ chức), kèm buộc cải chính hoặc hủy bỏ thông tin."},
+  {"topic":"Xử phạt VPHC","q":"Biện pháp khắc phục hậu quả đi kèm hành vi công bố thông tin sai lệch là gì?","options":["Buộc hủy bỏ hoặc cải chính thông tin","Buộc mua lại cổ phiếu từ nhà đầu tư","Buộc hủy niêm yết cổ phiếu của công ty","Buộc thay đổi người đại diện theo pháp luật"],"answer":0,"explain":"Đối với hành vi CBTT sai lệch: buộc hủy bỏ thông tin hoặc buộc cải chính thông tin."},
+  {"topic":"Luật Doanh nghiệp","q":"Theo Luật Doanh nghiệp 2020, loại hình doanh nghiệp nào được phát hành cổ phiếu?","options":["Công ty TNHH hai thành viên trở lên","Công ty cổ phần","Công ty hợp danh","Doanh nghiệp tư nhân"],"answer":1,"explain":"Chỉ công ty cổ phần được phát hành cổ phiếu, trái phiếu và các loại chứng khoán khác."},
+  {"topic":"Luật Doanh nghiệp","q":"Công ty TNHH được phát hành loại chứng khoán nào theo Luật Doanh nghiệp 2020?","options":["Không được phát hành bất kỳ chứng khoán nào","Cổ phiếu phổ thông","Trái phiếu","Chứng chỉ quỹ"],"answer":2,"explain":"Công ty TNHH được phát hành trái phiếu, chỉ bị cấm phát hành cổ phần (trừ để chuyển đổi thành CTCP)."},
+  {"topic":"Luật Doanh nghiệp","q":"Loại hình doanh nghiệp nào KHÔNG có tư cách pháp nhân?","options":["Công ty hợp danh","Công ty TNHH một thành viên","Công ty cổ phần","Doanh nghiệp tư nhân"],"answer":3,"explain":"Doanh nghiệp tư nhân không có tư cách pháp nhân; chủ DNTN chịu trách nhiệm vô hạn."},
+  {"topic":"Luật Doanh nghiệp","q":"Công ty cổ phần phải có số lượng cổ đông tối thiểu là bao nhiêu?","options":["03 cổ đông, không giới hạn tối đa","02 cổ đông, tối đa 50 cổ đông","01 cổ đông, không giới hạn tối đa","07 cổ đông, không giới hạn tối đa"],"answer":0,"explain":"Công ty cổ phần có tối thiểu 03 cổ đông, không giới hạn số lượng tối đa."},
+  {"topic":"Luật Doanh nghiệp","q":"Thành viên hợp danh của công ty hợp danh phải là ai?","options":["Tổ chức hoặc cá nhân","Chỉ tổ chức","Cá nhân","Doanh nghiệp tư nhân"],"answer":2,"explain":"Thành viên hợp danh bắt buộc là cá nhân; tổ chức chỉ được làm thành viên góp vốn."},
+  {"topic":"Luật Doanh nghiệp","q":"Theo Luật Doanh nghiệp 2020, cổ đông phải góp đủ vốn đã đăng ký mua khi thành lập trong thời hạn nào?","options":["30 ngày kể từ ngày được cấp Giấy chứng nhận đăng ký doanh nghiệp","90 ngày kể từ ngày được cấp Giấy chứng nhận đăng ký doanh nghiệp","06 tháng kể từ ngày được cấp Giấy chứng nhận đăng ký doanh nghiệp","12 tháng kể từ ngày được cấp Giấy chứng nhận đăng ký doanh nghiệp"],"answer":1,"explain":"Góp đủ trong 90 ngày kể từ ngày được cấp GCN ĐKDN; nếu không đủ, phải đăng ký điều chỉnh vốn trong 30 ngày tiếp theo."},
+  {"topic":"Luật Doanh nghiệp","q":"Khi thành lập doanh nghiệp, nếu các cổ đông sáng lập tự định giá tài sản góp vốn không phải là tiền thì phải theo nguyên tắc nào?","options":["Trên 50% số cổ đông sáng lập chấp thuận","Từ 65% số cổ đông sáng lập chấp thuận","Nguyên tắc đồng thuận (100% nhất trí)","Do Chủ tịch HĐQT quyết định"],"answer":2,"explain":"Lúc thành lập: tự định giá phải đồng thuận; nếu thuê tổ chức thẩm định giá thì mức giá chỉ cần trên 50% số cổ đông sáng lập chấp thuận."},
+  {"topic":"Luật Doanh nghiệp","q":"Cán bộ, công chức có được mua cổ phần của công ty cổ phần trên sàn chứng khoán không?","options":["Được, với tư cách nhà đầu tư không tham gia quản lý","Không được mua trong bất kỳ trường hợp nào","Chỉ được mua trái phiếu, không được mua cổ phần","Chỉ được mua khi thủ trưởng cơ quan đồng ý bằng văn bản"],"answer":0,"explain":"Cán bộ, công chức bị cấm thành lập, quản lý doanh nghiệp nhưng được góp vốn, mua cổ phần với tư cách nhà đầu tư thụ động (trừ trường hợp luật cấm riêng)."},
+  {"topic":"Luật Doanh nghiệp","q":"Vốn điều lệ công ty cổ phần (sau khi thành lập) là gì?","options":["Tổng giá trị tài sản của công ty","Tổng số cổ phần được quyền chào bán","Vốn chủ sở hữu trên BCTC","Tổng mệnh giá cổ phần các loại đã bán"],"answer":3,"explain":"Vốn điều lệ CTCP là tổng mệnh giá cổ phần các loại đã bán."},
+  {"topic":"Luật Doanh nghiệp","q":"Loại cổ phần nào bắt buộc phải có trong công ty cổ phần?","options":["Cổ phần ưu đãi cổ tức","Cổ phần phổ thông","Cổ phần ưu đãi biểu quyết","Cổ phần ưu đãi hoàn lại"],"answer":1,"explain":"Công ty cổ phần bắt buộc phải có cổ phần phổ thông."},
+  {"topic":"Luật Doanh nghiệp","q":"Cổ phần ưu đãi biểu quyết của cổ đông sáng lập có hiệu lực trong bao lâu?","options":["01 năm kể từ ngày được cấp GCN ĐKDN","05 năm kể từ ngày được cấp GCN ĐKDN","03 năm kể từ ngày được cấp GCN ĐKDN","Vô thời hạn, đến khi chuyển nhượng"],"answer":2,"explain":"Ưu đãi biểu quyết của cổ đông sáng lập chỉ có hiệu lực 03 năm từ ngày cấp GCN ĐKDN; loại cổ phần này không được chuyển nhượng."},
+  {"topic":"Luật Doanh nghiệp","q":"Cổ đông sở hữu cổ phần ưu đãi cổ tức có quyền nào sau đây?","options":["Nhận cổ tức cố định không phụ thuộc kết quả kinh doanh","Biểu quyết tại ĐHĐCĐ","Đề cử người vào HĐQT","Dự họp ĐHĐCĐ thường niên với quyền biểu quyết"],"answer":0,"explain":"Cổ phần ưu đãi cổ tức nhận cổ tức cố định (và thưởng), không có quyền biểu quyết, dự họp ĐHĐCĐ, đề cử HĐQT/BKS."},
+  {"topic":"Luật Doanh nghiệp","q":"Quy tắc chuyển đổi giữa cổ phần phổ thông và cổ phần ưu đãi là gì?","options":["Hai loại được chuyển đổi tự do cho nhau theo yêu cầu cổ đông","Phổ thông có thể chuyển thành ưu đãi theo quyết định của HĐQT","Không loại cổ phần nào được chuyển đổi sang loại khác","Ưu đãi chuyển sang phổ thông được; phổ thông sang ưu đãi thì không"],"answer":3,"explain":"Chuyển đổi một chiều: cổ phần ưu đãi → phổ thông theo nghị quyết ĐHĐCĐ; cổ phần phổ thông không thể chuyển thành ưu đãi."},
+  {"topic":"Luật Doanh nghiệp","q":"Các cổ đông sáng lập phải cùng nhau đăng ký mua tối thiểu bao nhiêu cổ phần phổ thông được quyền chào bán khi đăng ký doanh nghiệp?","options":["10%","20%","51%","30%"],"answer":1,"explain":"Cổ đông sáng lập phải cùng nhau đăng ký mua ít nhất 20% tổng số cổ phần phổ thông được quyền chào bán."},
+  {"topic":"Luật Doanh nghiệp","q":"Cổ phần mà cổ đông sáng lập mua thêm sau khi đăng ký thành lập có bị hạn chế chuyển nhượng 03 năm không?","options":["Có, như cổ phần mua lúc thành lập","Có, nhưng chỉ 01 năm","Không, được tự do chuyển nhượng","Chỉ được chuyển nhượng cho cổ đông sáng lập khác"],"answer":2,"explain":"Hạn chế 03 năm chỉ áp dụng cho số cổ phần đăng ký mua lúc thành lập; cổ phần mua thêm sau đó được tự do chuyển nhượng."},
+  {"topic":"Luật Doanh nghiệp","q":"Cổ đông phản đối nghị quyết tổ chức lại công ty muốn yêu cầu công ty mua lại cổ phần phải gửi yêu cầu bằng văn bản trong thời hạn nào?","options":["10 ngày kể từ ngày ĐHĐCĐ thông qua nghị quyết","30 ngày kể từ ngày ĐHĐCĐ thông qua nghị quyết","90 ngày kể từ ngày ĐHĐCĐ thông qua nghị quyết","15 ngày kể từ ngày ĐHĐCĐ thông qua nghị quyết"],"answer":0,"explain":"Gửi yêu cầu trong 10 ngày kể từ ngày ĐHĐCĐ thông qua; công ty phải mua lại trong 90 ngày kể từ ngày nhận yêu cầu."},
+  {"topic":"Luật Doanh nghiệp","q":"Hội đồng quản trị có quyền quyết định mua lại tối đa bao nhiêu cổ phần của từng loại đã bán trong 12 tháng?","options":["30%","20%","5%","10%"],"answer":3,"explain":"HĐQT quyết định mua lại không quá 10% tổng số cổ phần từng loại đã bán trong 12 tháng; trên 10% do ĐHĐCĐ quyết định."},
+  {"topic":"Luật Doanh nghiệp","q":"Theo Luật Doanh nghiệp 2020, cổ tức phải được thanh toán đầy đủ trong thời hạn nào?","options":["30 ngày kể từ ngày lập danh sách cổ đông","06 tháng kể từ ngày kết thúc họp ĐHĐCĐ thường niên","12 tháng kể từ ngày kết thúc năm tài chính","90 ngày kể từ ngày kết thúc họp ĐHĐCĐ thường niên"],"answer":1,"explain":"Cổ tức phải thanh toán đầy đủ trong 06 tháng kể từ ngày kết thúc họp ĐHĐCĐ thường niên; danh sách cổ đông lập chậm nhất 30 ngày trước mỗi lần trả."},
+  {"topic":"Luật Doanh nghiệp","q":"Cổ đông X bán cổ phần cho Y sau thời điểm kết thúc lập danh sách cổ đông nhận cổ tức nhưng trước ngày trả cổ tức. Ai nhận cổ tức từ công ty?","options":["Cổ đông Y (người nhận chuyển nhượng)","Chia theo số ngày nắm giữ của X và Y","Cổ đông X (người chuyển nhượng)","Công ty giữ lại đến khi hai bên thỏa thuận"],"answer":2,"explain":"Khoản 5 Điều 135: chuyển nhượng giữa thời điểm kết thúc lập danh sách và thời điểm trả cổ tức thì người chuyển nhượng nhận cổ tức."},
+  {"topic":"Luật Doanh nghiệp","q":"Tại công ty đại chúng, Chủ tịch HĐQT có được kiêm Tổng giám đốc không?","options":["Không được kiêm nhiệm","Được, nếu ĐHĐCĐ thông qua hằng năm","Được, nếu vốn điều lệ dưới 120 tỷ đồng","Được, không có hạn chế"],"answer":0,"explain":"Khoản 2 Điều 156: tại công ty đại chúng và DNNN, Chủ tịch HĐQT không được kiêm Giám đốc/Tổng giám đốc."},
+  {"topic":"Luật Doanh nghiệp","q":"Công ty cổ phần tổ chức theo mô hình không có Ban kiểm soát phải đáp ứng điều kiện nào?","options":["Có Ủy ban kiểm toán trực thuộc Tổng giám đốc","Không có cổ đông là tổ chức nắm trên 10% vốn","Ít nhất 50% thành viên HĐQT độc lập, có Ban kiểm toán nội bộ","Ít nhất 20% thành viên HĐQT độc lập và có Ủy ban kiểm toán"],"answer":3,"explain":"Mô hình không có BKS: ít nhất 20% thành viên HĐQT độc lập và có Ủy ban kiểm toán trực thuộc HĐQT (Chủ tịch UBKT là thành viên độc lập)."},
+  {"topic":"Luật Doanh nghiệp","q":"Hợp đồng giữa công ty với thành viên HĐQT có giá trị từ bao nhiêu phần trăm tổng giá trị tài sản trên BCTC gần nhất trở lên thì do ĐHĐCĐ chấp thuận?","options":["10%","35%","50%","65%"],"answer":1,"explain":"Dưới 35% tổng giá trị tài sản: HĐQT chấp thuận; từ 35% trở lên: ĐHĐCĐ chấp thuận."},
+  {"topic":"Luật Doanh nghiệp","q":"Khi ĐHĐCĐ biểu quyết thông qua hợp đồng với người có liên quan, cổ đông có lợi ích liên quan không biểu quyết. Hợp đồng được thông qua khi đạt bao nhiêu số phiếu còn lại tán thành?","options":["Trên 50%","Từ 51%","Từ 65%","Từ 75%"],"answer":2,"explain":"Hợp đồng chỉ được thông qua khi đạt từ 65% trở lên tổng số phiếu biểu quyết còn lại tán thành."},
+  {"topic":"Luật Doanh nghiệp","q":"Theo Luật Doanh nghiệp 2020, công ty con có được đầu tư mua cổ phần của công ty mẹ không?","options":["Không được","Được, tối đa 10% vốn điều lệ công ty mẹ","Được, nếu ĐHĐCĐ công ty mẹ chấp thuận","Được, nếu công ty mẹ là công ty đại chúng"],"answer":0,"explain":"Khoản 2 Điều 195: công ty con không được đầu tư góp vốn, mua cổ phần của công ty mẹ."},
+  {"topic":"Luật Doanh nghiệp","q":"Hình thức tổ chức lại nào mà công ty ban đầu vẫn tồn tại, chỉ chuyển một phần tài sản, quyền và nghĩa vụ sang công ty mới?","options":["Chia công ty","Hợp nhất công ty","Sáp nhập công ty","Tách công ty"],"answer":3,"explain":"Tách công ty: công ty bị tách vẫn tồn tại; chia, hợp nhất thì công ty ban đầu chấm dứt tồn tại."}
+];
+
+const Exam = (() => {
+  const COUNT = 30, MINUTES = 60, KEY = "study.pl-ck-ttck.exam", HKEY = "study.pl-ck-ttck.history", HMAX = 50, PASS = 5, LETTERS = "ABCDEF";
+  const FILTERS = { all: "Tất cả", wrong: "Sai", skip: "Bỏ trống", right: "Đúng" };
+  const $ = id => document.getElementById(id);
+  let s = null, r = null, tick = 0, filter = "all";
+
+  const shuffle = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+  const read = k => { try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } };
+  const write = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch { return false; } };
+  const save = () => write(KEY, s);
+  const load = () => {
+    const v = read(KEY);
+    if (!v || !v.ids.every((id, i) => BANK[id] && BANK[id].options.length === v.order[i].length)) return null;
+    v.flags ||= v.ids.map(() => false);
+    return v;
+  };
+  const clear = () => { try { localStorage.removeItem(KEY); } catch { /* ignore */ } };
+  const history = () => { const h = read(HKEY); return Array.isArray(h) ? h : []; };
+  const show = id => ["start", "exam", "result"].forEach(x => $(x).hidden = x !== id);
+  const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+  const pad = n => String(n).padStart(2, "0");
+  const fmtDate = ts => { const d = new Date(ts); return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`; };
+  const fmtClock = rec => { const sec = Math.round((rec.endedAt - rec.startAt) / 1000); return `${pad(Math.floor(sec / 60))}:${pad(sec % 60)}`; };
+  const rightCount = rec => rec.qs.filter((q, i) => rec.answers[i] === q.answer).length;
+  const scoreOf = rec => Math.round(rightCount(rec) / rec.qs.length * 100) / 10;
+
+  function begin() {
+    const ids = shuffle([...BANK.keys()]).slice(0, Math.min(COUNT, BANK.length));
+    const order = ids.map(id => { const k = [...BANK[id].options.keys()]; return BANK[id].fixed ? k : shuffle(k); });
+    s = { ids, order, answers: ids.map(() => null), flags: ids.map(() => false), cur: 0, startAt: Date.now(), endAt: Date.now() + MINUTES * 60000 };
+    save(); enter();
+  }
+
+  function enter() {
+    show("exam"); $("toolbar").hidden = false; $("timer").hidden = false;
+    clearInterval(tick); tick = setInterval(updateTimer, 1000); updateTimer(); render();
+  }
+
+  function updateTimer() {
+    const left = Math.max(0, s.endAt - Date.now()), sec = Math.ceil(left / 1000);
+    $("timer").textContent = `${pad(Math.floor(sec / 60))}:${pad(sec % 60)}`;
+    $("timer").classList.toggle("warn", sec <= 600 && sec > 300);
+    $("timer").classList.toggle("low", sec <= 300);
+    if (left <= 0) finish();
+  }
+
+  function render() {
+    const i = s.cur, n = s.ids.length, q = BANK[s.ids[i]];
+    $("q-no").textContent = `Câu ${i + 1}/${n}`;
+    $("q-topic").textContent = q.topic;
+    $("q-text").textContent = q.q;
+    $("q-opts").replaceChildren(...s.order[i].map((o, k) => {
+      const b = el("button", "opt" + (s.answers[i] === o ? " on" : ""));
+      b.append(el("b", null, LETTERS[k]), el("span", null, q.options[o]));
+      b.onclick = () => pick(k);
+      return b;
+    }));
+    $("flag").classList.toggle("on", s.flags[i]);
+    $("flag").textContent = s.flags[i] ? "⚑ Đã đánh dấu" : "⚑ Đánh dấu xem lại";
+    $("prev").disabled = i === 0;
+    $("next").textContent = i === n - 1 ? "Nộp bài ✓" : "Câu sau →";
+    $("palette").replaceChildren(...s.ids.map((_, k) => {
+      const b = el("button", (s.flags[k] ? "flag" : s.answers[k] != null ? "done" : "") + (k === i ? " cur" : ""), k + 1);
+      b.onclick = () => go(k);
+      return b;
+    }));
+    const done = s.answers.filter(a => a != null).length, flagged = s.flags.filter(Boolean).length;
+    $("progress").textContent = `Đã làm ${done}/${n}`;
+    $("prog-fill").style.width = `${done / n * 100}%`;
+    $("flag-count").textContent = flagged ? `⚑ ${flagged}` : "";
+  }
+
+  function pick(k) { if (k >= s.order[s.cur].length) return; s.answers[s.cur] = s.order[s.cur][k]; save(); render(); }
+  function go(i) { if (i < 0 || i >= s.ids.length) return; s.cur = i; save(); render(); window.scrollTo({ top: 0 }); }
+  function toggleFlag() { s.flags[s.cur] = !s.flags[s.cur]; save(); render(); }
+
+  function submit() {
+    const left = s.answers.filter(a => a == null).length, flagged = s.flags.filter(Boolean).length;
+    const warn = [left && `${left} câu chưa trả lời`, flagged && `${flagged} câu đang đánh dấu xem lại`].filter(Boolean).join(", ");
+    if (!confirm(warn ? `Còn ${warn}. Vẫn nộp bài?` : "Nộp bài?")) return;
+    finish();
+  }
+
+  // Kết quả lưu bản chụp nội dung câu hỏi để xem lại đúng như lúc thi dù ngân hàng đề thay đổi sau này.
+  function finish() {
+    clearInterval(tick);
+    $("toolbar").hidden = true; $("timer").hidden = true;
+    const rec = { startAt: s.startAt, endedAt: Math.min(Date.now(), s.endAt), order: s.order, answers: s.answers,
+                  qs: s.ids.map(id => { const { topic, q, options, answer, explain } = BANK[id]; return { topic, q, options, answer, explain }; }) };
+    const h = history(); h.unshift(rec);
+    if (!write(HKEY, h.slice(0, HMAX))) alert("Không lưu được kết quả vào trình duyệt (bộ nhớ đầy hoặc bị chặn). Hãy dùng Lưu PDF để giữ kết quả.");
+    clear(); showResult(rec);
+  }
+
+  const status = i => r.answers[i] == null ? "skip" : r.answers[i] === r.qs[i].answer ? "right" : "wrong";
+
+  function showResult(rec) {
+    r = rec; filter = "all";
+    const n = r.qs.length, score = scoreOf(r), pass = score >= PASS, count = { all: n, right: 0, wrong: 0, skip: 0 };
+    r.qs.forEach((_, i) => count[status(i)]++);
+    $("r-score").textContent = score.toLocaleString("vi");
+    $("r-score").className = pass ? "pass" : "fail";
+    $("r-ring").style.setProperty("--p", count.right / n * 100);
+    $("r-ring").style.setProperty("--c", pass ? "var(--ok-solid)" : "var(--bad-solid)");
+    $("r-badge").textContent = pass ? "Đạt" : "Chưa đạt";
+    $("r-badge").className = "badge " + (pass ? "pass" : "fail");
+    $("r-date").textContent = `Ngày làm ${fmtDate(r.startAt)} · mốc đạt ${PASS}/10 điểm`;
+    $("r-right").textContent = `${count.right}/${n}`;
+    $("r-wrong").textContent = count.wrong;
+    $("r-skip").textContent = count.skip;
+    $("r-time").textContent = fmtClock(r);
+    const topics = new Map();
+    r.qs.forEach((q, i) => { const t = topics.get(q.topic) || [0, 0]; t[1]++; if (status(i) === "right") t[0]++; topics.set(q.topic, t); });
+    $("r-topics").replaceChildren(...[...topics].sort((a, b) => a[1][0] / a[1][1] - b[1][0] / b[1][1]).map(([t, [ok, c]]) => {
+      const tr = el("tr"), name = el("td", null, t), track = el("div", "bar-track"), fill = el("i");
+      fill.style.width = `${ok / c * 100}%`;
+      fill.style.background = ok / c >= .5 ? "var(--ok-solid)" : "var(--bad-solid)";
+      track.append(fill); name.append(track);
+      tr.append(name, el("td", null, `${ok}/${c}`));
+      return tr;
+    }));
+    $("r-palette").replaceChildren(...r.qs.map((_, i) => {
+      const b = el("button", status(i), i + 1);
+      b.onclick = () => { setFilter("all"); $("rv-" + i).scrollIntoView({ behavior: "smooth", block: "start" }); };
+      return b;
+    }));
+    document.querySelectorAll("#filters button").forEach(b => { b.textContent = `${FILTERS[b.dataset.f]} (${count[b.dataset.f]})`; });
+    setFilter("all"); show("result"); window.scrollTo({ top: 0 });
+  }
+
+  function renderList() {
+    $("r-list").replaceChildren(...r.qs.map((q, i) => {
+      const st = status(i), card = el("div", "card review " + st);
+      card.id = "rv-" + i; card.hidden = filter !== "all" && filter !== st;
+      const head = el("div", "q-head");
+      head.append(el("span", "q-no", `Câu ${i + 1}`), el("span", "chip", q.topic),
+        el("span", "tag " + (st === "right" ? "pass" : st === "wrong" ? "fail" : "muted"), st === "right" ? "✓ Đúng" : st === "wrong" ? "✗ Sai" : "— Bỏ trống"));
+      const opts = el("div", "opts");
+      r.order[i].forEach((o, k) => {
+        const d = el("div", "opt" + (o === q.answer ? " correct" : "") + (o === r.answers[i] ? " picked" : ""));
+        d.append(el("b", null, LETTERS[k]), el("span", null, q.options[o]));
+        if (o === r.answers[i]) d.append(el("span", "tag muted", "Bạn chọn"));
+        opts.append(d);
+      });
+      const ex = el("div", "explain");
+      ex.append(el("b", null, `Đáp án đúng: ${LETTERS[r.order[i].indexOf(q.answer)]}. `), document.createTextNode(q.explain || ""));
+      card.append(head, el("p", "q-text", q.q), opts, ex);
+      return card;
+    }));
+  }
+
+  function setFilter(f) {
+    filter = f;
+    document.querySelectorAll("#filters button").forEach(b => b.classList.toggle("on", b.dataset.f === f));
+    renderList();
+  }
+
+  function savePdf() {
+    const title = document.title, d = new Date(r.startAt);
+    document.title = `PL-CK-TTCK-ket-qua-${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}-${pad(d.getHours())}${pad(d.getMinutes())}`;
+    window.print();
+    document.title = title;
+  }
+
+  function renderHistory() {
+    const h = history();
+    $("history").hidden = !h.length;
+    $("h-rows").replaceChildren(...h.map((rec, i) => {
+      const tr = el("tr"), score = scoreOf(rec), act = el("td"), cell = el("td");
+      const view = el("button", "sm", "Xem lại"), del = el("button", "sm danger", "Xóa");
+      view.onclick = () => showResult(rec);
+      del.onclick = () => { if (!confirm(`Xóa kết quả bài thi ngày ${fmtDate(rec.startAt)}?`)) return; const all = history(); all.splice(i, 1); write(HKEY, all); renderHistory(); };
+      act.append(view, del);
+      cell.append(el("span", "score-pill " + (score >= PASS ? "pass" : "fail"), score.toLocaleString("vi")));
+      tr.append(el("td", null, fmtDate(rec.startAt)), cell, el("td", null, `${rightCount(rec)}/${rec.qs.length}`), el("td", null, fmtClock(rec)), act);
+      return tr;
+    }));
+  }
+
+  function showStart() {
+    $("resume").hidden = !load();
+    renderHistory(); show("start"); window.scrollTo({ top: 0 });
+  }
+
+  function onKey(e) {
+    if ($("exam").hidden || e.ctrlKey || e.metaKey || e.altKey) return;
+    if (e.key === "ArrowLeft") return go(s.cur - 1);
+    if (e.key === "ArrowRight") return go(s.cur + 1);
+    if (e.key.length !== 1) return;
+    const k = e.key.toUpperCase(), idx = /[1-6]/.test(k) ? +k - 1 : LETTERS.indexOf(k);
+    if (idx >= 0) pick(idx);
+  }
+
+  function init() {
+    $("bank-count").textContent = BANK.length;
+    $("topic-count").textContent = new Set(BANK.map(q => q.topic)).size;
+    $("begin").onclick = $("again").onclick = () => { if (!load() || confirm("Bỏ bài đang làm dở và bắt đầu đề mới?")) begin(); };
+    $("resume").onclick = () => { s = load(); if (s) s.endAt > Date.now() ? enter() : finish(); };
+    $("prev").onclick = () => go(s.cur - 1);
+    $("next").onclick = () => s.cur === s.ids.length - 1 ? submit() : go(s.cur + 1);
+    $("flag").onclick = toggleFlag;
+    $("submit").onclick = submit;
+    $("home").onclick = showStart;
+    $("pdf").onclick = savePdf;
+    document.querySelectorAll("#filters button").forEach(b => { b.onclick = () => setFilter(b.dataset.f); });
+    document.addEventListener("keydown", onKey);
+    showStart();
+  }
+
+  return { init };
+})();
+Exam.init();
+</script>
+</body>
+</html>

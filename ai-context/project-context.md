@@ -18,7 +18,7 @@ Tool hiện có:
 | FIX Parser | `tools/fix-message-parser.html` — **file sinh ra** từ `src/fix-message-parser/` (ADR #7, build `scripts/build-single-file-tool.ps1 -Tool fix-message-parser`) | Đọc message/log FIX: bảng message + chi tiết tag, kiểm BodyLength/CheckSum/tag bắt buộc, từ điển FIX 4.4 + Server Sàn (BCGD `35=s/t/u`, ĐTTTT), chuỗi lệnh, che dữ liệu, xuất CSV/JSON; mẫu nhiều báo cáo giao dịch Server Sàn |
 
 Ngoài tool còn **bài thi trắc nghiệm ôn tập**: trang `study.html` (root, KHÔNG liên kết từ `index.html`) liệt kê card các đề trong `study/`
-(hiện có `study/CBTTCK.html` — 250 câu "Cơ bản về chứng khoán và TTCK", đề 30 câu/60 phút, lịch sử kết quả, Lưu PDF).
+(hiện có `study/CBTTCK.html` — 250 câu "Cơ bản về chứng khoán và TTCK" và `study/PL-CK-TTCK.html` — 200 câu "Pháp luật về chứng khoán và TTCK"; đề 30 câu/60 phút, lịch sử kết quả, Lưu PDF).
 Dựng đề mới theo playbook [`docs/study/README.md`](../docs/study/README.md); kiểm đề bằng `node scripts/validate-study-quiz-bank.js study/<MA_DE>.html`.
 
 ## Kiến trúc high-level
