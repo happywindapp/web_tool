@@ -40,7 +40,7 @@
 - [new-tool-must-use-two-tier-header-toolbar-colors.md](new-tool-must-use-two-tier-header-toolbar-colors.md) —
   **bắt buộc mọi AI khi thêm/sửa tool:** header teal `#164e63` cho việc cấp ứng dụng + tab, toolbar tint accent 10% cho việc trên dữ liệu; dùng file CSS chung hoặc chép rule; checklist ở `docs/architecture/README.md` mục 3.
 
-- [new-tool-must-work-on-phone-portrait.md](new-tool-must-work-on-phone-portrait.md) —
-  **bắt buộc mọi AI khi thêm/sửa tool:** dùng được trên điện thoại dọc (1 pane mỗi lúc, nút `⋯`, CSS/JS chung); bẫy đo `innerWidth`, track grid của phần tử ẩn, sticky trong scroller có padding.
+- [new-tool-must-work-on-desktop-and-mobile.md](new-tool-must-work-on-desktop-and-mobile.md) —
+  **bắt buộc mọi AI khi thêm/sửa tool:** dùng tốt cả Desktop và Mobile (4 dải kích thước, thao tác chuột/phím/chạm ngang nhau, kiểm ma trận); bẫy đo `innerWidth`, pane co về 0 ở 641–900, rule màn thấp thiếu `pointer:coarse`.
 
 - [scaffold-robocopy-copies-skill-junctions.md](scaffold-robocopy-copies-skill-junctions.md) — robocopy cần `/XJ` khi copy template

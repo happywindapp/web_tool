@@ -17,6 +17,7 @@ Implement feature: **{{tên feature}}**
 - Tuân thủ YAGNI · KISS · DRY và conventions trong `.github/copilot-instructions.md`.
 - Cập nhật `docs/` nếu thay đổi contract / data model.
 - Viết test cho luồng chính + edge cases.
+- Tool web: dùng tốt cả Desktop và Mobile — làm đủ checklist `docs/architecture/README.md` mục 3 (4 dải kích thước + ma trận kiểm).
 
 ## Output
 - Code thay đổi (diff hẹp, đúng việc).

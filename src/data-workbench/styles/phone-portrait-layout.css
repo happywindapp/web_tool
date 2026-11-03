@@ -82,5 +82,7 @@
   @media (max-height: 500px) and (min-width: 641px) and (pointer: coarse) {
     .work, .studio { grid-template-columns:repeat(2, minmax(0, 1fr)); grid-template-rows:85dvh; }
     .diff-body { grid-template-rows:auto minmax(60dvh, auto); }
+    .filters { flex-wrap:nowrap; overflow-x:auto; }
+    .filters > * { flex:none; }
     #split { display:none; }
   }

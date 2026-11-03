@@ -47,12 +47,23 @@ Xem `docs/tools/<tool>.md` — danh sách ở [`docs/tools/`](../tools/README.md
      link hỏng ⇒ báo lỗi rõ, không đụng nháp.
   8. Ghi contract link (định dạng, payload, `?data=`) vào `docs/tools/<tool>.md`.
   9. Kiểm: tạo link → mở ở trang mới → ra cùng dữ liệu, tuỳ chọn, kết quả; thử link hỏng và `?data=` thô.
-- **Dùng được trên điện thoại dọc (bắt buộc mọi tool) — ADR #12:** ở `max-width:640px` mỗi lúc hiện 1 pane, khung làm việc phải chiếm phần lớn màn hình. Chỉ thêm markup, CSS/JS dùng chung ở `src/data-workbench/styles/phone-portrait-layout.css` + `js/core/phone-pane-switcher.js`:
+- **Dùng tốt trên cả Desktop và Mobile (bắt buộc mọi tool, mới hoặc sửa) — ADR #12:** 1 file HTML, layout đổi theo kích thước (không làm bản mobile riêng). Phải đạt cả 4 dải:
+
+  | Dải | Media query | Layout bắt buộc |
+  | --- | --- | --- |
+  | Desktop rộng | `> 900px` | Pane cạnh nhau, kéo `#split` đổi tỉ lệ, toolbar đủ nút |
+  | Desktop hẹp / tablet | `641–900px` | Pane xếp dọc, mỗi pane có sàn `minmax(280px, 1fr)` + vùng chứa `overflow-y:auto`. Không dùng `minmax(0, …)`: toolbar wrap nhiều dòng là pane co về 0 |
+  | Điện thoại dọc | `max-width:640px` | 1 pane mỗi lúc trong carousel, header gọn + nút `⋯`, toolbar cuộn ngang, nút chính ghim trái |
+  | Màn thấp cảm ứng (điện thoại ngang) | `max-height:500px` **và** `pointer:coarse` | Trang cuộn, pane cao ~85dvh. Luôn kèm `pointer:coarse` để không đụng cửa sổ desktop thấp |
+
+  Chỉ thêm markup, CSS/JS dùng chung ở `src/data-workbench/styles/phone-portrait-layout.css` + `js/core/phone-pane-switcher.js` (tool 1 file viết tay thì chép 2 file này vào):
   1. Template `@include` file CSS trên **sau cùng**, include JS trước module đầu tiên gọi `PhoneLayout`; `<header class="top">` có `<button class="more-toggle" title="Thêm thao tác" aria-expanded="false">⋯</button>` ngay sau `h1` — việc phụ tự ẩn sau nút này.
   2. Vùng nhiều pane: `<div class="seg pane-switch">` + nút nhãn ngắn, **ngay trước** vùng có class `pane-scroller`; số nút = số pane. Pane để dạng `.pane` trong scroller (lớp bọc thêm thì khai `display:contents`). Pane nằm trong carousel, không `display:none`, nên `focus()`/đo kích thước vẫn đúng.
   3. Nút chạy ra kết quả: `data-pane-go="<chỉ số pane kết quả>"`, nút Xoá: `data-pane-go="0"`. Nạp mẫu/link: gọi `PhoneLayout.show(i)` hoặc `showLast()`. Trên desktop các hàm này không làm gì.
-  4. Không đặt nội dung thiết yếu chỉ qua hover hay chuột phải (trên touch dùng tap; `contextmenu` không có trên iOS). Vùng kéo-thả phải có `touch-action:none` và không phủ kín cả màn hình nếu trang cần cuộn.
-  5. Kiểm bằng headless `isMobile + hasTouch` ở 320/390/430: `innerWidth` phải đúng bằng viewport (layout tràn thì trình duyệt mobile tự nới `innerWidth`, không hiện lỗi gì), không có page error, thử đủ luồng nhập → chạy → xem kết quả.
+  4. **Thao tác ngang nhau:** mọi việc làm được bằng chuột, bàn phím và chạm. Hover chỉ là phần thêm, đặt trong `@media (hover:hover)`; không để nội dung thiết yếu chỉ qua hover, chuột phải (`contextmenu` không có trên iOS) hay kéo-thả — luôn có nút/tap thay thế. API không có ở mọi nơi (Fullscreen trên iPhone…) thì kiểm hỗ trợ rồi ẩn nút. Canvas zoom được: wheel + pinch hai ngón (`PanZoom`). Vùng kéo-thả có `touch-action:none` và không phủ kín màn hình nếu trang cần cuộn. Ô nhập trên phone ≥ 16px để iOS không tự zoom.
+  5. **Không làm hỏng desktop:** rule của dải nào nằm trong media query của dải đó. Sửa CSS chung (`base.css`, `phone-portrait-layout.css`, `app-bar-tabs-toolbar-surfaces.css`) ⇒ kiểm lại **mọi tool**, không chỉ tool đang làm.
+  6. **Kiểm theo ma trận** (headless, đo + chụp màn hình): desktop `1440×900`, `1024×768`, `800×700`, `1200×480` (không `isMobile`); mobile `320×568`, `390×844`, `430×932` + ngang `844×390`, `568×320` (`isMobile + hasTouch`). Đạt khi: `innerWidth` đúng bằng chiều rộng đặt (layout tràn thì trình duyệt mobile tự nới `innerWidth`, không báo lỗi gì); pane chính cao ≥ ~250px hoặc cuộn tới được; không page error; chạy đủ luồng nhập → chạy → xem kết quả → bấm lỗi về nguồn. Chưa kiểm trên máy iOS/Android thật ⇒ ghi rõ trong báo cáo.
+  7. Ghi mục `## Điện thoại` trong `docs/tools/<tool>.md`: pane nào trên phone, khi nào tự chuyển pane, thao tác nào không có trên touch.
 - **Hai tầng màu header/toolbar (bắt buộc mọi tool) — ADR #10:** nhìn màu là biết "đi đâu" hay "làm gì".
   - **Header** teal đậm `#164e63`: việc cấp ứng dụng (Trang chủ, tên tool, chia sẻ, lưu, giao diện, `VI | EN`).
   - **Tab điều hướng** (nếu tool có nhiều màn hình): hàng riêng cuối header, không viền, tab bật liền nền với toolbar + chữ đậm. Mẫu: `.wb-nav`.
