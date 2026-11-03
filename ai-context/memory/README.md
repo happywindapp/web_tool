@@ -44,3 +44,5 @@
   **bắt buộc mọi AI khi thêm/sửa tool:** dùng tốt cả Desktop và Mobile (4 dải kích thước, thao tác chuột/phím/chạm ngang nhau, kiểm ma trận); bẫy đo `innerWidth`, pane co về 0 ở 641–900, rule màn thấp thiếu `pointer:coarse`.
 
 - [scaffold-robocopy-copies-skill-junctions.md](scaffold-robocopy-copies-skill-junctions.md) — robocopy cần `/XJ` khi copy template
+
+- [study-quiz-cards-go-in-study-html-not-index.md](study-quiz-cards-go-in-study-html-not-index.md) — bài thi ở `study/`, card vào `study.html` không vào `index.html`; format ngân hàng đề `BANK`.
