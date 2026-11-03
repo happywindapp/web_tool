@@ -45,4 +45,4 @@
 
 - [scaffold-robocopy-copies-skill-junctions.md](scaffold-robocopy-copies-skill-junctions.md) — robocopy cần `/XJ` khi copy template
 
-- [study-quiz-cards-go-in-study-html-not-index.md](study-quiz-cards-go-in-study-html-not-index.md) — bài thi ở `study/`, card vào `study.html` không vào `index.html`; format ngân hàng đề `BANK`.
+- [study-quiz-cards-go-in-study-html-not-index.md](study-quiz-cards-go-in-study-html-not-index.md) — bài thi ở `study/`, card vào `study.html` không vào `index.html`; dựng đề mới theo playbook `docs/study/README.md` + validator `scripts/validate-study-quiz-bank.js`.

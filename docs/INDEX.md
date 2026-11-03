@@ -6,6 +6,7 @@
 
 - [Project Context](../ai-context/project-context.md) — mục tiêu + kiến trúc high-level (đọc đầu tiên)
 - [Tools](tools/README.md) — mỗi tool 1 file doc (luật, contract, data model, module, giới hạn)
+- [Study](study/README.md) — bài thi trắc nghiệm ôn tập (`study.html` + `study/*.html`): playbook dựng đề mới từ tài liệu, schema ngân hàng đề, UI đã chốt, kiểm thử
 - [Glossary](glossary.md) — thuật ngữ domain, viết tắt, tên riêng
 - [Dev toolchain](deployment/dev-toolchain-build-tool-from-url-or-document.md) — build tool mới từ URL/tài liệu (REA, Chrome CDP, office-extract)
 
@@ -14,6 +15,7 @@
 | Khu vực | Mô tả | Link |
 |---------|-------|------|
 | Tools | Kiến thức riêng từng tool (`tools/<x>.html` ↔ `docs/tools/<x>.md`) | [tools/](tools/) |
+| Study | Bài thi ôn tập (`study/<MA_DE>.html` ↔ `docs/study/<ma-de>.md`), card ở `study.html` | [study/](study/) |
 | Business | Business rules, luồng xử lý, edge cases | [business/](business/) |
 | Architecture | System design, C4, giao tiếp giữa services | [architecture/](architecture/) |
 | Data Models | ERD, schema, migration, naming | [data-models/](data-models/) |

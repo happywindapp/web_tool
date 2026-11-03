@@ -25,6 +25,8 @@ Thử nhanh với mẫu lỗi: thêm `?demo=json`, `?demo=xml` hoặc `?demo=htm
 
 ```text
 index.html       # trang chủ: danh sách tool
+study.html       # trang Ôn tập: card các bài thi trắc nghiệm (không liên kết từ index.html)
+study/           # mỗi bài thi 1 file .html tự chứa, ngân hàng đề inline — playbook: docs/study/README.md
 tools/           # mỗi tool 1 file .html tự chứa (data-workbench.html là file SINH RA — đừng sửa tay)
 src/data-workbench/   # nguồn module của Data Workbench → pwsh scripts/build-data-workbench-single-file.ps1
 src/fix-message-parser/  # nguồn module của FIX Parser → pwsh scripts/build-single-file-tool.ps1 -Tool fix-message-parser
