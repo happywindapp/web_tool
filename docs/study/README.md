@@ -34,6 +34,7 @@
 ## 4. Quy trình soạn đề từ tài liệu (`Documents/<bộ tài liệu>/`)
 
 1. **Trích text:** `pdftotext -enc UTF-8 -layout <file.pdf> <out.txt>` (pdftotext có ở `C:\_devtools\Beyond Compare 4\`) vào scratchpad, không ghi vào repo.
+   Nguồn `.pptx`: `python-pptx` (shape text + bảng + notes); text SmartArt KHÔNG có trong shape ⇒ đọc thêm `ppt/diagrams/data*.xml` (`<a:t>`) trong zip. Nguồn `.ppt` cũ: đổi sang `.pptx` bằng PowerPoint COM (`Presentations.Open(...).SaveAs(out, 24)`) trước.
    Nguồn `.docx`: `python-docx` duyệt `document.element.body` theo thứ tự (đoạn + bảng xen kẽ, không dùng `doc.tables` riêng); ký hiệu ≥ ≤ dạng công thức bị mất khi trích ⇒ suy từ ngữ cảnh.
 2. **PDF scan** (text rỗng): máy không có `pdftoppm` ⇒ Read tool `pages` không đọc được; dùng
    `python -I scripts/extract-pdf-text-bold-or-images-for-quiz.py <file.pdf> --images <dir>` rồi đọc từng ảnh.

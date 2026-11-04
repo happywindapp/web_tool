@@ -185,16 +185,16 @@
       <p class="muted" style="margin:0">Những vấn đề cơ bản về chứng khoán và thị trường chứng khoán</p>
       <div class="tiles">
         <div class="tile acc"><b id="bank-count"></b><span>câu trong ngân hàng đề</span></div>
-        <div class="tile acc"><b>30</b><span>câu mỗi đề</span></div>
+        <div class="tile acc"><b>50</b><span>câu mỗi đề</span></div>
         <div class="tile acc"><b>60</b><span>phút làm bài</span></div>
         <div class="tile acc"><b id="topic-count"></b><span>chủ đề</span></div>
       </div>
       <ul class="rules">
-        <li>Câu hỏi lấy <b>ngẫu nhiên</b> từ ngân hàng đề, thứ tự phương án được xáo trộn (trừ câu có phương án dạng "Câu A, B").</li>
-        <li>Hết giờ hệ thống <b>tự nộp bài</b>. Mỗi câu chỉ có 1 đáp án đúng, được đổi đáp án và quay lại câu trước bất cứ lúc nào.</li>
+        <li>Câu hỏi lấy <b>ngẫu nhiên</b> từ ngân hàng đề, thứ tự phương án được xáo trộn.</li>
+        <li>Hết giờ hệ thống <b>tự nộp bài</b>. Được đổi đáp án và quay lại câu trước bất cứ lúc nào.</li>
         <li>Câu còn phân vân: bấm <b>⚑ Đánh dấu xem lại</b> để dễ tìm lại trước khi nộp.</li>
         <li>Phím tắt: phím số <b>1, 2, 3…</b> hoặc chữ <b>A, B, C…</b> chọn đáp án, <b>←/→</b> chuyển câu.</li>
-        <li>Bài đang làm và kết quả sau khi nộp được lưu trên trình duyệt này — tải lại trang vẫn làm tiếp, xem lại hoặc lưu PDF.</li>
+        <li>Bài đang làm và kết quả sau khi nộp được lưu, có thể xem lại hoặc lưu PDF.</li>
       </ul>
       <div class="actions"><button class="main lg" id="begin">Bắt đầu làm bài</button><button class="lg" id="resume" hidden>Tiếp tục bài đang làm</button></div>
     </div>
@@ -511,7 +511,7 @@ const BANK = [
 ];
 
 const Exam = (() => {
-  const COUNT = 30, MINUTES = 60, KEY = "study.cbttck.exam", HKEY = "study.cbttck.history", HMAX = 50, PASS = 5, LETTERS = "ABCDEF";
+  const COUNT = 50, MINUTES = 60, KEY = "study.cbttck.exam", HKEY = "study.cbttck.history", HMAX = 50, PASS = 5, LETTERS = "ABCDEF";
   const FILTERS = { all: "Tất cả", wrong: "Sai", skip: "Bỏ trống", right: "Đúng" };
   const $ = id => document.getElementById(id);
   let s = null, r = null, tick = 0, filter = "all";
