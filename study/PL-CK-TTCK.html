@@ -114,12 +114,20 @@
   .review { border-left:5px solid var(--line-strong); }
   .review.right { border-left-color:var(--ok-solid); } .review.wrong { border-left-color:var(--bad-solid); } .review.skip { border-left-color:var(--warn-solid); }
   .review .opt { cursor:default; }
+  .review button.opt { cursor:pointer; }
   .review .opt.correct { background:var(--ok-bg); border-color:var(--ok-solid); }
   .review .opt.correct b { background:var(--ok-solid); border-color:var(--ok-solid); color:#fff; }
   .review .opt.picked:not(.correct) { background:var(--bad-bg); border-color:var(--bad-solid); }
   .review .opt.picked:not(.correct) b { background:var(--bad-solid); border-color:var(--bad-solid); color:#fff; }
   .tag { margin-left:auto; font-size:12px; font-weight:700; white-space:nowrap; }
   .explain { margin-top:12px; padding:10px 14px; border-radius:10px; border:1px solid var(--acc-line); background:var(--acc-soft); font-size:14px; }
+  .bank-tools { display:flex; flex-wrap:wrap; align-items:center; gap:10px; margin:14px 0 10px; }
+  .bank-tools input[type=search], .bank-tools select { min-height:40px; padding:6px 12px; font:inherit; font-size:16px; color:var(--ink); background:var(--soft); border:1px solid var(--line-strong); border-radius:10px; }
+  .bank-tools input[type=search] { flex:1 1 260px; min-width:0; }
+  .bank-tools select { flex:0 1 280px; max-width:100%; }
+  .bank-tools label { display:inline-flex; align-items:center; gap:6px; font-weight:600; cursor:pointer; }
+  .bank-tools :focus-visible { outline:3px solid color-mix(in srgb, var(--acc) 55%, transparent); outline-offset:1px; }
+  #b-home { margin-left:auto; }
   .print-only { display:none; }
   [hidden] { display:none !important; }
   .author { display:flex; flex-wrap:wrap; gap:2px 6px; padding:4px 16px 6px; background:var(--panel); font-size:12px; color:var(--muted); } .author a { color:var(--acc-text); } .author span:not(:first-child) { margin-left:10px; }
@@ -148,6 +156,7 @@
     #flag { margin-left:0; }
     #history td, #history th { padding:6px 4px; }
     #history td button { display:block; width:100%; margin:4px 0 0; }
+    .bank-tools select { flex-basis:100%; }
   }
   @media (prefers-reduced-motion: reduce) { #timer.low { animation:none; } button, .prog-fill { transition:none; } }
   @media print {
@@ -195,8 +204,9 @@
         <li>Câu còn phân vân: bấm <b>⚑ Đánh dấu xem lại</b> để dễ tìm lại trước khi nộp.</li>
         <li>Phím tắt: phím số <b>1, 2, 3…</b> hoặc chữ <b>A, B, C…</b> chọn đáp án, <b>←/→</b> chuyển câu.</li>
         <li>Bài đang làm và kết quả sau khi nộp được lưu, có thể xem lại hoặc lưu PDF.</li>
+        <li><b>Ôn tập ngân hàng đề</b>: xem mọi câu kèm đáp án và giải thích, lọc theo chủ đề, tìm từ khóa (gõ không dấu cũng được) hoặc ẩn đáp án để tự kiểm tra.</li>
       </ul>
-      <div class="actions"><button class="main lg" id="begin">Bắt đầu làm bài</button><button class="lg" id="resume" hidden>Tiếp tục bài đang làm</button></div>
+      <div class="actions"><button class="main lg" id="begin">Bắt đầu làm bài</button><button class="lg" id="resume" hidden>Tiếp tục bài đang làm</button><button class="lg" id="browse-open">Ôn tập ngân hàng đề</button></div>
     </div>
     <div class="card" id="history" hidden>
       <h3>Kết quả đã làm</h3>
@@ -218,6 +228,19 @@
         <div class="legend"><span><i class="done"></i>Đã trả lời</span><span><i class="flag"></i>Đánh dấu</span><span><i></i>Chưa trả lời</span><span><i class="cur"></i>Đang xem</span></div>
       </aside>
     </div>
+  </section>
+
+  <section id="browse" hidden>
+    <div class="card no-print">
+      <div class="q-head"><h2>Ngân hàng đề</h2><button class="sm" id="b-home">← Về trang đầu</button></div>
+      <div class="bank-tools">
+        <input type="search" id="b-search" placeholder="Tìm từ khóa (gõ không dấu cũng được)…" aria-label="Tìm câu hỏi">
+        <select id="b-topic" aria-label="Lọc theo chủ đề"></select>
+        <label><input type="checkbox" id="b-hide"> Ẩn đáp án để tự kiểm tra</label>
+      </div>
+      <p class="muted" id="b-count" style="margin:0"></p>
+    </div>
+    <div id="b-list"></div>
   </section>
 
   <section id="result" hidden>
@@ -464,7 +487,8 @@ const Exam = (() => {
   const COUNT = 50, MINUTES = 60, KEY = "study.pl-ck-ttck.exam", HKEY = "study.pl-ck-ttck.history", HMAX = 50, PASS = 5, LETTERS = "ABCDEF";
   const FILTERS = { all: "Tất cả", wrong: "Sai", skip: "Bỏ trống", right: "Đúng" };
   const $ = id => document.getElementById(id);
-  let s = null, r = null, tick = 0, filter = "all";
+  let s = null, r = null, tick = 0, filter = "all", hay = null;
+  const picks = new Map();
 
   const shuffle = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
   const read = k => { try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } };
@@ -478,8 +502,10 @@ const Exam = (() => {
   };
   const clear = () => { try { localStorage.removeItem(KEY); } catch { /* ignore */ } };
   const history = () => { const h = read(HKEY); return Array.isArray(h) ? h : []; };
-  const show = id => ["start", "exam", "result"].forEach(x => $(x).hidden = x !== id);
+  const show = id => ["start", "exam", "result", "browse"].forEach(x => $(x).hidden = x !== id);
   const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+  const explainBox = (letter, text) => { const ex = el("div", "explain"); ex.append(el("b", null, `Đáp án đúng: ${letter}. `), document.createTextNode(text || "")); return ex; };
+  const norm = t => t.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/g, "d");
   const pad = n => String(n).padStart(2, "0");
   const fmtDate = ts => { const d = new Date(ts); return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`; };
   const fmtClock = rec => { const sec = Math.round((rec.endedAt - rec.startAt) / 1000); return `${pad(Math.floor(sec / 60))}:${pad(sec % 60)}`; };
@@ -604,9 +630,7 @@ const Exam = (() => {
         if (o === r.answers[i]) d.append(el("span", "tag muted", "Bạn chọn"));
         opts.append(d);
       });
-      const ex = el("div", "explain");
-      ex.append(el("b", null, `Đáp án đúng: ${LETTERS[r.order[i].indexOf(q.answer)]}. `), document.createTextNode(q.explain || ""));
-      card.append(head, el("p", "q-text", q.q), opts, ex);
+      card.append(head, el("p", "q-text", q.q), opts, explainBox(LETTERS[r.order[i].indexOf(q.answer)], q.explain));
       return card;
     }));
   }
@@ -615,6 +639,43 @@ const Exam = (() => {
     filter = f;
     document.querySelectorAll("#filters button").forEach(b => b.classList.toggle("on", b.dataset.f === f));
     renderList();
+  }
+
+  function openBrowse() {
+    if (!$("b-list").children.length) renderBrowse();
+    show("browse"); window.scrollTo({ top: 0 });
+  }
+
+  // Chế độ ẩn đáp án: bấm 1 phương án mới lộ đúng/sai + giải thích của câu đó.
+  function bankCard(i) {
+    const q = BANK[i], hide = $("b-hide").checked, got = hide ? picks.get(i) : undefined, open = !hide || got != null;
+    const card = el("div", "card review" + (got == null ? "" : got === q.answer ? " right" : " wrong")), head = el("div", "q-head"), opts = el("div", "opts");
+    card.dataset.i = i;
+    head.append(el("span", "q-no", `Câu ${i + 1}`), el("span", "chip", q.topic));
+    if (got != null) head.append(el("span", "tag " + (got === q.answer ? "pass" : "fail"), got === q.answer ? "✓ Đúng" : "✗ Sai"));
+    q.options.forEach((text, o) => {
+      const d = el(open ? "div" : "button", "opt" + (open && o === q.answer ? " correct" : "") + (o === got ? " picked" : ""));
+      d.append(el("b", null, LETTERS[o]), el("span", null, text));
+      if (!open) d.onclick = () => { picks.set(i, o); card.replaceWith(bankCard(i)); countBrowse(); };
+      opts.append(d);
+    });
+    card.append(head, el("p", "q-text", q.q), opts);
+    if (open) card.append(explainBox(LETTERS[q.answer], q.explain));
+    return card;
+  }
+
+  function renderBrowse() { $("b-list").replaceChildren(...BANK.map((_, i) => bankCard(i))); filterBrowse(); }
+
+  function filterBrowse() {
+    hay ||= BANK.map(q => norm([q.topic, q.q, ...q.options, q.explain || ""].join(" ")));
+    const t = $("b-topic").value, words = norm($("b-search").value).split(/\s+/).filter(Boolean);
+    for (const c of $("b-list").children) { const i = +c.dataset.i; c.hidden = (t && BANK[i].topic !== t) || !words.every(w => hay[i].includes(w)); }
+    countBrowse();
+  }
+
+  function countBrowse() {
+    const shown = [...$("b-list").children].filter(c => !c.hidden).length, ok = [...picks].filter(([i, o]) => BANK[i].answer === o).length;
+    $("b-count").textContent = `Hiển thị ${shown}/${BANK.length} câu` + ($("b-hide").checked && picks.size ? ` · Tự kiểm tra: đúng ${ok}/${picks.size}` : "");
   }
 
   function savePdf() {
@@ -655,7 +716,14 @@ const Exam = (() => {
 
   function init() {
     $("bank-count").textContent = BANK.length;
-    $("topic-count").textContent = new Set(BANK.map(q => q.topic)).size;
+    const topics = new Map();
+    BANK.forEach(q => topics.set(q.topic, (topics.get(q.topic) || 0) + 1));
+    $("topic-count").textContent = topics.size;
+    $("b-topic").replaceChildren(new Option(`Tất cả chủ đề (${BANK.length})`, ""), ...[...topics].map(([t, c]) => new Option(`${t} (${c})`, t)));
+    $("browse-open").onclick = openBrowse;
+    $("b-home").onclick = showStart;
+    $("b-search").oninput = $("b-topic").onchange = filterBrowse;
+    $("b-hide").onchange = () => { picks.clear(); renderBrowse(); };
     $("begin").onclick = $("again").onclick = () => { if (!load() || confirm("Bỏ bài đang làm dở và bắt đầu đề mới?")) begin(); };
     $("resume").onclick = () => { s = load(); if (s) s.endAt > Date.now() ? enter() : finish(); };
     $("prev").onclick = () => go(s.cur - 1);

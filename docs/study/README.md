@@ -57,11 +57,13 @@
 - Bài đang làm lưu `localStorage[KEY]` (tải lại trang → "Tiếp tục bài đang làm"; hết giờ trong lúc đóng trang → tự nộp khi mở lại).
 - Kết quả lưu `localStorage[HKEY]` (mới nhất trước, tối đa 50) kèm **bản chụp nội dung câu hỏi** ⇒ xem lại đúng dù `BANK` đổi. Màn `#start` có bảng "Kết quả đã làm" (Xem lại / Xóa).
 - Màn kết quả: vòng điểm (`conic-gradient`), nhãn Đạt/Chưa đạt theo `PASS`, 4 thẻ Đúng/Sai/Bỏ trống/Thời gian, bảng theo chủ đề có thanh % (yếu nhất lên đầu), bảng câu xanh/đỏ/vàng, lọc có số đếm, từng câu tô đáp án đúng/chọn sai + giải thích.
+- **Ôn tập ngân hàng đề** (nút ở màn `#start` → section `#browse`): liệt kê toàn bộ `BANK` theo thứ tự gốc, phương án KHÔNG xáo (câu `fixed` khớp chữ cái), mỗi câu tô đáp án đúng + giải thích. Ô tìm kiếm khớp cả câu hỏi/phương án/giải thích/chủ đề, bỏ dấu (`norm()`: NFD + `đ→d`), nhiều từ = AND; lọc chủ đề (dropdown kèm số câu). Tick "Ẩn đáp án để tự kiểm tra" ⇒ phương án thành nút, bấm mới lộ đúng/sai + giải thích, đếm "đúng x/y"; tick lại = làm lại từ đầu. Không lưu `localStorage`.
 - **Lưu PDF** = `window.print()` + `@media print` (ẩn `.top`/`.no-print`/`.author`, ép màu sáng, hiện cả câu đang bị lọc ẩn, `print-color-adjust:exact`); tạm đổi `document.title` để tên file PDF gợi ý đúng.
 
 ## 6. Kiểm thử trước khi báo xong
 
 - `node scripts/validate-study-quiz-bank.js study/<MA_DE>.html` → `OK`.
 - Headless Chrome (puppeteer trong `~/.claude/skills/chrome-devtools/scripts`, `executablePath` Chrome hệ thống, `page.on("dialog", d => d.accept())`), desktop 1366 + mobile 390 (`isMobile`, `hasTouch`) + dark (`emulateMediaFeatures prefers-color-scheme`):
+  Ôn tập ngân hàng đề (đủ n câu, lọc chủ đề, tìm không dấu, ẩn đáp án → bấm đúng/sai) →
   bắt đầu → chọn đáp án (chuột + phím, câu `fixed` 6 phương án, phím ngoài khoảng bị bỏ qua) → ⚑ → tải lại + Tiếp tục → nộp → điểm/thẻ/lọc đúng → `emulateMediaType("print")` hiện đủ n câu → Về trang đầu có 1 dòng lịch sử → Xem lại khớp điểm → Xóa → hết giờ tự nộp + lưu lịch sử; `scrollWidth == innerWidth`; không `pageerror`.
 - `click` + `waitForNavigation` phải chạy trong `Promise.all` (file:// điều hướng xong trước khi kịp chờ).
