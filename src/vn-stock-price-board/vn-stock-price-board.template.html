@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src https://bgapidatafeed.vps.com.vn https://dchart-api.vndirect.com.vn">
+<title>Bảng giá chứng khoán</title>
+<style>
+/* @include ../data-workbench/styles/base.css */
+/* @include ../data-workbench/styles/app-bar-tabs-toolbar-surfaces.css */
+/* @include ../data-workbench/styles/theme-filter-popover-chips.css */
+/* @include styles/vn-stock-price-board.css */
+/* @include styles/technical-chart.css */
+/* @include ../data-workbench/styles/phone-portrait-layout.css */
+</style>
+</head>
+<body>
+<header class="top">
+  <a class="btn" href="../index.html">← Trang chủ</a>
+  <h1>Bảng giá chứng khoán</h1>
+  <button class="more-toggle" title="Thêm thao tác" aria-expanded="false">⋯</button>
+  <button id="share" title="Chép link chứa tab + danh mục + tuỳ chọn (nằm sau dấu #, không gửi lên máy chủ)">🔗 Chia sẻ link</button>
+  <button id="undo" title="Lấy lại danh mục trước khi nạp mẫu / link chia sẻ" hidden>↶ Khôi phục danh mục trước</button>
+  <label class="chk" title="Giao diện sáng / tối">Giao diện
+    <select id="theme"><option value="auto">Tự động</option><option value="light">Sáng</option><option value="dark">Tối</option></select></label>
+  <span class="seg lang-switch" title="Ngôn ngữ"><button data-lang="vi">VI</button><button data-lang="en">EN</button></span>
+  <nav class="seg wb-nav" id="tabs"></nav>
+</header>
+<div class="toolbar">
+  <select id="demo" title="Nạp danh mục mẫu rồi xem ngay"></select>
+  <input type="text" id="q" placeholder="Lọc / thêm mã: VNM, FPT…" title="Gõ để lọc bảng; Enter hoặc ★ Thêm để đưa vào danh mục" autocomplete="off" spellcheck="false">
+  <button id="add" class="main" title="Thêm các mã đang gõ vào danh mục ★ (lưu trong trình duyệt này)">★ Thêm</button>
+  <label class="chk" title="Chu kỳ lấy dữ liệu mới; ngoài giờ giao dịch tự giãn ra 60 giây, tab ẩn thì dừng">Cập nhật
+    <select id="rate" data-opt><option value="3">3s</option><option value="5" selected>5s</option><option value="10">10s</option><option value="30">30s</option><option value="off">Tạm dừng</option></select></label>
+  <label class="chk" title="Đơn vị khối lượng: lô 10 cổ phiếu như bảng giá các công ty CK, hoặc số cổ phiếu thật">KL
+    <select id="unit" data-opt><option value="x10">×10 CP</option><option value="share">Cổ phiếu</option></select></label>
+  <label class="chk" title="Hiện cột giá Cao / Thấp / Trung bình"><input type="checkbox" id="hl" data-opt checked>Cao/Thấp</label>
+  <label class="chk" title="Hiện cột nhà đầu tư nước ngoài: mua, bán, room"><input type="checkbox" id="fr" data-opt checked>ĐTNN</label>
+  <label class="chk" title="Ẩn bước giá 2–3 và cột Trần/Sàn cho bảng gọn"><input type="checkbox" id="compact" data-opt>Gọn</label>
+  <span class="sep"></span>
+  <button id="csv" title="Tải bảng đang xem thành CSV (mở bằng Excel)">⬇ CSV</button>
+</div>
+<section id="indices" class="indices" data-i18n-skip></section>
+<div class="seg pane-switch"><button>Bảng giá</button><button>Chi tiết mã</button></div>
+<main class="work pane-scroller">
+  <section class="pane board-pane">
+    <div class="bar"><b id="boardTitle">★ Danh mục</b><span id="count" class="muted"></span><span id="phase" class="badge"></span></div>
+    <div class="scroll"><table id="board" class="board"></table></div>
+  </section>
+  <section class="pane detail-pane">
+    <div class="bar"><b>Chi tiết mã</b></div>
+    <div class="scroll" id="detail" data-i18n-skip>
+      <div id="dTop"></div>
+      <section id="miniChart" class="mini-chart" hidden>
+        <div class="cbar" id="miniBar"></div>
+        <div class="cbox"><div class="clegend" id="miniLegend"></div><div class="chost" id="miniHost"></div><p class="cmsg" id="miniMsg" hidden></p></div>
+      </section>
+      <div id="dBottom"></div>
+    </div>
+  </section>
+</main>
+<footer class="status" id="status" data-i18n-skip></footer>
+<dialog id="chartDlg" class="chart-dlg" data-i18n-skip>
+  <div class="dlg-head"><span id="dlgTitle"></span><button id="dlgClose">✕</button></div>
+  <div class="cbar" id="fullBar"></div>
+  <div class="ichips" id="fullChips"></div>
+  <div class="cbox"><div class="clegend" id="fullLegend"></div><div class="chost" id="fullHost"></div><p class="cmsg" id="fullMsg" hidden></p></div>
+  <div class="dlg-foot muted" id="fullStatus"></div>
+</dialog>
+<div class="author">
+  <span>Tác giả:</span><b><a href="https://happywindapp.github.io/CV/cv_quan_phan.html">Phan Ngọc Minh Quân</a></b>
+  <span>GitHub Source:</span><a href="https://github.com/happywindapp/web_tool/">github.com/happywindapp/web_tool</a>
+</div>
+<script>
+"use strict";
+// @include js/lib/lightweight-charts-5.2.1.standalone.production.js
+// @include ../data-workbench/js/core/i18n-ui-language-vi-en.js
+// @include js/i18n/en-stock-board-ui-strings.js
+// @include ../data-workbench/js/i18n/en-shared-theme-sessions-filters.js
+// @include ../data-workbench/js/core/share-link-codec.js
+// @include ../data-workbench/js/core/text-utils.js
+// @include ../data-workbench/js/core/dom-and-storage-helpers.js
+// @include ../data-workbench/js/core/theme-picker-auto-light-dark.js
+// @include ../data-workbench/js/core/phone-pane-switcher.js
+// @include js/model/watchlist-symbol-parser.js
+// @include js/model/quote-price-model.js
+// @include js/model/board-columns-and-format.js
+// @include js/model/intraday-chart-svg.js
+// @include js/model/chart-ranges-and-resample.js
+// @include js/model/technical-indicators-trend-and-bands.js
+// @include js/model/technical-indicators-oscillators.js
+// @include js/model/indicator-catalog.js
+// @include js/data/vps-datafeed-client.js
+// @include js/data/vndirect-ohlc-history-client.js
+// @include js/samples/watchlist-demo-presets.js
+// @include js/ui/watchlist-store.js
+// @include js/ui/board-table-view.js
+// @include js/ui/index-strip-view.js
+// @include js/ui/symbol-detail-view.js
+// @include js/ui/technical-chart-view.js
+// @include js/ui/technical-chart-drawing-tools.js
+// @include js/ui/technical-chart-toolbar.js
+// @include js/ui/technical-chart-controller.js
+// @include js/ui/board-share-link-and-demo.js
+// @include js/ui/board-app.js
+// @include js/ui/board-controls.js
+Controls.start();
+</script>
+</body>
+</html>
