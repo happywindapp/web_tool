@@ -7,6 +7,8 @@ Mỗi tool trong `tools/` có đúng 1 file doc ở đây, cùng tên: `tools/<x
 | Data Workbench (Format JSON·XML·HTML · Chuyển đổi · Bảng CSV · So sánh · Format CSS·JS) — thay `format-json-xml-html` | [data-workbench.md](data-workbench.md) |
 | Soạn & xem trước sơ đồ (6 tab) | [diagram-editor.md](diagram-editor.md) |
 | FIX Parser (message/log FIX 4.4 + Server Sàn: BCGD, ĐTTTT) | [fix-message-parser.md](fix-message-parser.md) |
+| Lịch vạn niên (lịch dương–âm, đổi ngày, ngày/giờ tốt xấu) | [vietnamese-lunar-calendar.md](vietnamese-lunar-calendar.md) |
+| Bảng giá chứng khoán (HOSE · HNX · UPCOM, dữ liệu VPS) | [vn-stock-price-board.md](vn-stock-price-board.md) |
 
 ## Khung 1 file doc tool
 

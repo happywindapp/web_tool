@@ -6,9 +6,10 @@
 ## Workspace là gì
 
 `c:/_web_tool` **chính là git repo** `happywindapp/web_tool` (nhánh `main`): bộ công cụ web tiện ích,
-mỗi tool là **1 file HTML tự chứa** trong `tools/`, chạy 100% client-side, không gọi mạng.
+mỗi tool là **1 file HTML tự chứa** trong `tools/`, chạy 100% client-side, không gọi mạng (ngoại lệ: tab draw.io — ADR #11; Bảng giá chứng khoán tải giá VPS — ADR #13).
 Tool hiện có: `tools/data-workbench.html` (format/tự sửa JSON·XML·HTML · chuyển đổi · bảng CSV · so sánh · CSS/JS) —
-**file sinh ra** từ `src/data-workbench/`, build `pwsh scripts/build-data-workbench-single-file.ps1` (ADR #7); `tools/fix-message-parser.html` (FIX 4.4 + Server Sàn) — **file sinh ra** từ `src/fix-message-parser/`, build `pwsh scripts/build-single-file-tool.ps1 -Tool fix-message-parser`; `tools/diagram-editor.html` (6 tab Mermaid · PlantUML · draw.io · DBML · D2 · Structurizr) — **file sinh ra** từ `src/diagram-editor/`, build `pwsh scripts/build-single-file-tool.ps1 -Tool diagram-editor`, thư viện ở `tools/vendor/` tạo bằng `scripts/vendor-diagram-renderers.ps1` (ADR #11).
+**file sinh ra** từ `src/data-workbench/`, build `pwsh scripts/build-data-workbench-single-file.ps1` (ADR #7); `tools/fix-message-parser.html` (FIX 4.4 + Server Sàn) — **file sinh ra** từ `src/fix-message-parser/`, build `pwsh scripts/build-single-file-tool.ps1 -Tool fix-message-parser`; `tools/diagram-editor.html` (6 tab Mermaid · PlantUML · draw.io · DBML · D2 · Structurizr) — **file sinh ra** từ `src/diagram-editor/`, build `pwsh scripts/build-single-file-tool.ps1 -Tool diagram-editor`, thư viện ở `tools/vendor/` tạo bằng `scripts/vendor-diagram-renderers.ps1` (ADR #11); `tools/vn-stock-price-board.html` (bảng giá CK realtime, dữ liệu API công khai VPS) — **file sinh ra** từ `src/vn-stock-price-board/`, build `pwsh scripts/build-single-file-tool.ps1 -Tool vn-stock-price-board`.
+`tools/vietnamese-lunar-calendar.html` (Lịch vạn niên: lịch dương–âm, đổi ngày, ngày/giờ tốt xấu) — **file sinh ra** từ `src/vietnamese-lunar-calendar/`, build `pwsh scripts/build-single-file-tool.ps1 -Tool vietnamese-lunar-calendar`.
 Bài thi ôn tập: `study.html` + `study/<MA_DE>.html` (card vào `study.html`, KHÔNG vào `index.html`) — dựng/sửa đề theo `docs/study/README.md`, kiểm `node scripts/validate-study-quiz-bank.js study/<MA_DE>.html`.
 Đọc `ai-context/project-context.md` để nắm toàn cảnh.
 

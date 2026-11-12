@@ -76,7 +76,7 @@
     <p class="lead">Bộ công cụ xử lý dữ liệu ngay trong trình duyệt.</p>
     <ul class="facts">
       <li><b>Không cần cài đặt</b>Mở trang là dùng được.</li>
-      <li><b>Dữ liệu ở lại trên máy</b>Không gửi lên máy chủ nào, trừ tab draw.io và chỉ khi bạn bấm kết nối.</li>
+      <li><b>Dữ liệu ở lại trên máy</b>Không gửi lên máy chủ nào, trừ tab draw.io (khi bạn bấm kết nối) và Bảng giá chứng khoán (chỉ tải giá từ VPS, VNDirect).</li>
       <li><b>Dùng được offline</b>Tải file HTML về máy là chạy.</li>
     </ul>
   </div>
@@ -103,6 +103,22 @@
     <div class="card-body">
       <p>Đọc message/log FIX theo tên tag và ý nghĩa, kiểm tag bắt buộc, lọc, theo chuỗi lệnh, che dữ liệu, xuất CSV/JSON.</p>
       <div class="chips"><span>FIX 4.4</span><span>Server Sàn</span><span>BodyLength</span><span>CheckSum</span></div>
+      <span class="open">Mở công cụ <i aria-hidden="true">→</i></span>
+    </div>
+  </a>
+  <a class="card" href="tools/vietnamese-lunar-calendar.html">
+    <div class="card-head"><span class="mark" aria-hidden="true">☾ 15</span><h2>Lịch vạn niên</h2></div>
+    <div class="card-body">
+      <p>Lịch dương – âm, đổi ngày, ngày/giờ hoàng đạo, tiết khí, ngày lễ. Tab Tử vi: mệnh, phong thủy, thần số học, vận hạn năm nay, năm sau.</p>
+      <div class="chips"><span>Âm lịch</span><span>Can chi</span><span>Hoàng đạo</span><span>Tử vi</span></div>
+      <span class="open">Mở công cụ <i aria-hidden="true">→</i></span>
+    </div>
+  </a>
+  <a class="card" href="tools/vn-stock-price-board.html">
+    <div class="card-head"><span class="mark" aria-hidden="true">▲▼</span><h2>Bảng giá chứng khoán</h2></div>
+    <div class="card-body">
+      <p>Giá realtime HOSE · HNX · UPCOM, 3 bước giá mua/bán, chỉ số, danh mục yêu thích, sổ lệnh, biểu đồ kỹ thuật 5 phút → toàn bộ lịch sử với 18 chỉ báo. Cần mạng (dữ liệu VPS, VNDirect).</p>
+      <div class="chips"><span>VN30</span><span>HOSE</span><span>HNX</span><span>UPCOM</span><span>ETF</span><span>Chứng quyền</span></div>
       <span class="open">Mở công cụ <i aria-hidden="true">→</i></span>
     </div>
   </a>
@@ -179,7 +195,7 @@ I18n.add({
   "Không cần cài đặt": "Nothing to install",
   "Mở trang là dùng được.": "Open the page and start working.",
   "Dữ liệu ở lại trên máy": "Your data stays on your device",
-  "Không gửi lên máy chủ nào, trừ tab draw.io và chỉ khi bạn bấm kết nối.": "Nothing is sent to any server, except the draw.io tab and only after you click Connect.",
+  "Không gửi lên máy chủ nào, trừ tab draw.io (khi bạn bấm kết nối) và Bảng giá chứng khoán (chỉ tải giá từ VPS, VNDirect).": "Nothing is sent to any server, except the draw.io tab (after you click Connect) and the Stock price board (only downloads prices from VPS, VNDirect).",
   "Dùng được offline": "Works offline",
   "Tải file HTML về máy là chạy.": "Download the HTML file and run it.",
   "Mở công cụ": "Open tool",
@@ -188,6 +204,12 @@ I18n.add({
   "6 loại sơ đồ trong 1 tool, có mẫu thử, xuất PNG/SVG, chia sẻ link, lịch sử phiên bản. Riêng draw.io cần mạng.": "6 diagram languages in one tool, with samples, PNG/SVG export, share links and version history. Only draw.io needs a network connection.",
   "Đọc message/log FIX theo tên tag và ý nghĩa, kiểm tag bắt buộc, lọc, theo chuỗi lệnh, che dữ liệu, xuất CSV/JSON.": "Read FIX messages and logs by tag name and meaning, check required tags, filter, follow order chains, mask data, export CSV/JSON.",
   "Server Sàn": "Exchange server",
+  "Lịch vạn niên": "Vietnamese Lunar Calendar",
+  "Lịch dương – âm, đổi ngày, ngày/giờ hoàng đạo, tiết khí, ngày lễ. Tab Tử vi: mệnh, phong thủy, thần số học, vận hạn năm nay, năm sau.": "Solar–lunar calendar, date conversion, auspicious days/hours, solar terms, holidays. Horoscope tab: element, feng shui, numerology, this and next year's fortune.",
+  "Âm lịch": "Lunar calendar", "Can chi": "Stems & branches", "Hoàng đạo": "Auspicious days", "Tiết khí": "Solar terms", "Tử vi": "Horoscope",
+  "Bảng giá chứng khoán": "Vietnam stock price board",
+  "Giá realtime HOSE · HNX · UPCOM, 3 bước giá mua/bán, chỉ số, danh mục yêu thích, sổ lệnh, biểu đồ kỹ thuật 5 phút → toàn bộ lịch sử với 18 chỉ báo. Cần mạng (dữ liệu VPS, VNDirect).": "Live HOSE · HNX · UPCOM prices, 3 bid/ask levels, indices, watchlist, order book, technical charts from 5 minutes to full history with 18 indicators. Needs a network connection (VPS, VNDirect data).",
+  "Chứng quyền": "Warrants",
   "Tác giả:": "Author:",
 });
 I18n.init();

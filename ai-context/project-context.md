@@ -14,8 +14,10 @@ Tool hiện có:
 | Tool | File | Việc |
 |------|------|------|
 | Data Workbench | `tools/data-workbench.html` — **file sinh ra** từ `src/data-workbench/` (ADR #7); thay tool cũ `format-json-xml-html.html` (đã xoá) | 5 tab: Format JSON·XML·HTML (**tự sửa lỗi**, sort key, giải JSON lồng) · Chuyển đổi JSON/CSV/TSV/XML/YAML → … + SQL/Markdown/HTML table · Bảng CSV · So sánh (dòng / JSON cấu trúc) · Format CSS·JS |
-| Soạn & xem trước sơ đồ | `tools/diagram-editor.html` — **file sinh ra** từ `src/diagram-editor/` (ADR #11) + renderer ở `tools/vendor/`; `tools/mermaid-diagram-editor.html` chỉ còn chuyển hướng | 6 tab Mermaid · PlantUML · draw.io · DBML · D2 · Structurizr: preview, xuất PNG/SVG, link `#pako:`, nháp + lịch sử riêng từng tab. Năm tab offline; **draw.io là ngoại lệ duy nhất của "không gọi mạng"**, chỉ kết nối `embed.diagrams.net` sau khi người dùng bấm đồng ý |
+| Soạn & xem trước sơ đồ | `tools/diagram-editor.html` — **file sinh ra** từ `src/diagram-editor/` (ADR #11) + renderer ở `tools/vendor/`; `tools/mermaid-diagram-editor.html` chỉ còn chuyển hướng | 6 tab Mermaid · PlantUML · draw.io · DBML · D2 · Structurizr: preview, xuất PNG/SVG, link `#pako:`, nháp + lịch sử riêng từng tab. Năm tab offline; **draw.io là 1 trong 2 ngoại lệ của "không gọi mạng"** (cùng Bảng giá chứng khoán, ADR #13), chỉ kết nối `embed.diagrams.net` sau khi người dùng bấm đồng ý |
 | FIX Parser | `tools/fix-message-parser.html` — **file sinh ra** từ `src/fix-message-parser/` (ADR #7, build `scripts/build-single-file-tool.ps1 -Tool fix-message-parser`) | Đọc message/log FIX: bảng message + chi tiết tag, kiểm BodyLength/CheckSum/tag bắt buộc, từ điển FIX 4.4 + Server Sàn (BCGD `35=s/t/u`, ĐTTTT), chuỗi lệnh, che dữ liệu, xuất CSV/JSON; mẫu nhiều báo cáo giao dịch Server Sàn |
+| Lịch vạn niên | `tools/vietnamese-lunar-calendar.html` — **file sinh ra** từ `src/vietnamese-lunar-calendar/` (build `scripts/build-single-file-tool.ps1 -Tool vietnamese-lunar-calendar`) | Lịch tháng dương–âm + đổi ngày âm ↔ dương (thuật toán Hồ Ngọc Đức, UTC+7, 1800–2199) + chi tiết ngày tốt xấu: can chi, nạp âm, tiết khí, hoàng/hắc đạo, trực, 28 tú, Khổng Minh, Lý Thuần Phong, hướng xuất hành, tuổi xung, ngày lễ |
+| Bảng giá chứng khoán | `tools/vn-stock-price-board.html` — **file sinh ra** từ `src/vn-stock-price-board/` (build `scripts/build-single-file-tool.ps1 -Tool vn-stock-price-board`) | Bảng giá realtime HOSE·HNX·UPCOM kiểu iBoard: chỉ số + sparkline, tab sàn/rổ/ETF/CW, ★ danh mục, 3 bước giá, ĐTNN, pane chi tiết (sổ lệnh, chart trong ngày, lịch sử khớp). **Ngoại lệ gọi mạng thứ 2 (ADR #13)**: chỉ GET dữ liệu từ API công khai VPS |
 
 Ngoài tool còn **bài thi trắc nghiệm ôn tập**: trang `study.html` (root, KHÔNG liên kết từ `index.html`) liệt kê card các đề trong `study/`
 (hiện có `study/CBTTCK.html` — 250 câu "Cơ bản về chứng khoán và TTCK", `study/PL-CK-TTCK.html` — 200 câu "Pháp luật về chứng khoán và TTCK" và `study/MG-DT-CK.html` — 300 câu "Môi giới và Tư vấn đầu tư CK"; đề 50 câu/60 phút, lịch sử kết quả, Lưu PDF).
@@ -63,7 +65,7 @@ Không có. Không backend, không API, không DB, không CDN.
 
 - **1 tool = 1 file HTML tự chứa** trong `tools/`, tên kebab-case mô tả việc. Không thêm build step,
   framework hay script CDN nếu chưa hỏi user (xem [ADR](../docs/decisions/README.md)).
-- **Không gửi dữ liệu đi đâu** — đây là cam kết hiển thị ngay trên UI; mọi thay đổi gọi mạng là breaking. Ngoại lệ duy nhất đã chốt: tab draw.io (ADR #11).
+- **Không gửi dữ liệu đi đâu** — đây là cam kết hiển thị ngay trên UI; mọi thay đổi gọi mạng là breaking. Ngoại lệ đã chốt: tab draw.io (ADR #11), Bảng giá chứng khoán chỉ tải giá từ API công khai VPS (ADR #13).
 - **Tự sửa = đoán**: mỗi sửa đổi phải được ghi vào danh sách `fixes`, không sửa âm thầm.
 - **Mọi tool phải có khối tác giả** `<div class="author">` (Tác giả + GitHub Source) — markup/CSS chuẩn ở
   [`docs/architecture/README.md`](../docs/architecture/README.md) mục 3.

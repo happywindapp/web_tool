@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:">
+<title>Lịch vạn niên</title>
+<style>
+/* @include ../data-workbench/styles/base.css */
+/* @include ../data-workbench/styles/app-bar-tabs-toolbar-surfaces.css */
+/* @include ../data-workbench/styles/theme-filter-popover-chips.css */
+/* @include styles/lunar-calendar-month-grid-and-day-detail.css */
+/* @include ../data-workbench/styles/phone-portrait-layout.css */
+</style>
+</head>
+<body>
+<header class="top">
+  <a class="btn" href="../index.html">← Trang chủ</a>
+  <h1>Lịch vạn niên</h1>
+  <button class="more-toggle" title="Thêm thao tác" aria-expanded="false">⋯</button>
+  <button id="share" title="Chép link mở đúng ngày / lá số đang xem (dữ liệu nằm sau dấu #, không gửi lên máy chủ)">🔗 Chia sẻ link</button>
+  <label class="chk" title="Giao diện sáng / tối">Giao diện
+    <select id="theme"><option value="auto">Tự động</option><option value="light">Sáng</option><option value="dark">Tối</option></select></label>
+  <span id="note" class="muted"></span>
+  <span class="seg lang-switch" title="Ngôn ngữ"><button data-lang="vi">VI</button><button data-lang="en">EN</button></span>
+  <nav class="seg wb-nav" id="tabs"><button data-tab="cal">📅 Lịch</button><button data-tab="horo">🔮 Tử vi</button></nav>
+</header>
+<div class="toolbar" id="calBar">
+  <select id="demo" title="Nạp ngày mẫu rồi xem ngay"></select>
+  <button id="today" title="Về hôm nay (Home)">Hôm nay</button>
+  <span class="sep"></span>
+  <input type="text" id="q" inputmode="text" autocomplete="off" spellcheck="false" title="Ngày dương: 12/11/2026 · Ngày âm: thêm “âm” hoặc “lunar” phía trước, tháng nhuận thêm “n” (âm 1/6n/2025)" placeholder="12/11/2026 · âm 15/8/2026">
+  <button id="go" class="main" title="Đổi ngày dương ↔ âm và xem chi tiết (Enter)">Xem ngày</button>
+  <label class="chk" title="Hiện can chi ngày trong ô lịch (khi ngày đó không có lễ / tiết khí)"><input type="checkbox" id="cc">Can chi trong ô</label>
+  <span class="muted hint">← → ↑ ↓ chọn ngày · PageUp/PageDown đổi tháng · lịch tính theo giờ Việt Nam (UTC+7), không gửi dữ liệu đi đâu</span>
+</div>
+<div class="toolbar" id="horoBar" hidden>
+  <select id="horoDemo" title="Nạp hồ sơ mẫu rồi xem ngay"></select>
+  <input type="text" id="hName" class="name" autocomplete="off" spellcheck="false" maxlength="80" placeholder="Họ và tên" title="Họ và tên (dùng cho thần số học; có dấu hay không đều được)">
+  <select id="hSex" title="Giới tính (ảnh hưởng cung mệnh, sao chiếu mệnh)"></select>
+  <input type="text" id="hBirth" class="date" autocomplete="off" placeholder="Ngày sinh 15/08/1990" title="Ngày sinh dương lịch (dd/mm/yyyy); nhập âm lịch thì thêm “âm” phía trước">
+  <input type="text" id="hTime" class="time" autocomplete="off" placeholder="Giờ 07:30" title="Giờ sinh (07:30, 7h30); để trống nếu không rõ">
+  <label class="chk" title="Năm âm lịch cần xem vận hạn (năm sau = năm này + 1)">Năm xem <select id="hYear"></select></label>
+  <button id="hGo" class="main" title="Xem bản mệnh và vận hạn (Enter)">Xem tử vi</button>
+  <span class="muted hint">Chỉ mang tính tham khảo, giải trí · dữ liệu không rời khỏi máy</span>
+</div>
+<div class="seg pane-switch" id="calSwitch"><button>Lịch tháng</button><button>Chi tiết ngày</button></div>
+<main class="work pane-scroller" id="calWork">
+  <section class="pane month-pane">
+    <div class="bar monthnav">
+      <button id="prev" title="Tháng trước (PageUp)">◀</button>
+      <select id="month" title="Tháng dương lịch"></select>
+      <select id="year" title="Năm dương lịch"></select>
+      <button id="next" title="Tháng sau (PageDown)">▶</button>
+      <span id="lunarRange" class="muted"></span>
+    </div>
+    <div class="scroll">
+      <div id="grid" class="month"></div>
+      <div class="legend muted"><span><i class="dot"></i> Ngày hoàng đạo</span><span><span class="sw off"></span> Nghỉ lễ</span><span><b class="first-mark">1/10</b> Mùng 1 âm</span></div>
+      <ul id="events" class="events" data-i18n-skip></ul>
+    </div>
+  </section>
+  <section class="pane day-pane">
+    <div class="bar"><b>Chi tiết ngày</b></div>
+    <div class="scroll" id="detail" data-i18n-skip></div>
+  </section>
+</main>
+<div class="seg pane-switch" id="horoSwitch" hidden><button>Bản mệnh</button><button>Vận hạn</button></div>
+<main class="work pane-scroller" id="horoWork" hidden>
+  <section class="pane">
+    <div class="bar"><b>Bản mệnh</b></div>
+    <div class="scroll horo" id="hProfile" data-i18n-skip></div>
+  </section>
+  <section class="pane">
+    <div class="bar"><b>Vận hạn</b></div>
+    <div class="scroll horo" id="hFortune" data-i18n-skip></div>
+  </section>
+</main>
+<footer class="status" id="status"></footer>
+<div class="author">
+  <span>Tác giả:</span><b><a href="https://happywindapp.github.io/CV/cv_quan_phan.html">Phan Ngọc Minh Quân</a></b>
+  <span>GitHub Source:</span><a href="https://github.com/happywindapp/web_tool/">github.com/happywindapp/web_tool</a>
+</div>
+<script>
+"use strict";
+// @include ../data-workbench/js/core/i18n-ui-language-vi-en.js
+// @include js/i18n/en-lunar-calendar-ui-strings.js
+// @include js/i18n/en-almanac-terms.js
+// @include js/i18n/en-horoscope-texts.js
+// @include js/i18n/horoscope-detail-texts-vi-en.js
+// @include ../data-workbench/js/i18n/en-shared-theme-sessions-filters.js
+// @include ../data-workbench/js/core/share-link-codec.js
+// @include ../data-workbench/js/core/text-utils.js
+// @include ../data-workbench/js/core/dom-and-storage-helpers.js
+// @include ../data-workbench/js/core/theme-picker-auto-light-dark.js
+// @include ../data-workbench/js/core/phone-pane-switcher.js
+// @include js/calendar/lunar-solar-conversion-ho-ngoc-duc.js
+// @include js/calendar/can-chi-solar-terms-nap-am.js
+// @include js/calendar/auspicious-days-hours-almanac.js
+// @include js/calendar/vietnam-solar-lunar-holidays.js
+// @include js/calendar/date-text-parser.js
+// @include js/samples/demo-dates-registry.js
+// @include js/samples/horoscope-demo-profiles.js
+// @include js/horoscope/birth-chart-pillars-and-feng-shui.js
+// @include js/horoscope/pythagorean-numerology-name-and-birth.js
+// @include js/horoscope/yearly-fortune-stars-and-age-taboos.js
+// @include js/horoscope/horoscope-interpretation-texts.js
+// @include js/horoscope/western-zodiac-and-element-balance.js
+// @include js/ui/month-grid-view.js
+// @include js/ui/day-detail-pane.js
+// @include js/ui/horoscope-tab-view.js
+// @include js/ui/horoscope-natal-profile-view.js
+// @include js/ui/horoscope-tab-controller.js
+// @include js/ui/lunar-calendar-app.js
+</script>
+</body>
+</html>

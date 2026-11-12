@@ -4,7 +4,7 @@
 
 - **Static single-file tool (công cụ 1 file tĩnh)**: mỗi tool = 1 file `.html` trong `tools/`, CSS + JS inline.
 - `index.html` ở root = trang chủ tĩnh, chỉ chứa link tới từng tool.
-- Không backend, không build, không dependency, không network request (ngoại lệ duy nhất: tab draw.io của Diagram Editor, ADR #11). Mở bằng `file://` hay host tĩnh đều chạy.
+- Không backend, không build, không dependency, không network request (ngoại lệ: tab draw.io của Diagram Editor — ADR #11; Bảng giá chứng khoán chỉ tải giá từ API công khai VPS — ADR #13). Mở bằng `file://` hay host tĩnh đều chạy.
 - Trạng thái chỉ sống trong DOM/biến JS của tab — không `localStorage`, không cookie.
 
 ```text
