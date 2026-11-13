@@ -108,7 +108,8 @@ const Controls = (() => {
 
   async function start() {
     I18n.init();
-    ThemePicker.bind($("theme"), Prefs);
+    // Price boards are read on dark backgrounds → dark unless the viewer already picked a theme.
+    ThemePicker.bind($("theme"), { get: (k, d) => Prefs.get(k, k === "theme" ? "dark" : d), set: Prefs.set });
     BoardView.init($("board"), { name: s => Universe.name(s, I18n.lang), onSelect: Board.select, onStar: s => Watch.toggle(s), onSort: () => Board.draw(true) });
     IndexStrip.init($("indices"));
     DetailView.init($("dHead"), $("dOverview"), $("dBottom"));

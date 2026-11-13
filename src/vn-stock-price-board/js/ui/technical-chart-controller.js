@@ -123,7 +123,8 @@ const ChartCtl = (() => {
   }
 
   function init() {
-    st = clean(Prefs.get("chart", {}));
+    // Every visit opens at 1 year × 1D; type / scale / indicators are remembered, share links still set their own range.
+    st = clean({ ...Prefs.get("chart", {}), range: "1Y", interval: "1D" });
     mini = TechChart.create($("miniHost"), { legend: $("miniLegend"), compact: true });
     full = TechChart.create($("fullHost"), { legend: $("fullLegend"), onClick: pt => { const r = draw.click(pt, data.bars); if (!r) return; note = r; head(); if (r.redraw) render(true); } });
     [$("miniChart"), $("chartDlg")].forEach(wire);
