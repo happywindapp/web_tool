@@ -62,6 +62,7 @@ const Board = (() => {
       draw();
       refreshTrades();
       ChartCtl.onQuote(S.quotes.get(S.sel));
+      DetailTabs.onQuote(S.quotes.get(S.sel));
     } catch (e) {
       if (gen !== S.gen || seq !== S.seq) return;
       console.warn("tick - poll VPS datafeed fail", e);
@@ -108,6 +109,8 @@ const Board = (() => {
     BoardView.select(sym);
     renderDetail();
     ChartCtl.setSymbol(sym);
+    DetailTabs.setSymbol(sym);
+    DetailTabs.onQuote(S.quotes.get(sym));
     if (fromUser) PhoneLayout.show(1);
   }
 
@@ -149,6 +152,8 @@ const Board = (() => {
     if (res.opts) setOpts(Controls.writeOpts(res.opts), false);
     if (res.sort) BoardView.setSort(res.sort);
     if (res.chart) ChartCtl.set(res.chart);
+    if (res.fin) { FinView.set(res.fin); DetailTabs.reload("finance"); }
+    if (res.dtab) DetailTabs.show(res.dtab);
     if (res.watch) Watch.replace(res.watch);
     S.bad = res.bad || [];
     if (res.sym) { S.sel = res.sym; S.selQuote = null; S.trades = null; }
@@ -164,7 +169,7 @@ const Board = (() => {
   }
 
   const setFilter = Dom.debounce(v => { filterText = v; draw(); }, 150);
-  const payload = () => ({ tab: S.tab, watch: Watch.all(), opts, sort: BoardView.getSort(), sym: S.sel, chart: ChartCtl.get() });
+  const payload = () => ({ tab: S.tab, watch: Watch.all(), opts, sort: BoardView.getSort(), sym: S.sel, chart: ChartCtl.get(), dtab: DetailTabs.get(), fin: FinView.get() });
 
   Watch.onChange(onWatchChange);
   document.addEventListener("visibilitychange", () => { if (!document.hidden && opts.rate !== "off" && !(S.loading && !S.syms.length)) tick(); else clearTimeout(S.timer); });

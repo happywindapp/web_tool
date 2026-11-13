@@ -111,8 +111,9 @@ const Controls = (() => {
     ThemePicker.bind($("theme"), Prefs);
     BoardView.init($("board"), { name: s => Universe.name(s, I18n.lang), onSelect: Board.select, onStar: s => Watch.toggle(s), onSort: () => Board.draw(true) });
     IndexStrip.init($("indices"));
-    DetailView.init($("dTop"), $("dBottom"));
+    DetailView.init($("dHead"), $("dOverview"), $("dBottom"));
     ChartCtl.init();
+    DetailTabs.init();
     ShareDemo.fillDemo($("demo"));
     Board.setOpts(writeOpts(Prefs.get("opts", {})), false);
     Board.state().tab = Prefs.get("tab", "watch");

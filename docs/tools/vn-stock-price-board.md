@@ -2,7 +2,7 @@
 
 > File: [`tools/vn-stock-price-board.html`](../../tools/vn-stock-price-board.html) — **file sinh ra** từ
 > [`src/vn-stock-price-board/`](../../src/vn-stock-price-board/) bằng `pwsh scripts/build-single-file-tool.ps1 -Tool vn-stock-price-board` (ADR #7).
-> Ngoại lệ gọi mạng: ADR #13 (giá VPS) + ADR #14 (nến lịch sử VNDirect, thư viện Lightweight Charts). Luật chung mọi tool: `docs/architecture/`, `docs/decisions/`.
+> Ngoại lệ gọi mạng: ADR #13 (giá VPS) + ADR #14 (nến lịch sử VNDirect, thư viện Lightweight Charts) + ADR #15 (tab chi tiết: VNDirect finfo). Luật chung mọi tool: `docs/architecture/`, `docs/decisions/`.
 
 ## 1. Mục đích
 
@@ -32,9 +32,9 @@ thanh chỉ số, tab sàn/rổ, danh mục ★, pane chi tiết (sổ lệnh, c
 - **Nến lịch sử** (`History`, CSP `connect-src https://dchart-api.vndirect.com.vn`): `dchart/history?resolution=<1|5|15|30|60|D>&symbol=&from=&to=` → `{t,o,h,l,c,v,s}`, cache 60s trong bộ nhớ.
 - **Tab** (`?tab=`): `watch` (★ Danh mục) · `VN30` · `VN100` · `hose` · `hnx` · `HNX30` · `upcom` · `ETF` · `CW` + rổ khác `VNMID VNSML VNDIAMOND VNFINLEAD VNX50`.
 - **`?demo=`**: `banks` · `brokers` · `realestate` · `materials` · `energy` · `consumer` · `broken` (có token sai `12`, `VN-30` + mã không tồn tại `XYZ`, `NOTREAL1` ⇒ footer báo lỗi). Mẫu thay danh mục, giữ bản cũ cho `↶ Khôi phục danh mục trước`.
-- **Link chia sẻ** `#pako:` payload `{ tab, watch: [mã], opts: { rate, unit, hl, fr, compact }, sort: { key, dir }, sym, chart: { range, interval, type, scale, volume, compare, ind: [{ id, p }] } }`; `?data=VNM,FPT` = danh mục thô (đi lên server, chỉ dùng cho dữ liệu ngắn).
+- **Link chia sẻ** `#pako:` payload `{ tab, watch: [mã], opts: { rate, unit, hl, fr, compact }, sort: { key, dir }, sym, chart: { range, interval, type, scale, volume, compare, ind: [{ id, p }] }, dtab, fin: { kind, period } }`; `?data=VNM,FPT` = danh mục thô (đi lên server, chỉ dùng cho dữ liệu ngắn).
   Payload không tin cậy: mã phải khớp `^[A-Z0-9]{3,10}$` (tối đa 300), tab/sort/option chỉ nhận giá trị đã biết. Link hỏng ⇒ báo lỗi, giữ danh mục.
-- **localStorage** (`web_tool.vn-stock-price-board.*`): `watch`, `watchBackup`, `opts`, `tab`, `theme`, `universe`, `chart`. sessionStorage `…spark` = điểm sparkline chỉ số trong ngày.
+- **localStorage** (`web_tool.vn-stock-price-board.*`): `watch`, `watchBackup`, `opts`, `tab`, `theme`, `universe`, `chart`, `dtab`, `fin`. sessionStorage `…spark` = điểm sparkline chỉ số trong ngày.
 - **CSV**: `bang-gia-<tab>-<yyyymmdd>.csv` (EN `price-board-…`), UTF-8 BOM, cột = cột đang hiện.
 
 ## 4. Luật xử lý
@@ -61,6 +61,23 @@ thanh chỉ số, tab sàn/rổ, danh mục ★, pane chi tiết (sổ lệnh, c
 - Vẽ (chart lớn, theo mã, trong bộ nhớ): đường ngang · xu hướng · Fibonacci thoái lui (0–100%) · thước đo (Δ giá, %, số nến) · xoá. Legend OHLC + %, KL, giá trị chỉ báo theo crosshair; ⤢ xem toàn bộ; 📷 PNG.
 - Nến ngày cuối cập nhật theo quote mỗi lần poll (khung 1D; Heikin-Ashi không cập nhật trực tiếp).
 - Tool tự bắt `click` gốc trên vùng chart (thư viện nuốt click thứ 2 nhanh ở điểm khác như double-click); kéo > 6px không tính là click.
+
+### Các tab của pane chi tiết (`DetailTabs`, `TabHtml`, `FinView`, `FinTable`, `Finfo`)
+
+| Tab | Nội dung | Nguồn |
+|-----|----------|-------|
+| Tổng quan | Trần/sàn/TC, sổ lệnh 3 bước + chỉ số cơ bản: vốn hoá, P/E, P/B, P/S, EPS, BVPS, ROE, ROA, ROIC, tỷ suất cổ tức, Beta, CP lưu hành, KL TB 10 phiên, cao/thấp 52 tuần | VPS + `ratios/latest` |
+| Kỹ thuật | Chart kỹ thuật gọn (chỉ tải khi tab mở hoặc cửa sổ lớn mở) | VNDirect dchart |
+| Khớp lệnh | Diễn biến trong ngày, mua/bán chủ động, lịch sử khớp | VPS |
+| Tin tức | 10 tin/lần + "Xem thêm", nguồn, giờ, tóm tắt; tiêu đề mở bài gốc ở tab mới (`noopener`) | `news` (chỉ tiếng Việt) |
+| Tài chính | KQKD / Cân đối / Lưu chuyển tiền tệ × Quý (8 quý) / Năm (8 năm), đơn vị tỷ đồng, EPS giữ đồng, rê chuột xem % so với kỳ trước | `financial_models` + `financial_statements` |
+| Sự kiện | Cổ tức, cổ phiếu thưởng, phát hành thêm, ĐHCĐ: ngày công bố, GDKHQ, ngày thực hiện | `events` (`VN` / `EN_GB`) |
+| Hồ sơ | Tên, sàn, ngày thành lập, MST, địa chỉ, điện thoại, website, email, số nhân viên, giới thiệu + 15 cổ đông lớn | `company_profiles` + `shareholders` |
+| Khuyến nghị | Giá mục tiêu TB, tiềm năng so với giá khớp, bảng đơn vị / đánh giá / giá mục tiêu | `recommendations` |
+
+- Mẫu BCTC tự chọn theo mã: trong các mẫu cùng loại lấy mẫu có `note` thông tư (doanh nghiệp 1/2/3, ngân hàng 101/102/103, chứng khoán 89/90/91, bảo hiểm 411/412/413).
+- Đổi mã ⇒ bỏ kết quả của mã cũ (`seq`); đổi ngôn ngữ ⇒ vẽ lại từ bộ nhớ, riêng Sự kiện tải lại theo locale. Tab đang mở + tuỳ chọn BCTC nằm trong link chia sẻ (`dtab`, `fin`) và localStorage (`dtab`, `fin`).
+- `ownershipPct` của cổ đông đã là %, còn ROE/ROA/tỷ suất cổ tức của `ratios` là tỷ lệ (× 100 khi hiện).
 
 ## 5. Data model
 

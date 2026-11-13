@@ -11,7 +11,7 @@ const ChartBar = (() => {
     return `<select data-c="range" title="${e(T("Khoảng thời gian"))}">${ChartRange.RANGES.map(r => `<option value="${r.k}"${r.k === s.range ? " selected" : ""}>${e(T(r.label))}</option>`).join("")}</select>`
       + `<select data-c="interval" title="${e(T("Khung nến"))}">${intervalOpts(s)}</select>`
       + `<select data-c="type" title="${e(T("Kiểu biểu đồ"))}">${opts(TYPES, s.type)}</select>`
-      + `<button data-c="open" title="${e(T("Mở biểu đồ kỹ thuật toàn màn hình"))}">⛶</button>`;
+      + `<button data-c="open" class="chart-btn" title="${e(T("Mở biểu đồ kỹ thuật toàn màn hình"))}">📊 Full</button>`;
   }
 
   function full(s, tool) {

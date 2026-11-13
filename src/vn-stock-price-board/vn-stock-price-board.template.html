@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src https://bgapidatafeed.vps.com.vn https://dchart-api.vndirect.com.vn">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src https://bgapidatafeed.vps.com.vn https://dchart-api.vndirect.com.vn https://api-finfo.vndirect.com.vn">
 <title>Bảng giá chứng khoán</title>
 <style>
 /* @include ../data-workbench/styles/base.css */
@@ -11,6 +11,7 @@
 /* @include ../data-workbench/styles/theme-filter-popover-chips.css */
 /* @include styles/vn-stock-price-board.css */
 /* @include styles/technical-chart.css */
+/* @include styles/detail-tabs.css */
 /* @include ../data-workbench/styles/phone-portrait-layout.css */
 </style>
 </head>
@@ -50,12 +51,21 @@
   <section class="pane detail-pane">
     <div class="bar"><b>Chi tiết mã</b></div>
     <div class="scroll" id="detail" data-i18n-skip>
-      <div id="dTop"></div>
+      <div id="dHead"></div>
+      <nav class="dtabs" id="dTabs"></nav>
+      <section class="dpanel" data-tab="overview"><div id="dOverview"></div><div id="dRatios"></div></section>
+      <section class="dpanel" data-tab="chart" hidden>
       <section id="miniChart" class="mini-chart" hidden>
         <div class="cbar" id="miniBar"></div>
         <div class="cbox"><div class="clegend" id="miniLegend"></div><div class="chost" id="miniHost"></div><p class="cmsg" id="miniMsg" hidden></p></div>
       </section>
-      <div id="dBottom"></div>
+      </section>
+      <section class="dpanel" data-tab="trades" hidden><div id="dBottom"></div></section>
+      <section class="dpanel" data-tab="news" hidden><div id="dNews"></div></section>
+      <section class="dpanel" data-tab="finance" hidden><div id="dFinance"></div></section>
+      <section class="dpanel" data-tab="events" hidden><div id="dEvents"></div></section>
+      <section class="dpanel" data-tab="profile" hidden><div id="dProfile"></div></section>
+      <section class="dpanel" data-tab="recs" hidden><div id="dRecs"></div></section>
     </div>
   </section>
 </main>
@@ -90,8 +100,10 @@
 // @include js/model/technical-indicators-trend-and-bands.js
 // @include js/model/technical-indicators-oscillators.js
 // @include js/model/indicator-catalog.js
+// @include js/model/financial-statement-table.js
 // @include js/data/vps-datafeed-client.js
 // @include js/data/vndirect-ohlc-history-client.js
+// @include js/data/vndirect-finfo-client.js
 // @include js/samples/watchlist-demo-presets.js
 // @include js/ui/watchlist-store.js
 // @include js/ui/board-table-view.js
@@ -101,6 +113,9 @@
 // @include js/ui/technical-chart-drawing-tools.js
 // @include js/ui/technical-chart-toolbar.js
 // @include js/ui/technical-chart-controller.js
+// @include js/ui/detail-tab-renderers.js
+// @include js/ui/financial-statement-view.js
+// @include js/ui/detail-tabs-controller.js
 // @include js/ui/board-share-link-and-demo.js
 // @include js/ui/board-app.js
 // @include js/ui/board-controls.js

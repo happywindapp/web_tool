@@ -21,6 +21,8 @@ const ShareDemo = (() => {
     if (p.sort && SORT_KEYS.has(p.sort.key) && (p.sort.dir === 1 || p.sort.dir === -1)) out.sort = { key: p.sort.key, dir: p.sort.dir };
     if (WatchParse.isSymbol(p.sym)) out.sym = p.sym;
     if (p.chart && typeof p.chart === "object") out.chart = p.chart;
+    if (typeof p.dtab === "string" && DetailTabs.IDS.has(p.dtab)) out.dtab = p.dtab;
+    if (p.fin && typeof p.fin === "object") out.fin = p.fin;
     return out;
   }
 

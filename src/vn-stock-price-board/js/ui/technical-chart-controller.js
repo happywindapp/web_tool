@@ -1,7 +1,7 @@
 // Technical chart controller: one shared state (Prefs "chart") for the detail-pane mini chart and the full-screen dialog.
 const ChartCtl = (() => {
   const TYPES = ["candle", "ha", "bar", "line", "area", "baseline"], SCALES = ["normal", "log", "pct"];
-  let st, sym = "", quote = null, data = { key: "", bars: [], cmp: null }, seq = 0, mini, full, dlgOpen = false, note = null;
+  let st, sym = "", active = false, quote = null, data = { key: "", bars: [], cmp: null }, seq = 0, mini, full, dlgOpen = false, note = null;
   const draw = ChartDraw.create();
 
   function clean(raw) {
@@ -28,8 +28,9 @@ const ChartCtl = (() => {
     $("fullStatus").textContent = note ? T(note.key, note.p) : draw.tool() ? T(draw.needsTwo() ? "Bấm 2 điểm trên biểu đồ." : "Bấm 1 điểm trên biểu đồ.") : T("Kéo để cuộn, lăn chuột / chụm 2 ngón để phóng to, bấm đúp trục giá để tự co giãn.");
   }
 
+  // Only fetch while the chart is on screen (detail tab "Kỹ thuật" or the dialog).
   async function load() {
-    if (!sym) return;
+    if (!sym || (!active && !dlgOpen)) return;
     const my = ++seq, key = `${sym}|${st.range}|${st.interval}|${st.compare}`;
     if (data.key !== key) {
       msg("Đang tải dữ liệu biểu đồ…");
@@ -135,5 +136,7 @@ const ChartCtl = (() => {
     bars();
   }
 
-  return { init, setSymbol, onQuote, openDialog, get: () => st, set: raw => { st = clean(raw); save(); bars(); data.key = ""; load(); } };
+  const setActive = v => { active = v; if (v) load(); };
+
+  return { init, setSymbol, setActive, onQuote, openDialog, get: () => st, set: raw => { st = clean(raw); save(); bars(); data.key = ""; load(); } };
 })();

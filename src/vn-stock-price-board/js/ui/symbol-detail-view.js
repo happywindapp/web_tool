@@ -1,6 +1,6 @@
 // Detail pane for the selected symbol: price, stats, 3-level order book, intraday chart, active buy/sell and match history.
 const DetailView = (() => {
-  let top, bottom;
+  let top, overview, bottom;
   const TRADE_ROWS = 150;
 
   const stat = (label, val, cls = "") => `<div><span>${Dom.esc(T(label))}</span><b class="${cls}">${Dom.esc(val)}</b></div>`;
@@ -46,11 +46,11 @@ const DetailView = (() => {
 
   // s = { q, name, watched, unit, trades: array | null, tradeState: "loading" | "error" | "ok" }
   function render(s) {
-    if (!s.q) { top.innerHTML = `<p class="muted pad">${Dom.esc(T("Chọn 1 mã trong bảng giá để xem chi tiết."))}</p>`; bottom.innerHTML = ""; return; }
+    if (!s.q) { top.innerHTML = `<p class="muted pad">${Dom.esc(T("Chọn 1 mã trong bảng giá để xem chi tiết."))}</p>`; overview.innerHTML = ""; bottom.innerHTML = ""; return; }
     const q = s.q, tone = QuoteModel.tone(q.last || q.ref, q), tip = s.watched ? T("Bỏ khỏi danh mục") : T("Thêm vào danh mục");
     const head = `<div class="dh"><div><b class="dsym ${tone}">${Dom.esc(q.sym)}</b> <span class="badge">${Dom.esc(q.ex)}</span>`
       + `<button id="dStar" class="star${s.watched ? " on" : ""}" title="${Dom.esc(tip)}">${s.watched ? "★" : "☆"}</button>`
-      + `<button id="dChart" class="chart-btn" title="${Dom.esc(T("Mở biểu đồ kỹ thuật toàn màn hình"))}">📈</button>`
+      + `<button id="dChart" class="chart-btn" title="${Dom.esc(T("Mở biểu đồ kỹ thuật toàn màn hình"))}">📈 ${Dom.esc(T("Biểu đồ"))}</button>`
       + `<div class="muted dname">${Dom.esc(s.name)}</div></div>`
       + `<div class="dp ${tone}"><b>${Fmt.price(q.last || q.ref)}</b><span>${Fmt.chg(q, q.chg)} ${Fmt.pct(q, q.pct)}</span></div></div>`;
     let tail;
@@ -58,9 +58,10 @@ const DetailView = (() => {
     else if (s.tradeState === "error") tail = `<p class="bad pad">${Dom.esc(T("Không tải được lịch sử khớp lệnh."))}</p>`;
     else if (!s.trades || !s.trades.length) tail = `<p class="muted pad">${Dom.esc(T("Chưa có lệnh khớp trong ngày."))}</p>`;
     else tail = ChartSvg.intraday(s.trades, q) + sides(s.trades, s.unit) + tradeList(s.trades, q, s.unit);
-    top.innerHTML = head + stats(q, s.unit) + book(q, s.unit);
+    top.innerHTML = head;
+    overview.innerHTML = stats(q, s.unit) + book(q, s.unit);
     bottom.innerHTML = `<div class="dsec"><b>${Dom.esc(T("Diễn biến trong ngày"))}</b><button id="dReload" title="${Dom.esc(T("Tải lại lịch sử khớp lệnh"))}">↻</button></div>` + tail;
   }
 
-  return { init: (t, b) => { top = t; bottom = b; }, render };
+  return { init: (t, o, b) => { top = t; overview = o; bottom = b; }, render };
 })();

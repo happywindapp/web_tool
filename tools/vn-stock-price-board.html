@@ -4,7 +4,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src https://bgapidatafeed.vps.com.vn https://dchart-api.vndirect.com.vn">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src https://bgapidatafeed.vps.com.vn https://dchart-api.vndirect.com.vn https://api-finfo.vndirect.com.vn">
 <title>Bảng giá chứng khoán</title>
 <style>
   :root { --bg:#f8fafc; --panel:#fff; --line:#cbd5e1; --ink:#0f172a; --muted:#64748b; --acc:#0e7490;
@@ -176,7 +176,9 @@
   .clegend b { font-weight:600; }
   .cmsg { position:absolute; z-index:4; inset:0; display:grid; place-items:center; margin:0; padding:12px; text-align:center; color:var(--muted); background:var(--panel); }
   .cmsg[hidden] { display:none; }
-  button.chart-btn { min-height:0; padding:0 6px; border:0; background:none; font-size:16px; vertical-align:2px; }
+  button.chart-btn { min-height:0; padding:3px 12px; border:1px solid var(--acc); border-radius:999px; background:var(--acc); color:#fff; font-size:12.5px; font-weight:600; vertical-align:2px; box-shadow:0 1px 3px rgb(14 116 144 / .35); }
+  @media (hover:hover) { button.chart-btn:hover { background:color-mix(in srgb, var(--acc) 82%, #000); } }
+  .cbar button.chart-btn { margin-left:auto; padding:3px 12px; }
 
   dialog.chart-dlg { width:min(1600px, 96vw); height:92vh; height:92dvh; max-width:none; max-height:none; padding:0; border:1px solid var(--line); border-radius:10px;
                      background:var(--panel); color:var(--ink); }
@@ -204,6 +206,39 @@
     .mini-chart .cbar select { max-width:30vw; }
     .clegend > span ~ span { display:none; }
   }
+  /* Detail pane tabs: overview, chart, trades, news, financials, events, profile, analyst calls. */
+  .dtabs { position:sticky; top:0; z-index:5; display:flex; gap:2px; padding:4px 8px 0; overflow-x:auto; scrollbar-width:none; background:var(--panel); border-bottom:1px solid var(--line); }
+  .dtabs button { flex:none; min-height:0; padding:5px 9px; border:0; border-bottom:2px solid transparent; border-radius:0; background:none; color:var(--muted); font-size:12.5px; white-space:nowrap; }
+  .dtabs button.on { color:var(--ink); border-bottom-color:var(--acc); font-weight:600; }
+  @media (hover:hover) { .dtabs button:hover { color:var(--ink); } }
+  .dpanel { padding-bottom:8px; }
+  .dpanel .cbar { padding-top:8px; }
+  .dpanel .seg button.on { background:var(--acc); color:#fff; border-color:var(--acc); }
+
+  .nitem { padding:8px 12px; border-bottom:1px solid var(--gut); font-size:13px; }
+  .nitem b { font-weight:600; line-height:1.35; } .nitem a { color:var(--ink); text-decoration:none; }
+  @media (hover:hover) { .nitem a:hover { color:var(--acc); text-decoration:underline; } }
+  .nitem .muted { font-size:11.5px; margin-top:2px; }
+  .nitem p { margin:4px 0 0; color:var(--muted); font-size:12.5px; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
+  button.more { display:block; margin:8px auto; }
+  .summary { font-size:12.5px; line-height:1.5; white-space:pre-line; }
+
+  table.dtable { width:calc(100% - 24px); margin:6px 12px; border-collapse:collapse; font-size:12.5px; font-variant-numeric:tabular-nums; }
+  .dtable th { padding:3px 6px; color:var(--muted); font-size:11.5px; font-weight:600; text-align:left; border-bottom:1px solid var(--line); }
+  .dtable td { padding:4px 6px; vertical-align:top; border-bottom:1px solid var(--gut); }
+  .dtable .muted { font-size:11.5px; }
+  .dtable.kv th { width:36%; border-bottom:1px solid var(--gut); font-weight:400; vertical-align:top; }
+  .dtable a { color:var(--acc); word-break:break-all; }
+
+  .fscroll { overflow-x:auto; margin:4px 0 0; }
+  table.ftable { border-collapse:separate; border-spacing:0; min-width:100%; font-size:12px; font-variant-numeric:tabular-nums; white-space:nowrap; }
+  .ftable th, .ftable td { padding:3px 8px; border-bottom:1px solid var(--gut); text-align:right; }
+  .ftable thead th { position:sticky; top:0; background:var(--gut); color:var(--muted); font-weight:600; }
+  .ftable tbody th, .ftable thead th:first-child { position:sticky; left:0; z-index:1; max-width:190px; overflow:hidden; text-overflow:ellipsis; text-align:left; font-weight:400; background:var(--panel); }
+  .ftable thead th:first-child { z-index:2; background:var(--gut); }
+  .ftable tr.lv1 th { font-weight:600; } .ftable tr.lv2 th { padding-left:18px; } .ftable tr.lv3 th { padding-left:28px; color:var(--muted); } .ftable tr.lv4 th { padding-left:38px; color:var(--muted); }
+  @media (hover:hover) { .ftable tbody tr:hover :is(th, td) { background:var(--hover); } }
+  @media (min-width: 641px) { .dtabs { flex-wrap:wrap; overflow-x:visible; } }
   .pane-switch, .more-toggle { display:none; }
   /* Phone portrait: one pane at a time in a horizontal snap scroller; control rows scroll sideways instead of wrapping and the primary button stays pinned. */
   @media (max-width: 640px) {
@@ -330,12 +365,21 @@
   <section class="pane detail-pane">
     <div class="bar"><b>Chi tiết mã</b></div>
     <div class="scroll" id="detail" data-i18n-skip>
-      <div id="dTop"></div>
+      <div id="dHead"></div>
+      <nav class="dtabs" id="dTabs"></nav>
+      <section class="dpanel" data-tab="overview"><div id="dOverview"></div><div id="dRatios"></div></section>
+      <section class="dpanel" data-tab="chart" hidden>
       <section id="miniChart" class="mini-chart" hidden>
         <div class="cbar" id="miniBar"></div>
         <div class="cbox"><div class="clegend" id="miniLegend"></div><div class="chost" id="miniHost"></div><p class="cmsg" id="miniMsg" hidden></p></div>
       </section>
-      <div id="dBottom"></div>
+      </section>
+      <section class="dpanel" data-tab="trades" hidden><div id="dBottom"></div></section>
+      <section class="dpanel" data-tab="news" hidden><div id="dNews"></div></section>
+      <section class="dpanel" data-tab="finance" hidden><div id="dFinance"></div></section>
+      <section class="dpanel" data-tab="events" hidden><div id="dEvents"></div></section>
+      <section class="dpanel" data-tab="profile" hidden><div id="dProfile"></div></section>
+      <section class="dpanel" data-tab="recs" hidden><div id="dRecs"></div></section>
     </div>
   </section>
 </main>
@@ -530,6 +574,27 @@ I18n.add({
   "+ Chỉ báo…": "+ Indicator…", "Thêm chỉ báo kỹ thuật": "Add a technical indicator", "Trên biểu đồ giá": "On the price chart", "Khung riêng": "Separate pane",
   "Khoảng thời gian": "Time range", "Khung nến": "Candle interval", "Kiểu biểu đồ": "Chart type", "Mở biểu đồ kỹ thuật toàn màn hình": "Open the full-screen technical chart",
   "Xoá mọi hình vẽ": "Clear all drawings", "Xem toàn bộ dữ liệu": "Show all data", "Tải ảnh PNG của biểu đồ": "Download the chart as PNG", "Bỏ chỉ báo": "Remove indicator",
+  // detail tabs
+  "Tổng quan": "Overview", "Kỹ thuật": "Technical", "Tin tức": "News", "Tài chính": "Financials", "Sự kiện": "Events", "Hồ sơ": "Profile", "Khuyến nghị": "Analysts",
+  "Đang tải…": "Loading…", "Không tải được dữ liệu từ VNDirect. Thử lại sau.": "Could not load data from VNDirect. Try again later.",
+  "Chưa có chỉ số định giá cho mã này.": "No valuation ratios for this ticker.", "Chỉ số cơ bản": "Key ratios", "Vốn hoá (tỷ)": "Market cap (bn VND)",
+  "EPS (đ)": "EPS (VND)", "BVPS (đ)": "BVPS (VND)", "Tỷ suất cổ tức": "Dividend yield", "CP lưu hành": "Shares outstanding", "KL TB 10 phiên": "Avg vol 10 sessions",
+  "Cao nhất 52 tuần": "52-week high", "Thấp nhất 52 tuần": "52-week low",
+  "Chưa có tin tức cho mã này.": "No news for this ticker.", "Xem thêm tin": "More news",
+  "Tin tổng hợp từ VNDirect (tiếng Việt); bấm tiêu đề để đọc bài gốc.": "News aggregated by VNDirect (in Vietnamese); click a headline to read the original article.",
+  "Chưa có sự kiện quyền nào.": "No corporate events.", "Công bố": "Announced", "GDKHQ": "Ex-date", "Thực hiện": "Paid / effective",
+  "Chưa có hồ sơ doanh nghiệp.": "No company profile.", "Tên công ty": "Company name", "Sàn niêm yết": "Exchange", "Ngày thành lập": "Founded", "Mã số thuế": "Tax code",
+  "Địa chỉ": "Address", "Điện thoại": "Phone", "Website": "Website", "Email": "Email", "Số nhân viên": "Employees",
+  "Cổ đông lớn": "Major shareholders", "Cổ đông": "Shareholder", "Số CP": "Shares", "Tỷ lệ": "Ownership",
+  "Mua mạnh": "Strong buy", "Khả quan": "Outperform", "Mua thêm": "Add", "Tích luỹ": "Accumulate", "Nắm giữ": "Hold", "Trung lập": "Neutral",
+  "Kém khả quan": "Underperform", "Giảm tỷ trọng": "Reduce",
+  "Chưa có khuyến nghị của công ty phân tích.": "No analyst recommendations.", "Giá mục tiêu TB": "Avg target price", "Tiềm năng": "Upside",
+  "Số khuyến nghị": "Recommendations", "Đánh giá": "Rating", "Biểu đồ": "Chart", "Ngày": "Date", "Đơn vị": "Firm", "Giá mục tiêu": "Target price",
+  "Tiềm năng = giá mục tiêu so với giá khớp hiện tại. Nguồn: VNDirect / Bloomberg.": "Upside = target price vs. the current matched price. Source: VNDirect / Bloomberg.",
+  "Kết quả kinh doanh": "Income statement", "Cân đối kế toán": "Balance sheet", "Lưu chuyển tiền tệ": "Cash flow", "Quý": "Quarter", "Năm": "Year",
+  "Chưa có báo cáo tài chính cho mã này.": "No financial statements for this ticker.", "Chỉ tiêu (tỷ đồng)": "Item (bn VND)",
+  "{g}% so với kỳ trước": "{g}% vs. previous period",
+  "Nguồn: VNDirect. Rê chuột lên ô để xem % thay đổi so với kỳ trước; EPS tính bằng đồng.": "Source: VNDirect. Hover a cell for % change vs. the previous period; EPS is in VND.",
 });
 // English for the shared core modules (ThemePicker markup, SavedSessions, ColFilter) — included by every tool that uses them.
 I18n.add({
@@ -1202,6 +1267,52 @@ const Indicators = (() => {
 
   return { DEFS, DEFAULT, clean, params, add, compute, MAX };
 })();
+// Pure: pick the statutory statement model for a ticker, then pivot line items × fiscal periods (newest first).
+const FinTable = (() => {
+  const KINDS = { bs: "BALANCESHEET", is: "INCOME", cf: "CASHFLOW" };
+  const PERIODS = 8;
+
+  // Models of one kind: the one with a circular note (TT…) is the full statutory form; WEB/ALL-forms models are summaries.
+  function pickModel(models, kind) {
+    const name = KINDS[kind], of = models.filter(m => m.modelTypeName === name);
+    const best = of.find(m => m.note) || of[0];
+    if (!best) return null;
+    const items = of.filter(m => m.modelType === best.modelType && Number.isFinite(+m.itemCode))
+      .sort((a, b) => (+a.displayOrder || 0) - (+b.displayOrder || 0))
+      .map(m => ({ code: +m.itemCode, vi: String(m.itemVnName || ""), en: String(m.itemEnName || ""), level: Math.max(1, Math.min(4, +m.displayLevel || 1)) }));
+    return { modelType: +best.modelType, items };
+  }
+
+  // First fiscal date worth fetching: 2 years of quarters or 8 years of annual reports (+ slack).
+  function since(period, now = new Date()) {
+    const y = now.getUTCFullYear() - (period === "year" ? PERIODS + 1 : 3);
+    return `${y}-01-01`;
+  }
+
+  function build(model, rows, n = PERIODS) {
+    const periods = [...new Set(rows.map(r => String(r.fiscalDate)).filter(d => /^\d{4}-\d{2}-\d{2}$/.test(d)))].sort().reverse().slice(0, n);
+    const val = new Map(rows.map(r => [`${+r.itemCode}|${r.fiscalDate}`, +r.numericValue]));
+    const lines = model.items.map(it => ({ ...it, values: periods.map(p => { const v = val.get(`${it.code}|${p}`); return Number.isFinite(v) ? v : null; }) }))
+      .filter(l => l.values.some(v => v !== null));
+    return { periods, lines };
+  }
+
+  // "2026-06-30" → "Q2/2026" (quarter) or "2026" (annual).
+  const label = (date, period) => period === "year" ? date.slice(0, 4) : `Q${Math.ceil(+date.slice(5, 7) / 3)}/${date.slice(0, 4)}`;
+
+  // Money in billion VND; per-share and ratio-sized lines (EPS…) stay as they are.
+  function fmt(v, line) {
+    if (v == null) return "";
+    const small = line.values.every(x => x == null || Math.abs(x) < 1e7);
+    const n = small ? v : v / 1e9, d = small ? 0 : Math.abs(n) >= 100 ? 0 : 2;
+    return n.toLocaleString("en-US", { minimumFractionDigits: d, maximumFractionDigits: d });
+  }
+
+  // Change vs the previous period of the same row, in %.
+  const growth = (values, i) => values[i] != null && values[i + 1] ? (values[i] - values[i + 1]) / Math.abs(values[i + 1]) * 100 : null;
+
+  return { KINDS, pickModel, since, build, label, fmt, growth, PERIODS };
+})();
 // VPS public datafeed (unofficial, CORS *): the only host this tool talks to — also pinned by the page CSP connect-src.
 const Feed = (() => {
   const BASE = "https://bgapidatafeed.vps.com.vn/", CHUNK = 300;
@@ -1286,6 +1397,44 @@ const History = (() => {
   }
 
   return { load };
+})();
+// VNDirect finfo API (public, CORS *): valuation ratios, news, financial statements, corporate events, profile, shareholders, analyst calls.
+const Finfo = (() => {
+  const BASE = "https://api-finfo.vndirect.com.vn/v4/", cache = new Map(), TTL = 5 * 60e3;
+  const RATIOS = ["MARKETCAP", "PRICE_TO_EARNINGS", "PRICE_TO_BOOK", "PRICE_TO_SALES", "EPS_TR", "BVPS_CR", "ROAE_TR_AVG5Q", "ROAA_TR_AVG5Q", "ROIC_TR_AVG5Q",
+    "DIVIDEND_YIELD", "BETA", "OUTSTANDING_SHARES", "NMVOLUME_AVG_CR_10D", "PRICE_HIGHEST_CR_52W", "PRICE_LOWEST_CR_52W"];
+
+  async function get(path) {
+    const hit = cache.get(path);
+    if (hit && Date.now() - hit.at < TTL) return hit.v;
+    const ctl = new AbortController(), timer = setTimeout(() => ctl.abort(), 20000);
+    try {
+      const r = await fetch(BASE + path, { signal: ctl.signal });
+      if (!r.ok) throw new Error("HTTP " + r.status);
+      const j = await r.json(), v = { data: Array.isArray(j && j.data) ? j.data.filter(x => x && typeof x === "object") : [], total: +(j && j.totalElements) || 0 };
+      cache.set(path, { at: Date.now(), v });
+      return v;
+    } finally { clearTimeout(timer); }
+  }
+  const q = s => encodeURIComponent(s);
+
+  async function ratios(sym) {
+    const r = await get(`ratios/latest?filter=ratioCode:${RATIOS.join(",")}&where=code:${q(sym)}&order=reportDate&fields=ratioCode,value,reportDate`);
+    return Object.fromEntries(r.data.filter(x => x && RATIOS.includes(x.ratioCode) && Number.isFinite(+x.value)).map(x => [x.ratioCode, +x.value]));
+  }
+  // News exists in Vietnamese only (locale EN is empty).
+  const news = (sym, page = 1, size = 10) => get(`news?q=tagCodes:${q(sym)}&size=${size}&page=${page}&sort=newsDate:desc~newsTime:desc&fields=newsTitle,newsAbstract,newsSource,newsDate,newsTime,newsUrl,dstockUrl`);
+  const events = (sym, locale) => get(`events?q=code:${q(sym)}~locale:${locale === "en" ? "EN_GB" : "VN"}&size=40&sort=disclosureDate:desc`).then(r => r.data);
+  const profile = sym => get(`company_profiles?q=code:${q(sym)}`).then(r => r.data[0] || null);
+  const shareholders = sym => get(`shareholders?q=code:${q(sym)}&size=15&sort=ownershipPct:desc`).then(r => r.data);
+  const recommendations = sym => get(`recommendations?q=code:${q(sym)}&size=30&sort=reportDate:desc`).then(r => r.data);
+
+  // Statement line items of every model this ticker uses (bank / securities / insurance / normal companies differ).
+  const models = sym => get(`financial_models?q=codeList:${q(sym)}&size=3000&sort=displayOrder:asc&fields=modelType,modelTypeName,note,formType,itemCode,itemVnName,itemEnName,displayLevel,displayOrder`).then(r => r.data);
+  const values = (sym, modelType, period, since) =>
+    get(`financial_statements?q=code:${q(sym)}~reportType:${period === "year" ? "ANNUAL" : "QUARTER"}~modelType:${modelType}~fiscalDate:gte:${since}&size=6000&fields=itemCode,numericValue,fiscalDate`).then(r => r.data);
+
+  return { ratios, news, events, profile, shareholders, recommendations, models, values };
 })();
 // "Thử mẫu…" presets: ready-made watchlists (raw text, parsed like user input) + one with bad tokens to show the error report.
 const DEMOS = {
@@ -1463,7 +1612,7 @@ const IndexStrip = (() => {
 })();
 // Detail pane for the selected symbol: price, stats, 3-level order book, intraday chart, active buy/sell and match history.
 const DetailView = (() => {
-  let top, bottom;
+  let top, overview, bottom;
   const TRADE_ROWS = 150;
 
   const stat = (label, val, cls = "") => `<div><span>${Dom.esc(T(label))}</span><b class="${cls}">${Dom.esc(val)}</b></div>`;
@@ -1509,11 +1658,11 @@ const DetailView = (() => {
 
   // s = { q, name, watched, unit, trades: array | null, tradeState: "loading" | "error" | "ok" }
   function render(s) {
-    if (!s.q) { top.innerHTML = `<p class="muted pad">${Dom.esc(T("Chọn 1 mã trong bảng giá để xem chi tiết."))}</p>`; bottom.innerHTML = ""; return; }
+    if (!s.q) { top.innerHTML = `<p class="muted pad">${Dom.esc(T("Chọn 1 mã trong bảng giá để xem chi tiết."))}</p>`; overview.innerHTML = ""; bottom.innerHTML = ""; return; }
     const q = s.q, tone = QuoteModel.tone(q.last || q.ref, q), tip = s.watched ? T("Bỏ khỏi danh mục") : T("Thêm vào danh mục");
     const head = `<div class="dh"><div><b class="dsym ${tone}">${Dom.esc(q.sym)}</b> <span class="badge">${Dom.esc(q.ex)}</span>`
       + `<button id="dStar" class="star${s.watched ? " on" : ""}" title="${Dom.esc(tip)}">${s.watched ? "★" : "☆"}</button>`
-      + `<button id="dChart" class="chart-btn" title="${Dom.esc(T("Mở biểu đồ kỹ thuật toàn màn hình"))}">📈</button>`
+      + `<button id="dChart" class="chart-btn" title="${Dom.esc(T("Mở biểu đồ kỹ thuật toàn màn hình"))}">📈 ${Dom.esc(T("Biểu đồ"))}</button>`
       + `<div class="muted dname">${Dom.esc(s.name)}</div></div>`
       + `<div class="dp ${tone}"><b>${Fmt.price(q.last || q.ref)}</b><span>${Fmt.chg(q, q.chg)} ${Fmt.pct(q, q.pct)}</span></div></div>`;
     let tail;
@@ -1521,11 +1670,12 @@ const DetailView = (() => {
     else if (s.tradeState === "error") tail = `<p class="bad pad">${Dom.esc(T("Không tải được lịch sử khớp lệnh."))}</p>`;
     else if (!s.trades || !s.trades.length) tail = `<p class="muted pad">${Dom.esc(T("Chưa có lệnh khớp trong ngày."))}</p>`;
     else tail = ChartSvg.intraday(s.trades, q) + sides(s.trades, s.unit) + tradeList(s.trades, q, s.unit);
-    top.innerHTML = head + stats(q, s.unit) + book(q, s.unit);
+    top.innerHTML = head;
+    overview.innerHTML = stats(q, s.unit) + book(q, s.unit);
     bottom.innerHTML = `<div class="dsec"><b>${Dom.esc(T("Diễn biến trong ngày"))}</b><button id="dReload" title="${Dom.esc(T("Tải lại lịch sử khớp lệnh"))}">↻</button></div>` + tail;
   }
 
-  return { init: (t, b) => { top = t; bottom = b; }, render };
+  return { init: (t, o, b) => { top = t; overview = o; bottom = b; }, render };
 })();
 // Lightweight Charts wrapper: price series (6 types), volume, overlay + own-pane indicators, crosshair legend, click → drawing tools.
 const TechChart = (() => {
@@ -1717,7 +1867,7 @@ const ChartBar = (() => {
     return `<select data-c="range" title="${e(T("Khoảng thời gian"))}">${ChartRange.RANGES.map(r => `<option value="${r.k}"${r.k === s.range ? " selected" : ""}>${e(T(r.label))}</option>`).join("")}</select>`
       + `<select data-c="interval" title="${e(T("Khung nến"))}">${intervalOpts(s)}</select>`
       + `<select data-c="type" title="${e(T("Kiểu biểu đồ"))}">${opts(TYPES, s.type)}</select>`
-      + `<button data-c="open" title="${e(T("Mở biểu đồ kỹ thuật toàn màn hình"))}">⛶</button>`;
+      + `<button data-c="open" class="chart-btn" title="${e(T("Mở biểu đồ kỹ thuật toàn màn hình"))}">📊 Full</button>`;
   }
 
   function full(s, tool) {
@@ -1751,7 +1901,7 @@ const ChartBar = (() => {
 // Technical chart controller: one shared state (Prefs "chart") for the detail-pane mini chart and the full-screen dialog.
 const ChartCtl = (() => {
   const TYPES = ["candle", "ha", "bar", "line", "area", "baseline"], SCALES = ["normal", "log", "pct"];
-  let st, sym = "", quote = null, data = { key: "", bars: [], cmp: null }, seq = 0, mini, full, dlgOpen = false, note = null;
+  let st, sym = "", active = false, quote = null, data = { key: "", bars: [], cmp: null }, seq = 0, mini, full, dlgOpen = false, note = null;
   const draw = ChartDraw.create();
 
   function clean(raw) {
@@ -1778,8 +1928,9 @@ const ChartCtl = (() => {
     $("fullStatus").textContent = note ? T(note.key, note.p) : draw.tool() ? T(draw.needsTwo() ? "Bấm 2 điểm trên biểu đồ." : "Bấm 1 điểm trên biểu đồ.") : T("Kéo để cuộn, lăn chuột / chụm 2 ngón để phóng to, bấm đúp trục giá để tự co giãn.");
   }
 
+  // Only fetch while the chart is on screen (detail tab "Kỹ thuật" or the dialog).
   async function load() {
-    if (!sym) return;
+    if (!sym || (!active && !dlgOpen)) return;
     const my = ++seq, key = `${sym}|${st.range}|${st.interval}|${st.compare}`;
     if (data.key !== key) {
       msg("Đang tải dữ liệu biểu đồ…");
@@ -1885,7 +2036,214 @@ const ChartCtl = (() => {
     bars();
   }
 
-  return { init, setSymbol, onQuote, openDialog, get: () => st, set: raw => { st = clean(raw); save(); bars(); data.key = ""; load(); } };
+  const setActive = v => { active = v; if (v) load(); };
+
+  return { init, setSymbol, setActive, onQuote, openDialog, get: () => st, set: raw => { st = clean(raw); save(); bars(); data.key = ""; load(); } };
+})();
+// HTML for the detail tabs fed by VNDirect finfo: ratios, news, events, profile + shareholders, analyst calls, financial statements.
+const TabHtml = (() => {
+  const e = s => Dom.esc(s ?? "");
+  const dmy = s => /^\d{4}-\d{2}-\d{2}/.test(s || "") ? `${s.slice(8, 10)}/${s.slice(5, 7)}/${s.slice(0, 4)}` : "";
+  const url = u => /^https?:\/\//i.test(u || "") ? u : "";
+  const link = (u, text) => url(u) ? `<a href="${e(url(u))}" target="_blank" rel="noopener noreferrer">${e(text)}</a>` : e(text);
+  const num = (v, d = 2) => Number.isFinite(v) ? Fmt.en(v, d) : "—";
+  const pct = v => Number.isFinite(v) ? Fmt.en(v * 100, 2) + "%" : "—";
+  const stat = (label, val, cls = "") => `<div><span>${e(label)}</span><b class="${cls}">${e(val)}</b></div>`;
+  const empty = text => `<p class="muted pad">${e(text)}</p>`;
+
+  function ratios(r) {
+    if (!r || !Object.keys(r).length) return empty(T("Chưa có chỉ số định giá cho mã này."));
+    return `<div class="dsec"><b>${e(T("Chỉ số cơ bản"))}</b></div><div class="stats">`
+      + stat(T("Vốn hoá (tỷ)"), num(r.MARKETCAP / 1e9, 0)) + stat(T("P/E"), num(r.PRICE_TO_EARNINGS)) + stat(T("P/B"), num(r.PRICE_TO_BOOK)) + stat(T("P/S"), num(r.PRICE_TO_SALES))
+      + stat(T("EPS (đ)"), num(r.EPS_TR, 0)) + stat(T("BVPS (đ)"), num(r.BVPS_CR, 0)) + stat(T("ROE"), pct(r.ROAE_TR_AVG5Q)) + stat(T("ROA"), pct(r.ROAA_TR_AVG5Q))
+      + stat(T("ROIC"), pct(r.ROIC_TR_AVG5Q)) + stat(T("Tỷ suất cổ tức"), pct(r.DIVIDEND_YIELD)) + stat(T("Beta"), num(r.BETA)) + stat(T("CP lưu hành"), Fmt.big(r.OUTSTANDING_SHARES || 0) || "—")
+      + stat(T("KL TB 10 phiên"), Fmt.big(r.NMVOLUME_AVG_CR_10D || 0) || "—") + stat(T("Cao nhất 52 tuần"), num(r.PRICE_HIGHEST_CR_52W / 1000)) + stat(T("Thấp nhất 52 tuần"), num(r.PRICE_LOWEST_CR_52W / 1000))
+      + `</div>`;
+  }
+
+  function news(list, more) {
+    if (!list.length) return empty(T("Chưa có tin tức cho mã này."));
+    return list.map(n => `<article class="nitem"><b>${link(n.newsUrl || n.dstockUrl, String(n.newsTitle || "").trim())}</b>`
+      + `<div class="muted">${e(n.newsSource)} · ${dmy(n.newsDate)} ${e(String(n.newsTime || "").slice(0, 5))}</div>`
+      + (n.newsAbstract ? `<p>${e(String(n.newsAbstract).trim())}</p>` : "") + `</article>`).join("")
+      + (more ? `<button class="more" data-act="moreNews">${e(T("Xem thêm tin"))}</button>` : "")
+      + `<p class="muted pad">${e(T("Tin tổng hợp từ VNDirect (tiếng Việt); bấm tiêu đề để đọc bài gốc."))}</p>`;
+  }
+
+  function events(list) {
+    if (!list.length) return empty(T("Chưa có sự kiện quyền nào."));
+    return `<table class="dtable"><thead><tr><th>${e(T("Công bố"))}</th><th>${e(T("Sự kiện"))}</th><th>${e(T("GDKHQ"))}</th><th>${e(T("Thực hiện"))}</th></tr></thead><tbody>`
+      + list.map(x => `<tr><td>${dmy(x.disclosureDate)}</td><td><b>${e(x.typeDesc)}</b>${x.note ? `<div class="muted">${e(x.note)}</div>` : ""}</td>`
+        + `<td>${dmy(x.effectiveDate)}</td><td>${dmy(x.actualDate)}</td></tr>`).join("") + `</tbody></table>`;
+  }
+
+  function profile(p, holders, lang) {
+    if (!p) return empty(T("Chưa có hồ sơ doanh nghiệp."));
+    const en = lang === "en";
+    const row = (k, v) => v ? `<tr><th>${e(k)}</th><td>${v}</td></tr>` : "";
+    const summary = (en && p.enSummary) || p.vnSummary;
+    const info = `<table class="dtable kv"><tbody>${row(T("Tên công ty"), e(en ? p.enName || p.vnName : p.vnName))}${row(T("Sàn niêm yết"), e(p.floor))}`
+      + `${row(T("Ngày thành lập"), dmy(p.foundDate))}${row(T("Mã số thuế"), e(p.taxCode))}${row(T("Địa chỉ"), e(en && p.enAddress ? p.enAddress : p.vnAddress))}`
+      + `${row(T("Điện thoại"), e(p.phone))}${row(T("Website"), link(p.website, p.website))}${row(T("Email"), e(p.email))}`
+      + `${row(T("Số nhân viên"), Number.isFinite(+p.employees) && +p.employees ? Fmt.en(+p.employees) : "")}</tbody></table>`;
+    const hold = holders.length ? `<div class="dsec"><b>${e(T("Cổ đông lớn"))}</b></div><table class="dtable"><thead><tr><th>${e(T("Cổ đông"))}</th><th>${e(T("Số CP"))}</th><th>${e(T("Tỷ lệ"))}</th></tr></thead><tbody>`
+      + holders.map(h => `<tr><td>${e(h.shareholderName)}<div class="muted">${e(en ? h.enRoleType || h.roleType : h.roleType)} · ${dmy(h.effectiveDate)}</div></td>`
+        + `<td>${Fmt.en(+h.numberOfShares || 0)}</td><td>${Number.isFinite(+h.ownershipPct) ? Fmt.en(+h.ownershipPct, 2) + "%" : "—"}</td></tr>`).join("") + `</tbody></table>` : "";
+    return info + (summary ? `<p class="pad summary">${e(String(summary).trim())}</p>` : "") + hold;
+  }
+
+  const CALL = { BUY: "Mua", STRONG_BUY: "Mua mạnh", OUTPERFORM: "Khả quan", OVERWEIGHT: "Khả quan", ADD: "Mua thêm", ACCUMULATE: "Tích luỹ",
+    HOLD: "Nắm giữ", NEUTRAL: "Trung lập", MARKET_PERFORM: "Trung lập", UNDERPERFORM: "Kém khả quan", UNDERWEIGHT: "Kém khả quan", REDUCE: "Giảm tỷ trọng", SELL: "Bán" };
+  const callTone = c => /BUY|OUTPERFORM|OVERWEIGHT|ADD|ACCUM/.test(c) ? "up" : /SELL|UNDER|REDUCE/.test(c) ? "down" : "ref";
+
+  function recs(list, last) {
+    if (!list.length) return empty(T("Chưa có khuyến nghị của công ty phân tích."));
+    const avg = +list[0].avgTargetPrice, up = v => last && v ? (v / last - 1) * 100 : null;
+    const head = Number.isFinite(avg) && avg ? `<div class="stats">${stat(T("Giá mục tiêu TB"), num(avg))}${stat(T("Tiềm năng"), up(avg) == null ? "—" : Fmt.signed(up(avg)) + "%", up(avg) > 0 ? "up" : "down")}`
+      + `${stat(T("Số khuyến nghị"), String(list.length))}</div>` : "";
+    return head + `<table class="dtable"><thead><tr><th>${e(T("Ngày"))}</th><th>${e(T("Đơn vị"))}</th><th>${e(T("Đánh giá"))}</th><th>${e(T("Giá mục tiêu"))}</th><th>${e(T("Tiềm năng"))}</th></tr></thead><tbody>`
+      + list.map(x => { const c = String(x.type || "").toUpperCase().replace(/\s+/g, "_"), u = up(+x.targetPrice);
+        return `<tr><td>${dmy(x.reportDate)}</td><td>${e(x.firm)}</td><td class="${callTone(c)}">${e(CALL[c] ? T(CALL[c]) : x.type)}</td>`
+          + `<td>${num(+x.targetPrice)}</td><td class="${u > 0 ? "up" : u < 0 ? "down" : ""}">${u == null ? "—" : Fmt.signed(u) + "%"}</td></tr>`; }).join("")
+      + `</tbody></table><p class="muted pad">${e(T("Tiềm năng = giá mục tiêu so với giá khớp hiện tại. Nguồn: VNDirect / Bloomberg."))}</p>`;
+  }
+
+  return { ratios, news, events, profile, recs, empty, url };
+})();
+// Financial statements tab: balance sheet / income / cash flow × quarter / year, line items pivoted over the last 8 periods.
+const FinView = (() => {
+  const KINDS = [["is", "Kết quả kinh doanh"], ["bs", "Cân đối kế toán"], ["cf", "Lưu chuyển tiền tệ"]];
+  const PERIOD = [["quarter", "Quý"], ["year", "Năm"]];
+  const clean = raw => ({ kind: KINDS.some(k => k[0] === raw?.kind) ? raw.kind : "is", period: raw?.period === "year" ? "year" : "quarter" });
+  let st = clean(Prefs.get("fin", {}));
+
+  const seg = (act, list, cur) => `<span class="seg">${list.map(([k, l]) => `<button data-act="${act}" data-v="${k}"${k === cur ? ' class="on"' : ""}>${Dom.esc(T(l))}</button>`).join("")}</span>`;
+
+  // table: FinTable.build(...) result, or null while loading / on error (message shown instead).
+  function html(table, lang, message) {
+    const bar = `<div class="cbar">${seg("kind", KINDS, st.kind)}${seg("period", PERIOD, st.period)}</div>`;
+    if (message) return bar + `<p class="muted pad">${Dom.esc(message)}</p>`;
+    if (!table || !table.lines.length) return bar + `<p class="muted pad">${Dom.esc(T("Chưa có báo cáo tài chính cho mã này."))}</p>`;
+    const head = `<tr><th>${Dom.esc(T("Chỉ tiêu (tỷ đồng)"))}</th>${table.periods.map(p => `<th>${FinTable.label(p, table.period)}</th>`).join("")}</tr>`;
+    const rows = table.lines.map(l => {
+      const name = lang === "en" && l.en ? l.en : l.vi;
+      const cells = l.values.map((v, i) => {
+        const g = FinTable.growth(l.values, i), tip = g == null ? "" : ` title="${Dom.esc(T("{g}% so với kỳ trước", { g: Fmt.signed(g) }))}"`;
+        return `<td class="${v < 0 ? "down" : ""}"${tip}>${FinTable.fmt(v, l)}</td>`;
+      }).join("");
+      return `<tr class="lv${l.level}"><th title="${Dom.esc(name)}">${Dom.esc(name)}</th>${cells}</tr>`;
+    }).join("");
+    return bar + `<div class="fscroll"><table class="ftable"><thead>${head}</thead><tbody>${rows}</tbody></table></div>`
+      + `<p class="muted pad">${Dom.esc(T("Nguồn: VNDirect. Rê chuột lên ô để xem % thay đổi so với kỳ trước; EPS tính bằng đồng."))}</p>`;
+  }
+
+  async function load(sym) {
+    // Labels follow the period the table was fetched with, not the (maybe already changed) current choice.
+    const { kind, period } = st, model = FinTable.pickModel(await Finfo.models(sym), kind);
+    if (!model) return { periods: [], lines: [], kind, period };
+    return { ...FinTable.build(model, await Finfo.values(sym, model.modelType, period, FinTable.since(period))), kind, period };
+  }
+
+  // Returns true when the click changed the view (caller reloads).
+  function act(el) {
+    const a = el.dataset.act, v = el.dataset.v;
+    if (a === "kind" && v !== st.kind) st.kind = v;
+    else if (a === "period" && v !== st.period) st.period = v;
+    else return false;
+    st = clean(st);
+    Prefs.set("fin", st);
+    return true;
+  }
+
+  return { html, load, act, get: () => ({ ...st }), set: raw => { st = clean(raw); Prefs.set("fin", st); } };
+})();
+// Detail pane tabs: switch panels, lazy-load each tab's data once per symbol, drop stale responses after a symbol change.
+const DetailTabs = (() => {
+  const TABS = [["overview", "Tổng quan"], ["chart", "Kỹ thuật"], ["trades", "Khớp lệnh"], ["news", "Tin tức"], ["finance", "Tài chính"],
+    ["events", "Sự kiện"], ["profile", "Hồ sơ"], ["recs", "Khuyến nghị"]];
+  const IDS = new Set(TABS.map(x => x[0]));
+  const PANEL = { overview: "dRatios", news: "dNews", finance: "dFinance", events: "dEvents", profile: "dProfile", recs: "dRecs" };
+  let tab = IDS.has(Prefs.get("dtab")) ? Prefs.get("dtab") : "overview", sym = "", seq = 0, last = 0, data = {}, loaded = {}, newsBusy = false;
+  const req = {};
+
+  function bar() {
+    $("dTabs").innerHTML = TABS.map(([k, l]) => `<button data-dtab="${k}"${k === tab ? ' class="on"' : ""}>${Dom.esc(T(l))}</button>`).join("");
+    document.querySelectorAll("#detail .dpanel").forEach(p => { p.hidden = p.dataset.tab !== tab; });
+  }
+
+  function render(k) {
+    const el = $(PANEL[k]), d = data[k], lang = I18n.lang;
+    if (!el) return;
+    if (d === undefined) el.innerHTML = k === "finance" ? FinView.html(null, lang, T("Đang tải…")) : TabHtml.empty(T("Đang tải…"));
+    else if (d === null) el.innerHTML = k === "finance" ? FinView.html(null, lang, T("Không tải được dữ liệu từ VNDirect. Thử lại sau.")) : TabHtml.empty(T("Không tải được dữ liệu từ VNDirect. Thử lại sau."));
+    else if (k === "overview") el.innerHTML = TabHtml.ratios(d);
+    else if (k === "news") el.innerHTML = TabHtml.news(d.list, d.list.length < d.total);
+    else if (k === "finance") el.innerHTML = FinView.html(d, lang);
+    else if (k === "events") el.innerHTML = TabHtml.events(d);
+    else if (k === "profile") el.innerHTML = TabHtml.profile(d.p, d.h, lang);
+    else if (k === "recs") el.innerHTML = TabHtml.recs(d, last);
+  }
+
+  const FETCH = {
+    overview: s => Finfo.ratios(s),
+    news: async s => { const r = await Finfo.news(s, 1); return { list: r.data, total: r.total, page: 1 }; },
+    finance: s => FinView.load(s),
+    events: s => Finfo.events(s, I18n.lang),
+    profile: async s => { const [p, h] = await Promise.all([Finfo.profile(s), Finfo.shareholders(s)]); return { p, h }; },
+    recs: s => Finfo.recommendations(s),
+  };
+
+  async function load(k = tab, force = false) {
+    if (!sym || !FETCH[k] || (!force && loaded[k] === sym)) return;
+    // seq: symbol changed; req[k]: a newer load of the same tab (quick kind/period clicks, language switch) was started.
+    const my = seq, s = sym, tok = req[k] = (req[k] || 0) + 1;
+    loaded[k] = s; delete data[k]; render(k);
+    let v;
+    try { v = await FETCH[k](s); } catch (err) { console.warn("DetailTabs.load - get finfo fail", k, s, err); v = null; }
+    if (my !== seq || tok !== req[k]) return;
+    data[k] = v;
+    if (v === null) loaded[k] = "";
+    render(k);
+  }
+
+  async function moreNews() {
+    const d = data.news, my = seq;
+    if (!d || newsBusy) return;
+    newsBusy = true;
+    try {
+      const r = await Finfo.news(sym, d.page + 1);
+      if (my !== seq) return;
+      Object.assign(d, { list: d.list.concat(r.data), total: r.total, page: d.page + 1 });
+    } catch (err) { console.warn("DetailTabs.moreNews - get news fail", sym, err); }
+    finally { newsBusy = false; }
+    if (my === seq) render("news");
+  }
+
+  function show(k) {
+    if (!IDS.has(k)) return;
+    tab = k; Prefs.set("dtab", k); bar();
+    ChartCtl.setActive(k === "chart");
+    load(k);
+  }
+
+  function setSymbol(s) {
+    if (s === sym) return;
+    sym = s; seq++; data = {}; loaded = {}; last = 0;
+    load("overview");
+    if (tab !== "overview") load(tab);
+  }
+
+  function init() {
+    bar();
+    ChartCtl.setActive(tab === "chart");
+    $("dTabs").addEventListener("click", e => { const b = e.target.closest("button[data-dtab]"); if (b) show(b.dataset.dtab); });
+    $("dFinance").addEventListener("click", e => { const b = e.target.closest("button[data-act]"); if (b && FinView.act(b)) load("finance", true); });
+    $("dNews").addEventListener("click", e => { if (e.target.closest('[data-act="moreNews"]')) moreNews(); });
+    // Events come per locale → refetch; the rest only re-render from memory.
+    I18n.onChange(() => { bar(); delete data.events; loaded.events = ""; Object.keys(data).forEach(render); if (tab === "events") load("events"); });
+  }
+
+  return { init, show, setSymbol, reload: k => load(k, true), onQuote: q => { if (q && q.sym === sym) last = q.last || q.ref; }, get: () => tab, IDS };
 })();
 // 🔗 share link (#pako: payload = tab + watchlist + options + sort + selected symbol), ?data= / ?demo= / ?tab= intake, demo dropdown.
 const ShareDemo = (() => {
@@ -1910,6 +2268,8 @@ const ShareDemo = (() => {
     if (p.sort && SORT_KEYS.has(p.sort.key) && (p.sort.dir === 1 || p.sort.dir === -1)) out.sort = { key: p.sort.key, dir: p.sort.dir };
     if (WatchParse.isSymbol(p.sym)) out.sym = p.sym;
     if (p.chart && typeof p.chart === "object") out.chart = p.chart;
+    if (typeof p.dtab === "string" && DetailTabs.IDS.has(p.dtab)) out.dtab = p.dtab;
+    if (p.fin && typeof p.fin === "object") out.fin = p.fin;
     return out;
   }
 
@@ -2000,6 +2360,7 @@ const Board = (() => {
       draw();
       refreshTrades();
       ChartCtl.onQuote(S.quotes.get(S.sel));
+      DetailTabs.onQuote(S.quotes.get(S.sel));
     } catch (e) {
       if (gen !== S.gen || seq !== S.seq) return;
       console.warn("tick - poll VPS datafeed fail", e);
@@ -2046,6 +2407,8 @@ const Board = (() => {
     BoardView.select(sym);
     renderDetail();
     ChartCtl.setSymbol(sym);
+    DetailTabs.setSymbol(sym);
+    DetailTabs.onQuote(S.quotes.get(sym));
     if (fromUser) PhoneLayout.show(1);
   }
 
@@ -2087,6 +2450,8 @@ const Board = (() => {
     if (res.opts) setOpts(Controls.writeOpts(res.opts), false);
     if (res.sort) BoardView.setSort(res.sort);
     if (res.chart) ChartCtl.set(res.chart);
+    if (res.fin) { FinView.set(res.fin); DetailTabs.reload("finance"); }
+    if (res.dtab) DetailTabs.show(res.dtab);
     if (res.watch) Watch.replace(res.watch);
     S.bad = res.bad || [];
     if (res.sym) { S.sel = res.sym; S.selQuote = null; S.trades = null; }
@@ -2102,7 +2467,7 @@ const Board = (() => {
   }
 
   const setFilter = Dom.debounce(v => { filterText = v; draw(); }, 150);
-  const payload = () => ({ tab: S.tab, watch: Watch.all(), opts, sort: BoardView.getSort(), sym: S.sel, chart: ChartCtl.get() });
+  const payload = () => ({ tab: S.tab, watch: Watch.all(), opts, sort: BoardView.getSort(), sym: S.sel, chart: ChartCtl.get(), dtab: DetailTabs.get(), fin: FinView.get() });
 
   Watch.onChange(onWatchChange);
   document.addEventListener("visibilitychange", () => { if (!document.hidden && opts.rate !== "off" && !(S.loading && !S.syms.length)) tick(); else clearTimeout(S.timer); });
@@ -2222,8 +2587,9 @@ const Controls = (() => {
     ThemePicker.bind($("theme"), Prefs);
     BoardView.init($("board"), { name: s => Universe.name(s, I18n.lang), onSelect: Board.select, onStar: s => Watch.toggle(s), onSort: () => Board.draw(true) });
     IndexStrip.init($("indices"));
-    DetailView.init($("dTop"), $("dBottom"));
+    DetailView.init($("dHead"), $("dOverview"), $("dBottom"));
     ChartCtl.init();
+    DetailTabs.init();
     ShareDemo.fillDemo($("demo"));
     Board.setOpts(writeOpts(Prefs.get("opts", {})), false);
     Board.state().tab = Prefs.get("tab", "watch");
