@@ -15,7 +15,7 @@ const ShareDemo = (() => {
   function sanitize(p, tabs) {
     if (!p || typeof p !== "object") return null;
     const out = {};
-    if (typeof p.tab === "string" && tabs.has(p.tab)) out.tab = p.tab;
+    if (typeof p.tab === "string" && Board.validTab(p.tab)) out.tab = p.tab;
     if (Array.isArray(p.watch)) out.watch = WatchParse.clean(p.watch);
     if (p.opts && typeof p.opts === "object") out.opts = p.opts;
     if (p.sort && SORT_KEYS.has(p.sort.key) && (p.sort.dir === 1 || p.sort.dir === -1)) out.sort = { key: p.sort.key, dir: p.sort.dir };
@@ -36,16 +36,12 @@ const ShareDemo = (() => {
       if (hash) res = sanitize(await ShareCodec.decode(decodeURIComponent(hash)), tabs) || { error: true };
       else if (q.has("data")) { const d = q.get("data"); res = sanitize(await ShareCodec.decode(d), tabs) || fromText(d); }
       else if (q.has("demo")) res = Object.hasOwn(DEMOS, q.get("demo")) ? fromText(DEMOS[q.get("demo")].text) : { error: true };
-      if (q.has("tab") && tabs.has(q.get("tab"))) (res ||= {}).tab ||= q.get("tab");
+      if (q.has("tab") && Board.validTab(q.get("tab"))) (res ||= {}).tab ||= q.get("tab");
     } catch { res = { error: true }; }
     if (hash || q.has("data") || q.has("demo") || q.has("tab")) history.replaceState(null, "", location.pathname);
     return res;
   }
 
-  function fillDemo(select) {
-    select.innerHTML = `<option value="">${Dom.esc(T("Thử mẫu…"))}</option>`
-      + Object.entries(DEMOS).map(([k, d]) => `<option value="${k}">${Dom.esc(T(d.label))}</option>`).join("");
-  }
 
-  return { copyLink, readIncoming, fillDemo, fromText };
+  return { copyLink, readIncoming, fromText };
 })();

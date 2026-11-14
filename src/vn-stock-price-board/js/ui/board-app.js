@@ -1,17 +1,20 @@
 // App state + polling loop: resolve the tab's symbols, poll quotes + indices, feed the views, load trades for the selected symbol.
 const Board = (() => {
   const TABS = [
-    { id: "watch", label: "★ Danh mục" }, { id: "VN30" }, { id: "VN100" }, { id: "hose", label: "HOSE" }, { id: "hnx", label: "HNX" },
+    { id: "watch", label: "★ Danh mục" }, { id: "market", label: "Thị trường" }, { id: "screener", label: "Bộ lọc" }, { id: "VN30" }, { id: "VN100" }, { id: "hose", label: "HOSE" }, { id: "hnx", label: "HNX" },
     { id: "HNX30" }, { id: "upcom", label: "UPCOM" }, { id: "ETF" }, { id: "CW", label: "Chứng quyền" },
   ];
   const MORE = ["VNMID", "VNSML", "VNDIAMOND", "VNFINLEAD", "VNX50"];
   const TAB_IDS = new Set([...TABS.map(t => t.id), ...MORE]);
+  const validTab = t => TAB_IDS.has(t) || /^icb:\d{4}$/.test(t);
   const S = { tab: "watch", syms: [], quotes: new Map(), sel: "", selQuote: null, missing: [], bad: [], gen: 0, seq: 0, timer: 0, at: null, error: false, loading: true, trades: null };
   const lists = new Map();
   let opts = {}, filterText = "";
 
   async function symbolsFor(tab) {
     if (tab === "watch") return Watch.all();
+    if (MarketTabs.is(tab)) return Market.allSymbols();
+    if (tab.startsWith("icb:")) return Market.sectorCodes(tab.slice(4));
     if (lists.has(tab)) return lists.get(tab);
     let syms;
     if (tab === "ETF" || tab === "CW") {
@@ -25,12 +28,13 @@ const Board = (() => {
   }
 
   async function setTab(tab) {
-    S.tab = TAB_IDS.has(tab) ? tab : "watch";
+    S.tab = validTab(tab) ? tab : "watch";
     Prefs.set("tab", S.tab);
     const gen = ++S.gen;
     clearTimeout(S.timer);
     Object.assign(S, { quotes: new Map(), missing: [], loading: true, syms: [] });
     Controls.tabChanged(S.tab);
+    MarketTabs.show(S.tab);
     BoardView.message(T("Đang tải danh sách mã…"));
     try {
       const syms = await symbolsFor(S.tab);
@@ -51,11 +55,14 @@ const Board = (() => {
     try {
       // A symbol list that failed to load (network down on tab switch) is retried on every poll.
       if (!S.syms.length && S.tab !== "watch") { const syms = await symbolsFor(S.tab); if (gen !== S.gen || seq !== S.seq) return; S.syms = syms; }
-      const [qs, idx] = await Promise.all([S.syms.length ? Feed.quotes(S.syms) : [], Feed.indices()]);
+      // Alert tickers outside the current tab ride along in the same poll (not shown in the table).
+      const want = [...new Set([...S.syms, ...Alerts.symbols()])];
+      const [qs, idx] = await Promise.all([want.length ? Feed.quotes(want) : [], Feed.indices()]);
       if (gen !== S.gen || seq !== S.seq) return;
       Object.assign(S, { quotes: new Map(qs.map(q => [q.sym, q])), at: new Date(), error: false, loading: false });
       S.missing = S.tab === "watch" ? S.syms.filter(s => !S.quotes.has(s)) : [];
       IndexStrip.render(idx);
+      checkAlerts(S.quotes);
       const first = BoardCols.sortQuotes(visibleQuotes(), BoardView.getSort().key, BoardView.getSort().dir)[0];
       if (S.quotes.has(S.sel) && !S.trades) select(S.sel, false);
       else if (!S.quotes.has(S.sel) && first) select(first.sym, false);
@@ -73,10 +80,24 @@ const Board = (() => {
     schedule();
   }
 
+  // Alerts fire only while prices are live (session or lunch break): pre-open / evening / weekend quotes are yesterday's.
+  function checkAlerts(quotes) {
+    const ph = QuoteModel.phase();
+    if (QuoteModel.isLive(ph) || ph === "break") PersonalUI.onHits(Alerts.check(quotes), quotes);
+  }
+  // Hidden page: no board redraws, but alert tickers are still polled every 60 s so notifications can fire.
+  async function alertTick() {
+    try { const qs = await Feed.quotes(Alerts.symbols()); checkAlerts(new Map(qs.map(q => [q.sym, q]))); }
+    catch (e) { console.warn("alertTick - poll alert tickers fail", e); }
+    schedule();
+  }
+
   function schedule() {
     clearTimeout(S.timer);
-    if (opts.rate === "off" || document.hidden) return;
-    const ms = Math.max((+opts.rate || 5) * 1000, QuoteModel.isLive(QuoteModel.phase()) ? 0 : 60000);
+    if (opts.rate === "off") return;
+    if (document.hidden) { if (Alerts.symbols().length) S.timer = setTimeout(alertTick, 60000); return; }
+    // Whole-market tabs poll ~1,500 quotes (≈1.5 MB) → at most every 30 s.
+    const ms = Math.max((+opts.rate || 5) * 1000, QuoteModel.isLive(QuoteModel.phase()) ? 0 : 60000, MarketTabs.is(S.tab) ? 30000 : 0);
     S.timer = setTimeout(tick, ms);
   }
 
@@ -87,7 +108,9 @@ const Board = (() => {
   }
 
   function draw(force = false) {
+    if (MarketTabs.is(S.tab)) { const qs = S.syms.map(s => S.quotes.get(s)).filter(Boolean); MarketTabs.render(S.tab, qs); Controls.count(qs.length, S.syms.length); renderDetail(); return; }
     const list = visibleQuotes();
+    Notes.decorate(list);
     if (list.length) BoardView.render(list, opts, force);
     else if (!S.loading && S.tab === "watch" && !S.syms.length) BoardView.message(T("Danh mục trống — gõ mã vào ô “Lọc / thêm mã” rồi bấm ★ Thêm."));
     else if (!S.loading && S.quotes.size) BoardView.message(T("Không có mã khớp bộ lọc “{q}”.", { q: filterText }));
@@ -172,7 +195,7 @@ const Board = (() => {
   const payload = () => ({ tab: S.tab, watch: Watch.all(), opts, sort: BoardView.getSort(), sym: S.sel, chart: ChartCtl.get(), dtab: DetailTabs.get(), fin: FinView.get() });
 
   Watch.onChange(onWatchChange);
-  document.addEventListener("visibilitychange", () => { if (!document.hidden && opts.rate !== "off" && !(S.loading && !S.syms.length)) tick(); else clearTimeout(S.timer); });
+  document.addEventListener("visibilitychange", () => { if (!document.hidden && opts.rate !== "off" && !(S.loading && !S.syms.length)) tick(); else schedule(); });
 
-  return { TABS, MORE, TAB_IDS, state: () => S, getOpts: () => opts, setTab, tick, draw, select, loadTrades, renderDetail, applyIncoming, setOpts, setFilter, payload, setBad: b => { S.bad = b; } };
+  return { TABS, MORE, TAB_IDS, validTab, state: () => S, getOpts: () => opts, setTab, tick, draw, select, loadTrades, renderDetail, applyIncoming, setOpts, setFilter, payload, setBad: b => { S.bad = b; } };
 })();

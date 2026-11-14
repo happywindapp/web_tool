@@ -66,5 +66,18 @@ const TabHtml = (() => {
       + `</tbody></table><p class="muted pad">${e(T("Tiềm năng = giá mục tiêu so với giá khớp hiện tại. Nguồn: VNDirect / Bloomberg."))}</p>`;
   }
 
-  return { ratios, news, events, profile, recs, empty, url };
+  // Cash dividends per year (đ/share summed over payments), yield on today's price, and the unbroken streak up to the latest year.
+  function dividends(list, last) {
+    const per = {};
+    for (const d of list || []) { const y = +d.divYear, v = +d.dividend; if (y > 1990 && v > 0) per[y] = (per[y] || 0) + v; }
+    const years = Object.keys(per).map(Number).sort((a, b) => b - a);
+    if (!years.length) return "";
+    let streak = 0;
+    for (let y = years[0]; per[y]; y--) streak++;
+    const rows = years.slice(0, 8).map(y => `<tr><td>${y}</td><td>${Fmt.en(per[y])}</td><td>${last ? Fmt.en(per[y] / (last * 1000) * 100, 2) + "%" : "—"}</td></tr>`).join("");
+    const head = e(T("Cổ tức tiền mặt theo năm · trả liên tục {n} năm", { n: streak }));
+    return `<div class="dsec"><b>${head}</b></div><table class="dtable num"><thead><tr><th>${e(T("Năm"))}</th><th>${e(T("Cổ tức (đ/cp)"))}</th><th>${e(T("Tỷ suất theo giá hiện tại"))}</th></tr></thead><tbody>${rows}</tbody></table>`;
+  }
+
+  return { ratios, news, events, dividends, profile, recs, empty, url };
 })();

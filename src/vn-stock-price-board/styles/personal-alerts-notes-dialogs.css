@@ -1,0 +1,15 @@
+  /* 🔔 alerts / 📅 calendar dialog, notes + own target block, bell button, multi-ticker compare input. */
+  dialog.tool-dlg { width:min(640px, 96vw); max-height:86vh; max-height:86dvh; padding:0 0 8px; overflow:auto; border:1px solid var(--line); border-radius:10px; background:var(--panel); color:var(--ink); }
+  dialog.tool-dlg::backdrop { background:rgb(2 6 23 / .55); }
+  .tool-dlg .dlg-head { position:sticky; top:0; z-index:1; background:var(--panel); }
+  .tool-dlg .dlg-head b { flex:1 1 auto; font-size:15px; }
+  .tool-dlg .cbar { padding:10px 12px 0; }
+  .tool-dlg input[type=text] { width:7em; } .tool-dlg input[type=number] { width:8em; padding:5px 8px; border:1px solid var(--line); border-radius:6px; background:var(--btn); color:var(--ink); font:inherit; }
+  .tool-dlg tr[data-sym] { cursor:pointer; }
+  button.bell { min-height:0; padding:0 4px; border:0; background:none; font-size:15px; vertical-align:2px; }
+  .notes { display:grid; gap:6px; font-size:12.5px; }
+  .notes label { color:var(--muted); } .notes input { width:7em; padding:2px 6px; border:1px solid var(--line); border-radius:4px; background:var(--btn); color:var(--ink); font:inherit; }
+  .notes textarea { width:100%; padding:6px 8px; border:1px solid var(--line); border-radius:6px; background:var(--btn); color:var(--ink); font:inherit; resize:vertical; }
+  .notes button { justify-self:start; }
+  .cbar input.cmpin { width:11em; padding:3px 6px; }
+  @media (max-width: 640px) { dialog.tool-dlg { width:100vw; max-height:100dvh; border-radius:0; } .notes input, .notes textarea, .tool-dlg input { font-size:16px; } }

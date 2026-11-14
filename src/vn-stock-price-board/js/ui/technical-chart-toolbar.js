@@ -22,7 +22,7 @@ const ChartBar = (() => {
       + `<select data-c="type" title="${e(T("Kiểu biểu đồ"))}">${opts(TYPES, s.type)}</select>`
       + `<select data-c="scale" title="${e(T("Thang giá"))}">${opts(SCALES, s.scale)}</select>`
       + `<label class="chk"><input type="checkbox" data-c="volume"${s.volume ? " checked" : ""}>${e(T("Khối lượng"))}</label>`
-      + `<label class="chk" title="${e(T("Vẽ thêm VNINDEX để so sánh (thang % thay đổi)"))}"><input type="checkbox" data-c="compare"${s.compare ? " checked" : ""}>${e(T("So với VNINDEX"))}</label>`
+      + `<label class="chk" title="${e(T("So sánh tối đa 5 mã hoặc chỉ số, cách nhau bằng dấu phẩy (thang % thay đổi)"))}">${e(T("So sánh"))}<input type="text" class="cmpin" data-c="cmp" value="${e(s.cmp.join(", "))}" placeholder="VNINDEX, VCB…" spellcheck="false" autocomplete="off"></label>`
       + `<select data-c="add" title="${e(T("Thêm chỉ báo kỹ thuật"))}"><option value="">${e(T("+ Chỉ báo…"))}</option>`
       + `<optgroup label="${e(T("Trên biểu đồ giá"))}">${addOpts("main")}</optgroup><optgroup label="${e(T("Khung riêng"))}">${addOpts("own")}</optgroup></select>`
       + `<span class="seg tools">${TOOLS.map(([k, icon, tip]) => `<button data-c="tool" data-v="${k}" title="${e(T(tip))}"${k === tool ? ' class="on"' : ""}>${icon}</button>`).join("")}`

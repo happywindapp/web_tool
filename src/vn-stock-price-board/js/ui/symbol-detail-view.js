@@ -51,6 +51,7 @@ const DetailView = (() => {
     const head = `<div class="dh"><div><b class="dsym ${tone}">${Dom.esc(q.sym)}</b> <span class="badge">${Dom.esc(q.ex)}</span>`
       + `<button id="dStar" class="star${s.watched ? " on" : ""}" title="${Dom.esc(tip)}">${s.watched ? "★" : "☆"}</button>`
       + `<button id="dChart" class="chart-btn" title="${Dom.esc(T("Mở biểu đồ kỹ thuật toàn màn hình"))}">📈 ${Dom.esc(T("Biểu đồ"))}</button>`
+      + `<button id="dAlert" class="bell" title="${Dom.esc(T("Đặt cảnh báo giá cho mã này"))}">🔔</button>`
       + `<div class="muted dname">${Dom.esc(s.name)}</div></div>`
       + `<div class="dp ${tone}"><b>${Fmt.price(q.last || q.ref)}</b><span>${Fmt.chg(q, q.chg)} ${Fmt.pct(q, q.pct)}</span></div></div>`;
     let tail;

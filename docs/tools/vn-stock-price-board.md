@@ -31,10 +31,11 @@ thanh chỉ số, tab sàn/rổ, danh mục ★, pane chi tiết (sổ lệnh, c
   `getlistindexdetail/10,11,02,03` · `getliststocktrade/<mã>` · `getlistallstock` (cache localStorage theo ngày VN — tên công ty, sàn, loại `S/E/W`).
 - **Nến lịch sử** (`History`, CSP `connect-src https://dchart-api.vndirect.com.vn`): `dchart/history?resolution=<1|5|15|30|60|D>&symbol=&from=&to=` → `{t,o,h,l,c,v,s}`, cache 60s trong bộ nhớ.
 - **Tab** (`?tab=`): `watch` (★ Danh mục) · `VN30` · `VN100` · `hose` · `hnx` · `HNX30` · `upcom` · `ETF` · `CW` + rổ khác `VNMID VNSML VNDIAMOND VNFINLEAD VNX50`.
+- **Ngoại lệ có chủ đích với checklist "Dữ liệu mẫu"**: tool **không** có dropdown `Thử mẫu…` trên toolbar (user yêu cầu bỏ 2026-11-14, toolbar dành cho danh mục / lọc); dữ liệu mẫu chỉ còn qua `?demo=<key>` — đừng thêm lại dropdown.
 - **`?demo=`**: `banks` · `brokers` · `realestate` · `materials` · `energy` · `consumer` · `broken` (có token sai `12`, `VN-30` + mã không tồn tại `XYZ`, `NOTREAL1` ⇒ footer báo lỗi). Mẫu thay danh mục, giữ bản cũ cho `↶ Khôi phục danh mục trước`.
 - **Link chia sẻ** `#pako:` payload `{ tab, watch: [mã], opts: { rate, unit, hl, fr, compact }, sort: { key, dir }, sym, chart: { range, interval, type, scale, volume, compare, ind: [{ id, p }] }, dtab, fin: { kind, period } }`; `?data=VNM,FPT` = danh mục thô (đi lên server, chỉ dùng cho dữ liệu ngắn).
   Payload không tin cậy: mã phải khớp `^[A-Z0-9]{3,10}$` (tối đa 300), tab/sort/option chỉ nhận giá trị đã biết. Link hỏng ⇒ báo lỗi, giữ danh mục.
-- **localStorage** (`web_tool.vn-stock-price-board.*`): `watch`, `watchBackup`, `opts`, `tab`, `theme`, `universe`, `chart`, `dtab`, `fin`. sessionStorage `…spark` = điểm sparkline chỉ số trong ngày.
+- **localStorage** (`web_tool.vn-stock-price-board.*`): `watch`, `watchBackup`, `lists`, `opts`, `tab`, `theme`, `universe`, `chart`, `dtab`, `fin`, `scr`, `alerts`, `notes`, `market.*`. sessionStorage `…spark` = điểm sparkline chỉ số trong ngày.
 - **CSV**: `bang-gia-<tab>-<yyyymmdd>.csv` (EN `price-board-…`), UTF-8 BOM, cột = cột đang hiện.
 
 ## 4. Luật xử lý
@@ -66,7 +67,8 @@ thanh chỉ số, tab sàn/rổ, danh mục ★, pane chi tiết (sổ lệnh, c
 
 | Tab | Nội dung | Nguồn |
 |-----|----------|-------|
-| Tổng quan | Trần/sàn/TC, sổ lệnh 3 bước + chỉ số cơ bản: vốn hoá, P/E, P/B, P/S, EPS, BVPS, ROE, ROA, ROIC, tỷ suất cổ tức, Beta, CP lưu hành, KL TB 10 phiên, cao/thấp 52 tuần | VPS + `ratios/latest` |
+| Tổng quan | Trần/sàn/TC, sổ lệnh 3 bước, hiệu suất giá, khối ngoại + chỉ số cơ bản: vốn hoá, P/E, P/B, P/S, EPS, BVPS, ROE, ROA, ROIC, tỷ suất cổ tức, Beta, CP lưu hành, KL TB 10 phiên, cao/thấp 52 tuần | VPS + `ratios/latest` |
+| Định giá | Snowflake 5 trục, giá hợp lý (Graham, P/E, P/B, DCF sửa được), P/E–P/B 5 năm, Piotroski, Altman Z | `ratios`, `ratios/latest`, BCTC năm, dự phóng, cổ tức |
 | Kỹ thuật | Chart kỹ thuật gọn (chỉ tải khi tab mở hoặc cửa sổ lớn mở) | VNDirect dchart |
 | Khớp lệnh | Diễn biến trong ngày, mua/bán chủ động, lịch sử khớp | VPS |
 | Tin tức | 10 tin/lần + "Xem thêm", nguồn, giờ, tóm tắt; tiêu đề mở bài gốc ở tab mới (`noopener`) | `news` (chỉ tiếng Việt) |
@@ -78,6 +80,88 @@ thanh chỉ số, tab sàn/rổ, danh mục ★, pane chi tiết (sổ lệnh, c
 - Mẫu BCTC tự chọn theo mã: trong các mẫu cùng loại lấy mẫu có `note` thông tư (doanh nghiệp 1/2/3, ngân hàng 101/102/103, chứng khoán 89/90/91, bảo hiểm 411/412/413).
 - Đổi mã ⇒ bỏ kết quả của mã cũ (`seq`); đổi ngôn ngữ ⇒ vẽ lại từ bộ nhớ, riêng Sự kiện tải lại theo locale. Tab đang mở + tuỳ chọn BCTC nằm trong link chia sẻ (`dtab`, `fin`) và localStorage (`dtab`, `fin`).
 - `ownershipPct` của cổ đông đã là %, còn ROE/ROA/tỷ suất cổ tức của `ratios` là tỷ lệ (× 100 khi hiện).
+
+### Tab Định giá + bổ sung Đợt 1 (`ValTab`, `ValHtml`, `Valuation`, `Health`, `VSvg`, `OverviewExtra`)
+
+Plan: [`plans/261114-2305-vn-stock-board-advanced-features/plan.md`](../../plans/261114-2305-vn-stock-board-advanced-features/plan.md) (F1–F9). Mọi số liệu do tool tự tính, chỉ để tham khảo.
+
+| Khối | Tab | Công thức / nguồn |
+|------|-----|-------------------|
+| Hiệu suất giá (F9) | Tổng quan | %Δ giá đóng cửa phiên cuối so với phiên ≤ ngày bắt đầu kỳ (1T 7 ngày · 1Th 30 · 3Th 91 · YTD = phiên cuối năm trước · 1N · 3N · 5N), nến ngày VNDirect đã điều chỉnh; cột Chênh lệch = mã − VNINDEX |
+| Khối ngoại (F6) | Tổng quan | `foreigns` 120 phiên: cột mua/bán ròng (tỷ) + đường luỹ kế, chọn 20 / 60 / 120 phiên; room còn = `currentRoom / totalRoom` |
+| Snowflake (F3) | Định giá | 5 trục, mỗi trục = round(số tiêu chí đạt / số tiêu chí có dữ liệu × 6); tiêu chí thiếu dữ liệu không tính. **Định giá**: P/E < trung vị 5 năm · P/B < trung vị 5 năm · giá < giá hợp lý TB · P/E < 15 · PEG (P/E ÷ CAGR LNST 3 năm) < 1. **Tương lai**: dự phóng VNDirect năm sau BCTC năm gần nhất: doanh thu > +10 % · LNST > +10 % · LNST > +20 %. **Quá khứ**: ROE > 15 % · ROA > 7 % (tài chính > 1 %) · LNST năm gần nhất tăng · CAGR LNST 3 năm > 10 % · LNST tăng sau 5 năm. **Sức khoẻ**: doanh nghiệp thường — thanh toán hiện hành > 1 · (vay ngắn + dài hạn) / VCSH < 1 · EBIT / lãi vay > 3 · CFO > 0 · Altman Z an toàn · Piotroski ≥ 6; ngân hàng/CK/bảo hiểm — VCSH / tổng tài sản > 7 % · có lãi. **Cổ tức**: tỷ suất > 2 % · > 4 % · trả tiền 3 năm liền · năm gần nhất không giảm · cổ tức đã trả / LNST trong 0–80 % |
+| Giá hợp lý (F2) | Định giá | Graham = √(22,5 × EPS × BVPS) · P/E trung vị 5 năm × EPS · P/B trung vị 5 năm × BVPS · DCF 2 giai đoạn: FCF₀ = TB 3 năm (CFO + mua sắm TSCĐ), tăng g % trong 5 năm (mặc định CAGR LNST 3 năm, kẹp 0–20 %), sau đó tg = 3 %, chiết khấu WACC = 12 %, trừ nợ vay ròng (vay ngắn + dài − tiền), chia số CP lưu hành. g / WACC / tg sửa được trên giao diện (không lưu). DCF bỏ qua với tài chính hoặc FCF ≤ 0 |
+| Định giá lịch sử (F1) | Định giá | `ratios` P/E, P/B theo ngày 5 năm: TB, ±1σ, thấp/cao nhất, phân vị của hôm nay (thấp = rẻ so với chính nó) |
+| Piotroski / Altman (F8) | Định giá | Piotroski 9 tiêu chí trên 2 BCTC năm gần nhất (ROA > 0, CFO > 0, ΔROA > 0, CFO > LNST, Δ nợ dài hạn/TS ≤ 0, Δ thanh toán hiện hành > 0, số CP (≈ LNST/EPS) không tăng quá 2 %, Δ biên gộp > 0, Δ vòng quay TS > 0). Altman Z = 1,2·(TSNH − NNH)/TS + 1,4·LNCPP/TS + 3,3·EBIT/TS + 0,6·vốn hoá/nợ phải trả + doanh thu/TS (> 2,99 an toàn · 1,81–2,99 xám · < 1,81 nguy cơ). Cả hai chỉ cho doanh nghiệp thường |
+| Biểu đồ tài chính (F4) | Tài chính | Nút Bảng / Biểu đồ: KQKD = doanh thu (ngân hàng: tổng thu nhập hoạt động) + LNST công ty mẹ + đường biên LNST; Cân đối = tổng TS, nợ phải trả, VCSH; LCTT = dòng tiền KD / đầu tư / tài chính |
+| Dự phóng vs thực hiện (F5) | Tài chính | Dự phóng năm nay (`reportType:ESTIMATION`, của VNDirect, không phải consensus) vs tổng các quý đã báo cáo trong năm |
+| Cổ tức (F7) | Sự kiện | Cổ tức tiền theo năm (`events type:DIVIDEND`, cộng các đợt), tỷ suất trên giá hiện tại, số năm trả liên tục |
+
+Mã khoản mục dùng chung (`Health.C`): 11000 TSNH · 11100 tiền · 13100 nợ ngắn hạn · 13110 vay ngắn hạn · 13340 vay dài hạn · 13000 nợ phải trả · 14000 VCSH · 14200 LNST chưa phân phối · 14400 tổng TS · 21001 doanh thu thuần (ngân hàng 421701) · 23100 LN gộp · 23800 LNTT · 23000 LNST công ty mẹ · 23001 EPS · 22509 chi phí lãi vay · 32000 CFO · 32100 mua sắm TSCĐ (âm) · 33600 cổ tức đã trả (âm).
+
+### Đợt 2 — toàn thị trường (`Market`, `Mkt`, `MarketView`, `ScreenView`, `MarketTabs`)
+
+- **Dữ liệu chung** (`Market`): danh sách mã 3 sàn (VPS `getlistckindex`), ICB 3 cấp (`industry_classification`, cache localStorage theo ngày VN),
+  chỉ số `MARKETCAP, P/E, P/B, ROE, DIVIDEND_YIELD` của ~1.500 mã qua `ratios/latest?where=code:…` (cụm 100 mã, 6 song song, ~15–30 s lần đầu mỗi ngày,
+  có tiến trình; cụm lỗi bị bỏ qua, chỉ cache khi đủ). Tab toàn thị trường poll ~1.500 quote (≈ 1,5 MB) tối thiểu 30 s.
+- **Tab Thị trường**: độ rộng 3 sàn (trần/tăng/đứng/giảm/sàn + GTGD), heatmap treemap squarified theo ICB cấp 1 (ô = vốn hoá, chưa có vốn hoá thì GTGD;
+  màu −7 %…+7 %, trần tím, sàn xanh lơ; chọn sàn + Top 100/200/400; bấm ô mở mã), sức mạnh ngành ICB cấp 2 (%Δ theo vốn hoá, bấm mở bảng giá ngành),
+  top tăng / giảm (GTGD > 1 tỷ), GTGD lớn nhất, NN mua / bán ròng (`(fBuy − fSell) × 10 × giá TB`).
+- **Tab Bộ lọc**: sàn, ngành ICB cấp 2, vốn hoá ≥, P/E từ–đến, P/B ≤, ROE ≥, cổ tức ≥, %Δ hôm nay từ–đến, GTGD ≥; ô trống = không giới hạn, mã thiếu chỉ số trượt tiêu chí đó.
+  Bộ lọc mẫu: Giá trị · Chất lượng · Cổ tức cao · Giảm mạnh nền tốt · Thanh khoản cao. Sắp xếp theo cột, ☆ từng mã, "★ Thêm tất cả" (hỏi xác nhận), CSV. Lưu `scr` trong localStorage.
+- **Tab ngành**: ô "Ngành…" trên thanh tab (ICB cấp 2) → bảng giá các mã trong ngành; tab id `icb:<mã ngành>` (dùng được trong `?tab=` và link chia sẻ).
+- **So sánh cùng ngành** (cuối tab Định giá): mã cùng ICB cấp 3 (cấp 2 nếu < 3 mã), top 10 theo vốn hoá + chính mã + dòng trung vị ngành.
+
+### Đợt 3 — tiện ích cá nhân (`AlertRule`, `Alerts`, `Notes`, `PersonalUI`)
+
+- **🔔 Cảnh báo** (nút header + 🔔 cạnh tên mã): Giá ≥ / Giá ≤ (nghìn đồng) / Tăng ≥ % / Giảm ≥ %; kiểm sau mỗi lần poll (mã ngoài tab được poll kèm), mỗi cảnh báo báo 1 lần / ngày VN,
+  hiện ở footer + Notification của trình duyệt khi đã cho phép. Chỉ chạy khi trang mở; tối đa 100 cảnh báo; localStorage `alerts`.
+- **Ghi chú & giá mục tiêu** (đầu tab Định giá): giá mục tiêu riêng + ghi chú ≤ 2.000 ký tự / mã, localStorage `notes`; ô "Mục tiêu" trên toolbar bật 2 cột "Mục tiêu · Còn %" trong bảng giá.
+- **So sánh nhiều mã** (chart): ô "So sánh" nhận tối đa 5 mã/chỉ số (VNINDEX, VN30, mã bất kỳ), thang % chỉ áp cho pane giá; cấu hình cũ `compare: true` tự đổi thành `["VNINDEX"]`.
+- **📅 Lịch sự kiện danh mục**: sự kiện có ngày GDKHQ / hiệu lực từ 3 ngày trước trở đi của tối đa 40 mã trong ★ Danh mục (6 request song song), bấm dòng mở mã.
+
+### Gợi ý mua / bán (tab Thị trường — `PicksView`, `Picks`)
+
+Bấm **🔍 Phân tích** (phạm vi VN30 · VN100 · VN100 + HNX30 · ★ Danh mục, tối đa 300 mã): tải 2 năm nến ngày từng mã (6 song song), chấm `TechOutlook` khung ngày + tuần,
+MA200, %Δ 1 năm; P/E trung vị theo ICB cấp 3 từ chỉ số toàn thị trường. Kết quả cache localStorage `picks` theo ngày VN + phạm vi. Top 8 mỗi danh sách, GTGD hôm nay ≥ 1 tỷ.
+
+| Danh sách | Điều kiện | Điểm xếp hạng |
+|-----------|-----------|---------------|
+| Mua ngắn hạn | điểm ngày ≥ 15 và RSI < 70, hoặc RSI ≤ 32 khi điểm tuần > 0 (hồi từ quá bán) | điểm ngày (hoặc 40 khi hồi) + 10 nếu tuần > 0 + 10 nếu rẻ |
+| Mua trung hạn | điểm tuần ≥ 15 và điểm ngày > −15 | điểm tuần + 15 nếu trên MA200 + 10 nếu rẻ |
+| Mua dài hạn | ROE ≥ 15 %, P/E > 0 và ≤ 1,1 × P/E ngành | ROE + (P/E ngành ÷ P/E − 1) × 40 (kẹp −20…40) + 3 × tỷ suất cổ tức + 5 nếu trên MA200 |
+| Bán ngắn hạn | điểm ngày ≤ −15 hoặc RSI ≥ 75 | −điểm ngày + 20 nếu RSI ≥ 75 + 10 nếu tuần < 0 |
+| Bán trung hạn | điểm tuần ≤ −15 và điểm ngày < 15 | −điểm tuần + 15 nếu dưới MA200 + 10 nếu đắt |
+| Bán dài hạn | dưới MA200 và (đắt hoặc ROE < 8 %) | (P/E ÷ P/E ngành − 1) × 40 (kẹp 0…60; lỗ = 40) + 2 × (10 − ROE) + 10 nếu %Δ 1 năm < 0 |
+
+"Rẻ" = P/E < 0,85 × P/E ngành; "đắt" = P/E ≤ 0 (lỗ) hoặc > 1,4 × P/E ngành. Một mã có thể nằm ở cả mua dài hạn và bán ngắn hạn. Không phải khuyến nghị đầu tư.
+
+### Nhận định kỹ thuật tự động (tab Kỹ thuật — `TechOutlook`, `OutlookView`)
+
+Dựa trên quy tắc + thống kê lịch sử của chính mã (không dùng AI / server); nến ngày VNDirect ~10 năm, gộp tuần / tháng như chart.
+- **Điểm −100…+100** mỗi khung Ngày (MA 20/50/200) · Tuần (MA 10/20/40) · Tháng (MA 6/12/24) = bình quân có trọng số các phiếu −1…+1: giá vs MA ngắn (1) / vừa (1) / dài (2),
+  thứ tự MA (1), độ dốc MA vừa 5 nến (1), RSI 14 (≥ 70 −0,5 · ≤ 30 +0,5 · ≥ 50 +1 · < 50 −1), MACD vs signal (1), histogram tăng/giảm (0,5), ADX ≥ 25 theo +DI/−DI (1),
+  %B Bollinger > 1 −1 / < 0 +1 (0,5), KL > 1,5× TB20 theo chiều nến (0,5). Nhãn: ≥ 50 Tăng mạnh · ≥ 15 Tăng · > −15 Đi ngang · > −50 Giảm · còn lại Giảm mạnh.
+- **Năm**: %Δ 12 tháng, giá vs MA250 phiên, cách đỉnh/đáy 52 tuần, σ năm (độ lệch chuẩn log-return 252 phiên × √252).
+- **Phán đoán**: Ngày mai (khung ngày, vùng close ± ATR14, pivot S1/P/R1) · Tuần tới (khung tuần, ± ATR tuần, pivot tuần) · Tháng tới (khung tháng, ± ATR tháng) ·
+  Năm tới (khung tháng, ± 1σ năm) · Dài hạn (CAGR 5 năm, sụt giảm tối đa 5 năm, cách đỉnh lịch sử; Tích cực khi CAGR > 5 % và giá trên MA250).
+- **Lịch sử khi tín hiệu tương tự**: mọi nến quá khứ cùng nhóm điểm → % lần giá cao hơn sau 1 nến (ngày/tuần/tháng) hoặc 12 tháng, trung vị, P25–P75;
+  < 20 mẫu thì gộp mọi nhóm cùng chiều ("gộp mọi mức cùng chiều"), < 8 mẫu không hiện P25–P75, < 20 ghi "ít mẫu". Không phải khuyến nghị.
+
+### Giải thích trên Full chart (`ChartEvents`, `ChartHelp`)
+
+- Rê chuột lên mục trong legend → giải thích nến / từng đường (SMA, BB, Ichimoku, SAR…); rê vào pane chỉ báo → ý nghĩa + diễn giải giá trị tại nến đó (RSI 72: quá mua…).
+- Điểm cần lưu ý tự dò trong khoảng đang xem (tối đa 80, mới nhất): đỉnh / đáy (cực trị trong cửa sổ ±k nến, k = n/40 kẹp 3–12, nổi bật ≥ 2 ATR), cao nhất / thấp nhất của khoảng,
+  MA ngắn nhất cắt MA dài nhất trong các SMA/EMA/WMA đang bật (giao cắt vàng / tử thần), MACD cắt tín hiệu, RSI vào > 70 / < 30, đóng cửa ngoài dải Bollinger, KL ≥ 2,5× TB20.
+  Điểm chính (đỉnh, đáy, cao/thấp nhất, giao cắt MA) = mũi tên + chữ; tín hiệu phụ = chấm nhỏ. Rê tới nến có dấu → hộp giải thích. Chart gọn trong pane chi tiết không vẽ dấu.
+- Mở Full chart từ tab bất kỳ luôn tải dữ liệu (trước đây mở từ tab khác "Kỹ thuật" có thể báo không có dữ liệu).
+
+### Lưu / nhập / xuất danh mục (`WatchIO`, `WatchFile`)
+
+- Toolbar: **💾 Lưu danh mục** (đặt tên, lưu ★ danh mục hiện tại; dùng chung module `SavedSessions`, localStorage `lists`, ≤ 30 bản) · **📂 Đã lưu** (mở lại → thay danh mục, có ↶ Khôi phục) · **🗑** xoá bản đang mở.
+- **⬇ Xuất danh mục**: `danh-muc-<yyyymmdd>.json` (EN `watchlist-…`) = `{ app: "vn-stock-price-board", version: 1, exported, watch: [mã], notes: { mã: { text, target } }, alerts: [{ sym, type, value }] }` — chỉ ghi chú / cảnh báo của các mã trong danh mục.
+- **⬆ Nhập**: JSON của tool (khôi phục cả ghi chú + cảnh báo, bỏ cảnh báo trùng) · mảng JSON mã · TXT (mọi token) · CSV/TSV nhiều dòng (chỉ cột đầu, vd file ⬇ CSV của bảng giá).
+  Mã không có trong danh bạ VPS bị chuyển sang "Bỏ qua", tối đa 300 mã; nhập = thay danh mục (↶ Khôi phục được).
 
 ## 5. Data model
 

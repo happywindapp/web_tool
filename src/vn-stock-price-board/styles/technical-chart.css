@@ -33,6 +33,13 @@
   .ichip button { min-height:0; padding:0 5px; border:0; background:none; color:var(--muted); }
   .dlg-foot { padding:4px 12px 8px; font-size:12px; }
 
+  /* Full chart help: legend items explain themselves on hover; .ctip follows the cursor over marked bars / indicator panes. */
+  .chart-dlg .clegend span { pointer-events:auto; cursor:help; }
+  .ctip { position:absolute; z-index:6; max-width:300px; padding:6px 9px; border:1px solid var(--line); border-radius:8px; background:var(--panel);
+          box-shadow:0 4px 14px rgb(0 0 0 / .25); font-size:12px; line-height:1.45; pointer-events:none; }
+  .ctip[hidden] { display:none; }
+  .tip-ev + .tip-ev, .tip-ev + .tip-pane { margin-top:5px; padding-top:5px; border-top:1px solid var(--gut); }
+  .tip-read { margin-top:3px; font-weight:600; }
   @media (max-width: 640px) {
     dialog.chart-dlg { width:100vw; height:100dvh; border:0; border-radius:0; }
     .chart-dlg .cbar, .ichips { flex-wrap:nowrap; overflow-x:auto; scrollbar-width:none; }

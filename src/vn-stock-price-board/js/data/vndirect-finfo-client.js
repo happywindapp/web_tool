@@ -34,5 +34,24 @@ const Finfo = (() => {
   const values = (sym, modelType, period, since) =>
     get(`financial_statements?q=code:${q(sym)}~reportType:${period === "year" ? "ANNUAL" : "QUARTER"}~modelType:${modelType}~fiscalDate:gte:${since}&size=6000&fields=itemCode,numericValue,fiscalDate`).then(r => r.data);
 
-  return { ratios, news, events, profile, shareholders, recommendations, models, values };
+  // Selected line items across all models (codes are shared: 23000 NPAT parent, 14400 total assets…); report: "ANNUAL" | "QUARTER" | "ESTIMATION".
+  const items = (sym, report, codes, since) =>
+    get(`financial_statements?q=code:${q(sym)}~reportType:${report}~itemCode:${codes.join(",")}~fiscalDate:gte:${since}&size=2000&sort=fiscalDate:desc&fields=itemCode,numericValue,fiscalDate`).then(r => r.data);
+  // Daily ratio history, e.g. PRICE_TO_EARNINGS + PRICE_TO_BOOK for 5 years → { CODE: [{ date, value }] ascending }.
+  async function ratioHistory(sym, codes, since) {
+    const r = await get(`ratios?q=code:${q(sym)}~ratioCode:${codes.join(",")}~reportDate:gte:${since}&sort=reportDate:asc&size=5000&fields=ratioCode,reportDate,value`);
+    const out = Object.fromEntries(codes.map(c => [c, []]));
+    for (const x of r.data) if (out[x.ratioCode] && Number.isFinite(+x.value)) out[x.ratioCode].push({ date: String(x.reportDate), value: +x.value });
+    return out;
+  }
+  const foreigns = (sym, size = 120) => get(`foreigns?q=code:${q(sym)}&size=${size}&sort=tradingDate:desc&fields=tradingDate,netVal,netVol,buyVal,sellVal,currentRoom,totalRoom`).then(r => r.data);
+  // Cash dividends (đ/share per payment) — Vietnamese locale carries the numbers regardless of UI language.
+  const dividends = sym => get(`events?q=code:${q(sym)}~locale:VN~type:DIVIDEND&size=100&sort=effectiveDate:desc&fields=dividend,divYear,divPeriod,effectiveDate,ratio`).then(r => r.data);
+
+  // ICB sectors of one level (1: 10 industries · 2: 19 supersectors · 3: 42 sectors), each with its ticker list.
+  const industries = level => get(`industry_classification?q=industryLevel:${level}&size=500&fields=industryCode,vietnameseName,englishName,codeList,higherLevelCode`).then(r => r.data);
+  // Latest ratios of many tickers in one call (≤ ~100 codes keeps the URL short and the reply fast).
+  const ratiosBulk = (codes, ratioCodes) => get(`ratios/latest?filter=ratioCode:${ratioCodes.join(",")}&where=code:${codes.map(q).join(",")}&order=reportDate&size=1000&fields=code,ratioCode,value`).then(r => r.data);
+
+  return { ratios, news, events, profile, shareholders, recommendations, models, values, items, ratioHistory, foreigns, dividends, industries, ratiosBulk };
 })();

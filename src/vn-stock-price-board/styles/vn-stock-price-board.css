@@ -8,9 +8,12 @@
   .work { grid-template-columns:minmax(0, 1fr) minmax(320px, 380px); }
   .board-pane, .detail-pane { grid-template-rows:auto minmax(0, 1fr); }
   .scroll { overflow:auto; min-height:0; }
-  .toolbar #q { width:16em; }
-  .wb-nav select { padding:5px 8px; border:0; border-radius:6px 6px 0 0; background:transparent; }
+  .toolbar #q { width:10em; }
+  /* Header tokens (--btn / --ink) keep the closed selects readable on the teal bar; the option list gets the same teal so it never shows white on white. */
+  .wb-nav select { padding:5px 8px; border:0; border-radius:6px 6px 0 0; background:var(--btn); color:var(--ink); }
+  .wb-nav select option { background:#164e63; color:#ecfeff; }
   .wb-nav select.on { background:var(--tb); color:var(--tb-ink); font-weight:600; }
+  .wb-nav #sectorTabs { width:8.5em; }
   .badge { font-size:11px; padding:1px 7px; border:1px solid var(--line); border-radius:999px; color:var(--muted); white-space:nowrap; }
   .badge.live { color:var(--good); border-color:var(--good); }
   footer.status { padding:4px 16px; background:var(--panel); border-top:1px solid var(--line); font-size:12.5px; }
@@ -79,7 +82,7 @@
   @media (max-height: 600px) and (min-width: 641px) and (max-width: 900px) { .work { grid-template-rows:85dvh 85dvh; } }
   @media (max-width: 640px) {
     .indices { gap:6px; padding:6px 12px; } .ix { flex:0 0 150px; padding:4px 8px; } .spark { height:26px; }
-    .toolbar #q { width:11em; }
+    .toolbar #q { width:8.5em; }
     button.star { min-height:0; }
     .board td, .board th { padding:3px 6px; }
     footer.status { max-height:12dvh; overflow-y:auto; padding:4px 12px; }

@@ -2,13 +2,16 @@
 const TechChart = (() => {
   const css = () => { const s = getComputedStyle(document.documentElement), v = n => s.getPropertyValue(n).trim(); return { bg: v("--panel"), ink: v("--ink"), muted: v("--muted"), line: v("--line"), up: v("--up"), down: v("--down"), acc: v("--acc") }; };
   const alpha = (hex, a) => /^#[0-9a-f]{6}$/i.test(hex) ? hex + a : hex;
+  const CMP_COLORS = ["#eab308", "#ec4899", "#8b5cf6", "#06b6d4", "#84cc16"];
   const fmtPrice = p => Math.abs(p) >= 1e6 ? (p < 0 ? "-" : "") + Fmt.big(Math.abs(p)) : Math.abs(p) >= 1000 ? Fmt.en(p, 2) : p.toFixed(2);
   const pts = (bars, values) => values.map((v, i) => v == null || !Number.isFinite(v) ? { time: bars[i].time } : { time: bars[i].time, value: v });
 
-  // opt: { legend: HTMLElement, onClick(point), compact }
+  // opt: { legend: HTMLElement, tip?: HTMLElement (full chart help box), onClick(point), compact }
   function create(el, opt) {
     const LW = globalThis.LightweightCharts;
-    let chart = null, main = null, vol = null, last = null, overlays = [];
+    let chart = null, main = null, vol = null, last = null, overlays = [], paneInds = [], evByTime = new Map(), ptr = null;
+    el.addEventListener("pointermove", e => { const r = el.getBoundingClientRect(); ptr = { x: e.clientX - r.left, y: e.clientY - r.top }; });
+    el.addEventListener("pointerleave", () => { ptr = null; if (opt.tip) opt.tip.hidden = true; });
 
     // Native click → bar + price: the library drops a quick 2nd click at another spot (double-click guard), drawing needs every click.
     let down = null;
@@ -47,7 +50,7 @@ const TechChart = (() => {
       return s;
     }
 
-    // s = { bars, type, scale: "normal"|"log"|"pct", volume, inds (Indicators.compute), intraday, from (first visible index), keep, compare: { name, bars } }
+    // s = { bars, type, scale: "normal"|"log"|"pct", volume, inds (Indicators.compute), intraday, from (first visible index), keep, compare: [{ name, bars }] }
     function render(s) {
       const keep = s.keep && chart ? chart.timeScale().getVisibleLogicalRange() : null;
       if (chart) chart.remove();
@@ -57,40 +60,66 @@ const TechChart = (() => {
         autoSize: true,
         layout: { background: { type: "solid", color: c.bg }, textColor: c.muted, fontSize: 11, panes: { separatorColor: c.line } },
         grid: { vertLines: { color: alpha(c.line, "55") }, horzLines: { color: alpha(c.line, "55") } },
-        rightPriceScale: { borderColor: c.line, mode: { normal: 0, log: 1, pct: 2 }[s.scale] ?? 0 },
+        rightPriceScale: { borderColor: c.line },
         timeScale: { borderColor: c.line, timeVisible: s.intraday, secondsVisible: false, rightOffset: 4 },
         crosshair: { mode: LW.CrosshairMode.Normal },
         localization: { locale: "en-US", priceFormatter: fmtPrice },
       });
       last = { bars, raw: src, inds: s.inds, type: s.type };
       main = mainSeries(s.type, bars, c);
-      main.priceScale().applyOptions({ scaleMargins: { top: 0.08, bottom: s.volume ? 0.24 : 0.06 } });
+      // Log / % mode only on the price pane: oscillator panes (RSI, MACD…) keep their own linear scale.
+      main.priceScale().applyOptions({ mode: { normal: 0, log: 1, pct: 2 }[s.scale] ?? 0, scaleMargins: { top: 0.08, bottom: s.volume ? 0.24 : 0.06 } });
       vol = null;
       if (s.volume) {
         vol = chart.addSeries(LW.HistogramSeries, { priceScaleId: "vol", priceFormat: { type: "volume" }, priceLineVisible: false, lastValueVisible: false }, 0);
         vol.priceScale().applyOptions({ scaleMargins: { top: 0.8, bottom: 0 } });
         vol.setData(s.bars.map(b => ({ time: b.time, value: b.volume, color: alpha(b.close >= b.open ? c.up : c.down, "66") })));
       }
-      if (s.compare && s.compare.bars.length) {
-        const cmp = chart.addSeries(LW.LineSeries, { color: "#eab308", lineWidth: 2, priceLineVisible: false, title: s.compare.name }, 0);
-        cmp.setData(s.compare.bars.map(b => ({ time: b.time, value: b.close })));
-      }
+      (s.compare || []).forEach((c, i) => {
+        const cmp = chart.addSeries(LW.LineSeries, { color: CMP_COLORS[i % CMP_COLORS.length], lineWidth: 2, priceLineVisible: false, title: c.name }, 0);
+        cmp.setData(c.bars.map(b => ({ time: b.time, value: b.close })));
+      });
       let pane = 0;
-      overlays = [];
+      overlays = []; paneInds = [];
       for (const ind of s.inds) {
         if (ind.def.pane === "own" && opt.compact) continue;
         const p = ind.def.pane === "own" ? ++pane : 0;
         const series = ind.lines.map(ln => addLine(bars, ln, p));
-        overlays.push(...ind.lines.map((ln, i) => ({ ln, s: series[i] })));
+        overlays.push(...ind.lines.map((ln, i) => ({ ln, s: series[i], id: ind.id })));
+        if (p) { series[0].priceScale().applyOptions({ mode: 0 }); paneInds[p] = ind; }
         if (p && ind.def.levels) for (const lv of ind.def.levels) series[series.length - 1].createPriceLine({ price: lv, color: c.muted, lineWidth: 1, lineStyle: LW.LineStyle.Dotted, axisLabelVisible: false });
       }
       // Price pane keeps ≥ half the height however many oscillator panes are open.
       const panes = chart.panes();
       panes.forEach((pn, i) => pn.setStretchFactor(i ? 1 : Math.max(3, panes.length - 1)));
-      chart.subscribeCrosshairMove(p => legend(p.time));
+      // Full chart: mark peaks / troughs / crosses / signal points; hovering a marked bar explains it.
+      evByTime = new Map();
+      if (!opt.compact) {
+        const evs = ChartEvents.detect(s.bars, s.inds, s.from);
+        for (const ev of evs) (evByTime.get(ev.time) || evByTime.set(ev.time, []).get(ev.time)).push(ev);
+        LW.createSeriesMarkers(main, evs.map(ev => ({ time: ev.time, position: ev.pos === "above" ? "aboveBar" : "belowBar",
+          color: ev.tone === "up" ? c.up : ev.tone === "down" ? c.down : "#eab308", text: ChartHelp.short(ev.kind),
+          ...(ChartHelp.major(ev.kind) ? { shape: ev.pos === "above" ? "arrowDown" : "arrowUp" } : { shape: "circle", size: 0.4 }) })));
+      }
+      chart.subscribeCrosshairMove(p => { legend(p.time); tip(p.time); });
       if (keep) chart.timeScale().setVisibleLogicalRange(keep);
       else chart.timeScale().setVisibleLogicalRange({ from: s.from, to: bars.length + 3 });
       legend(null);
+    }
+
+    const paneAt = y => { let top = 0; const ps = chart.panes(); for (let k = 0; k < ps.length; k++) { top += ps[k].getHeight() + 1; if (y < top) return k; } return -1; };
+    // Help box near the cursor: marked events on the price pane, or the hovered indicator pane's meaning + reading.
+    function tip(time) {
+      if (!opt.tip) return;
+      if (time == null || !ptr || !last || !chart) { opt.tip.hidden = true; return; }
+      const pi = paneAt(ptr.y), i = last.bars.findIndex(b => b.time === time), ind = pi > 0 ? paneInds[pi] : null;
+      const pane = ind ? { id: ind.id, name: ind.def.name, reading: i >= 0 ? ChartHelp.interp(ind.id, ind.lines.map(l => l.values[i])) : "" } : null;
+      const html = ChartHelp.tipHtml(pi === 0 ? evByTime.get(time) || [] : [], pane);
+      if (!html) { opt.tip.hidden = true; return; }
+      opt.tip.innerHTML = html; opt.tip.hidden = false;
+      const w = el.clientWidth, tw = opt.tip.offsetWidth, th = opt.tip.offsetHeight;
+      opt.tip.style.left = `${ptr.x + 16 + tw > w ? Math.max(4, ptr.x - tw - 16) : ptr.x + 16}px`;
+      opt.tip.style.top = `${Math.max(4, Math.min(el.clientHeight - th - 4, ptr.y + 16))}px`;
     }
 
     function legend(time) {
@@ -99,8 +128,8 @@ const TechChart = (() => {
       let i = time == null ? bars.length - 1 : bars.findIndex(b => b.time === time);
       if (i < 0) i = bars.length - 1;
       const b = last.raw[i], prev = last.raw[i - 1], chg = prev ? (b.close - prev.close) / prev.close * 100 : 0, tone = chg > 0 ? "up" : chg < 0 ? "down" : "ref";
-      const vals = overlays.filter(o => o.ln.kind !== "hist" && o.ln.values[i] != null).map(o => `<span style="color:${o.ln.color}">${Dom.esc(o.ln.title)} ${fmtPrice(o.ln.values[i])}</span>`);
-      opt.legend.innerHTML = `<span>O <b class="${tone}">${fmtPrice(b.open)}</b> H <b class="${tone}">${fmtPrice(b.high)}</b> L <b class="${tone}">${fmtPrice(b.low)}</b> C <b class="${tone}">${fmtPrice(b.close)}</b>`
+      const vals = overlays.filter(o => o.ln.kind !== "hist" && o.ln.values[i] != null).map(o => `<span style="color:${o.ln.color}" title="${Dom.esc(ChartHelp.desc(o.id))}">${Dom.esc(o.ln.title)} ${fmtPrice(o.ln.values[i])}</span>`);
+      opt.legend.innerHTML = `<span title="${Dom.esc(ChartHelp.desc("price"))}">O <b class="${tone}">${fmtPrice(b.open)}</b> H <b class="${tone}">${fmtPrice(b.high)}</b> L <b class="${tone}">${fmtPrice(b.low)}</b> C <b class="${tone}">${fmtPrice(b.close)}</b>`
         + ` <b class="${tone}">${Fmt.signed(chg)}%</b> V <b>${Fmt.big(b.volume)}</b></span>${opt.compact ? "" : vals.join("")}`;
     }
 

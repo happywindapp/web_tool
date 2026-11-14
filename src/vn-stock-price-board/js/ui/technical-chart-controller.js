@@ -9,7 +9,9 @@ const ChartCtl = (() => {
     const range = ChartRange.RANGES.some(x => x.k === r.range) ? r.range : "1Y";
     return { range, interval: ChartRange.fix(range, ChartRange.INTERVALS.some(x => x.k === r.interval) ? r.interval : "1D"),
       type: TYPES.includes(r.type) ? r.type : "candle", scale: SCALES.includes(r.scale) ? r.scale : "normal",
-      volume: r.volume !== false, compare: r.compare === true, ind: Indicators.clean(r.ind) };
+      volume: r.volume !== false, ind: Indicators.clean(r.ind),
+      // Up to 5 overlay tickers; older saves / links carried compare: true for VNINDEX only.
+      cmp: WatchParse.clean(Array.isArray(r.cmp) ? r.cmp : r.compare === true ? ["VNINDEX"] : [], 5) };
   }
   const save = () => Prefs.set("chart", st);
 
@@ -31,14 +33,15 @@ const ChartCtl = (() => {
   // Only fetch while the chart is on screen (detail tab "Kỹ thuật" or the dialog).
   async function load() {
     if (!sym || (!active && !dlgOpen)) return;
-    const my = ++seq, key = `${sym}|${st.range}|${st.interval}|${st.compare}`;
+    const my = ++seq, key = `${sym}|${st.range}|${st.interval}|${st.cmp.join()}`;
     if (data.key !== key) {
       msg("Đang tải dữ liệu biểu đồ…");
       try {
         const w = ChartRange.windowOf(st.range, st.interval);
-        const [raw, cmp] = await Promise.all([History.load(sym, w.res, w.from, w.to), st.compare ? History.load("VNINDEX", w.res, w.from, w.to) : null]);
+        const others = st.cmp.filter(c => c !== sym);
+        const [raw, ...cmp] = await Promise.all([History.load(sym, w.res, w.from, w.to), ...others.map(c => History.load(c, w.res, w.from, w.to).catch(() => []))]);
         if (my !== seq) return;
-        data = { key, bars: ChartRange.shape(raw, st.interval), cmp: cmp ? ChartRange.shape(cmp, st.interval) : null };
+        data = { key, bars: ChartRange.shape(raw, st.interval), cmp: others.map((name, i) => ({ name, bars: ChartRange.shape(cmp[i], st.interval) })).filter(c => c.bars.length) };
       } catch (e) {
         if (my !== seq) return;
         console.warn("ChartCtl.load - get OHLC history fail", sym, e);
@@ -56,8 +59,8 @@ const ChartCtl = (() => {
     msg(null);
     const intra = ChartRange.intraday(st.interval);
     const inds = Indicators.compute(st.ind.filter(x => !Indicators.DEFS[x.id].intraday || intra), data.bars);
-    const s = { bars: data.bars, type: st.type, scale: st.compare ? "pct" : st.scale, volume: st.volume, inds, intraday: intra, keep,
-      from: ChartRange.firstVisible(data.bars, st.range), compare: data.cmp ? { name: "VNINDEX", bars: data.cmp } : null };
+    const s = { bars: data.bars, type: st.type, scale: data.cmp && data.cmp.length ? "pct" : st.scale, volume: st.volume, inds, intraday: intra, keep,
+      from: ChartRange.firstVisible(data.bars, st.range), compare: data.cmp || [] };
     mini.render(s);
     if (dlgOpen) { full.render(s); draw.apply(full); }
   }
@@ -87,7 +90,8 @@ const ChartCtl = (() => {
     dlgOpen = true; note = null;
     $("chartDlg").showModal();
     bars(); head();
-    requestAnimationFrame(() => render(false));
+    // Data may not be loaded yet (mini chart only loads while its tab is open) → load() fetches if needed, then renders.
+    requestAnimationFrame(load);
   }
 
   function act(c, el) {
@@ -95,7 +99,8 @@ const ChartCtl = (() => {
     if (c === "range") { st.range = v; st.interval = ChartRange.fix(v, st.interval); }
     else if (c === "interval") { if (!ChartRange.valid(st.range, v)) return; st.interval = v; }
     else if (c === "type" || c === "scale") st[c] = v;
-    else if (c === "volume" || c === "compare") st[c] = el.checked;
+    else if (c === "volume") st.volume = el.checked;
+    else if (c === "cmp") st.cmp = WatchParse.parse(el.value).symbols.slice(0, 5);
     else if (c === "add") { if (!Object.hasOwn(Indicators.DEFS, v)) return; st.ind = Indicators.add(st.ind, v); }
     else if (c === "param") { const x = st.ind[+el.dataset.i]; if (!x) return; x.p = Indicators.params(x.id, { ...x.p, [el.dataset.k]: el.value }); }
     else if (c === "rm") st.ind.splice(+el.dataset.i, 1);
@@ -106,7 +111,7 @@ const ChartCtl = (() => {
     else if (c === "open") { openDialog(); return; }
     else return;
     save(); bars();
-    if (["range", "interval", "compare"].includes(c)) load(); else render(true);
+    if (["range", "interval", "cmp"].includes(c)) load(); else render(true);
   }
 
   function png() {
@@ -126,7 +131,7 @@ const ChartCtl = (() => {
     // Every visit opens at 1 year × 1D; type / scale / indicators are remembered, share links still set their own range.
     st = clean({ ...Prefs.get("chart", {}), range: "1Y", interval: "1D" });
     mini = TechChart.create($("miniHost"), { legend: $("miniLegend"), compact: true });
-    full = TechChart.create($("fullHost"), { legend: $("fullLegend"), onClick: pt => { const r = draw.click(pt, data.bars); if (!r) return; note = r; head(); if (r.redraw) render(true); } });
+    full = TechChart.create($("fullHost"), { legend: $("fullLegend"), tip: $("fullTip"), onClick: pt => { const r = draw.click(pt, data.bars); if (!r) return; note = r; head(); if (r.redraw) render(true); } });
     [$("miniChart"), $("chartDlg")].forEach(wire);
     $("dlgClose").onclick = () => $("chartDlg").close();
     $("chartDlg").addEventListener("close", () => { dlgOpen = false; full.destroy(); draw.setTool(draw.tool()); });

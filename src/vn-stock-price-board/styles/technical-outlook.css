@@ -1,0 +1,13 @@
+  /* "Kỹ thuật" tab: automatic read per timeframe + outlook table. */
+  .tsum { font-size:13px; line-height:1.5; }
+  .tcards { display:grid; grid-template-columns:repeat(auto-fit, minmax(160px, 1fr)); gap:8px; padding:0 12px 4px; }
+  .tcard { padding:6px 8px; border:1px solid var(--line); border-radius:8px; font-size:12.5px; }
+  .tc-h { display:flex; justify-content:space-between; align-items:center; gap:6px; }
+  .tag { padding:1px 7px; border-radius:999px; font-size:11.5px; font-weight:600; white-space:nowrap; border:1px solid currentColor; }
+  .meter { position:relative; height:6px; margin:6px 0 4px; border-radius:3px; background:var(--gut); }
+  .meter::after { content:""; position:absolute; left:50%; top:-2px; bottom:-2px; width:1px; background:var(--muted); }
+  .meter i { position:absolute; top:0; bottom:0; border-radius:3px; } .meter i.upb { background:var(--up); } .meter i.downb { background:var(--down); }
+  .tc-r { color:var(--muted); font-size:11.5px; }
+  .tcard details { margin-top:4px; } .tcard summary { cursor:pointer; color:var(--muted); font-size:11.5px; }
+  .tcard ul.checks { margin:2px 0 0; }
+  table.outlook td { vertical-align:top; font-size:12px; } table.outlook td:first-child { white-space:nowrap; }

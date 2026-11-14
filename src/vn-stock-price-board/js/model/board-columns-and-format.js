@@ -38,6 +38,10 @@ const BoardCols = (() => {
     { k: "fBuy", g: "ĐTNN", h: "Mua", sort: "fBuy", opt: "fr", f: (q, o) => ({ t: Fmt.vol(q.fBuy, o.unit), c: "" }) },
     { k: "fSell", g: "ĐTNN", h: "Bán", sort: "fSell", opt: "fr", f: (q, o) => ({ t: Fmt.vol(q.fSell, o.unit), c: "" }) },
     { k: "room", g: "ĐTNN", h: "Room", opt: "fr", f: q => ({ t: Fmt.big(q.room), c: "" }) },
+    // Own target price (Notes.decorate sets q.target) and the distance to it from the current price.
+    { k: "target", g: "Của bạn", h: "Mục tiêu", opt: "tg", f: q => ({ t: q.target ? Fmt.price(q.target) : "", c: "" }) },
+    { k: "toTarget", g: "Của bạn", h: "Còn", opt: "tg", f: q => { const p = q.last || q.ref, u = q.target > 0 && p > 0 ? (q.target / p - 1) * 100 : null;
+      return { t: u == null ? "" : Fmt.signed(u, 1) + "%", c: u > 0 ? "up" : u < 0 ? "down" : "" }; } },
   ];
 
   // compact drops price levels 2–3 and ceiling/floor (filtered here, not CSS, so group colspans stay right).
