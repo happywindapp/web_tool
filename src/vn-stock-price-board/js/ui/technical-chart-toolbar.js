@@ -23,14 +23,19 @@ const ChartBar = (() => {
       + `<select data-c="scale" title="${e(T("Thang giá"))}">${opts(SCALES, s.scale)}</select>`
       + `<label class="chk"><input type="checkbox" data-c="volume"${s.volume ? " checked" : ""}>${e(T("Khối lượng"))}</label>`
       + `<label class="chk" title="${e(T("So sánh tối đa 5 mã hoặc chỉ số, cách nhau bằng dấu phẩy (thang % thay đổi)"))}">${e(T("So sánh"))}<input type="text" class="cmpin" data-c="cmp" value="${e(s.cmp.join(", "))}" placeholder="VNINDEX, VCB…" spellcheck="false" autocomplete="off"></label>`
-      + `<select data-c="add" title="${e(T("Thêm chỉ báo kỹ thuật"))}"><option value="">${e(T("+ Chỉ báo…"))}</option>`
-      + `<optgroup label="${e(T("Trên biểu đồ giá"))}">${addOpts("main")}</optgroup><optgroup label="${e(T("Khung riêng"))}">${addOpts("own")}</optgroup></select>`
+      + `<details class="indmenu"><summary title="${e(T("Bật / tắt chỉ báo kỹ thuật"))}">${e(T("+ Chỉ báo…"))}</summary><div class="indpanel">`
+      + `<span class="indnote">★ ${e(T("Chỉ báo quan trọng, dùng phổ biến nhất"))}</span><b>${e(T("Trên biểu đồ giá"))}</b>${addOpts("main", s.ind)}<b>${e(T("Khung riêng"))}</b>${addOpts("own", s.ind)}</div></details>`
       + `<span class="seg tools">${TOOLS.map(([k, icon, tip]) => `<button data-c="tool" data-v="${k}" title="${e(T(tip))}"${k === tool ? ' class="on"' : ""}>${icon}</button>`).join("")}`
       + `<button data-c="clearDraw" title="${e(T("Xoá mọi hình vẽ"))}">🗑</button></span>`
       + `<button data-c="fit" title="${e(T("Xem toàn bộ dữ liệu"))}">⤢</button>`
       + `<button data-c="png" title="${e(T("Tải ảnh PNG của biểu đồ"))}">📷 PNG</button>`;
   }
-  const addOpts = pane => Object.entries(Indicators.DEFS).filter(([, d]) => d.pane === pane).map(([k, d]) => `<option value="${k}">${Dom.esc(d.name)} — ${e(T(d.label))}</option>`).join("");
+  // Checked = shown on the chart; (n) when the same indicator is on with several parameter sets.
+  const addOpts = (pane, list) => Object.entries(Indicators.DEFS).filter(([, d]) => d.pane === pane).map(([k, d]) => {
+    const n = list.filter(x => x.id === k).length, core = Indicators.CORE.includes(k);
+    return `<div class="indrow${core ? " core" : ""}" title="${e(ChartHelp.desc(k))}"><label><input type="checkbox" data-c="toggleInd" value="${k}"${n ? " checked" : ""}> <b>${core ? "★ " : ""}${Dom.esc(d.name)}</b>${n > 1 ? ` (${n})` : ""} <span class="muted">${e(T(d.label))}</span></label>`
+      + `<button type="button" class="qbtn" data-c="indHelp" data-v="${k}" title="${e(T("Hướng dẫn chi tiết: cách đọc, ví dụ, cách phối hợp"))}">?</button></div>`;
+  }).join("");
 
   function chips(list) {
     return list.map((x, i) => {

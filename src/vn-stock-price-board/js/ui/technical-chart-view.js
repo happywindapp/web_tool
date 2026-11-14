@@ -3,13 +3,41 @@ const TechChart = (() => {
   const css = () => { const s = getComputedStyle(document.documentElement), v = n => s.getPropertyValue(n).trim(); return { bg: v("--panel"), ink: v("--ink"), muted: v("--muted"), line: v("--line"), up: v("--up"), down: v("--down"), acc: v("--acc") }; };
   const alpha = (hex, a) => /^#[0-9a-f]{6}$/i.test(hex) ? hex + a : hex;
   const CMP_COLORS = ["#eab308", "#ec4899", "#8b5cf6", "#06b6d4", "#84cc16"];
-  const fmtPrice = p => Math.abs(p) >= 1e6 ? (p < 0 ? "-" : "") + Fmt.big(Math.abs(p)) : Math.abs(p) >= 1000 ? Fmt.en(p, 2) : p.toFixed(2);
+  let fmtPrice = p => Math.abs(p) >= 1e6 ? (p < 0 ? "-" : "") + Fmt.big(Math.abs(p)) : Math.abs(p) >= 1000 ? Fmt.en(p, 2) : p.toFixed(2);
   const pts = (bars, values) => values.map((v, i) => v == null || !Number.isFinite(v) ? { time: bars[i].time } : { time: bars[i].time, value: v });
 
   // opt: { legend: HTMLElement, tip?: HTMLElement (full chart help box), onClick(point), compact }
   function create(el, opt) {
     const LW = globalThis.LightweightCharts;
     let chart = null, main = null, vol = null, last = null, overlays = [], paneInds = [], evByTime = new Map(), ptr = null;
+    const box = el.parentElement, PRICE_MIN = 340, PANE_MIN = 130;
+    // Full chart: every indicator pane keeps ≥ PANE_MIN px; when they don't fit, the host grows and the box scrolls.
+    function fitPanes() {
+      if (!chart) return;
+      const panes = chart.panes(), n = panes.length - 1, need = PRICE_MIN + n * PANE_MIN, scroll = !opt.compact && n > 0 && box.clientHeight < need;
+      el.style.height = scroll ? `${need}px` : "";
+      panes.forEach((pn, i) => pn.setStretchFactor(scroll ? (i ? PANE_MIN : PRICE_MIN) : (i ? 1 : Math.max(3, n))));
+      if (tags) requestAnimationFrame(() => requestAnimationFrame(paneTags));
+    }
+    // Name tag at the top-left of each indicator pane, so scrolled-down panes stay identifiable.
+    const tags = opt.compact ? null : box.appendChild(Object.assign(document.createElement("div"), { className: "pane-tags" }));
+    function paneTags() {
+      if (!chart) { tags.innerHTML = ""; return; }
+      let top = 0;
+      tags.innerHTML = chart.panes().map((pn, i) => {
+        const at = top, ind = paneInds[i];
+        top += pn.getHeight() + 1;
+        return i && ind ? `<span style="top:${at + 2}px" title="${Dom.esc(ChartHelp.desc(ind.id))}">${ind.lines.filter(l => l.kind !== "hist").map(l => `<b style="color:${l.color}">${Dom.esc(l.title)}</b>`).join(" ")}</span>` : "";
+      }).join("");
+    }
+    if (!opt.compact) {
+      new ResizeObserver(fitPanes).observe(box);
+      // Wheel over an indicator pane scrolls the panes (the price pane still zooms); capture runs before the library's own handler.
+      el.addEventListener("wheel", e => {
+        if (!chart || e.ctrlKey || box.scrollHeight <= box.clientHeight || e.clientY - el.getBoundingClientRect().top <= chart.panes()[0].getHeight()) return;
+        e.preventDefault(); e.stopPropagation(); box.scrollTop += e.deltaY;
+      }, { capture: true, passive: false });
+    }
     el.addEventListener("pointermove", e => { const r = el.getBoundingClientRect(); ptr = { x: e.clientX - r.left, y: e.clientY - r.top }; });
     el.addEventListener("pointerleave", () => { ptr = null; if (opt.tip) opt.tip.hidden = true; });
 
@@ -63,6 +91,7 @@ const TechChart = (() => {
         rightPriceScale: { borderColor: c.line },
         timeScale: { borderColor: c.line, timeVisible: s.intraday, secondsVisible: false, rightOffset: 4 },
         crosshair: { mode: LW.CrosshairMode.Normal },
+        handleScroll: { vertTouchDrag: !!opt.compact },
         localization: { locale: "en-US", priceFormatter: fmtPrice },
       });
       last = { bars, raw: src, inds: s.inds, type: s.type };
@@ -89,9 +118,8 @@ const TechChart = (() => {
         if (p) { series[0].priceScale().applyOptions({ mode: 0 }); paneInds[p] = ind; }
         if (p && ind.def.levels) for (const lv of ind.def.levels) series[series.length - 1].createPriceLine({ price: lv, color: c.muted, lineWidth: 1, lineStyle: LW.LineStyle.Dotted, axisLabelVisible: false });
       }
-      // Price pane keeps ≥ half the height however many oscillator panes are open.
-      const panes = chart.panes();
-      panes.forEach((pn, i) => pn.setStretchFactor(i ? 1 : Math.max(3, panes.length - 1)));
+      // Price pane keeps ≥ half the height when the panes fit; otherwise fixed minimum heights + scrolling.
+      fitPanes();
       // Full chart: mark peaks / troughs / crosses / signal points; hovering a marked bar explains it.
       evByTime = new Map();
       if (!opt.compact) {
@@ -149,10 +177,12 @@ const TechChart = (() => {
       render, legend, updateLast,
       main: () => main, chart: () => chart,
       fit: () => chart && chart.timeScale().fitContent(),
+      scrolls: () => !!el.style.height,
       screenshot: () => chart && chart.takeScreenshot(),
-      destroy: () => { if (chart) chart.remove(); chart = main = vol = last = null; },
+      destroy: () => { if (chart) chart.remove(); chart = main = vol = last = null; el.style.height = ""; if (tags) tags.innerHTML = ""; },
     };
   }
 
-  return { create, fmtPrice };
+  // setPriceFormat: a tool whose prices need other decimals (crypto < $1) swaps the page-wide formatter before the first render.
+  return { create, fmtPrice: p => fmtPrice(p), setPriceFormat: f => { fmtPrice = f; } };
 })();

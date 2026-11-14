@@ -22,11 +22,47 @@
   dialog.chart-dlg[open] { display:flex; flex-direction:column; }
   dialog.chart-dlg::backdrop { background:rgb(2 6 23 / .55); }
   .chart-dlg > * { flex:none; }
-  .chart-dlg .cbox { flex:1 1 0; min-height:200px; margin:0 8px; }
+  .chart-dlg .cbox { flex:1 1 0; min-height:200px; margin:0 8px; overflow-x:hidden; overflow-y:auto; overscroll-behavior:contain; }
   .dlg-head { display:flex; align-items:center; gap:8px; padding:8px 12px; border-bottom:1px solid var(--line); }
   .dlg-head #dlgTitle { flex:1 1 auto; min-width:0; font-size:15px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .dlg-head #dlgTitle b:first-child { font-size:18px; }
   .chart-dlg .cbar { padding:8px 12px 4px; }
+  .indmenu { position:relative; }
+  .indmenu > summary { list-style:none; padding:3px 10px; border:1px solid var(--line); border-radius:6px; background:var(--btn); font-size:12.5px; cursor:pointer; white-space:nowrap; }
+  .indmenu > summary::-webkit-details-marker { display:none; }
+  .indmenu[open] > summary { border-color:var(--acc); }
+  .indpanel { position:absolute; z-index:20; top:calc(100% + 4px); left:0; display:grid; gap:1px; width:max-content; max-width:min(420px, 90vw); max-height:60vh; overflow:auto;
+              padding:6px 10px; border:1px solid var(--line); border-radius:8px; background:var(--panel); box-shadow:0 6px 18px rgb(0 0 0 / .25); font-size:12.5px; }
+  .indpanel > b { margin-top:4px; color:var(--muted); font-size:11px; text-transform:uppercase; }
+  .indpanel label { display:flex; align-items:baseline; gap:6px; padding:2px 0; cursor:pointer; white-space:nowrap; }
+  .indrow { display:flex; align-items:center; gap:6px; padding:0 4px 0 8px; border-left:3px solid transparent; border-radius:4px; }
+  .indrow.core { border-left-color:var(--acc); background:color-mix(in srgb, var(--acc) 14%, transparent); }
+  .indrow.core label > b { color:var(--acc); }
+  .indnote { color:var(--muted); font-size:11px; }
+  .indrow label { flex:1 1 auto; min-width:0; }
+  .qbtn { flex:none; width:20px; height:20px; padding:0; border:1px solid var(--line); border-radius:50%; background:var(--btn); color:var(--acc); font-size:12px; font-weight:700; line-height:1; cursor:pointer; }
+  .qbtn:hover, .qbtn:focus-visible { border-color:var(--acc); background:var(--acc); color:#fff; }
+  dialog.ind-guide { width:min(760px, 96vw); }
+  .ind-guide .dlg-head b { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .ind-guide .dlg-head button { padding:2px 10px; }
+  .ig-body { padding:8px 14px; font-size:13.5px; line-height:1.5; }
+  .ig-on { display:inline-flex; gap:6px; margin-bottom:6px; }
+  .ig-fig { margin:0 0 6px; }
+  .ig-fig figcaption { font-size:11.5px; text-align:right; }
+  .ig-svg { display:block; width:100%; height:auto; border:1px solid var(--line); border-radius:6px; }
+  .ig-svg .ig-bg { fill:var(--panel); }
+  .ig-svg .ig-up { stroke:var(--up, #16a34a); fill:var(--up, #16a34a); }
+  .ig-svg .ig-dn { stroke:var(--down, #dc2626); fill:var(--down, #dc2626); }
+  .ig-svg .ig-lvl { stroke:var(--muted); stroke-dasharray:3 3; stroke-width:1; }
+  .ig-svg .ig-ax { fill:var(--muted); font-size:10.5px; }
+  .ig-svg .ig-ev path { stroke:none; }
+  .ig-svg .ig-ev text { font-size:10.5px; font-weight:700; paint-order:stroke; stroke:var(--panel); stroke-width:3px; }
+  .ig-svg .ig-ev.up { fill:var(--up, #16a34a); } .ig-svg .ig-ev.down { fill:var(--down, #dc2626); } .ig-svg .ig-ev.warn { fill:#d97706; }
+  @media (max-width: 640px) { .ig-svg .ig-ax, .ig-svg .ig-ev text { font-size:16px; } }
+  .ig-sec h4 { margin:10px 0 2px; color:var(--acc); font-size:13.5px; }
+  .ig-sec p, .ig-sec ul { margin:0; } .ig-sec ul { padding-left:20px; }
+  .ig-ex li { margin-bottom:3px; } .ig-warn p { padding:6px 10px; border-left:3px solid #d97706; border-radius:4px; background:rgb(217 119 6 / .1); }
+  .indpanel label .muted { font-size:11.5px; overflow:hidden; text-overflow:ellipsis; }
   .ichips { display:flex; flex-wrap:wrap; gap:6px; padding:0 12px 6px; }
   .ichip { display:inline-flex; align-items:center; gap:3px; padding:2px 4px 2px 8px; border:1px solid var(--line); border-radius:999px; font-size:12px; background:var(--gut); }
   .ichip input { width:4.2em; padding:1px 3px; border:1px solid var(--line); border-radius:4px; background:var(--btn); color:var(--ink); font:inherit; }
@@ -35,6 +71,7 @@
 
   /* Full chart help: legend items explain themselves on hover; .ctip follows the cursor over marked bars / indicator panes. */
   .chart-dlg .clegend span { pointer-events:auto; cursor:help; }
+  .pane-tags > span { position:absolute; z-index:3; left:8px; padding:0 5px; border-radius:4px; background:color-mix(in srgb, var(--panel) 80%, transparent); font-size:11.5px; pointer-events:auto; cursor:help; }
   .ctip { position:absolute; z-index:6; max-width:300px; padding:6px 9px; border:1px solid var(--line); border-radius:8px; background:var(--panel);
           box-shadow:0 4px 14px rgb(0 0 0 / .25); font-size:12px; line-height:1.45; pointer-events:none; }
   .ctip[hidden] { display:none; }

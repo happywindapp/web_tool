@@ -40,4 +40,7 @@ I18n.add({
   "Đỉnh": "Peak", "Đáy": "Trough", "Đỉnh của khoảng": "Range high", "Đáy của khoảng": "Range low", "Giao cắt vàng": "Golden cross", "Giao cắt tử thần": "Death cross",
   "MACD cắt lên": "MACD cross up", "MACD cắt xuống": "MACD cross down", "Quá mua": "Overbought", "Quá bán": "Oversold", "Vượt dải trên": "Above upper band",
   "Thủng dải dưới": "Below lower band", "KL đột biến": "Volume spike", "Cao nhất": "High", "Thấp nhất": "Low",
+  "Bật / tắt chỉ báo kỹ thuật": "Show / hide technical indicators",
+  "Nhiều khung chỉ báo: lăn chuột trên khung chỉ báo hoặc vuốt dọc để cuộn xem hết.": "Many indicator panes: use the wheel over an indicator pane or swipe up / down to scroll through them.",
+  "Chỉ báo quan trọng, dùng phổ biến nhất": "Key indicators, the most widely used",
 });

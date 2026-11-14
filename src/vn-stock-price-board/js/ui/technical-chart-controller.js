@@ -19,7 +19,10 @@ const ChartCtl = (() => {
   function msg(key) { say("miniMsg", key); say("fullMsg", key); }
   function bars() {
     $("miniBar").innerHTML = ChartBar.compact(st);
+    // Keep the indicator menu open while ticking several boxes (the toolbar is rebuilt on every change).
+    const open = !!$("fullBar").querySelector("details.indmenu[open]");
     $("fullBar").innerHTML = ChartBar.full(st, draw.tool());
+    if (open) $("fullBar").querySelector("details.indmenu").open = true;
     $("fullChips").innerHTML = ChartBar.chips(st.ind);
   }
   function head() {
@@ -27,7 +30,8 @@ const ChartCtl = (() => {
     $("dlgTitle").innerHTML = `<b class="${tone}">${Dom.esc(sym)}</b> <span class="muted">${Dom.esc(Universe.name(sym, I18n.lang))}</span>`
       + (q ? ` <b class="${tone}">${Fmt.price(q.last || q.ref)}</b> <span class="${tone}">${Fmt.chg(q, q.chg)} ${Fmt.pct(q, q.pct)}</span>` : "");
     $("dlgClose").title = T("Đóng (Esc)");
-    $("fullStatus").textContent = note ? T(note.key, note.p) : draw.tool() ? T(draw.needsTwo() ? "Bấm 2 điểm trên biểu đồ." : "Bấm 1 điểm trên biểu đồ.") : T("Kéo để cuộn, lăn chuột / chụm 2 ngón để phóng to, bấm đúp trục giá để tự co giãn.");
+    $("fullStatus").textContent = note ? T(note.key, note.p) : draw.tool() ? T(draw.needsTwo() ? "Bấm 2 điểm trên biểu đồ." : "Bấm 1 điểm trên biểu đồ.") : T("Kéo để cuộn, lăn chuột / chụm 2 ngón để phóng to, bấm đúp trục giá để tự co giãn.")
+      + (full.scrolls() ? " " + T("Nhiều khung chỉ báo: lăn chuột trên khung chỉ báo hoặc vuốt dọc để cuộn xem hết.") : "");
   }
 
   // Only fetch while the chart is on screen (detail tab "Kỹ thuật" or the dialog).
@@ -62,7 +66,7 @@ const ChartCtl = (() => {
     const s = { bars: data.bars, type: st.type, scale: data.cmp && data.cmp.length ? "pct" : st.scale, volume: st.volume, inds, intraday: intra, keep,
       from: ChartRange.firstVisible(data.bars, st.range), compare: data.cmp || [] };
     mini.render(s);
-    if (dlgOpen) { full.render(s); draw.apply(full); }
+    if (dlgOpen) { full.render(s); draw.apply(full); head(); }
   }
 
   function setSymbol(s) {
@@ -101,7 +105,8 @@ const ChartCtl = (() => {
     else if (c === "type" || c === "scale") st[c] = v;
     else if (c === "volume") st.volume = el.checked;
     else if (c === "cmp") st.cmp = WatchParse.parse(el.value).symbols.slice(0, 5);
-    else if (c === "add") { if (!Object.hasOwn(Indicators.DEFS, v)) return; st.ind = Indicators.add(st.ind, v); }
+    else if (c === "toggleInd") { if (!Object.hasOwn(Indicators.DEFS, v)) return; st.ind = el.checked ? Indicators.add(st.ind, v) : st.ind.filter(x => x.id !== v); }
+    else if (c === "indHelp") { IndGuide.open(v, guideHooks); return; }
     else if (c === "param") { const x = st.ind[+el.dataset.i]; if (!x) return; x.p = Indicators.params(x.id, { ...x.p, [el.dataset.k]: el.value }); }
     else if (c === "rm") st.ind.splice(+el.dataset.i, 1);
     else if (c === "tool") { draw.setTool(v); note = null; bars(); head(); return; }
@@ -113,6 +118,8 @@ const ChartCtl = (() => {
     save(); bars();
     if (["range", "interval", "cmp"].includes(c)) load(); else render(true);
   }
+
+  const guideHooks = { on: id => st.ind.some(x => x.id === id), toggle: (id, show) => act("toggleInd", { dataset: { v: id }, checked: show }) };
 
   function png() {
     const canvas = full.screenshot();
@@ -128,6 +135,16 @@ const ChartCtl = (() => {
   }
 
   function init() {
+    // The menu may sit near the dialog's right edge → flip the panel to open leftwards instead of being clipped.
+    $("fullBar").addEventListener("toggle", e => {
+      const d = e.target;
+      if (!d.matches || !d.matches("details.indmenu") || !d.open) return;
+      const pn = d.querySelector(".indpanel");
+      pn.style.left = "0"; pn.style.right = "auto";
+      if (pn.getBoundingClientRect().right > $("chartDlg").getBoundingClientRect().right - 8) { pn.style.left = "auto"; pn.style.right = "0"; }
+    }, true);
+    document.addEventListener("click", e => { const m = $("fullBar").querySelector("details.indmenu[open]"); if (m && !m.contains(e.target) && !e.composedPath().includes($("indHelpDlg"))) m.open = false; });
+    IndGuide.init();
     // Every visit opens at 1 year × 1D; type / scale / indicators are remembered, share links still set their own range.
     st = clean({ ...Prefs.get("chart", {}), range: "1Y", interval: "1D" });
     mini = TechChart.create($("miniHost"), { legend: $("miniLegend"), compact: true });

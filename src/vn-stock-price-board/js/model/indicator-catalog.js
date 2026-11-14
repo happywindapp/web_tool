@@ -47,6 +47,8 @@ const Indicators = (() => {
     roc: { name: "ROC", label: "Tốc độ thay đổi giá (%)", pane: "own", levels: [0], params: [P("n", 12, 1, 200)], calc: (b, p, c) => [line(`ROC ${p.n}`, TA.roc(col(b, "close"), p.n), c)] },
   };
 
+  // Most widely used; highlighted in the indicator menu.
+  const CORE = ["sma", "ema", "bb", "rsi", "macd"];
   const DEFAULT = [{ id: "sma", p: { n: 20 } }, { id: "sma", p: { n: 50 } }, { id: "rsi", p: { n: 14 } }, { id: "macd", p: { f: 12, s: 26, g: 9 } }];
   const MAX = 12;
 
@@ -67,5 +69,5 @@ const Indicators = (() => {
     return list.map(x => { const d = DEFS[x.id], c = d.pane === "main" ? PALETTE[k++ % PALETTE.length] : PALETTE[0]; return { ...x, def: d, lines: d.calc(bars, x.p, c) }; });
   }
 
-  return { DEFS, DEFAULT, clean, params, add, compute, MAX };
+  return { DEFS, DEFAULT, CORE, clean, params, add, compute, MAX };
 })();

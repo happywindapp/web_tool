@@ -156,6 +156,19 @@ Dựa trên quy tắc + thống kê lịch sử của chính mã (không dùng A
   Điểm chính (đỉnh, đáy, cao/thấp nhất, giao cắt MA) = mũi tên + chữ; tín hiệu phụ = chấm nhỏ. Rê tới nến có dấu → hộp giải thích. Chart gọn trong pane chi tiết không vẽ dấu.
 - Mở Full chart từ tab bất kỳ luôn tải dữ liệu (trước đây mở từ tab khác "Kỹ thuật" có thể báo không có dữ liệu).
 
+### Menu "+ Chỉ báo…" và hướng dẫn chỉ báo (`IndGuide`, `IND_GUIDE`, `IndIllus`)
+
+- Mỗi dòng: checkbox (đang hiện trên chart = tích; `(n)` khi bật nhiều bộ tham số) · rê chuột = giải thích ngắn (`ChartHelp.desc`) · nút **?** mở hộp hướng dẫn chi tiết.
+- Chỉ báo quan trọng (`Indicators.CORE` = SMA, EMA, BB, RSI, MACD) có ★, viền trái + nền màu accent.
+- Khung riêng bật bao nhiêu cũng được (tổng ≤ `Indicators.MAX` = 12): Full chart giữ khung giá ≥ 340 px, mỗi pane chỉ báo ≥ 130 px; không đủ chỗ thì vùng chart cuộn dọc
+  (lăn chuột trên pane chỉ báo = cuộn, trên khung giá = zoom như cũ; điện thoại vuốt dọc), mỗi pane có nhãn tên ở góc trên-trái. Đủ chỗ thì giữ bố cục cũ (khung giá ≥ ½ chiều cao).
+- Hộp hướng dẫn (`#indHelpDlg`, mở chồng lên Full chart, Esc chỉ đóng hộp này): **Là gì · Cách đọc · Ví dụ minh họa (có số liệu) · Phối hợp với chỉ báo khác · Lưu ý**,
+  checkbox "Bật trên biểu đồ", ‹ › hoặc phím ←/→ duyệt cả 18 chỉ báo; menu chỉ báo phía sau giữ nguyên trạng thái mở.
+- Hình minh họa vẽ SVG trên chuỗi giá giả lập cố định 160 nến (tăng → đỉnh → giảm → đi ngang → bứt phá; VWAP dùng 4 phiên × 40 nến 5 phút, có vạch ngăn phiên):
+  MA vẽ cặp 20/50 (SMA), 12/26 (EMA), 10/30 (WMA) để thấy giao cắt; đánh dấu tín hiệu từ `ChartEvents` (giao cắt MA, MACD, RSI, Bollinger; chỉ báo khác = đỉnh / đáy), tối đa 6 dấu.
+- Nội dung tiếng Việt ở `js/ui/indicator-guide-content.js`, English ở `js/i18n/en-indicator-guide-strings.js`; test `indicator-guide-and-illustration.test.js`
+  bắt buộc mọi id trong `Indicators.DEFS` có đủ 5 mục (≥ 2 ví dụ, ≥ 2 cách phối hợp) và hình không có NaN — thêm chỉ báo mới phải viết hướng dẫn.
+
 ### Lưu / nhập / xuất danh mục (`WatchIO`, `WatchFile`)
 
 - Toolbar: **💾 Lưu danh mục** (đặt tên, lưu ★ danh mục hiện tại; dùng chung module `SavedSessions`, localStorage `lists`, ≤ 30 bản) · **📂 Đã lưu** (mở lại → thay danh mục, có ↶ Khôi phục) · **🗑** xoá bản đang mở.

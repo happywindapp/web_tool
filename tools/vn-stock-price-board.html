@@ -188,11 +188,47 @@
   dialog.chart-dlg[open] { display:flex; flex-direction:column; }
   dialog.chart-dlg::backdrop { background:rgb(2 6 23 / .55); }
   .chart-dlg > * { flex:none; }
-  .chart-dlg .cbox { flex:1 1 0; min-height:200px; margin:0 8px; }
+  .chart-dlg .cbox { flex:1 1 0; min-height:200px; margin:0 8px; overflow-x:hidden; overflow-y:auto; overscroll-behavior:contain; }
   .dlg-head { display:flex; align-items:center; gap:8px; padding:8px 12px; border-bottom:1px solid var(--line); }
   .dlg-head #dlgTitle { flex:1 1 auto; min-width:0; font-size:15px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .dlg-head #dlgTitle b:first-child { font-size:18px; }
   .chart-dlg .cbar { padding:8px 12px 4px; }
+  .indmenu { position:relative; }
+  .indmenu > summary { list-style:none; padding:3px 10px; border:1px solid var(--line); border-radius:6px; background:var(--btn); font-size:12.5px; cursor:pointer; white-space:nowrap; }
+  .indmenu > summary::-webkit-details-marker { display:none; }
+  .indmenu[open] > summary { border-color:var(--acc); }
+  .indpanel { position:absolute; z-index:20; top:calc(100% + 4px); left:0; display:grid; gap:1px; width:max-content; max-width:min(420px, 90vw); max-height:60vh; overflow:auto;
+              padding:6px 10px; border:1px solid var(--line); border-radius:8px; background:var(--panel); box-shadow:0 6px 18px rgb(0 0 0 / .25); font-size:12.5px; }
+  .indpanel > b { margin-top:4px; color:var(--muted); font-size:11px; text-transform:uppercase; }
+  .indpanel label { display:flex; align-items:baseline; gap:6px; padding:2px 0; cursor:pointer; white-space:nowrap; }
+  .indrow { display:flex; align-items:center; gap:6px; padding:0 4px 0 8px; border-left:3px solid transparent; border-radius:4px; }
+  .indrow.core { border-left-color:var(--acc); background:color-mix(in srgb, var(--acc) 14%, transparent); }
+  .indrow.core label > b { color:var(--acc); }
+  .indnote { color:var(--muted); font-size:11px; }
+  .indrow label { flex:1 1 auto; min-width:0; }
+  .qbtn { flex:none; width:20px; height:20px; padding:0; border:1px solid var(--line); border-radius:50%; background:var(--btn); color:var(--acc); font-size:12px; font-weight:700; line-height:1; cursor:pointer; }
+  .qbtn:hover, .qbtn:focus-visible { border-color:var(--acc); background:var(--acc); color:#fff; }
+  dialog.ind-guide { width:min(760px, 96vw); }
+  .ind-guide .dlg-head b { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .ind-guide .dlg-head button { padding:2px 10px; }
+  .ig-body { padding:8px 14px; font-size:13.5px; line-height:1.5; }
+  .ig-on { display:inline-flex; gap:6px; margin-bottom:6px; }
+  .ig-fig { margin:0 0 6px; }
+  .ig-fig figcaption { font-size:11.5px; text-align:right; }
+  .ig-svg { display:block; width:100%; height:auto; border:1px solid var(--line); border-radius:6px; }
+  .ig-svg .ig-bg { fill:var(--panel); }
+  .ig-svg .ig-up { stroke:var(--up, #16a34a); fill:var(--up, #16a34a); }
+  .ig-svg .ig-dn { stroke:var(--down, #dc2626); fill:var(--down, #dc2626); }
+  .ig-svg .ig-lvl { stroke:var(--muted); stroke-dasharray:3 3; stroke-width:1; }
+  .ig-svg .ig-ax { fill:var(--muted); font-size:10.5px; }
+  .ig-svg .ig-ev path { stroke:none; }
+  .ig-svg .ig-ev text { font-size:10.5px; font-weight:700; paint-order:stroke; stroke:var(--panel); stroke-width:3px; }
+  .ig-svg .ig-ev.up { fill:var(--up, #16a34a); } .ig-svg .ig-ev.down { fill:var(--down, #dc2626); } .ig-svg .ig-ev.warn { fill:#d97706; }
+  @media (max-width: 640px) { .ig-svg .ig-ax, .ig-svg .ig-ev text { font-size:16px; } }
+  .ig-sec h4 { margin:10px 0 2px; color:var(--acc); font-size:13.5px; }
+  .ig-sec p, .ig-sec ul { margin:0; } .ig-sec ul { padding-left:20px; }
+  .ig-ex li { margin-bottom:3px; } .ig-warn p { padding:6px 10px; border-left:3px solid #d97706; border-radius:4px; background:rgb(217 119 6 / .1); }
+  .indpanel label .muted { font-size:11.5px; overflow:hidden; text-overflow:ellipsis; }
   .ichips { display:flex; flex-wrap:wrap; gap:6px; padding:0 12px 6px; }
   .ichip { display:inline-flex; align-items:center; gap:3px; padding:2px 4px 2px 8px; border:1px solid var(--line); border-radius:999px; font-size:12px; background:var(--gut); }
   .ichip input { width:4.2em; padding:1px 3px; border:1px solid var(--line); border-radius:4px; background:var(--btn); color:var(--ink); font:inherit; }
@@ -201,6 +237,7 @@
 
   /* Full chart help: legend items explain themselves on hover; .ctip follows the cursor over marked bars / indicator panes. */
   .chart-dlg .clegend span { pointer-events:auto; cursor:help; }
+  .pane-tags > span { position:absolute; z-index:3; left:8px; padding:0 5px; border-radius:4px; background:color-mix(in srgb, var(--panel) 80%, transparent); font-size:11.5px; pointer-events:auto; cursor:help; }
   .ctip { position:absolute; z-index:6; max-width:300px; padding:6px 9px; border:1px solid var(--line); border-radius:8px; background:var(--panel);
           box-shadow:0 4px 14px rgb(0 0 0 / .25); font-size:12px; line-height:1.45; pointer-events:none; }
   .ctip[hidden] { display:none; }
@@ -506,6 +543,7 @@
 </main>
 <footer class="status" id="status" data-i18n-skip></footer>
 <dialog id="toolDlg" class="tool-dlg" data-i18n-skip></dialog>
+<dialog id="indHelpDlg" class="tool-dlg ind-guide" data-i18n-skip></dialog>
 <dialog id="chartDlg" class="chart-dlg" data-i18n-skip>
   <div class="dlg-head"><span id="dlgTitle"></span><button id="dlgClose">✕</button></div>
   <div class="cbar" id="fullBar"></div>
@@ -884,6 +922,185 @@ I18n.add({
   "Đỉnh": "Peak", "Đáy": "Trough", "Đỉnh của khoảng": "Range high", "Đáy của khoảng": "Range low", "Giao cắt vàng": "Golden cross", "Giao cắt tử thần": "Death cross",
   "MACD cắt lên": "MACD cross up", "MACD cắt xuống": "MACD cross down", "Quá mua": "Overbought", "Quá bán": "Oversold", "Vượt dải trên": "Above upper band",
   "Thủng dải dưới": "Below lower band", "KL đột biến": "Volume spike", "Cao nhất": "High", "Thấp nhất": "Low",
+  "Bật / tắt chỉ báo kỹ thuật": "Show / hide technical indicators",
+  "Nhiều khung chỉ báo: lăn chuột trên khung chỉ báo hoặc vuốt dọc để cuộn xem hết.": "Many indicator panes: use the wheel over an indicator pane or swipe up / down to scroll through them.",
+  "Chỉ báo quan trọng, dùng phổ biến nhất": "Key indicators, the most widely used",
+});
+// English for the indicator guide (IND_GUIDE in js/ui/indicator-guide-content.js), keyed by the Vietnamese source text.
+I18n.add({
+  "SMA (Simple Moving Average) là giá đóng cửa trung bình của N phiên gần nhất, mỗi phiên có trọng số như nhau. SMA làm mượt biến động để thấy xu hướng.": "SMA (Simple Moving Average) is the average closing price of the last N sessions, each session weighted equally. It smooths out noise so the trend is easier to see.",
+  "Giá nằm trên SMA và SMA dốc lên: xu hướng tăng; giá dưới SMA và SMA dốc xuống: xu hướng giảm.": "Price above a rising SMA: uptrend; price below a falling SMA: downtrend.",
+  "SMA ngắn (10–20) theo dõi xu hướng ngắn hạn, SMA 50 trung hạn, SMA 200 dài hạn.": "Short SMAs (10–20) track the short-term trend, SMA 50 the medium term, SMA 200 the long term.",
+  "Trong xu hướng, SMA thường đóng vai hỗ trợ (khi tăng) hoặc kháng cự (khi giảm).": "Within a trend the SMA often acts as support (uptrend) or resistance (downtrend).",
+  "Ví dụ: cổ phiếu X giá 48, SMA 50 ở 45 và đang dốc lên → xu hướng tăng; giá điều chỉnh về 45 rồi bật lại là điểm mua theo xu hướng.": "Example: stock X trades at 48, its SMA 50 is at 45 and rising → uptrend; a pullback to 45 that bounces is a buy-with-the-trend entry.",
+  "Ví dụ: SMA 20 cắt lên SMA 50 (giao cắt vàng) sau 3 tháng giảm → tín hiệu xu hướng ngắn hạn đảo chiều tăng; SMA 20 cắt xuống SMA 50 (giao cắt tử thần) là chiều ngược lại.": "Example: SMA 20 crosses above SMA 50 (golden cross) after 3 months of decline → the short-term trend turns up; SMA 20 crossing below SMA 50 (death cross) is the opposite.",
+  "Dùng cùng RSI: giá trên SMA 50 nhưng RSI > 70 → xu hướng tốt nhưng đừng mua đuổi, chờ RSI hạ nhiệt.": "With RSI: price above SMA 50 but RSI > 70 → healthy trend but don't chase; wait for RSI to cool off.",
+  "Dùng cùng khối lượng: giá vượt SMA kèm khối lượng gấp 1,5 lần trung bình thì tín hiệu đáng tin hơn.": "With volume: a move above the SMA on 1.5× average volume is a more reliable signal.",
+  "SMA là chỉ báo trễ: trong thị trường đi ngang giá cắt qua lại SMA liên tục, tạo nhiều tín hiệu giả.": "SMA is a lagging indicator: in a sideways market price keeps crossing it, producing many false signals.",
+  "EMA (Exponential Moving Average) là trung bình động hàm mũ: phiên càng gần càng có trọng số lớn, nên EMA bám giá nhanh hơn SMA cùng chu kỳ.": "EMA (Exponential Moving Average) gives more weight to recent sessions, so it follows price faster than an SMA of the same length.",
+  "Giá trên EMA và EMA dốc lên: xu hướng tăng; ngược lại là giảm.": "Price above a rising EMA: uptrend; the reverse is a downtrend.",
+  "EMA 9–21 hay dùng cho giao dịch ngắn hạn; EMA 50/200 cho xu hướng lớn.": "EMA 9–21 is popular for short-term trading; EMA 50/200 for the big trend.",
+  "Hai EMA cắt nhau (ví dụ EMA 12 và EMA 26) là nền tảng của MACD.": "Two EMAs crossing (e.g. EMA 12 and EMA 26) is the basis of MACD.",
+  "Ví dụ: giá cổ phiếu X giảm về EMA 21 rồi đóng cửa bật lên trên đó trong khi EMA 21 vẫn dốc lên → điểm vào lệnh theo xu hướng.": "Example: stock X pulls back to its EMA 21, then closes back above it while the EMA 21 is still rising → an entry with the trend.",
+  "Ví dụ: sau đợt tăng mạnh, giá đóng cửa dưới EMA 9 hai phiên liền → động lượng ngắn hạn suy yếu, cân nhắc chốt một phần.": "Example: after a strong rally, price closes below the EMA 9 for two sessions → short-term momentum is fading; consider taking partial profit.",
+  "Kết hợp EMA nhanh với SMA 200: chỉ mua khi giá trên SMA 200 (xu hướng dài hạn tăng) và có tín hiệu từ EMA nhanh.": "Combine a fast EMA with SMA 200: only buy when price is above SMA 200 (long-term uptrend) and the fast EMA gives a signal.",
+  "Kết hợp với ADX: tín hiệu từ EMA chỉ nên dùng khi ADX > 25 (có xu hướng rõ).": "Combine with ADX: use EMA signals only when ADX > 25 (a clear trend).",
+  "EMA phản ứng nhanh nên cũng nhạy với nhiễu hơn SMA, dễ cho tín hiệu sớm nhưng sai.": "Because it reacts quickly, EMA is also more sensitive to noise than SMA — earlier signals, but more of them are wrong.",
+  "WMA (Weighted Moving Average) là trung bình có trọng số tuyến tính: phiên mới nhất nặng N, phiên trước nặng N−1… WMA nằm giữa SMA và EMA về độ nhạy.": "WMA (Weighted Moving Average) weights linearly: the latest session counts N, the one before N−1… Its sensitivity sits between SMA and EMA.",
+  "Đọc như SMA/EMA: vị trí giá so với đường và độ dốc của đường cho biết xu hướng.": "Read it like SMA/EMA: price position relative to the line and the line's slope show the trend.",
+  "WMA phản ứng nhanh với thay đổi gần đây nhưng ít giật hơn EMA ngắn.": "WMA reacts quickly to recent changes but is less jumpy than a short EMA.",
+  "Hai WMA khác chu kỳ cắt nhau cho tín hiệu đổi xu hướng.": "Two WMAs of different lengths crossing signal a trend change.",
+  "Ví dụ: WMA 10 cắt lên WMA 30 khi giá vừa vượt đỉnh cũ → xác nhận xu hướng tăng mới.": "Example: WMA 10 crosses above WMA 30 just as price breaks its previous high → confirms a new uptrend.",
+  "Ví dụ: giá đóng cửa dưới WMA 20 sau khi bám sát đường này cả tháng → xu hướng ngắn hạn có thể kết thúc.": "Example: price closes below WMA 20 after hugging it for a whole month → the short-term trend may be over.",
+  "Dùng WMA ngắn để vào lệnh và SMA 50/200 làm bộ lọc xu hướng lớn.": "Use a short WMA for entries and SMA 50/200 as the big-trend filter.",
+  "Kết hợp với MACD để xác nhận động lượng cùng chiều trước khi vào lệnh.": "Combine with MACD to confirm momentum points the same way before entering.",
+  "Giống mọi đường trung bình, WMA kém hiệu quả khi giá đi ngang trong biên độ hẹp.": "Like every moving average, WMA works poorly when price moves sideways in a narrow range.",
+  "Dải Bollinger gồm đường giữa (SMA 20) và hai dải cách ±2 độ lệch chuẩn. Dải nở ra khi biến động tăng, co lại khi thị trường yên ắng.": "Bollinger Bands are a middle line (SMA 20) and two bands ±2 standard deviations away. The bands widen when volatility rises and narrow when the market is quiet.",
+  "Giá chạm/vượt dải trên: đang mạnh nhưng căng; chạm dải dưới: đang yếu hoặc quá bán.": "Price touching / closing above the upper band: strong but stretched; touching the lower band: weak or oversold.",
+  "Dải co hẹp bất thường (squeeze) thường báo trước một đợt biến động mạnh, chưa biết chiều.": "Unusually narrow bands (a squeeze) often come before a big move, direction unknown.",
+  "Trong xu hướng tăng mạnh, giá có thể 'đi dọc' dải trên nhiều phiên — đó là dấu hiệu mạnh, không phải tín hiệu bán.": "In a strong uptrend price can 'walk' the upper band for many sessions — a sign of strength, not a sell signal.",
+  "Ví dụ: dải của cổ phiếu X co hẹp nhất 6 tháng, sau đó giá đóng cửa vượt dải trên với khối lượng lớn → bứt phá tăng.": "Example: stock X's bands are the narrowest in 6 months, then price closes above the upper band on heavy volume → upside breakout.",
+  "Ví dụ: trong biên độ đi ngang 40–44, giá chạm dải dưới 40 rồi quay lên đường giữa 42 → giao dịch hồi về đường giữa.": "Example: in a 40–44 sideways range, price touches the lower band at 40 and returns to the middle line at 42 → trade the reversion to the middle.",
+  "Kết hợp RSI: giá chạm dải dưới + RSI < 30 + nến đảo chiều là tín hiệu hồi phục tốt hơn chỉ dùng một chỉ báo.": "With RSI: lower band touch + RSI < 30 + a reversal candle is a better rebound signal than any single indicator.",
+  "Kết hợp khối lượng để phân biệt bứt phá thật (khối lượng lớn) với chạm dải giả.": "Use volume to tell a real breakout (heavy volume) from a false band touch.",
+  "Chạm dải không tự nó là tín hiệu mua/bán; cần xác định thị trường đang có xu hướng hay đi ngang.": "A band touch on its own is not a buy / sell signal; first decide whether the market is trending or ranging.",
+  "Kênh Donchian vẽ giá cao nhất và thấp nhất của N phiên (mặc định 20) cùng đường giữa. Đây là chỉ báo bứt phá kinh điển.": "The Donchian channel plots the highest high and lowest low of N sessions (default 20) plus a middle line. It is the classic breakout indicator.",
+  "Giá đóng cửa vượt cạnh trên: bứt phá lên, đỉnh mới N phiên.": "A close above the upper edge: upside breakout, a new N-session high.",
+  "Giá thủng cạnh dưới: phá vỡ hỗ trợ, đáy mới N phiên.": "A break below the lower edge: support broken, a new N-session low.",
+  "Kênh hẹp dần cho thấy giá tích luỹ, chuẩn bị chọn hướng.": "A narrowing channel means price is consolidating before choosing a direction.",
+  "Ví dụ: cổ phiếu X đi ngang 30–33 trong 4 tuần, rồi đóng cửa 33,5 vượt cạnh trên → tín hiệu mua bứt phá, đặt dừng lỗ dưới đường giữa.": "Example: stock X moves sideways between 30 and 33 for 4 weeks, then closes at 33.5 above the upper edge → breakout buy, stop below the middle line.",
+  "Ví dụ: đang nắm giữ, giá thủng cạnh dưới kênh 20 phiên → tín hiệu thoát theo hệ thống 'Turtle'.": "Example: while holding, price breaks the lower edge of the 20-session channel → exit signal in the 'Turtle' system.",
+  "Kết hợp ADX: bứt phá khi ADX đang tăng từ dưới 20 lên trên 25 có xác suất thành công cao hơn.": "With ADX: breakouts while ADX rises from below 20 to above 25 succeed more often.",
+  "Kết hợp ATR để đặt điểm dừng lỗ cách giá vào khoảng 2 ATR.": "Use ATR to place the stop about 2 ATR from the entry.",
+  "Trong thị trường giằng co, bứt phá giả xảy ra thường xuyên; nên chờ đóng cửa xác nhận.": "In choppy markets false breakouts are common; wait for a confirming close.",
+  "Ichimoku gồm 5 đường: Tenkan (trung bình đỉnh/đáy 9 phiên), Kijun (26 phiên), Span A và Span B tạo thành 'mây' dịch về tương lai 26 phiên, và Chikou (giá đóng cửa dịch lùi 26 phiên).": "Ichimoku has 5 lines: Tenkan (average high/low over 9 sessions), Kijun (26 sessions), Span A and Span B forming the 'cloud' shifted 26 sessions forward, and Chikou (the close shifted 26 sessions back).",
+  "Giá trên mây: xu hướng tăng; dưới mây: giảm; trong mây: trung tính.": "Price above the cloud: uptrend; below: downtrend; inside: neutral.",
+  "Tenkan cắt lên Kijun là tín hiệu mua sớm, mạnh nhất khi xảy ra phía trên mây.": "Tenkan crossing above Kijun is an early buy signal, strongest when it happens above the cloud.",
+  "Mây dày là vùng hỗ trợ/kháng cự mạnh; Span A trên Span B là mây tăng.": "A thick cloud is strong support / resistance; Span A above Span B is a bullish cloud.",
+  "Ví dụ: giá cổ phiếu X vượt lên trên mây, Tenkan cắt lên Kijun và Chikou nằm trên giá cũ → đủ 3 điều kiện xu hướng tăng.": "Example: stock X climbs above the cloud, Tenkan crosses above Kijun and Chikou is above past prices → all 3 uptrend conditions met.",
+  "Ví dụ: giá giảm về mép trên của mây dày rồi bật lên → mây đóng vai hỗ trợ.": "Example: price falls back to the top of a thick cloud and bounces → the cloud is acting as support.",
+  "Kết hợp RSI để tránh mua khi giá vừa vượt mây nhưng RSI đã quá mua.": "Combine with RSI to avoid buying right after a cloud breakout when RSI is already overbought.",
+  "Kết hợp khối lượng/OBV để xác nhận lực mua khi giá thoát khỏi mây.": "Use volume / OBV to confirm buying pressure as price leaves the cloud.",
+  "Ichimoku cần đủ dữ liệu (≥ 52 phiên) và kém hiệu quả khi thị trường đi ngang trong mây.": "Ichimoku needs enough data (≥ 52 sessions) and works poorly when the market moves sideways inside the cloud.",
+  "Parabolic SAR là chuỗi chấm bám theo giá, tăng tốc dần theo xu hướng. Chấm dưới giá: xu hướng tăng; chấm trên giá: xu hướng giảm.": "Parabolic SAR is a series of dots trailing price that accelerate as the trend continues. Dots below price: uptrend; dots above price: downtrend.",
+  "Chấm đổi phía (từ trên xuống dưới giá) là tín hiệu đảo chiều tăng, và ngược lại.": "Dots flipping sides (from above to below price) signal a bullish reversal, and vice versa.",
+  "Khoảng cách chấm–giá thu hẹp dần khi xu hướng kéo dài (tăng tốc).": "The gap between dots and price narrows as the trend extends (acceleration).",
+  "SAR thường dùng làm điểm dừng lỗ di động (trailing stop).": "SAR is often used as a trailing stop.",
+  "Ví dụ: mua cổ phiếu X ở 50, SAR hiện ở 47 → đặt dừng lỗ 47 và nâng theo SAR mỗi phiên; khi giá cắt xuống SAR thì thoát.": "Example: buy stock X at 50 with SAR at 47 → set the stop at 47 and raise it with SAR each session; exit when price crosses below SAR.",
+  "Ví dụ: sau đợt giảm, chấm SAR chuyển xuống dưới giá kèm MACD cắt lên → tín hiệu đảo chiều tăng.": "Example: after a decline, the SAR dots move below price while MACD crosses up → bullish reversal signal.",
+  "Chỉ dùng tín hiệu SAR khi ADX > 25; khi ADX thấp, SAR đổi phía liên tục và gây lỗ.": "Use SAR signals only when ADX > 25; with a low ADX, SAR keeps flipping and loses money.",
+  "Kết hợp với đường trung bình: chỉ lấy tín hiệu mua của SAR khi giá trên SMA 50.": "Combine with a moving average: take SAR buy signals only when price is above SMA 50.",
+  "Trong thị trường đi ngang, SAR đảo chiều liên tục tạo chuỗi tín hiệu sai.": "In sideways markets SAR flips constantly, producing a string of wrong signals.",
+  "VWAP là giá bình quân gia quyền theo khối lượng trong phiên, tính từ đầu phiên. Chỉ có ý nghĩa với nến phút (5m–1h).": "VWAP is the volume-weighted average price of the session, computed from the open. It only makes sense on minute candles (5m–1h).",
+  "Giá trên VWAP: bên mua chiếm ưu thế trong phiên; dưới VWAP: bên bán chiếm ưu thế.": "Price above VWAP: buyers dominate the session; below VWAP: sellers dominate.",
+  "Nhà đầu tư tổ chức thường mua quanh/dưới VWAP; VWAP hay là hỗ trợ/kháng cự trong ngày.": "Institutions often buy around / below VWAP; VWAP frequently acts as intraday support / resistance.",
+  "VWAP reset mỗi phiên mới.": "VWAP resets every new session.",
+  "Ví dụ: cổ phiếu X mở cửa giảm, sau 10h giá vượt lên trên VWAP và giữ được → lực mua trong ngày mạnh lên.": "Example: stock X opens lower, then after 10 a.m. price moves above VWAP and holds → intraday buying is getting stronger.",
+  "Ví dụ: giá hồi lên VWAP rồi bị đẩy xuống nhiều lần → VWAP đang là kháng cự trong ngày.": "Example: price rallies to VWAP and is pushed back down several times → VWAP is intraday resistance.",
+  "Kết hợp khối lượng: giá vượt VWAP kèm khối lượng tăng mạnh là tín hiệu đáng tin hơn.": "With volume: a move above VWAP on a sharp volume increase is more reliable.",
+  "Dùng cùng RSI khung 5 phút để tìm điểm vào khi giá kéo về VWAP.": "Use with RSI on the 5-minute chart to find entries when price pulls back to VWAP.",
+  "VWAP chỉ dùng trong ngày; với khung ngày/tuần không có ý nghĩa nên tool chỉ tính khi xem nến phút.": "VWAP is intraday only; on daily / weekly candles it is meaningless, so the tool only computes it on minute candles.",
+  "RSI (Relative Strength Index, 14 phiên) đo tỷ lệ giữa mức tăng và mức giảm gần đây, chạy từ 0 đến 100.": "RSI (Relative Strength Index, 14 sessions) measures recent gains against recent losses on a 0–100 scale.",
+  "RSI > 70: quá mua, dễ điều chỉnh; RSI < 30: quá bán, dễ hồi phục.": "RSI > 70: overbought, prone to a pullback; RSI < 30: oversold, prone to a rebound.",
+  "RSI cắt lên 50 cho thấy phe mua chiếm ưu thế, cắt xuống 50 là phe bán.": "RSI crossing above 50 means buyers have the upper hand; crossing below 50, sellers.",
+  "Phân kỳ: giá tạo đỉnh mới nhưng RSI tạo đỉnh thấp hơn → động lượng yếu dần, cảnh báo đảo chiều.": "Divergence: price makes a new high but RSI makes a lower high → momentum is fading, a reversal warning.",
+  "Ví dụ: cổ phiếu X giảm 5 phiên liền, RSI xuống 26 rồi quay lên trên 30 kèm nến xanh khối lượng lớn → tín hiệu hồi phục kỹ thuật.": "Example: stock X falls 5 sessions in a row, RSI drops to 26, then climbs back above 30 with a green high-volume candle → technical rebound signal.",
+  "Ví dụ: giá lập đỉnh mới 60 (cao hơn đỉnh 58 trước) nhưng RSI chỉ 64 (thấp hơn 72 lần trước) → phân kỳ âm, nên thận trọng.": "Example: price makes a new high at 60 (above the previous 58) but RSI reaches only 64 (below the previous 72) → bearish divergence, be careful.",
+  "Kết hợp đường trung bình: trong xu hướng tăng (giá trên SMA 200) chỉ mua khi RSI về 40–50, không chờ dưới 30.": "With moving averages: in an uptrend (price above SMA 200) buy when RSI dips to 40–50 instead of waiting for < 30.",
+  "Kết hợp dải Bollinger hoặc MACD để xác nhận tín hiệu quá mua/quá bán.": "Combine with Bollinger Bands or MACD to confirm overbought / oversold signals.",
+  "Trong xu hướng mạnh, RSI có thể ở vùng quá mua/quá bán rất lâu; bán chỉ vì RSI > 70 dễ bỏ lỡ đà tăng.": "In a strong trend RSI can stay overbought / oversold for a long time; selling just because RSI > 70 can miss the rally.",
+  "MACD = EMA 12 − EMA 26 (đường MACD); đường tín hiệu là EMA 9 của MACD; histogram = MACD − tín hiệu.": "MACD = EMA 12 − EMA 26 (the MACD line); the signal line is the EMA 9 of MACD; histogram = MACD − signal.",
+  "MACD cắt lên đường tín hiệu: động lượng chuyển sang tăng; cắt xuống: chuyển sang giảm.": "MACD crossing above the signal line: momentum turns up; crossing below: momentum turns down.",
+  "MACD trên 0: EMA nhanh trên EMA chậm, xu hướng tăng; dưới 0: xu hướng giảm.": "MACD above 0: the fast EMA is above the slow one, uptrend; below 0: downtrend.",
+  "Histogram co dần về 0 báo động lượng yếu đi trước khi giao cắt xảy ra.": "A histogram shrinking towards 0 shows momentum weakening before the cross happens.",
+  "Ví dụ: MACD của cổ phiếu X cắt lên đường tín hiệu khi cả hai đang dưới 0 → tín hiệu đảo chiều sớm; nếu sau đó MACD vượt lên trên 0 → xu hướng tăng được xác nhận.": "Example: stock X's MACD crosses above its signal line while both are below 0 → early reversal signal; if MACD then rises above 0 → the uptrend is confirmed.",
+  "Ví dụ: giá tăng lên đỉnh mới nhưng histogram nhỏ dần → phân kỳ âm, cân nhắc chốt lời.": "Example: price rises to a new high but the histogram keeps shrinking → bearish divergence, consider taking profit.",
+  "Kết hợp RSI: MACD cắt lên + RSI vượt 50 cùng lúc là tín hiệu mua chắc hơn.": "With RSI: a MACD cross up together with RSI moving above 50 is a stronger buy signal.",
+  "Kết hợp ADX hoặc đường trung bình để lọc tín hiệu khi thị trường đi ngang.": "Combine with ADX or a moving average to filter signals when the market is sideways.",
+  "MACD là chỉ báo trễ và cho nhiều giao cắt giả khi giá đi ngang.": "MACD lags and gives many false crosses when price moves sideways.",
+  "Stochastic (%K 14, %D 3) cho biết giá đóng cửa đang ở đâu trong biên độ cao–thấp của 14 phiên, từ 0 đến 100.": "Stochastic (%K 14, %D 3) shows where the close sits within the 14-session high–low range, from 0 to 100.",
+  "> 80: quá mua; < 20: quá bán.": "> 80: overbought; < 20: oversold.",
+  "%K cắt lên %D trong vùng < 20 là tín hiệu mua; %K cắt xuống %D trong vùng > 80 là tín hiệu bán.": "%K crossing above %D below 20 is a buy signal; %K crossing below %D above 80 is a sell signal.",
+  "Stochastic nhạy hơn RSI, phù hợp giao dịch ngắn hạn trong biên độ.": "Stochastic is more sensitive than RSI and suits short-term range trading.",
+  "Ví dụ: cổ phiếu X đi ngang 20–23, Stochastic xuống 12 rồi %K cắt lên %D khi giá ở 20,2 → mua gần đáy biên độ.": "Example: stock X ranges between 20 and 23; Stochastic drops to 12, then %K crosses above %D with price at 20.2 → buy near the bottom of the range.",
+  "Ví dụ: giá lên 23, Stochastic 88 và %K cắt xuống %D → chốt lời gần đỉnh biên độ.": "Example: price reaches 23, Stochastic is 88 and %K crosses below %D → take profit near the top of the range.",
+  "Dùng Stochastic để tìm điểm vào theo hướng xu hướng chính (xác định bằng SMA 50 hoặc MACD).": "Use Stochastic to time entries in the direction of the main trend (set by SMA 50 or MACD).",
+  "Kết hợp hỗ trợ/kháng cự: tín hiệu quá bán tại vùng hỗ trợ đáng tin hơn.": "Combine with support / resistance: an oversold signal at a support zone is more reliable.",
+  "Trong xu hướng mạnh, Stochastic báo quá mua/quá bán liên tục; đừng giao dịch ngược xu hướng chỉ dựa vào nó.": "In strong trends Stochastic signals overbought / oversold all the time; don't trade against the trend on it alone.",
+  "ADX (14) đo độ mạnh của xu hướng, không cho biết chiều. +DI và −DI cho biết phe mua hay phe bán mạnh hơn.": "ADX (14) measures trend strength, not direction. +DI and −DI show whether buyers or sellers are stronger.",
+  "ADX > 25: có xu hướng rõ; ADX < 20: thị trường đi ngang.": "ADX > 25: a clear trend; ADX < 20: a sideways market.",
+  "+DI trên −DI: phe mua mạnh hơn; −DI trên +DI: phe bán mạnh hơn.": "+DI above −DI: buyers are stronger; −DI above +DI: sellers are stronger.",
+  "ADX tăng dần là xu hướng đang mạnh lên; ADX quay đầu giảm từ vùng cao là xu hướng yếu dần.": "A rising ADX means the trend is strengthening; ADX turning down from a high level means it is fading.",
+  "Ví dụ: ADX của cổ phiếu X tăng từ 18 lên 30 trong khi +DI cắt lên −DI → một xu hướng tăng mới đang hình thành.": "Example: stock X's ADX rises from 18 to 30 while +DI crosses above −DI → a new uptrend is forming.",
+  "Ví dụ: ADX ở 15 kéo dài 1 tháng → đi ngang, nên dùng các chỉ báo dao động (RSI, Stochastic) thay vì đường trung bình.": "Example: ADX stays at 15 for a month → sideways; use oscillators (RSI, Stochastic) rather than moving averages.",
+  "Dùng ADX làm bộ lọc: chỉ theo tín hiệu của MA/MACD/SAR khi ADX > 25.": "Use ADX as a filter: follow MA / MACD / SAR signals only when ADX > 25.",
+  "Khi ADX thấp, ưu tiên giao dịch biên độ với Bollinger hoặc Stochastic.": "When ADX is low, prefer range trading with Bollinger Bands or Stochastic.",
+  "ADX trễ và không cho tín hiệu mua/bán trực tiếp; luôn phải xét thêm chiều xu hướng.": "ADX lags and gives no direct buy / sell signal; always check the trend direction too.",
+  "ATR (14) là biên độ dao động thực trung bình mỗi phiên, tính cả khoảng trống giá giữa các phiên.": "ATR (14) is the average true range per session, including price gaps between sessions.",
+  "ATR cao: cổ phiếu biến động mạnh, rủi ro mỗi phiên lớn; ATR thấp: biến động nhỏ.": "High ATR: the stock is volatile, larger risk per session; low ATR: small moves.",
+  "ATR tăng đột ngột thường đi kèm bứt phá hoặc hoảng loạn.": "A sudden jump in ATR often comes with a breakout or panic.",
+  "ATR không cho biết chiều giá.": "ATR does not tell direction.",
+  "Ví dụ: cổ phiếu X giá 50, ATR 1,5 → mỗi phiên thường dao động khoảng 1,5 (3%); đặt dừng lỗ cách giá vào 2 × ATR = 3, tức 47.": "Example: stock X at 50 with ATR 1.5 → it usually moves about 1.5 (3%) per session; set the stop 2 × ATR = 3 below entry, i.e. 47.",
+  "Ví dụ: chia vốn: chấp nhận lỗ 2 triệu mỗi lệnh, dừng lỗ 3 nghìn/cp → mua tối đa khoảng 660 cổ phiếu.": "Example: position sizing: risk 2 million per trade with a 3,000/share stop → buy at most about 660 shares.",
+  "Dùng ATR để đặt điểm dừng lỗ cho các tín hiệu từ Donchian, MA hoặc SAR.": "Use ATR to place stops for signals from Donchian, moving averages or SAR.",
+  "So sánh ATR với Bollinger: cả hai cùng co hẹp là dấu hiệu sắp có biến động lớn.": "Compare ATR with Bollinger Bands: both contracting together signals a big move is coming.",
+  "ATR là thước đo rủi ro, không phải tín hiệu giao dịch.": "ATR is a risk gauge, not a trading signal.",
+  "CCI (20) đo độ lệch của giá điển hình so với trung bình của nó, chia cho độ lệch trung bình; dao động quanh 0, thường trong khoảng −200 đến +200.": "CCI (20) measures how far the typical price is from its average, divided by the mean deviation; it oscillates around 0, usually between −200 and +200.",
+  "CCI > +100: giá mạnh bất thường (có thể bắt đầu xu hướng tăng hoặc quá mua).": "CCI > +100: unusually strong (a new uptrend starting, or overbought).",
+  "CCI < −100: yếu bất thường (bắt đầu giảm hoặc quá bán).": "CCI < −100: unusually weak (a downtrend starting, or oversold).",
+  "CCI cắt qua 0 cho thấy giá vượt lên/xuống dưới trung bình.": "CCI crossing 0 shows price moving above / below its average.",
+  "Ví dụ: CCI của cổ phiếu X từ −50 vượt lên +100 kèm khối lượng lớn → bắt đầu đợt tăng mạnh.": "Example: stock X's CCI rises from −50 above +100 on heavy volume → a strong rally is starting.",
+  "Ví dụ: CCI xuống −180 rồi quay lên trên −100 tại vùng hỗ trợ → tín hiệu hồi phục.": "Example: CCI falls to −180 then climbs back above −100 at a support zone → rebound signal.",
+  "Kết hợp đường trung bình dài để chỉ lấy tín hiệu CCI cùng chiều xu hướng lớn.": "Combine with a long moving average to take only CCI signals in the direction of the big trend.",
+  "Kết hợp RSI để xác nhận vùng quá mua/quá bán.": "Combine with RSI to confirm overbought / oversold zones.",
+  "CCI không có giới hạn trên/dưới cố định nên ngưỡng ±100 cần điều chỉnh theo từng cổ phiếu.": "CCI has no fixed upper / lower bound, so the ±100 thresholds need adjusting per stock.",
+  "Williams %R (14) cho biết giá đóng cửa cách đỉnh cao nhất 14 phiên bao xa, từ −100 (đáy biên độ) đến 0 (đỉnh biên độ).": "Williams %R (14) shows how far the close is from the 14-session high, from −100 (bottom of the range) to 0 (top of the range).",
+  "> −20: quá mua; < −80: quá bán.": "> −20: overbought; < −80: oversold.",
+  "%R thoát khỏi vùng quá bán (vượt lên trên −80) là tín hiệu mua sớm.": "%R leaving the oversold zone (rising above −80) is an early buy signal.",
+  "Về bản chất là Stochastic đảo dấu, rất nhạy.": "It is essentially an inverted Stochastic and very sensitive.",
+  "Ví dụ: %R của cổ phiếu X ở −92 trong 3 phiên rồi vượt lên −75 → lực bán cạn, có thể hồi phục.": "Example: stock X's %R sits at −92 for 3 sessions, then rises to −75 → selling is exhausted, a rebound is possible.",
+  "Ví dụ: %R ở −5 khi giá chạm kháng cự cũ → cân nhắc chốt lời ngắn hạn.": "Example: %R is −5 as price hits an old resistance → consider short-term profit taking.",
+  "Dùng cùng đường trung bình để chỉ mua khi quá bán trong xu hướng tăng.": "Use with a moving average to buy oversold dips only in an uptrend.",
+  "Kết hợp MACD để tránh bắt đáy khi động lượng giảm còn mạnh.": "Combine with MACD to avoid bottom-fishing while downside momentum is still strong.",
+  "Rất nhạy nên nhiều tín hiệu nhiễu; không dùng một mình.": "Very sensitive, so many noisy signals; don't use it alone.",
+  "MFI (Money Flow Index, 14) là RSI có tính khối lượng: đo dòng tiền vào/ra dựa trên giá điển hình × khối lượng, từ 0 đến 100.": "MFI (Money Flow Index, 14) is a volume-weighted RSI: it measures money flowing in / out from typical price × volume, on a 0–100 scale.",
+  "> 80: quá mua theo dòng tiền; < 20: quá bán.": "> 80: overbought by money flow; < 20: oversold.",
+  "Phân kỳ giữa MFI và giá thường đáng tin hơn RSI vì có yếu tố khối lượng.": "Divergence between MFI and price is often more reliable than with RSI because volume is included.",
+  "MFI tăng trong khi giá đi ngang: dòng tiền đang âm thầm vào.": "MFI rising while price moves sideways: money is quietly flowing in.",
+  "Ví dụ: giá cổ phiếu X lập đáy mới nhưng MFI tạo đáy cao hơn → dòng tiền không còn rút mạnh, phân kỳ dương.": "Example: stock X's price makes a new low but MFI makes a higher low → money is no longer leaving fast, bullish divergence.",
+  "Ví dụ: MFI 85 sau 5 phiên tăng mạnh khối lượng lớn → cẩn trọng điều chỉnh.": "Example: MFI at 85 after 5 strong high-volume up sessions → beware of a pullback.",
+  "Kết hợp OBV để xác nhận dòng tiền.": "Combine with OBV to confirm money flow.",
+  "Kết hợp hỗ trợ/kháng cự: MFI quá bán tại hỗ trợ mạnh là điểm mua tốt hơn.": "Combine with support / resistance: oversold MFI at strong support is a better buy point.",
+  "Phụ thuộc chất lượng dữ liệu khối lượng; cổ phiếu thanh khoản thấp cho tín hiệu nhiễu.": "Depends on volume data quality; illiquid stocks give noisy signals.",
+  "OBV (On-Balance Volume) cộng dồn khối lượng: phiên tăng cộng khối lượng, phiên giảm trừ khối lượng.": "OBV (On-Balance Volume) accumulates volume: up sessions add their volume, down sessions subtract it.",
+  "OBV đi lên cùng giá: dòng tiền xác nhận xu hướng tăng.": "OBV rising with price: money flow confirms the uptrend.",
+  "OBV tăng trong khi giá đi ngang: tích luỹ, giá có thể bứt phá lên.": "OBV rising while price moves sideways: accumulation, price may break out upwards.",
+  "OBV giảm trong khi giá tăng: phân phối, xu hướng tăng thiếu bền vững.": "OBV falling while price rises: distribution, the uptrend is not sustainable.",
+  "Ví dụ: cổ phiếu X đi ngang 3 tuần nhưng OBV liên tục lập đỉnh mới → tích luỹ, sau đó giá bứt phá.": "Example: stock X moves sideways for 3 weeks but OBV keeps making new highs → accumulation, then price breaks out.",
+  "Ví dụ: giá lập đỉnh mới nhưng OBV không vượt đỉnh cũ → phân kỳ âm, dòng tiền không xác nhận.": "Example: price makes a new high but OBV fails to exceed its old high → bearish divergence, money flow doesn't confirm.",
+  "Dùng OBV xác nhận bứt phá của Donchian/Bollinger.": "Use OBV to confirm Donchian / Bollinger breakouts.",
+  "Kết hợp MFI hoặc RSI để tìm phân kỳ giữa giá và dòng tiền.": "Combine with MFI or RSI to spot divergences between price and money flow.",
+  "Giá trị tuyệt đối của OBV không quan trọng, chỉ xu hướng của nó; một phiên khối lượng đột biến có thể làm lệch OBV.": "OBV's absolute value doesn't matter, only its direction; one abnormal volume session can skew OBV.",
+  "ROC (Rate of Change, 12) là phần trăm thay đổi của giá so với 12 phiên trước.": "ROC (Rate of Change, 12) is the percentage change of price versus 12 sessions ago.",
+  "ROC > 0: giá cao hơn 12 phiên trước, đà tăng; ROC < 0: đà giảm.": "ROC > 0: price is above where it was 12 sessions ago, upward momentum; ROC < 0: downward momentum.",
+  "ROC cắt lên 0 là tín hiệu động lượng chuyển sang tăng.": "ROC crossing above 0 signals momentum turning up.",
+  "Giá trị cực đoan so với lịch sử của chính cổ phiếu cho thấy quá mua/quá bán.": "Values extreme relative to the stock's own history signal overbought / oversold.",
+  "Ví dụ: ROC của cổ phiếu X từ −8% vượt lên 0 trong khi giá vượt SMA 20 → động lượng chuyển sang tăng.": "Example: stock X's ROC rises from −8% above 0 while price moves above SMA 20 → momentum turns up.",
+  "Ví dụ: ROC +25% trong khi bình thường chỉ ±10% → tăng quá nóng, dễ điều chỉnh.": "Example: ROC +25% when it normally stays within ±10% → overheated, prone to a pullback.",
+  "Kết hợp đường trung bình để lọc xu hướng.": "Combine with moving averages to filter the trend.",
+  "Kết hợp RSI/MACD để xác nhận động lượng.": "Combine with RSI / MACD to confirm momentum.",
+  "ROC nhạy với giá cũ bị loại khỏi cửa sổ, có thể đổi chiều dù giá hiện tại không đổi.": "ROC reacts to old prices leaving the window, so it can change direction even when today's price doesn't move.",
+  "Là gì": "What it is",
+  "Cách đọc": "How to read it",
+  "Ví dụ minh họa": "Worked examples",
+  "Phối hợp với chỉ báo khác": "Combining with other indicators",
+  "Lưu ý": "Caveats",
+  "Hướng dẫn chi tiết: cách đọc, ví dụ, cách phối hợp": "Detailed guide: how to read it, examples, combinations",
+  "Hình minh họa trên dữ liệu giả lập (không phải giá thật)": "Illustration on simulated data (not real prices)",
+  "Chỉ báo trước": "Previous indicator",
+  "Chỉ báo sau": "Next indicator",
+  "Đóng": "Close",
+  "Bật trên biểu đồ": "Show on chart",
 });
 // English for the shared core modules (ThemePicker markup, SavedSessions, ColFilter) — included by every tool that uses them.
 I18n.add({
@@ -1589,6 +1806,8 @@ const Indicators = (() => {
     roc: { name: "ROC", label: "Tốc độ thay đổi giá (%)", pane: "own", levels: [0], params: [P("n", 12, 1, 200)], calc: (b, p, c) => [line(`ROC ${p.n}`, TA.roc(col(b, "close"), p.n), c)] },
   };
 
+  // Most widely used; highlighted in the indicator menu.
+  const CORE = ["sma", "ema", "bb", "rsi", "macd"];
   const DEFAULT = [{ id: "sma", p: { n: 20 } }, { id: "sma", p: { n: 50 } }, { id: "rsi", p: { n: 14 } }, { id: "macd", p: { f: 12, s: 26, g: 9 } }];
   const MAX = 12;
 
@@ -1609,7 +1828,7 @@ const Indicators = (() => {
     return list.map(x => { const d = DEFS[x.id], c = d.pane === "main" ? PALETTE[k++ % PALETTE.length] : PALETTE[0]; return { ...x, def: d, lines: d.calc(bars, x.p, c) }; });
   }
 
-  return { DEFS, DEFAULT, clean, params, add, compute, MAX };
+  return { DEFS, DEFAULT, CORE, clean, params, add, compute, MAX };
 })();
 // Pure rule-based technical read: score −100…+100 per timeframe from MA / RSI / MACD / ADX / Bollinger / volume signals,
 // pivots + ATR ranges, and how this ticker's price actually moved after past bars with a similar score (historical odds).
@@ -1779,6 +1998,82 @@ const ChartEvents = (() => {
   }
 
   return { detect, MAX };
+})();
+// Pure: one indicator drawn on a fixed simulated series (rise → top → fall → range → breakout) as an SVG string, for the indicator guide.
+const IndIllus = (() => {
+  const N = 160, W = 560;
+  const r1 = n => Math.round(n * 10) / 10, r2 = n => Math.round(n * 100) / 100;
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const noise = i => { const x = Math.sin(i * 12.9898 + 78.233) * 43758.5453; return x - Math.floor(x) - 0.5; };
+  // Pairs of moving averages so the picture shows their crosses.
+  const SETUP = { sma: [["sma", { n: 20 }], ["sma", { n: 50 }]], ema: [["ema", { n: 12 }], ["ema", { n: 26 }]], wma: [["wma", { n: 10 }], ["wma", { n: 30 }]] };
+  const MA = ["maCrossUp", "maCrossDown"];
+  const EVENTS = { sma: MA, ema: MA, wma: MA, bb: ["bbUp", "bbDown"], macd: ["macdUp", "macdDown"], rsi: ["rsiHigh", "rsiLow"] };
+
+  // Deterministic bars; intraday = 4 sessions of 40 × 5-minute bars (VWAP resets per session).
+  function sample(intraday = false) {
+    const out = [], day0 = 1.7e9 - 1.7e9 % 86400;
+    let c = 40;
+    for (let i = 0; i < N; i++) {
+      const drift = i < 55 ? 0.32 : i < 95 ? -0.38 : i < 128 ? 0.12 * Math.sin(i / 2.5) : 0.42;
+      const o = c;
+      c = Math.max(5, c + drift + noise(i) * 1.1);
+      const time = intraday ? day0 + Math.floor(i / 40) * 86400 + 7200 + (i % 40) * 300 : day0 + i * 86400;
+      const vol = 1e6 * (1 + noise(i + 300) * 0.6) * (i === 60 || i === 130 ? 3.2 : 1) * (drift > 0 ? 1.2 : 0.9);
+      out.push({ time, open: r2(o), close: r2(c), high: r2(Math.max(o, c) + Math.abs(noise(i + 500)) * 0.8), low: r2(Math.min(o, c) - Math.abs(noise(i + 900)) * 0.8), volume: Math.round(vol) });
+    }
+    return out;
+  }
+
+  const finite = a => a.filter(Number.isFinite);
+  function path(values, x, y) {
+    let d = "", pen = false;
+    values.forEach((v, i) => { if (!Number.isFinite(v)) { pen = false; return; } d += `${pen ? "L" : "M"}${x(i)} ${y(v)}`; pen = true; });
+    return d;
+  }
+  function drawLine(l, x, y, y0, cw) {
+    if (l.kind === "hist") return l.values.map((v, i) => Number.isFinite(v) ? `<rect x="${r1(x(i) - cw * 0.35)}" y="${Math.min(y(v), y0)}" width="${r1(cw * 0.7)}" height="${r1(Math.abs(y(v) - y0)) || 0.5}" fill="${l.colors[i]}"/>` : "").join("");
+    if (l.kind === "dots") return l.values.map((v, i) => Number.isFinite(v) ? `<circle cx="${x(i)}" cy="${y(v)}" r="1.3" fill="${l.color}"/>` : "").join("");
+    return `<path d="${path(l.values, x, y)}" fill="none" stroke="${l.color}" stroke-width="${l.width || 1.6}"${l.dash ? ' stroke-dasharray="4 3"' : ""}/>`;
+  }
+  const legend = (lines, top) => `<text x="6" y="${top + 12}" class="ig-ax">${lines.map(l => `<tspan fill="${l.colors ? "#22c55e" : l.color}">${esc(l.title)}</tspan>`).join("  ")}</text>`;
+  const scale = (vals, top, h) => { const lo = Math.min(...vals), hi = Math.max(...vals), pad = (hi - lo || 1) * 0.06; return v => r1(top + (hi + pad - v) / (hi - lo + 2 * pad || 1) * h); };
+
+  // label(kind) → short text for a marked event (UI passes the translated name).
+  function svg(id, { label = k => k } = {}) {
+    const def = Indicators.DEFS[id];
+    if (!def) return "";
+    const bars = sample(!!def.intraday), own = def.pane === "own";
+    const inds = Indicators.compute((SETUP[id] || [[id, {}]]).map(([k, p]) => ({ id: k, p: Indicators.params(k, p) })), bars);
+    const lines = inds.flatMap(z => z.lines);
+    const pH = own ? 150 : 220, oTop = pH + 8, oH = own ? 110 : 0, h = own ? oTop + oH : pH, plotW = W - 48, cw = plotW / N;
+    const x = i => r1(4 + (i + 0.5) * cw);
+    const yP = scale(finite(bars.flatMap(b => [b.high, b.low]).concat(own ? [] : lines.flatMap(l => l.values))), own ? 22 : 38, pH - (own ? 28 : 44));
+    const candles = bars.map((b, i) => {
+      const cls = b.close >= b.open ? "ig-up" : "ig-dn", top = Math.min(yP(b.open), yP(b.close));
+      return `<line x1="${x(i)}" x2="${x(i)}" y1="${yP(b.high)}" y2="${yP(b.low)}" class="${cls}"/><rect x="${r1(x(i) - cw * 0.3)}" y="${top}" width="${r1(cw * 0.6)}" height="${r1(Math.abs(yP(b.open) - yP(b.close))) || 0.5}" class="${cls}"/>`;
+    }).join("");
+    const closes = bars.map(b => b.close), axis = (yv, v, cls = "ig-ax") => `<text x="${W - 4}" y="${yv + 3}" text-anchor="end" class="${cls}">${esc(r1(v))}</text>`;
+    const sessions = def.intraday ? bars.map((b, i) => i && Math.floor(b.time / 86400) !== Math.floor(bars[i - 1].time / 86400) ? `<line x1="${r1(x(i) - cw / 2)}" x2="${r1(x(i) - cw / 2)}" y1="0" y2="${pH}" class="ig-lvl"/>` : "").join("") : "";
+    let body = `<rect x="0" y="0" width="${W}" height="${pH}" class="ig-bg"/>${sessions}${candles}` + axis(yP(Math.max(...closes)), Math.max(...closes)) + axis(yP(Math.min(...closes)), Math.min(...closes));
+    if (!own) body += lines.map(l => drawLine(l, x, yP, 0, cw)).join("") + legend(lines, 0);
+    else {
+      const lv = def.levels || [], yO = scale(finite(lines.flatMap(l => l.values)).concat(lv, lines.some(l => l.kind === "hist") ? [0] : []), oTop + 16, oH - 20);
+      body += `<rect x="0" y="${oTop}" width="${W}" height="${oH}" class="ig-bg"/>`
+        + lv.map(v => `<line x1="4" x2="${4 + plotW}" y1="${yO(v)}" y2="${yO(v)}" class="ig-lvl"/>${axis(yO(v), v)}`).join("")
+        + lines.map(l => drawLine(l, x, yO, yO(0), cw)).join("") + legend(lines, oTop);
+    }
+    const kinds = EVENTS[id] || ["swingHigh", "swingLow"];
+    let ev = ChartEvents.detect(bars, inds).filter(v => kinds.includes(v.kind));
+    if (ev.length > 6) ev = Array.from({ length: 6 }, (_, k) => ev[Math.round(k * (ev.length - 1) / 5)]);
+    body += ev.map(v => {
+      const up = v.pos === "below", yv = r1(yP(v.price) + (up ? 4 : -4)), xv = x(v.i), tx = Math.min(W - 40, Math.max(24, xv));
+      return `<g class="ig-ev ${v.tone}"><path d="M${xv} ${yv}l-4 ${up ? 7 : -7}h8z"/><text x="${tx}" y="${r1(yv + (up ? 17 : -10))}" text-anchor="middle">${esc(label(v.kind))}</text></g>`;
+    }).join("");
+    return `<svg viewBox="0 0 ${W} ${h}" class="ig-svg" role="img">${body}</svg>`;
+  }
+
+  return { svg, sample, N };
 })();
 // Pure buy / sell idea lists per horizon from per-ticker technical scores + valuation vs. sector medians. Rules are fixed and listed in the docs.
 // Row: { sym, price, d (daily score), rsi, w (weekly score), above200 (bool|null), ret1y, pe, pb, roe (%), dy (%), secPe, value (bn traded) }.
@@ -2857,18 +3152,220 @@ const ChartHelp = (() => {
 
   return { desc, interp, tipHtml, eventText, short, major, TITLE };
 })();
+// Detailed guide per indicator (Vietnamese source, English in en-indicator-guide-strings.js): what it is, how to read it, worked examples, combinations, caveats.
+const IND_GUIDE = {
+  sma: {
+    what: "SMA (Simple Moving Average) là giá đóng cửa trung bình của N phiên gần nhất, mỗi phiên có trọng số như nhau. SMA làm mượt biến động để thấy xu hướng.",
+    read: ["Giá nằm trên SMA và SMA dốc lên: xu hướng tăng; giá dưới SMA và SMA dốc xuống: xu hướng giảm.", "SMA ngắn (10–20) theo dõi xu hướng ngắn hạn, SMA 50 trung hạn, SMA 200 dài hạn.", "Trong xu hướng, SMA thường đóng vai hỗ trợ (khi tăng) hoặc kháng cự (khi giảm)."],
+    ex: ["Ví dụ: cổ phiếu X giá 48, SMA 50 ở 45 và đang dốc lên → xu hướng tăng; giá điều chỉnh về 45 rồi bật lại là điểm mua theo xu hướng.", "Ví dụ: SMA 20 cắt lên SMA 50 (giao cắt vàng) sau 3 tháng giảm → tín hiệu xu hướng ngắn hạn đảo chiều tăng; SMA 20 cắt xuống SMA 50 (giao cắt tử thần) là chiều ngược lại."],
+    combo: ["Dùng cùng RSI: giá trên SMA 50 nhưng RSI > 70 → xu hướng tốt nhưng đừng mua đuổi, chờ RSI hạ nhiệt.", "Dùng cùng khối lượng: giá vượt SMA kèm khối lượng gấp 1,5 lần trung bình thì tín hiệu đáng tin hơn."],
+    warn: "SMA là chỉ báo trễ: trong thị trường đi ngang giá cắt qua lại SMA liên tục, tạo nhiều tín hiệu giả.",
+  },
+  ema: {
+    what: "EMA (Exponential Moving Average) là trung bình động hàm mũ: phiên càng gần càng có trọng số lớn, nên EMA bám giá nhanh hơn SMA cùng chu kỳ.",
+    read: ["Giá trên EMA và EMA dốc lên: xu hướng tăng; ngược lại là giảm.", "EMA 9–21 hay dùng cho giao dịch ngắn hạn; EMA 50/200 cho xu hướng lớn.", "Hai EMA cắt nhau (ví dụ EMA 12 và EMA 26) là nền tảng của MACD."],
+    ex: ["Ví dụ: giá cổ phiếu X giảm về EMA 21 rồi đóng cửa bật lên trên đó trong khi EMA 21 vẫn dốc lên → điểm vào lệnh theo xu hướng.", "Ví dụ: sau đợt tăng mạnh, giá đóng cửa dưới EMA 9 hai phiên liền → động lượng ngắn hạn suy yếu, cân nhắc chốt một phần."],
+    combo: ["Kết hợp EMA nhanh với SMA 200: chỉ mua khi giá trên SMA 200 (xu hướng dài hạn tăng) và có tín hiệu từ EMA nhanh.", "Kết hợp với ADX: tín hiệu từ EMA chỉ nên dùng khi ADX > 25 (có xu hướng rõ)."],
+    warn: "EMA phản ứng nhanh nên cũng nhạy với nhiễu hơn SMA, dễ cho tín hiệu sớm nhưng sai.",
+  },
+  wma: {
+    what: "WMA (Weighted Moving Average) là trung bình có trọng số tuyến tính: phiên mới nhất nặng N, phiên trước nặng N−1… WMA nằm giữa SMA và EMA về độ nhạy.",
+    read: ["Đọc như SMA/EMA: vị trí giá so với đường và độ dốc của đường cho biết xu hướng.", "WMA phản ứng nhanh với thay đổi gần đây nhưng ít giật hơn EMA ngắn.", "Hai WMA khác chu kỳ cắt nhau cho tín hiệu đổi xu hướng."],
+    ex: ["Ví dụ: WMA 10 cắt lên WMA 30 khi giá vừa vượt đỉnh cũ → xác nhận xu hướng tăng mới.", "Ví dụ: giá đóng cửa dưới WMA 20 sau khi bám sát đường này cả tháng → xu hướng ngắn hạn có thể kết thúc."],
+    combo: ["Dùng WMA ngắn để vào lệnh và SMA 50/200 làm bộ lọc xu hướng lớn.", "Kết hợp với MACD để xác nhận động lượng cùng chiều trước khi vào lệnh."],
+    warn: "Giống mọi đường trung bình, WMA kém hiệu quả khi giá đi ngang trong biên độ hẹp.",
+  },
+  bb: {
+    what: "Dải Bollinger gồm đường giữa (SMA 20) và hai dải cách ±2 độ lệch chuẩn. Dải nở ra khi biến động tăng, co lại khi thị trường yên ắng.",
+    read: ["Giá chạm/vượt dải trên: đang mạnh nhưng căng; chạm dải dưới: đang yếu hoặc quá bán.", "Dải co hẹp bất thường (squeeze) thường báo trước một đợt biến động mạnh, chưa biết chiều.", "Trong xu hướng tăng mạnh, giá có thể 'đi dọc' dải trên nhiều phiên — đó là dấu hiệu mạnh, không phải tín hiệu bán."],
+    ex: ["Ví dụ: dải của cổ phiếu X co hẹp nhất 6 tháng, sau đó giá đóng cửa vượt dải trên với khối lượng lớn → bứt phá tăng.", "Ví dụ: trong biên độ đi ngang 40–44, giá chạm dải dưới 40 rồi quay lên đường giữa 42 → giao dịch hồi về đường giữa."],
+    combo: ["Kết hợp RSI: giá chạm dải dưới + RSI < 30 + nến đảo chiều là tín hiệu hồi phục tốt hơn chỉ dùng một chỉ báo.", "Kết hợp khối lượng để phân biệt bứt phá thật (khối lượng lớn) với chạm dải giả."],
+    warn: "Chạm dải không tự nó là tín hiệu mua/bán; cần xác định thị trường đang có xu hướng hay đi ngang.",
+  },
+  dc: {
+    what: "Kênh Donchian vẽ giá cao nhất và thấp nhất của N phiên (mặc định 20) cùng đường giữa. Đây là chỉ báo bứt phá kinh điển.",
+    read: ["Giá đóng cửa vượt cạnh trên: bứt phá lên, đỉnh mới N phiên.", "Giá thủng cạnh dưới: phá vỡ hỗ trợ, đáy mới N phiên.", "Kênh hẹp dần cho thấy giá tích luỹ, chuẩn bị chọn hướng."],
+    ex: ["Ví dụ: cổ phiếu X đi ngang 30–33 trong 4 tuần, rồi đóng cửa 33,5 vượt cạnh trên → tín hiệu mua bứt phá, đặt dừng lỗ dưới đường giữa.", "Ví dụ: đang nắm giữ, giá thủng cạnh dưới kênh 20 phiên → tín hiệu thoát theo hệ thống 'Turtle'."],
+    combo: ["Kết hợp ADX: bứt phá khi ADX đang tăng từ dưới 20 lên trên 25 có xác suất thành công cao hơn.", "Kết hợp ATR để đặt điểm dừng lỗ cách giá vào khoảng 2 ATR."],
+    warn: "Trong thị trường giằng co, bứt phá giả xảy ra thường xuyên; nên chờ đóng cửa xác nhận.",
+  },
+  ichi: {
+    what: "Ichimoku gồm 5 đường: Tenkan (trung bình đỉnh/đáy 9 phiên), Kijun (26 phiên), Span A và Span B tạo thành 'mây' dịch về tương lai 26 phiên, và Chikou (giá đóng cửa dịch lùi 26 phiên).",
+    read: ["Giá trên mây: xu hướng tăng; dưới mây: giảm; trong mây: trung tính.", "Tenkan cắt lên Kijun là tín hiệu mua sớm, mạnh nhất khi xảy ra phía trên mây.", "Mây dày là vùng hỗ trợ/kháng cự mạnh; Span A trên Span B là mây tăng."],
+    ex: ["Ví dụ: giá cổ phiếu X vượt lên trên mây, Tenkan cắt lên Kijun và Chikou nằm trên giá cũ → đủ 3 điều kiện xu hướng tăng.", "Ví dụ: giá giảm về mép trên của mây dày rồi bật lên → mây đóng vai hỗ trợ."],
+    combo: ["Kết hợp RSI để tránh mua khi giá vừa vượt mây nhưng RSI đã quá mua.", "Kết hợp khối lượng/OBV để xác nhận lực mua khi giá thoát khỏi mây."],
+    warn: "Ichimoku cần đủ dữ liệu (≥ 52 phiên) và kém hiệu quả khi thị trường đi ngang trong mây.",
+  },
+  psar: {
+    what: "Parabolic SAR là chuỗi chấm bám theo giá, tăng tốc dần theo xu hướng. Chấm dưới giá: xu hướng tăng; chấm trên giá: xu hướng giảm.",
+    read: ["Chấm đổi phía (từ trên xuống dưới giá) là tín hiệu đảo chiều tăng, và ngược lại.", "Khoảng cách chấm–giá thu hẹp dần khi xu hướng kéo dài (tăng tốc).", "SAR thường dùng làm điểm dừng lỗ di động (trailing stop)."],
+    ex: ["Ví dụ: mua cổ phiếu X ở 50, SAR hiện ở 47 → đặt dừng lỗ 47 và nâng theo SAR mỗi phiên; khi giá cắt xuống SAR thì thoát.", "Ví dụ: sau đợt giảm, chấm SAR chuyển xuống dưới giá kèm MACD cắt lên → tín hiệu đảo chiều tăng."],
+    combo: ["Chỉ dùng tín hiệu SAR khi ADX > 25; khi ADX thấp, SAR đổi phía liên tục và gây lỗ.", "Kết hợp với đường trung bình: chỉ lấy tín hiệu mua của SAR khi giá trên SMA 50."],
+    warn: "Trong thị trường đi ngang, SAR đảo chiều liên tục tạo chuỗi tín hiệu sai.",
+  },
+  vwap: {
+    what: "VWAP là giá bình quân gia quyền theo khối lượng trong phiên, tính từ đầu phiên. Chỉ có ý nghĩa với nến phút (5m–1h).",
+    read: ["Giá trên VWAP: bên mua chiếm ưu thế trong phiên; dưới VWAP: bên bán chiếm ưu thế.", "Nhà đầu tư tổ chức thường mua quanh/dưới VWAP; VWAP hay là hỗ trợ/kháng cự trong ngày.", "VWAP reset mỗi phiên mới."],
+    ex: ["Ví dụ: cổ phiếu X mở cửa giảm, sau 10h giá vượt lên trên VWAP và giữ được → lực mua trong ngày mạnh lên.", "Ví dụ: giá hồi lên VWAP rồi bị đẩy xuống nhiều lần → VWAP đang là kháng cự trong ngày."],
+    combo: ["Kết hợp khối lượng: giá vượt VWAP kèm khối lượng tăng mạnh là tín hiệu đáng tin hơn.", "Dùng cùng RSI khung 5 phút để tìm điểm vào khi giá kéo về VWAP."],
+    warn: "VWAP chỉ dùng trong ngày; với khung ngày/tuần không có ý nghĩa nên tool chỉ tính khi xem nến phút.",
+  },
+  rsi: {
+    what: "RSI (Relative Strength Index, 14 phiên) đo tỷ lệ giữa mức tăng và mức giảm gần đây, chạy từ 0 đến 100.",
+    read: ["RSI > 70: quá mua, dễ điều chỉnh; RSI < 30: quá bán, dễ hồi phục.", "RSI cắt lên 50 cho thấy phe mua chiếm ưu thế, cắt xuống 50 là phe bán.", "Phân kỳ: giá tạo đỉnh mới nhưng RSI tạo đỉnh thấp hơn → động lượng yếu dần, cảnh báo đảo chiều."],
+    ex: ["Ví dụ: cổ phiếu X giảm 5 phiên liền, RSI xuống 26 rồi quay lên trên 30 kèm nến xanh khối lượng lớn → tín hiệu hồi phục kỹ thuật.", "Ví dụ: giá lập đỉnh mới 60 (cao hơn đỉnh 58 trước) nhưng RSI chỉ 64 (thấp hơn 72 lần trước) → phân kỳ âm, nên thận trọng."],
+    combo: ["Kết hợp đường trung bình: trong xu hướng tăng (giá trên SMA 200) chỉ mua khi RSI về 40–50, không chờ dưới 30.", "Kết hợp dải Bollinger hoặc MACD để xác nhận tín hiệu quá mua/quá bán."],
+    warn: "Trong xu hướng mạnh, RSI có thể ở vùng quá mua/quá bán rất lâu; bán chỉ vì RSI > 70 dễ bỏ lỡ đà tăng.",
+  },
+  macd: {
+    what: "MACD = EMA 12 − EMA 26 (đường MACD); đường tín hiệu là EMA 9 của MACD; histogram = MACD − tín hiệu.",
+    read: ["MACD cắt lên đường tín hiệu: động lượng chuyển sang tăng; cắt xuống: chuyển sang giảm.", "MACD trên 0: EMA nhanh trên EMA chậm, xu hướng tăng; dưới 0: xu hướng giảm.", "Histogram co dần về 0 báo động lượng yếu đi trước khi giao cắt xảy ra."],
+    ex: ["Ví dụ: MACD của cổ phiếu X cắt lên đường tín hiệu khi cả hai đang dưới 0 → tín hiệu đảo chiều sớm; nếu sau đó MACD vượt lên trên 0 → xu hướng tăng được xác nhận.", "Ví dụ: giá tăng lên đỉnh mới nhưng histogram nhỏ dần → phân kỳ âm, cân nhắc chốt lời."],
+    combo: ["Kết hợp RSI: MACD cắt lên + RSI vượt 50 cùng lúc là tín hiệu mua chắc hơn.", "Kết hợp ADX hoặc đường trung bình để lọc tín hiệu khi thị trường đi ngang."],
+    warn: "MACD là chỉ báo trễ và cho nhiều giao cắt giả khi giá đi ngang.",
+  },
+  stoch: {
+    what: "Stochastic (%K 14, %D 3) cho biết giá đóng cửa đang ở đâu trong biên độ cao–thấp của 14 phiên, từ 0 đến 100.",
+    read: ["> 80: quá mua; < 20: quá bán.", "%K cắt lên %D trong vùng < 20 là tín hiệu mua; %K cắt xuống %D trong vùng > 80 là tín hiệu bán.", "Stochastic nhạy hơn RSI, phù hợp giao dịch ngắn hạn trong biên độ."],
+    ex: ["Ví dụ: cổ phiếu X đi ngang 20–23, Stochastic xuống 12 rồi %K cắt lên %D khi giá ở 20,2 → mua gần đáy biên độ.", "Ví dụ: giá lên 23, Stochastic 88 và %K cắt xuống %D → chốt lời gần đỉnh biên độ."],
+    combo: ["Dùng Stochastic để tìm điểm vào theo hướng xu hướng chính (xác định bằng SMA 50 hoặc MACD).", "Kết hợp hỗ trợ/kháng cự: tín hiệu quá bán tại vùng hỗ trợ đáng tin hơn."],
+    warn: "Trong xu hướng mạnh, Stochastic báo quá mua/quá bán liên tục; đừng giao dịch ngược xu hướng chỉ dựa vào nó.",
+  },
+  adx: {
+    what: "ADX (14) đo độ mạnh của xu hướng, không cho biết chiều. +DI và −DI cho biết phe mua hay phe bán mạnh hơn.",
+    read: ["ADX > 25: có xu hướng rõ; ADX < 20: thị trường đi ngang.", "+DI trên −DI: phe mua mạnh hơn; −DI trên +DI: phe bán mạnh hơn.", "ADX tăng dần là xu hướng đang mạnh lên; ADX quay đầu giảm từ vùng cao là xu hướng yếu dần."],
+    ex: ["Ví dụ: ADX của cổ phiếu X tăng từ 18 lên 30 trong khi +DI cắt lên −DI → một xu hướng tăng mới đang hình thành.", "Ví dụ: ADX ở 15 kéo dài 1 tháng → đi ngang, nên dùng các chỉ báo dao động (RSI, Stochastic) thay vì đường trung bình."],
+    combo: ["Dùng ADX làm bộ lọc: chỉ theo tín hiệu của MA/MACD/SAR khi ADX > 25.", "Khi ADX thấp, ưu tiên giao dịch biên độ với Bollinger hoặc Stochastic."],
+    warn: "ADX trễ và không cho tín hiệu mua/bán trực tiếp; luôn phải xét thêm chiều xu hướng.",
+  },
+  atr: {
+    what: "ATR (14) là biên độ dao động thực trung bình mỗi phiên, tính cả khoảng trống giá giữa các phiên.",
+    read: ["ATR cao: cổ phiếu biến động mạnh, rủi ro mỗi phiên lớn; ATR thấp: biến động nhỏ.", "ATR tăng đột ngột thường đi kèm bứt phá hoặc hoảng loạn.", "ATR không cho biết chiều giá."],
+    ex: ["Ví dụ: cổ phiếu X giá 50, ATR 1,5 → mỗi phiên thường dao động khoảng 1,5 (3%); đặt dừng lỗ cách giá vào 2 × ATR = 3, tức 47.", "Ví dụ: chia vốn: chấp nhận lỗ 2 triệu mỗi lệnh, dừng lỗ 3 nghìn/cp → mua tối đa khoảng 660 cổ phiếu."],
+    combo: ["Dùng ATR để đặt điểm dừng lỗ cho các tín hiệu từ Donchian, MA hoặc SAR.", "So sánh ATR với Bollinger: cả hai cùng co hẹp là dấu hiệu sắp có biến động lớn."],
+    warn: "ATR là thước đo rủi ro, không phải tín hiệu giao dịch.",
+  },
+  cci: {
+    what: "CCI (20) đo độ lệch của giá điển hình so với trung bình của nó, chia cho độ lệch trung bình; dao động quanh 0, thường trong khoảng −200 đến +200.",
+    read: ["CCI > +100: giá mạnh bất thường (có thể bắt đầu xu hướng tăng hoặc quá mua).", "CCI < −100: yếu bất thường (bắt đầu giảm hoặc quá bán).", "CCI cắt qua 0 cho thấy giá vượt lên/xuống dưới trung bình."],
+    ex: ["Ví dụ: CCI của cổ phiếu X từ −50 vượt lên +100 kèm khối lượng lớn → bắt đầu đợt tăng mạnh.", "Ví dụ: CCI xuống −180 rồi quay lên trên −100 tại vùng hỗ trợ → tín hiệu hồi phục."],
+    combo: ["Kết hợp đường trung bình dài để chỉ lấy tín hiệu CCI cùng chiều xu hướng lớn.", "Kết hợp RSI để xác nhận vùng quá mua/quá bán."],
+    warn: "CCI không có giới hạn trên/dưới cố định nên ngưỡng ±100 cần điều chỉnh theo từng cổ phiếu.",
+  },
+  wr: {
+    what: "Williams %R (14) cho biết giá đóng cửa cách đỉnh cao nhất 14 phiên bao xa, từ −100 (đáy biên độ) đến 0 (đỉnh biên độ).",
+    read: ["> −20: quá mua; < −80: quá bán.", "%R thoát khỏi vùng quá bán (vượt lên trên −80) là tín hiệu mua sớm.", "Về bản chất là Stochastic đảo dấu, rất nhạy."],
+    ex: ["Ví dụ: %R của cổ phiếu X ở −92 trong 3 phiên rồi vượt lên −75 → lực bán cạn, có thể hồi phục.", "Ví dụ: %R ở −5 khi giá chạm kháng cự cũ → cân nhắc chốt lời ngắn hạn."],
+    combo: ["Dùng cùng đường trung bình để chỉ mua khi quá bán trong xu hướng tăng.", "Kết hợp MACD để tránh bắt đáy khi động lượng giảm còn mạnh."],
+    warn: "Rất nhạy nên nhiều tín hiệu nhiễu; không dùng một mình.",
+  },
+  mfi: {
+    what: "MFI (Money Flow Index, 14) là RSI có tính khối lượng: đo dòng tiền vào/ra dựa trên giá điển hình × khối lượng, từ 0 đến 100.",
+    read: ["> 80: quá mua theo dòng tiền; < 20: quá bán.", "Phân kỳ giữa MFI và giá thường đáng tin hơn RSI vì có yếu tố khối lượng.", "MFI tăng trong khi giá đi ngang: dòng tiền đang âm thầm vào."],
+    ex: ["Ví dụ: giá cổ phiếu X lập đáy mới nhưng MFI tạo đáy cao hơn → dòng tiền không còn rút mạnh, phân kỳ dương.", "Ví dụ: MFI 85 sau 5 phiên tăng mạnh khối lượng lớn → cẩn trọng điều chỉnh."],
+    combo: ["Kết hợp OBV để xác nhận dòng tiền.", "Kết hợp hỗ trợ/kháng cự: MFI quá bán tại hỗ trợ mạnh là điểm mua tốt hơn."],
+    warn: "Phụ thuộc chất lượng dữ liệu khối lượng; cổ phiếu thanh khoản thấp cho tín hiệu nhiễu.",
+  },
+  obv: {
+    what: "OBV (On-Balance Volume) cộng dồn khối lượng: phiên tăng cộng khối lượng, phiên giảm trừ khối lượng.",
+    read: ["OBV đi lên cùng giá: dòng tiền xác nhận xu hướng tăng.", "OBV tăng trong khi giá đi ngang: tích luỹ, giá có thể bứt phá lên.", "OBV giảm trong khi giá tăng: phân phối, xu hướng tăng thiếu bền vững."],
+    ex: ["Ví dụ: cổ phiếu X đi ngang 3 tuần nhưng OBV liên tục lập đỉnh mới → tích luỹ, sau đó giá bứt phá.", "Ví dụ: giá lập đỉnh mới nhưng OBV không vượt đỉnh cũ → phân kỳ âm, dòng tiền không xác nhận."],
+    combo: ["Dùng OBV xác nhận bứt phá của Donchian/Bollinger.", "Kết hợp MFI hoặc RSI để tìm phân kỳ giữa giá và dòng tiền."],
+    warn: "Giá trị tuyệt đối của OBV không quan trọng, chỉ xu hướng của nó; một phiên khối lượng đột biến có thể làm lệch OBV.",
+  },
+  roc: {
+    what: "ROC (Rate of Change, 12) là phần trăm thay đổi của giá so với 12 phiên trước.",
+    read: ["ROC > 0: giá cao hơn 12 phiên trước, đà tăng; ROC < 0: đà giảm.", "ROC cắt lên 0 là tín hiệu động lượng chuyển sang tăng.", "Giá trị cực đoan so với lịch sử của chính cổ phiếu cho thấy quá mua/quá bán."],
+    ex: ["Ví dụ: ROC của cổ phiếu X từ −8% vượt lên 0 trong khi giá vượt SMA 20 → động lượng chuyển sang tăng.", "Ví dụ: ROC +25% trong khi bình thường chỉ ±10% → tăng quá nóng, dễ điều chỉnh."],
+    combo: ["Kết hợp đường trung bình để lọc xu hướng.", "Kết hợp RSI/MACD để xác nhận động lượng."],
+    warn: "ROC nhạy với giá cũ bị loại khỏi cửa sổ, có thể đổi chiều dù giá hiện tại không đổi.",
+  },
+};
+const IND_GUIDE_SECTIONS = [["what", "Là gì"], ["read", "Cách đọc"], ["ex", "Ví dụ minh họa"], ["combo", "Phối hợp với chỉ báo khác"], ["warn", "Lưu ý"]];
+// Indicator guide dialog (opened from the "?" next to each indicator): sections + illustration, ‹ › / arrow keys through the catalog, tick to show on the chart.
+const IndGuide = (() => {
+  const e = s => Dom.esc(s);
+  const ids = () => Object.keys(Indicators.DEFS);
+  let cur = "", hooks = { on: () => false, toggle: () => {} };
+  const dlg = () => document.getElementById("indHelpDlg");
+  const section = ([k, title]) => {
+    const v = IND_GUIDE[cur][k], body = Array.isArray(v) ? `<ul>${v.map(s => `<li>${e(T(s))}</li>`).join("")}</ul>` : `<p>${e(T(v))}</p>`;
+    return `<section class="ig-sec ig-${k}"><h4>${e(T(title))}</h4>${body}</section>`;
+  };
+
+  function render() {
+    const d = Indicators.DEFS[cur], list = ids(), i = list.indexOf(cur);
+    const pic = IndIllus.svg(cur, { label: k => T(ChartHelp.TITLE[k] || k) });
+    dlg().innerHTML = `<div class="dlg-head"><button data-g="prev" title="${e(T("Chỉ báo trước"))}">‹</button><b>${e(d.name)} — ${e(T(d.label))}</b>`
+      + `<span class="muted">${i + 1}/${list.length}</span><button data-g="next" title="${e(T("Chỉ báo sau"))}">›</button><button data-g="close" title="${e(T("Đóng"))}">✕</button></div>`
+      + `<div class="ig-body"><label class="chk ig-on"><input type="checkbox" data-g="toggle"${hooks.on(cur) ? " checked" : ""}> ${e(T("Bật trên biểu đồ"))}</label>`
+      + `<figure class="ig-fig">${pic}<figcaption class="muted">${e(T("Hình minh họa trên dữ liệu giả lập (không phải giá thật)"))}</figcaption></figure>`
+      + IND_GUIDE_SECTIONS.map(section).join("") + `</div>`;
+  }
+  const go = step => { const list = ids(); cur = list[(list.indexOf(cur) + step + list.length) % list.length]; render(); dlg().scrollTop = 0; };
+
+  // h = { on(id) → shown on chart?, toggle(id, show) }.
+  function open(id, h) {
+    if (!Object.hasOwn(IND_GUIDE, id)) return;
+    cur = id; if (h) hooks = h;
+    render();
+    if (!dlg().open) dlg().showModal();
+  }
+
+  function init() {
+    const d = dlg();
+    d.addEventListener("click", ev => {
+      const b = ev.target.closest("button[data-g]");
+      if (!b) { if (ev.target === d) d.close(); return; }
+      if (b.dataset.g === "close") d.close(); else go(b.dataset.g === "next" ? 1 : -1);
+    });
+    d.addEventListener("change", ev => { if (ev.target.dataset.g === "toggle") { hooks.toggle(cur, ev.target.checked); ev.target.checked = hooks.on(cur); } });
+    d.addEventListener("keydown", ev => { if (ev.key === "ArrowRight" || ev.key === "ArrowLeft") { ev.preventDefault(); go(ev.key === "ArrowRight" ? 1 : -1); } });
+    I18n.onChange(() => { if (d.open) render(); });
+  }
+
+  return { open, init };
+})();
 // Lightweight Charts wrapper: price series (6 types), volume, overlay + own-pane indicators, crosshair legend, click → drawing tools.
 const TechChart = (() => {
   const css = () => { const s = getComputedStyle(document.documentElement), v = n => s.getPropertyValue(n).trim(); return { bg: v("--panel"), ink: v("--ink"), muted: v("--muted"), line: v("--line"), up: v("--up"), down: v("--down"), acc: v("--acc") }; };
   const alpha = (hex, a) => /^#[0-9a-f]{6}$/i.test(hex) ? hex + a : hex;
   const CMP_COLORS = ["#eab308", "#ec4899", "#8b5cf6", "#06b6d4", "#84cc16"];
-  const fmtPrice = p => Math.abs(p) >= 1e6 ? (p < 0 ? "-" : "") + Fmt.big(Math.abs(p)) : Math.abs(p) >= 1000 ? Fmt.en(p, 2) : p.toFixed(2);
+  let fmtPrice = p => Math.abs(p) >= 1e6 ? (p < 0 ? "-" : "") + Fmt.big(Math.abs(p)) : Math.abs(p) >= 1000 ? Fmt.en(p, 2) : p.toFixed(2);
   const pts = (bars, values) => values.map((v, i) => v == null || !Number.isFinite(v) ? { time: bars[i].time } : { time: bars[i].time, value: v });
 
   // opt: { legend: HTMLElement, tip?: HTMLElement (full chart help box), onClick(point), compact }
   function create(el, opt) {
     const LW = globalThis.LightweightCharts;
     let chart = null, main = null, vol = null, last = null, overlays = [], paneInds = [], evByTime = new Map(), ptr = null;
+    const box = el.parentElement, PRICE_MIN = 340, PANE_MIN = 130;
+    // Full chart: every indicator pane keeps ≥ PANE_MIN px; when they don't fit, the host grows and the box scrolls.
+    function fitPanes() {
+      if (!chart) return;
+      const panes = chart.panes(), n = panes.length - 1, need = PRICE_MIN + n * PANE_MIN, scroll = !opt.compact && n > 0 && box.clientHeight < need;
+      el.style.height = scroll ? `${need}px` : "";
+      panes.forEach((pn, i) => pn.setStretchFactor(scroll ? (i ? PANE_MIN : PRICE_MIN) : (i ? 1 : Math.max(3, n))));
+      if (tags) requestAnimationFrame(() => requestAnimationFrame(paneTags));
+    }
+    // Name tag at the top-left of each indicator pane, so scrolled-down panes stay identifiable.
+    const tags = opt.compact ? null : box.appendChild(Object.assign(document.createElement("div"), { className: "pane-tags" }));
+    function paneTags() {
+      if (!chart) { tags.innerHTML = ""; return; }
+      let top = 0;
+      tags.innerHTML = chart.panes().map((pn, i) => {
+        const at = top, ind = paneInds[i];
+        top += pn.getHeight() + 1;
+        return i && ind ? `<span style="top:${at + 2}px" title="${Dom.esc(ChartHelp.desc(ind.id))}">${ind.lines.filter(l => l.kind !== "hist").map(l => `<b style="color:${l.color}">${Dom.esc(l.title)}</b>`).join(" ")}</span>` : "";
+      }).join("");
+    }
+    if (!opt.compact) {
+      new ResizeObserver(fitPanes).observe(box);
+      // Wheel over an indicator pane scrolls the panes (the price pane still zooms); capture runs before the library's own handler.
+      el.addEventListener("wheel", e => {
+        if (!chart || e.ctrlKey || box.scrollHeight <= box.clientHeight || e.clientY - el.getBoundingClientRect().top <= chart.panes()[0].getHeight()) return;
+        e.preventDefault(); e.stopPropagation(); box.scrollTop += e.deltaY;
+      }, { capture: true, passive: false });
+    }
     el.addEventListener("pointermove", e => { const r = el.getBoundingClientRect(); ptr = { x: e.clientX - r.left, y: e.clientY - r.top }; });
     el.addEventListener("pointerleave", () => { ptr = null; if (opt.tip) opt.tip.hidden = true; });
 
@@ -2922,6 +3419,7 @@ const TechChart = (() => {
         rightPriceScale: { borderColor: c.line },
         timeScale: { borderColor: c.line, timeVisible: s.intraday, secondsVisible: false, rightOffset: 4 },
         crosshair: { mode: LW.CrosshairMode.Normal },
+        handleScroll: { vertTouchDrag: !!opt.compact },
         localization: { locale: "en-US", priceFormatter: fmtPrice },
       });
       last = { bars, raw: src, inds: s.inds, type: s.type };
@@ -2948,9 +3446,8 @@ const TechChart = (() => {
         if (p) { series[0].priceScale().applyOptions({ mode: 0 }); paneInds[p] = ind; }
         if (p && ind.def.levels) for (const lv of ind.def.levels) series[series.length - 1].createPriceLine({ price: lv, color: c.muted, lineWidth: 1, lineStyle: LW.LineStyle.Dotted, axisLabelVisible: false });
       }
-      // Price pane keeps ≥ half the height however many oscillator panes are open.
-      const panes = chart.panes();
-      panes.forEach((pn, i) => pn.setStretchFactor(i ? 1 : Math.max(3, panes.length - 1)));
+      // Price pane keeps ≥ half the height when the panes fit; otherwise fixed minimum heights + scrolling.
+      fitPanes();
       // Full chart: mark peaks / troughs / crosses / signal points; hovering a marked bar explains it.
       evByTime = new Map();
       if (!opt.compact) {
@@ -3008,12 +3505,14 @@ const TechChart = (() => {
       render, legend, updateLast,
       main: () => main, chart: () => chart,
       fit: () => chart && chart.timeScale().fitContent(),
+      scrolls: () => !!el.style.height,
       screenshot: () => chart && chart.takeScreenshot(),
-      destroy: () => { if (chart) chart.remove(); chart = main = vol = last = null; },
+      destroy: () => { if (chart) chart.remove(); chart = main = vol = last = null; el.style.height = ""; if (tags) tags.innerHTML = ""; },
     };
   }
 
-  return { create, fmtPrice };
+  // setPriceFormat: a tool whose prices need other decimals (crypto < $1) swaps the page-wide formatter before the first render.
+  return { create, fmtPrice: p => fmtPrice(p), setPriceFormat: f => { fmtPrice = f; } };
 })();
 // Drawing tools on the full chart: horizontal line, trend line, Fibonacci retracement, measure. Kept per symbol in memory, redrawn after every render.
 const ChartDraw = (() => {
@@ -3088,14 +3587,19 @@ const ChartBar = (() => {
       + `<select data-c="scale" title="${e(T("Thang giá"))}">${opts(SCALES, s.scale)}</select>`
       + `<label class="chk"><input type="checkbox" data-c="volume"${s.volume ? " checked" : ""}>${e(T("Khối lượng"))}</label>`
       + `<label class="chk" title="${e(T("So sánh tối đa 5 mã hoặc chỉ số, cách nhau bằng dấu phẩy (thang % thay đổi)"))}">${e(T("So sánh"))}<input type="text" class="cmpin" data-c="cmp" value="${e(s.cmp.join(", "))}" placeholder="VNINDEX, VCB…" spellcheck="false" autocomplete="off"></label>`
-      + `<select data-c="add" title="${e(T("Thêm chỉ báo kỹ thuật"))}"><option value="">${e(T("+ Chỉ báo…"))}</option>`
-      + `<optgroup label="${e(T("Trên biểu đồ giá"))}">${addOpts("main")}</optgroup><optgroup label="${e(T("Khung riêng"))}">${addOpts("own")}</optgroup></select>`
+      + `<details class="indmenu"><summary title="${e(T("Bật / tắt chỉ báo kỹ thuật"))}">${e(T("+ Chỉ báo…"))}</summary><div class="indpanel">`
+      + `<span class="indnote">★ ${e(T("Chỉ báo quan trọng, dùng phổ biến nhất"))}</span><b>${e(T("Trên biểu đồ giá"))}</b>${addOpts("main", s.ind)}<b>${e(T("Khung riêng"))}</b>${addOpts("own", s.ind)}</div></details>`
       + `<span class="seg tools">${TOOLS.map(([k, icon, tip]) => `<button data-c="tool" data-v="${k}" title="${e(T(tip))}"${k === tool ? ' class="on"' : ""}>${icon}</button>`).join("")}`
       + `<button data-c="clearDraw" title="${e(T("Xoá mọi hình vẽ"))}">🗑</button></span>`
       + `<button data-c="fit" title="${e(T("Xem toàn bộ dữ liệu"))}">⤢</button>`
       + `<button data-c="png" title="${e(T("Tải ảnh PNG của biểu đồ"))}">📷 PNG</button>`;
   }
-  const addOpts = pane => Object.entries(Indicators.DEFS).filter(([, d]) => d.pane === pane).map(([k, d]) => `<option value="${k}">${Dom.esc(d.name)} — ${e(T(d.label))}</option>`).join("");
+  // Checked = shown on the chart; (n) when the same indicator is on with several parameter sets.
+  const addOpts = (pane, list) => Object.entries(Indicators.DEFS).filter(([, d]) => d.pane === pane).map(([k, d]) => {
+    const n = list.filter(x => x.id === k).length, core = Indicators.CORE.includes(k);
+    return `<div class="indrow${core ? " core" : ""}" title="${e(ChartHelp.desc(k))}"><label><input type="checkbox" data-c="toggleInd" value="${k}"${n ? " checked" : ""}> <b>${core ? "★ " : ""}${Dom.esc(d.name)}</b>${n > 1 ? ` (${n})` : ""} <span class="muted">${e(T(d.label))}</span></label>`
+      + `<button type="button" class="qbtn" data-c="indHelp" data-v="${k}" title="${e(T("Hướng dẫn chi tiết: cách đọc, ví dụ, cách phối hợp"))}">?</button></div>`;
+  }).join("");
 
   function chips(list) {
     return list.map((x, i) => {
@@ -3128,7 +3632,10 @@ const ChartCtl = (() => {
   function msg(key) { say("miniMsg", key); say("fullMsg", key); }
   function bars() {
     $("miniBar").innerHTML = ChartBar.compact(st);
+    // Keep the indicator menu open while ticking several boxes (the toolbar is rebuilt on every change).
+    const open = !!$("fullBar").querySelector("details.indmenu[open]");
     $("fullBar").innerHTML = ChartBar.full(st, draw.tool());
+    if (open) $("fullBar").querySelector("details.indmenu").open = true;
     $("fullChips").innerHTML = ChartBar.chips(st.ind);
   }
   function head() {
@@ -3136,7 +3643,8 @@ const ChartCtl = (() => {
     $("dlgTitle").innerHTML = `<b class="${tone}">${Dom.esc(sym)}</b> <span class="muted">${Dom.esc(Universe.name(sym, I18n.lang))}</span>`
       + (q ? ` <b class="${tone}">${Fmt.price(q.last || q.ref)}</b> <span class="${tone}">${Fmt.chg(q, q.chg)} ${Fmt.pct(q, q.pct)}</span>` : "");
     $("dlgClose").title = T("Đóng (Esc)");
-    $("fullStatus").textContent = note ? T(note.key, note.p) : draw.tool() ? T(draw.needsTwo() ? "Bấm 2 điểm trên biểu đồ." : "Bấm 1 điểm trên biểu đồ.") : T("Kéo để cuộn, lăn chuột / chụm 2 ngón để phóng to, bấm đúp trục giá để tự co giãn.");
+    $("fullStatus").textContent = note ? T(note.key, note.p) : draw.tool() ? T(draw.needsTwo() ? "Bấm 2 điểm trên biểu đồ." : "Bấm 1 điểm trên biểu đồ.") : T("Kéo để cuộn, lăn chuột / chụm 2 ngón để phóng to, bấm đúp trục giá để tự co giãn.")
+      + (full.scrolls() ? " " + T("Nhiều khung chỉ báo: lăn chuột trên khung chỉ báo hoặc vuốt dọc để cuộn xem hết.") : "");
   }
 
   // Only fetch while the chart is on screen (detail tab "Kỹ thuật" or the dialog).
@@ -3171,7 +3679,7 @@ const ChartCtl = (() => {
     const s = { bars: data.bars, type: st.type, scale: data.cmp && data.cmp.length ? "pct" : st.scale, volume: st.volume, inds, intraday: intra, keep,
       from: ChartRange.firstVisible(data.bars, st.range), compare: data.cmp || [] };
     mini.render(s);
-    if (dlgOpen) { full.render(s); draw.apply(full); }
+    if (dlgOpen) { full.render(s); draw.apply(full); head(); }
   }
 
   function setSymbol(s) {
@@ -3210,7 +3718,8 @@ const ChartCtl = (() => {
     else if (c === "type" || c === "scale") st[c] = v;
     else if (c === "volume") st.volume = el.checked;
     else if (c === "cmp") st.cmp = WatchParse.parse(el.value).symbols.slice(0, 5);
-    else if (c === "add") { if (!Object.hasOwn(Indicators.DEFS, v)) return; st.ind = Indicators.add(st.ind, v); }
+    else if (c === "toggleInd") { if (!Object.hasOwn(Indicators.DEFS, v)) return; st.ind = el.checked ? Indicators.add(st.ind, v) : st.ind.filter(x => x.id !== v); }
+    else if (c === "indHelp") { IndGuide.open(v, guideHooks); return; }
     else if (c === "param") { const x = st.ind[+el.dataset.i]; if (!x) return; x.p = Indicators.params(x.id, { ...x.p, [el.dataset.k]: el.value }); }
     else if (c === "rm") st.ind.splice(+el.dataset.i, 1);
     else if (c === "tool") { draw.setTool(v); note = null; bars(); head(); return; }
@@ -3222,6 +3731,8 @@ const ChartCtl = (() => {
     save(); bars();
     if (["range", "interval", "cmp"].includes(c)) load(); else render(true);
   }
+
+  const guideHooks = { on: id => st.ind.some(x => x.id === id), toggle: (id, show) => act("toggleInd", { dataset: { v: id }, checked: show }) };
 
   function png() {
     const canvas = full.screenshot();
@@ -3237,6 +3748,16 @@ const ChartCtl = (() => {
   }
 
   function init() {
+    // The menu may sit near the dialog's right edge → flip the panel to open leftwards instead of being clipped.
+    $("fullBar").addEventListener("toggle", e => {
+      const d = e.target;
+      if (!d.matches || !d.matches("details.indmenu") || !d.open) return;
+      const pn = d.querySelector(".indpanel");
+      pn.style.left = "0"; pn.style.right = "auto";
+      if (pn.getBoundingClientRect().right > $("chartDlg").getBoundingClientRect().right - 8) { pn.style.left = "auto"; pn.style.right = "0"; }
+    }, true);
+    document.addEventListener("click", e => { const m = $("fullBar").querySelector("details.indmenu[open]"); if (m && !m.contains(e.target) && !e.composedPath().includes($("indHelpDlg"))) m.open = false; });
+    IndGuide.init();
     // Every visit opens at 1 year × 1D; type / scale / indicators are remembered, share links still set their own range.
     st = clean({ ...Prefs.get("chart", {}), range: "1Y", interval: "1D" });
     mini = TechChart.create($("miniHost"), { legend: $("miniLegend"), compact: true });

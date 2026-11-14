@@ -9,6 +9,7 @@ Mỗi tool trong `tools/` có đúng 1 file doc ở đây, cùng tên: `tools/<x
 | FIX Parser (message/log FIX 4.4 + Server Sàn: BCGD, ĐTTTT) | [fix-message-parser.md](fix-message-parser.md) |
 | Lịch vạn niên (lịch dương–âm, đổi ngày, ngày/giờ tốt xấu) | [vietnamese-lunar-calendar.md](vietnamese-lunar-calendar.md) |
 | Bảng giá chứng khoán (HOSE · HNX · UPCOM, dữ liệu VPS) | [vn-stock-price-board.md](vn-stock-price-board.md) |
+| Bảng giá Crypto & On-chain (Binance, CoinGecko, DeFiLlama, mempool.space) | [crypto-market-board.md](crypto-market-board.md) |
 
 ## Khung 1 file doc tool
 

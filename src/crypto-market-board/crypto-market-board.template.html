@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="vi" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src https://api.binance.com https://data-api.binance.vision wss://stream.binance.com:9443 wss://data-stream.binance.vision https://fapi.binance.com https://api.coingecko.com https://api.llama.fi https://stablecoins.llama.fi https://mempool.space https://api.blockchain.info wss://ws.blockchain.info https://api.alternative.me">
+<title>Bảng giá Crypto &amp; On-chain</title>
+<style>
+/* @include ../data-workbench/styles/base.css */
+/* @include ../data-workbench/styles/app-bar-tabs-toolbar-surfaces.css */
+/* @include ../data-workbench/styles/theme-filter-popover-chips.css */
+/* @include styles/crypto-market-board.css */
+/* @include ../vn-stock-price-board/styles/technical-chart.css */
+/* @include ../vn-stock-price-board/styles/detail-tabs.css */
+/* @include ../vn-stock-price-board/styles/market-heatmap-and-screener.css */
+/* @include styles/coin-detail-and-dialogs.css */
+/* @include styles/defi-revenue.css */
+/* @include styles/bitcoin-onchain.css */
+/* @include styles/btc-wallet-whale.css */
+/* @include ../data-workbench/styles/phone-portrait-layout.css */
+</style>
+</head>
+<body>
+<header class="top">
+  <a class="btn" href="../index.html">← Trang chủ</a>
+  <h1>Bảng giá Crypto &amp; On-chain</h1>
+  <button class="more-toggle" title="Thêm thao tác" aria-expanded="false">⋯</button>
+  <button id="share" title="Chép link chứa tab + danh mục + tuỳ chọn (nằm sau dấu #, không gửi lên máy chủ; không kèm vị thế của bạn)">🔗 Chia sẻ link</button>
+  <button id="alertsBtn" title="Cảnh báo giá cho các coin (lưu trong trình duyệt này)">🔔 Cảnh báo</button>
+  <button id="calcBtn" title="DCA backtest, quy đổi coin ↔ USD ↔ VND, tính giá thanh lý Futures, khối lượng theo rủi ro">🧮 Công cụ</button>
+  <button id="undo" title="Lấy lại danh mục trước khi nạp mẫu / link chia sẻ" hidden>↶ Khôi phục danh mục trước</button>
+  <label class="chk" title="Giao diện sáng / tối">Giao diện
+    <select id="theme"><option value="auto">Tự động</option><option value="light">Sáng</option><option value="dark">Tối</option></select></label>
+  <span class="seg lang-switch" title="Ngôn ngữ"><button data-lang="vi">VI</button><button data-lang="en">EN</button></span>
+  <nav class="seg wb-nav" id="tabs"></nav>
+</header>
+<div class="toolbar">
+  <button id="saveList" title="Lưu danh mục ★ hiện tại thành bản có tên (trong trình duyệt này, tối đa 30 bản)">💾 Lưu danh mục</button>
+  <select id="savedLists" title="Mở lại một danh mục đã lưu"></select>
+  <button id="delList" title="Xoá danh mục đang mở khỏi trình duyệt" hidden>🗑</button>
+  <label class="btn" title="Nhập danh mục từ file JSON do tool xuất, hoặc TXT / CSV chứa mã coin (CSV lấy cột đầu)">⬆ Nhập<input type="file" id="importList" accept=".json,.txt,.csv,.tsv,text/plain,application/json"></label>
+  <button id="exportList" title="Tải danh mục ★ kèm vị thế, ghi chú và cảnh báo thành file JSON">⬇ Xuất danh mục</button>
+  <span class="sep"></span>
+  <input type="text" id="q" placeholder="Lọc / thêm coin: BTC, ETH…" title="Gõ để lọc bảng; Enter hoặc ★ Thêm để đưa vào danh mục" autocomplete="off" spellcheck="false">
+  <button id="add" class="main" title="Thêm các coin đang gõ vào danh mục ★ (lưu trong trình duyệt này)">★ Thêm</button>
+  <span class="sep"></span>
+  <label class="chk" title="Realtime qua WebSocket Binance, hoặc lấy định kỳ; tab ẩn quá 30 giây thì giãn 60 giây">Cập nhật
+    <select id="rate" data-opt><option value="live">Realtime</option><option value="5">5s</option><option value="15">15s</option><option value="60">60s</option><option value="off">Tạm dừng</option></select></label>
+  <label class="chk" title="Đơn vị tiền hiển thị; VND quy đổi theo giá USDT/VND của CoinGecko">Tiền
+    <select id="cur" data-opt><option value="USD">USD</option><option value="VND">VND</option></select></label>
+  <label class="chk" title="Hiện cột vị thế của bạn trong ★ Danh mục: số lượng, giá vốn, giá trị, lãi/lỗ"><input type="checkbox" id="pos" data-opt checked>Vị thế</label>
+  <label class="chk" title="Hiện biểu đồ nhỏ 7 ngày trong bảng"><input type="checkbox" id="spark" data-opt checked>7 ngày</label>
+  <span class="sep"></span>
+  <button id="csv" title="Tải bảng đang xem thành CSV (mở bằng Excel)">⬇ CSV</button>
+</div>
+<section id="strip" class="indices" data-i18n-skip></section>
+<div class="seg pane-switch"><button>Bảng giá</button><button>Chi tiết coin</button></div>
+<main class="work pane-scroller" id="work">
+  <section class="pane board-pane">
+    <div class="bar"><b id="boardTitle">★ Danh mục</b><span id="count" class="muted"></span><span id="liveBadge" class="badge"></span></div>
+    <div class="scroll" id="boardBox"><div id="subBar" class="subbar" hidden data-i18n-skip></div><div id="pfBar" data-i18n-skip hidden></div><table id="board" class="board"></table></div>
+    <div class="scroll market" id="marketView" hidden data-i18n-skip></div>
+  </section>
+  <section class="pane detail-pane">
+    <div class="bar"><b>Chi tiết coin</b></div>
+    <div class="scroll" id="detail" data-i18n-skip>
+      <div id="dHead"></div>
+      <nav class="dtabs" id="dTabs"></nav>
+      <section class="dpanel" data-tab="overview"><div id="dOverview"></div></section>
+      <section class="dpanel" data-tab="chart" hidden>
+        <section id="miniChart" class="mini-chart">
+          <div class="cbar" id="miniBar"></div>
+          <div class="cbox"><div class="clegend" id="miniLegend"></div><div class="chost" id="miniHost"></div><p class="cmsg" id="miniMsg" hidden></p></div>
+        </section>
+        <div id="dOutlook"></div>
+      </section>
+      <section class="dpanel" data-tab="book" hidden><div id="dBook"></div></section>
+      <section class="dpanel" data-tab="deriv" hidden><div id="dDeriv"></div></section>
+      <section class="dpanel" data-tab="profile" hidden><div id="dProfile"></div></section>
+    </div>
+  </section>
+</main>
+<footer class="status" id="status" data-i18n-skip></footer>
+<dialog id="toolDlg" class="tool-dlg" data-i18n-skip></dialog>
+<dialog id="chartDlg" class="chart-dlg" data-i18n-skip>
+  <div class="dlg-head"><span id="dlgTitle"></span><button id="dlgClose">✕</button></div>
+  <div class="cbar" id="fullBar"></div>
+  <div class="ichips" id="fullChips"></div>
+  <div class="cbox"><div class="clegend" id="fullLegend"></div><div class="chost" id="fullHost"></div><div class="ctip" id="fullTip" hidden></div><p class="cmsg" id="fullMsg" hidden></p></div>
+  <div class="dlg-foot muted" id="fullStatus"></div>
+</dialog>
+<dialog id="guideDlg" class="tool-dlg guide-dlg" data-i18n-skip></dialog>
+<div class="toasts" id="toasts" data-i18n-skip></div>
+<div class="author">
+  <span>Tác giả:</span><b><a href="https://happywindapp.github.io/CV/cv_quan_phan.html">Phan Ngọc Minh Quân</a></b>
+  <span>GitHub Source:</span><a href="https://github.com/happywindapp/web_tool/">github.com/happywindapp/web_tool</a>
+</div>
+<script>
+"use strict";
+// @include ../vn-stock-price-board/js/lib/lightweight-charts-5.2.1.standalone.production.js
+// @include ../data-workbench/js/core/i18n-ui-language-vi-en.js
+// @include ../vn-stock-price-board/js/i18n/en-stock-board-ui-strings.js
+// @include ../vn-stock-price-board/js/i18n/en-stock-board-chart-help-strings.js
+// @include js/i18n/en-crypto-board-ui-strings.js
+// @include js/i18n/en-crypto-detail-and-tools-strings.js
+// @include js/i18n/en-crypto-indicator-guide-trend-strings.js
+// @include js/i18n/en-crypto-indicator-guide-oscillator-strings.js
+// @include js/i18n/en-crypto-defi-strings.js
+// @include js/i18n/en-crypto-onchain-strings.js
+// @include js/i18n/en-crypto-wallet-strings.js
+// @include ../data-workbench/js/i18n/en-shared-theme-sessions-filters.js
+// @include ../data-workbench/js/core/share-link-codec.js
+// @include ../data-workbench/js/core/text-utils.js
+// @include ../data-workbench/js/core/dom-and-storage-helpers.js
+// @include ../data-workbench/js/core/theme-picker-auto-light-dark.js
+// @include ../data-workbench/js/core/saved-sessions-local-storage.js
+// @include ../data-workbench/js/core/phone-pane-switcher.js
+// @include js/model/crypto-number-format.js
+// @include js/model/coin-symbol-parser.js
+// @include js/model/crypto-alert-rules.js
+// @include js/model/portfolio-and-trade-calculators.js
+// @include js/model/board-columns-crypto.js
+// @include js/model/watchlist-export-file-format.js
+// @include js/model/market-overview-math.js
+// @include js/model/coin-picks-ranking.js
+// @include js/model/indicator-guide-trend-content.js
+// @include js/model/indicator-guide-oscillator-content.js
+// @include ../vn-stock-price-board/js/model/chart-ranges-and-resample.js
+// @include ../vn-stock-price-board/js/model/technical-indicators-trend-and-bands.js
+// @include ../vn-stock-price-board/js/model/technical-indicators-oscillators.js
+// @include ../vn-stock-price-board/js/model/indicator-catalog.js
+// @include ../vn-stock-price-board/js/model/technical-outlook-scoring.js
+// @include ../vn-stock-price-board/js/model/chart-events-detector.js
+// @include ../vn-stock-price-board/js/model/market-breadth-sectors-and-screener.js
+// @include js/model/defi-revenue-metrics.js
+// @include js/model/bitcoin-cycle-indicators.js
+// @include js/model/btc-address-flow-math.js
+// @include js/data/http-json-fetch-with-cache.js
+// @include js/data/binance-spot-client.js
+// @include js/data/binance-live-stream.js
+// @include js/data/binance-futures-client.js
+// @include js/data/coingecko-client.js
+// @include js/data/coin-directory-and-row-merge.js
+// @include js/data/coin-picks-data-loader.js
+// @include js/data/defillama-client.js
+// @include js/data/bitcoin-network-and-cycle-data-client.js
+// @include js/data/bitcoin-address-and-whale-client.js
+// @include js/samples/crypto-watchlist-demo-presets.js
+// @include js/ui/prefs-watchlist-holdings-alerts-store.js
+// @include js/ui/series-chart-helper.js
+// @include ../vn-stock-price-board/js/ui/chart-help-explanations.js
+// @include ../vn-stock-price-board/js/ui/technical-chart-view.js
+// @include ../vn-stock-price-board/js/ui/technical-chart-drawing-tools.js
+// @include js/ui/board-table-view.js
+// @include js/ui/global-stats-strip-view.js
+// @include js/ui/portfolio-summary-bar.js
+// @include js/ui/coin-picks-view.js
+// @include js/ui/market-overview-view.js
+// @include js/ui/exchanges-ranking-view.js
+// @include js/ui/board-extra-tab-sources.js
+// @include js/ui/defi-revenue-tables.js
+// @include js/ui/defi-revenue-view.js
+// @include js/ui/bitcoin-onchain-chart-builders.js
+// @include js/ui/bitcoin-onchain-view.js
+// @include js/ui/btc-whale-stream-panel.js
+// @include js/ui/btc-wallet-whale-view.js
+// @include js/ui/coin-detail-header-and-overview.js
+// @include js/ui/coin-chart-toolbar.js
+// @include js/ui/indicator-guide-illustration-svg.js
+// @include js/ui/indicator-guide-dialog.js
+// @include js/ui/coin-technical-chart-controller.js
+// @include js/ui/coin-technical-outlook-view.js
+// @include js/ui/order-book-and-trades-view.js
+// @include js/ui/coin-derivatives-view.js
+// @include js/ui/coin-profile-view.js
+// @include js/ui/detail-tabs-controller.js
+// @include js/ui/alerts-dialog-and-toasts.js
+// @include js/ui/crypto-calculators-dialog.js
+// @include js/ui/watchlist-save-import-export.js
+// @include js/ui/share-link-and-demo.js
+// @include js/ui/board-app.js
+// @include js/ui/board-controls.js
+Controls.start();
+</script>
+</body>
+</html>
