@@ -5,7 +5,7 @@
   .up { color:var(--up); } .down { color:var(--down); } .ref { color:var(--ref); } .ceil { color:var(--ceil); } .floor { color:var(--floor); }
 
   body { grid-template-rows:auto auto auto 1fr auto auto; }
-  .work { grid-template-columns:minmax(0, 1fr) minmax(320px, 380px); }
+  .work { grid-template-columns:minmax(0, 1fr) clamp(380px, 36vw, 600px); }
   .board-pane, .detail-pane { grid-template-rows:auto minmax(0, 1fr); }
   .scroll { overflow:auto; min-height:0; }
   .toolbar #q { width:10em; }
