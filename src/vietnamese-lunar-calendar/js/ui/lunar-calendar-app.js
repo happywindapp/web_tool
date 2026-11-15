@@ -30,7 +30,6 @@
   function fillSelects() {
     $("month").innerHTML = Array.from({ length: 12 }, (_, i) => `<option value="${i + 1}">${Dom.esc(I18n.lang === "en" ? new Date(2000, i, 1).toLocaleString("en", { month: "short" }) : T("Tháng {m}", { m: i + 1 }))}</option>`).join("");
     if (!$("year").options.length) $("year").innerHTML = Array.from({ length: LunarCal.MAX_YEAR - LunarCal.MIN_YEAR + 1 }, (_, i) => `<option>${LunarCal.MIN_YEAR + i}</option>`).join("");
-    $("demo").innerHTML = `<option value="">${Dom.esc(T("Thử mẫu…"))}</option>` + DEMOS.keys.map(k => `<option value="${k}">${Dom.esc(T(DEMOS.name(k)))}</option>`).join("");
   }
 
   function renderMonth(focus) {
@@ -53,7 +52,6 @@
     st.sel = Math.min(MAX_JD, Math.max(MIN_JD, jd));
     const s = LunarCal.jdToDate(st.sel);
     st.y = s.y; st.m = s.m;
-    $("q").classList.remove("bad");
     $("toHoro").disabled = st.sel > today;
     renderMonth(focus);
     renderDay();
@@ -68,11 +66,9 @@
     select(LunarCal.jdFromDate(Math.min(s.d, last), m, y));
   }
 
-  // Parses the date box; errors go to the status bar and leave the current view untouched.
+  // Parses a date string from a sample or a share link; errors go to the status bar and leave the current view untouched.
   function goText(text) {
-    $("q").value = text;
     const r = DateText.parse(text);
-    $("q").classList.toggle("bad", !!r.error);
     if (r.error) { status(() => "✖ " + T(r.error, r.params), "bad"); return false; }
     select(r.jd);
     return true;
@@ -140,9 +136,6 @@
   $("today").onclick = () => select(today);
   $("month").onchange = () => { st.m = +$("month").value; shiftMonth(0); };
   $("year").onchange = () => { st.y = +$("year").value; shiftMonth(0); };
-  const go = () => { if (goText($("q").value)) PhoneLayout.show(1); };
-  $("go").onclick = go;
-  $("q").onkeydown = e => { if (e.key === "Enter") { e.preventDefault(); go(); } };
   $("cc").onchange = () => { st.cc = $("cc").checked; store.set("cc", st.cc); renderMonth(); };
   $("moon").onchange = () => { st.moon = $("moon").checked; store.set("moon", st.moon); renderMonth(); };
   // Cross-tab buttons carry only the birth (date, calendar, time, gender); name / SIM number already typed in the target tab stay.
@@ -151,7 +144,6 @@
   $("toHoro").onclick = () => HoroApp.useBirth(selBirth());
   $("hToSim").onclick = () => SimApp.useBirth(ownerOf(HoroApp.snapshot()));
   $("sToHoro").onclick = () => HoroApp.useBirth(ownerOf(SimApp.snapshot()));
-  $("demo").onchange = e => { const k = e.target.value; e.target.value = ""; if (k) demo(k); };
   $("share").onclick = share;
   for (const box of [$("grid"), $("events"), $("history"), $("detail")]) box.addEventListener("click", e => { const b = e.target.closest("[data-jd]"); if (b) select(+b.dataset.jd, { focus: box === $("grid") }); });
   $("grid").addEventListener("keydown", onGridKey);

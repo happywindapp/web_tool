@@ -81,9 +81,8 @@
   :root[data-theme="dark"] { --hd:#f87171; --sunday:#f87171; --first:#fbbf24; --hol:#fb7185; --acc-ink:#67e8f9; }
   body { grid-template-rows:auto auto 1fr auto auto; }
   .bar.monthnav { gap:4px; } .bar.monthnav #lunarRange { margin-left:6px; }
-  .cal-opts { display:contents; } #demo { order:-2; }
+  .cal-opts { display:contents; }
   .clock { margin-left:auto; font-size:20px; line-height:1; font-variant-numeric:tabular-nums; font-weight:700; color:var(--acc-ink); white-space:nowrap; }
-  #q { width:15em; } #q.bad { border-color:var(--bad); outline:1px solid var(--bad); }
   .toolbar .hint { font-size:12px; }
   @media (min-width: 901px) { .work { grid-template-columns:minmax(0, 1.15fr) minmax(0, 1fr); } }
   .scroll { overflow:auto; min-height:0; padding:10px; }
@@ -277,16 +276,15 @@
     dialog.wx-dialog { width:100vw; max-width:100vw; height:100dvh; max-height:100dvh; margin:0; border-radius:0; } .wxc-body, .wxc-bar { padding-left:8px; padding-right:8px; }
     .day .wx { font-size:9.5px; margin:4px 0 4px; } .wx-week { grid-template-columns:repeat(3, minmax(0, 1fr)); } .wx .wt, .wx .tmin, .wx .rh { display:none; } .wx .wn { width:auto; }
     .day .dot { top:4px; right:4px; width:6px; height:6px; }
-    #q { width:12em; }
     .hero .big { font-size:40px; }
     #detail dl { grid-template-columns:1fr; gap:0; } #detail dd { margin-bottom:6px; }
     #horoBar, #calBar { flex-wrap:wrap; overflow-x:visible; }
-    #calBar .main { position:static; box-shadow:none; } #calBar .sep { display:none; } #calBar #q { flex:1 1 0; width:auto; min-width:0; }
-    #calBar .cal-opts { display:flex; flex:1 1 100%; flex-wrap:nowrap; gap:6px; align-items:center; overflow-x:auto; scrollbar-width:none; } #calBar #demo { order:0; flex:none; max-width:9em; }
+    #calBar .main { position:static; box-shadow:none; }
+    #calBar .cal-opts { display:contents; } #calBar .chk { gap:4px; } #calBar button { padding:4px 8px; }
     #detail .reads-bar { flex-wrap:nowrap; } #detail .reads-tabs { flex-wrap:nowrap; overflow-x:auto; scrollbar-width:none; min-width:0; } #detail .reads-tabs > * { flex:none; padding:4px 8px; }
     .clock { font-size:16px; }
     .hero { grid-template-columns:1fr 1fr; } .hero .clock-side { grid-column:1 / -1; } .aclock { width:min(200px, 70%); } .bar.monthnav #lunarRange { display:none; }
-    #calBar .cal-opts > * { flex:none; } #calBar #wxPlace { max-width:10em; }
+    #calBar #wxPlace { max-width:6.5em; } #calBar .chk { padding-right:2px; }
     body.tab-horo { height:auto; min-height:100dvh; }
     body.tab-horo #horoWork { flex:none; height:85dvh; }
     #horoBar .main { position:static; box-shadow:none; }
@@ -456,11 +454,7 @@
 </header>
 <div class="toolbar" id="calBar">
   <button id="today" title="Về hôm nay (Home)">Hôm nay</button>
-  <span class="sep"></span>
-  <input type="text" id="q" inputmode="text" autocomplete="off" spellcheck="false" title="Ngày dương: 12/11/2026 · Ngày âm: thêm “âm” hoặc “lunar” phía trước, tháng nhuận thêm “n” (âm 1/6n/2025)" placeholder="12/11/2026 · âm 15/8/2026">
-  <button id="go" class="main" title="Đổi ngày dương ↔ âm và xem chi tiết (Enter)">Xem ngày</button>
   <span class="cal-opts">
-  <select id="demo" title="Nạp ngày mẫu rồi xem ngay"></select>
     <label class="chk" title="Hiện can chi ngày trong ô lịch (khi ngày đó không có lễ / tiết khí)"><input type="checkbox" id="cc">Can chi</label>
     <label class="chk" title="Hiện tuần trăng (trăng non, lưỡi liềm, bán nguyệt, trăng tròn…) trong từng ô ngày"><input type="checkbox" id="moon">Mặt trăng</label>
     <label class="chk" title="Hiện thời tiết (icon, mô tả, nhiệt độ, độ ẩm) trong ô lịch và Chi tiết ngày — tải từ Open-Meteo, chỉ gửi tọa độ tỉnh/thành"><input type="checkbox" id="wx">Thời tiết</label>
@@ -646,12 +640,9 @@ const T = I18n.t;
 // English UI strings of Lịch vạn niên (keys = Vietnamese source text).
 I18n.add({
   "Lịch vạn niên": "Vietnamese Lunar Calendar", "← Trang chủ": "← Home", "🔗 Chia sẻ link": "🔗 Share link", "Ngôn ngữ": "Language", "Lượt truy cập (GoatCounter, cập nhật mỗi ~10 phút)": "Visits (GoatCounter, updates every ~10 minutes)", "Tác giả:": "Author:",
-  "Chép link mở đúng ngày / lá số đang xem (dữ liệu nằm sau dấu #, không gửi lên máy chủ)": "Copy a link that opens the selected day / reading (data stays after the #, never sent to a server)",
-  "Nạp ngày mẫu rồi xem ngay": "Load a sample date and show it", "Thử mẫu…": "Try a sample…",
+  "Chép link mở đúng ngày / lá số đang xem (dữ liệu nằm sau dấu #, không gửi lên máy chủ)": "Copy a link that opens the selected day / reading (data stays after the #, never sent to a server)", "Thử mẫu…": "Try a sample…",
   "Tháng trước (PageUp)": "Previous month (PageUp)", "Tháng sau (PageDown)": "Next month (PageDown)", "Tháng dương lịch": "Solar month", "Năm dương lịch": "Solar year",
-  "Hôm nay": "Today", "Về hôm nay (Home)": "Back to today (Home)", "Xem ngày": "Show date", "Đổi ngày dương ↔ âm và xem chi tiết (Enter)": "Convert solar ↔ lunar and show details (Enter)",
-  "Ngày dương: 12/11/2026 · Ngày âm: thêm “âm” hoặc “lunar” phía trước, tháng nhuận thêm “n” (âm 1/6n/2025)": "Solar date: 12/11/2026 · Lunar date: prefix “lunar”, add “n” for a leap month (lunar 1/6n/2025)",
-  "12/11/2026 · âm 15/8/2026": "12/11/2026 · lunar 15/8/2026", "Hiện can chi ngày trong ô lịch (khi ngày đó không có lễ / tiết khí)": "Show the day's can chi in each cell (when it has no festival / solar term)",
+  "Hôm nay": "Today", "Về hôm nay (Home)": "Back to today (Home)", "Hiện can chi ngày trong ô lịch (khi ngày đó không có lễ / tiết khí)": "Show the day's can chi in each cell (when it has no festival / solar term)",
   "Lịch tháng": "Month", "Chi tiết ngày": "Day details", "Ngày hoàng đạo": "Auspicious day", "Nghỉ lễ": "Public holiday", "Mùng 1 âm": "1st of lunar month",
   "T2": "Mon", "T3": "Tue", "T4": "Wed", "T5": "Thu", "T6": "Fri", "T7": "Sat", "CN": "Sun", "n": "L",
   "Chủ Nhật": "Sunday", "Thứ Hai": "Monday", "Thứ Ba": "Tuesday", "Thứ Tư": "Wednesday", "Thứ Năm": "Thursday", "Thứ Sáu": "Friday", "Thứ Bảy": "Saturday",
@@ -5495,7 +5486,7 @@ const DayDetail = (() => {
     const tet = nextTet(jd, l);
     const hoang = [...Array(12).keys()].filter(h => Almanac.hourGod(p.chi, h).good).map(h => `${esc(T(CanChi.CHI[h]))} <small>(${HOURS[h]}h)</small>`).join(", ");
 
-    box.innerHTML = hero(jd, s, l, add.sun) + `<div class="tags">${tags.join("")}</div>` + (add.me || "") + (add.notes || "") + DailyReads.html(jd) + (add.weather || "")
+    box.innerHTML = hero(jd, s, l, add.sun) + `<div class="tags">${tags.join("")}</div>` + (add.notes || "") + DailyReads.html(jd) + (add.weather || "") + (add.me || "")
       + `<section><h3>${esc(T("Can chi & ngũ hành"))}</h3><dl>`
       + row("Năm", na(yp)) + row("Tháng", na(mp)) + row("Ngày", na(p)) + row("Giờ đầu ngày", esc(cc(CanChi.hour(jd, 0))))
       + row("Ngũ hành ngày", esc(T(rel.rule) + " (" + T(rel.canEl) + " – " + T(rel.chiEl) + "): " + T(rel.label)))
@@ -6878,7 +6869,6 @@ const DayNotes = (() => {
   function fillSelects() {
     $("month").innerHTML = Array.from({ length: 12 }, (_, i) => `<option value="${i + 1}">${Dom.esc(I18n.lang === "en" ? new Date(2000, i, 1).toLocaleString("en", { month: "short" }) : T("Tháng {m}", { m: i + 1 }))}</option>`).join("");
     if (!$("year").options.length) $("year").innerHTML = Array.from({ length: LunarCal.MAX_YEAR - LunarCal.MIN_YEAR + 1 }, (_, i) => `<option>${LunarCal.MIN_YEAR + i}</option>`).join("");
-    $("demo").innerHTML = `<option value="">${Dom.esc(T("Thử mẫu…"))}</option>` + DEMOS.keys.map(k => `<option value="${k}">${Dom.esc(T(DEMOS.name(k)))}</option>`).join("");
   }
 
   function renderMonth(focus) {
@@ -6901,7 +6891,6 @@ const DayNotes = (() => {
     st.sel = Math.min(MAX_JD, Math.max(MIN_JD, jd));
     const s = LunarCal.jdToDate(st.sel);
     st.y = s.y; st.m = s.m;
-    $("q").classList.remove("bad");
     $("toHoro").disabled = st.sel > today;
     renderMonth(focus);
     renderDay();
@@ -6916,11 +6905,9 @@ const DayNotes = (() => {
     select(LunarCal.jdFromDate(Math.min(s.d, last), m, y));
   }
 
-  // Parses the date box; errors go to the status bar and leave the current view untouched.
+  // Parses a date string from a sample or a share link; errors go to the status bar and leave the current view untouched.
   function goText(text) {
-    $("q").value = text;
     const r = DateText.parse(text);
-    $("q").classList.toggle("bad", !!r.error);
     if (r.error) { status(() => "✖ " + T(r.error, r.params), "bad"); return false; }
     select(r.jd);
     return true;
@@ -6988,9 +6975,6 @@ const DayNotes = (() => {
   $("today").onclick = () => select(today);
   $("month").onchange = () => { st.m = +$("month").value; shiftMonth(0); };
   $("year").onchange = () => { st.y = +$("year").value; shiftMonth(0); };
-  const go = () => { if (goText($("q").value)) PhoneLayout.show(1); };
-  $("go").onclick = go;
-  $("q").onkeydown = e => { if (e.key === "Enter") { e.preventDefault(); go(); } };
   $("cc").onchange = () => { st.cc = $("cc").checked; store.set("cc", st.cc); renderMonth(); };
   $("moon").onchange = () => { st.moon = $("moon").checked; store.set("moon", st.moon); renderMonth(); };
   // Cross-tab buttons carry only the birth (date, calendar, time, gender); name / SIM number already typed in the target tab stay.
@@ -6999,7 +6983,6 @@ const DayNotes = (() => {
   $("toHoro").onclick = () => HoroApp.useBirth(selBirth());
   $("hToSim").onclick = () => SimApp.useBirth(ownerOf(HoroApp.snapshot()));
   $("sToHoro").onclick = () => HoroApp.useBirth(ownerOf(SimApp.snapshot()));
-  $("demo").onchange = e => { const k = e.target.value; e.target.value = ""; if (k) demo(k); };
   $("share").onclick = share;
   for (const box of [$("grid"), $("events"), $("history"), $("detail")]) box.addEventListener("click", e => { const b = e.target.closest("[data-jd]"); if (b) select(+b.dataset.jd, { focus: box === $("grid") }); });
   $("grid").addEventListener("keydown", onGridKey);

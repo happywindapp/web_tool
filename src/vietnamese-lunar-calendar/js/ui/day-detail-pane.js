@@ -56,7 +56,7 @@ const DayDetail = (() => {
     const tet = nextTet(jd, l);
     const hoang = [...Array(12).keys()].filter(h => Almanac.hourGod(p.chi, h).good).map(h => `${esc(T(CanChi.CHI[h]))} <small>(${HOURS[h]}h)</small>`).join(", ");
 
-    box.innerHTML = hero(jd, s, l, add.sun) + `<div class="tags">${tags.join("")}</div>` + (add.me || "") + (add.notes || "") + DailyReads.html(jd) + (add.weather || "")
+    box.innerHTML = hero(jd, s, l, add.sun) + `<div class="tags">${tags.join("")}</div>` + (add.notes || "") + DailyReads.html(jd) + (add.weather || "") + (add.me || "")
       + `<section><h3>${esc(T("Can chi & ngũ hành"))}</h3><dl>`
       + row("Năm", na(yp)) + row("Tháng", na(mp)) + row("Ngày", na(p)) + row("Giờ đầu ngày", esc(cc(CanChi.hour(jd, 0))))
       + row("Ngũ hành ngày", esc(T(rel.rule) + " (" + T(rel.canEl) + " – " + T(rel.chiEl) + "): " + T(rel.label)))

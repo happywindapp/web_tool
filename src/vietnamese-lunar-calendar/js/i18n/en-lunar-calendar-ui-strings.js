@@ -1,12 +1,9 @@
 // English UI strings of Lịch vạn niên (keys = Vietnamese source text).
 I18n.add({
   "Lịch vạn niên": "Vietnamese Lunar Calendar", "← Trang chủ": "← Home", "🔗 Chia sẻ link": "🔗 Share link", "Ngôn ngữ": "Language", "Lượt truy cập (GoatCounter, cập nhật mỗi ~10 phút)": "Visits (GoatCounter, updates every ~10 minutes)", "Tác giả:": "Author:",
-  "Chép link mở đúng ngày / lá số đang xem (dữ liệu nằm sau dấu #, không gửi lên máy chủ)": "Copy a link that opens the selected day / reading (data stays after the #, never sent to a server)",
-  "Nạp ngày mẫu rồi xem ngay": "Load a sample date and show it", "Thử mẫu…": "Try a sample…",
+  "Chép link mở đúng ngày / lá số đang xem (dữ liệu nằm sau dấu #, không gửi lên máy chủ)": "Copy a link that opens the selected day / reading (data stays after the #, never sent to a server)", "Thử mẫu…": "Try a sample…",
   "Tháng trước (PageUp)": "Previous month (PageUp)", "Tháng sau (PageDown)": "Next month (PageDown)", "Tháng dương lịch": "Solar month", "Năm dương lịch": "Solar year",
-  "Hôm nay": "Today", "Về hôm nay (Home)": "Back to today (Home)", "Xem ngày": "Show date", "Đổi ngày dương ↔ âm và xem chi tiết (Enter)": "Convert solar ↔ lunar and show details (Enter)",
-  "Ngày dương: 12/11/2026 · Ngày âm: thêm “âm” hoặc “lunar” phía trước, tháng nhuận thêm “n” (âm 1/6n/2025)": "Solar date: 12/11/2026 · Lunar date: prefix “lunar”, add “n” for a leap month (lunar 1/6n/2025)",
-  "12/11/2026 · âm 15/8/2026": "12/11/2026 · lunar 15/8/2026", "Hiện can chi ngày trong ô lịch (khi ngày đó không có lễ / tiết khí)": "Show the day's can chi in each cell (when it has no festival / solar term)",
+  "Hôm nay": "Today", "Về hôm nay (Home)": "Back to today (Home)", "Hiện can chi ngày trong ô lịch (khi ngày đó không có lễ / tiết khí)": "Show the day's can chi in each cell (when it has no festival / solar term)",
   "Lịch tháng": "Month", "Chi tiết ngày": "Day details", "Ngày hoàng đạo": "Auspicious day", "Nghỉ lễ": "Public holiday", "Mùng 1 âm": "1st of lunar month",
   "T2": "Mon", "T3": "Tue", "T4": "Wed", "T5": "Thu", "T6": "Fri", "T7": "Sat", "CN": "Sun", "n": "L",
   "Chủ Nhật": "Sunday", "Thứ Hai": "Monday", "Thứ Ba": "Tuesday", "Thứ Tư": "Wednesday", "Thứ Năm": "Thursday", "Thứ Sáu": "Friday", "Thứ Bảy": "Saturday",

@@ -3,9 +3,8 @@
   :root[data-theme="dark"] { --hd:#f87171; --sunday:#f87171; --first:#fbbf24; --hol:#fb7185; --acc-ink:#67e8f9; }
   body { grid-template-rows:auto auto 1fr auto auto; }
   .bar.monthnav { gap:4px; } .bar.monthnav #lunarRange { margin-left:6px; }
-  .cal-opts { display:contents; } #demo { order:-2; }
+  .cal-opts { display:contents; }
   .clock { margin-left:auto; font-size:20px; line-height:1; font-variant-numeric:tabular-nums; font-weight:700; color:var(--acc-ink); white-space:nowrap; }
-  #q { width:15em; } #q.bad { border-color:var(--bad); outline:1px solid var(--bad); }
   .toolbar .hint { font-size:12px; }
   @media (min-width: 901px) { .work { grid-template-columns:minmax(0, 1.15fr) minmax(0, 1fr); } }
   .scroll { overflow:auto; min-height:0; padding:10px; }
@@ -199,16 +198,15 @@
     dialog.wx-dialog { width:100vw; max-width:100vw; height:100dvh; max-height:100dvh; margin:0; border-radius:0; } .wxc-body, .wxc-bar { padding-left:8px; padding-right:8px; }
     .day .wx { font-size:9.5px; margin:4px 0 4px; } .wx-week { grid-template-columns:repeat(3, minmax(0, 1fr)); } .wx .wt, .wx .tmin, .wx .rh { display:none; } .wx .wn { width:auto; }
     .day .dot { top:4px; right:4px; width:6px; height:6px; }
-    #q { width:12em; }
     .hero .big { font-size:40px; }
     #detail dl { grid-template-columns:1fr; gap:0; } #detail dd { margin-bottom:6px; }
     #horoBar, #calBar { flex-wrap:wrap; overflow-x:visible; }
-    #calBar .main { position:static; box-shadow:none; } #calBar .sep { display:none; } #calBar #q { flex:1 1 0; width:auto; min-width:0; }
-    #calBar .cal-opts { display:flex; flex:1 1 100%; flex-wrap:nowrap; gap:6px; align-items:center; overflow-x:auto; scrollbar-width:none; } #calBar #demo { order:0; flex:none; max-width:9em; }
+    #calBar .main { position:static; box-shadow:none; }
+    #calBar .cal-opts { display:contents; } #calBar .chk { gap:4px; } #calBar button { padding:4px 8px; }
     #detail .reads-bar { flex-wrap:nowrap; } #detail .reads-tabs { flex-wrap:nowrap; overflow-x:auto; scrollbar-width:none; min-width:0; } #detail .reads-tabs > * { flex:none; padding:4px 8px; }
     .clock { font-size:16px; }
     .hero { grid-template-columns:1fr 1fr; } .hero .clock-side { grid-column:1 / -1; } .aclock { width:min(200px, 70%); } .bar.monthnav #lunarRange { display:none; }
-    #calBar .cal-opts > * { flex:none; } #calBar #wxPlace { max-width:10em; }
+    #calBar #wxPlace { max-width:6.5em; } #calBar .chk { padding-right:2px; }
     body.tab-horo { height:auto; min-height:100dvh; }
     body.tab-horo #horoWork { flex:none; height:85dvh; }
     #horoBar .main { position:static; box-shadow:none; }
