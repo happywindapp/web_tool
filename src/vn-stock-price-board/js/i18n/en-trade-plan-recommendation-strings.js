@@ -10,6 +10,7 @@ I18n.add({
   "Xu hướng chưa ủng hộ (đi ngang / giảm, có thể quá bán) — đứng ngoài, chờ tín hiệu đảo chiều rõ ràng.": "The trend is not supportive (sideways / down, maybe oversold) — stay out and wait for a clear reversal.",
   "Xu hướng tuần giảm, khung ngày chỉ đang hồi kỹ thuật — tận dụng nhịp hồi để bán / hạ tỷ trọng, không mua mới.": "The weekly trend is down and the daily chart is only bouncing — use the bounce to sell / reduce, no new buys.",
   "Xu hướng tuần và ngày cùng giảm — ưu tiên bán / hạ tỷ trọng, chưa bắt đáy.": "Weekly and daily trends are both down — prefer selling / reducing, don't try to catch the bottom.",
+  "Chưa nên mua mới — chỉ mua lại khi có tín hiệu đảo chiều ở các điều kiện dưới đây.": "No new buys for now — only buy back once one of the reversal conditions below appears.",
   "Vùng mua hôm nay {a} – {b}; đặt lệnh giới hạn (LO) gần {a} thay vì mua đuổi.": "Today's buy zone {a} – {b}; place a limit order near {a} instead of chasing.",
   "Trung hạn: mua dần khi giá về {a} – {b} (hỗ trợ khung tuần) và có nến rút chân / MACD ngày cắt lên.": "Medium term: buy gradually when price reaches {a} – {b} (weekly support) with a long lower wick / daily MACD crossing up.",
   "Mua theo đà khi giá đóng cửa vượt {r} (đỉnh 20 phiên) với khối lượng > trung bình 20 phiên.": "Momentum buy when price closes above {r} (20-session high) on volume above the 20-session average.",

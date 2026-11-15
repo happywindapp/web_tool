@@ -35,8 +35,7 @@ thanh chỉ số, tab sàn/rổ, danh mục ★, pane chi tiết (sổ lệnh, c
 - **`?demo=`**: `banks` · `brokers` · `realestate` · `materials` · `energy` · `consumer` · `broken` (có token sai `12`, `VN-30` + mã không tồn tại `XYZ`, `NOTREAL1` ⇒ footer báo lỗi). Mẫu thay danh mục, giữ bản cũ cho `↶ Khôi phục danh mục trước`.
 - **Link chia sẻ** `#pako:` payload `{ tab, watch: [mã], opts: { rate, unit, hl, fr, compact }, sort: { key, dir }, sym, chart: { range, interval, type, scale, volume, compare, ind: [{ id, p }] }, dtab, fin: { kind, period } }`; `?data=VNM,FPT` = danh mục thô (đi lên server, chỉ dùng cho dữ liệu ngắn).
   Payload không tin cậy: mã phải khớp `^[A-Z0-9]{3,10}$` (tối đa 300), tab/sort/option chỉ nhận giá trị đã biết. Link hỏng ⇒ báo lỗi, giữ danh mục.
-- **localStorage** (`web_tool.vn-stock-price-board.*`): `watch`, `watchBackup`, `lists`, `opts`, `tab`, `theme`, `universe`, `chart`, `dtab`, `fin`, `scr`, `alerts`, `notes`, `market.*`. sessionStorage `…spark` = điểm sparkline chỉ số trong ngày.
-- **CSV**: `bang-gia-<tab>-<yyyymmdd>.csv` (EN `price-board-…`), UTF-8 BOM, cột = cột đang hiện.
+- **localStorage** (`web_tool.vn-stock-price-board.*`): `watch`, `watchBackup`, `lists`, `opts`, `tab`, `theme`, `universe`, `chart`, `dtab`, `fin`, `scr`, `alerts`, `notes`, `market.*`.- **CSV**: `bang-gia-<tab>-<yyyymmdd>.csv` (EN `price-board-…`), UTF-8 BOM, cột = cột đang hiện.
 
 ## 4. Luật xử lý
 
@@ -75,7 +74,7 @@ thanh chỉ số, tab sàn/rổ, danh mục ★, pane chi tiết (sổ lệnh, c
 | Tài chính | KQKD / Cân đối / Lưu chuyển tiền tệ × Quý (8 quý) / Năm (8 năm), đơn vị tỷ đồng, EPS giữ đồng, rê chuột xem % so với kỳ trước | `financial_models` + `financial_statements` |
 | Sự kiện | Cổ tức, cổ phiếu thưởng, phát hành thêm, ĐHCĐ: ngày công bố, GDKHQ, ngày thực hiện | `events` (`VN` / `EN_GB`) |
 | Hồ sơ | Tên, sàn, ngày thành lập, MST, địa chỉ, điện thoại, website, email, số nhân viên, giới thiệu + 15 cổ đông lớn | `company_profiles` + `shareholders` |
-| Khuyến nghị | Giá mục tiêu TB, tiềm năng so với giá khớp, bảng đơn vị / đánh giá / giá mục tiêu | `recommendations` |
+| Khuyến nghị | **Khuyến nghị của tool** (`TradePlan` pure + `TradePlanView`): thời điểm mua/bán (8 hành động từ xu hướng tuần × ngày + RSI, điều kiện mua/bán cụ thể, giao cắt `ChartCrosses` 10 phiên gần nhất) · bảng giá mua/chốt lời/dừng lỗ/R:R cho Hôm nay (pivot + ATR ngày, kẹp sàn–trần, làm tròn bước giá HOSE/HNX/UPCOM), Trung hạn (pivot + ATR tuần), Dài hạn (biên an toàn 15% dưới giá hợp lý hoặc MA250, mục tiêu = TB giá hợp lý + đồng thuận CTCK 12 tháng) · lưu ý khác (tỷ trọng theo rủi ro 1% vốn, thanh khoản 20 phiên, biến động năm, định giá / P/E percentile, Altman, Piotroski, sát đỉnh/đáy 52 tuần, lệch khung, đồng thuận CTCK, sàn–trần + T+2). Dùng lại dữ liệu tab Kỹ thuật / Định giá nếu đã tải. Phía dưới: giá mục tiêu TB, bảng đơn vị / đánh giá / giá mục tiêu | `recommendations` + dchart + finfo định giá |
 
 - Mẫu BCTC tự chọn theo mã: trong các mẫu cùng loại lấy mẫu có `note` thông tư (doanh nghiệp 1/2/3, ngân hàng 101/102/103, chứng khoán 89/90/91, bảo hiểm 411/412/413).
 - Đổi mã ⇒ bỏ kết quả của mã cũ (`seq`); đổi ngôn ngữ ⇒ vẽ lại từ bộ nhớ, riêng Sự kiện tải lại theo locale. Tab đang mở + tuỳ chọn BCTC nằm trong link chia sẻ (`dtab`, `fin`) và localStorage (`dtab`, `fin`).
@@ -154,7 +153,19 @@ Dựa trên quy tắc + thống kê lịch sử của chính mã (không dùng A
 - Điểm cần lưu ý tự dò trong khoảng đang xem (tối đa 80, mới nhất): đỉnh / đáy (cực trị trong cửa sổ ±k nến, k = n/40 kẹp 3–12, nổi bật ≥ 2 ATR), cao nhất / thấp nhất của khoảng,
   MA ngắn nhất cắt MA dài nhất trong các SMA/EMA/WMA đang bật (giao cắt vàng / tử thần), MACD cắt tín hiệu, RSI vào > 70 / < 30, đóng cửa ngoài dải Bollinger, KL ≥ 2,5× TB20.
   Điểm chính (đỉnh, đáy, cao/thấp nhất, giao cắt MA) = mũi tên + chữ; tín hiệu phụ = chấm nhỏ. Rê tới nến có dấu → hộp giải thích. Chart gọn trong pane chi tiết không vẽ dấu.
+- Toolbar Full chart: **+ Chỉ báo…** đứng đầu hàng (điện thoại: panel `position:fixed` ngay dưới nút, rộng hết màn hình, vì toolbar cuộn ngang sẽ cắt panel); khoảng thời gian (1 tuần … Tất cả) và khung nến (5m … 1M) là 2 select dùng chung `timeSels` với toolbar mini, khung nến không hợp với khoảng thì bị disable.
 - Mở Full chart từ tab bất kỳ luôn tải dữ liệu (trước đây mở từ tab khác "Kỹ thuật" có thể báo không có dữ liệu).
+
+### Thẻ chỉ số (VNINDEX · VN30 · HNX · UPCOM)
+
+- Dòng 1: điểm, ±, % (VPS `getlistindexdetail`). Dòng 2: GT (tỷ) · KL · NN ròng (VNDirect `foreigns?q=code:<INDEX>` phiên gần nhất, tooltip ghi ngày).
+- Chart `IndexCardSvg` (pure, `js/model/index-intraday-card-svg.js`): 2 phiên gần nhất nến 1 phút dchart — phiên trước xám, phiên mới xanh/đỏ quanh tham chiếu (clip-path), đường tham chiếu vàng nét đứt, cột KL 5 phút, trục 09:30 · 11:30 · ngày · 11:30 · 14:30; rê chuột = Thời gian · Chỉ số · Khối lượng. Phiên hôm nay nối thêm điểm live từ VPS.
+- `IndexData` (`js/data/index-intraday-and-foreign-loader.js`): tải nến 1 phút mỗi 60 s khi đang giao dịch / 10 phút ngoài giờ, khối ngoại mỗi 30 phút.
+- Dòng cuối: ⤒ trần · ↑ tăng · — đứng · ↓ giảm · ⤓ sàn + trạng thái phiên. Trần/sàn không có trong feed chỉ số ⇒ đếm từ bảng giá khi tab đang mở đúng rổ (HOSE→VNINDEX, VN30, HNX, UPCOM; tab Thị trường/Bộ lọc → 3 sàn), giữ số gần nhất, chưa có thì "–".
+
+### Full chart của chỉ số
+
+- Bấm (hoặc Enter) thẻ VNINDEX / VN30 / HNX / UPCOM ở dải chỉ số ⇒ `ChartCtl.openDialog(code)` mở Full chart của chỉ số đó (dchart dùng đúng các mã này); header lấy giá trị + thay đổi từ `IndexStrip.find`. Đóng dialog ⇒ quay lại mã đang chọn (`home`), mini chart vẽ lại mã đó.
 
 ### Menu "+ Chỉ báo…" và hướng dẫn chỉ báo (`IndGuide`, `IND_GUIDE`, `IndIllus`)
 

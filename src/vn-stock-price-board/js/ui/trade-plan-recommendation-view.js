@@ -18,7 +18,8 @@ const TradePlanView = (() => {
 
   function timingHtml(t, D, W, today, med, sigs) {
     const buyWhen = [
-      today && T("Vùng mua hôm nay {a} – {b}; đặt lệnh giới hạn (LO) gần {a} thay vì mua đuổi.", { a: f2(today.lo), b: f2(today.hi) }),
+      t.tone === "down" ? T("Chưa nên mua mới — chỉ mua lại khi có tín hiệu đảo chiều ở các điều kiện dưới đây.")
+        : today && T("Vùng mua hôm nay {a} – {b}; đặt lệnh giới hạn (LO) gần {a} thay vì mua đuổi.", { a: f2(today.lo), b: f2(today.hi) }),
       med && T("Trung hạn: mua dần khi giá về {a} – {b} (hỗ trợ khung tuần) và có nến rút chân / MACD ngày cắt lên.", { a: f2(med.lo), b: f2(med.hi) }),
       Number.isFinite(D.resistance) && T("Mua theo đà khi giá đóng cửa vượt {r} (đỉnh 20 phiên) với khối lượng > trung bình 20 phiên.", { r: f2(D.resistance) }),
     ].filter(Boolean);

@@ -1,4 +1,4 @@
-// Pure SVG strings: intraday price + volume chart from trades, and index sparklines. Colours come from CSS classes.
+// Pure SVG strings: intraday price + volume chart from trades. Colours come from CSS classes.
 const ChartSvg = (() => {
   const toMin = t => { const m = /^(\d{1,2}):(\d{2})/.exec(t); return m ? +m[1] * 60 + +m[2] : -1; };
   // Session axis 09:00–11:30 + 13:00–15:00 with the lunch break cut out (270 minutes).
@@ -39,17 +39,5 @@ const ChartSvg = (() => {
       + lbl(hi, "") + (q.ref > lo && q.ref < hi ? lbl(q.ref, "ref") : "") + lbl(lo, "") + `</svg>`;
   }
 
-  // Index sparkline: points [{ m: minute of day, v }] against the previous close.
-  function spark(points, ref, w = 120, h = 34) {
-    const vs = points.map(p => p.v).concat(ref);
-    let lo = Math.min(...vs), hi = Math.max(...vs);
-    if (hi - lo < 1e-9) { hi += 1; lo -= 1; }
-    const x = m => r1(axis(m) / SPAN * w), y = v => r1(2 + (hi - v) / (hi - lo) * (h - 4));
-    const last = points.length ? points[points.length - 1].v : ref, tone = last > ref ? "up" : last < ref ? "down" : "ref";
-    const d = points.map((p, i) => `${i ? "L" : "M"}${x(p.m)},${y(p.v)}`).join("");
-    return `<svg viewBox="0 0 ${w} ${h}" class="spark" preserveAspectRatio="none"><line x1="0" x2="${w}" y1="${y(ref)}" y2="${y(ref)}" class="refline"/>`
-      + (d ? `<path d="${d}" class="pl ${tone}"/>` : "") + `</svg>`;
-  }
-
-  return { minuteBars, intraday, spark, toMin };
+  return { minuteBars, intraday, toMin };
 })();

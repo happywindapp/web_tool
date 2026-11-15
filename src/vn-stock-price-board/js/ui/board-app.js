@@ -61,7 +61,7 @@ const Board = (() => {
       if (gen !== S.gen || seq !== S.seq) return;
       Object.assign(S, { quotes: new Map(qs.map(q => [q.sym, q])), at: new Date(), error: false, loading: false });
       S.missing = S.tab === "watch" ? S.syms.filter(s => !S.quotes.has(s)) : [];
-      IndexStrip.render(idx);
+      IndexStrip.render(idx, { tab: S.tab, quotes: S.quotes });
       checkAlerts(S.quotes);
       const first = BoardCols.sortQuotes(visibleQuotes(), BoardView.getSort().key, BoardView.getSort().dir)[0];
       if (S.quotes.has(S.sel) && !S.trades) select(S.sel, false);

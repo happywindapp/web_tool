@@ -98,13 +98,21 @@
   footer.status button { padding:1px 8px; font-size:12px; }
 
   .indices { display:flex; gap:8px; padding:8px 16px; overflow-x:auto; border-bottom:1px solid var(--line); scrollbar-width:thin; }
-  .ix { flex:1 0 190px; max-width:300px; display:grid; gap:1px; padding:5px 10px; background:var(--panel); border:1px solid var(--line); border-radius:8px; font-variant-numeric:tabular-nums; }
+  .ix { flex:1 0 270px; max-width:440px; display:grid; gap:2px; padding:6px 10px 5px; background:var(--panel); border:1px solid var(--line); border-radius:8px; font-variant-numeric:tabular-nums; }
   .ix.empty { color:var(--muted); }
-  .ix-h { display:flex; justify-content:space-between; gap:8px; } .ix-v { font-weight:700; }
+  .ix[data-ix] { cursor:pointer; } .ix[data-ix]:focus-visible { outline:2px solid var(--acc); }
+  @media (hover:hover) { .ix[data-ix]:hover { border-color:var(--acc); } }
+  .ix-h { display:flex; align-items:baseline; gap:8px; white-space:nowrap; } .ix-h > b { font-size:14px; } .ix-go { color:var(--muted); font-size:11px; }
+  .ix-v { font-size:14px; font-weight:700; } .ix-c { font-size:12.5px; font-weight:600; }
   .ix.up :is(.ix-v, .ix-c) { color:var(--up); } .ix.down :is(.ix-v, .ix-c) { color:var(--down); } .ix.ref :is(.ix-v, .ix-c) { color:var(--ref); }
-  .ix-c { font-size:12.5px; text-align:right; }
-  .ix-f { display:flex; justify-content:space-between; gap:6px; font-size:11.5px; color:var(--muted); } .ix-f i { font-style:normal; }
-  .spark { display:block; width:100%; height:34px; }
+  .ix-m { display:flex; flex-wrap:wrap; gap:0 12px; font-size:12px; color:var(--ink); } .ix-m .up { color:var(--up); } .ix-m .down { color:var(--down); }
+  .ixw { position:relative; } .ixc { display:block; width:100%; height:auto; overflow:visible; }
+  .ixc .pl { stroke-width:1.3; } .ixc .pl.prev { stroke:var(--muted); opacity:.8; } .ixc .vb rect { fill:var(--muted); opacity:.45; } .ixc .sep { stroke:var(--line); }
+  .ixc .ax text { fill:var(--muted); font-size:9px; } .ixh line { stroke:var(--muted); stroke-dasharray:2 2; vector-effect:non-scaling-stroke; } .ixh circle { fill:var(--ink); }
+  .ixtip { position:absolute; top:0; z-index:2; display:grid; grid-template-columns:auto auto; gap:1px 10px; padding:4px 8px; border:1px solid var(--line); border-radius:6px;
+           background:var(--panel); box-shadow:0 3px 10px rgb(0 0 0 / .25); font-size:11px; white-space:nowrap; pointer-events:none; }
+  .ixtip[hidden] { display:none; } .ixtip span { color:var(--muted); } .ixtip b { text-align:right; }
+  .ix-f { display:flex; justify-content:space-between; gap:6px; font-size:11.5px; color:var(--muted); } .ix-f i { font-style:normal; font-weight:600; }
   .pl { fill:none; stroke-width:1.6; vector-effect:non-scaling-stroke; } .pl.up { stroke:var(--up); } .pl.down { stroke:var(--down); } .pl.ref { stroke:var(--ref); }
   .refline { stroke:var(--ref); stroke-width:1; stroke-dasharray:3 3; opacity:.7; vector-effect:non-scaling-stroke; }
 
@@ -159,13 +167,13 @@
   @media (max-height: 600px) and (min-width: 641px) { body { height:auto; min-height:100dvh; } .work { grid-template-rows:85dvh; } }
   @media (max-height: 600px) and (min-width: 641px) and (max-width: 900px) { .work { grid-template-rows:85dvh 85dvh; } }
   @media (max-width: 640px) {
-    .indices { gap:6px; padding:6px 12px; } .ix { flex:0 0 150px; padding:4px 8px; } .spark { height:26px; }
+    .indices { gap:6px; padding:6px 12px; } .ix { flex:0 0 250px; padding:4px 8px; }
     .toolbar #q { width:8.5em; }
     button.star { min-height:0; }
     .board td, .board th { padding:3px 6px; }
     footer.status { max-height:12dvh; overflow-y:auto; padding:4px 12px; }
   }
-  @media (max-width: 640px) and (max-height: 700px) { .spark, .ix-f { display:none; } }
+  @media (max-width: 640px) and (max-height: 700px) { .ixw, .ix-f { display:none; } }
   /* Technical chart: compact chart in the detail pane + near full-screen dialog. */
   .mini-chart { border-top:1px solid var(--line); padding:6px 0 4px; }
   .cbar { display:flex; flex-wrap:wrap; gap:6px; align-items:center; padding:0 12px 6px; }
@@ -942,6 +950,9 @@ I18n.add({
   "Bật / tắt chỉ báo kỹ thuật": "Show / hide technical indicators",
   "Nhiều khung chỉ báo: lăn chuột trên khung chỉ báo hoặc vuốt dọc để cuộn xem hết.": "Many indicator panes: use the wheel over an indicator pane or swipe up / down to scroll through them.",
   "Chỉ báo quan trọng, dùng phổ biến nhất": "Key indicators, the most widely used",
+  "Mở biểu đồ kỹ thuật toàn màn hình của {s}": "Open the full-screen technical chart of {s}",
+  "GT {v} tỷ": "Val {v} bn", "KL {v}": "Vol {v}", "NN ròng {v} tỷ": "Foreign net {v} bn", "Khối ngoại mua − bán ròng phiên {d}": "Foreign net buying (buy − sell) on {d}",
+  "Trần · tăng · đứng giá · giảm · sàn": "Ceiling · up · unchanged · down · floor", "Thời gian": "Time", "Chỉ số": "Index",
   "Đánh dấu Đỉnh / Đáy": "Mark peaks / troughs", "Hiện / ẩn nhãn Đỉnh, Đáy trên biểu đồ giá": "Show / hide peak and trough labels on the price chart",
 });
 // English for the indicator guide (IND_GUIDE in js/ui/indicator-guide-content.js), keyed by the Vietnamese source text.
@@ -1182,6 +1193,7 @@ I18n.add({
   "Xu hướng chưa ủng hộ (đi ngang / giảm, có thể quá bán) — đứng ngoài, chờ tín hiệu đảo chiều rõ ràng.": "The trend is not supportive (sideways / down, maybe oversold) — stay out and wait for a clear reversal.",
   "Xu hướng tuần giảm, khung ngày chỉ đang hồi kỹ thuật — tận dụng nhịp hồi để bán / hạ tỷ trọng, không mua mới.": "The weekly trend is down and the daily chart is only bouncing — use the bounce to sell / reduce, no new buys.",
   "Xu hướng tuần và ngày cùng giảm — ưu tiên bán / hạ tỷ trọng, chưa bắt đáy.": "Weekly and daily trends are both down — prefer selling / reducing, don't try to catch the bottom.",
+  "Chưa nên mua mới — chỉ mua lại khi có tín hiệu đảo chiều ở các điều kiện dưới đây.": "No new buys for now — only buy back once one of the reversal conditions below appears.",
   "Vùng mua hôm nay {a} – {b}; đặt lệnh giới hạn (LO) gần {a} thay vì mua đuổi.": "Today's buy zone {a} – {b}; place a limit order near {a} instead of chasing.",
   "Trung hạn: mua dần khi giá về {a} – {b} (hỗ trợ khung tuần) và có nến rút chân / MACD ngày cắt lên.": "Medium term: buy gradually when price reaches {a} – {b} (weekly support) with a long lower wick / daily MACD crossing up.",
   "Mua theo đà khi giá đóng cửa vượt {r} (đỉnh 20 phiên) với khối lượng > trung bình 20 phiên.": "Momentum buy when price closes above {r} (20-session high) on volume above the 20-session average.",
@@ -1577,7 +1589,7 @@ const BoardCols = (() => {
 
   return { COLS, visible, rowCells, sortQuotes };
 })();
-// Pure SVG strings: intraday price + volume chart from trades, and index sparklines. Colours come from CSS classes.
+// Pure SVG strings: intraday price + volume chart from trades. Colours come from CSS classes.
 const ChartSvg = (() => {
   const toMin = t => { const m = /^(\d{1,2}):(\d{2})/.exec(t); return m ? +m[1] * 60 + +m[2] : -1; };
   // Session axis 09:00–11:30 + 13:00–15:00 with the lunch break cut out (270 minutes).
@@ -1618,19 +1630,55 @@ const ChartSvg = (() => {
       + lbl(hi, "") + (q.ref > lo && q.ref < hi ? lbl(q.ref, "ref") : "") + lbl(lo, "") + `</svg>`;
   }
 
-  // Index sparkline: points [{ m: minute of day, v }] against the previous close.
-  function spark(points, ref, w = 120, h = 34) {
-    const vs = points.map(p => p.v).concat(ref);
-    let lo = Math.min(...vs), hi = Math.max(...vs);
-    if (hi - lo < 1e-9) { hi += 1; lo -= 1; }
-    const x = m => r1(axis(m) / SPAN * w), y = v => r1(2 + (hi - v) / (hi - lo) * (h - 4));
-    const last = points.length ? points[points.length - 1].v : ref, tone = last > ref ? "up" : last < ref ? "down" : "ref";
-    const d = points.map((p, i) => `${i ? "L" : "M"}${x(p.m)},${y(p.v)}`).join("");
-    return `<svg viewBox="0 0 ${w} ${h}" class="spark" preserveAspectRatio="none"><line x1="0" x2="${w}" y1="${y(ref)}" y2="${y(ref)}" class="refline"/>`
-      + (d ? `<path d="${d}" class="pl ${tone}"/>` : "") + `</svg>`;
+  return { minuteBars, intraday, toMin };
+})();
+// Pure SVG for an index card: the last two sessions of 1-minute bars (previous session grey, latest green / red against its reference),
+// 5-minute volume bars and a time axis. Lunch break is cut out (09:00–11:30 + 13:00–15:00 = 270 minutes per session).
+const IndexCardSvg = (() => {
+  const W = 300, H = 76, PT = 4, PH = 42, VH = 12, SPAN = 270;
+  const axis = m => Math.max(0, Math.min(SPAN, m <= 690 ? m - 540 : 150 + Math.max(0, m - 780)));
+  const r1 = n => Math.round(n * 10) / 10;
+  const vnDay = t => Math.floor((t + 25200) / 86400), vnMin = t => Math.floor((t + 25200) % 86400 / 60);
+  const hm = m => `${String(Math.floor(m / 60)).padStart(2, "0")}:${String(m % 60).padStart(2, "0")}`;
+
+  // dchart minute bars (unix s) → [{ day, pts: [{ t, m, v, vol }] }] for the last n trading days.
+  function sessions(bars, n = 2) {
+    const by = new Map();
+    for (const b of bars || []) {
+      const m = vnMin(b.time), d = vnDay(b.time);
+      if (m < 540 || m > 900 || !(b.close > 0)) continue;
+      (by.get(d) || by.set(d, []).get(d)).push({ t: b.time, m, v: b.close, vol: b.volume || 0 });
+    }
+    return [...by.entries()].sort((a, b) => a[0] - b[0]).slice(-n).map(([day, pts]) => ({ day, pts }));
   }
 
-  return { minuteBars, intraday, spark, toMin };
+  // ref: reference of the latest session; id: unique per card (clip-path ids). Returns { svg, pts } — pts carry x / y for the hover readout.
+  function chart(ss, ref, id) {
+    const all = ss.flatMap(s => s.pts);
+    if (!all.length) return { svg: `<svg viewBox="0 0 ${W} ${H}" class="ixc"></svg>`, pts: [] };
+    const hasRef = Number.isFinite(ref) && ref > 0, vals = all.map(p => p.v).concat(hasRef ? ref : []);
+    let lo = Math.min(...vals), hi = Math.max(...vals);
+    if (hi - lo < 1e-9) { hi += 1; lo -= 1; }
+    const sw = W / ss.length, x = (k, m) => r1(k * sw + axis(m) / SPAN * sw), y = v => r1(PT + (hi - v) / (hi - lo) * PH), last = ss.length - 1;
+    const pts = ss.flatMap((s, k) => s.pts.map(p => ({ ...p, day: s.day, x: x(k, p.m), y: y(p.v) })));
+    const path = k => pts.filter(p => p.day === ss[k].day).map((p, i) => `${i ? "L" : "M"}${p.x},${p.y}`).join("");
+    const ry = hasRef ? y(ref) : null, vb = PT + PH + 3 + VH;
+    const lines = ss.map((s, k) => k < last ? `<path d="${path(k)}" class="pl prev"/>`
+      : hasRef ? `<path d="${path(k)}" class="pl up" clip-path="url(#${id}a)"/><path d="${path(k)}" class="pl down" clip-path="url(#${id}b)"/>` : `<path d="${path(k)}" class="pl ref"/>`).join("");
+    const buckets = new Map();
+    ss.forEach((s, k) => s.pts.forEach(p => { const key = k * 100 + Math.floor(axis(p.m) / 5); buckets.set(key, (buckets.get(key) || 0) + p.vol); }));
+    const vmax = Math.max(1, ...buckets.values()), bw = r1(sw / (SPAN / 5) * 0.7);
+    const vols = [...buckets].map(([key, v]) => { const k = Math.floor(key / 100), h = r1(v / vmax * VH); return `<rect x="${r1(k * sw + (key % 100) * 5 / SPAN * sw)}" y="${r1(vb - h)}" width="${bw}" height="${h}"/>`; }).join("");
+    const lbl = (px, text, anchor = "middle") => `<text x="${px}" y="${H - 2}" text-anchor="${anchor}">${text}</text>`;
+    const ticks = ss.map((s, k) => (k ? lbl(x(k, 540) + 2, new Date(s.day * 864e5).getUTCDate(), "start") + `<line x1="${x(k, 540)}" x2="${x(k, 540)}" y1="${PT}" y2="${vb}" class="sep"/>` : lbl(x(k, 570), "09:30"))
+      + lbl(x(k, 690), "11:30") + (ss.length === 1 ? lbl(x(k, 780), "13:00") : "") + (k === last ? lbl(W - 1, "14:30", "end") : "")).join("");
+    const clips = hasRef ? `<defs><clipPath id="${id}a"><rect x="0" y="0" width="${W}" height="${ry}"/></clipPath><clipPath id="${id}b"><rect x="0" y="${ry}" width="${W}" height="${H}"/></clipPath></defs>` : "";
+    return { pts, svg: `<svg viewBox="0 0 ${W} ${H}" class="ixc">${clips}<g class="vb">${vols}</g>`
+      + (hasRef ? `<line x1="0" x2="${W}" y1="${ry}" y2="${ry}" class="refline"/>` : "") + lines + `<g class="ax">${ticks}</g>`
+      + `<g class="ixh" visibility="hidden"><line y1="${PT}" y2="${vb}"/><circle r="2.5"/></g></svg>` };
+  }
+
+  return { sessions, chart, vnDay, hm, W };
 })();
 // Chart ranges × candle intervals: which combos the feed can serve, fetch window, week/month resampling and Heikin-Ashi.
 const ChartRange = (() => {
@@ -2916,6 +2964,31 @@ const Finfo = (() => {
 
   return { ratios, news, events, profile, shareholders, recommendations, models, values, items, ratioHistory, foreigns, dividends, industries, ratiosBulk };
 })();
+// Index card extras on their own slower clock: last sessions of 1-minute bars (VNDirect dchart) and the latest foreign net value (VNDirect finfo).
+const IndexData = (() => {
+  const st = {}, busy = new Set();
+  const due = (at, ms) => !at || Date.now() - at >= ms;
+
+  // names: VNINDEX / VN30 / HNX / UPCOM; done() runs after any part arrives so the strip can redraw.
+  function refresh(names, done) {
+    const live = QuoteModel.isLive(QuoteModel.phase()) || QuoteModel.phase() === "break", now = Math.floor(Date.now() / 1000), from = (Math.floor(now / 86400) - 8) * 86400;
+    for (const n of names) {
+      const s = st[n] ||= {};
+      if (!busy.has(n) && due(s.at, live ? 60e3 : 600e3)) {
+        busy.add(n); s.at = Date.now();
+        History.load(n, "1", from, now).then(b => { s.ss = IndexCardSvg.sessions(b); done(); })
+          .catch(err => console.warn("IndexData.refresh - get index minute bars fail", n, err)).finally(() => busy.delete(n));
+      }
+      if (due(s.fat, 30 * 60e3)) {
+        s.fat = Date.now();
+        Finfo.foreigns(n, 1).then(r => { const x = r && r[0]; s.fx = x && Number.isFinite(+x.netVal) ? { net: +x.netVal, date: String(x.tradingDate || "") } : null; done(); })
+          .catch(err => console.warn("IndexData.refresh - get index foreign flow fail", n, err));
+      }
+    }
+  }
+
+  return { refresh, get: n => st[n] || {} };
+})();
 // Whole-market data for the market / screener / sector tabs: listed tickers, ICB sectors, bulk valuation ratios (cached per Vietnam date).
 const Market = (() => {
   const KEY = "web_tool.vn-stock-price-board.market.", RATIOS = ["MARKETCAP", "PRICE_TO_EARNINGS", "PRICE_TO_BOOK", "ROAE_TR_AVG5Q", "DIVIDEND_YIELD"];
@@ -3196,42 +3269,88 @@ const BoardView = (() => {
 
   return { init, render, message, select, refreshStars, order, getSort: () => ({ ...sort }), setSort: s => { sort = s; } };
 })();
-// Index cards (VNINDEX, VN30, HNX, UPCOM): value, change, breadth and a sparkline built from the polls seen today.
+// Index cards (VNINDEX, VN30, HNX, UPCOM): value, traded value / volume / foreign net, two-session intraday chart with hover readout, breadth + phase.
 const IndexStrip = (() => {
-  const KEY = "web_tool.vn-stock-price-board.spark";
-  let el, last = [], points = load();
+  let el, last = [], hover = null;
+  const charts = {}, counts = {};
+  const e = s => Dom.esc(s ?? "");
+  const tone = v => v > 0 ? "up" : v < 0 ? "down" : "ref";
 
-  // The feed has no intraday index history → points are collected per Vietnam date while the page is open (sessionStorage).
-  function load() {
-    try { const s = JSON.parse(sessionStorage.getItem(KEY) || "null"); if (s && s.day === QuoteModel.vnDate() && s.pts) return s.pts; } catch { /* blocked */ }
-    return {};
+  // Ceiling / floor counts are not in the index feed → counted from the board when its tab holds that basket (kept until the next count).
+  function countFrom(ctx) {
+    if (!ctx || !ctx.quotes) return;
+    const qs = [...ctx.quotes.values()].filter(q => q.type === "S" && q.last), all = MarketTabs.is(ctx.tab);
+    const set = (name, list) => { counts[name] = { ceil: list.filter(q => QuoteModel.tone(q.last, q) === "ceil").length, floor: list.filter(q => QuoteModel.tone(q.last, q) === "floor").length }; };
+    if (ctx.tab === "VN30") set("VN30", qs);
+    for (const [name, ex] of [["VNINDEX", "HOSE"], ["HNX", "HNX"], ["UPCOM", "UPCOM"]]) if (all || ctx.tab === ex.toLowerCase()) set(name, qs.filter(q => q.ex === ex));
   }
-  function remember(list) {
-    for (const x of list) {
-      const m = ChartSvg.toMin(x.time), pts = points[x.code] ||= [];
-      if (m < 540 || !x.value || (pts.length && pts[pts.length - 1].m >= m)) continue;
-      pts.push({ m, v: x.value });
+
+  // Latest session = today → VPS reference + the live value appended; otherwise the previous session's close is the reference.
+  function series(x) {
+    const ss = (IndexData.get(x.name).ss || []).map(s => ({ ...s, pts: s.pts.slice() })), lastS = ss[ss.length - 1];
+    if (lastS && lastS.day === IndexCardSvg.vnDay(Date.now() / 1000)) {
+      const m = ChartSvg.toMin(x.time), tail = lastS.pts[lastS.pts.length - 1];
+      if (x.value && m > tail.m && m <= 900) lastS.pts.push({ t: tail.t + (m - tail.m) * 60, m, v: x.value, vol: 0 });
+      return { ss, ref: x.ref };
     }
-    try { sessionStorage.setItem(KEY, JSON.stringify({ day: QuoteModel.vnDate(), pts: points })); } catch { /* blocked */ }
+    return { ss, ref: ss.length > 1 ? ss[ss.length - 2].pts[ss[ss.length - 2].pts.length - 1].v : x.ref };
   }
-
-  const tone = x => x.chg > 0 ? "up" : x.chg < 0 ? "down" : "ref";
 
   function card(x) {
-    const pts = points[x.code] || [];
-    const sp = ChartSvg.spark(pts.length > 1 ? pts : [{ m: 540, v: x.ref }, { m: Math.max(541, ChartSvg.toMin(x.time)), v: x.value }], x.ref);
-    return `<div class="ix ${tone(x)}"><div class="ix-h"><b>${Dom.esc(x.name)}</b><span class="ix-v">${Fmt.en(x.value, 2)}</span></div>`
-      + `<div class="ix-c">${Fmt.signed(x.chg)} (${Fmt.signed(x.pct)}%)</div>${sp}`
-      + `<div class="ix-f"><span>${Dom.esc(T("{v} tỷ", { v: Fmt.en(x.valueMil / 1000) }))}</span>`
-      + `<span class="br" title="${Dom.esc(T("Số mã tăng / đứng giá / giảm"))}"><i class="up">▲${x.up}</i> <i class="ref">■${x.same}</i> <i class="down">▼${x.down}</i></span></div></div>`;
+    const { ss, ref } = series(x), c = IndexCardSvg.chart(ss, ref, "ixg" + x.code), fx = IndexData.get(x.name).fx, cf = counts[x.name], n = v => cf ? String(v) : "–";
+    charts[x.name] = c.pts;
+    const gt = T("GT {v} tỷ", { v: Fmt.en(x.valueMil / 1000, 0) }), kl = T("KL {v}", { v: Fmt.big(x.vol) || "0" });
+    const nn = fx ? T("NN ròng {v} tỷ", { v: Fmt.signed(fx.net / 1e9, 0) }) : "", nnTip = fx ? T("Khối ngoại mua − bán ròng phiên {d}", { d: fx.date.split("-").reverse().join("/") }) : "";
+    const open = T("Mở biểu đồ kỹ thuật toàn màn hình của {s}", { s: x.name }), ph = Controls.phaseLabel();
+    return `<div class="ix ${tone(x.chg)}" data-ix="${e(x.name)}" role="button" tabindex="0" title="${e(open)}">`
+      + `<div class="ix-h"><b>${e(x.name)} <span class="ix-go">▸</span></b><span class="ix-v">${Fmt.en(x.value, 2)}</span><span class="ix-c">${Fmt.signed(x.chg)} ${Fmt.signed(x.pct)}%</span></div>`
+      + `<div class="ix-m"><span>${e(gt)}</span><span>${e(kl)}</span>${fx ? `<span class="${tone(fx.net)}" title="${e(nnTip)}">${e(nn)}</span>` : ""}</div>`
+      + `<div class="ixw">${c.svg}<div class="ixtip" hidden></div></div>`
+      + `<div class="ix-f"><span class="br" title="${e(T("Trần · tăng · đứng giá · giảm · sàn"))}"><i class="ceil">⤒${n(cf?.ceil)}</i> <i class="up">↑${x.up}</i> <i class="ref">—${x.same}</i> <i class="down">↓${x.down}</i> <i class="floor">⤓${n(cf?.floor)}</i></span><span>${e(ph)}</span></div></div>`;
   }
 
-  function render(list) {
-    if (list) { last = list; remember(list); }
-    el.innerHTML = last.length ? last.map(card).join("") : `<div class="ix empty">${Dom.esc(T("Đang tải chỉ số…"))}</div>`;
+  function render(list, ctx) {
+    if (list) { last = list; countFrom(ctx); IndexData.refresh(list.map(x => x.name), () => render()); }
+    el.innerHTML = last.length ? last.map(card).join("") : `<div class="ix empty">${e(T("Đang tải chỉ số…"))}</div>`;
+    if (hover) show(hover.name, hover.fx);
   }
 
-  return { init: node => { el = node; render(); }, render };
+  // Hover readout: nearest minute to the pointer → crosshair + time · value · volume box.
+  function show(name, fx) {
+    const w = el.querySelector(`.ix[data-ix="${name}"] .ixw`), pts = charts[name];
+    if (!w || !pts || !pts.length) return;
+    const x = fx * IndexCardSvg.W, p = pts.reduce((a, b) => Math.abs(b.x - x) < Math.abs(a.x - x) ? b : a), g = w.querySelector(".ixh"), tip = w.querySelector(".ixtip");
+    g.setAttribute("visibility", "visible"); g.querySelector("line").setAttribute("x1", p.x); g.querySelector("line").setAttribute("x2", p.x);
+    g.querySelector("circle").setAttribute("cx", p.x); g.querySelector("circle").setAttribute("cy", p.y);
+    const d = new Date(p.day * 864e5), date = `${String(d.getUTCDate()).padStart(2, "0")}/${String(d.getUTCMonth() + 1).padStart(2, "0")}`;
+    tip.innerHTML = `<span>${e(T("Thời gian"))}</span><b>${IndexCardSvg.hm(p.m)}, ${date}</b><span>${e(T("Chỉ số"))}</span><b>${Fmt.en(p.v, 2)}</b><span>${e(T("Khối lượng"))}</span><b>${Fmt.big(p.vol) || "0"}</b>`;
+    tip.hidden = false;
+    const left = p.x / IndexCardSvg.W * w.clientWidth;
+    tip.style.left = `${left > w.clientWidth / 2 ? Math.max(0, left - tip.offsetWidth - 8) : left + 8}px`;
+  }
+
+  // Click / Enter on a card → full chart of that index (dchart serves VNINDEX, VN30, HNX, UPCOM under these names).
+  function init(node) {
+    el = node; render();
+    const open = ev => { const c = ev.target.closest("[data-ix]"); if (c && Object.values(QuoteModel.INDEX_CODES).includes(c.dataset.ix)) ChartCtl.openDialog(c.dataset.ix); };
+    el.addEventListener("click", open);
+    el.addEventListener("keydown", ev => { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); open(ev); } });
+    el.addEventListener("pointermove", ev => {
+      const w = ev.target.closest(".ixw"), c = w && w.closest("[data-ix]");
+      if (!c || ev.pointerType === "touch") return;
+      const r = w.getBoundingClientRect();
+      hover = { name: c.dataset.ix, fx: Math.max(0, Math.min(1, (ev.clientX - r.left) / r.width)) };
+      show(hover.name, hover.fx);
+    });
+    el.addEventListener("pointerout", ev => {
+      if (!hover || (ev.relatedTarget && ev.relatedTarget.closest && ev.relatedTarget.closest(".ixw"))) return;
+      hover = null;
+      el.querySelectorAll(".ixh").forEach(g => g.setAttribute("visibility", "hidden"));
+      el.querySelectorAll(".ixtip").forEach(t => { t.hidden = true; });
+    });
+  }
+
+  return { init, render, find: name => last.find(x => x.name === name) || null };
 })();
 // Detail pane for the selected symbol: price, stats, 3-level order book, intraday chart, active buy/sell and match history.
 const DetailView = (() => {
@@ -3443,7 +3562,8 @@ const TradePlanView = (() => {
 
   function timingHtml(t, D, W, today, med, sigs) {
     const buyWhen = [
-      today && T("Vùng mua hôm nay {a} – {b}; đặt lệnh giới hạn (LO) gần {a} thay vì mua đuổi.", { a: f2(today.lo), b: f2(today.hi) }),
+      t.tone === "down" ? T("Chưa nên mua mới — chỉ mua lại khi có tín hiệu đảo chiều ở các điều kiện dưới đây.")
+        : today && T("Vùng mua hôm nay {a} – {b}; đặt lệnh giới hạn (LO) gần {a} thay vì mua đuổi.", { a: f2(today.lo), b: f2(today.hi) }),
       med && T("Trung hạn: mua dần khi giá về {a} – {b} (hỗ trợ khung tuần) và có nến rút chân / MACD ngày cắt lên.", { a: f2(med.lo), b: f2(med.hi) }),
       Number.isFinite(D.resistance) && T("Mua theo đà khi giá đóng cửa vượt {r} (đỉnh 20 phiên) với khối lượng > trung bình 20 phiên.", { r: f2(D.resistance) }),
     ].filter(Boolean);
@@ -3952,25 +4072,25 @@ const ChartBar = (() => {
   const opts = (list, v) => list.map(([k, label]) => `<option value="${k}"${k === v ? " selected" : ""}>${e(T(label))}</option>`).join("");
   const intervalOpts = s => ChartRange.INTERVALS.map(i => `<option value="${i.k}"${i.k === s.interval ? " selected" : ""}${ChartRange.valid(s.range, i.k) ? "" : " disabled"}>${i.k}</option>`).join("");
 
+  // Range + candle interval selects, shared by the compact and full toolbars.
+  const timeSels = s => `<select data-c="range" title="${e(T("Khoảng thời gian"))}">${ChartRange.RANGES.map(r => `<option value="${r.k}"${r.k === s.range ? " selected" : ""}>${e(T(r.label))}</option>`).join("")}</select>`
+    + `<select data-c="interval" title="${e(T("Khung nến"))}">${intervalOpts(s)}</select>`;
+
   function compact(s) {
-    return `<select data-c="range" title="${e(T("Khoảng thời gian"))}">${ChartRange.RANGES.map(r => `<option value="${r.k}"${r.k === s.range ? " selected" : ""}>${e(T(r.label))}</option>`).join("")}</select>`
-      + `<select data-c="interval" title="${e(T("Khung nến"))}">${intervalOpts(s)}</select>`
+    return timeSels(s)
       + `<select data-c="type" title="${e(T("Kiểu biểu đồ"))}">${opts(TYPES, s.type)}</select>`
       + `<button data-c="open" class="chart-btn" title="${e(T("Mở biểu đồ kỹ thuật toàn màn hình"))}">📊 Full</button>`;
   }
 
   function full(s, tool) {
-    const seg = (key, list, cur, ok = () => true) => `<span class="seg" role="group">${list.map(([k, label]) =>
-      `<button data-c="${key}" data-v="${k}"${k === cur ? ' class="on"' : ""}${ok(k) ? "" : " disabled"}>${Dom.esc(label)}</button>`).join("")}</span>`;
-    return seg("range", ChartRange.RANGES.map(r => [r.k, r.k === "ALL" ? T(r.label) : r.k]), s.range)
-      + seg("interval", ChartRange.INTERVALS.map(i => [i.k, i.k]), s.interval, k => ChartRange.valid(s.range, k))
+    return `<details class="indmenu"><summary title="${e(T("Bật / tắt chỉ báo kỹ thuật"))}">${e(T("+ Chỉ báo…"))}</summary><div class="indpanel">`
+      + `<span class="indnote">★ ${e(T("Chỉ báo quan trọng, dùng phổ biến nhất"))}</span><label title="${e(T("Hiện / ẩn nhãn Đỉnh, Đáy trên biểu đồ giá"))}"><input type="checkbox" data-c="peaks"${s.peaks ? " checked" : ""}> ${e(T("Đánh dấu Đỉnh / Đáy"))}</label>`
+      + `<label title="${e(T("Chấm tại chỗ các đường cắt nhau (MA, MACD, RSI 70/30, +DI/−DI…); rê chuột hoặc chạm vào chấm để xem giải thích"))}"><input type="checkbox" data-c="crosses"${s.crosses ? " checked" : ""}> <span class="xdot">●</span> ${e(T("Điểm giao cắt quan trọng"))}</label><b>${e(T("Trên biểu đồ giá"))}</b>${addOpts("main", s.ind)}<b>${e(T("Khung riêng"))}</b>${addOpts("own", s.ind)}</div></details>`
+      + timeSels(s)
       + `<select data-c="type" title="${e(T("Kiểu biểu đồ"))}">${opts(TYPES, s.type)}</select>`
       + `<select data-c="scale" title="${e(T("Thang giá"))}">${opts(SCALES, s.scale)}</select>`
       + `<label class="chk"><input type="checkbox" data-c="volume"${s.volume ? " checked" : ""}>${e(T("Khối lượng"))}</label>`
       + `<label class="chk" title="${e(T("So sánh tối đa 5 mã hoặc chỉ số, cách nhau bằng dấu phẩy (thang % thay đổi)"))}">${e(T("So sánh"))}<input type="text" class="cmpin" data-c="cmp" value="${e(s.cmp.join(", "))}" placeholder="VNINDEX, VCB…" spellcheck="false" autocomplete="off"></label>`
-      + `<details class="indmenu"><summary title="${e(T("Bật / tắt chỉ báo kỹ thuật"))}">${e(T("+ Chỉ báo…"))}</summary><div class="indpanel">`
-      + `<span class="indnote">★ ${e(T("Chỉ báo quan trọng, dùng phổ biến nhất"))}</span><label title="${e(T("Hiện / ẩn nhãn Đỉnh, Đáy trên biểu đồ giá"))}"><input type="checkbox" data-c="peaks"${s.peaks ? " checked" : ""}> ${e(T("Đánh dấu Đỉnh / Đáy"))}</label>`
-      + `<label title="${e(T("Chấm tại chỗ các đường cắt nhau (MA, MACD, RSI 70/30, +DI/−DI…); rê chuột hoặc chạm vào chấm để xem giải thích"))}"><input type="checkbox" data-c="crosses"${s.crosses ? " checked" : ""}> <span class="xdot">●</span> ${e(T("Điểm giao cắt quan trọng"))}</label><b>${e(T("Trên biểu đồ giá"))}</b>${addOpts("main", s.ind)}<b>${e(T("Khung riêng"))}</b>${addOpts("own", s.ind)}</div></details>`
       + `<span class="seg tools">${TOOLS.map(([k, icon, tip]) => `<button data-c="tool" data-v="${k}" title="${e(T(tip))}"${k === tool ? ' class="on"' : ""}>${icon}</button>`).join("")}`
       + `<button data-c="clearDraw" title="${e(T("Xoá mọi hình vẽ"))}">🗑</button></span>`
       + `<button data-c="fit" title="${e(T("Xem toàn bộ dữ liệu"))}">⤢</button>`
@@ -3996,7 +4116,7 @@ const ChartBar = (() => {
 // Technical chart controller: one shared state (Prefs "chart") for the detail-pane mini chart and the full-screen dialog.
 const ChartCtl = (() => {
   const TYPES = ["candle", "ha", "bar", "line", "area", "baseline"], SCALES = ["normal", "log", "pct"];
-  let st, sym = "", active = false, quote = null, data = { key: "", bars: [], cmp: null }, seq = 0, mini, full, dlgOpen = false, note = null;
+  let st, sym = "", active = false, quote = null, data = { key: "", bars: [], cmp: null }, seq = 0, mini, full, dlgOpen = false, note = null, home = null;
   const draw = ChartDraw.create();
 
   function clean(raw) {
@@ -4022,8 +4142,10 @@ const ChartCtl = (() => {
   }
   function head() {
     const q = quote && quote.sym === sym ? quote : null, tone = q ? QuoteModel.tone(q.last || q.ref, q) : "";
+    const ix = IndexStrip.find(sym), ixTone = ix ? (ix.chg > 0 ? "up" : ix.chg < 0 ? "down" : "ref") : "";
     $("dlgTitle").innerHTML = `<b class="${tone}">${Dom.esc(sym)}</b> <span class="muted">${Dom.esc(Universe.name(sym, I18n.lang))}</span>`
-      + (q ? ` <b class="${tone}">${Fmt.price(q.last || q.ref)}</b> <span class="${tone}">${Fmt.chg(q, q.chg)} ${Fmt.pct(q, q.pct)}</span>` : "");
+      + (q ? ` <b class="${tone}">${Fmt.price(q.last || q.ref)}</b> <span class="${tone}">${Fmt.chg(q, q.chg)} ${Fmt.pct(q, q.pct)}</span>` : "")
+      + (!q && ix ? ` <b class="${ixTone}">${Fmt.en(ix.value, 2)}</b> <span class="${ixTone}">${Fmt.signed(ix.chg)} (${Fmt.signed(ix.pct)}%)</span>` : "");
     $("dlgClose").title = T("Đóng (Esc)");
     $("fullStatus").textContent = note ? T(note.key, note.p) : draw.tool() ? T(draw.needsTwo() ? "Bấm 2 điểm trên biểu đồ." : "Bấm 1 điểm trên biểu đồ.") : T("Kéo để cuộn, lăn chuột / chụm 2 ngón để phóng to, bấm đúp trục giá để tự co giãn.")
       + (full.scrolls() ? " " + T("Nhiều khung chỉ báo: lăn chuột trên khung chỉ báo hoặc vuốt dọc để cuộn xem hết.") : "");
@@ -4084,7 +4206,9 @@ const ChartCtl = (() => {
     if (dlgOpen) full.updateLast(bar);
   }
 
-  function openDialog() {
+  // s: another symbol (an index card) shown only while the dialog is open; closing returns to the selected ticker.
+  function openDialog(s) {
+    if (s && s !== sym) { home = sym; setSymbol(s); }
     if (!sym) return;
     dlgOpen = true; note = null;
     $("chartDlg").showModal();
@@ -4135,6 +4259,11 @@ const ChartCtl = (() => {
       const d = e.target;
       if (!d.matches || !d.matches("details.indmenu") || !d.open) return;
       const pn = d.querySelector(".indpanel");
+      // Phone toolbar scrolls sideways and would clip the panel → pin it under the button across the screen.
+      if (matchMedia("(max-width: 640px)").matches) {
+        Object.assign(pn.style, { position: "fixed", top: `${d.querySelector("summary").getBoundingClientRect().bottom + 4}px`, left: "8px", right: "8px", width: "auto", maxWidth: "none" });
+        return;
+      }
       pn.style.left = "0"; pn.style.right = "auto";
       if (pn.getBoundingClientRect().right > $("chartDlg").getBoundingClientRect().right - 8) { pn.style.left = "auto"; pn.style.right = "0"; }
     }, true);
@@ -4146,7 +4275,10 @@ const ChartCtl = (() => {
     full = TechChart.create($("fullHost"), { legend: $("fullLegend"), tip: $("fullTip"), onClick: pt => { const r = draw.click(pt, data.bars); if (!r) return; note = r; head(); if (r.redraw) render(true); } });
     [$("miniChart"), $("chartDlg")].forEach(wire);
     $("dlgClose").onclick = () => $("chartDlg").close();
-    $("chartDlg").addEventListener("close", () => { dlgOpen = false; full.destroy(); draw.setTool(draw.tool()); });
+    $("chartDlg").addEventListener("close", () => {
+      dlgOpen = false; full.destroy(); draw.setTool(draw.tool());
+      if (home !== null) { const h = home; home = null; setSymbol(h); }
+    });
     const redraw = () => { if (data.bars.length) render(true); };
     $("theme").addEventListener("change", redraw);
     matchMedia("(prefers-color-scheme: dark)").addEventListener("change", redraw);
@@ -5289,7 +5421,7 @@ const Board = (() => {
       if (gen !== S.gen || seq !== S.seq) return;
       Object.assign(S, { quotes: new Map(qs.map(q => [q.sym, q])), at: new Date(), error: false, loading: false });
       S.missing = S.tab === "watch" ? S.syms.filter(s => !S.quotes.has(s)) : [];
-      IndexStrip.render(idx);
+      IndexStrip.render(idx, { tab: S.tab, quotes: S.quotes });
       checkAlerts(S.quotes);
       const first = BoardCols.sortQuotes(visibleQuotes(), BoardView.getSort().key, BoardView.getSort().dir)[0];
       if (S.quotes.has(S.sel) && !S.trades) select(S.sel, false);
@@ -5564,7 +5696,7 @@ const Controls = (() => {
     if (!Board.applyIncoming(incoming)) Board.setTab(Board.state().tab);
   }
 
-  return { start, say, status, tabChanged, count, writeOpts };
+  return { start, say, status, tabChanged, count, writeOpts, phaseLabel: () => T(PHASE[QuoteModel.phase()]) };
 })();
 Controls.start();
 </script>

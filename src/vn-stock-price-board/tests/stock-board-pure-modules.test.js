@@ -102,5 +102,4 @@ test("ChartSvg: minute bars and SVG output without NaN", () => {
   assert.match(svg, /class="pl down"/);
   assert.doesNotMatch(svg, /NaN|Infinity/);
   assert.doesNotMatch(ChartSvg.intraday([], { ref: 10 }), /NaN/);
-  assert.doesNotMatch(ChartSvg.spark([], 1000), /NaN/);
 });

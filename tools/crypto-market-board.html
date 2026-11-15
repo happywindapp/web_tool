@@ -952,6 +952,9 @@ I18n.add({
   "Bật / tắt chỉ báo kỹ thuật": "Show / hide technical indicators",
   "Nhiều khung chỉ báo: lăn chuột trên khung chỉ báo hoặc vuốt dọc để cuộn xem hết.": "Many indicator panes: use the wheel over an indicator pane or swipe up / down to scroll through them.",
   "Chỉ báo quan trọng, dùng phổ biến nhất": "Key indicators, the most widely used",
+  "Mở biểu đồ kỹ thuật toàn màn hình của {s}": "Open the full-screen technical chart of {s}",
+  "GT {v} tỷ": "Val {v} bn", "KL {v}": "Vol {v}", "NN ròng {v} tỷ": "Foreign net {v} bn", "Khối ngoại mua − bán ròng phiên {d}": "Foreign net buying (buy − sell) on {d}",
+  "Trần · tăng · đứng giá · giảm · sàn": "Ceiling · up · unchanged · down · floor", "Thời gian": "Time", "Chỉ số": "Index",
   "Đánh dấu Đỉnh / Đáy": "Mark peaks / troughs", "Hiện / ẩn nhãn Đỉnh, Đáy trên biểu đồ giá": "Show / hide peak and trough labels on the price chart",
 });
 // English for the full chart's cross dots (ChartCrossUI) and their menu toggle.
@@ -5643,7 +5646,8 @@ const CoinBar = (() => {
 
   const rangeOpts = s => RANGES.map(([k, , l]) => `<option value="${k}"${k === s.range ? " selected" : ""}>${e(T(l))}</option>`).join("");
   const ivOpts = s => INTERVALS.map(([k, l]) => `<option value="${k}"${k === s.interval ? " selected" : ""}${valid(s.range, k) ? "" : " disabled"}>${l}</option>`).join("");
-  const compact = s => `<select data-c="range" title="${e(T("Khoảng thời gian"))}">${rangeOpts(s)}</select><select data-c="interval" title="${e(T("Khung nến"))}">${ivOpts(s)}</select>`
+  const timeSels = s => `<select data-c="range" title="${e(T("Khoảng thời gian"))}">${rangeOpts(s)}</select><select data-c="interval" title="${e(T("Khung nến"))}">${ivOpts(s)}</select>`;
+  const compact = s => timeSels(s)
     + `<select data-c="type" title="${e(T("Kiểu biểu đồ"))}">${opts(TYPES, s.type)}</select>`
     + `<button data-c="open" class="chart-btn" title="${e(T("Mở biểu đồ kỹ thuật toàn màn hình"))}">📊 Full</button>`;
 
@@ -5664,14 +5668,11 @@ const CoinBar = (() => {
   }
 
   function full(s, tool, pickOpen) {
-    const seg = (key, list, cur, ok = () => true) => `<span class="seg" role="group">${list.map(([k, l]) => `<button data-c="${key}" data-v="${k}"${k === cur ? ' class="on"' : ""}${ok(k) ? "" : " disabled"}>${e(l)}</button>`).join("")}</span>`;
-    return seg("range", RANGES.map(([k, , l]) => [k, k === "ALL" ? T(l) : k]), s.range) + seg("interval", INTERVALS, s.interval, k => valid(s.range, k))
+    return picker(s, pickOpen) + timeSels(s)
       + `<select data-c="type" title="${e(T("Kiểu biểu đồ"))}">${opts(TYPES, s.type)}</select>`
       + `<select data-c="scale" title="${e(T("Thang giá"))}">${opts(SCALES, s.scale)}</select>`
       + `<label class="chk"><input type="checkbox" data-c="volume"${s.volume ? " checked" : ""}>${e(T("Khối lượng"))}</label>`
-      + `<label class="chk" title="${e(T("So sánh tối đa 3 coin, cách nhau bằng dấu phẩy (thang % thay đổi)"))}">${e(T("So sánh"))}<input type="text" class="cmpin" data-c="cmp" value="${e(s.cmp.join(", "))}" placeholder="BTC, ETH" spellcheck="false" autocomplete="off"></label>`
-      + picker(s, pickOpen)
-      + `<span class="seg tools">${TOOLS.map(([k, icon, tip]) => `<button data-c="tool" data-v="${k}" title="${e(T(tip))}"${k === tool ? ' class="on"' : ""}>${icon}</button>`).join("")}`
+      + `<label class="chk" title="${e(T("So sánh tối đa 3 coin, cách nhau bằng dấu phẩy (thang % thay đổi)"))}">${e(T("So sánh"))}<input type="text" class="cmpin" data-c="cmp" value="${e(s.cmp.join(", "))}" placeholder="BTC, ETH" spellcheck="false" autocomplete="off"></label>`      + `<span class="seg tools">${TOOLS.map(([k, icon, tip]) => `<button data-c="tool" data-v="${k}" title="${e(T(tip))}"${k === tool ? ' class="on"' : ""}>${icon}</button>`).join("")}`
       + `<button data-c="clearDraw" title="${e(T("Xoá mọi hình vẽ"))}">🗑</button></span>`
       + `<button data-c="fit" title="${e(T("Xem toàn bộ dữ liệu"))}">⤢</button><button data-c="png" title="${e(T("Tải ảnh PNG của biểu đồ"))}">📷 PNG</button>`;
   }

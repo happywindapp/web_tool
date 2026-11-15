@@ -43,5 +43,8 @@ I18n.add({
   "Bật / tắt chỉ báo kỹ thuật": "Show / hide technical indicators",
   "Nhiều khung chỉ báo: lăn chuột trên khung chỉ báo hoặc vuốt dọc để cuộn xem hết.": "Many indicator panes: use the wheel over an indicator pane or swipe up / down to scroll through them.",
   "Chỉ báo quan trọng, dùng phổ biến nhất": "Key indicators, the most widely used",
+  "Mở biểu đồ kỹ thuật toàn màn hình của {s}": "Open the full-screen technical chart of {s}",
+  "GT {v} tỷ": "Val {v} bn", "KL {v}": "Vol {v}", "NN ròng {v} tỷ": "Foreign net {v} bn", "Khối ngoại mua − bán ròng phiên {d}": "Foreign net buying (buy − sell) on {d}",
+  "Trần · tăng · đứng giá · giảm · sàn": "Ceiling · up · unchanged · down · floor", "Thời gian": "Time", "Chỉ số": "Index",
   "Đánh dấu Đỉnh / Đáy": "Mark peaks / troughs", "Hiện / ẩn nhãn Đỉnh, Đáy trên biểu đồ giá": "Show / hide peak and trough labels on the price chart",
 });

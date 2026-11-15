@@ -1,7 +1,7 @@
 // Technical chart controller: one shared state (Prefs "chart") for the detail-pane mini chart and the full-screen dialog.
 const ChartCtl = (() => {
   const TYPES = ["candle", "ha", "bar", "line", "area", "baseline"], SCALES = ["normal", "log", "pct"];
-  let st, sym = "", active = false, quote = null, data = { key: "", bars: [], cmp: null }, seq = 0, mini, full, dlgOpen = false, note = null;
+  let st, sym = "", active = false, quote = null, data = { key: "", bars: [], cmp: null }, seq = 0, mini, full, dlgOpen = false, note = null, home = null;
   const draw = ChartDraw.create();
 
   function clean(raw) {
@@ -27,8 +27,10 @@ const ChartCtl = (() => {
   }
   function head() {
     const q = quote && quote.sym === sym ? quote : null, tone = q ? QuoteModel.tone(q.last || q.ref, q) : "";
+    const ix = IndexStrip.find(sym), ixTone = ix ? (ix.chg > 0 ? "up" : ix.chg < 0 ? "down" : "ref") : "";
     $("dlgTitle").innerHTML = `<b class="${tone}">${Dom.esc(sym)}</b> <span class="muted">${Dom.esc(Universe.name(sym, I18n.lang))}</span>`
-      + (q ? ` <b class="${tone}">${Fmt.price(q.last || q.ref)}</b> <span class="${tone}">${Fmt.chg(q, q.chg)} ${Fmt.pct(q, q.pct)}</span>` : "");
+      + (q ? ` <b class="${tone}">${Fmt.price(q.last || q.ref)}</b> <span class="${tone}">${Fmt.chg(q, q.chg)} ${Fmt.pct(q, q.pct)}</span>` : "")
+      + (!q && ix ? ` <b class="${ixTone}">${Fmt.en(ix.value, 2)}</b> <span class="${ixTone}">${Fmt.signed(ix.chg)} (${Fmt.signed(ix.pct)}%)</span>` : "");
     $("dlgClose").title = T("Đóng (Esc)");
     $("fullStatus").textContent = note ? T(note.key, note.p) : draw.tool() ? T(draw.needsTwo() ? "Bấm 2 điểm trên biểu đồ." : "Bấm 1 điểm trên biểu đồ.") : T("Kéo để cuộn, lăn chuột / chụm 2 ngón để phóng to, bấm đúp trục giá để tự co giãn.")
       + (full.scrolls() ? " " + T("Nhiều khung chỉ báo: lăn chuột trên khung chỉ báo hoặc vuốt dọc để cuộn xem hết.") : "");
@@ -89,7 +91,9 @@ const ChartCtl = (() => {
     if (dlgOpen) full.updateLast(bar);
   }
 
-  function openDialog() {
+  // s: another symbol (an index card) shown only while the dialog is open; closing returns to the selected ticker.
+  function openDialog(s) {
+    if (s && s !== sym) { home = sym; setSymbol(s); }
     if (!sym) return;
     dlgOpen = true; note = null;
     $("chartDlg").showModal();
@@ -140,6 +144,11 @@ const ChartCtl = (() => {
       const d = e.target;
       if (!d.matches || !d.matches("details.indmenu") || !d.open) return;
       const pn = d.querySelector(".indpanel");
+      // Phone toolbar scrolls sideways and would clip the panel → pin it under the button across the screen.
+      if (matchMedia("(max-width: 640px)").matches) {
+        Object.assign(pn.style, { position: "fixed", top: `${d.querySelector("summary").getBoundingClientRect().bottom + 4}px`, left: "8px", right: "8px", width: "auto", maxWidth: "none" });
+        return;
+      }
       pn.style.left = "0"; pn.style.right = "auto";
       if (pn.getBoundingClientRect().right > $("chartDlg").getBoundingClientRect().right - 8) { pn.style.left = "auto"; pn.style.right = "0"; }
     }, true);
@@ -151,7 +160,10 @@ const ChartCtl = (() => {
     full = TechChart.create($("fullHost"), { legend: $("fullLegend"), tip: $("fullTip"), onClick: pt => { const r = draw.click(pt, data.bars); if (!r) return; note = r; head(); if (r.redraw) render(true); } });
     [$("miniChart"), $("chartDlg")].forEach(wire);
     $("dlgClose").onclick = () => $("chartDlg").close();
-    $("chartDlg").addEventListener("close", () => { dlgOpen = false; full.destroy(); draw.setTool(draw.tool()); });
+    $("chartDlg").addEventListener("close", () => {
+      dlgOpen = false; full.destroy(); draw.setTool(draw.tool());
+      if (home !== null) { const h = home; home = null; setSymbol(h); }
+    });
     const redraw = () => { if (data.bars.length) render(true); };
     $("theme").addEventListener("change", redraw);
     matchMedia("(prefers-color-scheme: dark)").addEventListener("change", redraw);

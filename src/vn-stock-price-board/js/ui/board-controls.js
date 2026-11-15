@@ -135,5 +135,5 @@ const Controls = (() => {
     if (!Board.applyIncoming(incoming)) Board.setTab(Board.state().tab);
   }
 
-  return { start, say, status, tabChanged, count, writeOpts };
+  return { start, say, status, tabChanged, count, writeOpts, phaseLabel: () => T(PHASE[QuoteModel.phase()]) };
 })();
