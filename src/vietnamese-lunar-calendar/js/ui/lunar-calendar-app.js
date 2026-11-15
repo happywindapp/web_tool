@@ -53,7 +53,7 @@
     const s = LunarCal.jdToDate(st.sel);
     st.y = s.y; st.m = s.m;
     $("q").classList.remove("bad");
-    $("toHoro").disabled = $("toSim").disabled = st.sel > today;
+    $("toHoro").disabled = st.sel > today;
     renderMonth(focus);
     renderDay();
     status(() => DayDetail.summary(st.sel));
@@ -148,13 +148,13 @@
   const selBirth = () => { const d = LunarCal.jdToDate(st.sel), p = n => String(n).padStart(2, "0"); return { birth: `${p(d.d)}/${p(d.m)}/${d.y}`, lunar: false }; };
   const ownerOf = s => ({ birth: s.birth, lunar: s.lunar, time: s.time, male: s.male });
   $("toHoro").onclick = () => HoroApp.useBirth(selBirth());
-  $("toSim").onclick = () => SimApp.useBirth(selBirth());
   $("hToSim").onclick = () => SimApp.useBirth(ownerOf(HoroApp.snapshot()));
   $("sToHoro").onclick = () => HoroApp.useBirth(ownerOf(SimApp.snapshot()));
   $("demo").onchange = e => { const k = e.target.value; e.target.value = ""; if (k) demo(k); };
   $("share").onclick = share;
   for (const box of [$("grid"), $("events"), $("history"), $("detail")]) box.addEventListener("click", e => { const b = e.target.closest("[data-jd]"); if (b) select(+b.dataset.jd, { focus: box === $("grid") }); });
   $("grid").addEventListener("keydown", onGridKey);
+  DailyReads.init({ store, onChange: () => renderDay() });
   $("tabs").onclick = e => { const b = e.target.closest("[data-tab]"); if (b) setTab(b.dataset.tab); };
   HoroApp.init({ today, status: (fn, cls) => status(fn, cls, "horo"), note, tab: setTab });
   SimApp.init({ today, status: (fn, cls) => status(fn, cls, "sim"), note, tab: setTab });
@@ -167,6 +167,8 @@
   window.addEventListener("hashchange", () => { if (location.hash.length > 1) { const h = fromHash(); cleanUrl(); openLink(h); } });
   NoteBoard.init({ store });
   DayNotes.init({ store, sel: () => st.sel, onChange: () => { renderMonth(); renderDay(); } });
+  const tick = () => { const d = new Date(), p = n => String(n).padStart(2, "0"); $("clock").textContent = "🕐 " + p(d.getHours()) + ":" + p(d.getMinutes()) + ":" + p(d.getSeconds()); AnalogClock.update($("detail")); };
+  tick(); setInterval(tick, 1000);
   select(today);
   WeatherApp.init({ store, note, onChange: () => { renderMonth(); renderDay(); } });
   const q = new URLSearchParams(location.search);

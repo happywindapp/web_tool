@@ -42,7 +42,7 @@ I18n.add({
   "Nhập ngày sinh để biết SIM có hợp mệnh nạp âm của chủ không.": "Enter a birth date to see whether the number suits the owner's Nayin element.",
   "Nhập ngày sinh để xác định hành tứ trụ còn thiếu.": "Enter a birth date to find the element the four pillars lack.",
   "Cách tính: {how}": "How it is computed: {how}", "không có": "none", "Tổng kết": "Summary", "Cần cân nhắc": "To consider",
-  "📱 Xem SIM":"📱 Phone number", "Mở tab SIM phong thủy với ngày sinh chủ SIM là ngày đang chọn trên lịch": "Open the phone-number tab with the selected day as the owner's birth date",
+  "📱 Xem SIM":"📱 Phone number",
   "Mở tab SIM phong thủy với ngày giờ sinh, giới tính đang nhập ở đây": "Open the phone-number tab with the birth date, time and gender entered here",
   "Mở tab Tử vi với ngày giờ sinh, giới tính của chủ SIM": "Open the Horoscope tab with the SIM owner's birth date, time and gender",
   "Đã chép ngày sinh — nhập số SIM rồi bấm “Chấm điểm SIM”.": "Birth date copied — enter a phone number and press “Score number”.",

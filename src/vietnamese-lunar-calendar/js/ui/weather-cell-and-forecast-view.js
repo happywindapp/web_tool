@@ -49,7 +49,8 @@ const WeatherView = (() => {
 
   // st: { place, data, error, loading, more } from WeatherApp.
   function section(st, sel, today) {
-    const head = `<section class="wx-sec"><h3>${esc(T("Thời tiết · {place}", { place: st.place }))}</h3>`;
+    const head = `<section class="wx-sec"><div class="wx-head"><h3>${esc(T("Thời tiết · {place}", { place: st.place }))}</h3>`
+      + `<button type="button" class="wx-more" data-wx-charts title="${esc(T("Biểu đồ nhiệt độ, lượng mưa, độ ẩm theo mùa, theo năm, nhiều năm"))}">${esc(T("📊 Biểu đồ thời tiết"))}</button></div>`;
     if (st.loading && !st.data) return head + `<p class="muted">${esc(T("Đang tải thời tiết…"))}</p></section>`;
     if (!st.data) return head + `<p class="bad">${esc(T("✖ Không tải được thời tiết: {msg}", { msg: st.error }))}</p></section>`;
     const { days, current: cur } = st.data, w = days[sel], s = LunarCal.jdToDate(sel);

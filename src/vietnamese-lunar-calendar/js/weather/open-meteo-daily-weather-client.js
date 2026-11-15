@@ -35,5 +35,13 @@ const Weather = (() => {
     return { ...out, at };
   }
 
-  return { load, parse, url };
+  // BigDataCloud reverse geocoding (free, no key): "Phường/xã, Tỉnh" for the 📍 location, null when unknown.
+  async function placeName(lat, lon) {
+    const r = await fetch("https://api.bigdatacloud.net/data/reverse-geocode-client?" + new URLSearchParams({ latitude: fix(lat), longitude: fix(lon), localityLanguage: "vi" }));
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    return nameOf(await r.json());
+  }
+  const nameOf = j => [...new Set([j.locality, j.principalSubdivision || j.city].filter(s => typeof s === "string" && s.trim()))].join(", ").slice(0, 80) || null;
+
+  return { load, parse, url, placeName, nameOf };
 })();

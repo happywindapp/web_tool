@@ -10,9 +10,6 @@ const DayDetail = (() => {
   const moonRow = m => esc(m.icon + " " + T(m.name)) + ` <small class="muted">${esc(T("tuổi trăng {a} ngày (lúc 20h)", { a: I18n.num(Math.round(m.age * 10) / 10) }))}</small>`;
   const pad = n => String(n).padStart(2, "0");
   const dmy = s => pad(s.d) + "/" + pad(s.m) + "/" + s.y;
-  const quote = jd => { const q = DailyQuote.of(jd); return `<blockquote class="quote">${esc(T(q.text))}<cite>— ${esc(T(q.by))}</cite></blockquote>`; };
-  const book = jd => { const b = BookOfDay.of(jd), y = b.year < 0 ? T("{y} TCN", { y: -b.year }) : String(b.year);
-    return `<section class="book"><h3>${esc(T("📚 Sách hay mỗi ngày"))}</h3><p><b>${esc(T(b.title))}</b> — ${esc(b.author)} (${esc(y)})</p><p>${esc(T(b.about))}</p></section>`; };
 
   function moment(localJd) {
     const total = Math.round((localJd + 0.5) * 1440), day = Math.floor(total / 1440), mins = total - day * 1440, s = LunarCal.jdToDate(day);
@@ -33,7 +30,8 @@ const DayDetail = (() => {
       + `<span>${esc(T(WEEKDAYS[wd]))}</span><span>${esc(T("Tháng {m} năm {y}", { m: s.m, y: s.y }))}</span></div>`
       + `<div class="side lunar"><small>${esc(T("Âm lịch"))}</small><b class="big">${l.d}</b>`
       + `<span>${esc(month)}</span>`
-      + `<span>${esc(T("Năm {name}", { name: cc(CanChi.year(l.y)) }) + " · " + l.y)}</span></div></div>`;
+      + `<span>${esc(T("Năm {name}", { name: cc(CanChi.year(l.y)) }) + " · " + l.y)}</span></div>`
+      + `<div class="side clock-side">${AnalogClock.svg()}</div></div>`;
   }
 
   function hoursTable(jd, p, l) {
@@ -46,7 +44,7 @@ const DayDetail = (() => {
     return html + "</tbody></table>";
   }
 
-  // add: { notes, weather } HTML — notes above the quote, weather after the book.
+  // add: { notes, weather } HTML — notes above the quote, weather after the knowledge link.
   function render(box, jd, today, add = {}) {
     const s = LunarCal.jdToDate(jd), l = LunarCal.fromJd(jd), p = CanChi.day(jd), mp = CanChi.month(l.m, l.y), yp = CanChi.year(l.y);
     const god = Almanac.dayGod(l.m, p.chi), term = CanChi.solarTerm(jd), truc = Almanac.truc(p.chi, term.idx), star = Almanac.mansion(jd);
@@ -58,7 +56,7 @@ const DayDetail = (() => {
     const tet = nextTet(jd, l);
     const hoang = [...Array(12).keys()].filter(h => Almanac.hourGod(p.chi, h).good).map(h => `${esc(T(CanChi.CHI[h]))} <small>(${HOURS[h]}h)</small>`).join(", ");
 
-    box.innerHTML = hero(jd, s, l) + `<div class="tags">${tags.join("")}</div>` + (add.notes || "") + quote(jd) + book(jd) + (add.weather || "")
+    box.innerHTML = hero(jd, s, l) + `<div class="tags">${tags.join("")}</div>` + (add.notes || "") + DailyReads.html(jd) + (add.weather || "")
       + `<section><h3>${esc(T("Can chi & ngũ hành"))}</h3><dl>`
       + row("Năm", na(yp)) + row("Tháng", na(mp)) + row("Ngày", na(p)) + row("Giờ đầu ngày", esc(cc(CanChi.hour(jd, 0))))
       + row("Ngũ hành ngày", esc(T(rel.rule) + " (" + T(rel.canEl) + " – " + T(rel.chiEl) + "): " + T(rel.label)))
@@ -78,6 +76,7 @@ const DayDetail = (() => {
       + row("Tuổi xung tháng", Almanac.clashes(mp).map(q => esc(cc(q))).join(", ") || `<span class="muted">${esc(T("Không"))}</span>`)
       + `</dl></section><section><h3>${esc(T("Giờ trong ngày"))}</h3>${hoursTable(jd, p, l)}</section>`
       + (tet ? `<p class="muted count">${esc(T("Còn {n} ngày đến Tết Nguyên Đán {y} ({date}).", { n: I18n.num(tet.jd - jd), y: tet.y, date: dmy(LunarCal.jdToDate(tet.jd)) }))}</p>` : "");
+    AnalogClock.update(box);
   }
 
   // One-line summary for the status bar.

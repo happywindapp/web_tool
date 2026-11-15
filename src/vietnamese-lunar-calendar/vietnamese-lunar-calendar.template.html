@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src https://quan111.goatcounter.com https://api.open-meteo.com">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src https://quan111.goatcounter.com https://api.open-meteo.com https://archive-api.open-meteo.com https://api.bigdatacloud.net">
 <title>Lịch vạn niên</title>
 <style>
 /* @include ../data-workbench/styles/base.css */
@@ -41,18 +41,18 @@
   <nav class="seg wb-nav" id="tabs"><button data-tab="cal">📅 Lịch</button><button data-tab="horo">🔮 Tử vi</button><button data-tab="sim">📱 SIM phong thủy</button></nav>
 </header>
 <div class="toolbar" id="calBar">
-  <select id="demo" title="Nạp ngày mẫu rồi xem ngay"></select>
   <button id="today" title="Về hôm nay (Home)">Hôm nay</button>
   <span class="sep"></span>
   <input type="text" id="q" inputmode="text" autocomplete="off" spellcheck="false" title="Ngày dương: 12/11/2026 · Ngày âm: thêm “âm” hoặc “lunar” phía trước, tháng nhuận thêm “n” (âm 1/6n/2025)" placeholder="12/11/2026 · âm 15/8/2026">
   <button id="go" class="main" title="Đổi ngày dương ↔ âm và xem chi tiết (Enter)">Xem ngày</button>
-  <label class="chk" title="Hiện can chi ngày trong ô lịch (khi ngày đó không có lễ / tiết khí)"><input type="checkbox" id="cc">Can chi trong ô</label>
-  <label class="chk" title="Hiện tuần trăng (trăng non, lưỡi liềm, bán nguyệt, trăng tròn…) trong từng ô ngày"><input type="checkbox" id="moon">Mặt trăng</label>
-  <label class="chk" title="Hiện thời tiết (icon, mô tả, nhiệt độ, độ ẩm) trong ô lịch và Chi tiết ngày — tải từ Open-Meteo, chỉ gửi tọa độ tỉnh/thành"><input type="checkbox" id="wx">Thời tiết</label>
-  <span class="wx-opts" id="wxOpts"><select id="wxPlace" title="Tỉnh/thành lấy thời tiết (tọa độ trung tâm hành chính)"></select><button id="wxHere" title="Dùng vị trí hiện tại của trình duyệt (làm tròn ~1 km, chỉ lưu trên máy này)">📍</button></span>
-  <button id="toHoro" title="Mở tab Tử vi với ngày sinh là ngày đang chọn trên lịch">🔮 Xem tử vi</button>
-  <button id="toSim" title="Mở tab SIM phong thủy với ngày sinh chủ SIM là ngày đang chọn trên lịch">📱 Xem SIM</button>
-  <span class="muted hint">← → ↑ ↓ chọn ngày · PageUp/PageDown đổi tháng · lịch tính theo giờ Việt Nam (UTC+7) · thời tiết từ Open-Meteo</span>
+  <span class="cal-opts">
+  <select id="demo" title="Nạp ngày mẫu rồi xem ngay"></select>
+    <label class="chk" title="Hiện can chi ngày trong ô lịch (khi ngày đó không có lễ / tiết khí)"><input type="checkbox" id="cc">Can chi</label>
+    <label class="chk" title="Hiện tuần trăng (trăng non, lưỡi liềm, bán nguyệt, trăng tròn…) trong từng ô ngày"><input type="checkbox" id="moon">Mặt trăng</label>
+    <label class="chk" title="Hiện thời tiết (icon, mô tả, nhiệt độ, độ ẩm) trong ô lịch và Chi tiết ngày — tải từ Open-Meteo, chỉ gửi tọa độ tỉnh/thành"><input type="checkbox" id="wx">Thời tiết</label>
+    <span class="wx-opts" id="wxOpts"><select id="wxPlace" title="Tỉnh/thành lấy thời tiết (tọa độ trung tâm hành chính)"></select><button id="wxHere" title="Dùng vị trí hiện tại của trình duyệt (làm tròn ~1 km, chỉ lưu trên máy này; tên địa danh tra qua BigDataCloud)">📍</button></span>
+    <button id="toHoro" title="Mở tab Tử vi với ngày sinh là ngày đang chọn trên lịch">🔮 Xem tử vi</button>
+  </span>
 </div>
 <div class="toolbar" id="horoBar" hidden>
   <select id="horoDemo" title="Nạp hồ sơ mẫu rồi xem ngay"></select>
@@ -89,6 +89,7 @@
       <select id="year" title="Năm dương lịch"></select>
       <button id="next" title="Tháng sau (PageDown)">▶</button>
       <span id="lunarRange" class="muted"></span>
+      <time id="clock" class="clock" title="Giờ hiện tại trên máy bạn"></time>
     </div>
     <div class="scroll">
       <div id="grid" class="month"></div>
@@ -131,6 +132,12 @@
     <div class="scroll horo" id="sDetail" data-i18n-skip></div>
   </section>
 </main>
+<dialog id="wxCharts" class="wx-dialog">
+  <div class="wxc-head"><b id="wxcTitle">📊 Biểu đồ thời tiết</b><button id="wxcClose" title="Đóng (Esc)">✕</button></div>
+  <div class="wxc-bar"><span class="seg" id="wxcModes"><button data-mode="season">Theo mùa</button><button data-mode="year">Theo năm</button><button data-mode="multi">Nhiều năm</button></span>
+    <select id="wxcYear" title="Năm"></select><select id="wxcSeason" title="Mùa (xuân 2–4, hạ 5–7, thu 8–10, đông 11–1)"></select><select id="wxcSpan" title="Số năm thống kê"></select></div>
+  <div id="wxcBody" class="wxc-body" data-i18n-skip></div>
+</dialog>
 <footer class="status" id="status"></footer>
 <div class="author">
   <span>Tác giả:</span><b><a href="https://happywindapp.github.io/CV/cv_quan_phan.html">Phan Ngọc Minh Quân</a></b>
@@ -153,6 +160,15 @@
 // @include js/i18n/book-of-the-day-vietnamese-books-vi-en.js
 // @include js/i18n/book-of-the-day-world-literature-vi-en.js
 // @include js/i18n/book-of-the-day-world-nonfiction-vi-en.js
+// @include js/i18n/book-topics-by-title.js
+// @include js/i18n/knowledge-links-vi-en.js
+// @include js/i18n/knowledge-links-tech-and-skills-vi-en.js
+// @include js/i18n/knowledge-links-life-and-culture-vi-en.js
+// @include js/i18n/movies-vietnam-asia-and-world-drama-vi-en.js
+// @include js/i18n/movies-scifi-animation-documentary-comedy-thriller-vi-en.js
+// @include js/i18n/movies-for-learning-english-vi-en.js
+// @include js/i18n/english-word-of-the-day-daily-work-tech-vi-en.js
+// @include js/i18n/english-word-of-the-day-idioms-academic-vi-en.js
 // @include js/i18n/world-history-events-by-month-vi-en.js
 // @include js/i18n/vietnam-history-events-by-month-vi-en.js
 // @include ../data-workbench/js/i18n/en-shared-theme-sessions-filters.js
@@ -168,6 +184,7 @@
 // @include js/calendar/moon-phase-from-new-moon.js
 // @include js/calendar/date-text-parser.js
 // @include js/weather/open-meteo-daily-weather-client.js
+// @include js/weather/open-meteo-history-and-statistics.js
 // @include js/samples/demo-dates-registry.js
 // @include js/samples/horoscope-demo-profiles.js
 // @include js/horoscope/birth-chart-pillars-and-feng-shui.js
@@ -177,8 +194,10 @@
 // @include js/horoscope/western-zodiac-and-element-balance.js
 // @include js/ui/weather-cell-and-forecast-view.js
 // @include js/ui/daily-quote-and-book-pickers.js
+// @include js/ui/daily-reads-view.js
 // @include js/ui/month-grid-view.js
 // @include js/ui/history-this-month-view.js
+// @include js/ui/analog-clock-face.js
 // @include js/ui/day-detail-pane.js
 // @include js/ui/horoscope-tab-view.js
 // @include js/ui/horoscope-natal-profile-view.js
@@ -193,6 +212,9 @@
 // @include js/ui/sim-score-pane-view.js
 // @include js/ui/sim-analysis-pane-view.js
 // @include js/ui/sim-feng-shui-tab-controller.js
+// @include js/ui/svg-weather-chart.js
+// @include js/ui/weather-charts-views.js
+// @include js/ui/weather-charts-dialog.js
 // @include js/ui/weather-location-controller.js
 // @include js/ui/note-board-controller.js
 // @include js/ui/day-notes-controller.js
