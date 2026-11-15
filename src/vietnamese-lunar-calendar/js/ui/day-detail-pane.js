@@ -23,15 +23,15 @@ const DayDetail = (() => {
     return { y, jd: LunarCal.toJd(1, 1, y, false) };
   }
 
-  function hero(jd, s, l) {
-    const wd = LunarCal.weekday(jd);
+  function hero(jd, s, l, sun) {
+    const wd = LunarCal.weekday(jd), good = Almanac.dayGod(l.m, CanChi.day(jd).chi).good;
     const month = T(l.leap ? "Tháng {m} nhuận" : "Tháng {m}", { m: l.m }) + " (" + T(l.monthLen === 30 ? "đủ" : "thiếu") + ")";
     return `<div class="hero"><div class="side solar"><small>${esc(T("Dương lịch"))}</small><b class="big${wd === 0 ? " sun" : ""}">${s.d}</b>`
-      + `<span>${esc(T(WEEKDAYS[wd]))}</span><span>${esc(T("Tháng {m} năm {y}", { m: s.m, y: s.y }))}</span></div>`
-      + `<div class="side lunar"><small>${esc(T("Âm lịch"))}</small><b class="big">${l.d}</b>`
+      + `<span>${esc(T(WEEKDAYS[wd]))}</span><span>${esc(T("Tháng {m} năm {y}", { m: s.m, y: s.y }))}</span>${HeroFacts.solar(jd)}</div>`
+      + `<div class="side lunar ${good ? "good" : "bad"}"><small>${esc(T("Âm lịch"))}</small><b class="big">${l.d}</b>`
       + `<span>${esc(month)}</span>`
-      + `<span>${esc(T("Năm {name}", { name: cc(CanChi.year(l.y)) }) + " · " + l.y)}</span></div>`
-      + `<div class="side clock-side">${AnalogClock.svg()}</div></div>`;
+      + `<span>${esc(T("Năm {name}", { name: cc(CanChi.year(l.y)) }) + " · " + l.y)}</span>${HeroFacts.lunar(jd, good)}</div>`
+      + `<div class="side clock-side">${AnalogClock.svg(sun)}</div></div>` + HeroFacts.strip(jd);
   }
 
   function hoursTable(jd, p, l) {
@@ -44,7 +44,7 @@ const DayDetail = (() => {
     return html + "</tbody></table>";
   }
 
-  // add: { notes, weather } HTML — notes above the quote, weather after the knowledge link.
+  // add: { me, notes, weather, sun } — notes/weather HTML, sun = today's { rise, set } for the clock; — notes above the quote, weather after the knowledge link.
   function render(box, jd, today, add = {}) {
     const s = LunarCal.jdToDate(jd), l = LunarCal.fromJd(jd), p = CanChi.day(jd), mp = CanChi.month(l.m, l.y), yp = CanChi.year(l.y);
     const god = Almanac.dayGod(l.m, p.chi), term = CanChi.solarTerm(jd), truc = Almanac.truc(p.chi, term.idx), star = Almanac.mansion(jd);
@@ -56,7 +56,7 @@ const DayDetail = (() => {
     const tet = nextTet(jd, l);
     const hoang = [...Array(12).keys()].filter(h => Almanac.hourGod(p.chi, h).good).map(h => `${esc(T(CanChi.CHI[h]))} <small>(${HOURS[h]}h)</small>`).join(", ");
 
-    box.innerHTML = hero(jd, s, l) + `<div class="tags">${tags.join("")}</div>` + (add.notes || "") + DailyReads.html(jd) + (add.weather || "")
+    box.innerHTML = hero(jd, s, l, add.sun) + `<div class="tags">${tags.join("")}</div>` + (add.me || "") + (add.notes || "") + DailyReads.html(jd) + (add.weather || "")
       + `<section><h3>${esc(T("Can chi & ngũ hành"))}</h3><dl>`
       + row("Năm", na(yp)) + row("Tháng", na(mp)) + row("Ngày", na(p)) + row("Giờ đầu ngày", esc(cc(CanChi.hour(jd, 0))))
       + row("Ngũ hành ngày", esc(T(rel.rule) + " (" + T(rel.canEl) + " – " + T(rel.chiEl) + "): " + T(rel.label)))

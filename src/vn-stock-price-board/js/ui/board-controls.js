@@ -128,6 +128,7 @@ const Controls = (() => {
     wire();
     MarketTabs.init();
     PersonalUI.init();
+    CorrelationUI.init();
     WatchIO.init();
     Market.sectorsLoad().then(buildTabs, e => console.warn("start - load ICB sectors fail", e));
     Universe.load().then(() => Board.draw(true), e => console.warn("start - load symbol directory fail", e));

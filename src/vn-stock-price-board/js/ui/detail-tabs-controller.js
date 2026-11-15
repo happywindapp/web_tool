@@ -25,7 +25,7 @@ const DetailTabs = (() => {
     else if (k === "finance") el.innerHTML = FinView.html(d, lang);
     else if (k === "events") el.innerHTML = TabHtml.dividends(d.divs, last) + TabHtml.events(d.list);
     else if (k === "profile") el.innerHTML = TabHtml.profile(d.p, d.h, lang);
-    else if (k === "recs") el.innerHTML = TradePlanView.html(d, quote) + TabHtml.recs(d.list, last);
+    else if (k === "recs") el.innerHTML = TradePlanView.html(d, quote) + SignalBacktestView.html(d.bt) + TabHtml.recs(d.list, last);
   }
 
   const FETCH = {
@@ -40,7 +40,7 @@ const DetailTabs = (() => {
     recs: async s => {
       const opt = (v, f) => v ? Promise.resolve(v) : f(s).catch(err => { console.warn("DetailTabs.recs - optional part fail", s, err); return null; });
       const [list, tech, val] = await Promise.all([Finfo.recommendations(s), opt(data.chart, OutlookView.load), opt(data.valuation, ValTab.load)]);
-      return { list, tech, val };
+      return { list, tech, val, bt: tech && tech.bars ? SignalBacktest.run(tech.bars) : null };
     },
   };
 

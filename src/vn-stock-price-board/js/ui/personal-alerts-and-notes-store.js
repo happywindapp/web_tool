@@ -1,4 +1,4 @@
-// Personal data kept in this browser only: price alerts and per-ticker notes + own target price.
+// Personal data kept in this browser only: price / technical-signal alerts and per-ticker notes + own target price.
 const Alerts = (() => {
   const MAX = 100;
   const id = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
@@ -25,7 +25,8 @@ const Alerts = (() => {
   // Called after every poll with all fetched quotes; returns the alerts that just fired.
   function check(quotes) {
     reload();
-    const r = AlertRule.check(list, quotes, QuoteModel.vnDate());
+    SignalBars.refresh([...new Set(list.filter(a => AlertRule.isSignal(a.type)).map(a => a.sym))]);
+    const r = AlertRule.check(list, quotes, QuoteModel.vnDate(), SignalBars.state);
     if (r.hits.length) { list = r.list; changed(); }
     return r.hits;
   }

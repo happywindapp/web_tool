@@ -22,20 +22,21 @@ không đăng nhập, không quảng cáo, có danh mục ★ riêng, chia sẻ 
 
 **Tool lấy**: màu chuẩn VN (trần tím · sàn xanh lơ · TC vàng · tăng xanh lá · giảm đỏ), header 2 tầng, 3 bước giá, flash ô đổi giá,
 thanh chỉ số, tab sàn/rổ, danh mục ★, pane chi tiết (sổ lệnh, chart trong ngày, lịch sử khớp, mua/bán chủ động). **Chưa làm**: tab ngành
-(API không có phân ngành — dùng mẫu danh mục theo ngành thay thế), phái sinh, lô lẻ, thoả thuận.
+(API không có phân ngành — dùng mẫu danh mục theo ngành thay thế), lô lẻ (VPS có `getliststockdataoddlot` nhưng ngoài phiên trả rỗng, chưa xác minh định dạng — hoãn 2026-11-16), thoả thuận. Phái sinh VN30F: đã có (tab Phái sinh).
 
 ## 3. Contract (đổi là breaking)
 
 - **Nguồn dữ liệu** (`Feed`, chỉ GET, CSP `connect-src https://bgapidatafeed.vps.com.vn`):
   `getlistckindex/<VN30|VN100|HNX30|hose|hnx|upcom|VNMID|VNSML|VNDIAMOND|VNFINLEAD|VNX50>` · `getliststockdata/<mã,…>` (tối đa 300 mã/request) ·
-  `getlistindexdetail/10,11,02,03` · `getliststocktrade/<mã>` · `getlistallstock` (cache localStorage theo ngày VN — tên công ty, sàn, loại `S/E/W`).
+  `getlistindexdetail/10,11,02,03` · `getliststocktrade/<mã>` · `getlistallstock` (cache localStorage theo ngày VN — tên công ty, sàn, loại `S/E/W/D`) ·
+  `getpsalldatalsnapshot/<mã,…>` cho hợp đồng tương lai VN30 (mã KRX bắt đầu bằng số, vd `41I1GB000`; `Feed.quotes` tự tách theo `isFuture`).
 - **Nến lịch sử** (`History`, CSP `connect-src https://dchart-api.vndirect.com.vn`): `dchart/history?resolution=<1|5|15|30|60|D>&symbol=&from=&to=` → `{t,o,h,l,c,v,s}`, cache 60s trong bộ nhớ.
-- **Tab** (`?tab=`): `watch` (★ Danh mục) · `VN30` · `VN100` · `hose` · `hnx` · `HNX30` · `upcom` · `ETF` · `CW` + rổ khác `VNMID VNSML VNDIAMOND VNFINLEAD VNX50`.
+- **Tab** (`?tab=`): `watch` (★ Danh mục) · `VN30` · `VN100` · `hose` · `hnx` · `HNX30` · `upcom` · `ETF` · `CW` · `PS` (Phái sinh) · `market` · `screener` · `flows` (Dòng tiền) + rổ khác `VNMID VNSML VNDIAMOND VNFINLEAD VNX50`.
 - **Ngoại lệ có chủ đích với checklist "Dữ liệu mẫu"**: tool **không** có dropdown `Thử mẫu…` trên toolbar (user yêu cầu bỏ 2026-11-14, toolbar dành cho danh mục / lọc); dữ liệu mẫu chỉ còn qua `?demo=<key>` — đừng thêm lại dropdown.
 - **`?demo=`**: `banks` · `brokers` · `realestate` · `materials` · `energy` · `consumer` · `broken` (có token sai `12`, `VN-30` + mã không tồn tại `XYZ`, `NOTREAL1` ⇒ footer báo lỗi). Mẫu thay danh mục, giữ bản cũ cho `↶ Khôi phục danh mục trước`.
-- **Link chia sẻ** `#pako:` payload `{ tab, watch: [mã], opts: { rate, unit, hl, fr, compact }, sort: { key, dir }, sym, chart: { range, interval, type, scale, volume, compare, ind: [{ id, p }] }, dtab, fin: { kind, period } }`; `?data=VNM,FPT` = danh mục thô (đi lên server, chỉ dùng cho dữ liệu ngắn).
+- **Link chia sẻ** `#pako:` payload `{ tab, watch: [mã], opts: { rate, unit, hl, fr, compact }, sort: { key, dir }, sym, chart: { range, interval, type, scale, volume, compare, ind: [{ id, p }], layout: 1|2|4, cells: [{ sym, interval }] ×3 }, dtab, fin: { kind, period } }`; `?data=VNM,FPT` = danh mục thô (đi lên server, chỉ dùng cho dữ liệu ngắn).
   Payload không tin cậy: mã phải khớp `^[A-Z0-9]{3,10}$` (tối đa 300), tab/sort/option chỉ nhận giá trị đã biết. Link hỏng ⇒ báo lỗi, giữ danh mục.
-- **localStorage** (`web_tool.vn-stock-price-board.*`): `watch`, `watchBackup`, `lists`, `opts`, `tab`, `theme`, `universe`, `chart`, `dtab`, `fin`, `scr`, `alerts`, `notes`, `market.*`.- **CSV**: `bang-gia-<tab>-<yyyymmdd>.csv` (EN `price-board-…`), UTF-8 BOM, cột = cột đang hiện.
+- **localStorage** (`web_tool.vn-stock-price-board.*`): `watch`, `watchBackup`, `lists`, `opts`, `tab`, `theme`, `universe`, `chart`, `dtab`, `fin`, `scr`, `alerts`, `notes`, `market.*`, `flowDays`, `flowFloor`, `corrPeriod`.- **CSV**: `bang-gia-<tab>-<yyyymmdd>.csv` (EN `price-board-…`), UTF-8 BOM, cột = cột đang hiện.
 
 ## 4. Luật xử lý
 
@@ -74,7 +75,7 @@ thanh chỉ số, tab sàn/rổ, danh mục ★, pane chi tiết (sổ lệnh, c
 | Tài chính | KQKD / Cân đối / Lưu chuyển tiền tệ × Quý (8 quý) / Năm (8 năm), đơn vị tỷ đồng, EPS giữ đồng, rê chuột xem % so với kỳ trước | `financial_models` + `financial_statements` |
 | Sự kiện | Cổ tức, cổ phiếu thưởng, phát hành thêm, ĐHCĐ: ngày công bố, GDKHQ, ngày thực hiện | `events` (`VN` / `EN_GB`) |
 | Hồ sơ | Tên, sàn, ngày thành lập, MST, địa chỉ, điện thoại, website, email, số nhân viên, giới thiệu + 15 cổ đông lớn | `company_profiles` + `shareholders` |
-| Khuyến nghị | **Khuyến nghị của tool** (`TradePlan` pure + `TradePlanView`): thời điểm mua/bán (8 hành động từ xu hướng tuần × ngày + RSI, điều kiện mua/bán cụ thể, giao cắt `ChartCrosses` 10 phiên gần nhất) · bảng giá mua/chốt lời/dừng lỗ/R:R cho Hôm nay (pivot + ATR ngày, kẹp sàn–trần, làm tròn bước giá HOSE/HNX/UPCOM), Trung hạn (pivot + ATR tuần), Dài hạn (biên an toàn 15% dưới giá hợp lý hoặc MA250, mục tiêu = TB giá hợp lý + đồng thuận CTCK 12 tháng) · lưu ý khác (tỷ trọng theo rủi ro 1% vốn, thanh khoản 20 phiên, biến động năm, định giá / P/E percentile, Altman, Piotroski, sát đỉnh/đáy 52 tuần, lệch khung, đồng thuận CTCK, sàn–trần + T+2). Dùng lại dữ liệu tab Kỹ thuật / Định giá nếu đã tải. Phía dưới: giá mục tiêu TB, bảng đơn vị / đánh giá / giá mục tiêu | `recommendations` + dchart + finfo định giá |
+| Khuyến nghị | **Khuyến nghị của tool** (`TradePlan` pure + `TradePlanView`): thời điểm mua/bán (8 hành động từ xu hướng tuần × ngày + RSI, điều kiện mua/bán cụ thể, giao cắt `ChartCrosses` 10 phiên gần nhất) · bảng giá mua/chốt lời/dừng lỗ/R:R cho Hôm nay (pivot + ATR ngày, kẹp sàn–trần, làm tròn bước giá HOSE/HNX/UPCOM), Trung hạn (pivot + ATR tuần), Dài hạn (biên an toàn 15% dưới giá hợp lý hoặc MA250, mục tiêu = TB giá hợp lý + đồng thuận CTCK 12 tháng) · lưu ý khác (tỷ trọng theo rủi ro 1% vốn, thanh khoản 20 phiên, biến động năm, định giá / P/E percentile, Altman, Piotroski, sát đỉnh/đáy 52 tuần, lệch khung, đồng thuận CTCK, sàn–trần + T+2). Dùng lại dữ liệu tab Kỹ thuật / Định giá nếu đã tải. **Kiểm chứng tín hiệu** (`SignalBacktest` pure + `SignalBacktestView`): 5 năm nến ngày, bộ chỉ báo cố định SMA 20/50 · RSI 14 · MACD 12-26-9 · Stoch 14 · ADX 14 · SAR qua `ChartCrosses.detect`; mỗi loại giao cắt: số lần, lãi/lỗ TB + tỷ lệ đúng hướng sau 5/20/60 phiên (giao cắt cảnh báo không có hướng ⇒ chỉ TB), dòng tham chiếu = mọi phiên, câu tóm tắt tín hiệu đáng tin nhất (≥ 55 % sau 20 phiên, ≥ 5 lần). Phía dưới: giá mục tiêu TB, bảng đơn vị / đánh giá / giá mục tiêu | `recommendations` + dchart + finfo định giá |
 
 - Mẫu BCTC tự chọn theo mã: trong các mẫu cùng loại lấy mẫu có `note` thông tư (doanh nghiệp 1/2/3, ngân hàng 101/102/103, chứng khoán 89/90/91, bảo hiểm 411/412/413).
 - Đổi mã ⇒ bỏ kết quả của mã cũ (`seq`); đổi ngôn ngữ ⇒ vẽ lại từ bộ nhớ, riêng Sự kiện tải lại theo locale. Tab đang mở + tuỳ chọn BCTC nằm trong link chia sẻ (`dtab`, `fin`) và localStorage (`dtab`, `fin`).
@@ -115,6 +116,8 @@ Mã khoản mục dùng chung (`Health.C`): 11000 TSNH · 11100 tiền · 13100 
 
 - **🔔 Cảnh báo** (nút header + 🔔 cạnh tên mã): Giá ≥ / Giá ≤ (nghìn đồng) / Tăng ≥ % / Giảm ≥ %; kiểm sau mỗi lần poll (mã ngoài tab được poll kèm), mỗi cảnh báo báo 1 lần / ngày VN,
   hiện ở footer + Notification của trình duyệt khi đã cho phép. Chỉ chạy khi trang mở; tối đa 100 cảnh báo; localStorage `alerts`.
+- **Cảnh báo tín hiệu kỹ thuật** (cùng hộp 🔔, nhóm "Tín hiệu kỹ thuật"): giá cắt lên / xuống MA n (2–250) · RSI 14 vượt lên / xuống dưới ngưỡng (1–99) · MACD cắt lên / xuống đường tín hiệu · giá vào vùng mua hôm nay · giá thủng dừng lỗ trung hạn (vùng của `TradePlan`).
+  So **giá đóng cửa hôm qua** với **giá khớp hiện tại** (`SignalState`: nến ngày đã hoàn tất + 1 nến live) ⇒ chỉ báo khi giao cắt xảy ra trong phiên hôm nay. Nến ngày của các mã có cảnh báo tín hiệu do `SignalBars` tải nền (2 năm, làm mới 30 phút / đổi ngày); chưa tải xong thì chưa báo.
 - **Ghi chú & giá mục tiêu** (đầu tab Định giá): giá mục tiêu riêng + ghi chú ≤ 2.000 ký tự / mã, localStorage `notes`; ô "Mục tiêu" trên toolbar bật 2 cột "Mục tiêu · Còn %" trong bảng giá.
 - **So sánh nhiều mã** (chart): ô "So sánh" nhận tối đa 5 mã/chỉ số (VNINDEX, VN30, mã bất kỳ), thang % chỉ áp cho pane giá; cấu hình cũ `compare: true` tự đổi thành `["VNINDEX"]`.
 - **📅 Lịch sự kiện danh mục**: sự kiện có ngày GDKHQ / hiệu lực từ 3 ngày trước trở đi của tối đa 40 mã trong ★ Danh mục (6 request song song), bấm dòng mở mã.
@@ -162,6 +165,15 @@ Dựa trên quy tắc + thống kê lịch sử của chính mã (không dùng A
 - Chart `IndexCardSvg` (pure, `js/model/index-intraday-card-svg.js`): 2 phiên gần nhất nến 1 phút dchart — phiên trước xám, phiên mới xanh/đỏ quanh tham chiếu (clip-path), đường tham chiếu vàng nét đứt, cột KL 5 phút, trục 09:30 · 11:30 · ngày · 11:30 · 14:30; rê chuột = Thời gian · Chỉ số · Khối lượng. Phiên hôm nay nối thêm điểm live từ VPS.
 - `IndexData` (`js/data/index-intraday-and-foreign-loader.js`): tải nến 1 phút mỗi 60 s khi đang giao dịch / 10 phút ngoài giờ, khối ngoại mỗi 30 phút.
 - Dòng cuối: ⤒ trần · ↑ tăng · — đứng · ↓ giảm · ⤓ sàn + trạng thái phiên. Trần/sàn không có trong feed chỉ số ⇒ đếm từ bảng giá khi tab đang mở đúng rổ (HOSE→VNINDEX, VN30, HNX, UPCOM; tab Thị trường/Bộ lọc → 3 sàn), giữ số gần nhất, chưa có thì "–".
+
+### Đợt 4 — dòng tiền, phái sinh, tương quan, nhiều biểu đồ (2026-11-16)
+
+- **Tab Dòng tiền** (`FlowRank` pure + `FlowsView`): top 15 mua ròng / bán ròng của **khối ngoại** và **tự doanh CTCK** trong 1 / 5 / 10 / 20 phiên, lọc sàn, tổng ròng · mua · bán, giá + % hiện tại từ bảng giá, bấm mã mở chi tiết.
+  Dữ liệu cuối ngày VNDirect: `foreigns?q=tradingDate:gte:<ngày>~type:STOCK` (≈ 1.500 dòng/phiên, 20 phiên ≈ 3 MB) và `proprietary_trading?q=date:gte:<ngày>~type:STOCK` (công bố trễ ~1 ngày, chủ yếu HOSE); ngày giao dịch lấy từ dòng `foreigns` của VNINDEX.
+- **Tab Phái sinh** (`PS`): 4 hợp đồng VN30F từ `Universe` loại `D`, giá từ `getpsalldatalsnapshot`; thêm cột **OI · Basis · Đáo hạn** (opt `fut`, chỉ ở tab này), basis = giá HĐ − VN30 (cập nhật mỗi lần poll), KL là số hợp đồng (không nhân ×10). Pane chi tiết thêm HĐ mở, basis, ngày đáo hạn; chart kỹ thuật dùng dchart với chính mã KRX.
+- **🔗 Tương quan** (nút header, `Correlation` pure + `CorrelationUI`): ma trận Pearson của % thay đổi giá ngày giữa VNINDEX và tối đa 20 mã đầu ★ Danh mục (bỏ mã phái sinh), 3 tháng / 6 tháng / 1 năm, chỉ tính phiên cả hai mã cùng có giá (≥ 20 phiên); TB tương quan giữa các mã (không tính VNINDEX) + nhận xét đa dạng hoá, 3 cặp đi cùng nhau nhất / bù trừ tốt nhất.
+- **Bố cục nhiều biểu đồ** (Full chart, select ▢ 1 · ▥ 2 · ▦ 4 biểu đồ — `ChartGrid`): ô 1 là biểu đồ chính như cũ; mỗi ô phụ có ô nhập mã (trống = mã đang xem) + select khung nến, vẽ gọn (giá + chỉ báo trên biểu đồ giá + KL, cùng kiểu nến / thang), khoảng thời gian = khoảng của biểu đồ chính nếu hợp khung nến, không thì mặc định theo khung (5m→1 tuần … 1M→10 năm).
+  Tải lại ô phụ khi dữ liệu > 60 s; giữ zoom khi vẽ lại cùng dữ liệu. Desktop 2 ô cạnh nhau / 2×2; ≤ 900px 2 ô xếp dọc; điện thoại 4 ô = 2×2.
 
 ### Full chart của chỉ số
 

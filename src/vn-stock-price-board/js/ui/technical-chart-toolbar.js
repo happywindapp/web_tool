@@ -2,6 +2,7 @@
 const ChartBar = (() => {
   const TYPES = [["candle", "Nến"], ["ha", "Heikin-Ashi"], ["bar", "OHLC"], ["line", "Đường"], ["area", "Vùng"], ["baseline", "Baseline"]];
   const SCALES = [["normal", "Thang giá"], ["log", "Thang log"], ["pct", "Thang % thay đổi"]];
+  const LAYOUTS = [["1", "▢ 1 biểu đồ"], ["2", "▥ 2 biểu đồ"], ["4", "▦ 4 biểu đồ"]];
   const TOOLS = [["h", "─", "Đường ngang: bấm 1 điểm"], ["t", "╱", "Đường xu hướng: bấm 2 điểm"], ["f", "Fib", "Fibonacci thoái lui: bấm đỉnh/đáy rồi điểm còn lại"], ["m", "📏", "Đo % thay đổi giữa 2 điểm"]];
   const e = s => Dom.esc(s);
   const opts = (list, v) => list.map(([k, label]) => `<option value="${k}"${k === v ? " selected" : ""}>${e(T(label))}</option>`).join("");
@@ -24,6 +25,7 @@ const ChartBar = (() => {
       + timeSels(s)
       + `<select data-c="type" title="${e(T("Kiểu biểu đồ"))}">${opts(TYPES, s.type)}</select>`
       + `<select data-c="scale" title="${e(T("Thang giá"))}">${opts(SCALES, s.scale)}</select>`
+      + `<select data-c="layout" title="${e(T("Bố cục: thêm biểu đồ phụ, mỗi ô tự chọn mã và khung nến"))}">${opts(LAYOUTS, String(s.layout))}</select>`
       + `<label class="chk"><input type="checkbox" data-c="volume"${s.volume ? " checked" : ""}>${e(T("Khối lượng"))}</label>`
       + `<label class="chk" title="${e(T("So sánh tối đa 5 mã hoặc chỉ số, cách nhau bằng dấu phẩy (thang % thay đổi)"))}">${e(T("So sánh"))}<input type="text" class="cmpin" data-c="cmp" value="${e(s.cmp.join(", "))}" placeholder="VNINDEX, VCB…" spellcheck="false" autocomplete="off"></label>`
       + `<span class="seg tools">${TOOLS.map(([k, icon, tip]) => `<button data-c="tool" data-v="${k}" title="${e(T(tip))}"${k === tool ? ' class="on"' : ""}>${icon}</button>`).join("")}`

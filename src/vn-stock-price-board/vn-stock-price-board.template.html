@@ -41,6 +41,7 @@
   <button id="share" title="Chép link chứa tab + danh mục + tuỳ chọn (nằm sau dấu #, không gửi lên máy chủ)">🔗 Chia sẻ link</button>
   <button id="alertsBtn" title="Cảnh báo giá cho các mã (lưu trong trình duyệt này)">🔔 Cảnh báo</button>
   <button id="calBtn" title="Cổ tức, ĐHCĐ, phát hành sắp tới của các mã trong ★ Danh mục">📅 Lịch sự kiện</button>
+<button id="corrBtn" title="Tương quan giá giữa các mã trong ★ Danh mục và VNINDEX">🔗 Tương quan</button>
   <button id="undo" title="Lấy lại danh mục trước khi nạp mẫu / link chia sẻ" hidden>↶ Khôi phục danh mục trước</button>
   <label class="chk" title="Giao diện sáng / tối">Giao diện
     <select id="theme"><option value="auto">Tự động</option><option value="light">Sáng</option><option value="dark">Tối</option></select></label>
@@ -105,7 +106,7 @@
   <div class="dlg-head"><span id="dlgTitle"></span><button id="dlgClose">✕</button></div>
   <div class="cbar" id="fullBar"></div>
   <div class="ichips" id="fullChips"></div>
-  <div class="cbox"><div class="clegend" id="fullLegend"></div><div class="chost" id="fullHost"></div><div class="ctip" id="fullTip" hidden></div><p class="cmsg" id="fullMsg" hidden></p></div>
+  <div class="cgrid" id="fullGrid" data-n="1"><div class="cbox"><div class="clegend" id="fullLegend"></div><div class="chost" id="fullHost"></div><div class="ctip" id="fullTip" hidden></div><p class="cmsg" id="fullMsg" hidden></p></div></div>
   <div class="dlg-foot muted" id="fullStatus"></div>
 </dialog>
 <div class="author">
@@ -122,6 +123,7 @@
 // @include js/i18n/en-indicator-guide-strings.js
 // @include js/i18n/en-chart-cross-points-strings.js
 // @include js/i18n/en-trade-plan-recommendation-strings.js
+// @include js/i18n/en-signals-flows-futures-multichart-strings.js
 // @include ../data-workbench/js/i18n/en-shared-theme-sessions-filters.js
 // @include ../data-workbench/js/core/share-link-codec.js
 // @include ../data-workbench/js/core/text-utils.js
@@ -142,6 +144,10 @@
 // @include js/model/chart-events-detector.js
 // @include js/model/chart-line-crosses-detector.js
 // @include js/model/trade-plan-recommendation.js
+// @include js/model/signal-backtest-forward-returns.js
+// @include js/model/technical-signal-alert-state.js
+// @include js/model/foreign-proprietary-flow-ranking.js
+// @include js/model/watchlist-return-correlation.js
 // @include js/model/indicator-illustration-svg.js
 // @include js/model/stock-picks-ranking.js
 // @include js/model/financial-statement-table.js
@@ -155,6 +161,7 @@
 // @include js/data/vndirect-ohlc-history-client.js
 // @include js/data/vndirect-finfo-client.js
 // @include js/data/index-intraday-and-foreign-loader.js
+// @include js/data/signal-alert-daily-bars-loader.js
 // @include js/data/market-snapshot-loader.js
 // @include js/samples/watchlist-demo-presets.js
 // @include js/ui/watchlist-store.js
@@ -165,11 +172,13 @@
 // @include js/ui/chart-help-explanations.js
 // @include js/ui/chart-cross-points.js
 // @include js/ui/trade-plan-recommendation-view.js
+// @include js/ui/signal-backtest-view.js
 // @include js/ui/indicator-guide-content.js
 // @include js/ui/indicator-guide-dialog.js
 // @include js/ui/technical-chart-view.js
 // @include js/ui/technical-chart-drawing-tools.js
 // @include js/ui/technical-chart-toolbar.js
+// @include js/ui/technical-chart-multi-grid.js
 // @include js/ui/technical-chart-controller.js
 // @include js/ui/technical-outlook-view.js
 // @include js/ui/detail-tab-renderers.js
@@ -180,8 +189,10 @@
 // @include js/ui/stock-picks-view.js
 // @include js/ui/market-dashboard-and-heatmap-view.js
 // @include js/ui/stock-screener-view.js
+// @include js/ui/foreign-proprietary-flows-view.js
 // @include js/ui/market-tabs-controller.js
 // @include js/ui/personal-tools-dialogs.js
+// @include js/ui/watchlist-correlation-dialog.js
 // @include js/ui/watchlist-save-import-export.js
 // @include js/ui/detail-tabs-controller.js
 // @include js/ui/board-share-link-and-demo.js

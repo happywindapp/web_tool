@@ -14,7 +14,9 @@ const Fmt = (() => {
 const BoardCols = (() => {
   const tone = QuoteModel.tone;
   const P = (q, p) => ({ t: Fmt.price(p), c: tone(p, q) });
-  const V = (q, v, p, o) => ({ t: Fmt.vol(v, o.unit), c: tone(p, q) });
+  // Futures volumes are contracts, never shown ×10.
+  const un = (q, o) => q.fut ? "" : o.unit;
+  const V = (q, v, p, o) => ({ t: Fmt.vol(v, un(q, o)), c: tone(p, q) });
   const book = (side, i, g) => [
     { k: `${side}${i + 1}p`, g, h: "Giá {n}", n: i + 1, cls: i ? "lv23" : "", f: q => P(q, q[side === "b" ? "bids" : "asks"][i].p) },
     { k: `${side}${i + 1}v`, g, h: "KL {n}", n: i + 1, cls: i ? "lv23" : "", f: (q, o) => { const l = q[side === "b" ? "bids" : "asks"][i]; return V(q, l.v, l.p, o); } },
@@ -31,13 +33,17 @@ const BoardCols = (() => {
     { k: "chg", g: "Khớp lệnh", h: "+/-", sort: "chg", cls: "mt", f: q => ({ t: Fmt.chg(q, q.chg), c: tone(q.last, q) }) },
     { k: "pct", g: "Khớp lệnh", h: "%", sort: "pct", cls: "mt", f: q => ({ t: Fmt.pct(q, q.pct), c: tone(q.last, q) }) },
     ...book("a", 0, "Bên bán"), ...book("a", 1, "Bên bán"), ...book("a", 2, "Bên bán"),
-    { k: "totVol", h: "Tổng KL", sort: "totVol", f: (q, o) => ({ t: Fmt.vol(q.totVol, o.unit), c: "" }) },
+    { k: "totVol", h: "Tổng KL", sort: "totVol", f: (q, o) => ({ t: Fmt.vol(q.totVol, un(q, o)), c: "" }) },
     { k: "high", g: "Giá", h: "Cao", opt: "hl", f: q => P(q, q.high) },
     { k: "low", g: "Giá", h: "Thấp", opt: "hl", f: q => P(q, q.low) },
     { k: "avg", g: "Giá", h: "TB", opt: "hl", f: q => P(q, q.avg) },
-    { k: "fBuy", g: "ĐTNN", h: "Mua", sort: "fBuy", opt: "fr", f: (q, o) => ({ t: Fmt.vol(q.fBuy, o.unit), c: "" }) },
-    { k: "fSell", g: "ĐTNN", h: "Bán", sort: "fSell", opt: "fr", f: (q, o) => ({ t: Fmt.vol(q.fSell, o.unit), c: "" }) },
+    { k: "fBuy", g: "ĐTNN", h: "Mua", sort: "fBuy", opt: "fr", f: (q, o) => ({ t: Fmt.vol(q.fBuy, un(q, o)), c: "" }) },
+    { k: "fSell", g: "ĐTNN", h: "Bán", sort: "fSell", opt: "fr", f: (q, o) => ({ t: Fmt.vol(q.fSell, un(q, o)), c: "" }) },
     { k: "room", g: "ĐTNN", h: "Room", opt: "fr", f: q => ({ t: Fmt.big(q.room), c: "" }) },
+    // Futures tab only (opt "fut"): open interest, basis vs VN30 (set by the poll), maturity.
+    { k: "oi", g: "Phái sinh", h: "OI", opt: "fut", f: q => ({ t: q.fut ? Fmt.en(q.fut.oi) : "", c: "" }) },
+    { k: "basis", g: "Phái sinh", h: "Basis", opt: "fut", f: q => { const b = q.fut ? q.fut.basis : NaN; return { t: Number.isFinite(b) ? Fmt.signed(b, 1) : "", c: b > 0 ? "up" : b < 0 ? "down" : "" }; } },
+    { k: "mature", g: "Phái sinh", h: "Đáo hạn", opt: "fut", f: q => ({ t: q.fut ? q.fut.mature : "", c: "" }) },
     // Own target price (Notes.decorate sets q.target) and the distance to it from the current price.
     { k: "target", g: "Của bạn", h: "Mục tiêu", opt: "tg", f: q => ({ t: q.target ? Fmt.price(q.target) : "", c: "" }) },
     { k: "toTarget", g: "Của bạn", h: "Còn", opt: "tg", f: q => { const p = q.last || q.ref, u = q.target > 0 && p > 0 ? (q.target / p - 1) * 100 : null;

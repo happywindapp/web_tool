@@ -174,6 +174,29 @@
     footer.status { max-height:12dvh; overflow-y:auto; padding:4px 12px; }
   }
   @media (max-width: 640px) and (max-height: 700px) { .ixw, .ix-f { display:none; } }
+
+  /* Full chart layout 2 / 4 (ChartGrid): main chart + compact cells with their own ticker / interval. */
+  .chart-dlg .cgrid { flex:1 1 0; min-height:0; display:grid; gap:6px; margin:0 8px; grid-template-columns:minmax(0, 1fr); grid-template-rows:minmax(0, 1fr); }
+  .chart-dlg .cgrid .cbox { margin:0; min-height:0; }
+  .cgrid[data-n="2"] { grid-template-columns:repeat(2, minmax(0, 1fr)); }
+  .cgrid[data-n="4"] { grid-template-columns:repeat(2, minmax(0, 1fr)); grid-template-rows:repeat(2, minmax(0, 1fr)); }
+  .ccell { display:flex; flex-direction:column; min-width:0; min-height:0; border:1px solid var(--line); border-radius:6px; }
+  .ccell-bar { display:flex; align-items:center; gap:6px; padding:3px 6px; font-size:12px; white-space:nowrap; overflow:hidden; font-variant-numeric:tabular-nums; }
+  .ccell-bar input { width:7em; padding:2px 6px; border:1px solid var(--line); border-radius:6px; background:var(--btn); color:var(--ink); font:inherit; }
+  @media (max-width: 900px) { .cgrid[data-n="2"] { grid-template-columns:minmax(0, 1fr); grid-template-rows:repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 640px) { .ccell-bar input { font-size:16px; width:6em; } }
+
+  /* "Dòng tiền" tab, backtest table, correlation dialog. */
+  .flow-bar-ctl label { display:flex; align-items:center; gap:4px; }
+  table.flow td.flow-bar { width:28%; } .flow-bar i { display:block; height:8px; border-radius:2px; } .flow-bar i.upb { background:var(--up); } .flow-bar i.downb { background:var(--down); }
+  .bt-win { font-size:11.5px; color:var(--muted); } .bt-win.ok { color:var(--up); font-weight:600; } .bt-win.no { color:var(--down); font-weight:600; }
+  .bt-dot { font-style:normal; } .bt-dot.up { color:var(--up); } .bt-dot.down { color:var(--down); } .bt-dot.warn { color:#eab308; }
+  table.bt tr.bt-base td { border-top:2px solid var(--line); color:var(--muted); }
+  dialog.tool-dlg[data-kind="corr"] { width:min(1100px, 96vw); }
+  @media (max-width: 640px) { dialog.tool-dlg[data-kind="corr"] { width:100vw; } }
+  table.corr th, table.corr td { text-align:center; font-variant-numeric:tabular-nums; } table.corr td { min-width:3.2em; }
+  table.corr tbody th { position:sticky; left:0; background:var(--panel); }
+  .corr-pairs { display:flex; flex-wrap:wrap; gap:4px 24px; padding:0 12px; font-size:13px; } .corr-pairs ul { margin:4px 0; padding-left:18px; }
   /* Technical chart: compact chart in the detail pane + near full-screen dialog. */
   .mini-chart { border-top:1px solid var(--line); padding:6px 0 4px; }
   .cbar { display:flex; flex-wrap:wrap; gap:6px; align-items:center; padding:0 12px 6px; }
@@ -509,6 +532,7 @@
   <button id="share" title="Chép link chứa tab + danh mục + tuỳ chọn (nằm sau dấu #, không gửi lên máy chủ)">🔗 Chia sẻ link</button>
   <button id="alertsBtn" title="Cảnh báo giá cho các mã (lưu trong trình duyệt này)">🔔 Cảnh báo</button>
   <button id="calBtn" title="Cổ tức, ĐHCĐ, phát hành sắp tới của các mã trong ★ Danh mục">📅 Lịch sự kiện</button>
+<button id="corrBtn" title="Tương quan giá giữa các mã trong ★ Danh mục và VNINDEX">🔗 Tương quan</button>
   <button id="undo" title="Lấy lại danh mục trước khi nạp mẫu / link chia sẻ" hidden>↶ Khôi phục danh mục trước</button>
   <label class="chk" title="Giao diện sáng / tối">Giao diện
     <select id="theme"><option value="auto">Tự động</option><option value="light">Sáng</option><option value="dark">Tối</option></select></label>
@@ -573,7 +597,7 @@
   <div class="dlg-head"><span id="dlgTitle"></span><button id="dlgClose">✕</button></div>
   <div class="cbar" id="fullBar"></div>
   <div class="ichips" id="fullChips"></div>
-  <div class="cbox"><div class="clegend" id="fullLegend"></div><div class="chost" id="fullHost"></div><div class="ctip" id="fullTip" hidden></div><p class="cmsg" id="fullMsg" hidden></p></div>
+  <div class="cgrid" id="fullGrid" data-n="1"><div class="cbox"><div class="clegend" id="fullLegend"></div><div class="chost" id="fullHost"></div><div class="ctip" id="fullTip" hidden></div><p class="cmsg" id="fullMsg" hidden></p></div></div>
   <div class="dlg-foot muted" id="fullStatus"></div>
 </dialog>
 <div class="author">
@@ -846,10 +870,10 @@ I18n.add({
   "Giá tính bằng nghìn đồng. Chỉ báo khi trang này đang mở; mỗi cảnh báo báo tối đa 1 lần mỗi ngày; lưu trong trình duyệt này.": "Prices in thousand VND. Alerts only fire while this page is open, at most once a day each; stored in this browser.",
   "Chưa có cảnh báo nào.": "No alerts yet.", "Lịch sự kiện danh mục": "Watchlist event calendar", "Đang tải sự kiện của {n} mã…": "Loading events for {n} tickers…",
   "Sự kiện có ngày GDKHQ / hiệu lực từ 3 ngày trước trở đi của các mã trong ★ Danh mục (tối đa {n} mã).": "Events with an ex-date / effective date from 3 days ago onwards for tickers in the ★ watchlist (up to {n} tickers).",
-  "Không có sự kiện sắp tới.": "No upcoming events.", "🔔 {s}: {c} {v} — giá {p} ({pct})": "🔔 {s}: {c} {v} — price {p} ({pct})",
+  "Không có sự kiện sắp tới.": "No upcoming events.", "🔔 {s}: {c} — giá {p} ({pct})": "🔔 {s}: {c} — price {p} ({pct})",
   "Ghi chú & giá mục tiêu của bạn": "Your notes & target price", "Giá mục tiêu (nghìn đồng)": "Target price (thousand VND)", "Lưu ghi chú": "Save note",
   "Luận điểm đầu tư, điều kiện mua/bán… (lưu trong trình duyệt này)": "Investment thesis, buy/sell conditions… (stored in this browser)",
-  "Nhập mã đang niêm yết (không dùng chỉ số) và giá trị số cho cảnh báo.": "Enter a listed ticker (not an index) and a numeric value for the alert.", "Cảnh báo": "Alerts",
+  "Nhập mã đang niêm yết (không dùng chỉ số) và giá trị hợp lệ cho cảnh báo (kỳ MA 2–250, ngưỡng RSI 1–99).": "Enter a listed ticker (not an index) and a valid value for the alert (MA period 2–250, RSI level 1–99).", "Cảnh báo": "Alerts",
   "Thêm {n} mã vào danh mục ★?": "Add {n} tickers to the ★ watchlist?", "So sánh": "Compare",
   "So sánh tối đa 5 mã hoặc chỉ số, cách nhau bằng dấu phẩy (thang % thay đổi)": "Compare up to 5 tickers or indices, comma-separated (% change scale)",
   "🔔 Cảnh báo": "🔔 Alerts", "📅 Lịch sự kiện": "📅 Event calendar", "Cảnh báo giá cho các mã (lưu trong trình duyệt này)": "Price alerts for tickers (stored in this browser)",
@@ -1229,6 +1253,46 @@ I18n.add({
   "Khuyến nghị do tool tự tính theo quy tắc từ giá lịch sử, chỉ báo kỹ thuật, định giá và giá mục tiêu CTCK — không phải tư vấn đầu tư; luôn tự quyết định và quản lý rủi ro.":
     "Recommendation computed by the tool from price history, technical indicators, valuation and broker targets using fixed rules — not investment advice; always decide for yourself and manage risk.",
 });
+// English for the backtest table, technical-signal alerts, "Dòng tiền" tab, futures tab, correlation dialog and the Full chart multi layout.
+I18n.add({
+  "Tín hiệu": "Signal", "Số lần": "Count", "Sau {n} phiên": "After {n} sessions", "Lần gần nhất": "Last seen", "Mọi phiên (tham chiếu)": "All sessions (baseline)",
+  "tăng {p}%": "up {p}%", "Kiểm chứng tín hiệu (backtest {y} năm)": "Signal backtest ({y} years)",
+  "Với mã này, tín hiệu đáng tin nhất là “{s}”: đúng hướng {w}% số lần sau 20 phiên ({n} lần).": "For this ticker the most reliable signal is “{s}”: right direction {w}% of the time after 20 sessions ({n} times).",
+  "Chưa có tín hiệu nào đúng hướng ổn định (≥ 55% sau 20 phiên, ≥ 5 lần) với mã này — đừng dựa vào một tín hiệu đơn lẻ.": "No signal has been reliably right for this ticker (≥ 55% after 20 sessions, ≥ 5 times) — don't rely on a single signal.",
+  "Dữ liệu ngày {a} – {b} · SMA 20/50, RSI 14, MACD 12-26-9, Stoch 14, ADX 14, SAR.": "Daily data {a} – {b} · SMA 20/50, RSI 14, MACD 12-26-9, Stoch 14, ADX 14, SAR.",
+  "Ô = lãi / lỗ trung bình sau N phiên kể từ giá đóng cửa ngày có tín hiệu · % = tỷ lệ lần giá đi đúng hướng tín hiệu (xanh ≥ 60%, đỏ ≤ 40%, cần ≥ 5 lần). Chưa trừ phí, thuế; quá khứ không bảo đảm tương lai.":
+    "Cell = average gain / loss N sessions after the close on the signal day · % = share of times price moved the signal's way (green ≥ 60%, red ≤ 40%, needs ≥ 5 times). Before fees and taxes; the past does not guarantee the future.",
+  "Không có giao cắt nào trong giai đoạn này.": "No crosses in this period.",
+
+  "Cảnh báo giá & tín hiệu kỹ thuật": "Price & technical-signal alerts", "Giá": "Price", "Tín hiệu kỹ thuật (nến ngày)": "Technical signals (daily candles)",
+  "Giá cắt lên MA {v}": "Price crosses above MA {v}", "Giá cắt xuống MA {v}": "Price crosses below MA {v}", "RSI 14 vượt lên {v}": "RSI 14 rises above {v}", "RSI 14 xuống dưới {v}": "RSI 14 falls below {v}",
+  "MACD cắt lên đường tín hiệu": "MACD crosses above its signal line", "MACD cắt xuống đường tín hiệu": "MACD crosses below its signal line",
+  "Giá vào vùng mua hôm nay (tab Khuyến nghị)": "Price enters today's buy zone (Recommendations tab)", "Giá thủng dừng lỗ trung hạn (tab Khuyến nghị)": "Price breaks the medium-term stop (Recommendations tab)",
+  "Tín hiệu kỹ thuật: so giá khớp hiện tại với giá đóng cửa hôm qua trên nến ngày — báo khi giao cắt xảy ra trong phiên hôm nay (MA = kỳ bạn nhập, RSI = ngưỡng bạn nhập).":
+    "Technical signals compare the live price with yesterday's close on daily candles — they fire when the cross happens during today's session (MA = the period you enter, RSI = the level you enter).",
+
+  "Dòng tiền": "Money flow", "Số phiên": "Sessions", "Sàn giao dịch": "Exchange", "Tất cả": "All", "Khối ngoại": "Foreign investors", "Tự doanh CTCK": "Proprietary trading (brokers)",
+  "Ròng {n} tỷ · mua {b} tỷ · bán {s} tỷ": "Net {n} bn · bought {b} bn · sold {s} bn", "Top mua ròng (tỷ đồng)": "Top net buys (VND bn)", "Top bán ròng (tỷ đồng)": "Top net sells (VND bn)",
+  "Tự doanh công bố sau phiên khoảng 1 ngày, chủ yếu cổ phiếu HOSE.": "Proprietary flows are published about 1 day after the session, mostly HOSE stocks.",
+  "Đang tải dòng tiền {n} phiên (khoảng 3 MB)…": "Loading {n} sessions of flows (about 3 MB)…", "Đang tải dòng tiền {n} phiên…": "Loading {n} sessions of flows…",
+  "Nguồn: VNDirect finfo, cuối ngày (không phải realtime). Bấm mã để xem chi tiết.": "Source: VNDirect finfo, end of day (not real time). Click a ticker for details.", "Không có dữ liệu.": "No data.",
+
+  "Phái sinh": "Futures", "OI": "OI", "Basis": "Basis", "Đáo hạn": "Maturity", "HĐ mở (OI)": "Open interest", "Basis so với VN30": "Basis vs VN30",
+
+  "Tương quan giá danh mục": "Watchlist price correlation", "3 tháng": "3 months", "6 tháng": "6 months", "1 năm": "1 year",
+  "Các mã đi cùng nhau rất sát — danh mục tập trung rủi ro, nên thêm mã khác ngành.": "These tickers move closely together — the watchlist concentrates risk; consider other sectors.",
+  "Mức tương quan trung bình — đa dạng hoá ở mức vừa.": "Moderate correlation — moderately diversified.", "Tương quan thấp — danh mục được đa dạng hoá tốt.": "Low correlation — well diversified.",
+  "Tương quan trung bình giữa các mã: {r}.": "Average correlation between tickers: {r}.", "Bỏ qua (không đủ dữ liệu): {s}": "Skipped (not enough data): {s}",
+  "Đi cùng nhau nhất": "Move together most", "Bù trừ nhau tốt nhất": "Best offsetting pairs",
+  "Hệ số tương quan Pearson của % thay đổi giá ngày, chỉ tính các phiên cả hai mã cùng có giá (≥ {n} phiên): 1 = luôn cùng chiều, 0 = không liên quan, −1 = ngược chiều. Hàng / cột {b} cho biết mã đi theo thị trường chung đến mức nào.":
+    "Pearson correlation of daily % price changes over sessions both tickers traded (≥ {n} sessions): 1 = always together, 0 = unrelated, −1 = opposite. The {b} row / column shows how closely each ticker follows the market.",
+  "Cần ít nhất 2 mã trong ★ Danh mục để tính tương quan.": "Add at least 2 tickers to the ★ Watchlist to compute correlation.", "Đang tải giá {n} mã…": "Loading prices of {n} tickers…",
+  "Không tải được dữ liệu giá (VNDirect). Thử lại sau.": "Could not load prices (VNDirect). Try again later.", "Chỉ tính {n} mã đầu tiên của danh mục.": "Only the first {n} watchlist tickers are used.",
+  "Tương quan giá giữa các mã trong ★ Danh mục và VNINDEX": "Price correlation between ★ Watchlist tickers and VNINDEX", "🔗 Tương quan": "🔗 Correlation",
+
+  "▢ 1 biểu đồ": "▢ 1 chart", "▥ 2 biểu đồ": "▥ 2 charts", "▦ 4 biểu đồ": "▦ 4 charts", "Bố cục: thêm biểu đồ phụ, mỗi ô tự chọn mã và khung nến": "Layout: add side charts, each with its own ticker and interval",
+  "Mã hoặc chỉ số (để trống = mã đang xem)": "Ticker or index (empty = the ticker on screen)",
+});
 // English for the shared core modules (ThemePicker markup, SavedSessions, ColFilter) — included by every tool that uses them.
 I18n.add({
   "Thêm thao tác": "More actions",
@@ -1459,7 +1523,7 @@ const WatchParse = (() => {
 const QuoteModel = (() => {
   const num = v => { const n = parseFloat(v); return Number.isFinite(n) ? n : 0; };
   const cents = x => Math.round(x * 100);
-  const EX = { STO: "HOSE", STX: "HNX", UPX: "UPCOM" };
+  const EX = { STO: "HOSE", STX: "HNX", UPX: "UPCOM", DVX: "PS" };
 
   // "54.2|6850|d" → { p: 54.2, v: 6850 }; ATO/ATC orders keep their label as p.
   function level(s) {
@@ -1479,6 +1543,8 @@ const QuoteModel = (() => {
       fBuy: num(r.fBVol), fSell: num(r.fSVolume), room: num(r.fRoom),
       cw: r.sType === "W" ? { underlying: String(r.CWUnderlying || ""), issuer: String(r.CWIssuerName || ""), strike: num(r.CWExcersisePrice),
         ratio: String(r.CWExerciseRatio || ""), maturity: String(r.CWMaturityDate || ""), lastTrade: String(r.CWLastTradingDate || "") } : null,
+      // VN30 index futures (getpsalldatalsnapshot): open interest in contracts, maturity "dd/mm/yyyy"; basis is filled in by the poll.
+      fut: r.sType === "D" ? { oi: num(r.oi), mature: String(r.matureDate || ""), basis: NaN } : null,
     };
   }
 
@@ -1544,7 +1610,9 @@ const Fmt = (() => {
 const BoardCols = (() => {
   const tone = QuoteModel.tone;
   const P = (q, p) => ({ t: Fmt.price(p), c: tone(p, q) });
-  const V = (q, v, p, o) => ({ t: Fmt.vol(v, o.unit), c: tone(p, q) });
+  // Futures volumes are contracts, never shown ×10.
+  const un = (q, o) => q.fut ? "" : o.unit;
+  const V = (q, v, p, o) => ({ t: Fmt.vol(v, un(q, o)), c: tone(p, q) });
   const book = (side, i, g) => [
     { k: `${side}${i + 1}p`, g, h: "Giá {n}", n: i + 1, cls: i ? "lv23" : "", f: q => P(q, q[side === "b" ? "bids" : "asks"][i].p) },
     { k: `${side}${i + 1}v`, g, h: "KL {n}", n: i + 1, cls: i ? "lv23" : "", f: (q, o) => { const l = q[side === "b" ? "bids" : "asks"][i]; return V(q, l.v, l.p, o); } },
@@ -1561,13 +1629,17 @@ const BoardCols = (() => {
     { k: "chg", g: "Khớp lệnh", h: "+/-", sort: "chg", cls: "mt", f: q => ({ t: Fmt.chg(q, q.chg), c: tone(q.last, q) }) },
     { k: "pct", g: "Khớp lệnh", h: "%", sort: "pct", cls: "mt", f: q => ({ t: Fmt.pct(q, q.pct), c: tone(q.last, q) }) },
     ...book("a", 0, "Bên bán"), ...book("a", 1, "Bên bán"), ...book("a", 2, "Bên bán"),
-    { k: "totVol", h: "Tổng KL", sort: "totVol", f: (q, o) => ({ t: Fmt.vol(q.totVol, o.unit), c: "" }) },
+    { k: "totVol", h: "Tổng KL", sort: "totVol", f: (q, o) => ({ t: Fmt.vol(q.totVol, un(q, o)), c: "" }) },
     { k: "high", g: "Giá", h: "Cao", opt: "hl", f: q => P(q, q.high) },
     { k: "low", g: "Giá", h: "Thấp", opt: "hl", f: q => P(q, q.low) },
     { k: "avg", g: "Giá", h: "TB", opt: "hl", f: q => P(q, q.avg) },
-    { k: "fBuy", g: "ĐTNN", h: "Mua", sort: "fBuy", opt: "fr", f: (q, o) => ({ t: Fmt.vol(q.fBuy, o.unit), c: "" }) },
-    { k: "fSell", g: "ĐTNN", h: "Bán", sort: "fSell", opt: "fr", f: (q, o) => ({ t: Fmt.vol(q.fSell, o.unit), c: "" }) },
+    { k: "fBuy", g: "ĐTNN", h: "Mua", sort: "fBuy", opt: "fr", f: (q, o) => ({ t: Fmt.vol(q.fBuy, un(q, o)), c: "" }) },
+    { k: "fSell", g: "ĐTNN", h: "Bán", sort: "fSell", opt: "fr", f: (q, o) => ({ t: Fmt.vol(q.fSell, un(q, o)), c: "" }) },
     { k: "room", g: "ĐTNN", h: "Room", opt: "fr", f: q => ({ t: Fmt.big(q.room), c: "" }) },
+    // Futures tab only (opt "fut"): open interest, basis vs VN30 (set by the poll), maturity.
+    { k: "oi", g: "Phái sinh", h: "OI", opt: "fut", f: q => ({ t: q.fut ? Fmt.en(q.fut.oi) : "", c: "" }) },
+    { k: "basis", g: "Phái sinh", h: "Basis", opt: "fut", f: q => { const b = q.fut ? q.fut.basis : NaN; return { t: Number.isFinite(b) ? Fmt.signed(b, 1) : "", c: b > 0 ? "up" : b < 0 ? "down" : "" }; } },
+    { k: "mature", g: "Phái sinh", h: "Đáo hạn", opt: "fut", f: q => ({ t: q.fut ? q.fut.mature : "", c: "" }) },
     // Own target price (Notes.decorate sets q.target) and the distance to it from the current price.
     { k: "target", g: "Của bạn", h: "Mục tiêu", opt: "tg", f: q => ({ t: q.target ? Fmt.price(q.target) : "", c: "" }) },
     { k: "toTarget", g: "Của bạn", h: "Còn", opt: "tg", f: q => { const p = q.last || q.ref, u = q.target > 0 && p > 0 ? (q.target / p - 1) * 100 : null;
@@ -2272,6 +2344,143 @@ const TradePlan = (() => {
 
   return { tick, round, timing, fromFrame, longTerm, position, liquidity, recent };
 })();
+// Pure: how price moved 5 / 20 / 60 sessions after each kind of important cross in the past (daily bars), against the average of all sessions.
+const SignalBacktest = (() => {
+  const H = [5, 20, 60], YEARS = 5;
+  const SET = [{ id: "sma", p: { n: 20 } }, { id: "sma", p: { n: 50 } }, { id: "rsi", p: { n: 14 } }, { id: "macd", p: { f: 12, s: 26, g: 9 } },
+    { id: "stoch", p: { n: 14, k: 3, d: 3 } }, { id: "adx", p: { n: 14 } }, { id: "psar", p: { s: 0.02, m: 0.2 } }];
+
+  const stat = rets => {
+    if (!rets.length) return null;
+    return { n: rets.length, avg: rets.reduce((s, r) => s + r, 0) / rets.length, up: rets.filter(r => r > 0).length / rets.length * 100 };
+  };
+  const ret = (bars, i, h) => i + h < bars.length && bars[i].close > 0 ? (bars[i + h].close / bars[i].close - 1) * 100 : null;
+
+  // bars: daily ascending → { from, to, base: { h: stat }, rows: [{ kind, tone, n, last, h: { h: stat & win } }] } sorted by count; null when < 1 year of data.
+  function run(bars, years = YEARS) {
+    if (!bars || bars.length < 260) return null;
+    const start = Math.max(60, bars.findIndex(b => b.time >= bars[bars.length - 1].time - years * 365.25 * 86400));
+    const crosses = ChartCrosses.detect(bars, Indicators.compute(SET, bars), start), by = new Map();
+    for (const x of crosses) {
+      const r = by.get(x.kind) || { kind: x.kind, tone: x.tone, n: 0, last: 0, rets: Object.fromEntries(H.map(h => [h, []])) };
+      r.n++; r.last = x.time;
+      for (const h of H) { const v = ret(bars, x.i, h); if (v !== null) r.rets[h].push(v); }
+      by.set(x.kind, r);
+    }
+    const base = {};
+    for (const h of H) { const all = []; for (let i = start; i < bars.length; i++) { const v = ret(bars, i, h); if (v !== null) all.push(v); } base[h] = stat(all); }
+    const rows = [...by.values()].map(r => ({ kind: r.kind, tone: r.tone, n: r.n, last: r.last, h: Object.fromEntries(H.map(h => {
+      const s = stat(r.rets[h]);
+      // "win" = price went the way the signal points; warning-type signals have no direction.
+      return [h, s && { ...s, win: r.tone === "up" ? s.up : r.tone === "down" ? 100 - s.up : null }];
+    })) })).sort((a, b) => b.n - a.n || a.kind.localeCompare(b.kind));
+    return { from: bars[start].time, to: bars[bars.length - 1].time, base, rows };
+  }
+
+  return { run, H, YEARS };
+})();
+// Pure: per-ticker state for technical-signal alerts — yesterday's indicator values vs the same indicators with today's live price appended.
+const SignalState = (() => {
+  const KEEP = 400;
+  const lastOf = a => { for (let i = a.length - 1; i >= 0; i--) if (Number.isFinite(a[i])) return a[i]; return NaN; };
+  const at = (a, i) => Number.isFinite(a[i]) ? a[i] : NaN;
+
+  // Daily bars without today's (possibly partial) bar; day = "yyyymmdd" Vietnam date.
+  function completed(bars, day) {
+    const t = Date.UTC(+day.slice(0, 4), +day.slice(4, 6) - 1, +day.slice(6)) / 1000;
+    return bars.filter(b => b.time < t).slice(-KEEP);
+  }
+
+  // Trade-plan zones from completed bars (fixed for the day): today's buy zone + medium-term stop.
+  function plan(done, ex) {
+    if (done.length < 60) return null;
+    const today = TradePlan.fromFrame(TechOutlook.frame(done, "D", [1, 5]), ex, null), med = TradePlan.fromFrame(TechOutlook.frame(ChartRange.shape(done, "1W"), "W", [1, 4]), ex, null);
+    return today && med ? { lo: today.lo, hi: today.hi, stop: med.stop } : null;
+  }
+
+  // done: completed daily bars; p: zones from plan(); last: live price → { prev, ma(n), rsi, macd, plan } where pairs are [yesterday, now].
+  function of(done, p, last) {
+    if (done.length < 30 || !(last > 0)) return null;
+    const c = done.map(b => b.close), live = [...c, last], n = c.length;
+    const m0 = TA.macd(c), m1 = TA.macd(live);
+    return {
+      prev: c[n - 1], plan: p,
+      ma: k => [lastOf(TA.sma(c, k)), at(TA.sma(live, k), n)],
+      rsi: [lastOf(TA.rsi(c, 14)), at(TA.rsi(live, 14), n)],
+      macd: [at(m0.line, n - 1) - at(m0.signal, n - 1), at(m1.line, n) - at(m1.signal, n)],
+    };
+  }
+
+  return { completed, plan, of };
+})();
+// Pure: foreign / proprietary net-flow ranking over the last N sessions (values in VND).
+const FlowRank = (() => {
+  // raw finfo rows (foreigns: tradingDate/buyVal/sellVal · proprietary: date/buyingVal/sellingVal) → { date, code, floor, net, buy, sell }.
+  const norm = r => ({ date: String(r.tradingDate || r.date || ""), code: String(r.code || ""), floor: String(r.floor || ""),
+    net: +r.netVal || 0, buy: +(r.buyVal ?? r.buyingVal) || 0, sell: +(r.sellVal ?? r.sellingVal) || 0 });
+
+  // Newest n distinct dates present in the rows.
+  const lastDates = (rows, n) => [...new Set(rows.map(r => r.date))].sort().reverse().slice(0, n);
+
+  // Rows of the given dates (floor "" = all) → one entry per ticker with summed values.
+  function sum(rows, dates, floor = "") {
+    const keep = new Set(dates), m = new Map();
+    for (const r of rows) {
+      if (!keep.has(r.date) || (floor && r.floor !== floor)) continue;
+      const x = m.get(r.code) || { code: r.code, floor: r.floor, net: 0, buy: 0, sell: 0 };
+      x.net += r.net; x.buy += r.buy; x.sell += r.sell;
+      m.set(r.code, x);
+    }
+    return [...m.values()];
+  }
+
+  function rank(list, n = 15) {
+    const tot = list.reduce((s, x) => ({ net: s.net + x.net, buy: s.buy + x.buy, sell: s.sell + x.sell }), { net: 0, buy: 0, sell: 0 });
+    return { buy: list.filter(x => x.net > 0).sort((a, b) => b.net - a.net).slice(0, n), sell: list.filter(x => x.net < 0).sort((a, b) => a.net - b.net).slice(0, n), tot };
+  }
+
+  return { norm, lastDates, sum, rank };
+})();
+// Pure: Pearson correlation of daily returns between tickers (dates matched pairwise), average and the most / least correlated pairs.
+const Correlation = (() => {
+  const MIN = 20;
+
+  // Daily bars → Map(time → % return vs the previous bar).
+  function returns(bars) {
+    const m = new Map();
+    for (let i = 1; i < bars.length; i++) if (bars[i - 1].close > 0) m.set(bars[i].time, bars[i].close / bars[i - 1].close - 1);
+    return m;
+  }
+
+  // Two return maps → r on their common dates (null when fewer than MIN shared sessions or a flat series).
+  function pearson(a, b) {
+    const xs = [], ys = [];
+    for (const [t, x] of a) if (b.has(t)) { xs.push(x); ys.push(b.get(t)); }
+    const n = xs.length;
+    if (n < MIN) return null;
+    const mx = xs.reduce((s, v) => s + v, 0) / n, my = ys.reduce((s, v) => s + v, 0) / n;
+    let sxy = 0, sxx = 0, syy = 0;
+    for (let i = 0; i < n; i++) { const dx = xs[i] - mx, dy = ys[i] - my; sxy += dx * dy; sxx += dx * dx; syy += dy * dy; }
+    return sxx && syy ? sxy / Math.sqrt(sxx * syy) : null;
+  }
+
+  // series: [{ sym, bars }] → { syms, m (r matrix, diagonal 1), avg (pairs without the first = benchmark), pairs (sorted high → low) }.
+  function matrix(series, benchFirst = true) {
+    const rets = series.map(s => returns(s.bars)), k = series.length, m = Array.from({ length: k }, () => new Array(k).fill(null)), pairs = [];
+    for (let i = 0; i < k; i++) {
+      m[i][i] = 1;
+      for (let j = i + 1; j < k; j++) {
+        const r = pearson(rets[i], rets[j]);
+        m[i][j] = m[j][i] = r;
+        if (r !== null && (!benchFirst || i > 0)) pairs.push({ a: series[i].sym, b: series[j].sym, r });
+      }
+    }
+    pairs.sort((p, q) => q.r - p.r);
+    return { syms: series.map(s => s.sym), m, pairs, avg: pairs.length ? pairs.reduce((s, p) => s + p.r, 0) / pairs.length : null };
+  }
+
+  return { returns, pearson, matrix, MIN };
+})();
 // Pure: one indicator drawn on a fixed simulated series (rise → top → fall → range → breakout) as an SVG string, for the indicator guide.
 const IndIllus = (() => {
   const N = 160, W = 560;
@@ -2754,14 +2963,36 @@ const Mkt = (() => {
 
   return { value, foreignNet, breadth, top, sectorPerf, row, screen, FIELDS, PRESETS, treemap };
 })();
-// Pure: price-alert rules (price ≥ / ≤, day change ≥ +x % / ≤ −x %) and own-target upside.
+// Pure: price-alert rules (price ≥ / ≤, day change ≥ +x % / ≤ −x %), technical-signal rules (MA / RSI / MACD crosses, trade-plan zones) and own-target upside.
 const AlertRule = (() => {
-  const TYPES = ["above", "below", "pctUp", "pctDown"];
-  const valid = a => !!a && TYPES.includes(a.type) && Number.isFinite(+a.value) && typeof a.sym === "string";
+  const PRICE = ["above", "below", "pctUp", "pctDown"], SIGNAL = ["maUp", "maDown", "rsiUp", "rsiDown", "macdUp", "macdDown", "planBuy", "planStop"];
+  const TYPES = [...PRICE, ...SIGNAL];
+  const isSignal = t => SIGNAL.includes(t);
+  const range = { maUp: [2, 250], maDown: [2, 250], rsiUp: [1, 99], rsiDown: [1, 99] };
+  function valid(a) {
+    if (!a || !TYPES.includes(a.type) || !Number.isFinite(+a.value) || typeof a.sym !== "string") return false;
+    const r = range[a.type];
+    return !r || (+a.value >= r[0] && +a.value <= r[1]);
+  }
+
+  // Signals compare yesterday's close with the live price: s = SignalState.of(…) for the ticker (null until its daily bars are loaded).
+  function signalHit(a, q, s) {
+    if (!s) return false;
+    const v = +a.value, p = q.last, [x0, x1] = a.type.startsWith("ma") ? s.ma(v) : a.type.startsWith("rsi") ? s.rsi : a.type.startsWith("macd") ? s.macd : [];
+    if (a.type === "maUp") return s.prev <= x0 && p > x1;
+    if (a.type === "maDown") return s.prev >= x0 && p < x1;
+    if (a.type === "rsiUp") return x0 <= v && x1 > v;
+    if (a.type === "rsiDown") return x0 >= v && x1 < v;
+    if (a.type === "macdUp") return x0 <= 0 && x1 > 0;
+    if (a.type === "macdDown") return x0 >= 0 && x1 < 0;
+    if (a.type === "planBuy") return !!s.plan && p >= s.plan.lo && p <= s.plan.hi;
+    return !!s.plan && p < s.plan.stop;
+  }
 
   // q: board quote (last / pct). No trade yet → never fires.
-  function hit(a, q) {
+  function hit(a, q, sig) {
     if (!valid(a) || !q || !q.last) return false;
+    if (isSignal(a.type)) return signalHit(a, q, sig);
     const v = +a.value;
     if (a.type === "above") return q.last >= v;
     if (a.type === "below") return q.last <= v;
@@ -2770,9 +3001,10 @@ const AlertRule = (() => {
   }
 
   // Alerts that fire now and have not fired on this Vietnam date yet → marks them fired (returns new objects, input untouched).
-  function check(list, quotes, day) {
+  function check(list, quotes, day, sigOf = () => null) {
     const hits = [], next = list.map(a => {
-      if (a.fired === day || !hit(a, quotes.get(a.sym))) return a;
+      const q = quotes.get(a.sym);
+      if (a.fired === day || !hit(a, q, isSignal(a.type) && q ? sigOf(a.sym, q) : null)) return a;
       const b = { ...a, fired: day };
       hits.push(b);
       return b;
@@ -2782,7 +3014,7 @@ const AlertRule = (() => {
 
   const upside = (target, price) => target > 0 && price > 0 ? (target / price - 1) * 100 : null;
 
-  return { TYPES, valid, hit, check, upside };
+  return { TYPES, PRICE, SIGNAL, isSignal, valid, hit, check, upside };
 })();
 // Pure watchlist file format: export JSON (tickers + their notes / alerts) and import from that JSON, plain text or CSV.
 const WatchFile = (() => {
@@ -2840,9 +3072,13 @@ const Feed = (() => {
   // Basket / exchange symbol list: VN30, VN100, HNX30, hose, hnx, upcom… (unknown key → empty body).
   const list = async key => [...new Set(arr(await get("getlistckindex/" + encodeURIComponent(key))).filter(WatchParse.isSymbol))];
 
+  // Derivative codes (KRX style, e.g. 41I1GB000) start with a digit and come from the futures snapshot.
+  const isFuture = s => /^\d/.test(s);
+
   async function quotes(symbols) {
-    const parts = [];
-    for (let i = 0; i < symbols.length; i += CHUNK) parts.push(get("getliststockdata/" + symbols.slice(i, i + CHUNK).join(",")));
+    const parts = [], stocks = symbols.filter(s => !isFuture(s)), fut = symbols.filter(isFuture);
+    for (let i = 0; i < stocks.length; i += CHUNK) parts.push(get("getliststockdata/" + stocks.slice(i, i + CHUNK).join(",")));
+    if (fut.length) parts.push(get("getpsalldatalsnapshot/" + fut.join(",")));
     return (await Promise.all(parts)).flatMap(arr).filter(r => r && WatchParse.isSymbol(r.sym)).map(QuoteModel.quote);
   }
 
@@ -2851,7 +3087,7 @@ const Feed = (() => {
   const trades = async sym => arr(await get("getliststocktrade/" + sym, 30000)).map(QuoteModel.trade);
   const universe = async () => arr(await get("getlistallstock", 30000));
 
-  return { list, quotes, indices, trades, universe };
+  return { list, quotes, indices, trades, universe, isFuture };
 })();
 
 // Symbol directory (name, exchange, type) cached once per Vietnam trading date; ETF / CW tabs are built from it.
@@ -2954,6 +3190,11 @@ const Finfo = (() => {
     return out;
   }
   const foreigns = (sym, size = 120) => get(`foreigns?q=code:${q(sym)}&size=${size}&sort=tradingDate:desc&fields=tradingDate,netVal,netVol,buyVal,sellVal,currentRoom,totalRoom`).then(r => r.data);
+  // Whole-market daily flows since a date (stocks only): foreign investors and securities firms' proprietary desks (published ~1 day later).
+  const foreignsSince = since => get(`foreigns?q=tradingDate:gte:${since}~type:STOCK&size=40000&fields=code,floor,tradingDate,netVal,buyVal,sellVal`).then(r => r.data);
+  const proprietarySince = since => get(`proprietary_trading?q=date:gte:${since}~type:STOCK&size=20000&fields=code,floor,date,netVal,buyingVal,sellingVal`).then(r => r.data);
+  // Last n trading dates (yyyy-mm-dd, newest first), read from VNINDEX's foreign-flow rows.
+  const tradingDates = n => get(`foreigns?q=code:VNINDEX&size=${n}&sort=tradingDate:desc&fields=tradingDate`).then(r => r.data.map(x => String(x.tradingDate)));
   // Cash dividends (đ/share per payment) — Vietnamese locale carries the numbers regardless of UI language.
   const dividends = sym => get(`events?q=code:${q(sym)}~locale:VN~type:DIVIDEND&size=100&sort=effectiveDate:desc&fields=dividend,divYear,divPeriod,effectiveDate,ratio`).then(r => r.data);
 
@@ -2962,7 +3203,7 @@ const Finfo = (() => {
   // Latest ratios of many tickers in one call (≤ ~100 codes keeps the URL short and the reply fast).
   const ratiosBulk = (codes, ratioCodes) => get(`ratios/latest?filter=ratioCode:${ratioCodes.join(",")}&where=code:${codes.map(q).join(",")}&order=reportDate&size=1000&fields=code,ratioCode,value`).then(r => r.data);
 
-  return { ratios, news, events, profile, shareholders, recommendations, models, values, items, ratioHistory, foreigns, dividends, industries, ratiosBulk };
+  return { ratios, news, events, profile, shareholders, recommendations, models, values, items, ratioHistory, foreigns, foreignsSince, proprietarySince, tradingDates, dividends, industries, ratiosBulk };
 })();
 // Index card extras on their own slower clock: last sessions of 1-minute bars (VNDirect dchart) and the latest foreign net value (VNDirect finfo).
 const IndexData = (() => {
@@ -2988,6 +3229,35 @@ const IndexData = (() => {
   }
 
   return { refresh, get: n => st[n] || {} };
+})();
+// Daily bars of the tickers that have technical-signal alerts (VNDirect dchart), refreshed every 30 min in the background; state() adds the live price.
+const SignalBars = (() => {
+  const TTL = 30 * 60e3, cache = new Map(), busy = new Set();
+
+  async function loadOne(sym) {
+    busy.add(sym);
+    try {
+      const now = Math.floor(Date.now() / 1000), day = QuoteModel.vnDate();
+      const done = SignalState.completed(await History.load(sym, "D", now - 2 * 366 * 86400, now), day);
+      cache.set(sym, { at: Date.now(), day, done, plan: undefined });
+    } catch (err) { console.warn("SignalBars.loadOne - get daily bars fail", sym, err); }
+    finally { busy.delete(sym); }
+  }
+
+  // Fire-and-forget; a new Vietnam date or an old entry triggers a reload.
+  function refresh(syms) {
+    const day = QuoteModel.vnDate();
+    for (const s of syms) { const c = cache.get(s); if (!busy.has(s) && (!c || c.day !== day || Date.now() - c.at > TTL)) loadOne(s); }
+  }
+
+  function state(sym, q) {
+    const c = cache.get(sym);
+    if (!c || c.day !== QuoteModel.vnDate()) return null;
+    if (c.plan === undefined) c.plan = SignalState.plan(c.done, q.ex);
+    return SignalState.of(c.done, c.plan, q.last);
+  }
+
+  return { refresh, state };
 })();
 // Whole-market data for the market / screener / sector tabs: listed tickers, ICB sectors, bulk valuation ratios (cached per Vietnam date).
 const Market = (() => {
@@ -3115,7 +3385,7 @@ const Watch = (() => {
 
   return { all, has, add, remove, toggle, replace, undo, hasBackup: () => !!backup, onChange: f => listeners.push(f) };
 })();
-// Personal data kept in this browser only: price alerts and per-ticker notes + own target price.
+// Personal data kept in this browser only: price / technical-signal alerts and per-ticker notes + own target price.
 const Alerts = (() => {
   const MAX = 100;
   const id = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
@@ -3142,7 +3412,8 @@ const Alerts = (() => {
   // Called after every poll with all fetched quotes; returns the alerts that just fired.
   function check(quotes) {
     reload();
-    const r = AlertRule.check(list, quotes, QuoteModel.vnDate());
+    SignalBars.refresh([...new Set(list.filter(a => AlertRule.isSignal(a.type)).map(a => a.sym))]);
+    const r = AlertRule.check(list, quotes, QuoteModel.vnDate(), SignalBars.state);
     if (r.hits.length) { list = r.list; changed(); }
     return r.hits;
   }
@@ -3368,6 +3639,8 @@ const DetailView = (() => {
       stat("NN mua", Fmt.vol(q.fBuy, unit) || "0"), stat("NN bán", Fmt.vol(q.fSell, unit) || "0"), stat("Room NN", Fmt.big(q.room) || "—")];
     if (q.cw) out.push(stat("CK cơ sở", q.cw.underlying || "—"), stat("Giá thực hiện", q.cw.strike ? Fmt.en(q.cw.strike, 2) : "—"),
       stat("Tỷ lệ chuyển đổi", q.cw.ratio || "—"), stat("Ngày GD cuối", ymd(q.cw.lastTrade) || "—"), stat("Ngày đáo hạn", ymd(q.cw.maturity) || "—"));
+    if (q.fut) out.push(stat("HĐ mở (OI)", Fmt.en(q.fut.oi)), stat("Basis so với VN30", Number.isFinite(q.fut.basis) ? Fmt.signed(q.fut.basis, 1) : "—", q.fut.basis > 0 ? "up" : q.fut.basis < 0 ? "down" : ""),
+      stat("Ngày đáo hạn", q.fut.mature || "—"));
     return `<div class="stats">${out.join("")}</div>`;
   }
 
@@ -3641,6 +3914,41 @@ const TradePlanView = (() => {
   }
 
   return { html, consensus };
+})();
+// "Khuyến nghị" tab: backtest table of the important crosses on this ticker (SignalBacktest) — how often each fired and what price did next.
+const SignalBacktestView = (() => {
+  const e = s => Dom.esc(s ?? "");
+  const day = t => new Date(t * 1000).toISOString().slice(0, 10).split("-").reverse().join("/");
+  const pct = v => `<span class="${v > 0 ? "up" : v < 0 ? "down" : ""}">${Fmt.signed(v, 1)}%</span>`;
+
+  function cell(s) {
+    if (!s) return `<td class="muted">—</td>`;
+    const w = s.win === null ? "" : ` <span class="bt-win ${s.n >= 5 && s.win >= 60 ? "ok" : s.n >= 5 && s.win <= 40 ? "no" : ""}">${Fmt.en(s.win, 0)}%</span>`;
+    return `<td>${pct(s.avg)}${w}</td>`;
+  }
+
+  // Signal with a direction, ≥ 5 samples, highest hit rate after 20 sessions.
+  function best(rows) {
+    const c = rows.filter(r => r.h[20] && r.h[20].win !== null && r.h[20].n >= 5).sort((a, b) => b.h[20].win - a.h[20].win)[0];
+    return c && c.h[20].win >= 55 ? c : null;
+  }
+
+  function html(r) {
+    if (!r) return "";
+    const H = SignalBacktest.H, b = best(r.rows);
+    const head = `<tr><th>${e(T("Tín hiệu"))}</th><th>${e(T("Số lần"))}</th>${H.map(h => `<th>${e(T("Sau {n} phiên", { n: h }))}</th>`).join("")}<th>${e(T("Lần gần nhất"))}</th></tr>`;
+    const rows = r.rows.map(x => `<tr><td><i class="bt-dot ${x.tone}">●</i> ${e(T(ChartCrossUI.TITLE[x.kind]))}</td><td>${x.n}</td>${H.map(h => cell(x.h[h])).join("")}<td>${day(x.last)}</td></tr>`).join("");
+    const base = `<tr class="bt-base"><td>${e(T("Mọi phiên (tham chiếu)"))}</td><td>—</td>${H.map(h => r.base[h] ? `<td>${pct(r.base[h].avg)} <span class="muted">${e(T("tăng {p}%", { p: Fmt.en(r.base[h].up, 0) }))}</span></td>` : "<td>—</td>").join("")}<td></td></tr>`;
+    const sum = b ? T("Với mã này, tín hiệu đáng tin nhất là “{s}”: đúng hướng {w}% số lần sau 20 phiên ({n} lần).", { s: T(ChartCrossUI.TITLE[b.kind]), w: Fmt.en(b.h[20].win, 0), n: b.h[20].n })
+      : T("Chưa có tín hiệu nào đúng hướng ổn định (≥ 55% sau 20 phiên, ≥ 5 lần) với mã này — đừng dựa vào một tín hiệu đơn lẻ.");
+    const span = T("Dữ liệu ngày {a} – {b} · SMA 20/50, RSI 14, MACD 12-26-9, Stoch 14, ADX 14, SAR.", { a: day(r.from), b: day(r.to) });
+    const note = T("Ô = lãi / lỗ trung bình sau N phiên kể từ giá đóng cửa ngày có tín hiệu · % = tỷ lệ lần giá đi đúng hướng tín hiệu (xanh ≥ 60%, đỏ ≤ 40%, cần ≥ 5 lần). Chưa trừ phí, thuế; quá khứ không bảo đảm tương lai.");
+    return `<div class="dsec"><b>${e(T("Kiểm chứng tín hiệu (backtest {y} năm)", { y: SignalBacktest.YEARS }))}</b></div><p class="pad">${e(sum)} <span class="muted">${e(span)}</span></p>`
+      + (r.rows.length ? `<div class="fscroll"><table class="dtable bt"><thead>${head}</thead><tbody>${rows}${base}</tbody></table></div>` : `<p class="muted pad">${e(T("Không có giao cắt nào trong giai đoạn này."))}</p>`)
+      + `<p class="muted pad">${e(note)}</p>`;
+  }
+
+  return { html };
 })();
 // Detailed guide per indicator (Vietnamese source, English in en-indicator-guide-strings.js): what it is, how to read it, worked examples, combinations, caveats.
 const IND_GUIDE = {
@@ -4067,6 +4375,7 @@ const ChartDraw = (() => {
 const ChartBar = (() => {
   const TYPES = [["candle", "Nến"], ["ha", "Heikin-Ashi"], ["bar", "OHLC"], ["line", "Đường"], ["area", "Vùng"], ["baseline", "Baseline"]];
   const SCALES = [["normal", "Thang giá"], ["log", "Thang log"], ["pct", "Thang % thay đổi"]];
+  const LAYOUTS = [["1", "▢ 1 biểu đồ"], ["2", "▥ 2 biểu đồ"], ["4", "▦ 4 biểu đồ"]];
   const TOOLS = [["h", "─", "Đường ngang: bấm 1 điểm"], ["t", "╱", "Đường xu hướng: bấm 2 điểm"], ["f", "Fib", "Fibonacci thoái lui: bấm đỉnh/đáy rồi điểm còn lại"], ["m", "📏", "Đo % thay đổi giữa 2 điểm"]];
   const e = s => Dom.esc(s);
   const opts = (list, v) => list.map(([k, label]) => `<option value="${k}"${k === v ? " selected" : ""}>${e(T(label))}</option>`).join("");
@@ -4089,6 +4398,7 @@ const ChartBar = (() => {
       + timeSels(s)
       + `<select data-c="type" title="${e(T("Kiểu biểu đồ"))}">${opts(TYPES, s.type)}</select>`
       + `<select data-c="scale" title="${e(T("Thang giá"))}">${opts(SCALES, s.scale)}</select>`
+      + `<select data-c="layout" title="${e(T("Bố cục: thêm biểu đồ phụ, mỗi ô tự chọn mã và khung nến"))}">${opts(LAYOUTS, String(s.layout))}</select>`
       + `<label class="chk"><input type="checkbox" data-c="volume"${s.volume ? " checked" : ""}>${e(T("Khối lượng"))}</label>`
       + `<label class="chk" title="${e(T("So sánh tối đa 5 mã hoặc chỉ số, cách nhau bằng dấu phẩy (thang % thay đổi)"))}">${e(T("So sánh"))}<input type="text" class="cmpin" data-c="cmp" value="${e(s.cmp.join(", "))}" placeholder="VNINDEX, VCB…" spellcheck="false" autocomplete="off"></label>`
       + `<span class="seg tools">${TOOLS.map(([k, icon, tip]) => `<button data-c="tool" data-v="${k}" title="${e(T(tip))}"${k === tool ? ' class="on"' : ""}>${icon}</button>`).join("")}`
@@ -4113,6 +4423,102 @@ const ChartBar = (() => {
 
   return { compact, full, chips };
 })();
+// Full chart layout 2 / 4: extra compact charts next to the main one, each with its own ticker (empty = the main ticker) and candle interval.
+const ChartGrid = (() => {
+  const LAYOUTS = [1, 2, 4], MAX = 3, STALE = 60e3;
+  const DEFAULT = [{ sym: "", interval: "1W" }, { sym: "VNINDEX", interval: "1D" }, { sym: "", interval: "1h" }];
+  // Range shown for an interval when the main chart's range does not fit it.
+  const RANGE_FOR = { "5m": "1W", "15m": "1M", "30m": "3M", "1h": "3M", "1D": "1Y", "1W": "3Y", "1M": "10Y" };
+  const e = s => Dom.esc(s ?? "");
+  let cells = [], n = 1, mainSym = "", st = null, onEdit = () => {};
+
+  const layout = v => LAYOUTS.includes(+v) ? +v : 1;
+  function clean(raw) {
+    const list = Array.isArray(raw) ? raw : [];
+    return DEFAULT.map((d, i) => {
+      const x = list[i] && typeof list[i] === "object" ? list[i] : {}, sym = String(x.sym || "").trim().toUpperCase();
+      return { sym: sym && WatchParse.isSymbol(sym) ? sym : (x.sym === undefined ? d.sym : ""), interval: ChartRange.INTERVALS.some(v => v.k === x.interval) ? x.interval : d.interval };
+    });
+  }
+
+  const box = () => $("fullGrid");
+  const symOf = c => c.cfg.sym || mainSym;
+  const rangeOf = iv => st && ChartRange.valid(st.range, iv) ? st.range : RANGE_FOR[iv];
+
+  function build() {
+    cells.forEach(c => c.view.destroy());
+    box().querySelectorAll(".ccell").forEach(el => el.remove());
+    cells = [];
+    for (let i = 0; i < n - 1; i++) {
+      const cfg = st.cells[i], el = document.createElement("div");
+      el.className = "ccell"; el.dataset.cell = i;
+      el.innerHTML = `<div class="ccell-bar"><input type="text" data-g="sym" value="${e(cfg.sym)}" placeholder="${e(mainSym)}" title="${e(T("Mã hoặc chỉ số (để trống = mã đang xem)"))}" spellcheck="false" autocomplete="off">`
+        + `<select data-g="interval" title="${e(T("Khung nến"))}">${ChartRange.INTERVALS.map(v => `<option value="${v.k}"${v.k === cfg.interval ? " selected" : ""}>${v.k}</option>`).join("")}</select>`
+        + `<span class="ccell-name"></span></div><div class="cbox"><div class="clegend"></div><div class="chost"></div><p class="cmsg" hidden></p></div>`;
+      box().appendChild(el);
+      cells.push({ cfg, el, key: "", drawn: "", at: 0, bars: [], view: TechChart.create(el.querySelector(".chost"), { legend: el.querySelector(".clegend"), compact: true }) });
+    }
+  }
+
+  function msg(c, key) { const m = c.el.querySelector(".cmsg"); m.hidden = !key; m.textContent = key ? T(key) : ""; }
+
+  async function load(c, force) {
+    const sym = symOf(c), iv = c.cfg.interval, rk = rangeOf(iv), key = `${sym}|${rk}|${iv}`;
+    if (!sym || (!force && c.key === key && Date.now() - c.at < STALE)) { draw(c); return; }
+    if (c.key !== key) { c.bars = []; msg(c, "Đang tải dữ liệu biểu đồ…"); }
+    c.key = key; c.at = Date.now();
+    try {
+      const w = ChartRange.windowOf(rk, iv), raw = await History.load(sym, w.res, w.from, w.to);
+      if (c.key !== key || !cells.includes(c)) return;
+      c.bars = ChartRange.shape(raw, iv);
+    } catch (err) { console.warn("ChartGrid.load - get OHLC history fail", sym, err); if (c.key === key) c.bars = []; }
+    draw(c);
+  }
+
+  function draw(c) {
+    const name = c.el.querySelector(".ccell-name"), sym = symOf(c), b = c.bars, last = b[b.length - 1], prev = b[b.length - 2];
+    if (!b.length) { c.view.destroy(); name.textContent = sym; if (c.key) msg(c, "Không có dữ liệu cho khoảng thời gian / khung nến này."); return; }
+    msg(c, null);
+    const pct = prev && prev.close ? (last.close / prev.close - 1) * 100 : 0;
+    name.innerHTML = `<b>${e(sym)}</b> ${TechChart.fmtPrice(last.close)} <span class="${pct > 0 ? "up" : pct < 0 ? "down" : "ref"}">${Fmt.signed(pct)}%</span>`;
+    const intra = ChartRange.intraday(c.cfg.interval);
+    // keep: same data drawn before → keep the user's zoom / scroll.
+    const keep = c.drawn === c.key; c.drawn = c.key;
+    c.view.render({ bars: b, type: st.type, scale: st.scale === "pct" ? "normal" : st.scale, volume: st.volume, peaks: false, crosses: false, intraday: intra, keep, compare: [],
+      inds: Indicators.compute(st.ind.filter(x => Indicators.DEFS[x.id].pane === "main" && (!Indicators.DEFS[x.id].intraday || intra)), b), from: ChartRange.firstVisible(b, rangeOf(c.cfg.interval)) });
+  }
+
+  // Called on every main render while the dialog is open: rebuild cells when the layout changed, then load / redraw each.
+  function sync(state, sym) {
+    st = state;
+    const want = layout(state.layout), symChanged = sym !== mainSym;
+    mainSym = sym;
+    box().dataset.n = want;
+    if (want !== n || cells.length !== want - 1 || cells.some((c, i) => c.cfg !== state.cells[i])) { n = want; build(); }
+    else if (symChanged) cells.forEach(c => { c.el.querySelector('[data-g="sym"]').placeholder = sym; });
+    cells.forEach(c => load(c, false));
+  }
+
+  function destroy() { cells.forEach(c => c.view.destroy()); box().querySelectorAll(".ccell").forEach(el => el.remove()); cells = []; n = 1; box().dataset.n = 1; }
+
+  function init(edited) {
+    onEdit = edited;
+    box().addEventListener("change", ev => {
+      const el = ev.target.closest("[data-g]"), cellEl = el && el.closest(".ccell"), c = cellEl && cells[+cellEl.dataset.cell];
+      if (!c) return;
+      if (el.dataset.g === "interval") c.cfg.interval = el.value;
+      else {
+        const s = el.value.trim().toUpperCase();
+        if (s && !WatchParse.isSymbol(s)) { el.value = c.cfg.sym; return; }
+        c.cfg.sym = el.value = s;
+      }
+      onEdit();
+      load(c, true);
+    });
+  }
+
+  return { LAYOUTS, layout, clean, sync, destroy, init, tick: () => cells.forEach(c => { if (Date.now() - c.at >= STALE) load(c, false); }) };
+})();
 // Technical chart controller: one shared state (Prefs "chart") for the detail-pane mini chart and the full-screen dialog.
 const ChartCtl = (() => {
   const TYPES = ["candle", "ha", "bar", "line", "area", "baseline"], SCALES = ["normal", "log", "pct"];
@@ -4125,6 +4531,7 @@ const ChartCtl = (() => {
     return { range, interval: ChartRange.fix(range, ChartRange.INTERVALS.some(x => x.k === r.interval) ? r.interval : "1D"),
       type: TYPES.includes(r.type) ? r.type : "candle", scale: SCALES.includes(r.scale) ? r.scale : "normal",
       volume: r.volume !== false, peaks: r.peaks === true, crosses: r.crosses !== false, ind: Indicators.clean(r.ind),
+      layout: ChartGrid.layout(r.layout), cells: ChartGrid.clean(r.cells),
       // Up to 5 overlay tickers; older saves / links carried compare: true for VNINDEX only.
       cmp: WatchParse.clean(Array.isArray(r.cmp) ? r.cmp : r.compare === true ? ["VNINDEX"] : [], 5) };
   }
@@ -4183,7 +4590,7 @@ const ChartCtl = (() => {
     const s = { bars: data.bars, type: st.type, scale: data.cmp && data.cmp.length ? "pct" : st.scale, volume: st.volume, peaks: st.peaks, crosses: st.crosses, inds, intraday: intra, keep,
       from: ChartRange.firstVisible(data.bars, st.range), compare: data.cmp || [] };
     mini.render(s);
-    if (dlgOpen) { full.render(s); draw.apply(full); head(); }
+    if (dlgOpen) { full.render(s); draw.apply(full); head(); ChartGrid.sync(st, sym); }
   }
 
   function setSymbol(s) {
@@ -4196,6 +4603,7 @@ const ChartCtl = (() => {
 
   // Board poll → refresh the header and the last daily candle with the live quote.
   function onQuote(q) {
+    if (dlgOpen) ChartGrid.tick();
     if (!q || q.sym !== sym) return;
     quote = q;
     if (dlgOpen) head();
@@ -4222,6 +4630,7 @@ const ChartCtl = (() => {
     if (c === "range") { st.range = v; st.interval = ChartRange.fix(v, st.interval); }
     else if (c === "interval") { if (!ChartRange.valid(st.range, v)) return; st.interval = v; }
     else if (c === "type" || c === "scale") st[c] = v;
+    else if (c === "layout") st.layout = ChartGrid.layout(v);
     else if (["volume", "peaks", "crosses"].includes(c)) st[c] = el.checked;
     else if (c === "cmp") st.cmp = WatchParse.parse(el.value).symbols.slice(0, 5);
     else if (c === "toggleInd") { if (!Object.hasOwn(Indicators.DEFS, v)) return; st.ind = el.checked ? Indicators.add(st.ind, v) : st.ind.filter(x => x.id !== v); }
@@ -4269,6 +4678,7 @@ const ChartCtl = (() => {
     }, true);
     document.addEventListener("click", e => { const m = $("fullBar").querySelector("details.indmenu[open]"); if (m && !m.contains(e.target) && !e.composedPath().includes($("indHelpDlg"))) m.open = false; });
     IndGuide.init();
+    ChartGrid.init(save);
     // Every visit opens at 1 year × 1D; type / scale / indicators are remembered, share links still set their own range.
     st = clean({ ...Prefs.get("chart", {}), range: "1Y", interval: "1D" });
     mini = TechChart.create($("miniHost"), { legend: $("miniLegend"), compact: true });
@@ -4276,7 +4686,7 @@ const ChartCtl = (() => {
     [$("miniChart"), $("chartDlg")].forEach(wire);
     $("dlgClose").onclick = () => $("chartDlg").close();
     $("chartDlg").addEventListener("close", () => {
-      dlgOpen = false; full.destroy(); draw.setTool(draw.tool());
+      dlgOpen = false; full.destroy(); ChartGrid.destroy(); draw.setTool(draw.tool());
       if (home !== null) { const h = home; home = null; setSymbol(h); }
     });
     const redraw = () => { if (data.bars.length) render(true); };
@@ -4998,9 +5408,84 @@ const ScreenView = (() => {
 
   return { form, results, act, get: () => JSON.parse(JSON.stringify(st)), set: raw => { st = clean(raw); save(); } };
 })();
+// "Dòng tiền" tab: top net buy / sell of foreign investors and proprietary desks over 1–20 sessions (VNDirect finfo), filter by exchange.
+const FlowsView = (() => {
+  const DAYS = [1, 5, 10, 20], FLOORS = ["", "HOSE", "HNX", "UPCOM"], N = 15;
+  let days = DAYS.includes(Prefs.get("flowDays")) ? Prefs.get("flowDays") : 1, floor = FLOORS.includes(Prefs.get("flowFloor")) ? Prefs.get("flowFloor") : "";
+  let data = null, key = "", busy = false, failed = false, seq = 0;
+  const listeners = [];
+  const e = s => Dom.esc(s ?? "");
+  const bn = v => Fmt.signed(v / 1e9, 1);
+  const dmy = s => `${s.slice(8, 10)}/${s.slice(5, 7)}`;
+
+  async function load() {
+    const k = String(days);
+    if (key === k && (data || busy)) return;
+    const my = ++seq; key = k; busy = true; failed = false; data = null;
+    try {
+      const dates = await Finfo.tradingDates(days + 1);
+      if (dates.length < days) throw new Error("no trading dates");
+      // Proprietary data lags a day → read one session earlier and keep its own newest N dates.
+      const [fr, pr] = await Promise.all([Finfo.foreignsSince(dates[days - 1]), Finfo.proprietarySince(dates[Math.min(days, dates.length - 1)])]);
+      if (my !== seq) return;
+      const f = fr.map(FlowRank.norm), p = pr.map(FlowRank.norm);
+      data = { f, fd: FlowRank.lastDates(f, days), p, pd: FlowRank.lastDates(p, days) };
+    } catch (err) {
+      if (my !== seq) return;
+      console.warn("FlowsView.load - get foreign / proprietary flows fail", err);
+      failed = true; key = "";
+    }
+    busy = false;
+    listeners.forEach(fn => fn());
+  }
+
+  function table(list, max, quotes) {
+    if (!list.length) return `<p class="muted pad">${e(T("Không có dữ liệu."))}</p>`;
+    return `<table class="dtable flow"><tbody>` + list.map(x => {
+      const q = quotes.get(x.code), w = Math.max(2, Math.abs(x.net) / max * 100).toFixed(0);
+      return `<tr data-sym="${e(x.code)}"><td><b>${e(x.code)}</b> <span class="muted">${e(x.floor)}</span></td>`
+        + `<td>${q && q.last ? `<span class="${QuoteModel.tone(q.last, q)}">${Fmt.price(q.last)} ${Fmt.pct(q, q.pct)}</span>` : ""}</td>`
+        + `<td class="${x.net > 0 ? "up" : "down"}"><b>${bn(x.net)}</b></td><td class="flow-bar"><i class="${x.net > 0 ? "upb" : "downb"}" style="width:${w}%"></i></td></tr>`;
+    }).join("") + `</tbody></table>`;
+  }
+
+  function block(title, rows, dates, quotes, note) {
+    if (!dates.length) return `<div class="dsec"><b>${e(title)}</b></div><p class="muted pad">${e(T("Không có dữ liệu."))}</p>`;
+    const r = FlowRank.rank(FlowRank.sum(rows, dates, floor), N), max = Math.max(1, ...[...r.buy, ...r.sell].map(x => Math.abs(x.net)));
+    const span = dates.length > 1 ? `${dmy(dates[dates.length - 1])} – ${dmy(dates[0])}` : dmy(dates[0]);
+    const tot = T("Ròng {n} tỷ · mua {b} tỷ · bán {s} tỷ", { n: bn(r.tot.net), b: Fmt.en(r.tot.buy / 1e9, 0), s: Fmt.en(r.tot.sell / 1e9, 0) });
+    return `<div class="dsec"><b>${e(title)}</b> <span class="muted">${e(span)}</span> <b class="${r.tot.net >= 0 ? "up" : "down"}">${e(tot)}</b></div>`
+      + (note ? `<p class="muted pad">${e(note)}</p>` : "")
+      + `<div class="mk-tops"><div class="mk-top"><b class="up">${e(T("Top mua ròng (tỷ đồng)"))}</b>${table(r.buy, max, quotes)}</div>`
+      + `<div class="mk-top"><b class="down">${e(T("Top bán ròng (tỷ đồng)"))}</b>${table(r.sell, max, quotes)}</div></div>`;
+  }
+
+  function html(quotes) {
+    load();
+    const qm = new Map(quotes.map(q => [q.sym, q]));
+    const bar = `<div class="dsec flow-bar-ctl"><label>${e(T("Số phiên"))} <select data-fl="days">${DAYS.map(d => `<option value="${d}"${d === days ? " selected" : ""}>${d}</option>`).join("")}</select></label>`
+      + `<label>${e(T("Sàn giao dịch"))} <select data-fl="floor">${FLOORS.map(f => `<option value="${f}"${f === floor ? " selected" : ""}>${e(f || T("Tất cả"))}</option>`).join("")}</select></label></div>`;
+    const wait = T(days >= 10 ? "Đang tải dòng tiền {n} phiên (khoảng 3 MB)…" : "Đang tải dòng tiền {n} phiên…", { n: days });
+    const body = failed ? `<p class="muted pad">${e(T("Không tải được dữ liệu từ VNDirect. Thử lại sau."))}</p>`
+      : !data ? `<p class="mk-progress">${e(wait)}</p>`
+      : block(T("Khối ngoại"), data.f, data.fd, qm, "")
+        + block(T("Tự doanh CTCK"), data.p, data.pd, qm, T("Tự doanh công bố sau phiên khoảng 1 ngày, chủ yếu cổ phiếu HOSE."));
+    return `<div class="market">${bar}${body}<p class="muted pad">${e(T("Nguồn: VNDirect finfo, cuối ngày (không phải realtime). Bấm mã để xem chi tiết."))}</p></div>`;
+  }
+
+  // Select change → true when the view must be rebuilt.
+  function act(el) {
+    if (!el.dataset || !el.dataset.fl) return false;
+    if (el.dataset.fl === "days") { days = +el.value; Prefs.set("flowDays", days); }
+    else { floor = FLOORS.includes(el.value) ? el.value : ""; Prefs.set("flowFloor", floor); }
+    return true;
+  }
+
+  return { html, act, onChange: f => listeners.push(f) };
+})();
 // "Thị trường" / "Bộ lọc" tabs: swap the price table for the market view, start the whole-market loads, route clicks and inputs.
 const MarketTabs = (() => {
-  const SPECIAL = new Set(["market", "screener"]);
+  const SPECIAL = new Set(["market", "screener", "flows"]);
   let tab = "", quotes = [];
   const is = t => SPECIAL.has(t);
   const view = () => $("marketView");
@@ -5008,6 +5493,7 @@ const MarketTabs = (() => {
   function rebuild() {
     if (!tab) return;
     if (tab === "screener") { view().innerHTML = ScreenView.form(I18n.lang); ScreenView.results(quotes); }
+    else if (tab === "flows") view().innerHTML = FlowsView.html(quotes);
     else view().innerHTML = MarketView.html(quotes, I18n.lang);
   }
 
@@ -5016,6 +5502,7 @@ const MarketTabs = (() => {
     $("boardBox").hidden = !!tab;
     view().hidden = !tab;
     if (!tab) return;
+    if (tab === "flows") { rebuild(); return; }
     Market.sectorsLoad().then(rebuild, err => console.warn("MarketTabs.show - load sectors fail", err));
     Market.ratiosAll().catch(err => { console.warn("MarketTabs.show - load market ratios fail", err); Controls.say("bad", "Không tải được chỉ số toàn thị trường từ VNDirect. Thử lại sau."); });
     rebuild();
@@ -5024,7 +5511,7 @@ const MarketTabs = (() => {
   function render(t, qs) {
     quotes = qs;
     if (t !== tab) return;
-    if (tab === "screener") ScreenView.results(qs); else view().innerHTML = MarketView.html(qs, I18n.lang);
+    if (tab === "screener") ScreenView.results(qs); else if (tab === "flows") view().innerHTML = FlowsView.html(qs); else view().innerHTML = MarketView.html(qs, I18n.lang);
   }
 
   function init() {
@@ -5041,6 +5528,7 @@ const MarketTabs = (() => {
       if (row) Board.select(row.dataset.sym, true);
     });
     view().addEventListener("change", e => {
+      if (tab === "flows") { if (FlowsView.act(e.target)) rebuild(); return; }
       if (tab === "market") { if (PicksView.act(e.target, "change")) rebuild(); return; }
       if (tab !== "screener") return;
       const r = ScreenView.act(e.target, "change");
@@ -5048,6 +5536,7 @@ const MarketTabs = (() => {
     });
     Market.onChange(() => { if (tab) render(tab, quotes); });
     PicksView.onChange(() => { if (tab === "market") render(tab, quotes); });
+    FlowsView.onChange(() => { if (tab === "flows") rebuild(); });
     I18n.onChange(rebuild);
     Watch.onChange(() => { if (tab === "screener") ScreenView.results(); });
   }
@@ -5057,10 +5546,21 @@ const MarketTabs = (() => {
 // Personal tools: 🔔 price alerts dialog + firing, 📅 watchlist event calendar, notes / own target block in the "Định giá" tab.
 const PersonalUI = (() => {
   const TYPES = [["above", "Giá ≥"], ["below", "Giá ≤"], ["pctUp", "Tăng ≥ (%)"], ["pctDown", "Giảm ≥ (%)"]];
+  // [type, label ({v} = the alert value), default value]; types without {v} take no value.
+  const SIG = [["maUp", "Giá cắt lên MA {v}", 20], ["maDown", "Giá cắt xuống MA {v}", 20], ["rsiUp", "RSI 14 vượt lên {v}", 70], ["rsiDown", "RSI 14 xuống dưới {v}", 30],
+    ["macdUp", "MACD cắt lên đường tín hiệu", 0], ["macdDown", "MACD cắt xuống đường tín hiệu", 0],
+    ["planBuy", "Giá vào vùng mua hôm nay (tab Khuyến nghị)", 0], ["planStop", "Giá thủng dừng lỗ trung hạn (tab Khuyến nghị)", 0]];
   const CAL_MAX = 40;
   const e = s => Dom.esc(s ?? "");
   const dlg = () => $("toolDlg");
+  const sigOf = t => SIG.find(x => x[0] === t);
   const typeLabel = t => T((TYPES.find(x => x[0] === t) || ["", t])[1]);
+  const alertLabel = a => { const s = sigOf(a.type); return s ? T(s[1], { v: a.value }) : `${typeLabel(a.type)} ${Fmt.en(a.value, 2)}`; };
+  function syncValue() {
+    const s = sigOf($("alType").value), box = $("alVal");
+    box.disabled = !!s && !s[1].includes("{v}");
+    if (s) box.value = s[2] || "";
+  }
   const dmy = s => /^\d{4}-\d{2}-\d{2}/.test(s || "") ? `${s.slice(8, 10)}/${s.slice(5, 7)}/${s.slice(0, 4)}` : "";
   const canNotify = () => "Notification" in globalThis;
   const head = title => `<div class="dlg-head"><b>${e(title)}</b><button data-x="close" title="${e(T("Đóng (Esc)"))}">✕</button></div>`;
@@ -5070,13 +5570,15 @@ const PersonalUI = (() => {
     const perm = canNotify() && Notification.permission !== "granted"
       ? `<button data-x="perm">${e(T("Bật thông báo trình duyệt"))}</button>` : "";
     const fired = a => a.fired === day ? T("Đã báo hôm nay") : T("Đang chờ");
-    const rows = list.map(a => `<tr><td><b>${e(a.sym)}</b></td><td>${e(typeLabel(a.type))} ${Fmt.en(a.value, 2)}</td>`
+    const rows = list.map(a => `<tr><td><b>${e(a.sym)}</b></td><td>${e(alertLabel(a))}</td>`
       + `<td class="${a.fired === day ? "up" : "muted"}">${e(fired(a))}</td><td><button data-x="del" data-id="${e(a.id)}" title="${e(T("Xoá"))}">✕</button></td></tr>`).join("");
-    return head("🔔 " + T("Cảnh báo giá"))
+    return head("🔔 " + T("Cảnh báo giá & tín hiệu kỹ thuật"))
       + `<div class="cbar"><input type="text" id="alSym" value="${e(sym)}" placeholder="${e(T("Mã"))}" spellcheck="false" autocomplete="off">`
-      + `<select id="alType">${TYPES.map(([k, l]) => `<option value="${k}">${e(T(l))}</option>`).join("")}</select>`
+      + `<select id="alType"><optgroup label="${e(T("Giá"))}">${TYPES.map(([k, l]) => `<option value="${k}">${e(T(l))}</option>`).join("")}</optgroup>`
+      + `<optgroup label="${e(T("Tín hiệu kỹ thuật (nến ngày)"))}">${SIG.map(([k, l]) => `<option value="${k}">${e(T(l, { v: "…" }))}</option>`).join("")}</optgroup></select>`
       + `<input type="number" id="alVal" step="any" placeholder="${e(T("Giá trị"))}"><button class="main" data-x="add">${e(T("Thêm"))}</button>${perm}</div>`
       + `<p class="muted pad">${e(T("Giá tính bằng nghìn đồng. Chỉ báo khi trang này đang mở; mỗi cảnh báo báo tối đa 1 lần mỗi ngày; lưu trong trình duyệt này."))}</p>`
+      + `<p class="muted pad">${e(T("Tín hiệu kỹ thuật: so giá khớp hiện tại với giá đóng cửa hôm qua trên nến ngày — báo khi giao cắt xảy ra trong phiên hôm nay (MA = kỳ bạn nhập, RSI = ngưỡng bạn nhập)."))}</p>`
       + (rows ? `<table class="dtable"><tbody>${rows}</tbody></table>` : `<p class="muted pad">${e(T("Chưa có cảnh báo nào."))}</p>`);
   }
 
@@ -5091,7 +5593,7 @@ const PersonalUI = (() => {
   function refreshAlerts() {
     const v = { s: $("alSym")?.value || "", t: $("alType")?.value, n: $("alVal")?.value || "" };
     openAlerts(v.s);
-    if (v.t) $("alType").value = v.t;
+    if (v.t) { $("alType").value = v.t; syncValue(); }
     $("alVal").value = v.n;
   }
 
@@ -5126,7 +5628,7 @@ const PersonalUI = (() => {
   // Fired alerts → status line + browser notification when allowed.
   function onHits(hits, quotes) {
     for (const a of hits) {
-      const q = quotes.get(a.sym), msg = T("🔔 {s}: {c} {v} — giá {p} ({pct})", { s: a.sym, c: typeLabel(a.type), v: Fmt.en(a.value, 2), p: Fmt.price(q.last), pct: Fmt.pct(q, q.pct) });
+      const q = quotes.get(a.sym), msg = T("🔔 {s}: {c} — giá {p} ({pct})", { s: a.sym, c: alertLabel(a), p: Fmt.price(q.last), pct: Fmt.pct(q, q.pct) });
       Controls.say("warn", msg);
       if (canNotify() && Notification.permission === "granted") { try { new Notification(T("Cảnh báo giá"), { body: msg, tag: a.id }); } catch { /* some mobile browsers only allow service-worker notifications */ } }
     }
@@ -5153,11 +5655,13 @@ const PersonalUI = (() => {
       if (x === "perm") Notification.requestPermission().then(refreshAlerts);
       if (x === "del") { Alerts.remove(b.dataset.id); refreshAlerts(); }
       if (x === "add") {
-        const sym = String($("alSym").value || "").trim().toUpperCase(), v = parseFloat($("alVal").value);
-        if (!Alerts.add(sym, $("alType").value, v)) { Controls.say("bad", "Nhập mã đang niêm yết (không dùng chỉ số) và giá trị số cho cảnh báo."); return; }
+        const sym = String($("alSym").value || "").trim().toUpperCase(), type = $("alType").value, v = $("alVal").disabled ? 0 : parseFloat($("alVal").value);
+        if (!Alerts.add(sym, type, v)) { Controls.say("bad", "Nhập mã đang niêm yết (không dùng chỉ số) và giá trị hợp lệ cho cảnh báo (kỳ MA 2–250, ngưỡng RSI 1–99)."); return; }
         openAlerts(sym);
+        $("alType").value = type; syncValue();
       }
     });
+    dlg().addEventListener("change", ev => { if (ev.target.id === "alType") syncValue(); });
     const label = () => { const n = Alerts.all().length; $("alertsBtn").textContent = "🔔 " + T("Cảnh báo") + (n ? ` (${n})` : ""); };
     Alerts.onChange(label);
     I18n.onChange(label);
@@ -5165,6 +5669,72 @@ const PersonalUI = (() => {
   }
 
   return { init, openAlerts, openCalendar, onHits, notesHtml, noteDraft, restoreDraft };
+})();
+// 🔗 Correlation dialog: daily-return correlation matrix of up to 20 ★ watchlist tickers + VNINDEX over 3 months / 6 months / 1 year.
+const CorrelationUI = (() => {
+  const MAX = 20, BENCH = "VNINDEX", PERIODS = [["3M", 92, "3 tháng"], ["6M", 183, "6 tháng"], ["1Y", 366, "1 năm"]];
+  let period = PERIODS.some(p => p[0] === Prefs.get("corrPeriod")) ? Prefs.get("corrPeriod") : "6M", seq = 0;
+  const e = s => Dom.esc(s ?? "");
+  const dlg = () => $("toolDlg");
+  const r2 = r => r === null ? "—" : Fmt.en(r, 2);
+  // Positive = moves together (orange, concentration), negative = hedges (blue).
+  const bg = r => r === null ? "" : `background:${r >= 0 ? `rgb(234 88 12 / ${(r * 0.8).toFixed(2)})` : `rgb(37 99 235 / ${(-r * 0.8).toFixed(2)})`}`;
+
+  function head() {
+    return `<div class="dlg-head"><b>🔗 ${e(T("Tương quan giá danh mục"))}</b><select id="corrPeriod" title="${e(T("Khoảng thời gian"))}">`
+      + PERIODS.map(([k, , l]) => `<option value="${k}"${k === period ? " selected" : ""}>${e(T(l))}</option>`).join("")
+      + `</select><button data-x="close" title="${e(T("Đóng (Esc)"))}">✕</button></div>`;
+  }
+
+  function show(body) {
+    dlg().dataset.kind = "corr";
+    dlg().innerHTML = head() + body;
+    if (!dlg().open) dlg().showModal();
+  }
+
+  function result(x, skipped) {
+    const grid = `<div class="fscroll"><table class="dtable corr"><thead><tr><th></th>${x.syms.map(s => `<th>${e(s)}</th>`).join("")}</tr></thead><tbody>`
+      + x.syms.map((s, i) => `<tr><th>${e(s)}</th>${x.m[i].map((r, j) => `<td style="${i === j ? "" : bg(r)}"${i === j ? ' class="muted"' : ""}>${r2(r)}</td>`).join("")}</tr>`).join("")
+      + `</tbody></table></div>`;
+    const pair = p => `<li><b>${e(p.a)} – ${e(p.b)}</b> ${r2(p.r)}</li>`;
+    const level = x.avg === null ? "" : T(x.avg >= 0.6 ? "Các mã đi cùng nhau rất sát — danh mục tập trung rủi ro, nên thêm mã khác ngành." : x.avg >= 0.35 ? "Mức tương quan trung bình — đa dạng hoá ở mức vừa." : "Tương quan thấp — danh mục được đa dạng hoá tốt.");
+    const avg = x.avg === null ? "" : T("Tương quan trung bình giữa các mã: {r}.", { r: r2(x.avg) });
+    const skip = skipped.length ? `<p class="muted pad">${e(T("Bỏ qua (không đủ dữ liệu): {s}", { s: skipped.join(", ") }))}</p>` : "";
+    return `<p class="pad"><b>${e(avg)}</b> ${e(level)}</p>${grid}`
+      + (x.pairs.length ? `<div class="corr-pairs"><div><b class="down">${e(T("Đi cùng nhau nhất"))}</b><ul>${x.pairs.slice(0, 3).map(pair).join("")}</ul></div>`
+        + `<div><b class="up">${e(T("Bù trừ nhau tốt nhất"))}</b><ul>${x.pairs.slice(-3).reverse().map(pair).join("")}</ul></div></div>` : "")
+      + skip + `<p class="muted pad">${e(T("Hệ số tương quan Pearson của % thay đổi giá ngày, chỉ tính các phiên cả hai mã cùng có giá (≥ {n} phiên): 1 = luôn cùng chiều, 0 = không liên quan, −1 = ngược chiều. Hàng / cột {b} cho biết mã đi theo thị trường chung đến mức nào.", { n: Correlation.MIN, b: BENCH }))}</p>`;
+  }
+
+  async function open() {
+    const syms = Watch.all().filter(s => !Feed.isFuture(s)).slice(0, MAX), my = ++seq;
+    if (syms.length < 2) { show(`<p class="muted pad">${e(T("Cần ít nhất 2 mã trong ★ Danh mục để tính tương quan."))}</p>`); return; }
+    show(`<p class="muted pad">${e(T("Đang tải giá {n} mã…", { n: syms.length + 1 }))}</p>`);
+    const days = PERIODS.find(p => p[0] === period)[1], now = Math.floor(Date.now() / 1000), all = [BENCH, ...syms], bars = new Map();
+    let next = 0;
+    const worker = async () => {
+      while (next < all.length) {
+        const s = all[next++];
+        try { bars.set(s, await History.load(s, "D", now - days * 86400, now)); } catch (err) { console.warn("CorrelationUI.open - get daily bars fail", s, err); }
+      }
+    };
+    await Promise.all(Array.from({ length: 6 }, worker));
+    if (my !== seq || !dlg().open || dlg().dataset.kind !== "corr") return;
+    const ok = all.filter(s => (bars.get(s) || []).length > Correlation.MIN), skipped = all.filter(s => !ok.includes(s));
+    if (ok.length < 2) { show(`<p class="muted pad">${e(T("Không tải được dữ liệu giá (VNDirect). Thử lại sau."))}</p>`); return; }
+    show(result(Correlation.matrix(ok.map(s => ({ sym: s, bars: bars.get(s) })), ok[0] === BENCH), skipped));
+    if (Watch.all().length > MAX) dlg().insertAdjacentHTML("beforeend", `<p class="muted pad">${e(T("Chỉ tính {n} mã đầu tiên của danh mục.", { n: MAX }))}</p>`);
+  }
+
+  function init() {
+    $("corrBtn").onclick = open;
+    dlg().addEventListener("change", ev => {
+      if (ev.target.id !== "corrPeriod") return;
+      period = ev.target.value; Prefs.set("corrPeriod", period); open();
+    });
+  }
+
+  return { init, open };
 })();
 // ★ watchlist management: named saves (💾 / 📂 / 🗑, shared SavedSessions), ⬇ export JSON, ⬆ import JSON / TXT / CSV.
 const WatchIO = (() => {
@@ -5234,7 +5804,7 @@ const DetailTabs = (() => {
     else if (k === "finance") el.innerHTML = FinView.html(d, lang);
     else if (k === "events") el.innerHTML = TabHtml.dividends(d.divs, last) + TabHtml.events(d.list);
     else if (k === "profile") el.innerHTML = TabHtml.profile(d.p, d.h, lang);
-    else if (k === "recs") el.innerHTML = TradePlanView.html(d, quote) + TabHtml.recs(d.list, last);
+    else if (k === "recs") el.innerHTML = TradePlanView.html(d, quote) + SignalBacktestView.html(d.bt) + TabHtml.recs(d.list, last);
   }
 
   const FETCH = {
@@ -5249,7 +5819,7 @@ const DetailTabs = (() => {
     recs: async s => {
       const opt = (v, f) => v ? Promise.resolve(v) : f(s).catch(err => { console.warn("DetailTabs.recs - optional part fail", s, err); return null; });
       const [list, tech, val] = await Promise.all([Finfo.recommendations(s), opt(data.chart, OutlookView.load), opt(data.valuation, ValTab.load)]);
-      return { list, tech, val };
+      return { list, tech, val, bt: tech && tech.bars ? SignalBacktest.run(tech.bars) : null };
     },
   };
 
@@ -5361,15 +5931,17 @@ const ShareDemo = (() => {
 // App state + polling loop: resolve the tab's symbols, poll quotes + indices, feed the views, load trades for the selected symbol.
 const Board = (() => {
   const TABS = [
-    { id: "watch", label: "★ Danh mục" }, { id: "market", label: "Thị trường" }, { id: "screener", label: "Bộ lọc" }, { id: "VN30" }, { id: "VN100" }, { id: "hose", label: "HOSE" }, { id: "hnx", label: "HNX" },
-    { id: "HNX30" }, { id: "upcom", label: "UPCOM" }, { id: "ETF" }, { id: "CW", label: "Chứng quyền" },
+    { id: "watch", label: "★ Danh mục" }, { id: "market", label: "Thị trường" }, { id: "screener", label: "Bộ lọc" }, { id: "flows", label: "Dòng tiền" }, { id: "VN30" }, { id: "VN100" }, { id: "hose", label: "HOSE" }, { id: "hnx", label: "HNX" },
+    { id: "HNX30" }, { id: "upcom", label: "UPCOM" }, { id: "ETF" }, { id: "CW", label: "Chứng quyền" }, { id: "PS", label: "Phái sinh" },
   ];
   const MORE = ["VNMID", "VNSML", "VNDIAMOND", "VNFINLEAD", "VNX50"];
   const TAB_IDS = new Set([...TABS.map(t => t.id), ...MORE]);
   const validTab = t => TAB_IDS.has(t) || /^icb:\d{4}$/.test(t);
   const S = { tab: "watch", syms: [], quotes: new Map(), sel: "", selQuote: null, missing: [], bad: [], gen: 0, seq: 0, timer: 0, at: null, error: false, loading: true, trades: null };
   const lists = new Map();
-  let opts = {}, filterText = "";
+  let opts = {}, filterText = "", futOpts = { base: null, o: null };
+  // Futures tab adds its own columns (opt "fut"); the object is reused so the table only rebuilds when options change.
+  const viewOpts = () => S.tab !== "PS" ? opts : futOpts.base === opts ? futOpts.o : (futOpts = { base: opts, o: { ...opts, fut: true } }).o;
 
   async function symbolsFor(tab) {
     if (tab === "watch") return Watch.all();
@@ -5377,9 +5949,9 @@ const Board = (() => {
     if (tab.startsWith("icb:")) return Market.sectorCodes(tab.slice(4));
     if (lists.has(tab)) return lists.get(tab);
     let syms;
-    if (tab === "ETF" || tab === "CW") {
+    if (tab === "ETF" || tab === "CW" || tab === "PS") {
       if (!Universe.ready()) await Universe.load();
-      syms = Universe.ofType(tab === "ETF" ? "E" : "W");
+      syms = Universe.ofType(tab === "ETF" ? "E" : tab === "PS" ? "D" : "W");
       // The directory keeps expired warrants → keep only those still trading.
       if (tab === "CW") { const today = QuoteModel.vnDate(); syms = (await Feed.quotes(syms)).filter(q => q.cw && q.cw.lastTrade >= today).map(q => q.sym).sort(); }
     } else syms = await Feed.list(tab);
@@ -5419,6 +5991,8 @@ const Board = (() => {
       const want = [...new Set([...S.syms, ...Alerts.symbols()])];
       const [qs, idx] = await Promise.all([want.length ? Feed.quotes(want) : [], Feed.indices()]);
       if (gen !== S.gen || seq !== S.seq) return;
+      const vn30 = idx.find(x => x.name === "VN30");
+      if (vn30 && vn30.value) for (const q of qs) if (q.fut) q.fut.basis = (q.last || q.ref) - vn30.value;
       Object.assign(S, { quotes: new Map(qs.map(q => [q.sym, q])), at: new Date(), error: false, loading: false });
       S.missing = S.tab === "watch" ? S.syms.filter(s => !S.quotes.has(s)) : [];
       IndexStrip.render(idx, { tab: S.tab, quotes: S.quotes });
@@ -5471,7 +6045,7 @@ const Board = (() => {
     if (MarketTabs.is(S.tab)) { const qs = S.syms.map(s => S.quotes.get(s)).filter(Boolean); MarketTabs.render(S.tab, qs); Controls.count(qs.length, S.syms.length); renderDetail(); return; }
     const list = visibleQuotes();
     Notes.decorate(list);
-    if (list.length) BoardView.render(list, opts, force);
+    if (list.length) BoardView.render(list, viewOpts(), force);
     else if (!S.loading && S.tab === "watch" && !S.syms.length) BoardView.message(T("Danh mục trống — gõ mã vào ô “Lọc / thêm mã” rồi bấm ★ Thêm."));
     else if (!S.loading && S.quotes.size) BoardView.message(T("Không có mã khớp bộ lọc “{q}”.", { q: filterText }));
     else if (!S.loading && !S.error) BoardView.message(T("Không có mã nào."));
@@ -5483,7 +6057,7 @@ const Board = (() => {
     const q = S.quotes.get(S.sel) || S.selQuote;
     if (q) S.selQuote = q;
     const t = S.trades && S.trades.sym === S.sel ? S.trades : null;
-    DetailView.render({ q, name: q ? Universe.name(q.sym, I18n.lang) : "", watched: !!q && Watch.has(q.sym), unit: opts.unit,
+    DetailView.render({ q, name: q ? Universe.name(q.sym, I18n.lang) : "", watched: !!q && Watch.has(q.sym), unit: q && q.fut ? "" : opts.unit,
       trades: t && t.list, tradeState: t ? t.state : "loading" });
   }
 
@@ -5557,7 +6131,7 @@ const Board = (() => {
   Watch.onChange(onWatchChange);
   document.addEventListener("visibilitychange", () => { if (!document.hidden && opts.rate !== "off" && !(S.loading && !S.syms.length)) tick(); else schedule(); });
 
-  return { TABS, MORE, TAB_IDS, validTab, state: () => S, getOpts: () => opts, setTab, tick, draw, select, loadTrades, renderDetail, applyIncoming, setOpts, setFilter, payload, setBad: b => { S.bad = b; } };
+  return { TABS, MORE, TAB_IDS, validTab, state: () => S, getOpts: viewOpts, setTab, tick, draw, select, loadTrades, renderDetail, applyIncoming, setOpts, setFilter, payload, setBad: b => { S.bad = b; } };
 })();
 // DOM wiring: tabs, toolbar options, add / filter box, share / undo, CSV, keyboard, status footer, language switch, start-up.
 const Controls = (() => {
@@ -5689,6 +6263,7 @@ const Controls = (() => {
     wire();
     MarketTabs.init();
     PersonalUI.init();
+    CorrelationUI.init();
     WatchIO.init();
     Market.sectorsLoad().then(buildTabs, e => console.warn("start - load ICB sectors fail", e));
     Universe.load().then(() => Board.draw(true), e => console.warn("start - load symbol directory fail", e));

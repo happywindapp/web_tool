@@ -10,6 +10,7 @@ const ChartCtl = (() => {
     return { range, interval: ChartRange.fix(range, ChartRange.INTERVALS.some(x => x.k === r.interval) ? r.interval : "1D"),
       type: TYPES.includes(r.type) ? r.type : "candle", scale: SCALES.includes(r.scale) ? r.scale : "normal",
       volume: r.volume !== false, peaks: r.peaks === true, crosses: r.crosses !== false, ind: Indicators.clean(r.ind),
+      layout: ChartGrid.layout(r.layout), cells: ChartGrid.clean(r.cells),
       // Up to 5 overlay tickers; older saves / links carried compare: true for VNINDEX only.
       cmp: WatchParse.clean(Array.isArray(r.cmp) ? r.cmp : r.compare === true ? ["VNINDEX"] : [], 5) };
   }
@@ -68,7 +69,7 @@ const ChartCtl = (() => {
     const s = { bars: data.bars, type: st.type, scale: data.cmp && data.cmp.length ? "pct" : st.scale, volume: st.volume, peaks: st.peaks, crosses: st.crosses, inds, intraday: intra, keep,
       from: ChartRange.firstVisible(data.bars, st.range), compare: data.cmp || [] };
     mini.render(s);
-    if (dlgOpen) { full.render(s); draw.apply(full); head(); }
+    if (dlgOpen) { full.render(s); draw.apply(full); head(); ChartGrid.sync(st, sym); }
   }
 
   function setSymbol(s) {
@@ -81,6 +82,7 @@ const ChartCtl = (() => {
 
   // Board poll → refresh the header and the last daily candle with the live quote.
   function onQuote(q) {
+    if (dlgOpen) ChartGrid.tick();
     if (!q || q.sym !== sym) return;
     quote = q;
     if (dlgOpen) head();
@@ -107,6 +109,7 @@ const ChartCtl = (() => {
     if (c === "range") { st.range = v; st.interval = ChartRange.fix(v, st.interval); }
     else if (c === "interval") { if (!ChartRange.valid(st.range, v)) return; st.interval = v; }
     else if (c === "type" || c === "scale") st[c] = v;
+    else if (c === "layout") st.layout = ChartGrid.layout(v);
     else if (["volume", "peaks", "crosses"].includes(c)) st[c] = el.checked;
     else if (c === "cmp") st.cmp = WatchParse.parse(el.value).symbols.slice(0, 5);
     else if (c === "toggleInd") { if (!Object.hasOwn(Indicators.DEFS, v)) return; st.ind = el.checked ? Indicators.add(st.ind, v) : st.ind.filter(x => x.id !== v); }
@@ -154,6 +157,7 @@ const ChartCtl = (() => {
     }, true);
     document.addEventListener("click", e => { const m = $("fullBar").querySelector("details.indmenu[open]"); if (m && !m.contains(e.target) && !e.composedPath().includes($("indHelpDlg"))) m.open = false; });
     IndGuide.init();
+    ChartGrid.init(save);
     // Every visit opens at 1 year × 1D; type / scale / indicators are remembered, share links still set their own range.
     st = clean({ ...Prefs.get("chart", {}), range: "1Y", interval: "1D" });
     mini = TechChart.create($("miniHost"), { legend: $("miniLegend"), compact: true });
@@ -161,7 +165,7 @@ const ChartCtl = (() => {
     [$("miniChart"), $("chartDlg")].forEach(wire);
     $("dlgClose").onclick = () => $("chartDlg").close();
     $("chartDlg").addEventListener("close", () => {
-      dlgOpen = false; full.destroy(); draw.setTool(draw.tool());
+      dlgOpen = false; full.destroy(); ChartGrid.destroy(); draw.setTool(draw.tool());
       if (home !== null) { const h = home; home = null; setSymbol(h); }
     });
     const redraw = () => { if (data.bars.length) render(true); };

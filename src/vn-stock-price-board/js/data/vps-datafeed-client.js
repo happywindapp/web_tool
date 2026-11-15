@@ -16,9 +16,13 @@ const Feed = (() => {
   // Basket / exchange symbol list: VN30, VN100, HNX30, hose, hnx, upcom… (unknown key → empty body).
   const list = async key => [...new Set(arr(await get("getlistckindex/" + encodeURIComponent(key))).filter(WatchParse.isSymbol))];
 
+  // Derivative codes (KRX style, e.g. 41I1GB000) start with a digit and come from the futures snapshot.
+  const isFuture = s => /^\d/.test(s);
+
   async function quotes(symbols) {
-    const parts = [];
-    for (let i = 0; i < symbols.length; i += CHUNK) parts.push(get("getliststockdata/" + symbols.slice(i, i + CHUNK).join(",")));
+    const parts = [], stocks = symbols.filter(s => !isFuture(s)), fut = symbols.filter(isFuture);
+    for (let i = 0; i < stocks.length; i += CHUNK) parts.push(get("getliststockdata/" + stocks.slice(i, i + CHUNK).join(",")));
+    if (fut.length) parts.push(get("getpsalldatalsnapshot/" + fut.join(",")));
     return (await Promise.all(parts)).flatMap(arr).filter(r => r && WatchParse.isSymbol(r.sym)).map(QuoteModel.quote);
   }
 
@@ -27,7 +31,7 @@ const Feed = (() => {
   const trades = async sym => arr(await get("getliststocktrade/" + sym, 30000)).map(QuoteModel.trade);
   const universe = async () => arr(await get("getlistallstock", 30000));
 
-  return { list, quotes, indices, trades, universe };
+  return { list, quotes, indices, trades, universe, isFuture };
 })();
 
 // Symbol directory (name, exchange, type) cached once per Vietnam trading date; ETF / CW tabs are built from it.

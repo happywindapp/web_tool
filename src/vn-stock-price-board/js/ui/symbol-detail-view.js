@@ -14,6 +14,8 @@ const DetailView = (() => {
       stat("NN mua", Fmt.vol(q.fBuy, unit) || "0"), stat("NN bán", Fmt.vol(q.fSell, unit) || "0"), stat("Room NN", Fmt.big(q.room) || "—")];
     if (q.cw) out.push(stat("CK cơ sở", q.cw.underlying || "—"), stat("Giá thực hiện", q.cw.strike ? Fmt.en(q.cw.strike, 2) : "—"),
       stat("Tỷ lệ chuyển đổi", q.cw.ratio || "—"), stat("Ngày GD cuối", ymd(q.cw.lastTrade) || "—"), stat("Ngày đáo hạn", ymd(q.cw.maturity) || "—"));
+    if (q.fut) out.push(stat("HĐ mở (OI)", Fmt.en(q.fut.oi)), stat("Basis so với VN30", Number.isFinite(q.fut.basis) ? Fmt.signed(q.fut.basis, 1) : "—", q.fut.basis > 0 ? "up" : q.fut.basis < 0 ? "down" : ""),
+      stat("Ngày đáo hạn", q.fut.mature || "—"));
     return `<div class="stats">${out.join("")}</div>`;
   }
 

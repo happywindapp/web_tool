@@ -2,7 +2,7 @@
 const QuoteModel = (() => {
   const num = v => { const n = parseFloat(v); return Number.isFinite(n) ? n : 0; };
   const cents = x => Math.round(x * 100);
-  const EX = { STO: "HOSE", STX: "HNX", UPX: "UPCOM" };
+  const EX = { STO: "HOSE", STX: "HNX", UPX: "UPCOM", DVX: "PS" };
 
   // "54.2|6850|d" → { p: 54.2, v: 6850 }; ATO/ATC orders keep their label as p.
   function level(s) {
@@ -22,6 +22,8 @@ const QuoteModel = (() => {
       fBuy: num(r.fBVol), fSell: num(r.fSVolume), room: num(r.fRoom),
       cw: r.sType === "W" ? { underlying: String(r.CWUnderlying || ""), issuer: String(r.CWIssuerName || ""), strike: num(r.CWExcersisePrice),
         ratio: String(r.CWExerciseRatio || ""), maturity: String(r.CWMaturityDate || ""), lastTrade: String(r.CWLastTradingDate || "") } : null,
+      // VN30 index futures (getpsalldatalsnapshot): open interest in contracts, maturity "dd/mm/yyyy"; basis is filled in by the poll.
+      fut: r.sType === "D" ? { oi: num(r.oi), mature: String(r.matureDate || ""), basis: NaN } : null,
     };
   }
 

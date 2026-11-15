@@ -1,10 +1,21 @@
 // Personal tools: 🔔 price alerts dialog + firing, 📅 watchlist event calendar, notes / own target block in the "Định giá" tab.
 const PersonalUI = (() => {
   const TYPES = [["above", "Giá ≥"], ["below", "Giá ≤"], ["pctUp", "Tăng ≥ (%)"], ["pctDown", "Giảm ≥ (%)"]];
+  // [type, label ({v} = the alert value), default value]; types without {v} take no value.
+  const SIG = [["maUp", "Giá cắt lên MA {v}", 20], ["maDown", "Giá cắt xuống MA {v}", 20], ["rsiUp", "RSI 14 vượt lên {v}", 70], ["rsiDown", "RSI 14 xuống dưới {v}", 30],
+    ["macdUp", "MACD cắt lên đường tín hiệu", 0], ["macdDown", "MACD cắt xuống đường tín hiệu", 0],
+    ["planBuy", "Giá vào vùng mua hôm nay (tab Khuyến nghị)", 0], ["planStop", "Giá thủng dừng lỗ trung hạn (tab Khuyến nghị)", 0]];
   const CAL_MAX = 40;
   const e = s => Dom.esc(s ?? "");
   const dlg = () => $("toolDlg");
+  const sigOf = t => SIG.find(x => x[0] === t);
   const typeLabel = t => T((TYPES.find(x => x[0] === t) || ["", t])[1]);
+  const alertLabel = a => { const s = sigOf(a.type); return s ? T(s[1], { v: a.value }) : `${typeLabel(a.type)} ${Fmt.en(a.value, 2)}`; };
+  function syncValue() {
+    const s = sigOf($("alType").value), box = $("alVal");
+    box.disabled = !!s && !s[1].includes("{v}");
+    if (s) box.value = s[2] || "";
+  }
   const dmy = s => /^\d{4}-\d{2}-\d{2}/.test(s || "") ? `${s.slice(8, 10)}/${s.slice(5, 7)}/${s.slice(0, 4)}` : "";
   const canNotify = () => "Notification" in globalThis;
   const head = title => `<div class="dlg-head"><b>${e(title)}</b><button data-x="close" title="${e(T("Đóng (Esc)"))}">✕</button></div>`;
@@ -14,13 +25,15 @@ const PersonalUI = (() => {
     const perm = canNotify() && Notification.permission !== "granted"
       ? `<button data-x="perm">${e(T("Bật thông báo trình duyệt"))}</button>` : "";
     const fired = a => a.fired === day ? T("Đã báo hôm nay") : T("Đang chờ");
-    const rows = list.map(a => `<tr><td><b>${e(a.sym)}</b></td><td>${e(typeLabel(a.type))} ${Fmt.en(a.value, 2)}</td>`
+    const rows = list.map(a => `<tr><td><b>${e(a.sym)}</b></td><td>${e(alertLabel(a))}</td>`
       + `<td class="${a.fired === day ? "up" : "muted"}">${e(fired(a))}</td><td><button data-x="del" data-id="${e(a.id)}" title="${e(T("Xoá"))}">✕</button></td></tr>`).join("");
-    return head("🔔 " + T("Cảnh báo giá"))
+    return head("🔔 " + T("Cảnh báo giá & tín hiệu kỹ thuật"))
       + `<div class="cbar"><input type="text" id="alSym" value="${e(sym)}" placeholder="${e(T("Mã"))}" spellcheck="false" autocomplete="off">`
-      + `<select id="alType">${TYPES.map(([k, l]) => `<option value="${k}">${e(T(l))}</option>`).join("")}</select>`
+      + `<select id="alType"><optgroup label="${e(T("Giá"))}">${TYPES.map(([k, l]) => `<option value="${k}">${e(T(l))}</option>`).join("")}</optgroup>`
+      + `<optgroup label="${e(T("Tín hiệu kỹ thuật (nến ngày)"))}">${SIG.map(([k, l]) => `<option value="${k}">${e(T(l, { v: "…" }))}</option>`).join("")}</optgroup></select>`
       + `<input type="number" id="alVal" step="any" placeholder="${e(T("Giá trị"))}"><button class="main" data-x="add">${e(T("Thêm"))}</button>${perm}</div>`
       + `<p class="muted pad">${e(T("Giá tính bằng nghìn đồng. Chỉ báo khi trang này đang mở; mỗi cảnh báo báo tối đa 1 lần mỗi ngày; lưu trong trình duyệt này."))}</p>`
+      + `<p class="muted pad">${e(T("Tín hiệu kỹ thuật: so giá khớp hiện tại với giá đóng cửa hôm qua trên nến ngày — báo khi giao cắt xảy ra trong phiên hôm nay (MA = kỳ bạn nhập, RSI = ngưỡng bạn nhập)."))}</p>`
       + (rows ? `<table class="dtable"><tbody>${rows}</tbody></table>` : `<p class="muted pad">${e(T("Chưa có cảnh báo nào."))}</p>`);
   }
 
@@ -35,7 +48,7 @@ const PersonalUI = (() => {
   function refreshAlerts() {
     const v = { s: $("alSym")?.value || "", t: $("alType")?.value, n: $("alVal")?.value || "" };
     openAlerts(v.s);
-    if (v.t) $("alType").value = v.t;
+    if (v.t) { $("alType").value = v.t; syncValue(); }
     $("alVal").value = v.n;
   }
 
@@ -70,7 +83,7 @@ const PersonalUI = (() => {
   // Fired alerts → status line + browser notification when allowed.
   function onHits(hits, quotes) {
     for (const a of hits) {
-      const q = quotes.get(a.sym), msg = T("🔔 {s}: {c} {v} — giá {p} ({pct})", { s: a.sym, c: typeLabel(a.type), v: Fmt.en(a.value, 2), p: Fmt.price(q.last), pct: Fmt.pct(q, q.pct) });
+      const q = quotes.get(a.sym), msg = T("🔔 {s}: {c} — giá {p} ({pct})", { s: a.sym, c: alertLabel(a), p: Fmt.price(q.last), pct: Fmt.pct(q, q.pct) });
       Controls.say("warn", msg);
       if (canNotify() && Notification.permission === "granted") { try { new Notification(T("Cảnh báo giá"), { body: msg, tag: a.id }); } catch { /* some mobile browsers only allow service-worker notifications */ } }
     }
@@ -97,11 +110,13 @@ const PersonalUI = (() => {
       if (x === "perm") Notification.requestPermission().then(refreshAlerts);
       if (x === "del") { Alerts.remove(b.dataset.id); refreshAlerts(); }
       if (x === "add") {
-        const sym = String($("alSym").value || "").trim().toUpperCase(), v = parseFloat($("alVal").value);
-        if (!Alerts.add(sym, $("alType").value, v)) { Controls.say("bad", "Nhập mã đang niêm yết (không dùng chỉ số) và giá trị số cho cảnh báo."); return; }
+        const sym = String($("alSym").value || "").trim().toUpperCase(), type = $("alType").value, v = $("alVal").disabled ? 0 : parseFloat($("alVal").value);
+        if (!Alerts.add(sym, type, v)) { Controls.say("bad", "Nhập mã đang niêm yết (không dùng chỉ số) và giá trị hợp lệ cho cảnh báo (kỳ MA 2–250, ngưỡng RSI 1–99)."); return; }
         openAlerts(sym);
+        $("alType").value = type; syncValue();
       }
     });
+    dlg().addEventListener("change", ev => { if (ev.target.id === "alType") syncValue(); });
     const label = () => { const n = Alerts.all().length; $("alertsBtn").textContent = "🔔 " + T("Cảnh báo") + (n ? ` (${n})` : ""); };
     Alerts.onChange(label);
     I18n.onChange(label);

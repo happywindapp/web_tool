@@ -45,6 +45,11 @@ const Finfo = (() => {
     return out;
   }
   const foreigns = (sym, size = 120) => get(`foreigns?q=code:${q(sym)}&size=${size}&sort=tradingDate:desc&fields=tradingDate,netVal,netVol,buyVal,sellVal,currentRoom,totalRoom`).then(r => r.data);
+  // Whole-market daily flows since a date (stocks only): foreign investors and securities firms' proprietary desks (published ~1 day later).
+  const foreignsSince = since => get(`foreigns?q=tradingDate:gte:${since}~type:STOCK&size=40000&fields=code,floor,tradingDate,netVal,buyVal,sellVal`).then(r => r.data);
+  const proprietarySince = since => get(`proprietary_trading?q=date:gte:${since}~type:STOCK&size=20000&fields=code,floor,date,netVal,buyingVal,sellingVal`).then(r => r.data);
+  // Last n trading dates (yyyy-mm-dd, newest first), read from VNINDEX's foreign-flow rows.
+  const tradingDates = n => get(`foreigns?q=code:VNINDEX&size=${n}&sort=tradingDate:desc&fields=tradingDate`).then(r => r.data.map(x => String(x.tradingDate)));
   // Cash dividends (đ/share per payment) — Vietnamese locale carries the numbers regardless of UI language.
   const dividends = sym => get(`events?q=code:${q(sym)}~locale:VN~type:DIVIDEND&size=100&sort=effectiveDate:desc&fields=dividend,divYear,divPeriod,effectiveDate,ratio`).then(r => r.data);
 
@@ -53,5 +58,5 @@ const Finfo = (() => {
   // Latest ratios of many tickers in one call (≤ ~100 codes keeps the URL short and the reply fast).
   const ratiosBulk = (codes, ratioCodes) => get(`ratios/latest?filter=ratioCode:${ratioCodes.join(",")}&where=code:${codes.map(q).join(",")}&order=reportDate&size=1000&fields=code,ratioCode,value`).then(r => r.data);
 
-  return { ratios, news, events, profile, shareholders, recommendations, models, values, items, ratioHistory, foreigns, dividends, industries, ratiosBulk };
+  return { ratios, news, events, profile, shareholders, recommendations, models, values, items, ratioHistory, foreigns, foreignsSince, proprietarySince, tradingDates, dividends, industries, ratiosBulk };
 })();

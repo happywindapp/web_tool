@@ -34,19 +34,20 @@
   }
 
   function renderMonth(focus) {
-    const r = MonthGrid.build({ y: st.y, m: st.m, sel: st.sel, today, cc: st.cc, moon: st.moon, wx: WeatherApp.days(), notes: DayNotes.days() });
+    const r = MonthGrid.build({ y: st.y, m: st.m, sel: st.sel, today, cc: st.cc, moon: st.moon, wx: WeatherApp.days(), notes: DayNotes.days(), me: Me.has() ? Me.mark : null });
     $("grid").innerHTML = r.html;
     $("month").value = st.m; $("year").value = st.y;
     const lf = r.lunarFrom, lt = r.lunarTo, lab = l => l.d + "/" + l.m + (l.leap ? T("n") : "");
     $("lunarRange").textContent = T("Âm {a} – {b}", { a: lab(lf), b: lab(lt) + "/" + lt.y });
     $("events").innerHTML = r.events.map(e => `<li><button type="button" data-jd="${e.jd}" data-pane-go="1" class="${e.term ? "term" : e.off ? "off" : ""}"><b>${e.d}</b> ${Dom.esc(T(e.name))}${e.lunar ? ` <small>${Dom.esc(T("(âm)"))}</small>` : ""}</button></li>`).join("");
+    $("meLegend").hidden = !Me.has();
     $("history").innerHTML = HistoryView.render({ y: st.y, m: st.m, day: LunarCal.jdToDate(st.sel).d });
     $("prev").disabled = st.y === LunarCal.MIN_YEAR && st.m === 1;
     $("next").disabled = st.y === LunarCal.MAX_YEAR && st.m === 12;
     if (focus) $("grid").querySelector(".sel")?.focus({ preventScroll: true });
   }
 
-  const renderDay = () => DayDetail.render($("detail"), st.sel, today, { notes: DayNotes.section(st.sel), weather: WeatherApp.section(st.sel, today) });
+  const renderDay = () => DayDetail.render($("detail"), st.sel, today, { me: Me.section(st.sel), notes: DayNotes.section(st.sel), weather: WeatherApp.section(st.sel, today), sun: WeatherApp.sun(today) });
 
   function select(jd, { focus = false } = {}) {
     st.sel = Math.min(MAX_JD, Math.max(MIN_JD, jd));
@@ -166,6 +167,7 @@
   const fromHash = () => { const h = location.hash.slice(1); try { return decodeURIComponent(h); } catch { return h; } };
   window.addEventListener("hashchange", () => { if (location.hash.length > 1) { const h = fromHash(); cleanUrl(); openLink(h); } });
   NoteBoard.init({ store });
+  Me.init({ store, onChange: () => { renderMonth(); renderDay(); } });
   DayNotes.init({ store, sel: () => st.sel, onChange: () => { renderMonth(); renderDay(); } });
   const tick = () => { const d = new Date(), p = n => String(n).padStart(2, "0"); $("clock").textContent = "🕐 " + p(d.getHours()) + ":" + p(d.getMinutes()) + ":" + p(d.getSeconds()); AnalogClock.update($("detail")); };
   tick(); setInterval(tick, 1000);

@@ -105,6 +105,16 @@
   .wxc-legend .c-max { background:var(--c-max); } .wxc-legend .c-min { background:var(--c-min); } .wxc-legend .c-mean { background:var(--c-mean); } .wxc-legend .c-rh { background:var(--c-rh); }
   .wxc-legend .c-rain { background:var(--c-rain); } .wxc-legend .c-rainy { background:var(--c-rainy); } .wxc-legend .c-trend { background:var(--c-trend); }
   .wxc-tip { position:absolute; z-index:1; pointer-events:none; min-width:150px; padding:6px 9px; border:1px solid var(--line); border-radius:8px; background:var(--panel); box-shadow:0 4px 14px rgba(0,0,0,.15); font-size:12px; line-height:1.5; white-space:nowrap; }
+  .day .me-mark { font-style:normal; font-size:11px; margin-left:3px; vertical-align:3px; } .day .me-mark.good { color:#d97706; } .day .me-mark.bad { color:var(--bad); }
+  .day.sel .me-mark { color:#fff; }
+  #detail .me-sec { margin-top:12px; padding:8px 12px; border:1px solid var(--line); border-left:4px solid var(--muted); border-radius:10px; }
+  #detail .me-sec.great, #detail .me-sec.good { border-left-color:var(--good); } #detail .me-sec.careful { border-left-color:var(--bad); } #detail .me-sec.empty { border-left-color:var(--line); }
+  #detail .me-sec h3 { margin:0; } #detail .me-verdict { margin:6px 0 2px; font-size:16px; } #detail .me-sec.great .me-verdict b, #detail .me-sec.good .me-verdict b { color:var(--good); } #detail .me-sec.careful .me-verdict b { color:var(--bad); }
+  #detail .me-why { margin:4px 0; padding-left:4px; list-style:none; } #detail .me-why li { margin:2px 0; } #detail .me-why .good { color:var(--good); } #detail .me-why .bad { color:var(--bad); }
+  #detail .me-sec p { margin:6px 0; } #detail .me-note { font-size:11.5px; } #detail .me-bd { font-weight:700; color:var(--hol); }
+  dialog.me-dialog { width:min(420px, 94vw); padding:0; border:1px solid var(--line); border-radius:12px; background:var(--panel); color:var(--ink); }
+  dialog.me-dialog::backdrop { background:rgba(15, 23, 42, .55); } .me-form { display:grid; gap:10px; padding:12px 14px; } .me-form label { display:grid; gap:4px; }
+  .me-form .cal-kind label { display:inline-flex; } .me-form p { margin:0; font-size:12px; }
   .hist { margin-top:14px; } .hist h3 { margin:0 0 6px; font-size:13px; text-transform:uppercase; letter-spacing:.04em; color:var(--acc-ink); }
   .hist ul { list-style:none; margin:0; padding:0; display:grid; gap:6px; font-size:13.5px; line-height:1.45; }
   .hist li { padding:4px 8px; border-radius:6px; } .hist li.on { background:var(--hdrow); } .hist .lnk, .hist b { margin-right:4px; font-weight:600; white-space:nowrap; }
@@ -112,9 +122,19 @@
   #detail { font-size:14px; }
   .hero { display:grid; grid-template-columns:1fr 1fr minmax(0, .85fr); gap:8px; }
   .hero .clock-side { align-content:center; padding:6px; background:color-mix(in srgb, var(--acc) 6%, var(--panel)); }
-  .aclock { width:min(150px, 100%); height:auto; }
-  .aclock .face { fill:var(--panel); stroke:var(--acc-ink); stroke-width:2; } .aclock .tk { stroke:var(--muted); stroke-width:.8; } .aclock .tk.big { stroke:var(--ink); stroke-width:2; }
-  .aclock text { fill:var(--ink); font-size:10px; font-weight:700; } .aclock line { stroke-linecap:round; }
+  .aclock { width:min(170px, 100%); height:auto; }
+  .aclock .face { fill:var(--panel); stroke:var(--acc-ink); stroke-width:1.5; } .aclock .tk { stroke:var(--muted); stroke-width:.8; } .aclock .tk.big { stroke:var(--ink); stroke-width:2; }
+  .aclock .num { fill:var(--ink); font-size:10px; font-weight:700; text-anchor:middle; }
+  .aclock .cz { fill:color-mix(in srgb, var(--muted) 10%, var(--panel)); stroke:var(--line); stroke-width:.5; } .aclock .cz.hd { fill:color-mix(in srgb, #f59e0b 28%, var(--panel)); }
+  .aclock .cz.now { fill:var(--acc); } .aclock .cl { fill:var(--ink); font-size:6.3px; font-weight:600; text-anchor:middle; pointer-events:none; } .aclock .cl.long { font-size:5.2px; }
+  .aclock .dayarc, .aclock .night { fill:none; stroke-width:3; } .aclock .dayarc { stroke:#fbbf24; } .aclock .night { stroke:#334155; } .aclock .now24 { fill:var(--hd); }
+  .clock-cc { font-size:12px; font-weight:600; } .clock-cc.good { color:var(--good); } .clock-cc.bad { color:var(--bad); }
+  .hero .hf { font-size:12px; color:var(--muted); } .hero .badge { font-weight:700; } .hero .badge.good { color:var(--good); } .hero .badge.bad { color:var(--bad); }
+  .hero .lunar.good { border-color:color-mix(in srgb, var(--good) 60%, var(--line)); } .hero .lunar.bad { border-color:color-mix(in srgb, var(--bad) 45%, var(--line)); }
+  .hero-strip { display:flex; flex-wrap:wrap; align-items:center; gap:4px 14px; margin-top:8px; padding:6px 10px; border:1px solid var(--line); border-radius:10px; background:var(--gut); font-size:12.5px; }
+  .hero-strip .hs-row { flex:1 1 100%; display:flex; flex-wrap:wrap; justify-content:space-between; gap:4px 14px; }
+  .hero-strip .yb { display:grid; gap:2px; flex:1 1 180px; } .yb-bar { height:6px; border-radius:3px; background:var(--line); overflow:hidden; } .yb-bar i { display:block; height:100%; background:var(--acc); }
+  .aclock text.cl { dominant-baseline:auto; } .aclock line { stroke-linecap:round; }
   .aclock .hh { stroke:var(--ink); stroke-width:4; } .aclock .mh { stroke:var(--ink); stroke-width:2.6; } .aclock .sh { stroke:var(--hd); stroke-width:1.2; } .aclock .pin { fill:var(--hd); }
   .hero .side { display:grid; justify-items:center; gap:2px; padding:10px; border:1px solid var(--line); border-radius:10px; text-align:center; }
   .hero .lunar { background:color-mix(in srgb, var(--first) 8%, var(--panel)); }
@@ -180,7 +200,8 @@
     #calBar .main { position:static; box-shadow:none; } #calBar .sep { display:none; } #calBar #q { flex:1 1 0; width:auto; min-width:0; }
     #calBar .cal-opts { display:flex; flex:1 1 100%; flex-wrap:nowrap; gap:6px; align-items:center; overflow-x:auto; scrollbar-width:none; } #calBar #demo { order:0; flex:none; max-width:9em; }
     #detail .reads-bar { flex-wrap:nowrap; } #detail .reads-tabs { flex-wrap:nowrap; overflow-x:auto; scrollbar-width:none; min-width:0; } #detail .reads-tabs > * { flex:none; padding:4px 8px; }
-    .clock { font-size:16px; } .bar.monthnav #lunarRange { display:none; }
+    .clock { font-size:16px; }
+    .hero { grid-template-columns:1fr 1fr; } .hero .clock-side { grid-column:1 / -1; } .aclock { width:min(200px, 70%); } .bar.monthnav #lunarRange { display:none; }
     #calBar .cal-opts > * { flex:none; } #calBar #wxPlace { max-width:10em; }
     body.tab-horo { height:auto; min-height:100dvh; }
     body.tab-horo #horoWork { flex:none; height:85dvh; }

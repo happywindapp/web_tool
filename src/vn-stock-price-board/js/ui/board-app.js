@@ -1,15 +1,17 @@
 // App state + polling loop: resolve the tab's symbols, poll quotes + indices, feed the views, load trades for the selected symbol.
 const Board = (() => {
   const TABS = [
-    { id: "watch", label: "★ Danh mục" }, { id: "market", label: "Thị trường" }, { id: "screener", label: "Bộ lọc" }, { id: "VN30" }, { id: "VN100" }, { id: "hose", label: "HOSE" }, { id: "hnx", label: "HNX" },
-    { id: "HNX30" }, { id: "upcom", label: "UPCOM" }, { id: "ETF" }, { id: "CW", label: "Chứng quyền" },
+    { id: "watch", label: "★ Danh mục" }, { id: "market", label: "Thị trường" }, { id: "screener", label: "Bộ lọc" }, { id: "flows", label: "Dòng tiền" }, { id: "VN30" }, { id: "VN100" }, { id: "hose", label: "HOSE" }, { id: "hnx", label: "HNX" },
+    { id: "HNX30" }, { id: "upcom", label: "UPCOM" }, { id: "ETF" }, { id: "CW", label: "Chứng quyền" }, { id: "PS", label: "Phái sinh" },
   ];
   const MORE = ["VNMID", "VNSML", "VNDIAMOND", "VNFINLEAD", "VNX50"];
   const TAB_IDS = new Set([...TABS.map(t => t.id), ...MORE]);
   const validTab = t => TAB_IDS.has(t) || /^icb:\d{4}$/.test(t);
   const S = { tab: "watch", syms: [], quotes: new Map(), sel: "", selQuote: null, missing: [], bad: [], gen: 0, seq: 0, timer: 0, at: null, error: false, loading: true, trades: null };
   const lists = new Map();
-  let opts = {}, filterText = "";
+  let opts = {}, filterText = "", futOpts = { base: null, o: null };
+  // Futures tab adds its own columns (opt "fut"); the object is reused so the table only rebuilds when options change.
+  const viewOpts = () => S.tab !== "PS" ? opts : futOpts.base === opts ? futOpts.o : (futOpts = { base: opts, o: { ...opts, fut: true } }).o;
 
   async function symbolsFor(tab) {
     if (tab === "watch") return Watch.all();
@@ -17,9 +19,9 @@ const Board = (() => {
     if (tab.startsWith("icb:")) return Market.sectorCodes(tab.slice(4));
     if (lists.has(tab)) return lists.get(tab);
     let syms;
-    if (tab === "ETF" || tab === "CW") {
+    if (tab === "ETF" || tab === "CW" || tab === "PS") {
       if (!Universe.ready()) await Universe.load();
-      syms = Universe.ofType(tab === "ETF" ? "E" : "W");
+      syms = Universe.ofType(tab === "ETF" ? "E" : tab === "PS" ? "D" : "W");
       // The directory keeps expired warrants → keep only those still trading.
       if (tab === "CW") { const today = QuoteModel.vnDate(); syms = (await Feed.quotes(syms)).filter(q => q.cw && q.cw.lastTrade >= today).map(q => q.sym).sort(); }
     } else syms = await Feed.list(tab);
@@ -59,6 +61,8 @@ const Board = (() => {
       const want = [...new Set([...S.syms, ...Alerts.symbols()])];
       const [qs, idx] = await Promise.all([want.length ? Feed.quotes(want) : [], Feed.indices()]);
       if (gen !== S.gen || seq !== S.seq) return;
+      const vn30 = idx.find(x => x.name === "VN30");
+      if (vn30 && vn30.value) for (const q of qs) if (q.fut) q.fut.basis = (q.last || q.ref) - vn30.value;
       Object.assign(S, { quotes: new Map(qs.map(q => [q.sym, q])), at: new Date(), error: false, loading: false });
       S.missing = S.tab === "watch" ? S.syms.filter(s => !S.quotes.has(s)) : [];
       IndexStrip.render(idx, { tab: S.tab, quotes: S.quotes });
@@ -111,7 +115,7 @@ const Board = (() => {
     if (MarketTabs.is(S.tab)) { const qs = S.syms.map(s => S.quotes.get(s)).filter(Boolean); MarketTabs.render(S.tab, qs); Controls.count(qs.length, S.syms.length); renderDetail(); return; }
     const list = visibleQuotes();
     Notes.decorate(list);
-    if (list.length) BoardView.render(list, opts, force);
+    if (list.length) BoardView.render(list, viewOpts(), force);
     else if (!S.loading && S.tab === "watch" && !S.syms.length) BoardView.message(T("Danh mục trống — gõ mã vào ô “Lọc / thêm mã” rồi bấm ★ Thêm."));
     else if (!S.loading && S.quotes.size) BoardView.message(T("Không có mã khớp bộ lọc “{q}”.", { q: filterText }));
     else if (!S.loading && !S.error) BoardView.message(T("Không có mã nào."));
@@ -123,7 +127,7 @@ const Board = (() => {
     const q = S.quotes.get(S.sel) || S.selQuote;
     if (q) S.selQuote = q;
     const t = S.trades && S.trades.sym === S.sel ? S.trades : null;
-    DetailView.render({ q, name: q ? Universe.name(q.sym, I18n.lang) : "", watched: !!q && Watch.has(q.sym), unit: opts.unit,
+    DetailView.render({ q, name: q ? Universe.name(q.sym, I18n.lang) : "", watched: !!q && Watch.has(q.sym), unit: q && q.fut ? "" : opts.unit,
       trades: t && t.list, tradeState: t ? t.state : "loading" });
   }
 
@@ -197,5 +201,5 @@ const Board = (() => {
   Watch.onChange(onWatchChange);
   document.addEventListener("visibilitychange", () => { if (!document.hidden && opts.rate !== "off" && !(S.loading && !S.syms.length)) tick(); else schedule(); });
 
-  return { TABS, MORE, TAB_IDS, validTab, state: () => S, getOpts: () => opts, setTab, tick, draw, select, loadTrades, renderDetail, applyIncoming, setOpts, setFilter, payload, setBad: b => { S.bad = b; } };
+  return { TABS, MORE, TAB_IDS, validTab, state: () => S, getOpts: viewOpts, setTab, tick, draw, select, loadTrades, renderDetail, applyIncoming, setOpts, setFilter, payload, setBad: b => { S.bad = b; } };
 })();

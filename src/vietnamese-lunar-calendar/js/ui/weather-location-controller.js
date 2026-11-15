@@ -70,6 +70,6 @@ const WeatherApp = (() => {
 
   function set(on) { st.on = !!on; $("wx").checked = st.on; o.store.set("wx", st.on); load(); }
 
-  return { init, set, relabel: fill, on: () => st.on, days: () => (st.on && st.data ? st.data.days : null),
+  return { init, set, relabel: fill, sun: jd => (st.on && st.data && st.data.days[jd] ? { rise: st.data.days[jd].rise, set: st.data.days[jd].set } : null), on: () => st.on, days: () => (st.on && st.data ? st.data.days : null),
     section: (sel, today) => (st.on ? WeatherView.section(st, sel, today) : "") };
 })();
