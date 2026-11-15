@@ -5846,9 +5846,9 @@ const CoinChart = (() => {
 
   function clean(raw) {
     const r = raw && typeof raw === "object" ? raw : {};
-    const range = RK.includes(r.range) ? r.range : "1Y";
+    const range = RK.includes(r.range) ? r.range : "1Y", v2 = r.v === 2; // v2: saved after peaks default → off, crosses → on
     return { range, interval: CoinBar.fix(range, IV.includes(r.interval) ? r.interval : "1d"), type: TYPES.includes(r.type) ? r.type : "candle", scale: SCALES.includes(r.scale) ? r.scale : "normal",
-      volume: r.volume !== false, peaks: r.peaks !== false, crosses: r.crosses === true, ind: Indicators.clean(r.ind), cmp: CoinParse.clean(Array.isArray(r.cmp) ? r.cmp : [], 3) };
+      volume: r.volume !== false, peaks: v2 && r.peaks === true, crosses: !v2 || r.crosses !== false, v: 2, ind: Indicators.clean(r.ind), cmp: CoinParse.clean(Array.isArray(r.cmp) ? r.cmp : [], 3) };
   }
   const save = () => Prefs.set("chart", st);
   const say = (id, key, p) => { const el = $(id); el.hidden = !key; el.textContent = key ? T(key, p) : ""; };
