@@ -9,14 +9,14 @@ I18n.add({
     "Cell = average gain / loss N sessions after the close on the signal day · % = share of times price moved the signal's way (green ≥ 60%, red ≤ 40%, needs ≥ 5 times). Before fees and taxes; the past does not guarantee the future.",
   "Không có giao cắt nào trong giai đoạn này.": "No crosses in this period.",
 
-  "Cảnh báo giá & tín hiệu kỹ thuật": "Price & technical-signal alerts", "Giá": "Price", "Tín hiệu kỹ thuật (nến ngày)": "Technical signals (daily candles)",
+  "Cảnh báo giá & tín hiệu kỹ thuật": "Price & technical-signal alerts", "Tín hiệu kỹ thuật (nến ngày)": "Technical signals (daily candles)",
   "Giá cắt lên MA {v}": "Price crosses above MA {v}", "Giá cắt xuống MA {v}": "Price crosses below MA {v}", "RSI 14 vượt lên {v}": "RSI 14 rises above {v}", "RSI 14 xuống dưới {v}": "RSI 14 falls below {v}",
   "MACD cắt lên đường tín hiệu": "MACD crosses above its signal line", "MACD cắt xuống đường tín hiệu": "MACD crosses below its signal line",
   "Giá vào vùng mua hôm nay (tab Khuyến nghị)": "Price enters today's buy zone (Recommendations tab)", "Giá thủng dừng lỗ trung hạn (tab Khuyến nghị)": "Price breaks the medium-term stop (Recommendations tab)",
   "Tín hiệu kỹ thuật: so giá khớp hiện tại với giá đóng cửa hôm qua trên nến ngày — báo khi giao cắt xảy ra trong phiên hôm nay (MA = kỳ bạn nhập, RSI = ngưỡng bạn nhập).":
     "Technical signals compare the live price with yesterday's close on daily candles — they fire when the cross happens during today's session (MA = the period you enter, RSI = the level you enter).",
 
-  "Dòng tiền": "Money flow", "Số phiên": "Sessions", "Sàn giao dịch": "Exchange", "Tất cả": "All", "Khối ngoại": "Foreign investors", "Tự doanh CTCK": "Proprietary trading (brokers)",
+  "Dòng tiền": "Money flow", "Số phiên": "Sessions", "Sàn giao dịch": "Exchange", "Khối ngoại": "Foreign investors", "Tự doanh CTCK": "Proprietary trading (brokers)",
   "Ròng {n} tỷ · mua {b} tỷ · bán {s} tỷ": "Net {n} bn · bought {b} bn · sold {s} bn", "Top mua ròng (tỷ đồng)": "Top net buys (VND bn)", "Top bán ròng (tỷ đồng)": "Top net sells (VND bn)",
   "Tự doanh công bố sau phiên khoảng 1 ngày, chủ yếu cổ phiếu HOSE.": "Proprietary flows are published about 1 day after the session, mostly HOSE stocks.",
   "Đang tải dòng tiền {n} phiên (khoảng 3 MB)…": "Loading {n} sessions of flows (about 3 MB)…", "Đang tải dòng tiền {n} phiên…": "Loading {n} sessions of flows…",

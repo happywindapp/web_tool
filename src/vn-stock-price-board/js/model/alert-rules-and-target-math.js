@@ -7,7 +7,7 @@ const AlertRule = (() => {
   function valid(a) {
     if (!a || !TYPES.includes(a.type) || !Number.isFinite(+a.value) || typeof a.sym !== "string") return false;
     const r = range[a.type];
-    return !r || (+a.value >= r[0] && +a.value <= r[1]);
+    return !r || (+a.value >= r[0] && +a.value <= r[1] && (!a.type.startsWith("ma") || Number.isInteger(+a.value)));
   }
 
   // Signals compare yesterday's close with the live price: s = SignalState.of(…) for the ticker (null until its daily bars are loaded).

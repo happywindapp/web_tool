@@ -115,6 +115,12 @@
   dialog.me-dialog { width:min(420px, 94vw); padding:0; border:1px solid var(--line); border-radius:12px; background:var(--panel); color:var(--ink); }
   dialog.me-dialog::backdrop { background:rgba(15, 23, 42, .55); } .me-form { display:grid; gap:10px; padding:12px 14px; } .me-form label { display:grid; gap:4px; }
   .me-form .cal-kind label { display:inline-flex; } .me-form p { margin:0; font-size:12px; }
+  .aclock { cursor:pointer; } .clock.alarm { color:var(--hd); }
+  .al-row { display:flex; flex-wrap:wrap; align-items:center; gap:6px; } .al-row input[type=number] { width:4.5em; margin-right:4px; } .al-row [hidden] { display:none; }
+  .al-list { list-style:none; margin:0; padding:0; display:grid; gap:4px; max-height:180px; overflow:auto; }
+  .al-list li { display:flex; justify-content:space-between; align-items:center; gap:6px; padding:4px 8px; border:1px solid var(--line); border-radius:6px; }
+  .al-list button { border:0; background:none; cursor:pointer; } #alErr:empty { display:none; }
+  .al-fire #alFireText { font-size:16px; } .al-fire .wxc-head { background:var(--hd); }
   .hist { margin-top:14px; } .hist h3 { margin:0 0 6px; font-size:13px; text-transform:uppercase; letter-spacing:.04em; color:var(--acc-ink); }
   .hist ul { list-style:none; margin:0; padding:0; display:grid; gap:6px; font-size:13.5px; line-height:1.45; }
   .hist li { padding:4px 8px; border-radius:6px; } .hist li.on { background:var(--hdrow); } .hist .lnk, .hist b { margin-right:4px; font-weight:600; white-space:nowrap; }

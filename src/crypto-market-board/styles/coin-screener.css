@@ -1,0 +1,6 @@
+  .scr-sigs { display:flex; flex-wrap:wrap; align-items:center; gap:4px 12px; padding:2px 12px 8px; font-size:12px; }
+  .scr-within { width:56px; padding:3px 6px; border:1px solid var(--line); border-radius:4px; background:var(--btn); color:var(--ink); font:inherit; }
+  .scr-wrap { overflow-x:auto; }
+  .scr-t th, .scr-t td { white-space:nowrap; } .scr-t th.r, .scr-t td.r { text-align:right; } .scr-t th[data-s] { cursor:pointer; user-select:none; }
+  .scr-t tbody tr { cursor:pointer; } .scr-t td.scr-chips { white-space:normal; min-width:220px; }
+  @media (max-width: 640px) { .scr-within { font-size:16px; } }

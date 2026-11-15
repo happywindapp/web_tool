@@ -46,8 +46,9 @@ const Finfo = (() => {
   }
   const foreigns = (sym, size = 120) => get(`foreigns?q=code:${q(sym)}&size=${size}&sort=tradingDate:desc&fields=tradingDate,netVal,netVol,buyVal,sellVal,currentRoom,totalRoom`).then(r => r.data);
   // Whole-market daily flows since a date (stocks only): foreign investors and securities firms' proprietary desks (published ~1 day later).
-  const foreignsSince = since => get(`foreigns?q=tradingDate:gte:${since}~type:STOCK&size=40000&fields=code,floor,tradingDate,netVal,buyVal,sellVal`).then(r => r.data);
-  const proprietarySince = since => get(`proprietary_trading?q=date:gte:${since}~type:STOCK&size=20000&fields=code,floor,date,netVal,buyingVal,sellingVal`).then(r => r.data);
+  const whole = (path, what) => get(path).then(r => { if (r.total > r.data.length) console.warn("Finfo.whole - result truncated", what, r.total, r.data.length); return r.data; });
+  const foreignsSince = since => whole(`foreigns?q=tradingDate:gte:${since}~type:STOCK&size=40000&fields=code,floor,tradingDate,netVal,buyVal,sellVal`, "foreigns");
+  const proprietarySince = since => whole(`proprietary_trading?q=date:gte:${since}~type:STOCK&size=20000&fields=code,floor,date,netVal,buyingVal,sellingVal`, "proprietary");
   // Last n trading dates (yyyy-mm-dd, newest first), read from VNINDEX's foreign-flow rows.
   const tradingDates = n => get(`foreigns?q=code:VNINDEX&size=${n}&sort=tradingDate:desc&fields=tradingDate`).then(r => r.data.map(x => String(x.tradingDate)));
   // Cash dividends (đ/share per payment) — Vietnamese locale carries the numbers regardless of UI language.

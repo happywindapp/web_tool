@@ -43,6 +43,7 @@ test("signal state: yesterday vs live price, MA cross alert fires only on today'
 
 test("alert rule: signal value ranges, plan zones, check() passes the state per ticker", () => {
   assert.equal(A.valid({ sym: "AAA", type: "maUp", value: 1 }), false);
+  assert.equal(A.valid({ sym: "AAA", type: "maUp", value: 20.5 }), false);
   assert.equal(A.valid({ sym: "AAA", type: "rsiUp", value: 70 }), true);
   assert.equal(A.valid({ sym: "AAA", type: "macdUp", value: 0 }), true);
   const plan = { lo: 10, hi: 11, stop: 9 }, st = { plan };

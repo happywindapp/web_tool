@@ -15,6 +15,7 @@ const Board = (() => {
 
   async function symbolsFor(tab) {
     if (tab === "watch") return Watch.all();
+    if (tab === "flows") return FlowsView.symbols();
     if (MarketTabs.is(tab)) return Market.allSymbols();
     if (tab.startsWith("icb:")) return Market.sectorCodes(tab.slice(4));
     if (lists.has(tab)) return lists.get(tab);
@@ -56,6 +57,7 @@ const Board = (() => {
     const gen = S.gen, seq = ++S.seq;
     try {
       // A symbol list that failed to load (network down on tab switch) is retried on every poll.
+      if (S.tab === "flows") S.syms = FlowsView.symbols();
       if (!S.syms.length && S.tab !== "watch") { const syms = await symbolsFor(S.tab); if (gen !== S.gen || seq !== S.seq) return; S.syms = syms; }
       // Alert tickers outside the current tab ride along in the same poll (not shown in the table).
       const want = [...new Set([...S.syms, ...Alerts.symbols()])];

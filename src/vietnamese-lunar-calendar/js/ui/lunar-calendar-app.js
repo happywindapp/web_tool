@@ -34,7 +34,7 @@
   }
 
   function renderMonth(focus) {
-    const r = MonthGrid.build({ y: st.y, m: st.m, sel: st.sel, today, cc: st.cc, moon: st.moon, wx: WeatherApp.days(), notes: DayNotes.days(), me: Me.has() ? Me.mark : null });
+    const r = MonthGrid.build({ y: st.y, m: st.m, sel: st.sel, today, cc: st.cc, moon: st.moon, wx: WeatherApp.days(), notes: DayNotes.days(), alarms: Alarms.days(), me: Me.has() ? Me.mark : null });
     $("grid").innerHTML = r.html;
     $("month").value = st.m; $("year").value = st.y;
     const lf = r.lunarFrom, lt = r.lunarTo, lab = l => l.d + "/" + l.m + (l.leap ? T("n") : "");
@@ -167,11 +167,16 @@
   const fromHash = () => { const h = location.hash.slice(1); try { return decodeURIComponent(h); } catch { return h; } };
   window.addEventListener("hashchange", () => { if (location.hash.length > 1) { const h = fromHash(); cleanUrl(); openLink(h); } });
   NoteBoard.init({ store });
+  Alarms.init({ store, sel: () => st.sel, onChange: () => { renderMonth(); renderDay(); } });
   Me.init({ store, onChange: () => { renderMonth(); renderDay(); } });
   DayNotes.init({ store, sel: () => st.sel, onChange: () => { renderMonth(); renderDay(); } });
-  const tick = () => { const d = new Date(), p = n => String(n).padStart(2, "0"); $("clock").textContent = "🕐 " + p(d.getHours()) + ":" + p(d.getMinutes()) + ":" + p(d.getSeconds()); AnalogClock.update($("detail")); };
-  tick(); setInterval(tick, 1000);
+  const tick = () => { const d = new Date(), p = n => String(n).padStart(2, "0"); const al = Alarms.tick(), c = $("clock");
+    c.textContent = al ? al.text : "🕐 " + p(d.getHours()) + ":" + p(d.getMinutes()) + ":" + p(d.getSeconds());
+    c.title = al ? T("Báo thức gần nhất: {at}", { at: al.title }) : T("Giờ hiện tại trên máy bạn"); c.classList.toggle("alarm", !!al);
+    AnalogClock.update($("detail"));
+  };
   select(today);
+  tick(); setInterval(tick, 1000);
   WeatherApp.init({ store, note, onChange: () => { renderMonth(); renderDay(); } });
   const q = new URLSearchParams(location.search);
   setTab(q.get("tab") || store.get("tab", "cal"));

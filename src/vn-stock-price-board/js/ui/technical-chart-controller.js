@@ -62,7 +62,7 @@ const ChartCtl = (() => {
   }
 
   function render(keep) {
-    if (!data.bars.length) { [mini, full].forEach(v => v.destroy()); msg("Không có dữ liệu cho khoảng thời gian / khung nến này."); return; }
+    if (!data.bars.length) { [mini, full].forEach(v => v.destroy()); msg("Không có dữ liệu cho khoảng thời gian / khung nến này."); if (dlgOpen) ChartGrid.sync(st, sym); return; }
     msg(null);
     const intra = ChartRange.intraday(st.interval);
     const inds = Indicators.compute(st.ind.filter(x => !Indicators.DEFS[x.id].intraday || intra), data.bars);

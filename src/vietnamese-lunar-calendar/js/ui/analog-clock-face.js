@@ -23,7 +23,7 @@ const AnalogClock = (() => {
     }
     const r = hm(sun && sun.rise), s = hm(sun && sun.set);
     const day = r != null && s != null ? `<path class="night" d="${arc(48.5, s * 15, r * 15 + 360)}"/><path class="dayarc" d="${arc(48.5, r * 15, s * 15)}"/>` : "";
-    return `<svg class="aclock" viewBox="0 0 140 140" role="img" aria-label="clock">${ring}<circle class="face" cx="${C}" cy="${C}" r="47"/>${day}${ticks}${nums}`
+    return `<svg class="aclock" viewBox="0 0 140 140" role="button" aria-label="clock"><title>${esc(T("Bấm để đặt báo thức / đếm ngược"))}</title>${ring}<circle class="face" cx="${C}" cy="${C}" r="47"/>${day}${ticks}${nums}`
       + `<path class="now24" d="M${pt(66, 0)}L${pt(70, -3)}L${pt(70, 3)}Z"/>`
       + `<line class="hh" x1="${C}" y1="${C + 6}" x2="${C}" y2="${C - 25}"/><line class="mh" x1="${C}" y1="${C + 8}" x2="${C}" y2="${C - 36}"/>`
       + `<line class="sh" x1="${C}" y1="${C + 10}" x2="${C}" y2="${C - 41}"/><circle class="pin" cx="${C}" cy="${C}" r="2.6"/></svg>`

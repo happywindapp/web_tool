@@ -103,3 +103,6 @@
   .gd-act { margin-top:10px !important; }
   .mk-share { font-weight:400; font-size:.62em; opacity:.85; }
   @media (max-width: 640px) { dialog.guide-dlg { width:100vw; } .gd { padding:4px 12px 12px !important; } }
+  .bt-bar { display:flex; flex-wrap:wrap; align-items:center; gap:6px 10px; padding:4px 12px; } .bt-status { font-size:12px; }
+  .bt-scroll { overflow-x:auto; margin:4px 8px; } .bt-trades { margin:4px 10px; font-size:12px; } .bt-trades summary { cursor:pointer; color:var(--muted); }
+  .bt-scroll .dtable { font-size:11.5px; white-space:nowrap; } .bt-scroll td.r, .bt-scroll th.r { text-align:right; }

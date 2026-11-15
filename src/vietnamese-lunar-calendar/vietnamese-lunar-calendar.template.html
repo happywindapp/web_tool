@@ -133,6 +133,23 @@
     <div class="scroll horo" id="sDetail" data-i18n-skip></div>
   </section>
 </main>
+<dialog id="alDlg" class="me-dialog">
+  <div class="wxc-head"><b>⏰ Báo thức / Đếm ngược</b><button id="alClose" title="Đóng (Esc)">✕</button></div>
+  <div class="me-form">
+    <span class="cal-kind"><label class="chk"><input type="radio" name="alMode" id="alModeAl" checked>Báo thức</label><label class="chk"><input type="radio" name="alMode" id="alModeCd">Đếm ngược</label></span>
+    <div id="alAlarmBox" class="al-row"><b id="alDay"></b><select id="alH" title="Giờ"></select>:<select id="alM" title="Phút"></select><select id="alAmPm" title="Sáng (AM) / chiều tối (PM)"><option>AM</option><option>PM</option></select></div>
+    <div id="alCdBox" class="al-row" hidden><label><input type="number" id="alCdH" min="0" max="99" value="0">giờ</label><label><input type="number" id="alCdM" min="0" max="59" value="25">phút</label><label><input type="number" id="alCdS" min="0" max="59" value="0">giây</label></div>
+    <input type="text" id="alNote" maxlength="200" placeholder="Ghi chú (vd: Họp nhóm, uống thuốc…)">
+    <p id="alErr" class="bad"></p>
+    <div class="nb-row"><button id="alAdd" class="main">+ Thêm báo thức</button></div>
+    <b>Báo thức đang có</b><ul id="alList" class="al-list" data-i18n-skip></ul>
+    <p class="muted">Ngày báo thức = ngày đang chọn trên lịch. Chỉ kêu khi trang này đang mở; lưu trên trình duyệt này.</p>
+  </div>
+</dialog>
+<dialog id="alFire" class="me-dialog al-fire">
+  <div class="wxc-head"><b>⏰ Tới giờ!</b></div>
+  <div class="me-form"><div id="alFireText" data-i18n-skip></div><div class="nb-row"><button id="alStop" class="main">Tắt báo thức</button></div></div>
+</dialog>
 <dialog id="meDlg" class="me-dialog">
   <div class="wxc-head"><b>👤 Ngày giờ sinh của tôi</b></div>
   <div class="me-form">
@@ -211,6 +228,7 @@
 // @include js/ui/history-this-month-view.js
 // @include js/ui/analog-clock-face.js
 // @include js/ui/day-hero-facts.js
+// @include js/ui/alarm-clock-and-countdown.js
 // @include js/ui/day-detail-pane.js
 // @include js/ui/horoscope-tab-view.js
 // @include js/ui/horoscope-natal-profile-view.js

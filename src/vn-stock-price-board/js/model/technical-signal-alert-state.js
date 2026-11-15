@@ -5,9 +5,9 @@ const SignalState = (() => {
   const at = (a, i) => Number.isFinite(a[i]) ? a[i] : NaN;
 
   // Daily bars without today's (possibly partial) bar; day = "yyyymmdd" Vietnam date.
-  function completed(bars, day) {
+  function completed(bars, day, keep = KEEP) {
     const t = Date.UTC(+day.slice(0, 4), +day.slice(4, 6) - 1, +day.slice(6)) / 1000;
-    return bars.filter(b => b.time < t).slice(-KEEP);
+    return bars.filter(b => b.time < t).slice(-keep);
   }
 
   // Trade-plan zones from completed bars (fixed for the day): today's buy zone + medium-term stop.

@@ -2,16 +2,17 @@
 const FlowsView = (() => {
   const DAYS = [1, 5, 10, 20], FLOORS = ["", "HOSE", "HNX", "UPCOM"], N = 15;
   let days = DAYS.includes(Prefs.get("flowDays")) ? Prefs.get("flowDays") : 1, floor = FLOORS.includes(Prefs.get("flowFloor")) ? Prefs.get("flowFloor") : "";
-  let data = null, key = "", busy = false, failed = false, seq = 0;
-  const listeners = [];
+  let data = null, key = "", busy = false, failed = 0, seq = 0;
+  const listeners = [], RETRY = 60e3;
   const e = s => Dom.esc(s ?? "");
   const bn = v => Fmt.signed(v / 1e9, 1);
   const dmy = s => `${s.slice(8, 10)}/${s.slice(5, 7)}`;
 
+  // failed = time of the last failure for this key → retry at most once a minute (render → load runs on every poll).
   async function load() {
     const k = String(days);
-    if (key === k && (data || busy)) return;
-    const my = ++seq; key = k; busy = true; failed = false; data = null;
+    if (key === k && (data || busy || Date.now() - failed < RETRY)) return;
+    const my = ++seq; key = k; busy = true; failed = 0; data = null;
     try {
       const dates = await Finfo.tradingDates(days + 1);
       if (dates.length < days) throw new Error("no trading dates");
@@ -23,7 +24,7 @@ const FlowsView = (() => {
     } catch (err) {
       if (my !== seq) return;
       console.warn("FlowsView.load - get foreign / proprietary flows fail", err);
-      failed = true; key = "";
+      failed = Date.now();
     }
     busy = false;
     listeners.forEach(fn => fn());
@@ -67,9 +68,16 @@ const FlowsView = (() => {
   function act(el) {
     if (!el.dataset || !el.dataset.fl) return false;
     if (el.dataset.fl === "days") { days = +el.value; Prefs.set("flowDays", days); }
-    else { floor = FLOORS.includes(el.value) ? el.value : ""; Prefs.set("flowFloor", floor); }
+    else { floor = FLOORS.includes(el.value) ? el.value : ""; Prefs.set("flowFloor", floor); listeners.forEach(fn => fn()); }
     return true;
   }
 
-  return { html, act, onChange: f => listeners.push(f) };
+  // Tickers on screen → the board polls only these for the price column (not the whole market).
+  function symbols() {
+    if (!data) return [];
+    const top = (rows, dates) => { const r = FlowRank.rank(FlowRank.sum(rows, dates, floor), N); return [...r.buy, ...r.sell].map(x => x.code); };
+    return [...new Set([...top(data.f, data.fd), ...top(data.p, data.pd)])];
+  }
+
+  return { html, act, symbols, onChange: f => listeners.push(f) };
 })();

@@ -23,7 +23,7 @@ const PicksData = (() => {
       let done = 0;
       for (let i = 0; i < coins.length; i += POOL) {
         await Promise.all(coins.slice(i, i + POOL).map(async r => {
-          try { const d = await Spot.klines(r.pair, "1d", 400); if (d.length >= 30) rows.push(rowOf(r, d)); }
+          try { const d = await DailyBars.get(r.pair); if (d.length >= 30) rows.push(rowOf(r, d)); }
           catch (e) { console.warn("PicksData.load - klines fail", r.pair, e.message); }
           onProgress(++done, coins.length);
         }));

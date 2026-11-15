@@ -14,9 +14,11 @@
 /* @include ../vn-stock-price-board/styles/detail-tabs.css */
 /* @include ../vn-stock-price-board/styles/market-heatmap-and-screener.css */
 /* @include styles/coin-detail-and-dialogs.css */
+/* @include styles/coin-screener.css */
 /* @include styles/defi-revenue.css */
 /* @include styles/bitcoin-onchain.css */
 /* @include styles/btc-wallet-whale.css */
+/* @include styles/correlation-and-multi-chart.css */
 /* @include ../data-workbench/styles/phone-portrait-layout.css */
 </style>
 <!-- GoatCounter: chỉ gửi path (không query/hash); chạy local đếm thành /local/<tên file> để không lộ thư mục máy -->
@@ -125,6 +127,9 @@
 // @include js/i18n/en-crypto-onchain-strings.js
 // @include js/i18n/en-crypto-wallet-strings.js
 // @include js/i18n/en-crypto-trade-advice-strings.js
+// @include js/i18n/en-crypto-screener-and-signal-alert-strings.js
+// @include js/i18n/en-crypto-advice-backtest-strings.js
+// @include js/i18n/en-crypto-correlation-and-multi-chart-strings.js
 // @include ../data-workbench/js/i18n/en-shared-theme-sessions-filters.js
 // @include ../data-workbench/js/core/share-link-codec.js
 // @include ../data-workbench/js/core/text-utils.js
@@ -140,7 +145,11 @@
 // @include js/model/watchlist-export-file-format.js
 // @include js/model/market-overview-math.js
 // @include js/model/coin-picks-ranking.js
+// @include js/model/coin-technical-signals.js
+// @include js/model/coin-screener-rules.js
+// @include js/model/signal-alert-rules.js
 // @include js/model/coin-trade-advice-rules.js
+// @include js/model/coin-advice-backtest.js
 // @include js/model/indicator-guide-trend-content.js
 // @include js/model/indicator-guide-oscillator-content.js
 // @include ../vn-stock-price-board/js/model/chart-ranges-and-resample.js
@@ -154,12 +163,14 @@
 // @include js/model/defi-revenue-metrics.js
 // @include js/model/bitcoin-cycle-indicators.js
 // @include js/model/btc-address-flow-math.js
+// @include js/model/return-correlation-math.js
 // @include js/data/http-json-fetch-with-cache.js
 // @include js/data/binance-spot-client.js
 // @include js/data/binance-live-stream.js
 // @include js/data/binance-futures-client.js
 // @include js/data/coingecko-client.js
 // @include js/data/coin-directory-and-row-merge.js
+// @include js/data/coin-daily-bars-cache-loader.js
 // @include js/data/coin-picks-data-loader.js
 // @include js/data/defillama-client.js
 // @include js/data/bitcoin-network-and-cycle-data-client.js
@@ -176,6 +187,9 @@
 // @include js/ui/portfolio-summary-bar.js
 // @include js/ui/coin-picks-view.js
 // @include js/ui/market-overview-view.js
+// @include js/ui/coin-technical-screener-view.js
+// @include js/ui/coin-multi-chart-grid-view.js
+// @include js/ui/coin-correlation-matrix-view.js
 // @include js/ui/exchanges-ranking-view.js
 // @include js/ui/board-extra-tab-sources.js
 // @include js/ui/defi-revenue-tables.js
@@ -191,10 +205,13 @@
 // @include js/ui/coin-technical-chart-controller.js
 // @include js/ui/coin-technical-outlook-view.js
 // @include js/ui/coin-trade-advice-view.js
+// @include js/ui/coin-advice-backtest-view.js
 // @include js/ui/order-book-and-trades-view.js
 // @include js/ui/coin-derivatives-view.js
 // @include js/ui/coin-profile-view.js
 // @include js/ui/detail-tabs-controller.js
+// @include js/ui/signal-alerts-store-and-poller.js
+// @include js/ui/signal-alerts-dialog-section.js
 // @include js/ui/alerts-dialog-and-toasts.js
 // @include js/ui/crypto-calculators-dialog.js
 // @include js/ui/watchlist-save-import-export.js

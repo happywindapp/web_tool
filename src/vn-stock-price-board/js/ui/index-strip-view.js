@@ -8,7 +8,7 @@ const IndexStrip = (() => {
   // Ceiling / floor counts are not in the index feed → counted from the board when its tab holds that basket (kept until the next count).
   function countFrom(ctx) {
     if (!ctx || !ctx.quotes) return;
-    const qs = [...ctx.quotes.values()].filter(q => q.type === "S" && q.last), all = MarketTabs.is(ctx.tab);
+    const qs = [...ctx.quotes.values()].filter(q => q.type === "S" && q.last), all = MarketTabs.is(ctx.tab) && ctx.tab !== "flows";
     const set = (name, list) => { counts[name] = { ceil: list.filter(q => QuoteModel.tone(q.last, q) === "ceil").length, floor: list.filter(q => QuoteModel.tone(q.last, q) === "floor").length }; };
     if (ctx.tab === "VN30") set("VN30", qs);
     for (const [name, ex] of [["VNINDEX", "HOSE"], ["HNX", "HNX"], ["UPCOM", "UPCOM"]]) if (all || ctx.tab === ex.toLowerCase()) set(name, qs.filter(q => q.ex === ex));

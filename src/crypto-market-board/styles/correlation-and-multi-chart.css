@@ -1,0 +1,46 @@
+  /* "Tương quan" tab (cr-) + "Đa biểu đồ" tab (mc-). */
+  :root { --cr-pos:#22d3ee; --cr-neg:#f87171; }
+  :root[data-theme="dark"] { --cr-pos:#0e7490; --cr-neg:#b91c1c; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --cr-pos:#0e7490; --cr-neg:#b91c1c; } }
+  .cr-ctl, .mc-bar { display:flex; flex-wrap:wrap; gap:6px 12px; align-items:center; padding:8px 12px; }
+  .cr-insight { margin:2px 12px 8px; padding:6px 10px; border-left:3px solid var(--muted); border-radius:4px; background:var(--gut); font-size:13px; line-height:1.45; }
+  .cr-insight.high { border-left-color:var(--down); } .cr-insight.mid { border-left-color:var(--ref); } .cr-insight.low { border-left-color:var(--up); }
+  .cr-wrap { display:flex; flex-wrap:wrap; gap:12px; align-items:flex-start; padding:0 12px; }
+  .cr-mxbox { flex:1 1 480px; min-width:0; max-width:100%; }
+  .cr-listbox { flex:1 1 340px; min-width:0; }
+  .cr-mx { overflow-x:auto; border:1px solid var(--line); border-radius:8px; background:var(--panel); }
+  .cr-mx table { border-collapse:separate; border-spacing:1px; font-size:10.5px; font-variant-numeric:tabular-nums; }
+  .cr-mx td { min-width:36px; height:28px; padding:0 1px; text-align:center; color:var(--ink); white-space:nowrap; }
+  .cr-mx td.cr-na { color:var(--muted); }
+  .cr-mx th { background:var(--panel); color:var(--ink); font-size:11px; font-weight:600; cursor:pointer; }
+  .cr-mx th:hover { color:var(--acc); }
+  .cr-col { vertical-align:bottom; padding:4px 0; }
+  .cr-col span { display:inline-block; writing-mode:vertical-rl; transform:rotate(180deg); }
+  .cr-row { position:sticky; left:0; z-index:1; padding:0 6px; text-align:left; }
+  .cr-legend { display:flex; align-items:center; gap:6px; margin:6px 2px; color:var(--muted); font-size:11px; }
+  .cr-legend i { flex:0 1 180px; height:8px; border:1px solid var(--line); border-radius:4px; background:linear-gradient(to right, var(--cr-neg), var(--panel), var(--cr-pos)); }
+  .cr-listbox table.dtable { width:100%; margin:0; }
+  .cr-list th.r, .cr-list td { white-space:nowrap; }
+  .cr-list tbody tr { cursor:pointer; }
+  button.cr-sort { min-height:0; padding:0; border:0; background:none; color:inherit; font:inherit; cursor:pointer; }
+  button.cr-sort.on { color:var(--acc); }
+  .mc-grid { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:8px; padding:0 12px 10px; }
+  .mc-cell { min-width:0; border:1px solid var(--line); border-radius:8px; overflow:hidden; background:var(--panel); }
+  .mc-cell[hidden] { display:none; }
+  .mc-head { display:flex; align-items:center; gap:6px; padding:4px 6px; border-bottom:1px solid var(--line); }
+  .mc-sym { width:5.4em; flex:none; font-weight:700; text-transform:uppercase; }
+  .mc-info { flex:1 1 auto; min-width:0; min-height:0; padding:0 2px; border:0; background:none; font:inherit; font-size:12.5px; text-align:left; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; cursor:pointer; }
+  .mc-full { flex:none; min-height:0; padding:1px 8px; }
+  .mc-box { height:clamp(240px, 34vh, 400px); }
+  .mc-1x2 .mc-box { height:clamp(300px, 56vh, 560px); }
+  @media (hover:hover) { .mc-info:hover { text-decoration:underline; } .cr-list tbody tr:hover { background:var(--hover); } }
+  @media (max-width: 640px) {
+    .cr-ctl, .mc-bar { padding:6px 8px; }
+    .cr-ctl select, .mc-bar select, .mc-head select, .mc-sym { font-size:16px; min-height:36px; }
+    .cr-insight { margin-left:8px; margin-right:8px; }
+    .cr-wrap { padding:0 8px; }
+    .cr-mxbox, .cr-listbox { flex-basis:100%; }
+    .mc-grid { grid-template-columns:minmax(0, 1fr); padding:0 8px 10px; }
+    .mc-box, .mc-1x2 .mc-box { height:260px; }
+    .mc-head { flex-wrap:wrap; }
+  }

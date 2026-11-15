@@ -1,4 +1,4 @@
-// 🔔 price alerts dialog (add / re-arm / delete, browser notifications) + in-page toasts when an alert fires.
+// 🔔 price + technical-signal alerts dialog (add / re-arm / delete, browser notifications) + in-page toasts when an alert fires.
 const PersonalUI = (() => {
   const e = s => Dom.esc(s ?? "");
   let forSym = "";
@@ -13,13 +13,20 @@ const PersonalUI = (() => {
 
   const ruleText = a => `${a.sym} ${T(AlertRule.TYPES[a.type])} ${a.type.startsWith("pct") ? Fmt.en(a.value, 2) + "%" : Fmt.money(a.value)}`;
 
+  function notify(text, cls, title) {
+    toast(text, cls);
+    try { if ("Notification" in window && Notification.permission === "granted") new Notification(T(title), { body: text }); } catch { /* not allowed here */ }
+  }
+  const refresh = () => { if ($("toolDlg").open && $("toolDlg").dataset.kind === "alerts") render(); };
+
   function onHits(hits) {
-    for (const h of hits) {
-      const text = T("🔔 {r} — giá hiện tại {p} ({c})", { r: ruleText(h), p: Fmt.money(h.price), c: Fmt.pct(h.pct) });
-      toast(text, h.type === "below" || h.type === "pctDown" ? "down" : "up");
-      try { if ("Notification" in window && Notification.permission === "granted") new Notification(T("Cảnh báo giá crypto"), { body: text }); } catch { /* not allowed here */ }
-    }
-    if ($("toolDlg").open && $("toolDlg").dataset.kind === "alerts") render();
+    for (const h of hits) notify(T("🔔 {r} — giá hiện tại {p} ({c})", { r: ruleText(h), p: Fmt.money(h.price), c: Fmt.pct(h.pct) }), h.type === "below" || h.type === "pctDown" ? "down" : "up", "Cảnh báo giá crypto");
+    refresh();
+  }
+
+  function onSignalHits(hits) {
+    for (const h of hits) notify(T("🔔 {r} — giá hiện tại {p}", { r: SignalAlertsUI.desc(h), p: Fmt.money(h.price) }), SignalAlertRule.bearish(h) ? "down" : "up", "Cảnh báo tín hiệu kỹ thuật");
+    refresh();
   }
 
   function render() {
@@ -36,7 +43,7 @@ const PersonalUI = (() => {
       + (list.length ? `<table class="dtable"><tbody>${list.map(a => `<tr><td>${e(ruleText(a))}</td><td class="${a.fired ? "muted" : "good"}">${e(a.fired ? T("Đã kích hoạt {t}", { t: new Date(a.fired).toLocaleString(I18n.lang) }) : T("Đang theo dõi"))}</td>`
         + `<td>${a.fired ? `<button data-a="rearm" data-id="${e(a.id)}">${e(T("Bật lại"))}</button>` : ""} <button data-a="del" data-id="${e(a.id)}">🗑</button></td></tr>`).join("")}</tbody></table>`
         : `<p class="muted">${e(T("Chưa có cảnh báo nào."))}</p>`)
-      + `<p class="muted">${e(T("Cảnh báo kiểm tra theo giá realtime khi trang đang mở (tab ẩn: mỗi 60 giây); mỗi cảnh báo báo 1 lần rồi chờ bật lại. Lưu trong trình duyệt này."))}</p></div>`;
+      + `<p class="muted">${e(T("Cảnh báo kiểm tra theo giá realtime khi trang đang mở (tab ẩn: mỗi 60 giây); mỗi cảnh báo báo 1 lần rồi chờ bật lại. Lưu trong trình duyệt này."))}</p>` + SignalAlertsUI.html(forSym) + `</div>`;
   }
 
   function openAlerts(sym = "") {
@@ -50,6 +57,8 @@ const PersonalUI = (() => {
     if (!b || dlg.dataset.kind !== "alerts") return;
     const a = b.dataset.a;
     if (a === "close") dlg.close();
+    const sym = $("saSym") ? CoinParse.norm($("saSym").value) : "";
+    if (SignalAlertsUI.click(a, b.dataset.id)) { if (CoinParse.isSymbol(sym)) forSym = sym; render(); return; }
     if (a === "perm") Notification.requestPermission().then(render, render);
     if (a === "rearm") { Alerts.rearm(b.dataset.id); render(); }
     if (a === "del") { Alerts.remove(b.dataset.id); render(); }
@@ -63,8 +72,10 @@ const PersonalUI = (() => {
   function init() {
     $("alertsBtn").onclick = () => openAlerts(Board.state().sel);
     $("toolDlg").addEventListener("click", onClick);
+    $("toolDlg").addEventListener("change", ev => { if (ev.target.id === "saSig") SignalAlertsUI.syncSelects(); });
+    SignalPoll.start();
     $("toolDlg").addEventListener("click", ev => { if (ev.target === $("toolDlg")) $("toolDlg").close(); });
   }
 
-  return { init, onHits, openAlerts, toast };
+  return { init, onHits, onSignalHits, openAlerts, toast };
 })();

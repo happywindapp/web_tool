@@ -40,7 +40,7 @@ const DetailTabs = (() => {
     recs: async s => {
       const opt = (v, f) => v ? Promise.resolve(v) : f(s).catch(err => { console.warn("DetailTabs.recs - optional part fail", s, err); return null; });
       const [list, tech, val] = await Promise.all([Finfo.recommendations(s), opt(data.chart, OutlookView.load), opt(data.valuation, ValTab.load)]);
-      return { list, tech, val, bt: tech && tech.bars ? SignalBacktest.run(tech.bars) : null };
+      return { list, tech, val, bt: tech && tech.bars ? SignalBacktest.run(SignalState.completed(tech.bars, QuoteModel.vnDate(), Infinity)) : null };
     },
   };
 

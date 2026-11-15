@@ -20,11 +20,11 @@ const MonthGrid = (() => {
     const title = T("Âm {d}/{m}/{y}", { d: l.d, m: l.m + (l.leap ? T("n") : ""), y: l.y }) + " · " + T(CanChi.CAN[info.p.can]) + " " + T(CanChi.CHI[info.p.chi])
       + " · " + T(god.name) + " (" + T(god.good ? "hoàng đạo" : "hắc đạo") + ")" + hol.map(h => " · " + T(h.name)).join("") + (o.notes && o.notes.has(jd) ? " · " + T("📝 Có ghi chú") : "") + (w ? " · " + WeatherView.line(w) : "");
     return `<button type="button" class="${cls}" data-jd="${jd}" data-pane-go="1" tabindex="${jd === o.sel ? 0 : -1}" title="${esc(title)}" aria-pressed="${jd === o.sel}">`
-      + `<span class="sd">${s.d}${o.notes && o.notes.has(jd) ? '<i class="nmark" aria-hidden="true">📝</i>' : ""}${o.me ? o.me(jd) : ""}</span><span class="ld">${o.moon ? moon(jd) : ""}${esc(lunarLabel(l))}</span>${god.good ? '<i class="dot" aria-hidden="true"></i>' : ""}${WeatherView.cell(w)}`
+      + `<span class="sd">${s.d}${o.notes && o.notes.has(jd) ? '<i class="nmark" aria-hidden="true">📝</i>' : ""}${o.alarms && o.alarms.has(jd) ? '<i class="nmark" aria-hidden="true">⏰</i>' : ""}${o.me ? o.me(jd) : ""}</span><span class="ld">${o.moon ? moon(jd) : ""}${esc(lunarLabel(l))}</span>${god.good ? '<i class="dot" aria-hidden="true"></i>' : ""}${WeatherView.cell(w)}`
       + `<span class="ev${hol.length ? " hol" : term ? " term" : ""}">${esc(ev)}</span></button>`;
   }
 
-  // o: { y, m, sel, today, cc, moon, wx: { [jd]: day weather } | null, notes: Set of jd having day notes, me: jd → personal mark HTML } → { html, events, lunarFrom, lunarTo }
+  // o: { y, m, sel, today, cc, moon, wx: { [jd]: day weather } | null, notes: Set of jd having day notes, alarms: Set of jd, me: jd → personal mark HTML } → { html, events, lunarFrom, lunarTo }
   function build(o) {
     const first = LunarCal.jdFromDate(1, o.m, o.y), days = LunarCal.jdFromDate(1, o.m % 12 + 1, o.y + (o.m === 12 ? 1 : 0)) - first;
     const lead = (LunarCal.weekday(first) + 6) % 7, total = Math.ceil((lead + days) / 7) * 7, events = [];

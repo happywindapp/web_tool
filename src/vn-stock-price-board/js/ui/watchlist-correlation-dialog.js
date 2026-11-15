@@ -30,7 +30,7 @@ const CorrelationUI = (() => {
     const skip = skipped.length ? `<p class="muted pad">${e(T("Bỏ qua (không đủ dữ liệu): {s}", { s: skipped.join(", ") }))}</p>` : "";
     return `<p class="pad"><b>${e(avg)}</b> ${e(level)}</p>${grid}`
       + (x.pairs.length ? `<div class="corr-pairs"><div><b class="down">${e(T("Đi cùng nhau nhất"))}</b><ul>${x.pairs.slice(0, 3).map(pair).join("")}</ul></div>`
-        + `<div><b class="up">${e(T("Bù trừ nhau tốt nhất"))}</b><ul>${x.pairs.slice(-3).reverse().map(pair).join("")}</ul></div></div>` : "")
+        + (x.pairs.length > 3 ? `<div><b class="up">${e(T("Bù trừ nhau tốt nhất"))}</b><ul>${x.pairs.slice(Math.max(3, x.pairs.length - 3)).reverse().map(pair).join("")}</ul></div>` : "") + `</div>` : "")
       + skip + `<p class="muted pad">${e(T("Hệ số tương quan Pearson của % thay đổi giá ngày, chỉ tính các phiên cả hai mã cùng có giá (≥ {n} phiên): 1 = luôn cùng chiều, 0 = không liên quan, −1 = ngược chiều. Hàng / cột {b} cho biết mã đi theo thị trường chung đến mức nào.", { n: Correlation.MIN, b: BENCH }))}</p>`;
   }
 

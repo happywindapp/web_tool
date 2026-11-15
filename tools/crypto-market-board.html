@@ -434,6 +434,15 @@
   .gd-act { margin-top:10px !important; }
   .mk-share { font-weight:400; font-size:.62em; opacity:.85; }
   @media (max-width: 640px) { dialog.guide-dlg { width:100vw; } .gd { padding:4px 12px 12px !important; } }
+  .bt-bar { display:flex; flex-wrap:wrap; align-items:center; gap:6px 10px; padding:4px 12px; } .bt-status { font-size:12px; }
+  .bt-scroll { overflow-x:auto; margin:4px 8px; } .bt-trades { margin:4px 10px; font-size:12px; } .bt-trades summary { cursor:pointer; color:var(--muted); }
+  .bt-scroll .dtable { font-size:11.5px; white-space:nowrap; } .bt-scroll td.r, .bt-scroll th.r { text-align:right; }
+  .scr-sigs { display:flex; flex-wrap:wrap; align-items:center; gap:4px 12px; padding:2px 12px 8px; font-size:12px; }
+  .scr-within { width:56px; padding:3px 6px; border:1px solid var(--line); border-radius:4px; background:var(--btn); color:var(--ink); font:inherit; }
+  .scr-wrap { overflow-x:auto; }
+  .scr-t th, .scr-t td { white-space:nowrap; } .scr-t th.r, .scr-t td.r { text-align:right; } .scr-t th[data-s] { cursor:pointer; user-select:none; }
+  .scr-t tbody tr { cursor:pointer; } .scr-t td.scr-chips { white-space:normal; min-width:220px; }
+  @media (max-width: 640px) { .scr-within { font-size:16px; } }
   /* "DeFi & Doanh thu" tab (df- prefix). */
   .df { padding-bottom: 12px; }
   .df .dsec { display: flex; align-items: center; gap: 6px; margin-top: 6px; padding: 8px 12px 2px; border-top: 1px solid var(--line); } .df .dsec b { margin-right: auto; }
@@ -525,6 +534,52 @@
     .wl-form input[type=text] { flex-basis:100%; }
     button.wl-lk { max-width:9em; }
     .wl-ctl .seg button { min-width:44px; min-height:36px; }
+  }
+  /* "Tương quan" tab (cr-) + "Đa biểu đồ" tab (mc-). */
+  :root { --cr-pos:#22d3ee; --cr-neg:#f87171; }
+  :root[data-theme="dark"] { --cr-pos:#0e7490; --cr-neg:#b91c1c; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --cr-pos:#0e7490; --cr-neg:#b91c1c; } }
+  .cr-ctl, .mc-bar { display:flex; flex-wrap:wrap; gap:6px 12px; align-items:center; padding:8px 12px; }
+  .cr-insight { margin:2px 12px 8px; padding:6px 10px; border-left:3px solid var(--muted); border-radius:4px; background:var(--gut); font-size:13px; line-height:1.45; }
+  .cr-insight.high { border-left-color:var(--down); } .cr-insight.mid { border-left-color:var(--ref); } .cr-insight.low { border-left-color:var(--up); }
+  .cr-wrap { display:flex; flex-wrap:wrap; gap:12px; align-items:flex-start; padding:0 12px; }
+  .cr-mxbox { flex:1 1 480px; min-width:0; max-width:100%; }
+  .cr-listbox { flex:1 1 340px; min-width:0; }
+  .cr-mx { overflow-x:auto; border:1px solid var(--line); border-radius:8px; background:var(--panel); }
+  .cr-mx table { border-collapse:separate; border-spacing:1px; font-size:10.5px; font-variant-numeric:tabular-nums; }
+  .cr-mx td { min-width:36px; height:28px; padding:0 1px; text-align:center; color:var(--ink); white-space:nowrap; }
+  .cr-mx td.cr-na { color:var(--muted); }
+  .cr-mx th { background:var(--panel); color:var(--ink); font-size:11px; font-weight:600; cursor:pointer; }
+  .cr-mx th:hover { color:var(--acc); }
+  .cr-col { vertical-align:bottom; padding:4px 0; }
+  .cr-col span { display:inline-block; writing-mode:vertical-rl; transform:rotate(180deg); }
+  .cr-row { position:sticky; left:0; z-index:1; padding:0 6px; text-align:left; }
+  .cr-legend { display:flex; align-items:center; gap:6px; margin:6px 2px; color:var(--muted); font-size:11px; }
+  .cr-legend i { flex:0 1 180px; height:8px; border:1px solid var(--line); border-radius:4px; background:linear-gradient(to right, var(--cr-neg), var(--panel), var(--cr-pos)); }
+  .cr-listbox table.dtable { width:100%; margin:0; }
+  .cr-list th.r, .cr-list td { white-space:nowrap; }
+  .cr-list tbody tr { cursor:pointer; }
+  button.cr-sort { min-height:0; padding:0; border:0; background:none; color:inherit; font:inherit; cursor:pointer; }
+  button.cr-sort.on { color:var(--acc); }
+  .mc-grid { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:8px; padding:0 12px 10px; }
+  .mc-cell { min-width:0; border:1px solid var(--line); border-radius:8px; overflow:hidden; background:var(--panel); }
+  .mc-cell[hidden] { display:none; }
+  .mc-head { display:flex; align-items:center; gap:6px; padding:4px 6px; border-bottom:1px solid var(--line); }
+  .mc-sym { width:5.4em; flex:none; font-weight:700; text-transform:uppercase; }
+  .mc-info { flex:1 1 auto; min-width:0; min-height:0; padding:0 2px; border:0; background:none; font:inherit; font-size:12.5px; text-align:left; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; cursor:pointer; }
+  .mc-full { flex:none; min-height:0; padding:1px 8px; }
+  .mc-box { height:clamp(240px, 34vh, 400px); }
+  .mc-1x2 .mc-box { height:clamp(300px, 56vh, 560px); }
+  @media (hover:hover) { .mc-info:hover { text-decoration:underline; } .cr-list tbody tr:hover { background:var(--hover); } }
+  @media (max-width: 640px) {
+    .cr-ctl, .mc-bar { padding:6px 8px; }
+    .cr-ctl select, .mc-bar select, .mc-head select, .mc-sym { font-size:16px; min-height:36px; }
+    .cr-insight { margin-left:8px; margin-right:8px; }
+    .cr-wrap { padding:0 8px; }
+    .cr-mxbox, .cr-listbox { flex-basis:100%; }
+    .mc-grid { grid-template-columns:minmax(0, 1fr); padding:0 8px 10px; }
+    .mc-box, .mc-1x2 .mc-box { height:260px; }
+    .mc-head { flex-wrap:wrap; }
   }
   .pane-switch, .more-toggle { display:none; }
   /* Phone portrait: one pane at a time in a horizontal snap scroller; control rows scroll sideways instead of wrapping and the primary button stays pinned. */
@@ -1577,6 +1632,82 @@ I18n.add({
   "KL giao dịch 24h chỉ {m}: thanh khoản mỏng — dùng lệnh giới hạn, chia nhỏ lệnh, tránh lệnh thị trường.": "24h volume only {m}: thin liquidity — use limit orders, split orders, avoid market orders.",
   "Chia vốn mua làm 3–4 lần (DCA) thay vì mua một lần; luôn đặt dừng lỗ trước khi vào lệnh và không dùng tiền vay.": "Split buys into 3–4 parts (DCA) instead of one; always set the stop-loss before entering and never use borrowed money.",
 });
+// English for the "Bộ lọc" screener tab and technical-signal alerts.
+I18n.add({
+  "Bộ lọc": "Screener",
+  "Quá bán trong xu hướng tăng": "Oversold in an uptrend", "Golden cross mới (≤ 10 phiên)": "Fresh golden cross (≤ 10 days)", "Vừa vượt MA200": "Just crossed above MA200",
+  "Bứt phá đỉnh 20 phiên + KL ≥ 1,5×": "20-day breakout + volume ≥ 1.5×", "Quá mua RSI ≥ 75": "Overbought RSI ≥ 75", "Death cross / thủng MA200": "Death cross / below MA200",
+  "Golden cross": "Golden cross", "MA50 cắt lên MA200 — xu hướng dài hạn chuyển tăng.": "MA50 crosses above MA200 — long-term trend turns up.",
+  "Death cross": "Death cross", "MA50 cắt xuống MA200 — xu hướng dài hạn chuyển giảm.": "MA50 crosses below MA200 — long-term trend turns down.",
+  "Vượt MA200": "Cross above MA200", "Giá đóng cửa vượt lên trên MA200.": "The close moves above the MA200.",
+  "Thủng MA200": "Break below MA200", "Giá đóng cửa rơi xuống dưới MA200.": "The close falls below the MA200.",
+  "MACD cắt lên": "MACD cross up", "MACD cắt lên đường tín hiệu — động lượng tăng.": "MACD crosses above its signal line — momentum turns up.",
+  "MACD cắt xuống": "MACD cross down", "MACD cắt xuống đường tín hiệu — động lượng giảm.": "MACD crosses below its signal line — momentum turns down.",
+  "RSI thoát quá bán": "RSI exits oversold", "RSI cắt lên 30 từ vùng quá bán.": "RSI crosses up through 30 from oversold.",
+  "RSI thoát quá mua": "RSI exits overbought", "RSI cắt xuống 70 từ vùng quá mua.": "RSI crosses down through 70 from overbought.",
+  "Khối lượng đột biến": "Volume spike", "Khối lượng ≥ 2× trung bình 20 nến trước.": "Volume ≥ 2× the average of the previous 20 candles.",
+  "Bứt phá đỉnh 20": "20-bar breakout", "Giá đóng cửa cao hơn đỉnh 20 nến trước.": "The close is above the high of the previous 20 candles.",
+  "Thủng đáy 20": "20-bar breakdown", "Giá đóng cửa thấp hơn đáy 20 nến trước.": "The close is below the low of the previous 20 candles.",
+  "Giá vào vùng mua (Khuyến nghị)": "Price enters buy zone (Advice)", "Giá vào vùng bán / chốt lời (Khuyến nghị)": "Price enters sell / take-profit zone (Advice)",
+  "Ngắn hạn": "Short term",
+  "🔔 {r} — giá hiện tại {p}": "🔔 {r} — current price {p}", "Cảnh báo tín hiệu kỹ thuật": "Technical signal alerts",
+  "RSI từ": "RSI from", "RSI đến": "RSI to", "24h từ (%)": "24h from (%)", "24h đến (%)": "24h to (%)", "7 ngày từ (%)": "7d from (%)", "7 ngày đến (%)": "7d to (%)",
+  "Cách ATH tối đa (%)": "Max below ATH (%)", "Vốn hoá tối thiểu (triệu $)": "Min market cap ($ million)", "KL× tối thiểu": "Min volume ×", "KL×": "Vol ×",
+  "Điểm từ": "Score from", "Điểm đến": "Score to", "Điểm": "Score", "Tín hiệu": "Signal", "Bất kỳ": "Any", "Giá trên": "Price above", "Giá dưới": "Price below",
+  "Bộ lọc kỹ thuật": "Technical screener", "nến ngày đã đóng cửa · top coin có cặp USDT trên Binance": "closed daily candles · top coins with a Binance USDT pair",
+  "Mẫu bộ lọc": "Preset", "Tuỳ chỉnh": "Custom", "Số coin xét": "Coins scanned", "So với MA50": "Vs MA50", "So với MA200": "Vs MA200",
+  "Tín hiệu xảy ra trong": "Signals within the last", "phiên gần nhất:": "days:", "{n} phiên trước": "{n} days ago", "phiên vừa đóng": "last closed day",
+  "Không tải được nến ngày để lọc.": "Could not load daily candles to screen.", "Kết quả: {n} / {t} coin": "Results: {n} / {t} coins",
+  "Chỉ dùng nến ngày đã đóng (bỏ phiên đang chạy). Tín hiệu chọn nhiều ô = chỉ cần khớp 1 trong số đó. KL× = khối lượng phiên cuối / trung bình 20 phiên trước. Điểm = điểm kỹ thuật ngày (−100…+100). Chỉ là sàng lọc theo quy tắc, không phải lời khuyên đầu tư.":
+    "Only closed daily candles are used (the running day is dropped). With several signals ticked, matching any one is enough. Vol × = last day's volume / average of the previous 20 days. Score = daily technical score (−100…+100). A rule-based screen, not investment advice.",
+  "Báo khi giá hiện tại nằm trong vùng của khung {h} ở tab Khuyến nghị.": "Fires when the current price is inside the {h} zone of the Advice tab.",
+  "Khung thời gian": "Horizon", "Chưa có cảnh báo tín hiệu nào.": "No signal alerts yet.",
+  "Cảnh báo tín hiệu kiểm tra mỗi 5 phút khi trang đang mở (kể cả tab ẩn) và ngay sau khi thêm; tín hiệu nến chỉ tính khi nến đã đóng cửa, mỗi nến báo tối đa 1 lần. Khung nến không áp dụng cho cảnh báo vùng mua / bán.":
+    "Signal alerts are checked every 5 minutes while the page is open (even in a hidden tab) and right after adding; candle signals count only on closed candles, at most once per candle. The candle interval does not apply to buy / sell zone alerts.",
+  "Cảnh báo không hợp lệ: cần mã coin hợp lệ.": "Invalid alert: a valid coin ticker is required.",
+});
+// English for the advice backtest section.
+I18n.add({
+  "Kiểm chứng quá khứ": "Backtest", "phát lại khuyến nghị trên lịch sử, không nhìn trước tương lai": "replays the advice over history without looking ahead",
+  "▶ Kiểm chứng quá khứ": "▶ Run backtest", "▶ Chạy lại kiểm chứng": "▶ Run backtest again",
+  "Đang tải nến lịch sử…": "Loading candle history…", "Đang phát lại lịch sử… {p}%": "Replaying history… {p}%",
+  "Chưa đủ lịch sử giá (cần ≥ 310 nến ngày) để kiểm chứng.": "Not enough price history (≥ 310 daily candles needed) to backtest.",
+  "Không chạy được kiểm chứng.": "Could not run the backtest.", "Đã chạy {n} lần phát lại trong {s} giây.": "Replayed {n} points in {s} s.",
+  "Chốt lời": "Take profit", "Hết hạn giữ": "Time exit", "Số lần khuyến nghị mua": "Buy calls", "vào lệnh {n} lần ({p}%)": "entered {n} times ({p}%)",
+  "Tỷ lệ thắng": "Win rate", "{n} lệnh có lãi sau phí": "{n} trades profitable after fees", "Lãi trung bình / lệnh": "Average return / trade",
+  "lệnh tệ nhất {w}": "worst trade {w}", "Lãi gộp các lệnh": "Compounded return", "mua & giữ cùng kỳ {b}": "buy & hold, same period {b}",
+  "Sụt giảm tối đa": "Max drawdown", "chuỗi lệnh nối tiếp": "of the trade sequence", "Thời gian giữ trung bình": "Average holding time", "{d} ngày": "{d} days",
+  "chốt lời {a} · dừng lỗ {b} · hết hạn {c}": "target {a} · stop {b} · time {c}",
+  "chưa có lần nào chạm vùng mua": "price never reached the buy zone", "chưa có khuyến nghị mua nào": "no buy call in this period",
+  "Khuyến nghị bán": "Sell calls", "giá thấp hơn sau {w} ngày: {p}% số lần (thay đổi TB {m})": "price lower after {w} days: {p}% of the time (average move {m})",
+  "Trung lập (chờ)": "Neutral (wait)", "Chưa kết thúc": "Unresolved", "bỏ qua vì dữ liệu chưa đủ để chốt kết quả": "skipped: not enough data after the call to settle the result",
+  "Lệnh gần nhất ({n})": "Latest trades ({n})", "Vào": "Entry", "Giá vào": "Entry price", "Giá ra": "Exit price", "Kết thúc": "Exit", "Lãi / lỗ": "P / L",
+  "Quy tắc: khuyến nghị mua → chờ giá chạm vùng mua trong {a} / {b} / {c} ngày (ngắn / trung / dài hạn), vào ở giá thấp hơn của giá mở cửa và đỉnh vùng mua; thoát khi chạm dừng lỗ hoặc vùng bán, nếu không thì sau {d} / {f} / {g} ngày. Nến vừa vào lệnh chỉ xét dừng lỗ; cùng nến chạm cả dừng lỗ và mục tiêu tính là dừng lỗ; gap qua mức thì khớp ở giá mở cửa. Phí {x}% mỗi chiều, không tính trượt giá, mỗi lệnh dùng toàn bộ vốn và các lệnh không chồng nhau.":
+    "Rules: buy call → wait for price to reach the buy zone within {a} / {b} / {c} days (short / medium / long term), fill at the lower of the open and the top of the zone; exit at the stop or the sell zone, otherwise after {d} / {f} / {g} days. The entry candle only checks the stop; a candle touching both stop and target counts as the stop; a gap through a level fills at the open. Fee {x}% per side, no slippage, each trade uses the full capital and trades do not overlap.",
+  "Khuyến nghị bán: so giá đóng cửa sau {a} / {b} / {c} ngày với giá lúc khuyến nghị (các lần có thể chồng nhau). Ngắn / trung hạn phát lại mỗi ngày trong ~2 năm gần nhất, dài hạn mỗi tuần trên toàn bộ lịch sử nến ngày ({n} nến). Chỉ dùng nến đã đóng tại thời điểm đó; bỏ qua funding, Fear & Greed, xu hướng BTC và thanh khoản. Quy tắc theo kỹ thuật, quá khứ không đảm bảo tương lai, không phải lời khuyên đầu tư.":
+    "Sell calls: compare the close after {a} / {b} / {c} days with the price at the call (calls may overlap). Short / medium term are replayed daily over roughly the last 2 years, long term weekly over the whole daily history ({n} candles). Only candles already closed at that moment are used; funding, Fear & Greed, BTC trend and liquidity are ignored. Rule-based on technicals, past results do not guarantee the future, not investment advice."
+});
+// English for the "Tương quan" and "Đa biểu đồ" tabs.
+I18n.add({
+  "Tương quan": "Correlation", "Đa biểu đồ": "Multi-chart",
+  "Đang tải dữ liệu ngày {done}/{total}…": "Loading daily data {done}/{total}…",
+  "Tương quan với BTC": "Correlation vs BTC", "Beta so với BTC": "Beta vs BTC", "Biến động năm": "Annualised volatility",
+  "Tương quan trung bình {v}: các coin này thường đi cùng chiều — danh mục gần như biến động như một khối, ít đa dạng hoá.": "Average correlation {v}: these coins mostly move together — the portfolio behaves almost as one block, little diversification.",
+  "Tương quan trung bình {v}: mức vừa — đa dạng hoá có tác dụng một phần.": "Average correlation {v}: moderate — diversification helps only partly.",
+  "Tương quan trung bình {v}: thấp — các coin khá độc lập, danh mục được đa dạng hoá tốt.": "Average correlation {v}: low — the coins are fairly independent, the portfolio is well diversified.",
+  "Danh mục ★ đang trống — thêm coin vào danh mục hoặc chọn Top 10 / 20 / 30.": "The ★ watchlist is empty — add coins to it or pick Top 10 / 20 / 30.",
+  "Cần ít nhất 2 coin có cặp USDT và đủ lịch sử để tính tương quan.": "At least 2 coins with a USDT pair and enough history are needed to compute correlation.",
+  "Bỏ qua (lịch sử ngắn hơn kỳ đã chọn): {l}.": "Skipped (history shorter than the chosen period): {l}.",
+  "Danh mục có nhiều coin, chỉ lấy {m} coin đầu.": "The watchlist is longer — only the first {m} coins are used.",
+  "Không tải được: {l}.": "Could not load: {l}.",
+  "{n} ngày chung · {m} coin · cập nhật {t}": "{n} common days · {m} coins · updated {t}",
+  "Tương quan (−1…+1) đo hai coin có cùng chiều biến động theo ngày hay không: +1 đi cùng, 0 không liên quan, −1 ngược chiều. Beta so với BTC: BTC đổi 1% thì coin này thường đổi bao nhiêu % (beta 1.5 = mạnh hơn BTC 1.5 lần). Biến động năm = độ lệch chuẩn lợi suất log theo ngày × √365. Tính trên giá đóng cửa ngày (00:00 UTC), chỉ các ngày có dữ liệu của mọi coin; quá khứ không đảm bảo tương lai.":
+    "Correlation (−1…+1) shows whether two coins move in the same direction day by day: +1 together, 0 unrelated, −1 opposite. Beta vs BTC: when BTC moves 1%, how many % this coin usually moves (beta 1.5 = 1.5× as strong as BTC). Annualised volatility = standard deviation of daily log returns × √365. Based on daily closes (00:00 UTC), only days where every coin has data; past results do not guarantee the future.",
+  "Nhóm coin": "Coins", "Top {n} vốn hoá": "Top {n} by market cap", "Kỳ": "Period", "{n} ngày": "{n} days",
+  "Bố cục": "Layout", "Đồng bộ khung nến…": "Sync interval…", "Đặt cùng một khung nến cho mọi ô": "Apply one interval to every chart",
+  "Gõ mã coin vào ô để đổi; bấm giá để xem chi tiết coin.": "Type a coin ticker in a box to change it; click the price to open the coin.",
+  "Mã coin, ví dụ BTC": "Coin ticker, e.g. BTC", "Mở biểu đồ đầy đủ (chỉ báo, công cụ vẽ)": "Open the full chart (indicators, drawing tools)", "Xem chi tiết coin": "Open coin details",
+});
 // English for the shared core modules (ThemePicker markup, SavedSessions, ColFilter) — included by every tool that uses them.
 I18n.add({
   "Thêm thao tác": "More actions",
@@ -2128,6 +2259,179 @@ const CoinPicks = (() => {
 
   return { RULES, rank, reasons, TOP };
 })();
+// Pure technical signals from CLOSED candles: snapshot (RSI, MAs, MACD, volume ratio, 52-week distance) + crossing / breakout events.
+const CoinSignals = (() => {
+  const ok = x => x != null && Number.isFinite(x);
+  const META = {
+    goldenCross: ["Golden cross", "MA50 cắt lên MA200 — xu hướng dài hạn chuyển tăng."],
+    deathCross: ["Death cross", "MA50 cắt xuống MA200 — xu hướng dài hạn chuyển giảm."],
+    crossUp200: ["Vượt MA200", "Giá đóng cửa vượt lên trên MA200."],
+    crossDown200: ["Thủng MA200", "Giá đóng cửa rơi xuống dưới MA200."],
+    macdUp: ["MACD cắt lên", "MACD cắt lên đường tín hiệu — động lượng tăng."],
+    macdDown: ["MACD cắt xuống", "MACD cắt xuống đường tín hiệu — động lượng giảm."],
+    rsiExitOversold: ["RSI thoát quá bán", "RSI cắt lên 30 từ vùng quá bán."],
+    rsiExitOverbought: ["RSI thoát quá mua", "RSI cắt xuống 70 từ vùng quá mua."],
+    volSpike: ["Khối lượng đột biến", "Khối lượng ≥ 2× trung bình 20 nến trước."],
+    breakout20: ["Bứt phá đỉnh 20", "Giá đóng cửa cao hơn đỉnh 20 nến trước."],
+    breakdown20: ["Thủng đáy 20", "Giá đóng cửa thấp hơn đáy 20 nến trước."],
+  };
+  const KEYS = Object.keys(META);
+
+  function calc(bars) {
+    const c = bars.map(b => b.close), v = bars.map(b => b.volume), m = TA.macd(c);
+    return { bars, c, v, rsi: TA.rsi(c, 14), ma50: TA.sma(c, 50), ma200: TA.sma(c, 200), line: m.line, sig: m.signal };
+  }
+
+  const volRatioAt = (x, i) => {
+    if (i < 20) return null;
+    const avg = x.v.slice(i - 20, i).reduce((s, n) => s + n, 0) / 20;
+    return avg > 0 ? x.v[i] / avg : null;
+  };
+  const cross = (a, b, i, up) => ok(a[i]) && ok(b[i]) && ok(a[i - 1]) && ok(b[i - 1]) && (up ? a[i - 1] <= b[i - 1] && a[i] > b[i] : a[i - 1] >= b[i - 1] && a[i] < b[i]);
+
+  function hasEvent(x, key, i) {
+    if (i < 1) return false;
+    const { c, rsi, ma50, ma200, line, sig, bars } = x;
+    switch (key) {
+      case "goldenCross": return cross(ma50, ma200, i, true);
+      case "deathCross": return cross(ma50, ma200, i, false);
+      case "crossUp200": return cross(c, ma200, i, true);
+      case "crossDown200": return cross(c, ma200, i, false);
+      case "macdUp": return cross(line, sig, i, true);
+      case "macdDown": return cross(line, sig, i, false);
+      case "rsiExitOversold": return ok(rsi[i]) && ok(rsi[i - 1]) && rsi[i - 1] < 30 && rsi[i] >= 30;
+      case "rsiExitOverbought": return ok(rsi[i]) && ok(rsi[i - 1]) && rsi[i - 1] > 70 && rsi[i] <= 70;
+      case "volSpike": { const r = volRatioAt(x, i); return r != null && r >= 2; }
+      case "breakout20": return i >= 20 && c[i] > Math.max(...bars.slice(i - 20, i).map(b => b.high));
+      case "breakdown20": return i >= 20 && c[i] < Math.min(...bars.slice(i - 20, i).map(b => b.low));
+      default: return false;
+    }
+  }
+
+  // → [{ key, barsAgo }] newest first; each key once (its most recent occurrence within `lookback` bars back, 0 = last bar).
+  function events(bars, lookback = 10, only = null) {
+    if (!bars || bars.length < 30) return [];
+    const x = calc(bars), n = bars.length - 1, out = [];
+    for (const key of only || KEYS) {
+      for (let a = 0; a <= lookback && n - a >= 1; a++) if (hasEvent(x, key, n - a)) { out.push({ key, barsAgo: a }); break; }
+    }
+    return out.sort((p, q) => p.barsAgo - q.barsAgo);
+  }
+
+  // → null when < 30 bars; withScore adds the daily TechOutlook score (heavier).
+  function snapshot(bars, withScore = true) {
+    if (!bars || bars.length < 30) return null;
+    const x = calc(bars), i = bars.length - 1, price = x.c[i], ma50 = x.ma50[i], ma200 = x.ma200[i];
+    const hi52 = Math.max(...bars.slice(-365).map(b => b.high)), f = withScore ? TechOutlook.frame(bars, "D", []) : null;
+    return { price, rsi: x.rsi[i], ma50, ma200, vsMa50: ok(ma50) ? (price / ma50 - 1) * 100 : null, vsMa200: ok(ma200) ? (price / ma200 - 1) * 100 : null,
+      macdAbove: ok(x.line[i]) && ok(x.sig[i]) ? x.line[i] > x.sig[i] : null, volRatio: volRatioAt(x, i), fromHi52: hi52 > 0 ? (price / hi52 - 1) * 100 : null, score: f ? f.score : null };
+  }
+
+  const SECONDS = { "1h": 3600, "4h": 14400, "1d": 86400 };
+  // Drops the still-forming last bar; bar.time is the open time shifted by tz seconds (Spot.TZ).
+  const closed = (bars, interval, tz = 0, nowMs = Date.now()) => bars.length && nowMs / 1000 + tz < bars[bars.length - 1].time + SECONDS[interval] ? bars.slice(0, -1) : bars;
+
+  return { META, KEYS, SECONDS, events, snapshot, closed };
+})();
+// Pure screener rules: preset criteria, match of one coin (snapshot + events + row) against criteria, sorting.
+const ScreenerRules = (() => {
+  const EMPTY = { rsiMin: "", rsiMax: "", ma50: "", ma200: "", pctMin: "", pctMax: "", p7Min: "", p7Max: "", athMax: "", mcapMin: "", volMin: "", scoreMin: "", scoreMax: "", within: 10, sig: [] };
+  const PRESETS = {
+    oversoldUp: ["Quá bán trong xu hướng tăng", { rsiMax: 35, ma200: "above" }],
+    golden: ["Golden cross mới (≤ 10 phiên)", { sig: ["goldenCross"], within: 10 }],
+    crossUp200: ["Vừa vượt MA200", { sig: ["crossUp200"], within: 5 }],
+    breakout: ["Bứt phá đỉnh 20 phiên + KL ≥ 1,5×", { sig: ["breakout20"], within: 1, volMin: 1.5 }],
+    macdUp: ["MACD cắt lên", { sig: ["macdUp"], within: 3 }],
+    overbought: ["Quá mua RSI ≥ 75", { rsiMin: 75 }],
+    bearish: ["Death cross / thủng MA200", { sig: ["deathCross", "crossDown200"], within: 10 }],
+  };
+  const num = v => v === "" || v == null || !Number.isFinite(+v) ? null : +v;
+  const preset = k => PRESETS[k] ? { ...EMPTY, ...PRESETS[k][1] } : { ...EMPTY };
+
+  // Keeps only known fields with sane types (stored criteria / presets).
+  function clean(c) {
+    const o = { ...EMPTY };
+    if (!c || typeof c !== "object") return o;
+    for (const k of Object.keys(EMPTY)) {
+      if (k === "sig") o.sig = Array.isArray(c.sig) ? c.sig.filter(s => CoinSignals.KEYS.includes(s)) : [];
+      else if (k === "ma50" || k === "ma200") o[k] = c[k] === "above" || c[k] === "below" ? c[k] : "";
+      else if (k === "within") o.within = Math.min(60, Math.max(0, Math.round(num(c.within) ?? 10)));
+      else o[k] = num(c[k]) == null ? "" : +c[k];
+    }
+    return o;
+  }
+
+  const inRange = (v, lo, hi) => (lo == null || (v != null && v >= lo)) && (hi == null || (v != null && v <= hi));
+
+  // item: { snap, events: [{ key, barsAgo }], row } → boolean
+  function match(item, crit) {
+    const { snap: s, events, row: r } = item, c = clean(crit);
+    if (!s) return false;
+    if (!inRange(s.rsi, num(c.rsiMin), num(c.rsiMax)) || !inRange(s.score, num(c.scoreMin), num(c.scoreMax))) return false;
+    if (c.ma50 && (s.ma50 == null || (c.ma50 === "above") !== (s.price > s.ma50))) return false;
+    if (c.ma200 && (s.ma200 == null || (c.ma200 === "above") !== (s.price > s.ma200))) return false;
+    if (!inRange(r.pct, num(c.pctMin), num(c.pctMax)) || !inRange(r.pct7d, num(c.p7Min), num(c.p7Max))) return false;
+    if (num(c.athMax) != null && !(r.athPct != null && r.athPct >= -c.athMax)) return false;
+    if (num(c.mcapMin) != null && !(r.mcap >= c.mcapMin * 1e6)) return false;
+    if (num(c.volMin) != null && !(s.volRatio != null && s.volRatio >= c.volMin)) return false;
+    if (c.sig.length && !events.some(e => c.sig.includes(e.key) && e.barsAgo <= c.within)) return false;
+    return true;
+  }
+
+  const VALUE = { coin: it => it.row.sym, price: it => it.row.last, pct: it => it.row.pct, pct7d: it => it.row.pct7d, rsi: it => it.snap.rsi, score: it => it.snap.score,
+    vs200: it => it.snap.vsMa200, vol: it => it.snap.volRatio, sig: it => it.events.length ? it.events[0].barsAgo : null };
+  const COLS = Object.keys(VALUE);
+
+  // Stable sort; empty values always last.
+  function sort(items, col, dir) {
+    const f = VALUE[col] || VALUE.coin, k = dir === "asc" ? 1 : -1;
+    return items.map((it, i) => ({ it, i, v: f(it) })).sort((a, b) => {
+      const an = a.v == null || (typeof a.v === "number" && !Number.isFinite(a.v)), bn = b.v == null || (typeof b.v === "number" && !Number.isFinite(b.v));
+      if (an || bn) return an === bn ? a.i - b.i : an ? 1 : -1;
+      return (typeof a.v === "string" ? a.v.localeCompare(b.v) : a.v - b.v) * k || a.i - b.i;
+    }).map(x => x.it);
+  }
+
+  return { EMPTY, PRESETS, COLS, preset, clean, match, sort };
+})();
+// Pure technical-signal alert rules: candle events on the last CLOSED bar, or price inside a CoinAdvice buy / sell zone. Fires once, then waits for re-arm.
+const SignalAlertRule = (() => {
+  const ZONES = { buyZone: ["Giá vào vùng mua (Khuyến nghị)", "buy"], sellZone: ["Giá vào vùng bán / chốt lời (Khuyến nghị)", "sell"] };
+  const INTERVALS = ["1h", "4h", "1d"];
+  const HORIZONS = { short: "Ngắn hạn", medium: "Trung hạn", long: "Dài hạn" };
+  const isZone = a => Object.hasOwn(ZONES, a.signal);
+  const valid = a => !!a && typeof a.sym === "string" && (isZone(a) ? Object.hasOwn(HORIZONS, a.horizon) : CoinSignals.KEYS.includes(a.signal) && INTERVALS.includes(a.interval));
+  const bearish = a => ["sellZone", "deathCross", "crossDown200", "macdDown", "rsiExitOverbought", "breakdown20"].includes(a.signal);
+  const barKey = a => `${a.sym}|${a.interval}`;
+
+  // Lookups the poller must fetch for the armed alerts: candle groups (sym|interval) and zone coins.
+  function needs(list) {
+    const armed = list.filter(a => !a.fired), bars = new Map(), zones = new Set();
+    for (const a of armed) if (isZone(a)) zones.add(a.sym); else bars.set(barKey(a), { sym: a.sym, interval: a.interval });
+    return { bars, zones };
+  }
+
+  function zoneHit(a, advice, price) {
+    const h = advice && advice.horizons.find(x => x.id === a.horizon), z = h && h[ZONES[a.signal][1]];
+    return !!z && price > 0 && price >= z.lo && price <= z.hi;
+  }
+
+  // ctx: { bars: Map "SYM|interval" → closed bars, advice: Map sym → CoinAdvice.build result, price: Map sym → last price } → hits [{ ...alert, price, bar }]
+  function evaluate(list, ctx) {
+    const hits = [];
+    for (const a of list) {
+      if (a.fired) continue;
+      if (isZone(a)) { const p = ctx.price.get(a.sym); if (zoneHit(a, ctx.advice.get(a.sym), p)) hits.push({ ...a, price: p, bar: 0 }); continue; }
+      const bars = ctx.bars.get(barKey(a));
+      if (!bars || bars.length < 31) continue;
+      const t = bars[bars.length - 1].time;
+      if (t !== a.bar && CoinSignals.events(bars, 0, [a.signal]).length) hits.push({ ...a, price: bars[bars.length - 1].close, bar: t });
+    }
+    return hits;
+  }
+
+  return { ZONES, INTERVALS, HORIZONS, isZone, valid, bearish, needs, evaluate };
+})();
 // Pure rule-based advice for one coin: per horizon (today / medium / long) an action, when to buy / sell, buy zone, sell zone,
 // stop-loss, reward : risk and historical odds; plus other key notes (sizing by ATR, MA200, RSI, ATH, funding, Fear & Greed, BTC, liquidity).
 // Texts are Vietnamese keys + numeric params (the UI translates and formats). Needs TA + TechOutlook.
@@ -2213,6 +2517,92 @@ const CoinAdvice = (() => {
   }
 
   return { build, ACTION };
+})();
+// CoinBacktest (pure): replays CoinAdvice.build over closed bars only (no look-ahead), simulates buy-side calls (entry zone, stop, target, time exit, fees)
+// and scores sell-side calls. k = { h4, d1, w1 } candle arrays (oldest first, closed bars). Needs TA + TechOutlook + CoinAdvice.
+const CoinBacktest = (() => {
+  const DAY = 86400, FEE = 0.001, START = 250, DAILY_SPAN = 730, WIN = { h4: 300, d1: 600, w1: 200 };
+  const RULES = { short: { entry: 5, hold: 5, win: 5 }, medium: { entry: 20, hold: 40, win: 20 }, long: { entry: 91, hold: 182, win: 182 } };
+  const IDS = Object.keys(RULES);
+  const sleep = () => new Promise(r => setTimeout(r, 0));
+
+  const closedCount = (bars, span, t) => { let lo = 0, hi = bars.length; while (lo < hi) { const m = (lo + hi) >> 1; if (bars[m].time + span <= t) lo = m + 1; else hi = m; } return lo; };
+
+  // Advice as of the close of daily bar i: only bars closed at or before that moment are visible.
+  function decisionAt(k, i) {
+    const t = k.d1[i].time + DAY, nh = closedCount(k.h4, 14400, t), nw = closedCount(k.w1, 604800, t);
+    if (nw < 2) return null;
+    return CoinAdvice.build({ h4: k.h4.slice(Math.max(0, nh - WIN.h4), nh), d1: k.d1.slice(Math.max(0, i + 1 - WIN.d1), i + 1), w1: k.w1.slice(Math.max(0, nw - WIN.w1), nw) });
+  }
+
+  const done = (c, j, k, entry, exit, reason) => ({ entered: true, from: j, to: k, entry, exit, reason, days: k - j, ret: exit * (1 - FEE) / (entry * (1 + FEE)) - 1 });
+
+  // Hold from entry bar j: stop first (gap → open), then target (gap → open), else close of the last hold bar. Entry bar only checks the stop.
+  function hold(d1, c, r, j, entry) {
+    const end = j + r.hold;
+    for (let k = j; k <= end; k++) {
+      if (k >= d1.length) return { pending: true };
+      const b = d1[k];
+      if (b.low <= c.stop) return done(c, j, k, entry, Math.min(b.open, c.stop), "stop");
+      if (k > j && b.high >= c.target) return done(c, j, k, entry, Math.max(b.open, c.target), "target");
+      if (k === end) return done(c, j, k, entry, b.close, "time");
+    }
+  }
+
+  // Buy-side call at daily bar c.i: fills at min(open, zone high) on the first bar touching the zone within the entry window.
+  function simulateBuy(d1, c, r) {
+    for (let j = c.i + 1; j <= c.i + r.entry; j++) {
+      if (j >= d1.length) return { pending: true };
+      if (d1[j].low <= c.hi) return hold(d1, c, r, j, Math.min(d1[j].open, c.hi));
+    }
+    return { entered: false };
+  }
+
+  function equityStats(rets) {
+    let eq = 1, peak = 1, dd = 0;
+    for (const x of rets) { eq *= 1 + x; peak = Math.max(peak, eq); dd = Math.min(dd, eq / peak - 1); }
+    return { compound: eq - 1, maxDD: dd };
+  }
+
+  // Non-overlapping buy trades + sell-side hit rate + neutral count for one horizon.
+  function evaluate(id, calls, d1) {
+    const r = RULES[id], buys = [], sells = [], out = { id, calls: calls.length, neutral: 0, pending: 0 };
+    let free = 0;
+    for (const c of calls) {
+      if (c.tone === "ref") out.neutral++;
+      else if (c.tone === "down" && c.i + r.win < d1.length) sells.push(d1[c.i + r.win].close / c.price - 1);
+      else if (c.tone === "up" && c.i >= free) {
+        const s = simulateBuy(d1, c, r);
+        if (s.pending) { out.pending++; continue; }
+        buys.push({ at: d1[c.i].time + DAY, zone: [c.lo, c.hi], stop: c.stop, target: c.target, ...s, t0: s.entered ? d1[s.from].time : null, t1: s.entered ? d1[s.to].time : null });
+        free = s.entered ? s.to : c.i + r.entry;
+      }
+    }
+    const trades = buys.filter(b => b.entered), recent = trades.slice(-15).reverse(), rets = trades.map(t => t.ret), avg = a => a.length ? a.reduce((s, x) => s + x, 0) / a.length : null;
+    const first = calls.length ? calls[0].i : 0, firstClose = calls.length ? calls[0].price : null;
+    return { ...out, buyCalls: buys.length, entered: trades.length, wins: rets.filter(x => x > 0).length, avg: avg(rets), worst: rets.length ? Math.min(...rets) : null,
+      avgDays: avg(trades.map(t => t.days)), stops: trades.filter(t => t.reason === "stop").length, targets: trades.filter(t => t.reason === "target").length,
+      ...equityStats(rets), sellCalls: sells.length, sellHits: sells.filter(x => x < 0).length, sellAvg: avg(sells),
+      bh: firstClose ? d1[d1.length - 1].close / firstClose - 1 : null, from: calls.length ? d1[first].time : null, to: d1[d1.length - 1].time, trades: recent };
+  }
+
+  // Daily steps for short + medium over the last ~2 years, weekly steps for long over all history. opt: { onProgress(f), cancelled(), pause }.
+  async function run(k, opt = {}) {
+    const n = k.d1.length, dFrom = Math.max(START, n - 1 - DAILY_SPAN), pause = opt.pause || sleep, calls = { short: [], medium: [], long: [] };
+    const steps = []; for (let i = START; i < n; i++) if (i >= dFrom || (n - 1 - i) % 7 === 0) steps.push(i);
+    let t0 = Date.now();
+    for (let s = 0; s < steps.length; s++) {
+      const i = steps[s], v = decisionAt(k, i);
+      if (v) v.horizons.forEach(h => {
+        if (h.id === "long" ? (n - 1 - i) % 7 === 0 : i >= dFrom)
+          calls[h.id].push({ i, price: v.price, tone: h.tone, lo: h.buy.lo, hi: h.buy.hi, target: h.sell.lo, stop: h.stop.v });
+      });
+      if (Date.now() - t0 > 40) { if (opt.onProgress) opt.onProgress((s + 1) / steps.length); await pause(); if (opt.cancelled && opt.cancelled()) return null; t0 = Date.now(); }
+    }
+    return { rules: RULES, fee: FEE, steps: steps.length, results: IDS.map(id => evaluate(id, calls[id], k.d1)) };
+  }
+
+  return { run, decisionAt, simulateBuy, evaluate, equityStats, RULES, FEE };
 })();
 // Indicator guide, part 1 (on-price indicators): what it measures, formula, how to read, worked crypto example, combos, crypto caveat.
 // imp = core indicator highlighted in the picker. Text is Vietnamese source, translated through T().
@@ -3323,6 +3713,70 @@ const BtcFlow = (() => {
 
   return { SAT, MAX_BOOK, TAGS, normalize, addrType, balance, txNet, txDirection, counterparty, confirmations, mergeTxs, summariseUtx, isWhale, labelOf, btc, isTxid, cleanBook, short };
 })();
+// Pure daily-return statistics: align closes by calendar day, log returns, Pearson matrix, beta vs a benchmark, annualised volatility.
+const ReturnCorr = (() => {
+  const DAY = 86400;
+  const day = t => Math.floor(t / DAY);
+  const mean = a => a.reduce((s, x) => s + x, 0) / a.length;
+
+  // series: { SYM: [{ time, close }] } → { n, returns: { SYM: number[] } }; only days present in every series, only consecutive-day pairs.
+  function align(series) {
+    const syms = Object.keys(series), maps = syms.map(s => new Map(series[s].filter(b => b.close > 0).map(b => [day(b.time), b.close])));
+    if (!syms.length) return { n: 0, returns: {} };
+    const days = [...maps[0].keys()].filter(d => maps.every(m => m.has(d))).sort((a, b) => a - b);
+    const returns = Object.fromEntries(syms.map(s => [s, []]));
+    for (let i = 1; i < days.length; i++) {
+      if (days[i] - days[i - 1] !== 1) continue;
+      syms.forEach((s, k) => returns[s].push(Math.log(maps[k].get(days[i]) / maps[k].get(days[i - 1]))));
+    }
+    return { n: returns[syms[0]].length, returns };
+  }
+
+  function pearson(a, b) {
+    const n = Math.min(a.length, b.length);
+    if (n < 3) return null;
+    const ma = mean(a.slice(0, n)), mb = mean(b.slice(0, n));
+    let sab = 0, saa = 0, sbb = 0;
+    for (let i = 0; i < n; i++) { const x = a[i] - ma, y = b[i] - mb; sab += x * y; saa += x * x; sbb += y * y; }
+    if (saa < 1e-18 || sbb < 1e-18) return null;
+    return Math.max(-1, Math.min(1, sab / Math.sqrt(saa * sbb)));
+  }
+
+  function beta(r, rb) {
+    const n = Math.min(r.length, rb.length);
+    if (n < 3) return null;
+    const m = mean(r.slice(0, n)), mb = mean(rb.slice(0, n));
+    let sab = 0, sbb = 0;
+    for (let i = 0; i < n; i++) { sab += (r[i] - m) * (rb[i] - mb); sbb += (rb[i] - mb) ** 2; }
+    return sbb < 1e-18 ? null : sab / sbb;
+  }
+
+  // Annualised standard deviation of daily log returns (√365), as a fraction.
+  function volatility(r) {
+    if (r.length < 3) return null;
+    const m = mean(r);
+    return Math.sqrt(r.reduce((s, x) => s + (x - m) ** 2, 0) / (r.length - 1) * 365);
+  }
+
+  const matrix = (syms, returns) => syms.map(a => syms.map(b => a === b ? (pearson(returns[a], returns[a]) === null ? null : 1) : pearson(returns[a], returns[b])));
+
+  function avgPairwise(m) {
+    const v = [];
+    for (let i = 0; i < m.length; i++) for (let j = i + 1; j < m.length; j++) if (m[i][j] != null) v.push(m[i][j]);
+    return v.length ? mean(v) : null;
+  }
+
+  // show: symbols in the matrix; bench: extra series used for beta / correlation (may be outside `show`).
+  function analyze(series, show, bench = "BTC") {
+    const { n, returns } = align(series), rb = returns[bench], syms = show.filter(s => returns[s]), m = matrix(syms, returns);
+    const stats = Object.fromEntries(syms.map(s => [s, { corr: rb ? (s === bench ? 1 : pearson(returns[s], rb)) : null, beta: rb ? (s === bench ? 1 : beta(returns[s], rb)) : null, vol: volatility(returns[s]) }]));
+    return { n, syms, matrix: m, stats, avg: avgPairwise(m) };
+  }
+
+  const level = avg => avg == null ? null : avg >= 0.7 ? "high" : avg >= 0.4 ? "mid" : "low";
+
+  return { align, pearson, beta, volatility, matrix, avgPairwise, analyze, level };
+})();
 // GET JSON with timeout, TTL cache (memory, + sessionStorage when persist) and in-flight de-dup; errors carry .status and .rateLimited (HTTP 429) for clear UI messages.
 const Http = (() => {
   const cache = new Map(), inflight = new Map();
@@ -3710,6 +4164,34 @@ const Coins = (() => {
   return { loadPairs, loadGecko, addExtra, pair, gecko: g, name, id, known, row, resolve, list: () => list, spotBases: () => [...pairMap.keys()], hasSpot: b => pairMap.has(b),
     geckoAt: () => at, geckoError: () => err, ready: () => pairMap.size > 0 || gecko.size > 0 };
 })();
+// Shared daily Binance candles (400 per pair), cached 15 min, loaded 6 requests at a time (used by buy / sell ideas and the screener).
+const DailyBars = (() => {
+  const TTL = 900e3, POOL = 6, cache = new Map();
+
+  function get(pair) {
+    const hit = cache.get(pair);
+    if (hit && Date.now() - hit.at < TTL) return hit.p;
+    const p = Spot.klines(pair, "1d", 400);
+    cache.set(pair, { at: Date.now(), p });
+    p.catch(() => { if (cache.get(pair) && cache.get(pair).p === p) cache.delete(pair); });
+    return p;
+  }
+
+  // pairs → Map pair → bars (failed pairs left out); onProgress(done, total).
+  async function many(pairs, onProgress = () => {}) {
+    const out = new Map();
+    let done = 0;
+    for (let i = 0; i < pairs.length; i += POOL) {
+      await Promise.all(pairs.slice(i, i + POOL).map(async pair => {
+        try { out.set(pair, await get(pair)); } catch (e) { console.warn("DailyBars.many - klines fail", pair, e.message); }
+        onProgress(++done, pairs.length);
+      }));
+    }
+    return out;
+  }
+
+  return { get, many };
+})();
 // Inputs of the buy / sell ideas: daily Binance candles (400) of the top ~60 tradable coins → technical scores, 200-day MA, weekly score.
 // 6 requests at a time, result cached 15 min (Binance public weight: ~2 per call).
 const PicksData = (() => {
@@ -3735,7 +4217,7 @@ const PicksData = (() => {
       let done = 0;
       for (let i = 0; i < coins.length; i += POOL) {
         await Promise.all(coins.slice(i, i + POOL).map(async r => {
-          try { const d = await Spot.klines(r.pair, "1d", 400); if (d.length >= 30) rows.push(rowOf(r, d)); }
+          try { const d = await DailyBars.get(r.pair); if (d.length >= 30) rows.push(rowOf(r, d)); }
           catch (e) { console.warn("PicksData.load - klines fail", r.pair, e.message); }
           onProgress(++done, coins.length);
         }));
@@ -4717,6 +5199,347 @@ const MarketView = (() => {
   function onTicks() { if (host && !timer) timer = setTimeout(() => { timer = 0; paint(); }, Math.max(0, 10000 - (Date.now() - lastPaint))); }
 
   return { id: "market", label: "Thị trường", wide: true, mount, unmount, relabel: paint, onTicks };
+})();
+// "Bộ lọc" tab: technical screener over the top coins (closed daily candles), preset or custom criteria, sortable results.
+const ScreenerView = (() => {
+  const SIZES = [50, 100, 200], TTL = 900e3, LOOK = 60;
+  const NUM = [["rsiMin", "RSI từ"], ["rsiMax", "RSI đến"], ["pctMin", "24h từ (%)"], ["pctMax", "24h đến (%)"], ["p7Min", "7 ngày từ (%)"], ["p7Max", "7 ngày đến (%)"],
+    ["athMax", "Cách ATH tối đa (%)"], ["mcapMin", "Vốn hoá tối thiểu (triệu $)"], ["volMin", "KL× tối thiểu"], ["scoreMin", "Điểm từ"], ["scoreMax", "Điểm đến"]];
+  const COLS = [["coin", "Coin"], ["price", "Giá"], ["pct", "24h"], ["pct7d", "7 ngày"], ["rsi", "RSI"], ["score", "Điểm"], ["vs200", "vs MA200"], ["vol", "KL×"], ["sig", "Tín hiệu"]];
+  const e = s => Dom.esc(s ?? "");
+  let host = null, seq = 0, prog = null, err = false, res = null;
+  let n = SIZES.includes(Prefs.get("scr.n")) ? Prefs.get("scr.n") : 100;
+  let crit = ScreenerRules.clean(Prefs.get("scr.crit", null));
+  let preset = Prefs.get("scr.preset", "");
+  let sort = Prefs.get("scr.sort", null);
+  if (!sort || !ScreenerRules.COLS.includes(sort.col)) sort = { col: "score", dir: "desc" };
+
+  const save = () => { Prefs.set("scr.n", n); Prefs.set("scr.crit", crit); Prefs.set("scr.preset", preset); Prefs.set("scr.sort", sort); };
+  const opt = (v, l, cur) => `<option value="${e(v)}"${String(v) === String(cur) ? " selected" : ""}>${e(l)}</option>`;
+  const maSel = (k, l) => `<label>${e(T(l))}<select data-f="${k}">${opt("", T("Bất kỳ"), crit[k])}${opt("above", T("Giá trên"), crit[k])}${opt("below", T("Giá dưới"), crit[k])}</select></label>`;
+
+  function formHtml() {
+    return `<div class="dsec"><b>${e(T("Bộ lọc kỹ thuật"))}</b><span class="muted">${e(T("nến ngày đã đóng cửa · top coin có cặp USDT trên Binance"))}</span></div>`
+      + `<div class="posform"><label>${e(T("Mẫu bộ lọc"))}<select data-f="preset">${opt("", T("Tuỳ chỉnh"), preset)}${Object.entries(ScreenerRules.PRESETS).map(([k, p]) => opt(k, T(p[0]), preset)).join("")}</select></label>`
+      + `<label>${e(T("Số coin xét"))}<select data-f="n">${SIZES.map(s => opt(s, T("Top {n}", { n: s }), n)).join("")}</select></label>`
+      + maSel("ma50", "So với MA50") + maSel("ma200", "So với MA200")
+      + NUM.map(([k, l]) => `<label>${e(T(l))}<input type="number" step="any" data-f="${k}" value="${e(crit[k])}"></label>`).join("") + `</div>`
+      + `<div class="scr-sigs"><span class="muted">${e(T("Tín hiệu xảy ra trong"))}</span><input type="number" min="0" max="${LOOK}" step="1" data-f="within" value="${crit.within}" class="scr-within"><span class="muted">${e(T("phiên gần nhất:"))}</span>`
+      + CoinSignals.KEYS.map(k => `<label class="chk" title="${e(T(CoinSignals.META[k][1]))}"><input type="checkbox" data-sig="${k}"${crit.sig.includes(k) ? " checked" : ""}> ${e(T(CoinSignals.META[k][0]))}</label>`).join("") + `</div>`;
+  }
+
+  const chip = ev => `<span class="rchip" title="${e(T(CoinSignals.META[ev.key][1]))}">${e(T(CoinSignals.META[ev.key][0]))} · ${e(ev.barsAgo ? T("{n} phiên trước", { n: ev.barsAgo }) : T("phiên vừa đóng"))}</span>`;
+  const cell = (v, d = 1) => v == null || !Number.isFinite(v) ? "" : Fmt.en(v, d);
+  const tone = v => `<td class="r ${Fmt.tone(v)}">${e(Fmt.pct(v, 1))}</td>`;
+
+  function rowHtml(it) {
+    const r = it.row, s = it.snap, show = Math.max(10, crit.within);
+    return `<tr data-coin="${e(r.sym)}"><td class="l"><b>${e(r.sym)}</b></td><td class="r">${e(Fmt.money(r.last || s.price))}</td>${tone(r.pct)}${tone(r.pct7d)}`
+      + `<td class="r">${e(cell(s.rsi))}</td><td class="r ${Fmt.tone(s.score)}">${e(s.score == null ? "" : Fmt.signed(s.score, 0))}</td>${tone(s.vsMa200)}<td class="r">${e(cell(s.volRatio, 2))}</td>`
+      + `<td class="l scr-chips">${it.events.filter(v => v.barsAgo <= show).map(chip).join("")}</td></tr>`;
+  }
+
+  function outHtml() {
+    if (!res) return `<p class="pad muted">${e(err ? T("Không tải được nến ngày để lọc.") : prog ? T("Đang phân tích {d}/{n} coin…", { d: prog[0], n: prog[1] }) : T("Đang tải…"))}</p>`;
+    const items = ScreenerRules.sort(res.items.map(it => ({ ...it, row: Coins.row(it.sym) })).filter(it => ScreenerRules.match(it, crit)), sort.col, sort.dir);
+    const arrow = c => c === sort.col ? (sort.dir === "asc" ? " ▲" : " ▼") : "";
+    return `<div class="dsec"><b>${e(T("Kết quả: {n} / {t} coin", { n: items.length, t: res.items.length }))}</b></div>`
+      + (items.length ? `<div class="scr-wrap"><table class="dtable scr-t"><thead><tr>${COLS.map(([k, l]) => `<th data-s="${k}" class="${k === "coin" || k === "sig" ? "l" : "r"}">${e(T(l))}${arrow(k)}</th>`).join("")}</tr></thead><tbody>${items.map(rowHtml).join("")}</tbody></table></div>`
+        : `<p class="pad muted">${e(T("Hiện không có coin nào đạt điều kiện."))}</p>`)
+      + `<p class="sc-note">${e(T("Chỉ dùng nến ngày đã đóng (bỏ phiên đang chạy). Tín hiệu chọn nhiều ô = chỉ cần khớp 1 trong số đó. KL× = khối lượng phiên cuối / trung bình 20 phiên trước. Điểm = điểm kỹ thuật ngày (−100…+100). Chỉ là sàng lọc theo quy tắc, không phải lời khuyên đầu tư."))}</p>`;
+  }
+
+  const paintOut = () => { const o = host && host.querySelector(".scr-out"); if (o) o.innerHTML = outHtml(); };
+  function paint() { if (host) host.innerHTML = `<div class="scr-form">${formHtml()}</div><div class="scr-out">${outHtml()}</div>`; }
+
+  async function build(coins, my) {
+    const bars = await DailyBars.many(coins.map(r => r.pair), (a, b) => { prog = [a, b]; if (my === seq && (a % 6 === 0 || a === b)) paintOut(); });
+    const items = [];
+    for (const r of coins) {
+      const b = bars.get(r.pair) && CoinSignals.closed(bars.get(r.pair), "1d", Spot.TZ), snap = b && CoinSignals.snapshot(b);
+      if (snap) items.push({ sym: r.sym, snap, events: CoinSignals.events(b, LOOK) });
+      if (items.length % 20 === 0) await new Promise(f => setTimeout(f));
+      if (my !== seq) return null;
+    }
+    return items;
+  }
+
+  async function load() {
+    const my = ++seq;
+    if (res && res.n === n && Date.now() - res.at < TTL) return;
+    res = null; err = false; prog = null; paintOut();
+    for (let w = 0; w < 40 && !Coins.geckoAt() && !Coins.geckoError(); w++) { await new Promise(f => setTimeout(f, 500)); if (my !== seq) return; }
+    const coins = [...new Set(Coins.list().map(g => g.sym))].map(Coins.row).filter(r => r.pair && MarketMath.tradable(r)).sort((a, b) => (a.rank || 1e9) - (b.rank || 1e9)).slice(0, n);
+    try { const items = await build(coins, my); if (my !== seq) return; res = items && items.length ? { n, at: Date.now(), items } : null; err = !res; }
+    catch (x) { if (my !== seq) return; console.warn("ScreenerView.load - analyse coins fail", x.message); err = true; }
+    paintOut();
+  }
+
+  function readCrit() {
+    const c = { ...crit, sig: [...host.querySelectorAll("[data-sig]")].filter(i => i.checked).map(i => i.dataset.sig) };
+    host.querySelectorAll("input[data-f], select[data-f]").forEach(i => { if (!["preset", "n"].includes(i.dataset.f)) c[i.dataset.f] = i.value; });
+    return ScreenerRules.clean(c);
+  }
+
+  function onChange(ev) {
+    const t = ev.target, f = t.dataset && t.dataset.f;
+    if (!f && !t.dataset.sig) return;
+    if (ev.type === "input" && t.type !== "number") return;
+    if (f === "preset") { preset = t.value; crit = ScreenerRules.preset(preset); save(); paint(); return; }
+    if (f === "n") { n = +t.value; save(); load(); return; }
+    crit = readCrit(); preset = ""; save();
+    const p = host.querySelector('[data-f="preset"]'); if (p) p.value = "";
+    paintOut();
+  }
+
+  function onClick(ev) {
+    const th = ev.target.closest("th[data-s]");
+    if (!th) return;
+    const c = th.dataset.s;
+    sort = { col: c, dir: sort.col === c && sort.dir === "desc" ? "asc" : "desc" };
+    save(); paintOut();
+  }
+
+  function mount(el) { host = el; ["change", "input", "click"].forEach(t => el.addEventListener(t, t === "click" ? onClick : onChange)); paint(); load(); }
+  function unmount() { seq++; if (host) { ["change", "input", "click"].forEach(t => host.removeEventListener(t, t === "click" ? onClick : onChange)); } host = null; }
+  return { id: "screener", label: "Bộ lọc", wide: true, mount, unmount, relabel: paint };
+})();
+// "Đa biểu đồ" tab: 2–4 compact Binance candle charts side by side (coin + interval per cell), live via kline streams. State in Prefs "multi".
+const MultiChartView = (() => {
+  const IVS = [["15m", "15m"], ["1h", "1h"], ["4h", "4h"], ["1d", "1D"], ["1w", "1W"]], IV = IVS.map(x => x[0]), DEF = ["BTC", "ETH", "SOL", "BNB"], N = 4, BARS = 300, SHOW = 90;
+  const e = s => Dom.esc(s ?? "");
+  const tk = new Map();
+  let host = null, st = null, cells = [], timer = 0;
+
+  function clean(raw) {
+    const r = raw && typeof raw === "object" ? raw : {}, saved = Array.isArray(r.cells) ? r.cells : [], base = [...new Set([...Watch.all(), ...DEF])].slice(0, N);
+    return { layout: r.layout === "1x2" ? "1x2" : "2x2", cells: base.map((d, i) => ({ sym: saved[i] && CoinParse.isSymbol(saved[i].sym) ? saved[i].sym : d, iv: saved[i] && IV.includes(saved[i].iv) ? saved[i].iv : "4h" })) };
+  }
+  const save = () => Prefs.set("multi", st);
+  const count = () => st.layout === "1x2" ? 2 : N;
+  const opts = (list, cur) => list.map(([v, l]) => `<option value="${v}"${v === cur ? " selected" : ""}>${e(l)}</option>`).join("");
+
+  function bar() {
+    host.querySelector(".mc-bar").innerHTML = `<label class="chk">${e(T("Bố cục"))} <select data-mc="layout">${opts([["2x2", "2×2"], ["1x2", "1×2"]], st.layout)}</select></label>`
+      + `<label class="chk"><select data-mc="sync" title="${e(T("Đặt cùng một khung nến cho mọi ô"))}"><option value="">${e(T("Đồng bộ khung nến…"))}</option>${opts(IVS, "")}</select></label>`
+      + `<span class="muted">${e(T("Gõ mã coin vào ô để đổi; bấm giá để xem chi tiết coin."))}</span>`;
+  }
+
+  function cellHtml(i) {
+    return `<div class="mc-cell" data-i="${i}"><div class="mc-head"><input class="mc-sym" data-mc="sym" data-i="${i}" type="text" autocomplete="off" spellcheck="false" maxlength="20">`
+      + `<button class="mc-info" data-coin=""></button><select data-mc="iv" data-i="${i}">${opts(IVS, "")}</select><button class="mc-full" data-mc="full" data-i="${i}">⤢</button></div>`
+      + `<div class="mc-box cbox"><div class="chost"></div><p class="cmsg" hidden></p></div></div>`;
+  }
+  function titles() {
+    cells.forEach(c => { c.el.querySelector(".mc-sym").title = T("Mã coin, ví dụ BTC"); c.el.querySelector(".mc-full").title = T("Mở biểu đồ đầy đủ (chỉ báo, công cụ vẽ)"); c.el.querySelector(".mc-info").title = T("Xem chi tiết coin"); });
+  }
+
+  function head(i) {
+    const c = cells[i], { sym } = st.cells[i], t = tk.get(Coins.pair(sym)), row = Coins.row(sym);
+    const last = c.last ?? (t && t.last) ?? row.last, pct = t && t.open && last ? (last / t.open - 1) * 100 : row.pct, tone = Fmt.tone(pct);
+    c.info.dataset.coin = sym;
+    c.info.innerHTML = last ? `<b class="${tone}">${e(Fmt.money(last))}</b> <span class="${tone}">${e(Fmt.pct(pct, 1))}</span>` : "";
+  }
+  function msg(i, key) { const p = cells[i].el.querySelector(".cmsg"); p.hidden = !key; p.textContent = key ? T(key) : ""; }
+
+  function stop(i) { const c = cells[i]; c.seq++; if (c.unsub) { c.unsub(); c.unsub = null; } c.chart.destroy(); c.last = null; }
+
+  async function start(i) {
+    const c = cells[i]; stop(i);
+    const my = c.seq, { sym, iv } = st.cells[i], pair = Coins.pair(sym);
+    c.el.querySelector(".mc-sym").value = sym; c.el.querySelector("[data-mc=iv]").value = iv; head(i);
+    if (!pair) {
+      if (Coins.spotBases().length) msg(i, "Coin này không có cặp USDT trên Binance nên không có biểu đồ nến.");
+      else { msg(i, "Đang tải dữ liệu biểu đồ…"); setTimeout(() => { if (host && my === c.seq) start(i); }, 1000); }
+      return;
+    }
+    msg(i, "Đang tải dữ liệu biểu đồ…");
+    let bars;
+    try { bars = await Spot.klines(pair, iv, BARS); }
+    catch (x) { if (my === c.seq) { console.warn("MultiChartView.start - get klines fail", pair, x.message); msg(i, "Không tải được nến từ Binance. Thử lại sau."); } return; }
+    if (my !== c.seq || !host) return;
+    if (!bars.length) { msg(i, "Không có dữ liệu nến."); return; }
+    msg(i, null);
+    c.last = bars[bars.length - 1].close;
+    c.chart.render({ bars, type: "candle", scale: "normal", volume: true, inds: [], peaks: false, crosses: false, intraday: iv !== "1d" && iv !== "1w", from: Math.max(0, bars.length - SHOW), keep: false, compare: [] });
+    c.unsub = Live.sub(`${pair.toLowerCase()}@kline_${iv}`, d => { if (!d || !d.k) return; const b = Spot.liveBar(d.k); c.chart.updateLast(b); c.last = b.close; head(i); });
+    head(i); tickersSoon();
+  }
+
+  async function tickers() {
+    const pairs = [...new Set(st.cells.slice(0, count()).map(c => Coins.pair(c.sym)).filter(Boolean))];
+    if (!pairs.length || !host) return;
+    try { (await Spot.tickers(pairs)).forEach(t => tk.set(t.pair, t)); } catch (x) { console.warn("MultiChartView.tickers - get 24h tickers fail", x.message); }
+    if (host) cells.forEach((_, i) => head(i));
+  }
+  const tickersSoon = Dom.debounce(tickers, 200);
+
+  function layout() {
+    host.querySelector(".mc-grid").className = `mc-grid mc-${st.layout}`;
+    cells.forEach((c, i) => { const on = i < count(); c.el.hidden = !on; if (on && !c.on) start(i); else if (!on && c.on) stop(i); c.on = on; });
+  }
+
+  function onChange(ev) {
+    const el = ev.target.closest("[data-mc]");
+    if (!el) return;
+    const k = el.dataset.mc, i = +el.dataset.i;
+    if (k === "layout") { st.layout = el.value === "1x2" ? "1x2" : "2x2"; layout(); }
+    else if (k === "sync") { if (!IV.includes(el.value)) return; st.cells.forEach(c => { c.iv = el.value; }); el.value = ""; cells.forEach((c, j) => { if (c.on) start(j); }); }
+    else if (k === "sym" && cells[i]) {
+      const s = CoinParse.parse(el.value).symbols[0];
+      if (!s) { el.value = st.cells[i].sym; return; }
+      st.cells[i].sym = s; start(i);
+    } else if (k === "iv" && cells[i] && IV.includes(el.value)) { st.cells[i].iv = el.value; start(i); }
+    else return;
+    save();
+  }
+  function onClick(ev) {
+    const b = ev.target.closest("[data-mc=full]");
+    const s = b && cells[+b.dataset.i] && st.cells[+b.dataset.i].sym;
+    if (s && Coins.pair(s)) { Board.select(s, false); DetailTabs.show("chart"); CoinChart.openDialog(); }
+  }
+
+  function mount(el) {
+    host = el; st = clean(Prefs.get("multi"));
+    el.innerHTML = `<div class="mc-bar"></div><div class="mc-grid">${Array.from({ length: N }, (_, i) => cellHtml(i)).join("")}</div>`;
+    cells = [...el.querySelectorAll(".mc-cell")].map(div => ({ el: div, info: div.querySelector(".mc-info"), chart: TechChart.create(div.querySelector(".chost"), { compact: true }), seq: 0, unsub: null, last: null, on: false }));
+    bar(); titles(); layout();
+    el.addEventListener("change", onChange); el.addEventListener("click", onClick);
+    timer = setInterval(tickers, 30000);
+  }
+  function unmount() {
+    if (host) { host.removeEventListener("change", onChange); host.removeEventListener("click", onClick); cells.forEach((_, i) => stop(i)); }
+    clearInterval(timer); host = null; cells = [];
+  }
+  function relabel() { if (!host) return; bar(); titles(); cells.forEach((_, i) => head(i)); }
+
+  return { id: "multi", label: "Đa biểu đồ", wide: true, mount, unmount, relabel, onTicks: () => { if (host) cells.forEach((_, i) => head(i)); } };
+})();
+// "Tương quan" tab: heatmap of daily-return correlation between coins (★ watchlist or top N by market cap) + per-coin correlation with BTC, beta, annualised volatility.
+const CorrView = (() => {
+  const UNI = ["watch", "10", "20", "30"], PERIODS = [30, 90, 180, 365], MAX_WATCH = 25, TTL = 15 * 60e3, POOL = 6, SORTS = ["sym", "corr", "beta", "vol"];
+  const saved = Prefs.get("corr.sort");
+  const st = { u: UNI.includes(Prefs.get("corr.u")) ? Prefs.get("corr.u") : "10", d: PERIODS.includes(Prefs.get("corr.d")) ? Prefs.get("corr.d") : 90,
+    sort: saved && SORTS.includes(saved.k) ? { k: saved.k, desc: !!saved.desc } : { k: "corr", desc: true } };
+  const cache = new Map();
+  let host = null, data = null, prog = null, seq = 0, retry = 0;
+  const e = s => Dom.esc(s ?? "");
+  const num = (v, d = 2) => v == null ? "–" : Fmt.en(v, d);
+
+  function universe() {
+    if (!Coins.spotBases().length || (st.u !== "watch" && !Coins.list().length)) return null;
+    if (st.u === "watch") {
+      const all = Watch.all().filter(s => Coins.pair(s) && !MarketMath.isStable(Coins.row(s)));
+      return { syms: all.slice(0, MAX_WATCH), cut: Math.max(0, all.length - MAX_WATCH), empty: !Watch.all().length };
+    }
+    const seen = new Set(), out = [];
+    for (const g of Coins.list().slice().sort((a, b) => (a.rank || 1e9) - (b.rank || 1e9))) {
+      if (seen.has(g.sym)) continue;
+      seen.add(g.sym);
+      if (Coins.pair(g.sym) && MarketMath.tradable(Coins.row(g.sym))) out.push(g.sym);
+      if (out.length >= +st.u) break;
+    }
+    return { syms: out, cut: 0 };
+  }
+
+  async function daily(pair) {
+    const key = `${pair}|${st.d}`, hit = cache.get(key);
+    if (hit && Date.now() - hit.at < TTL) return hit.bars;
+    const bars = (await Spot.klines(pair, "1d", st.d + 2)).slice(0, -1);
+    cache.set(key, { at: Date.now(), bars });
+    return bars;
+  }
+
+  async function load() {
+    const my = ++seq;
+    clearTimeout(retry);
+    const u = universe();
+    if (!u) { data = null; paint(); retry = setTimeout(() => { if (my === seq && host) load(); }, 1200); return; }
+    if (u.syms.length < 2) { data = { u, res: null }; paint(); return; }
+    const need = [...new Set([...u.syms, "BTC"])].filter(s => Coins.pair(s)), jobs = need.slice(), series = {}, failed = [];
+    prog = { done: 0, total: need.length }; data = null; paint();
+    await Promise.all(Array.from({ length: Math.min(POOL, need.length) }, async () => {
+      while (jobs.length && my === seq) {
+        const s = jobs.shift();
+        try { series[s] = await daily(Coins.pair(s)); } catch (x) { console.warn("CorrView.load - get klines fail", s, x.message); failed.push(s); }
+        if (my === seq) { prog.done++; const p = host && host.querySelector(".cr-prog"); if (p) p.textContent = T("Đang tải dữ liệu ngày {done}/{total}…", prog); }
+      }
+    }));
+    if (my !== seq || !host) return;
+    prog = null;
+    const min = Math.max(20, st.d * 0.5), short = u.syms.filter(s => series[s] && series[s].length < min), ok = u.syms.filter(s => series[s] && !short.includes(s));
+    const use = Object.fromEntries(Object.entries(series).filter(([s]) => !short.includes(s)));
+    data = { u, failed: failed.filter(s => u.syms.includes(s)), short, at: Date.now(), res: ok.length >= 2 ? ReturnCorr.analyze(use, ok) : null };
+    paint();
+  }
+
+  function cell(a, b, v, text) {
+    if (v == null) return `<td class="cr-na" title="${e(a)} × ${e(b)}: –">·</td>`;
+    const p = Math.round(Math.abs(v) * 100), s = Fmt.en(v, 2), short = text === 1 ? s : s.replace(/^(-?)0\./, "$1.");
+    return `<td style="background:color-mix(in srgb, var(${v >= 0 ? "--cr-pos" : "--cr-neg"}) ${p}%, var(--panel))" title="${e(a)} × ${e(b)}: ${s}">${text ? e(short) : ""}</td>`;
+  }
+
+  function matrix(res) {
+    const n = res.syms.length, text = n <= 12 ? 1 : n <= 20 ? 2 : 0;
+    const head = res.syms.map(s => `<th class="cr-col" data-coin="${e(s)}" title="${e(s)}"><span>${e(s)}</span></th>`).join("");
+    const rows = res.syms.map((a, i) => `<tr><th class="cr-row" data-coin="${e(a)}">${e(a)}</th>${res.syms.map((b, j) => cell(a, b, res.matrix[i][j], text)).join("")}</tr>`).join("");
+    return `<div class="cr-mx"><table><thead><tr><th class="cr-row"></th>${head}</tr></thead><tbody>${rows}</tbody></table></div>`
+      + `<div class="cr-legend"><span>−1</span><i></i><span>+1</span></div>`;
+  }
+
+  const HEAD = [["sym", "Coin"], ["corr", "Tương quan với BTC"], ["beta", "Beta so với BTC"], ["vol", "Biến động năm"]];
+  function list(res) {
+    const val = (s, k) => k === "sym" ? s : res.stats[s][k], dir = st.sort.desc ? -1 : 1;
+    const syms = res.syms.slice().sort((a, b) => { const x = val(a, st.sort.k), y = val(b, st.sort.k); return (x == null) - (y == null) || (x < y ? -1 : x > y ? 1 : 0) * dir; });
+    const th = (k, l, r) => `<th${r ? ' class="r"' : ""}><button class="cr-sort${st.sort.k === k ? " on" : ""}" data-sort="${k}">${e(T(l))}${st.sort.k === k ? (st.sort.desc ? " ▼" : " ▲") : ""}</button></th>`;
+    return `<table class="dtable num cr-list"><thead><tr>${HEAD.map(([k, l], i) => th(k, l, i)).join("")}</tr></thead><tbody>`
+      + syms.map(s => { const x = res.stats[s]; return `<tr data-coin="${e(s)}"><td><b>${e(s)}</b></td><td>${num(x.corr)}</td><td>${num(x.beta)}</td><td>${x.vol == null ? "–" : num(x.vol * 100, 0) + "%"}</td></tr>`; }).join("") + `</tbody></table>`;
+  }
+
+  const INSIGHT = { high: "Tương quan trung bình {v}: các coin này thường đi cùng chiều — danh mục gần như biến động như một khối, ít đa dạng hoá.",
+    mid: "Tương quan trung bình {v}: mức vừa — đa dạng hoá có tác dụng một phần.", low: "Tương quan trung bình {v}: thấp — các coin khá độc lập, danh mục được đa dạng hoá tốt." };
+
+  function body() {
+    if (prog) return `<p class="pad muted cr-prog">${e(T("Đang tải dữ liệu ngày {done}/{total}…", prog))}</p>`;
+    if (!data) return `<p class="pad muted">${e(T("Đang tải dữ liệu vốn hoá…"))}</p>`;
+    if (data.u.empty) return `<p class="pad muted">${e(T("Danh mục ★ đang trống — thêm coin vào danh mục hoặc chọn Top 10 / 20 / 30."))}</p>`;
+    if (!data.res) return `<p class="pad muted">${e(T("Cần ít nhất 2 coin có cặp USDT và đủ lịch sử để tính tương quan."))}${data.short && data.short.length ? " " + e(T("Bỏ qua (lịch sử ngắn hơn kỳ đã chọn): {l}.", { l: data.short.join(", ") })) : ""}</p>`;
+    const r = data.res, lv = ReturnCorr.level(r.avg), notes = [];
+    if (data.u.cut) notes.push(T("Danh mục có nhiều coin, chỉ lấy {m} coin đầu.", { m: MAX_WATCH }));
+    if (data.short.length) notes.push(T("Bỏ qua (lịch sử ngắn hơn kỳ đã chọn): {l}.", { l: data.short.join(", ") }));
+    if (data.failed.length) notes.push(T("Không tải được: {l}.", { l: data.failed.join(", ") }));
+    return (lv ? `<p class="cr-insight ${lv}">${e(T(INSIGHT[lv], { v: num(r.avg) }))}</p>` : "") + `<div class="cr-wrap"><div class="cr-mxbox">${matrix(r)}</div><div class="cr-listbox">${list(r)}</div></div>`
+      + `<p class="sc-note">${e(T("{n} ngày chung · {m} coin · cập nhật {t}", { n: r.n, m: r.syms.length, t: new Date(data.at).toLocaleTimeString("en-GB") }))}${notes.length ? " · " + e(notes.join(" ")) : ""}</p>`
+      + `<p class="sc-note">${e(T("Tương quan (−1…+1) đo hai coin có cùng chiều biến động theo ngày hay không: +1 đi cùng, 0 không liên quan, −1 ngược chiều. Beta so với BTC: BTC đổi 1% thì coin này thường đổi bao nhiêu % (beta 1.5 = mạnh hơn BTC 1.5 lần). Biến động năm = độ lệch chuẩn lợi suất log theo ngày × √365. Tính trên giá đóng cửa ngày (00:00 UTC), chỉ các ngày có dữ liệu của mọi coin; quá khứ không đảm bảo tương lai."))}</p>`;
+  }
+
+  function paint() {
+    if (!host) return;
+    const opt = (v, cur, l) => `<option value="${v}"${String(v) === String(cur) ? " selected" : ""}>${e(l)}</option>`;
+    host.innerHTML = `<div class="cr-ctl"><label class="chk">${e(T("Nhóm coin"))} <select data-cr="u">${opt("watch", st.u, T("★ Danh mục"))}${UNI.slice(1).map(v => opt(v, st.u, T("Top {n} vốn hoá", { n: v }))).join("")}</select></label>`
+      + `<label class="chk">${e(T("Kỳ"))} <select data-cr="d">${PERIODS.map(v => opt(v, st.d, T("{n} ngày", { n: v }))).join("")}</select></label></div>` + body();
+  }
+
+  function onChange(ev) {
+    const el = ev.target.closest("[data-cr]");
+    if (!el) return;
+    if (el.dataset.cr === "u" && UNI.includes(el.value)) { st.u = el.value; Prefs.set("corr.u", st.u); }
+    else if (el.dataset.cr === "d" && PERIODS.includes(+el.value)) { st.d = +el.value; Prefs.set("corr.d", st.d); }
+    else return;
+    load();
+  }
+  function onClick(ev) {
+    const b = ev.target.closest("[data-sort]");
+    if (!b || !SORTS.includes(b.dataset.sort)) return;
+    st.sort = { k: b.dataset.sort, desc: st.sort.k === b.dataset.sort ? !st.sort.desc : b.dataset.sort !== "sym" };
+    Prefs.set("corr.sort", st.sort);
+    paint();
+  }
+
+  function mount(el) { host = el; el.addEventListener("change", onChange); el.addEventListener("click", onClick); load(); }
+  function unmount() { if (host) { host.removeEventListener("change", onChange); host.removeEventListener("click", onClick); } host = null; seq++; clearTimeout(retry); prog = null; }
+
+  return { id: "corr", label: "Tương quan", wide: true, mount, unmount, relabel: paint };
 })();
 // "Exchanges" tab (CoinMarketCap-style ranking): CoinGecko spot exchanges by trust score + DeFiLlama CEX transparency
 // (on-chain reserves, net inflows 24h / 7d / 30d, derivatives OI). Sortable, searchable; exchange token links to the coin.
@@ -6070,7 +6893,7 @@ const AdviceView = (() => {
   }
 
   async function open(s) {
-    sym = s;
+    sym = s; AdviceBacktestView.cancel();
     const my = ++seq, el = $("dAdvice"), pair = Coins.pair(s), head = `<div class="dsec"><b>${e(T("Khuyến nghị"))}</b><span class="muted">${e(T("tự động theo quy tắc kỹ thuật — không phải lời khuyên đầu tư"))}</span></div>`;
     if (MarketMath.isStable(Coins.row(s))) { el.innerHTML = head + `<p class="pad muted">${e(T("{s} là stablecoin (giá neo ~1$) — không có khuyến nghị mua / bán theo giá.", { s }))}</p>`; return; }
     if (!pair) { el.innerHTML = head + `<p class="pad muted">${e(T("Coin này không có cặp USDT trên Binance nên không có biểu đồ nến."))}</p>`; return; }
@@ -6082,7 +6905,8 @@ const AdviceView = (() => {
       el.innerHTML = head + `<p class="pad adv-price">${e(T("Giá tham chiếu {p} (đóng cửa nến ngày hiện tại)", { p: Fmt.price(v.price) }))}</p>`
         + `<div class="ol-grid">${v.horizons.map(card).join("")}</div>`
         + `<div class="dsec"><b>${e(T("Khuyến nghị quan trọng khác"))}</b></div><ul class="insights">${v.notes.map(([c, k, p]) => `<li class="${c}">${e(tr(k, p))}</li>`).join("")}</ul>`
-        + `<p class="sc-note">${e(T("Cách tính: điểm kỹ thuật (MA20/50/200, RSI, MACD, ADX, Bollinger, khối lượng) quyết định hành động; vùng mua / bán lấy từ pivot, MA, đỉnh / đáy gần nhất ± một phần ATR; dừng lỗ dưới vùng mua 0,5–1 ATR. Ngắn hạn dùng nến 4h + ngày, trung hạn nến ngày, dài hạn nến tuần."))}</p>`;
+        + `<p class="sc-note">${e(T("Cách tính: điểm kỹ thuật (MA20/50/200, RSI, MACD, ADX, Bollinger, khối lượng) quyết định hành động; vùng mua / bán lấy từ pivot, MA, đỉnh / đáy gần nhất ± một phần ATR; dừng lỗ dưới vùng mua 0,5–1 ATR. Ngắn hạn dùng nến 4h + ngày, trung hạn nến ngày, dài hạn nến tuần."))}</p><div id="dAdviceBt"></div>`;
+      AdviceBacktestView.mount($("dAdviceBt"), pair);
     } catch (err) {
       if (my !== seq) return;
       console.warn("AdviceView.open - load klines fail", s, err.message);
@@ -6090,7 +6914,85 @@ const AdviceView = (() => {
     }
   }
 
-  return { open, close: () => { seq++; } };
+  return { open, load, close: () => { seq++; AdviceBacktestView.cancel(); } };
+})();
+// Backtest section at the end of the "Khuyến nghị" tab: on demand, replays CoinAdvice over history and shows per-horizon results (cached 30 min per pair).
+const AdviceBacktestView = (() => {
+  const TITLE = { short: "Hôm nay / ngắn hạn", medium: "Trung hạn", long: "Dài hạn" };
+  const REASON = { target: "Chốt lời", stop: "Dừng lỗ", time: "Hết hạn giữ" };
+  const cache = new Map();
+  let seq = 0;
+  const e = s => Dom.esc(s ?? "");
+  const pct = (x, d = 1) => x == null ? "—" : Fmt.pct(x * 100, d);
+  const day = t => Fmt.date(t * 1000);
+  const closed = (bars, span) => bars.filter(b => b.time - Spot.TZ + span <= Date.now() / 1000);
+
+  function card(r, rules) {
+    const w = rules[r.id], row = (label, val, sub = "", cls = "") => `<div class="adv-row"><span>${e(T(label))}</span><b class="${cls}">${e(val)}</b>${sub ? `<em class="muted">${e(sub)}</em>` : ""}</div>`;
+    const buy = r.entered
+      ? row("Số lần khuyến nghị mua", `${r.buyCalls}`, T("vào lệnh {n} lần ({p}%)", { n: r.entered, p: Fmt.en(r.entered / r.buyCalls * 100, 0) }))
+        + row("Tỷ lệ thắng", `${Fmt.en(r.wins / r.entered * 100, 0)}%`, T("{n} lệnh có lãi sau phí", { n: r.wins }), r.wins / r.entered >= 0.5 ? "up" : "down")
+        + row("Lãi trung bình / lệnh", pct(r.avg, 2), T("lệnh tệ nhất {w}", { w: pct(r.worst) }), Fmt.tone(r.avg))
+        + row("Lãi gộp các lệnh", pct(r.compound), T("mua & giữ cùng kỳ {b}", { b: pct(r.bh) }), Fmt.tone(r.compound))
+        + row("Sụt giảm tối đa", pct(r.maxDD), T("chuỗi lệnh nối tiếp"), "down")
+        + row("Thời gian giữ trung bình", T("{d} ngày", { d: Fmt.en(r.avgDays, 1) }), T("chốt lời {a} · dừng lỗ {b} · hết hạn {c}", { a: r.targets, b: r.stops, c: r.entered - r.targets - r.stops }))
+      : row("Số lần khuyến nghị mua", `${r.buyCalls}`, r.buyCalls ? T("chưa có lần nào chạm vùng mua") : T("chưa có khuyến nghị mua nào"));
+    const sell = row("Khuyến nghị bán", `${r.sellCalls}`, r.sellCalls ? T("giá thấp hơn sau {w} ngày: {p}% số lần (thay đổi TB {m})", { w: w.win, p: Fmt.en(r.sellHits / r.sellCalls * 100, 0), m: pct(r.sellAvg) }) : "");
+    return `<div class="ol-card adv-card"><div class="ol-h"><b>${e(T(TITLE[r.id]))}</b><span class="badge">${e(r.from ? `${day(r.from)} → ${day(r.to)}` : "")}</span></div>`
+      + buy + sell + row("Trung lập (chờ)", `${r.neutral}`) + (r.pending ? row("Chưa kết thúc", `${r.pending}`, T("bỏ qua vì dữ liệu chưa đủ để chốt kết quả")) : "")
+      + (r.trades.length ? `<details class="bt-trades"><summary>${e(T("Lệnh gần nhất ({n})", { n: r.trades.length }))}</summary>${tradesTable(r)}</details>` : "") + `</div>`;
+  }
+
+  function tradesTable(r) {
+    const th = ["Khuyến nghị", "Vào", "Giá vào", "Giá ra", "Kết thúc", "Ngày", "Lãi / lỗ"].map((h, i) => `<th${[2, 3, 5, 6].includes(i) ? ' class="r"' : ""}>${e(T(h))}</th>`).join("");
+    const rows = r.trades.map(t => `<tr><td>${day(t.at)}</td><td>${day(t.t0)}</td><td class="r">${e(Fmt.price(t.entry))}</td><td class="r">${e(Fmt.price(t.exit))}</td><td>${e(T(REASON[t.reason]))}</td><td class="r">${t.days}</td><td class="r ${Fmt.tone(t.ret)}">${e(pct(t.ret, 2))}</td></tr>`).join("");
+    return `<div class="bt-scroll"><table class="dtable"><thead><tr>${th}</tr></thead><tbody>${rows}</tbody></table></div>`;
+  }
+
+  function resultsHtml(res, bars) {
+    const w = res.rules;
+    return `<div class="ol-grid">${res.results.map(r => card(r, w)).join("")}</div>`
+      + `<p class="sc-note">${e(T("Quy tắc: khuyến nghị mua → chờ giá chạm vùng mua trong {a} / {b} / {c} ngày (ngắn / trung / dài hạn), vào ở giá thấp hơn của giá mở cửa và đỉnh vùng mua; thoát khi chạm dừng lỗ hoặc vùng bán, nếu không thì sau {d} / {f} / {g} ngày. Nến vừa vào lệnh chỉ xét dừng lỗ; cùng nến chạm cả dừng lỗ và mục tiêu tính là dừng lỗ; gap qua mức thì khớp ở giá mở cửa. Phí {x}% mỗi chiều, không tính trượt giá, mỗi lệnh dùng toàn bộ vốn và các lệnh không chồng nhau.", { a: w.short.entry, b: w.medium.entry, c: w.long.entry, d: w.short.hold, f: w.medium.hold, g: w.long.hold, x: Fmt.en(res.fee * 100, 1) }))}</p>`
+      + `<p class="sc-note">${e(T("Khuyến nghị bán: so giá đóng cửa sau {a} / {b} / {c} ngày với giá lúc khuyến nghị (các lần có thể chồng nhau). Ngắn / trung hạn phát lại mỗi ngày trong ~2 năm gần nhất, dài hạn mỗi tuần trên toàn bộ lịch sử nến ngày ({n} nến). Chỉ dùng nến đã đóng tại thời điểm đó; bỏ qua funding, Fear & Greed, xu hướng BTC và thanh khoản. Quy tắc theo kỹ thuật, quá khứ không đảm bảo tương lai, không phải lời khuyên đầu tư.", { a: w.short.win, b: w.medium.win, c: w.long.win, n: bars }))}</p>`;
+  }
+
+  async function run(box, tok, pair, key) {
+    const status = box.querySelector(".bt-status"), btn = box.querySelector("button");
+    btn.disabled = true; status.textContent = T("Đang tải nến lịch sử…");
+    try {
+      const [h4, d1, w1] = (await Promise.all([Spot.klines(pair, "4h", 5000), Spot.klines(pair, "1d", 2000), Spot.klines(pair, "1w", 400)])).map((b, i) => closed(b, [14400, 86400, 604800][i]));
+      if (tok !== seq) return;
+      if (d1.length < 310) { status.textContent = T("Chưa đủ lịch sử giá (cần ≥ 310 nến ngày) để kiểm chứng."); btn.disabled = false; return; }
+      const t0 = performance.now();
+      const res = await CoinBacktest.run({ h4, d1, w1 }, { cancelled: () => tok !== seq, onProgress: f => { if (tok === seq) status.textContent = T("Đang phát lại lịch sử… {p}%", { p: Fmt.en(f * 100, 0) }); } });
+      if (!res || tok !== seq) return;
+      res.bars = d1.length; res.secs = (performance.now() - t0) / 1000;
+      cache.set(key, { at: Date.now(), res });
+      show(box, res);
+    } catch (err) {
+      if (tok !== seq) return;
+      console.warn("AdviceBacktestView.run - backtest fail", pair, err.message);
+      status.textContent = T("Không chạy được kiểm chứng."); btn.disabled = false;
+    }
+  }
+
+  function show(box, res) {
+    box.querySelector("button").disabled = false;
+    box.querySelector("button").textContent = T("▶ Chạy lại kiểm chứng");
+    box.querySelector(".bt-status").textContent = T("Đã chạy {n} lần phát lại trong {s} giây.", { n: res.steps, s: Fmt.en(res.secs, 1) });
+    box.querySelector(".bt-out").innerHTML = resultsHtml(res, res.bars);
+  }
+
+  function mount(el, pair) {
+    const tok = ++seq, key = pair;
+    el.innerHTML = `<div class="dsec"><b>${e(T("Kiểm chứng quá khứ"))}</b><span class="muted">${e(T("phát lại khuyến nghị trên lịch sử, không nhìn trước tương lai"))}</span></div>`
+      + `<div class="bt-bar"><button class="main">${e(T("▶ Kiểm chứng quá khứ"))}</button><span class="muted bt-status"></span></div><div class="bt-out"></div>`;
+    const hit = cache.get(key);
+    if (hit && Date.now() - hit.at < 30 * 60e3) show(el, hit.res);
+    el.querySelector("button").addEventListener("click", () => run(el, tok, pair, key));
+  }
+
+  return { mount, cancel: () => { seq++; } };
 })();
 // "Sổ lệnh" tab: Binance order book (top 15 per side, depth bars, spread, bid/ask imbalance) + realtime aggregated trades with taker buy/sell split.
 const BookView = (() => {
@@ -6313,7 +7215,122 @@ const DetailTabs = (() => {
 
   return { IDS, init, show, setSymbol, relabel, get: () => cur };
 })();
-// 🔔 price alerts dialog (add / re-arm / delete, browser notifications) + in-page toasts when an alert fires.
+// Technical-signal alerts: browser store (Prefs "sigAlerts") + a poller that checks them every 5 min while the page is open (also hidden).
+const SignalAlerts = (() => {
+  const MAX = 50, KEY = "sigAlerts";
+  const id = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+  const clean = arr => Array.isArray(arr) ? arr.filter(a => a && SignalAlertRule.valid(a) && CoinParse.isSymbol(a.sym)).slice(0, MAX).map(a => ({
+    id: /^[a-z0-9]{4,20}$/.test(a.id || "") ? a.id : id(), sym: a.sym, signal: a.signal, interval: SignalAlertRule.isZone(a) ? "" : a.interval, horizon: SignalAlertRule.isZone(a) ? a.horizon : "",
+    fired: Number.isFinite(+a.fired) && +a.fired > 0 ? +a.fired : 0, bar: Number.isFinite(+a.bar) ? +a.bar : 0 })) : [];
+  let list = clean(Prefs.get(KEY, []));
+  const fns = [];
+  const changed = () => { Prefs.set(KEY, list); fns.forEach(f => f()); };
+  const reload = () => { list = clean(Prefs.get(KEY, [])); };
+  addEventListener("storage", e => { if (e.key === Prefs.P + KEY) { reload(); fns.forEach(f => f()); } });
+
+  function add(sym, signal, interval, horizon) {
+    reload();
+    const a = { id: id(), sym, signal, interval, horizon, fired: 0, bar: 0 };
+    if (!SignalAlertRule.valid(a) || !CoinParse.isSymbol(sym) || list.length >= MAX) return false;
+    list = clean([...list, a]); changed();
+    return true;
+  }
+  const remove = aid => { reload(); list = list.filter(a => a.id !== aid); changed(); };
+  const rearm = aid => { reload(); list = list.map(a => a.id === aid ? { ...a, fired: 0 } : a); changed(); };
+  // Stamps hits that are still armed in the stored list (another tab may have fired them first) → the hits this tab owns.
+  function claim(hits, now = Date.now()) {
+    reload();
+    const own = hits.filter(h => list.some(a => a.id === h.id && !a.fired));
+    if (own.length) { list = list.map(a => { const h = own.find(x => x.id === a.id); return h ? { ...a, fired: now, bar: h.bar || a.bar } : a; }); changed(); }
+    return own;
+  }
+  return { add, remove, rearm, claim, all: () => list.slice(), onChange: f => fns.push(f) };
+})();
+
+const SignalPoll = (() => {
+  let busy = false;
+
+  async function gather(need) {
+    const ctx = { bars: new Map(), advice: new Map(), price: new Map() };
+    await Promise.all([...need.bars].map(async ([k, { sym, interval }]) => {
+      const pair = Coins.pair(sym);
+      if (!pair) return;
+      try { ctx.bars.set(k, CoinSignals.closed(await Spot.klines(pair, interval, 300), interval, Spot.TZ)); }
+      catch (e) { console.warn("SignalPoll.gather - klines fail", pair, interval, e.message); }
+    }));
+    await Promise.all([...need.zones].map(async sym => {
+      const pair = Coins.pair(sym);
+      if (!pair) return;
+      ctx.price.set(sym, Coins.row(sym).last);
+      try { ctx.advice.set(sym, await AdviceView.load(sym, pair)); }
+      catch (e) { console.warn("SignalPoll.gather - advice fail", sym, e.message); }
+    }));
+    return ctx;
+  }
+
+  async function run() {
+    if (busy) return [];
+    busy = true;
+    try {
+      const list = SignalAlerts.all(), need = SignalAlertRule.needs(list);
+      if (!need.bars.size && !need.zones.size) return [];
+      const hits = SignalAlerts.claim(SignalAlertRule.evaluate(list, await gather(need)));
+      if (hits.length) PersonalUI.onSignalHits(hits);
+      return hits;
+    } catch (e) { console.warn("SignalPoll.run - check signal alerts fail", e.message); return []; }
+    finally { busy = false; }
+  }
+
+  function start() { setInterval(run, 300e3); setTimeout(run, 8000); }
+  return { run, start };
+})();
+// "Cảnh báo tín hiệu kỹ thuật" section of the 🔔 dialog: add form + list (status, re-arm, delete).
+const SignalAlertsUI = (() => {
+  const e = s => Dom.esc(s ?? "");
+  const IV = { "1h": "1h", "4h": "4h", "1d": "1D" };
+  const opt = (v, l) => `<option value="${e(v)}">${e(l)}</option>`;
+
+  const desc = a => SignalAlertRule.isZone(a) ? `${a.sym} · ${T(SignalAlertRule.ZONES[a.signal][0])} · ${T(SignalAlertRule.HORIZONS[a.horizon])}`
+    : `${a.sym} · ${T(CoinSignals.META[a.signal][0])} · ${IV[a.interval]}`;
+  const tip = a => SignalAlertRule.isZone(a) ? T("Báo khi giá hiện tại nằm trong vùng của khung {h} ở tab Khuyến nghị.", { h: T(SignalAlertRule.HORIZONS[a.horizon]) }) : T(CoinSignals.META[a.signal][1]);
+
+  function html(sym) {
+    const list = SignalAlerts.all();
+    return `<div class="dsec"><b>${e(T("Cảnh báo tín hiệu kỹ thuật"))}</b></div>`
+      + `<div class="posform"><label>${e(T("Coin"))}<input type="text" id="saSym" value="${e(sym)}" placeholder="BTC" spellcheck="false" autocomplete="off"></label>`
+      + `<label>${e(T("Tín hiệu"))}<select id="saSig"><optgroup label="${e(T("Tín hiệu nến"))}">${CoinSignals.KEYS.map(k => opt(k, T(CoinSignals.META[k][0]))).join("")}</optgroup>`
+      + `<optgroup label="${e(T("Khuyến nghị"))}">${Object.entries(SignalAlertRule.ZONES).map(([k, z]) => opt(k, T(z[0]))).join("")}</optgroup></select></label>`
+      + `<label>${e(T("Khung nến"))}<select id="saIv">${SignalAlertRule.INTERVALS.map(v => opt(v, IV[v])).join("")}</select></label>`
+      + `<label>${e(T("Khung thời gian"))}<select id="saHz" disabled>${Object.entries(SignalAlertRule.HORIZONS).map(([k, l]) => opt(k, T(l))).join("")}</select></label>`
+      + `<button class="main" data-a="sadd">${e(T("Thêm cảnh báo"))}</button></div>`
+      + (list.length ? `<table class="dtable"><tbody>${list.map(a => `<tr title="${e(tip(a))}"><td>${e(desc(a))}</td><td class="${a.fired ? "muted" : "good"}">${e(a.fired ? T("Đã kích hoạt {t}", { t: new Date(a.fired).toLocaleString(I18n.lang) }) : T("Đang theo dõi"))}</td>`
+        + `<td>${a.fired ? `<button data-a="srearm" data-id="${e(a.id)}">${e(T("Bật lại"))}</button>` : ""} <button data-a="sdel" data-id="${e(a.id)}">🗑</button></td></tr>`).join("")}</tbody></table>`
+        : `<p class="muted">${e(T("Chưa có cảnh báo tín hiệu nào."))}</p>`)
+      + `<p class="muted">${e(T("Cảnh báo tín hiệu kiểm tra mỗi 5 phút khi trang đang mở (kể cả tab ẩn) và ngay sau khi thêm; tín hiệu nến chỉ tính khi nến đã đóng cửa, mỗi nến báo tối đa 1 lần. Khung nến không áp dụng cho cảnh báo vùng mua / bán."))}</p>`;
+  }
+
+  // Disable the select that does not apply to the chosen signal.
+  function syncSelects() {
+    const sig = $("saSig"); if (!sig) return;
+    const zone = Object.hasOwn(SignalAlertRule.ZONES, sig.value);
+    $("saIv").disabled = zone; $("saHz").disabled = !zone;
+  }
+
+  // → true when the click was handled here (caller re-renders).
+  function click(a, id) {
+    if (a === "srearm") SignalAlerts.rearm(id);
+    else if (a === "sdel") SignalAlerts.remove(id);
+    else if (a === "sadd") {
+      const sym = CoinParse.norm($("saSym").value);
+      if (!CoinParse.isSymbol(sym) || !SignalAlerts.add(sym, $("saSig").value, $("saIv").value, $("saHz").value)) { PersonalUI.toast(T("Cảnh báo không hợp lệ: cần mã coin hợp lệ."), "down"); return true; }
+      setTimeout(SignalPoll.run, 0);
+    } else return false;
+    return true;
+  }
+
+  return { html, desc, tip, click, syncSelects };
+})();
+// 🔔 price + technical-signal alerts dialog (add / re-arm / delete, browser notifications) + in-page toasts when an alert fires.
 const PersonalUI = (() => {
   const e = s => Dom.esc(s ?? "");
   let forSym = "";
@@ -6328,13 +7345,20 @@ const PersonalUI = (() => {
 
   const ruleText = a => `${a.sym} ${T(AlertRule.TYPES[a.type])} ${a.type.startsWith("pct") ? Fmt.en(a.value, 2) + "%" : Fmt.money(a.value)}`;
 
+  function notify(text, cls, title) {
+    toast(text, cls);
+    try { if ("Notification" in window && Notification.permission === "granted") new Notification(T(title), { body: text }); } catch { /* not allowed here */ }
+  }
+  const refresh = () => { if ($("toolDlg").open && $("toolDlg").dataset.kind === "alerts") render(); };
+
   function onHits(hits) {
-    for (const h of hits) {
-      const text = T("🔔 {r} — giá hiện tại {p} ({c})", { r: ruleText(h), p: Fmt.money(h.price), c: Fmt.pct(h.pct) });
-      toast(text, h.type === "below" || h.type === "pctDown" ? "down" : "up");
-      try { if ("Notification" in window && Notification.permission === "granted") new Notification(T("Cảnh báo giá crypto"), { body: text }); } catch { /* not allowed here */ }
-    }
-    if ($("toolDlg").open && $("toolDlg").dataset.kind === "alerts") render();
+    for (const h of hits) notify(T("🔔 {r} — giá hiện tại {p} ({c})", { r: ruleText(h), p: Fmt.money(h.price), c: Fmt.pct(h.pct) }), h.type === "below" || h.type === "pctDown" ? "down" : "up", "Cảnh báo giá crypto");
+    refresh();
+  }
+
+  function onSignalHits(hits) {
+    for (const h of hits) notify(T("🔔 {r} — giá hiện tại {p}", { r: SignalAlertsUI.desc(h), p: Fmt.money(h.price) }), SignalAlertRule.bearish(h) ? "down" : "up", "Cảnh báo tín hiệu kỹ thuật");
+    refresh();
   }
 
   function render() {
@@ -6351,7 +7375,7 @@ const PersonalUI = (() => {
       + (list.length ? `<table class="dtable"><tbody>${list.map(a => `<tr><td>${e(ruleText(a))}</td><td class="${a.fired ? "muted" : "good"}">${e(a.fired ? T("Đã kích hoạt {t}", { t: new Date(a.fired).toLocaleString(I18n.lang) }) : T("Đang theo dõi"))}</td>`
         + `<td>${a.fired ? `<button data-a="rearm" data-id="${e(a.id)}">${e(T("Bật lại"))}</button>` : ""} <button data-a="del" data-id="${e(a.id)}">🗑</button></td></tr>`).join("")}</tbody></table>`
         : `<p class="muted">${e(T("Chưa có cảnh báo nào."))}</p>`)
-      + `<p class="muted">${e(T("Cảnh báo kiểm tra theo giá realtime khi trang đang mở (tab ẩn: mỗi 60 giây); mỗi cảnh báo báo 1 lần rồi chờ bật lại. Lưu trong trình duyệt này."))}</p></div>`;
+      + `<p class="muted">${e(T("Cảnh báo kiểm tra theo giá realtime khi trang đang mở (tab ẩn: mỗi 60 giây); mỗi cảnh báo báo 1 lần rồi chờ bật lại. Lưu trong trình duyệt này."))}</p>` + SignalAlertsUI.html(forSym) + `</div>`;
   }
 
   function openAlerts(sym = "") {
@@ -6365,6 +7389,8 @@ const PersonalUI = (() => {
     if (!b || dlg.dataset.kind !== "alerts") return;
     const a = b.dataset.a;
     if (a === "close") dlg.close();
+    const sym = $("saSym") ? CoinParse.norm($("saSym").value) : "";
+    if (SignalAlertsUI.click(a, b.dataset.id)) { if (CoinParse.isSymbol(sym)) forSym = sym; render(); return; }
     if (a === "perm") Notification.requestPermission().then(render, render);
     if (a === "rearm") { Alerts.rearm(b.dataset.id); render(); }
     if (a === "del") { Alerts.remove(b.dataset.id); render(); }
@@ -6378,10 +7404,12 @@ const PersonalUI = (() => {
   function init() {
     $("alertsBtn").onclick = () => openAlerts(Board.state().sel);
     $("toolDlg").addEventListener("click", onClick);
+    $("toolDlg").addEventListener("change", ev => { if (ev.target.id === "saSig") SignalAlertsUI.syncSelects(); });
+    SignalPoll.start();
     $("toolDlg").addEventListener("click", ev => { if (ev.target === $("toolDlg")) $("toolDlg").close(); });
   }
 
-  return { init, onHits, openAlerts, toast };
+  return { init, onHits, onSignalHits, openAlerts, toast };
 })();
 // 🧮 calculators: DCA backtest on Binance daily candles, coin ↔ USD ↔ VND converter, futures liquidation / P&L, risk-based position size.
 const CalcUI = (() => {
@@ -6567,7 +7595,7 @@ const ShareDemo = (() => {
 // Analytic view contract: { id, label, wide, mount(el), unmount(), relabel() }; elements with data-coin="SYM" inside open that coin.
 const Board = (() => {
   const tab = (id, label, v = null) => ({ id, label: v ? v.label : label, view: v });
-  const TABS = [tab("watch", "★ Danh mục"), tab("market", "", MarketView), tab("top100", "Top 100"), tab("top", "Top 250"), tab("trending", "Trending"), tab("exchanges", "", ExchangesView),
+  const TABS = [tab("watch", "★ Danh mục"), tab("market", "", MarketView), tab("screener", "", ScreenerView), tab("multi", "", MultiChartView), tab("corr", "", CorrView), tab("top100", "Top 100"), tab("top", "Top 250"), tab("trending", "Trending"), tab("exchanges", "", ExchangesView),
     tab("network", "Mạng lưới"), tab("spot", "Spot Binance"), tab("futures", "Phái sinh"), tab("defi", "", DefiView), tab("onchain", "", OnchainView), tab("wallet", "", WalletView)];
   const TAB_IDS = new Set(TABS.map(t => t.id));
   const S = { tab: "watch", sel: "BTC", fut: [], futAt: 0, futErr: null, view: null, missing: [], bad: [], geckoErr: null, loading: true };

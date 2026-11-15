@@ -37,7 +37,7 @@ const AdviceView = (() => {
   }
 
   async function open(s) {
-    sym = s;
+    sym = s; AdviceBacktestView.cancel();
     const my = ++seq, el = $("dAdvice"), pair = Coins.pair(s), head = `<div class="dsec"><b>${e(T("Khuyến nghị"))}</b><span class="muted">${e(T("tự động theo quy tắc kỹ thuật — không phải lời khuyên đầu tư"))}</span></div>`;
     if (MarketMath.isStable(Coins.row(s))) { el.innerHTML = head + `<p class="pad muted">${e(T("{s} là stablecoin (giá neo ~1$) — không có khuyến nghị mua / bán theo giá.", { s }))}</p>`; return; }
     if (!pair) { el.innerHTML = head + `<p class="pad muted">${e(T("Coin này không có cặp USDT trên Binance nên không có biểu đồ nến."))}</p>`; return; }
@@ -49,7 +49,8 @@ const AdviceView = (() => {
       el.innerHTML = head + `<p class="pad adv-price">${e(T("Giá tham chiếu {p} (đóng cửa nến ngày hiện tại)", { p: Fmt.price(v.price) }))}</p>`
         + `<div class="ol-grid">${v.horizons.map(card).join("")}</div>`
         + `<div class="dsec"><b>${e(T("Khuyến nghị quan trọng khác"))}</b></div><ul class="insights">${v.notes.map(([c, k, p]) => `<li class="${c}">${e(tr(k, p))}</li>`).join("")}</ul>`
-        + `<p class="sc-note">${e(T("Cách tính: điểm kỹ thuật (MA20/50/200, RSI, MACD, ADX, Bollinger, khối lượng) quyết định hành động; vùng mua / bán lấy từ pivot, MA, đỉnh / đáy gần nhất ± một phần ATR; dừng lỗ dưới vùng mua 0,5–1 ATR. Ngắn hạn dùng nến 4h + ngày, trung hạn nến ngày, dài hạn nến tuần."))}</p>`;
+        + `<p class="sc-note">${e(T("Cách tính: điểm kỹ thuật (MA20/50/200, RSI, MACD, ADX, Bollinger, khối lượng) quyết định hành động; vùng mua / bán lấy từ pivot, MA, đỉnh / đáy gần nhất ± một phần ATR; dừng lỗ dưới vùng mua 0,5–1 ATR. Ngắn hạn dùng nến 4h + ngày, trung hạn nến ngày, dài hạn nến tuần."))}</p><div id="dAdviceBt"></div>`;
+      AdviceBacktestView.mount($("dAdviceBt"), pair);
     } catch (err) {
       if (my !== seq) return;
       console.warn("AdviceView.open - load klines fail", s, err.message);
@@ -57,5 +58,5 @@ const AdviceView = (() => {
     }
   }
 
-  return { open, close: () => { seq++; } };
+  return { open, load, close: () => { seq++; AdviceBacktestView.cancel(); } };
 })();

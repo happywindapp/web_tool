@@ -2,7 +2,7 @@
 // Analytic view contract: { id, label, wide, mount(el), unmount(), relabel() }; elements with data-coin="SYM" inside open that coin.
 const Board = (() => {
   const tab = (id, label, v = null) => ({ id, label: v ? v.label : label, view: v });
-  const TABS = [tab("watch", "★ Danh mục"), tab("market", "", MarketView), tab("top100", "Top 100"), tab("top", "Top 250"), tab("trending", "Trending"), tab("exchanges", "", ExchangesView),
+  const TABS = [tab("watch", "★ Danh mục"), tab("market", "", MarketView), tab("screener", "", ScreenerView), tab("multi", "", MultiChartView), tab("corr", "", CorrView), tab("top100", "Top 100"), tab("top", "Top 250"), tab("trending", "Trending"), tab("exchanges", "", ExchangesView),
     tab("network", "Mạng lưới"), tab("spot", "Spot Binance"), tab("futures", "Phái sinh"), tab("defi", "", DefiView), tab("onchain", "", OnchainView), tab("wallet", "", WalletView)];
   const TAB_IDS = new Set(TABS.map(t => t.id));
   const S = { tab: "watch", sel: "BTC", fut: [], futAt: 0, futErr: null, view: null, missing: [], bad: [], geckoErr: null, loading: true };

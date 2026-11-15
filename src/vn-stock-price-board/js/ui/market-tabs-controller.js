@@ -51,7 +51,7 @@ const MarketTabs = (() => {
     });
     Market.onChange(() => { if (tab) render(tab, quotes); });
     PicksView.onChange(() => { if (tab === "market") render(tab, quotes); });
-    FlowsView.onChange(() => { if (tab === "flows") rebuild(); });
+    FlowsView.onChange(() => { if (tab === "flows") { rebuild(); Board.tick(); } });
     I18n.onChange(rebuild);
     Watch.onChange(() => { if (tab === "screener") ScreenView.results(); });
   }

@@ -1264,14 +1264,14 @@ I18n.add({
     "Cell = average gain / loss N sessions after the close on the signal day · % = share of times price moved the signal's way (green ≥ 60%, red ≤ 40%, needs ≥ 5 times). Before fees and taxes; the past does not guarantee the future.",
   "Không có giao cắt nào trong giai đoạn này.": "No crosses in this period.",
 
-  "Cảnh báo giá & tín hiệu kỹ thuật": "Price & technical-signal alerts", "Giá": "Price", "Tín hiệu kỹ thuật (nến ngày)": "Technical signals (daily candles)",
+  "Cảnh báo giá & tín hiệu kỹ thuật": "Price & technical-signal alerts", "Tín hiệu kỹ thuật (nến ngày)": "Technical signals (daily candles)",
   "Giá cắt lên MA {v}": "Price crosses above MA {v}", "Giá cắt xuống MA {v}": "Price crosses below MA {v}", "RSI 14 vượt lên {v}": "RSI 14 rises above {v}", "RSI 14 xuống dưới {v}": "RSI 14 falls below {v}",
   "MACD cắt lên đường tín hiệu": "MACD crosses above its signal line", "MACD cắt xuống đường tín hiệu": "MACD crosses below its signal line",
   "Giá vào vùng mua hôm nay (tab Khuyến nghị)": "Price enters today's buy zone (Recommendations tab)", "Giá thủng dừng lỗ trung hạn (tab Khuyến nghị)": "Price breaks the medium-term stop (Recommendations tab)",
   "Tín hiệu kỹ thuật: so giá khớp hiện tại với giá đóng cửa hôm qua trên nến ngày — báo khi giao cắt xảy ra trong phiên hôm nay (MA = kỳ bạn nhập, RSI = ngưỡng bạn nhập).":
     "Technical signals compare the live price with yesterday's close on daily candles — they fire when the cross happens during today's session (MA = the period you enter, RSI = the level you enter).",
 
-  "Dòng tiền": "Money flow", "Số phiên": "Sessions", "Sàn giao dịch": "Exchange", "Tất cả": "All", "Khối ngoại": "Foreign investors", "Tự doanh CTCK": "Proprietary trading (brokers)",
+  "Dòng tiền": "Money flow", "Số phiên": "Sessions", "Sàn giao dịch": "Exchange", "Khối ngoại": "Foreign investors", "Tự doanh CTCK": "Proprietary trading (brokers)",
   "Ròng {n} tỷ · mua {b} tỷ · bán {s} tỷ": "Net {n} bn · bought {b} bn · sold {s} bn", "Top mua ròng (tỷ đồng)": "Top net buys (VND bn)", "Top bán ròng (tỷ đồng)": "Top net sells (VND bn)",
   "Tự doanh công bố sau phiên khoảng 1 ngày, chủ yếu cổ phiếu HOSE.": "Proprietary flows are published about 1 day after the session, mostly HOSE stocks.",
   "Đang tải dòng tiền {n} phiên (khoảng 3 MB)…": "Loading {n} sessions of flows (about 3 MB)…", "Đang tải dòng tiền {n} phiên…": "Loading {n} sessions of flows…",
@@ -2386,9 +2386,9 @@ const SignalState = (() => {
   const at = (a, i) => Number.isFinite(a[i]) ? a[i] : NaN;
 
   // Daily bars without today's (possibly partial) bar; day = "yyyymmdd" Vietnam date.
-  function completed(bars, day) {
+  function completed(bars, day, keep = KEEP) {
     const t = Date.UTC(+day.slice(0, 4), +day.slice(4, 6) - 1, +day.slice(6)) / 1000;
-    return bars.filter(b => b.time < t).slice(-KEEP);
+    return bars.filter(b => b.time < t).slice(-keep);
   }
 
   // Trade-plan zones from completed bars (fixed for the day): today's buy zone + medium-term stop.
@@ -2972,7 +2972,7 @@ const AlertRule = (() => {
   function valid(a) {
     if (!a || !TYPES.includes(a.type) || !Number.isFinite(+a.value) || typeof a.sym !== "string") return false;
     const r = range[a.type];
-    return !r || (+a.value >= r[0] && +a.value <= r[1]);
+    return !r || (+a.value >= r[0] && +a.value <= r[1] && (!a.type.startsWith("ma") || Number.isInteger(+a.value)));
   }
 
   // Signals compare yesterday's close with the live price: s = SignalState.of(…) for the ticker (null until its daily bars are loaded).
@@ -3191,8 +3191,9 @@ const Finfo = (() => {
   }
   const foreigns = (sym, size = 120) => get(`foreigns?q=code:${q(sym)}&size=${size}&sort=tradingDate:desc&fields=tradingDate,netVal,netVol,buyVal,sellVal,currentRoom,totalRoom`).then(r => r.data);
   // Whole-market daily flows since a date (stocks only): foreign investors and securities firms' proprietary desks (published ~1 day later).
-  const foreignsSince = since => get(`foreigns?q=tradingDate:gte:${since}~type:STOCK&size=40000&fields=code,floor,tradingDate,netVal,buyVal,sellVal`).then(r => r.data);
-  const proprietarySince = since => get(`proprietary_trading?q=date:gte:${since}~type:STOCK&size=20000&fields=code,floor,date,netVal,buyingVal,sellingVal`).then(r => r.data);
+  const whole = (path, what) => get(path).then(r => { if (r.total > r.data.length) console.warn("Finfo.whole - result truncated", what, r.total, r.data.length); return r.data; });
+  const foreignsSince = since => whole(`foreigns?q=tradingDate:gte:${since}~type:STOCK&size=40000&fields=code,floor,tradingDate,netVal,buyVal,sellVal`, "foreigns");
+  const proprietarySince = since => whole(`proprietary_trading?q=date:gte:${since}~type:STOCK&size=20000&fields=code,floor,date,netVal,buyingVal,sellingVal`, "proprietary");
   // Last n trading dates (yyyy-mm-dd, newest first), read from VNINDEX's foreign-flow rows.
   const tradingDates = n => get(`foreigns?q=code:VNINDEX&size=${n}&sort=tradingDate:desc&fields=tradingDate`).then(r => r.data.map(x => String(x.tradingDate)));
   // Cash dividends (đ/share per payment) — Vietnamese locale carries the numbers regardless of UI language.
@@ -3230,29 +3231,30 @@ const IndexData = (() => {
 
   return { refresh, get: n => st[n] || {} };
 })();
-// Daily bars of the tickers that have technical-signal alerts (VNDirect dchart), refreshed every 30 min in the background; state() adds the live price.
+// Daily bars of the tickers that have technical-signal alerts (VNDirect dchart), loaded once per Vietnam date in the background; state() adds the live price.
 const SignalBars = (() => {
-  const TTL = 30 * 60e3, cache = new Map(), busy = new Set();
+  const RETRY = 5 * 60e3, cache = new Map(), busy = new Set();
 
-  async function loadOne(sym) {
+  async function loadOne(sym, day) {
     busy.add(sym);
     try {
-      const now = Math.floor(Date.now() / 1000), day = QuoteModel.vnDate();
-      const done = SignalState.completed(await History.load(sym, "D", now - 2 * 366 * 86400, now), day);
-      cache.set(sym, { at: Date.now(), day, done, plan: undefined });
-    } catch (err) { console.warn("SignalBars.loadOne - get daily bars fail", sym, err); }
-    finally { busy.delete(sym); }
+      const now = Math.floor(Date.now() / 1000);
+      cache.set(sym, { day, at: Date.now(), done: SignalState.completed(await History.load(sym, "D", now - 2 * 366 * 86400, now), day), plan: undefined });
+    } catch (err) {
+      console.warn("SignalBars.loadOne - get daily bars fail", sym, err);
+      cache.set(sym, { day, at: Date.now(), done: [], failed: true });
+    } finally { busy.delete(sym); }
   }
 
-  // Fire-and-forget; a new Vietnam date or an old entry triggers a reload.
+  // Completed bars only change with the date; a failed load is retried every 5 min (refresh runs on every poll).
   function refresh(syms) {
     const day = QuoteModel.vnDate();
-    for (const s of syms) { const c = cache.get(s); if (!busy.has(s) && (!c || c.day !== day || Date.now() - c.at > TTL)) loadOne(s); }
+    for (const s of syms) { const c = cache.get(s); if (!busy.has(s) && (!c || c.day !== day || (c.failed && Date.now() - c.at > RETRY))) loadOne(s, day); }
   }
 
   function state(sym, q) {
     const c = cache.get(sym);
-    if (!c || c.day !== QuoteModel.vnDate()) return null;
+    if (!c || c.failed || c.day !== QuoteModel.vnDate()) return null;
     if (c.plan === undefined) c.plan = SignalState.plan(c.done, q.ex);
     return SignalState.of(c.done, c.plan, q.last);
   }
@@ -3550,7 +3552,7 @@ const IndexStrip = (() => {
   // Ceiling / floor counts are not in the index feed → counted from the board when its tab holds that basket (kept until the next count).
   function countFrom(ctx) {
     if (!ctx || !ctx.quotes) return;
-    const qs = [...ctx.quotes.values()].filter(q => q.type === "S" && q.last), all = MarketTabs.is(ctx.tab);
+    const qs = [...ctx.quotes.values()].filter(q => q.type === "S" && q.last), all = MarketTabs.is(ctx.tab) && ctx.tab !== "flows";
     const set = (name, list) => { counts[name] = { ceil: list.filter(q => QuoteModel.tone(q.last, q) === "ceil").length, floor: list.filter(q => QuoteModel.tone(q.last, q) === "floor").length }; };
     if (ctx.tab === "VN30") set("VN30", qs);
     for (const [name, ex] of [["VNINDEX", "HOSE"], ["HNX", "HNX"], ["UPCOM", "UPCOM"]]) if (all || ctx.tab === ex.toLowerCase()) set(name, qs.filter(q => q.ex === ex));
@@ -4583,7 +4585,7 @@ const ChartCtl = (() => {
   }
 
   function render(keep) {
-    if (!data.bars.length) { [mini, full].forEach(v => v.destroy()); msg("Không có dữ liệu cho khoảng thời gian / khung nến này."); return; }
+    if (!data.bars.length) { [mini, full].forEach(v => v.destroy()); msg("Không có dữ liệu cho khoảng thời gian / khung nến này."); if (dlgOpen) ChartGrid.sync(st, sym); return; }
     msg(null);
     const intra = ChartRange.intraday(st.interval);
     const inds = Indicators.compute(st.ind.filter(x => !Indicators.DEFS[x.id].intraday || intra), data.bars);
@@ -5412,16 +5414,17 @@ const ScreenView = (() => {
 const FlowsView = (() => {
   const DAYS = [1, 5, 10, 20], FLOORS = ["", "HOSE", "HNX", "UPCOM"], N = 15;
   let days = DAYS.includes(Prefs.get("flowDays")) ? Prefs.get("flowDays") : 1, floor = FLOORS.includes(Prefs.get("flowFloor")) ? Prefs.get("flowFloor") : "";
-  let data = null, key = "", busy = false, failed = false, seq = 0;
-  const listeners = [];
+  let data = null, key = "", busy = false, failed = 0, seq = 0;
+  const listeners = [], RETRY = 60e3;
   const e = s => Dom.esc(s ?? "");
   const bn = v => Fmt.signed(v / 1e9, 1);
   const dmy = s => `${s.slice(8, 10)}/${s.slice(5, 7)}`;
 
+  // failed = time of the last failure for this key → retry at most once a minute (render → load runs on every poll).
   async function load() {
     const k = String(days);
-    if (key === k && (data || busy)) return;
-    const my = ++seq; key = k; busy = true; failed = false; data = null;
+    if (key === k && (data || busy || Date.now() - failed < RETRY)) return;
+    const my = ++seq; key = k; busy = true; failed = 0; data = null;
     try {
       const dates = await Finfo.tradingDates(days + 1);
       if (dates.length < days) throw new Error("no trading dates");
@@ -5433,7 +5436,7 @@ const FlowsView = (() => {
     } catch (err) {
       if (my !== seq) return;
       console.warn("FlowsView.load - get foreign / proprietary flows fail", err);
-      failed = true; key = "";
+      failed = Date.now();
     }
     busy = false;
     listeners.forEach(fn => fn());
@@ -5477,11 +5480,18 @@ const FlowsView = (() => {
   function act(el) {
     if (!el.dataset || !el.dataset.fl) return false;
     if (el.dataset.fl === "days") { days = +el.value; Prefs.set("flowDays", days); }
-    else { floor = FLOORS.includes(el.value) ? el.value : ""; Prefs.set("flowFloor", floor); }
+    else { floor = FLOORS.includes(el.value) ? el.value : ""; Prefs.set("flowFloor", floor); listeners.forEach(fn => fn()); }
     return true;
   }
 
-  return { html, act, onChange: f => listeners.push(f) };
+  // Tickers on screen → the board polls only these for the price column (not the whole market).
+  function symbols() {
+    if (!data) return [];
+    const top = (rows, dates) => { const r = FlowRank.rank(FlowRank.sum(rows, dates, floor), N); return [...r.buy, ...r.sell].map(x => x.code); };
+    return [...new Set([...top(data.f, data.fd), ...top(data.p, data.pd)])];
+  }
+
+  return { html, act, symbols, onChange: f => listeners.push(f) };
 })();
 // "Thị trường" / "Bộ lọc" tabs: swap the price table for the market view, start the whole-market loads, route clicks and inputs.
 const MarketTabs = (() => {
@@ -5536,7 +5546,7 @@ const MarketTabs = (() => {
     });
     Market.onChange(() => { if (tab) render(tab, quotes); });
     PicksView.onChange(() => { if (tab === "market") render(tab, quotes); });
-    FlowsView.onChange(() => { if (tab === "flows") rebuild(); });
+    FlowsView.onChange(() => { if (tab === "flows") { rebuild(); Board.tick(); } });
     I18n.onChange(rebuild);
     Watch.onChange(() => { if (tab === "screener") ScreenView.results(); });
   }
@@ -5702,7 +5712,7 @@ const CorrelationUI = (() => {
     const skip = skipped.length ? `<p class="muted pad">${e(T("Bỏ qua (không đủ dữ liệu): {s}", { s: skipped.join(", ") }))}</p>` : "";
     return `<p class="pad"><b>${e(avg)}</b> ${e(level)}</p>${grid}`
       + (x.pairs.length ? `<div class="corr-pairs"><div><b class="down">${e(T("Đi cùng nhau nhất"))}</b><ul>${x.pairs.slice(0, 3).map(pair).join("")}</ul></div>`
-        + `<div><b class="up">${e(T("Bù trừ nhau tốt nhất"))}</b><ul>${x.pairs.slice(-3).reverse().map(pair).join("")}</ul></div></div>` : "")
+        + (x.pairs.length > 3 ? `<div><b class="up">${e(T("Bù trừ nhau tốt nhất"))}</b><ul>${x.pairs.slice(Math.max(3, x.pairs.length - 3)).reverse().map(pair).join("")}</ul></div>` : "") + `</div>` : "")
       + skip + `<p class="muted pad">${e(T("Hệ số tương quan Pearson của % thay đổi giá ngày, chỉ tính các phiên cả hai mã cùng có giá (≥ {n} phiên): 1 = luôn cùng chiều, 0 = không liên quan, −1 = ngược chiều. Hàng / cột {b} cho biết mã đi theo thị trường chung đến mức nào.", { n: Correlation.MIN, b: BENCH }))}</p>`;
   }
 
@@ -5819,7 +5829,7 @@ const DetailTabs = (() => {
     recs: async s => {
       const opt = (v, f) => v ? Promise.resolve(v) : f(s).catch(err => { console.warn("DetailTabs.recs - optional part fail", s, err); return null; });
       const [list, tech, val] = await Promise.all([Finfo.recommendations(s), opt(data.chart, OutlookView.load), opt(data.valuation, ValTab.load)]);
-      return { list, tech, val, bt: tech && tech.bars ? SignalBacktest.run(tech.bars) : null };
+      return { list, tech, val, bt: tech && tech.bars ? SignalBacktest.run(SignalState.completed(tech.bars, QuoteModel.vnDate(), Infinity)) : null };
     },
   };
 
@@ -5945,6 +5955,7 @@ const Board = (() => {
 
   async function symbolsFor(tab) {
     if (tab === "watch") return Watch.all();
+    if (tab === "flows") return FlowsView.symbols();
     if (MarketTabs.is(tab)) return Market.allSymbols();
     if (tab.startsWith("icb:")) return Market.sectorCodes(tab.slice(4));
     if (lists.has(tab)) return lists.get(tab);
@@ -5986,6 +5997,7 @@ const Board = (() => {
     const gen = S.gen, seq = ++S.seq;
     try {
       // A symbol list that failed to load (network down on tab switch) is retried on every poll.
+      if (S.tab === "flows") S.syms = FlowsView.symbols();
       if (!S.syms.length && S.tab !== "watch") { const syms = await symbolsFor(S.tab); if (gen !== S.gen || seq !== S.seq) return; S.syms = syms; }
       // Alert tickers outside the current tab ride along in the same poll (not shown in the table).
       const want = [...new Set([...S.syms, ...Alerts.symbols()])];
