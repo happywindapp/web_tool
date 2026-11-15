@@ -10,6 +10,7 @@
 /* @include ../data-workbench/styles/app-bar-tabs-toolbar-surfaces.css */
 /* @include ../data-workbench/styles/theme-filter-popover-chips.css */
 /* @include styles/lunar-calendar-month-grid-and-day-detail.css */
+/* @include styles/sim-feng-shui-score-and-hexagram.css */
 /* @include ../data-workbench/styles/phone-portrait-layout.css */
 </style>
 <!-- GoatCounter: chỉ gửi path (không query/hash); chạy local đếm thành /local/<tên file> để không lộ thư mục máy -->
@@ -37,7 +38,7 @@
     <select id="theme"><option value="auto">Tự động</option><option value="light">Sáng</option><option value="dark">Tối</option></select></label>
   <span id="note" class="muted"></span>
   <span class="seg lang-switch" title="Ngôn ngữ"><span class="gc-views" title="Lượt truy cập (GoatCounter, cập nhật mỗi ~10 phút)" hidden></span><button data-lang="vi">VI</button><button data-lang="en">EN</button></span>
-  <nav class="seg wb-nav" id="tabs"><button data-tab="cal">📅 Lịch</button><button data-tab="horo">🔮 Tử vi</button></nav>
+  <nav class="seg wb-nav" id="tabs"><button data-tab="cal">📅 Lịch</button><button data-tab="horo">🔮 Tử vi</button><button data-tab="sim">📱 SIM phong thủy</button></nav>
 </header>
 <div class="toolbar" id="calBar">
   <select id="demo" title="Nạp ngày mẫu rồi xem ngay"></select>
@@ -46,18 +47,37 @@
   <input type="text" id="q" inputmode="text" autocomplete="off" spellcheck="false" title="Ngày dương: 12/11/2026 · Ngày âm: thêm “âm” hoặc “lunar” phía trước, tháng nhuận thêm “n” (âm 1/6n/2025)" placeholder="12/11/2026 · âm 15/8/2026">
   <button id="go" class="main" title="Đổi ngày dương ↔ âm và xem chi tiết (Enter)">Xem ngày</button>
   <label class="chk" title="Hiện can chi ngày trong ô lịch (khi ngày đó không có lễ / tiết khí)"><input type="checkbox" id="cc">Can chi trong ô</label>
+  <label class="chk" title="Hiện tuần trăng (trăng non, lưỡi liềm, bán nguyệt, trăng tròn…) trong từng ô ngày"><input type="checkbox" id="moon">Mặt trăng</label>
+  <button id="toHoro" title="Mở tab Tử vi với ngày sinh là ngày đang chọn trên lịch">🔮 Xem tử vi</button>
+  <button id="toSim" title="Mở tab SIM phong thủy với ngày sinh chủ SIM là ngày đang chọn trên lịch">📱 Xem SIM</button>
   <span class="muted hint">← → ↑ ↓ chọn ngày · PageUp/PageDown đổi tháng · lịch tính theo giờ Việt Nam (UTC+7), không gửi dữ liệu đi đâu</span>
 </div>
 <div class="toolbar" id="horoBar" hidden>
   <select id="horoDemo" title="Nạp hồ sơ mẫu rồi xem ngay"></select>
   <input type="text" id="hName" class="name" autocomplete="off" spellcheck="false" maxlength="80" placeholder="Họ và tên" title="Họ và tên (dùng cho thần số học; có dấu hay không đều được)">
   <select id="hSex" title="Giới tính (ảnh hưởng cung mệnh, sao chiếu mệnh)"></select>
-  <input type="text" id="hBirth" class="date" autocomplete="off" placeholder="Ngày sinh 15/08/1990" title="Ngày sinh dương lịch (dd/mm/yyyy); nhập âm lịch thì thêm “âm” phía trước">
-  <input type="text" id="hTime" class="time" autocomplete="off" placeholder="Giờ 07:30" title="Giờ sinh (07:30, 7h30); để trống nếu không rõ">
+  <input type="text" id="hBirth" class="date" autocomplete="off" placeholder="Ngày sinh 15/08/1990" title="Ngày sinh (dd/mm/yyyy) theo lịch chọn bên cạnh; tháng nhuận âm lịch thêm “n” (15/6n/2025)">
+  <span class="pick-wrap"><span aria-hidden="true">📅</span><input type="date" id="hBirthPick" title="Chọn ngày sinh trên lịch (ghi vào ô theo dương/âm lịch đang chọn)"></span>
+  <input type="text" id="hTime" class="time" list="birthHours" autocomplete="off" placeholder="Giờ 07:30" title="Giờ sinh: gõ (07:30, 7h30) hoặc chọn trong danh sách sổ xuống; để trống nếu không rõ">
+  <span class="cal-kind" title="Ngày sinh nhập theo dương lịch hay âm lịch"><label class="chk"><input type="radio" name="hCal" id="hSolar" checked>Dương lịch</label><label class="chk"><input type="radio" name="hCal" id="hLunar">Âm lịch</label></span>
   <label class="chk" title="Năm âm lịch cần xem vận hạn (năm sau = năm này + 1)">Năm xem <select id="hYear"></select></label>
   <button id="hGo" class="main" title="Xem bản mệnh và vận hạn (Enter)">Xem tử vi</button>
-  <span class="muted hint">Chỉ mang tính tham khảo, giải trí · dữ liệu không rời khỏi máy</span>
+  <button id="hToSim" title="Mở tab SIM phong thủy với ngày giờ sinh, giới tính đang nhập ở đây">📱 Xem SIM</button>
+  <span class="muted hint">Nhập ngày sinh (thêm giờ sinh, họ tên nếu có) → xem tứ trụ, mệnh, hướng hợp, thần số học và vận hạn từng năm</span>
 </div>
+<div class="toolbar" id="simBar" hidden>
+  <select id="simDemo" title="Nạp SIM mẫu rồi chấm ngay"></select>
+  <input type="text" id="sNum" inputmode="tel" autocomplete="off" spellcheck="false" maxlength="40" placeholder="Số SIM 0912 345 678" title="Số di động 10 chữ số (0… hoặc +84…); được có dấu cách, chấm, gạch">
+  <select id="sSex" title="Giới tính chủ SIM (dùng cho tứ trụ, cung mệnh)"></select>
+  <input type="text" id="sBirth" class="date" autocomplete="off" placeholder="Ngày sinh 15/08/1990" title="Ngày sinh chủ SIM (dd/mm/yyyy) theo lịch chọn bên cạnh; để trống thì chỉ chấm riêng dãy số">
+  <span class="pick-wrap"><span aria-hidden="true">📅</span><input type="date" id="sBirthPick" title="Chọn ngày sinh trên lịch (ghi vào ô theo dương/âm lịch đang chọn)"></span>
+  <input type="text" id="sTime" class="time" list="birthHours" autocomplete="off" placeholder="Giờ 07:30" title="Giờ sinh: gõ (07:30, 7h30) hoặc chọn trong danh sách sổ xuống; để trống nếu không rõ">
+  <span class="cal-kind" title="Ngày sinh nhập theo dương lịch hay âm lịch"><label class="chk"><input type="radio" name="sCal" id="sSolar" checked>Dương lịch</label><label class="chk"><input type="radio" name="sCal" id="sLunar">Âm lịch</label></span>
+  <button id="sGo" class="main" title="Chấm điểm và luận giải SIM (Enter)">Chấm điểm SIM</button>
+  <button id="sToHoro" title="Mở tab Tử vi với ngày giờ sinh, giới tính của chủ SIM">🔮 Xem tử vi</button>
+  <span class="muted hint">Âm dương · ngũ hành · tứ trụ · quẻ Kinh Dịch · cửu tinh · dân gian — tham khảo, giải trí</span>
+</div>
+<datalist id="birthHours"></datalist>
 <div class="seg pane-switch" id="calSwitch"><button>Lịch tháng</button><button>Chi tiết ngày</button></div>
 <main class="work pane-scroller" id="calWork">
   <section class="pane month-pane">
@@ -90,6 +110,17 @@
     <div class="scroll horo" id="hFortune" data-i18n-skip></div>
   </section>
 </main>
+<div class="seg pane-switch" id="simSwitch" hidden><button>Chấm điểm</button><button>Luận giải</button></div>
+<main class="work pane-scroller" id="simWork" hidden>
+  <section class="pane">
+    <div class="bar"><b>Chấm điểm</b></div>
+    <div class="scroll horo" id="sScore" data-i18n-skip></div>
+  </section>
+  <section class="pane">
+    <div class="bar"><b>Luận giải</b></div>
+    <div class="scroll horo" id="sDetail" data-i18n-skip></div>
+  </section>
+</main>
 <footer class="status" id="status"></footer>
 <div class="author">
   <span>Tác giả:</span><b><a href="https://happywindapp.github.io/CV/cv_quan_phan.html">Phan Ngọc Minh Quân</a></b>
@@ -102,6 +133,9 @@
 // @include js/i18n/en-almanac-terms.js
 // @include js/i18n/en-horoscope-texts.js
 // @include js/i18n/horoscope-detail-texts-vi-en.js
+// @include js/i18n/natal-profile-explanations-vi-en.js
+// @include js/i18n/sim-feng-shui-texts-vi-en.js
+// @include js/i18n/en-sim-feng-shui-ui-strings.js
 // @include ../data-workbench/js/i18n/en-shared-theme-sessions-filters.js
 // @include ../data-workbench/js/core/share-link-codec.js
 // @include ../data-workbench/js/core/text-utils.js
@@ -112,6 +146,7 @@
 // @include js/calendar/can-chi-solar-terms-nap-am.js
 // @include js/calendar/auspicious-days-hours-almanac.js
 // @include js/calendar/vietnam-solar-lunar-holidays.js
+// @include js/calendar/moon-phase-from-new-moon.js
 // @include js/calendar/date-text-parser.js
 // @include js/samples/demo-dates-registry.js
 // @include js/samples/horoscope-demo-profiles.js
@@ -124,7 +159,17 @@
 // @include js/ui/day-detail-pane.js
 // @include js/ui/horoscope-tab-view.js
 // @include js/ui/horoscope-natal-profile-view.js
+// @include js/ui/birth-date-time-pickers.js
 // @include js/ui/horoscope-tab-controller.js
+// @include js/samples/sim-demo-profiles.js
+// @include js/sim/sim-number-digits-pairs-and-folk-patterns.js
+// @include js/sim/plum-blossom-hexagram-casting.js
+// @include js/sim/bazi-day-master-strength-useful-element.js
+// @include js/sim/sim-feng-shui-scoring.js
+// @include js/ui/sim-score-explanations.js
+// @include js/ui/sim-score-pane-view.js
+// @include js/ui/sim-analysis-pane-view.js
+// @include js/ui/sim-feng-shui-tab-controller.js
 // @include js/ui/lunar-calendar-app.js
 </script>
 </body>

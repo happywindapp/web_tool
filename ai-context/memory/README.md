@@ -17,6 +17,9 @@
 
 ## Mục lục
 
+- [sed-case-conversion-corrupts-vietnamese-utf8.md](sed-case-conversion-corrupts-vietnamese-utf8.md) —
+  sed `\L`/`\U` phá chữ có dấu (byte rác `�`); đổi hoa/thường bằng Edit tool hoặc node.
+
 - [bilingual-technique-names-in-explanations.md](bilingual-technique-names-in-explanations.md) —
   **bắt buộc mọi AI khi giải thích:** kỹ thuật/pattern/khái niệm quan trọng ghi song ngữ `English term (thuật ngữ tiếng Việt)`; chỉ thuật ngữ then chốt, lần đầu nhắc. Bản Claude: `~/.claude/CLAUDE.md`
 

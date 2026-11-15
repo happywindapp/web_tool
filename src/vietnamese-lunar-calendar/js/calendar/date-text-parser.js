@@ -6,11 +6,11 @@ const DateText = (() => {
   const RANGE = { error: "Chỉ hỗ trợ năm {min}–{max}.", params: { min: LunarCal.MIN_YEAR, max: LunarCal.MAX_YEAR } };
   const inRange = jd => jd >= LunarCal.jdFromDate(1, 1, LunarCal.MIN_YEAR) && jd <= LunarCal.jdFromDate(31, 12, LunarCal.MAX_YEAR);
 
-  // → { jd } or { error, params } (error is a Vietnamese i18n key).
-  function parse(text) {
+  // → { jd } or { error, params } (error is a Vietnamese i18n key). opts.lunar: read as lunar even without the "âm" prefix.
+  function parse(text, opts) {
     let s = String(text || "").trim().replace(/\s+/g, " ");
     if (!s) return { error: "Chưa nhập ngày." };
-    const lunar = LUNAR_PREFIX.test(s);
+    const lunar = !!opts?.lunar || LUNAR_PREFIX.test(s);
     s = s.replace(LUNAR_PREFIX, "");
     let d, m, y, leap = false, mm;
     const iso = /^(\d{4})-(\d{1,2})-(\d{1,2})$/.exec(s);

@@ -14,7 +14,7 @@ const HoroApp = (() => {
 
   function read() {
     const name = $("hName").value.trim().slice(0, MAX_NAME), male = $("hSex").value !== "f", year = +$("hYear").value;
-    const b = DateText.parse($("hBirth").value);
+    const b = DateText.parse($("hBirth").value, { lunar: $("hLunar").checked });
     if (b.error) return { error: b.error, params: b.params, field: "hBirth" };
     if (b.jd > deps.today) return { error: "Ngày sinh không được sau hôm nay.", field: "hBirth" };
     const t = parseTime($("hTime").value);
@@ -46,11 +46,18 @@ const HoroApp = (() => {
     $("hSex").value = p.male === false ? "f" : "m";
     $("hBirth").value = typeof p.birth === "string" ? p.birth : "";
     $("hTime").value = typeof p.time === "string" ? p.time : "";
+    $(p.lunar === true ? "hLunar" : "hSolar").checked = true;
     if (Number.isInteger(p.year) && p.year >= LunarCal.MIN_YEAR && p.year <= LunarCal.MAX_YEAR) $("hYear").value = p.year;
   }
 
   // Payload is untrusted: only known string/boolean/integer fields are copied into the inputs.
   function open(p) { deps.tab("horo"); fill(p); const ok = run(); PhoneLayout.show(0); return ok; }
+
+  // From another tab: b = { birth, lunar?, time?, male? } replaces only those fields (name and year stay), then reads.
+  function useBirth(b) {
+    if (!b.birth) { deps.tab("horo"); return; }
+    open({ ...snapshot(), ...b });
+  }
 
   function demo(key) {
     const p = HORO_DEMOS.data(key);
@@ -60,7 +67,7 @@ const HoroApp = (() => {
     return true;
   }
 
-  const snapshot = () => ({ tab: "horo", name: $("hName").value.trim(), male: $("hSex").value !== "f", birth: $("hBirth").value.trim(), time: $("hTime").value.trim(), year: +$("hYear").value });
+  const snapshot = () => ({ tab: "horo", name: $("hName").value.trim(), male: $("hSex").value !== "f", birth: $("hBirth").value.trim(), lunar: $("hLunar").checked, time: $("hTime").value.trim(), year: +$("hYear").value });
 
   function fillSelects() {
     $("horoDemo").innerHTML = `<option value="">${Dom.esc(T("Thử mẫu…"))}</option>` + HORO_DEMOS.keys.map(k => `<option value="${k}">${Dom.esc(T(HORO_DEMOS.name(k)))}</option>`).join("");
@@ -78,13 +85,15 @@ const HoroApp = (() => {
       $("hYear").value = LunarCal.fromJd(d.today).y;
     }
     $("hGo").onclick = run;
+    BirthPickers.attach({ text: "hBirth", pick: "hBirthPick", lunar: "hLunar" }, d.today, run);
     for (const id of ["hName", "hBirth", "hTime"]) $(id).onkeydown = e => { if (e.key === "Enter") { e.preventDefault(); run(); } };
     $("hYear").onchange = () => { if (ctx) run(); };
+    for (const id of ["hSolar", "hLunar"]) $(id).onchange = () => { if ($("hBirth").value.trim()) run(); };
     render();
     $("horoDemo").onchange = e => { const k = e.target.value; e.target.value = ""; if (k) demo(k); };
   }
 
   function relabel() { const sex = $("hSex").value; fillSelects(); $("hSex").value = sex; render(); }
 
-  return { init, open, demo, snapshot, relabel };
+  return { init, open, demo, snapshot, relabel, parseTime, useBirth };
 })();

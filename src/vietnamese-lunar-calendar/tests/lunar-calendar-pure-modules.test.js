@@ -82,6 +82,10 @@ test("date text parser: solar, lunar, leap and every error path", () => {
   assert.equal(DateText.iso(DateText.parse("âm 15/8/2026").jd), "2026-09-25");
   assert.equal(DateText.iso(DateText.parse("lunar 1/6n/2025").jd), "2025-07-25");
   assert.equal(DateText.iso(DateText.parse("Âm lịch: 1/6 nhuận/2025").jd), "2025-07-25");
+  assert.equal(DateText.iso(DateText.parse("15/8/2026", { lunar: true }).jd), "2026-09-25");
+  assert.equal(DateText.iso(DateText.parse("1/6n/2025", { lunar: true }).jd), "2025-07-25");
+  assert.equal(DateText.iso(DateText.parse("âm 15/8/2026", { lunar: false }).jd), "2026-09-25");
+  assert.ok(DateText.parse("30/12/2026", { lunar: true }).error);
   const err = s => DateText.parse(s).error;
   assert.match(err(""), /Chưa nhập/);
   assert.match(err("hello"), /Không hiểu/);

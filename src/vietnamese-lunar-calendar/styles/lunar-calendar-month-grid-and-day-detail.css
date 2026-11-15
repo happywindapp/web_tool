@@ -16,6 +16,7 @@
   .day .ld { position:absolute; right:6px; bottom:4px; font-size:12px; color:var(--muted); }
   .day.first .ld, .first-mark { color:var(--first); font-weight:700; }
   .day.full .ld { font-weight:700; }
+  .day .moon { font-style:normal; font-size:13px; margin-right:2px; vertical-align:-1px; }
   .day .ev { font-size:10.5px; line-height:1.2; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%; padding-right:22px; }
   .day .ev.hol { color:var(--hol); } .day .ev.term { color:var(--acc-ink); }
   .day .dot, .legend .dot { position:absolute; top:6px; right:6px; width:7px; height:7px; border-radius:50%; background:var(--hd); }
@@ -55,7 +56,7 @@
   .hours th { font-weight:600; color:var(--muted); }
   .hours tr.hd td { background:var(--hdrow); }
   .count { margin:12px 0 0; }
-  #hName { width:14em; } #hBirth { width:10em; } #hTime { width:6.5em; }
+  #hName { width:14em; } #hBirth { width:10em; } #hTime { width:8.5em; }
   #horoBar input.bad { border-color:var(--bad); outline:1px solid var(--bad); }
   .horo { font-size:14px; }
   .horo h3 { margin:14px 0 6px; font-size:13px; text-transform:uppercase; letter-spacing:.04em; color:var(--acc-ink); }

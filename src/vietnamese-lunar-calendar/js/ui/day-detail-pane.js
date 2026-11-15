@@ -7,6 +7,7 @@ const DayDetail = (() => {
   const tag = (text, cls = "") => `<span class="tag ${cls}">${esc(text)}</span>`;
   const verdict = good => tag(T(good ? "tốt" : "xấu"), good ? "good" : "bad");
   const row = (label, value) => `<dt>${esc(T(label))}</dt><dd>${value}</dd>`;
+  const moonRow = m => esc(m.icon + " " + T(m.name)) + ` <small class="muted">${esc(T("tuổi trăng {a} ngày (lúc 20h)", { a: I18n.num(Math.round(m.age * 10) / 10) }))}</small>`;
   const pad = n => String(n).padStart(2, "0");
   const dmy = s => pad(s.d) + "/" + pad(s.m) + "/" + s.y;
 
@@ -59,6 +60,7 @@ const DayDetail = (() => {
       + row("Ngũ hành ngày", esc(T(rel.rule) + " (" + T(rel.canEl) + " – " + T(rel.chiEl) + "): " + T(rel.label)))
       + row("Tiết khí", esc(T(term.name)) + ` <small class="muted">${esc(T("từ {a} đến {b}", { a: moment(term.start), b: moment(term.end) }))}</small>`
         + (term.next ? " " + tag(T("{name} bắt đầu hôm nay", { name: T(term.next.name) }), "term") : ""))
+      + row("Tuần trăng", moonRow(MoonPhase.of(jd)))
       + `</dl></section><section><h3>${esc(T("Ngày tốt xấu"))}</h3><dl>`
       + row("Giờ hoàng đạo", hoang)
       + row("Trực", esc(T(truc.name)) + `<br><small><b>${esc(T("Nên:"))}</b> ${esc(T(truc.good))}<br><b>${esc(T("Kỵ:"))}</b> ${esc(T(truc.bad))}</small>`)

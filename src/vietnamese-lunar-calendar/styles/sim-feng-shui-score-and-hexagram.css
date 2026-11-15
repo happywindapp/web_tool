@@ -1,0 +1,43 @@
+  #sNum { width:12em; } #sBirth { width:10em; } #sTime { width:8.5em; }
+  #simBar input.bad { border-color:var(--bad); outline:1px solid var(--bad); }
+  .sim-hero { grid-template-columns:1fr auto; align-items:center; gap:8px 16px; }
+  .sim-hero > div:first-child { display:grid; gap:2px; }
+  .sim-hero .sim-no { font-size:24px; letter-spacing:.04em; font-variant-numeric:tabular-nums; }
+  .sim-total { display:grid; justify-items:center; gap:2px; }
+  .sim-total b { font-size:36px; line-height:1; color:var(--acc-ink); } .sim-total span { font-size:12px; color:var(--muted); }
+  .sim-digits { display:grid; grid-template-columns:repeat(10, minmax(0, 1fr)); gap:4px; margin:10px 0 2px; }
+  .sim-digits span { display:grid; justify-items:center; gap:1px; padding:4px 0; border:1px solid var(--line); border-radius:8px; }
+  .sim-digits b { font-size:20px; line-height:1.1; } .sim-digits i { width:70%; height:4px; border-radius:2px; }
+  .sim-digits small { font-size:10.5px; color:var(--muted); line-height:1.2; }
+  .crit { padding:8px 10px; margin:0 0 8px; border:1px solid var(--line); border-radius:10px; }
+  .crit.off { opacity:.6; }
+  .crit-head { display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:6px; }
+  .crit .el-bar { display:block; height:6px; }
+  .crit p { margin:6px 0 2px; } .crit small { display:block; font-size:12px; }
+  .crit-good { background:var(--good); } .crit-mid { background:#ca8a04; } .crit-bad { background:var(--bad); }
+  .sim-el { grid-template-columns:4em 1fr 2.5em auto; }
+  .hex-card { display:grid; grid-template-columns:64px 1fr; gap:12px; align-items:start; padding:8px 0; border-bottom:1px solid var(--line); }
+  .hex-card > div:last-child { display:grid; gap:2px; }
+  .hex { display:grid; gap:5px; padding-top:4px; }
+  .hex i { display:block; height:8px; border-radius:2px; background:var(--ink); }
+  .hex i.yin { background:linear-gradient(to right, var(--ink) 0 42%, transparent 42% 58%, var(--ink) 58%); }
+  .hex i.mv { background:var(--hd); } .hex i.yin.mv { background:linear-gradient(to right, var(--hd) 0 42%, transparent 42% 58%, var(--hd) 58%); }
+  @media (max-width: 640px) {
+    #simBar { flex-wrap:wrap; overflow-x:visible; }
+    body.tab-sim { height:auto; min-height:100dvh; }
+    body.tab-sim #simWork { flex:none; height:85dvh; }
+    #simBar .main { position:static; box-shadow:none; }
+    #simBar #simDemo, #simBar #sNum { flex:1 1 100%; max-width:none; }
+    #simBar #sBirth, #simBar #sTime { flex:1 1 0; width:auto; min-width:0; }
+    .sim-hero .sim-no { font-size:20px; } .sim-total b { font-size:30px; }
+    .sim-digits { gap:2px; } .sim-digits b { font-size:17px; } .sim-digits small { font-size:9.5px; }
+    .toolbar .cal-kind { flex:1 1 100%; }
+  }
+  .cal-kind { display:inline-flex; gap:2px 10px; flex-wrap:wrap; align-items:center; }
+  .pick-wrap { position:relative; display:inline-grid; place-items:center; width:2.4em; height:2.2em; border:1px solid var(--line); border-radius:6px; background:var(--panel); cursor:pointer; flex:none; }
+  .pick-wrap input[type="date"] { position:absolute; inset:0; width:100%; height:100%; opacity:0; cursor:pointer; padding:0; border:0; }
+  .pick-wrap:focus-within { outline:2px solid var(--acc); outline-offset:1px; }
+  @media (hover: hover) { .pick-wrap:hover { background:var(--hover); } }
+  .crit p.crit-why { margin:2px 0 4px; font-size:13px; }
+  .sim-summary { margin:10px 0 4px; padding:8px 10px; border:1px solid var(--line); border-radius:10px; background:color-mix(in srgb, var(--acc) 6%, var(--panel)); }
+  .sim-summary h3 { margin-top:0 !important; }

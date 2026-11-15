@@ -94,6 +94,7 @@
   .day .ld { position:absolute; right:6px; bottom:4px; font-size:12px; color:var(--muted); }
   .day.first .ld, .first-mark { color:var(--first); font-weight:700; }
   .day.full .ld { font-weight:700; }
+  .day .moon { font-style:normal; font-size:13px; margin-right:2px; vertical-align:-1px; }
   .day .ev { font-size:10.5px; line-height:1.2; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%; padding-right:22px; }
   .day .ev.hol { color:var(--hol); } .day .ev.term { color:var(--acc-ink); }
   .day .dot, .legend .dot { position:absolute; top:6px; right:6px; width:7px; height:7px; border-radius:50%; background:var(--hd); }
@@ -133,7 +134,7 @@
   .hours th { font-weight:600; color:var(--muted); }
   .hours tr.hd td { background:var(--hdrow); }
   .count { margin:12px 0 0; }
-  #hName { width:14em; } #hBirth { width:10em; } #hTime { width:6.5em; }
+  #hName { width:14em; } #hBirth { width:10em; } #hTime { width:8.5em; }
   #horoBar input.bad { border-color:var(--bad); outline:1px solid var(--bad); }
   .horo { font-size:14px; }
   .horo h3 { margin:14px 0 6px; font-size:13px; text-transform:uppercase; letter-spacing:.04em; color:var(--acc-ink); }
@@ -182,6 +183,49 @@
     .horo dl { grid-template-columns:1fr; gap:0; } .horo dd { margin-bottom:6px; }
     .hours { font-size:12px; } .hours th, .hours td { padding:4px 3px; }
   }
+  #sNum { width:12em; } #sBirth { width:10em; } #sTime { width:8.5em; }
+  #simBar input.bad { border-color:var(--bad); outline:1px solid var(--bad); }
+  .sim-hero { grid-template-columns:1fr auto; align-items:center; gap:8px 16px; }
+  .sim-hero > div:first-child { display:grid; gap:2px; }
+  .sim-hero .sim-no { font-size:24px; letter-spacing:.04em; font-variant-numeric:tabular-nums; }
+  .sim-total { display:grid; justify-items:center; gap:2px; }
+  .sim-total b { font-size:36px; line-height:1; color:var(--acc-ink); } .sim-total span { font-size:12px; color:var(--muted); }
+  .sim-digits { display:grid; grid-template-columns:repeat(10, minmax(0, 1fr)); gap:4px; margin:10px 0 2px; }
+  .sim-digits span { display:grid; justify-items:center; gap:1px; padding:4px 0; border:1px solid var(--line); border-radius:8px; }
+  .sim-digits b { font-size:20px; line-height:1.1; } .sim-digits i { width:70%; height:4px; border-radius:2px; }
+  .sim-digits small { font-size:10.5px; color:var(--muted); line-height:1.2; }
+  .crit { padding:8px 10px; margin:0 0 8px; border:1px solid var(--line); border-radius:10px; }
+  .crit.off { opacity:.6; }
+  .crit-head { display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:6px; }
+  .crit .el-bar { display:block; height:6px; }
+  .crit p { margin:6px 0 2px; } .crit small { display:block; font-size:12px; }
+  .crit-good { background:var(--good); } .crit-mid { background:#ca8a04; } .crit-bad { background:var(--bad); }
+  .sim-el { grid-template-columns:4em 1fr 2.5em auto; }
+  .hex-card { display:grid; grid-template-columns:64px 1fr; gap:12px; align-items:start; padding:8px 0; border-bottom:1px solid var(--line); }
+  .hex-card > div:last-child { display:grid; gap:2px; }
+  .hex { display:grid; gap:5px; padding-top:4px; }
+  .hex i { display:block; height:8px; border-radius:2px; background:var(--ink); }
+  .hex i.yin { background:linear-gradient(to right, var(--ink) 0 42%, transparent 42% 58%, var(--ink) 58%); }
+  .hex i.mv { background:var(--hd); } .hex i.yin.mv { background:linear-gradient(to right, var(--hd) 0 42%, transparent 42% 58%, var(--hd) 58%); }
+  @media (max-width: 640px) {
+    #simBar { flex-wrap:wrap; overflow-x:visible; }
+    body.tab-sim { height:auto; min-height:100dvh; }
+    body.tab-sim #simWork { flex:none; height:85dvh; }
+    #simBar .main { position:static; box-shadow:none; }
+    #simBar #simDemo, #simBar #sNum { flex:1 1 100%; max-width:none; }
+    #simBar #sBirth, #simBar #sTime { flex:1 1 0; width:auto; min-width:0; }
+    .sim-hero .sim-no { font-size:20px; } .sim-total b { font-size:30px; }
+    .sim-digits { gap:2px; } .sim-digits b { font-size:17px; } .sim-digits small { font-size:9.5px; }
+    .toolbar .cal-kind { flex:1 1 100%; }
+  }
+  .cal-kind { display:inline-flex; gap:2px 10px; flex-wrap:wrap; align-items:center; }
+  .pick-wrap { position:relative; display:inline-grid; place-items:center; width:2.4em; height:2.2em; border:1px solid var(--line); border-radius:6px; background:var(--panel); cursor:pointer; flex:none; }
+  .pick-wrap input[type="date"] { position:absolute; inset:0; width:100%; height:100%; opacity:0; cursor:pointer; padding:0; border:0; }
+  .pick-wrap:focus-within { outline:2px solid var(--acc); outline-offset:1px; }
+  @media (hover: hover) { .pick-wrap:hover { background:var(--hover); } }
+  .crit p.crit-why { margin:2px 0 4px; font-size:13px; }
+  .sim-summary { margin:10px 0 4px; padding:8px 10px; border:1px solid var(--line); border-radius:10px; background:color-mix(in srgb, var(--acc) 6%, var(--panel)); }
+  .sim-summary h3 { margin-top:0 !important; }
   .pane-switch, .more-toggle { display:none; }
   /* Phone portrait: one pane at a time in a horizontal snap scroller; control rows scroll sideways instead of wrapping and the primary button stays pinned. */
   @media (max-width: 640px) {
@@ -296,7 +340,7 @@
     <select id="theme"><option value="auto">Tự động</option><option value="light">Sáng</option><option value="dark">Tối</option></select></label>
   <span id="note" class="muted"></span>
   <span class="seg lang-switch" title="Ngôn ngữ"><span class="gc-views" title="Lượt truy cập (GoatCounter, cập nhật mỗi ~10 phút)" hidden></span><button data-lang="vi">VI</button><button data-lang="en">EN</button></span>
-  <nav class="seg wb-nav" id="tabs"><button data-tab="cal">📅 Lịch</button><button data-tab="horo">🔮 Tử vi</button></nav>
+  <nav class="seg wb-nav" id="tabs"><button data-tab="cal">📅 Lịch</button><button data-tab="horo">🔮 Tử vi</button><button data-tab="sim">📱 SIM phong thủy</button></nav>
 </header>
 <div class="toolbar" id="calBar">
   <select id="demo" title="Nạp ngày mẫu rồi xem ngay"></select>
@@ -305,18 +349,37 @@
   <input type="text" id="q" inputmode="text" autocomplete="off" spellcheck="false" title="Ngày dương: 12/11/2026 · Ngày âm: thêm “âm” hoặc “lunar” phía trước, tháng nhuận thêm “n” (âm 1/6n/2025)" placeholder="12/11/2026 · âm 15/8/2026">
   <button id="go" class="main" title="Đổi ngày dương ↔ âm và xem chi tiết (Enter)">Xem ngày</button>
   <label class="chk" title="Hiện can chi ngày trong ô lịch (khi ngày đó không có lễ / tiết khí)"><input type="checkbox" id="cc">Can chi trong ô</label>
+  <label class="chk" title="Hiện tuần trăng (trăng non, lưỡi liềm, bán nguyệt, trăng tròn…) trong từng ô ngày"><input type="checkbox" id="moon">Mặt trăng</label>
+  <button id="toHoro" title="Mở tab Tử vi với ngày sinh là ngày đang chọn trên lịch">🔮 Xem tử vi</button>
+  <button id="toSim" title="Mở tab SIM phong thủy với ngày sinh chủ SIM là ngày đang chọn trên lịch">📱 Xem SIM</button>
   <span class="muted hint">← → ↑ ↓ chọn ngày · PageUp/PageDown đổi tháng · lịch tính theo giờ Việt Nam (UTC+7), không gửi dữ liệu đi đâu</span>
 </div>
 <div class="toolbar" id="horoBar" hidden>
   <select id="horoDemo" title="Nạp hồ sơ mẫu rồi xem ngay"></select>
   <input type="text" id="hName" class="name" autocomplete="off" spellcheck="false" maxlength="80" placeholder="Họ và tên" title="Họ và tên (dùng cho thần số học; có dấu hay không đều được)">
   <select id="hSex" title="Giới tính (ảnh hưởng cung mệnh, sao chiếu mệnh)"></select>
-  <input type="text" id="hBirth" class="date" autocomplete="off" placeholder="Ngày sinh 15/08/1990" title="Ngày sinh dương lịch (dd/mm/yyyy); nhập âm lịch thì thêm “âm” phía trước">
-  <input type="text" id="hTime" class="time" autocomplete="off" placeholder="Giờ 07:30" title="Giờ sinh (07:30, 7h30); để trống nếu không rõ">
+  <input type="text" id="hBirth" class="date" autocomplete="off" placeholder="Ngày sinh 15/08/1990" title="Ngày sinh (dd/mm/yyyy) theo lịch chọn bên cạnh; tháng nhuận âm lịch thêm “n” (15/6n/2025)">
+  <span class="pick-wrap"><span aria-hidden="true">📅</span><input type="date" id="hBirthPick" title="Chọn ngày sinh trên lịch (ghi vào ô theo dương/âm lịch đang chọn)"></span>
+  <input type="text" id="hTime" class="time" list="birthHours" autocomplete="off" placeholder="Giờ 07:30" title="Giờ sinh: gõ (07:30, 7h30) hoặc chọn trong danh sách sổ xuống; để trống nếu không rõ">
+  <span class="cal-kind" title="Ngày sinh nhập theo dương lịch hay âm lịch"><label class="chk"><input type="radio" name="hCal" id="hSolar" checked>Dương lịch</label><label class="chk"><input type="radio" name="hCal" id="hLunar">Âm lịch</label></span>
   <label class="chk" title="Năm âm lịch cần xem vận hạn (năm sau = năm này + 1)">Năm xem <select id="hYear"></select></label>
   <button id="hGo" class="main" title="Xem bản mệnh và vận hạn (Enter)">Xem tử vi</button>
-  <span class="muted hint">Chỉ mang tính tham khảo, giải trí · dữ liệu không rời khỏi máy</span>
+  <button id="hToSim" title="Mở tab SIM phong thủy với ngày giờ sinh, giới tính đang nhập ở đây">📱 Xem SIM</button>
+  <span class="muted hint">Nhập ngày sinh (thêm giờ sinh, họ tên nếu có) → xem tứ trụ, mệnh, hướng hợp, thần số học và vận hạn từng năm</span>
 </div>
+<div class="toolbar" id="simBar" hidden>
+  <select id="simDemo" title="Nạp SIM mẫu rồi chấm ngay"></select>
+  <input type="text" id="sNum" inputmode="tel" autocomplete="off" spellcheck="false" maxlength="40" placeholder="Số SIM 0912 345 678" title="Số di động 10 chữ số (0… hoặc +84…); được có dấu cách, chấm, gạch">
+  <select id="sSex" title="Giới tính chủ SIM (dùng cho tứ trụ, cung mệnh)"></select>
+  <input type="text" id="sBirth" class="date" autocomplete="off" placeholder="Ngày sinh 15/08/1990" title="Ngày sinh chủ SIM (dd/mm/yyyy) theo lịch chọn bên cạnh; để trống thì chỉ chấm riêng dãy số">
+  <span class="pick-wrap"><span aria-hidden="true">📅</span><input type="date" id="sBirthPick" title="Chọn ngày sinh trên lịch (ghi vào ô theo dương/âm lịch đang chọn)"></span>
+  <input type="text" id="sTime" class="time" list="birthHours" autocomplete="off" placeholder="Giờ 07:30" title="Giờ sinh: gõ (07:30, 7h30) hoặc chọn trong danh sách sổ xuống; để trống nếu không rõ">
+  <span class="cal-kind" title="Ngày sinh nhập theo dương lịch hay âm lịch"><label class="chk"><input type="radio" name="sCal" id="sSolar" checked>Dương lịch</label><label class="chk"><input type="radio" name="sCal" id="sLunar">Âm lịch</label></span>
+  <button id="sGo" class="main" title="Chấm điểm và luận giải SIM (Enter)">Chấm điểm SIM</button>
+  <button id="sToHoro" title="Mở tab Tử vi với ngày giờ sinh, giới tính của chủ SIM">🔮 Xem tử vi</button>
+  <span class="muted hint">Âm dương · ngũ hành · tứ trụ · quẻ Kinh Dịch · cửu tinh · dân gian — tham khảo, giải trí</span>
+</div>
+<datalist id="birthHours"></datalist>
 <div class="seg pane-switch" id="calSwitch"><button>Lịch tháng</button><button>Chi tiết ngày</button></div>
 <main class="work pane-scroller" id="calWork">
   <section class="pane month-pane">
@@ -347,6 +410,17 @@
   <section class="pane">
     <div class="bar"><b>Vận hạn</b></div>
     <div class="scroll horo" id="hFortune" data-i18n-skip></div>
+  </section>
+</main>
+<div class="seg pane-switch" id="simSwitch" hidden><button>Chấm điểm</button><button>Luận giải</button></div>
+<main class="work pane-scroller" id="simWork" hidden>
+  <section class="pane">
+    <div class="bar"><b>Chấm điểm</b></div>
+    <div class="scroll horo" id="sScore" data-i18n-skip></div>
+  </section>
+  <section class="pane">
+    <div class="bar"><b>Luận giải</b></div>
+    <div class="scroll horo" id="sDetail" data-i18n-skip></div>
   </section>
 </main>
 <footer class="status" id="status"></footer>
@@ -450,8 +524,11 @@ I18n.add({
   "Ngày âm {d}/{m}/{y} không tồn tại (tháng này chỉ có {n} ngày).": "Lunar date {d}/{m}/{y} does not exist (this month has only {n} days).",
   "Tết Nguyên Đán 2027": "Lunar New Year 2027", "Trung Thu 2026": "Mid-Autumn 2026", "Tháng nhuận (6 nhuận 2025)": "Leap month (leap 6th month 2025)",
   "Đổi dương → âm (12/11/2026)": "Solar → lunar (12/11/2026)", "Ngày giao tiết Lập đông 2026": "Solar-term changeover: Start of Winter 2026",
-  "Lỗi: tháng nhuận không có": "Error: leap month does not exist", "Lỗi: ngày 30 của tháng thiếu": "Error: day 30 of a 29-day month",
-  "Lỗi: ngày dương không tồn tại": "Error: invalid solar date",
+  "Mặt trăng": "Moon", "Hiện tuần trăng (trăng non, lưỡi liềm, bán nguyệt, trăng tròn…) trong từng ô ngày": "Show the moon phase (new, crescent, half, full…) in each day cell",
+  "🔮 Xem tử vi": "🔮 Horoscope", "Mở tab Tử vi với ngày sinh là ngày đang chọn trên lịch": "Open the Horoscope tab with the selected day as the birth date",
+  "Tuần trăng": "Moon phase", "tuổi trăng {a} ngày (lúc 20h)": "moon age {a} days (at 8 pm)",
+  "Trăng non (sóc)": "New moon", "Trăng lưỡi liềm đầu tháng": "Waxing crescent", "Bán nguyệt đầu tháng (thượng huyền)": "First quarter", "Trăng khuyết đầu tháng": "Waxing gibbous",
+  "Trăng tròn (vọng)": "Full moon", "Trăng khuyết cuối tháng": "Waning gibbous", "Bán nguyệt cuối tháng (hạ huyền)": "Last quarter", "Trăng lưỡi liềm cuối tháng": "Waning crescent",
   "✖ Không có mẫu “{key}”.": "✖ No sample “{key}”.", "Đã nạp mẫu: {name}": "Loaded sample: {name}",
   "✖ Link chia sẻ bị hỏng hoặc không đúng định dạng: {msg}": "✖ The share link is broken or malformed: {msg}",
   "✖ Link không chứa ngày của Lịch vạn niên.": "✖ The link holds no Lunar Calendar date.", "Đã mở ngày từ link.": "Opened the date from the link.",
@@ -531,7 +608,7 @@ I18n.add({
   "Tổng quan": "Overview", "Tuổi": "Zodiac year", "Cung hoàng đạo": "Star sign", "Nhật chủ": "Day master", "Cung mệnh": "Kua",
   "Tứ trụ & cân bằng ngũ hành": "Four pillars & element balance", "Trụ": "Pillar", "Nạp âm": "Nayin",
   "Hành vượng: {strong}.": "Dominant element: {strong}.", "Đủ cả 5 hành — ngũ hành khá cân bằng.": "All 5 elements present — fairly balanced.",
-  "Thiếu hành {el}: nên bổ sung bằng màu {colors}, hướng {dirs}.": "Missing {el}: add it through the colours {colors} and the directions {dirs}.",
+  "Cách bổ sung: màu {colors}, hướng {dirs}.": "Make up for it with the colours {colors} and the directions {dirs}.",
   "Nhật chủ (can ngày sinh) {can}: {text}": "Day master (stem of the birth day) {can}: {text}",
   "Mệnh {name} ({el})": "Element {name} ({el})", "Điểm mạnh": "Strengths", "Điểm yếu": "Weaknesses", "Nghề hợp": "Suitable careers",
   "Sức khỏe cần chú ý": "Health to watch", "Hướng hợp": "Good directions", "Tuổi {animal} (12 con giáp)": "Year of the {animal} (Chinese zodiac)",
@@ -547,15 +624,20 @@ I18n.add({
   "Nạp hồ sơ mẫu rồi xem ngay": "Load a sample profile and show it", "Họ và tên": "Full name",
   "Họ và tên (dùng cho thần số học; có dấu hay không đều được)": "Full name (used for numerology; accents optional)",
   "Giới tính (ảnh hưởng cung mệnh, sao chiếu mệnh)": "Gender (affects the Kua trigram and the ruling star)", "Nam giới": "Male", "Nữ giới": "Female",
-  "Ngày sinh 15/08/1990": "Birth date 15/08/1990", "Ngày sinh dương lịch (dd/mm/yyyy); nhập âm lịch thì thêm “âm” phía trước": "Solar birth date (dd/mm/yyyy); prefix “lunar” for a lunar date",
-  "Giờ 07:30": "Time 07:30", "Giờ sinh (07:30, 7h30); để trống nếu không rõ": "Birth time (07:30, 7h30); leave empty if unknown",
+  "Ngày sinh 15/08/1990": "Birth date 15/08/1990", "Ngày sinh (dd/mm/yyyy) theo lịch chọn bên cạnh; tháng nhuận âm lịch thêm “n” (15/6n/2025)": "Birth date (dd/mm/yyyy) in the calendar picked next to it; add “n” for a lunar leap month (15/6n/2025)",
+  "Ngày sinh nhập theo dương lịch hay âm lịch": "Is the birth date solar or lunar?",
+  "Ngày sinh âm lịch (15/8/1990)": "Lunar birth date (15/8/1990)",
+  "Giờ 07:30": "Time 07:30", "Giờ sinh: gõ (07:30, 7h30) hoặc chọn trong danh sách sổ xuống; để trống nếu không rõ": "Birth time: type it (07:30, 7h30) or pick from the drop-down list; leave empty if unknown",
+  "Chọn ngày sinh trên lịch (ghi vào ô theo dương/âm lịch đang chọn)": "Pick the birth date on a calendar (written in the solar/lunar calendar selected)", "giờ {chi}": "{chi} hour",
   "Năm xem": "Year", "Năm âm lịch cần xem vận hạn (năm sau = năm này + 1)": "Lunar year to read (next year = this year + 1)",
   "Xem tử vi": "Read horoscope", "Xem bản mệnh và vận hạn (Enter)": "Show natal profile and fortune (Enter)",
-  "Chỉ mang tính tham khảo, giải trí · dữ liệu không rời khỏi máy": "For reference and entertainment only · data never leaves this device",
+  "Nhập ngày sinh (thêm giờ sinh, họ tên nếu có) → xem tứ trụ, mệnh, hướng hợp, thần số học và vận hạn từng năm":
+    "Enter a birth date (plus birth time and name if known) → see the four pillars, element, good directions, numerology and year-by-year fortune",
   "Nhập ngày sinh rồi bấm “Xem tử vi”, hoặc chọn một hồ sơ mẫu.": "Enter a birth date and press “Read horoscope”, or pick a sample profile.",
-  "Nam, có giờ sinh": "Male, with birth time", "Nữ, sinh trước Tết": "Female, born before Tet", "Sinh giờ Tý muộn (23:40)": "Born in the late Rat hour (23:40)",
-  "Không rõ giờ sinh": "Unknown birth time", "Lỗi: ngày sinh không tồn tại": "Error: birth date does not exist", "Lỗi: giờ sinh sai": "Error: invalid birth time",
-  "Giờ sinh không hợp lệ: “{t}” (dạng 07:30, để trống nếu không rõ).": "Invalid birth time: “{t}” (use 07:30, leave empty if unknown).",
+  "{who} tuổi {cc} ({animal}), mệnh {na} thuộc hành {el}, nhật chủ {dm}, cung mệnh {kua} ({group} tứ mệnh).":
+    "{who}: {cc} year ({animal}), element {na} ({el}), day master {dm}, Kua {kua} ({group} group).",
+  "Bạn": "You", "Hình tượng mệnh: {text}": "Element imagery: {text}", "Trụ {k}": "{k} pillar",
+  "Nam, sinh 11/01/1986 lúc 01:30":"Male, born 11/01/1986 at 01:30", "Nam, sinh 25/07/2015 lúc 10:30": "Male, born 25/07/2015 at 10:30",  "Giờ sinh không hợp lệ: “{t}” (dạng 07:30, để trống nếu không rõ).": "Invalid birth time: “{t}” (use 07:30, leave empty if unknown).",
   "Ngày sinh không được sau hôm nay.": "The birth date cannot be after today.", "Chưa có ngày sinh để chia sẻ.": "No birth date to share yet.",
   "Đã xem tử vi: {who} · tuổi {cc} · mệnh {na} · cung {kua}": "Horoscope for {who} · year {cc} · element {na} · Kua {kua}",
   "Đã mở lá số từ link.": "Opened the reading from the link.", "(chưa nhập tên)": "(no name)", "Không rõ giờ": "Unknown hour",
@@ -749,6 +831,305 @@ const HoroDetail = (() => {
   I18n.add(en);
   return { ANIMAL_NAME, ZODIAC, ZODIAC_ELEMENT, ZODIAC_MODE, ANIMAL, ELEMENT, DAY_MASTER, ARROW, CAREER };
 })();
+// Diễn giải pane "Bản mệnh": hình tượng 30 mệnh nạp âm, ý nghĩa 4 trụ, hành vượng/thiếu, quan hệ tuổi, Đông/Tây tứ mệnh — cặp VI/EN, VI là khóa T().
+const NatalExplain = (() => {
+  const en = {};
+  const p = (vi, enText) => { en[vi] = enText; return vi; };
+
+  // Same order as CanChi.NAP_AM.
+  const NAP_AM = [
+    p("Vàng nằm đáy biển: tài năng tiềm ẩn, kín đáo, cần thời cơ và người nâng đỡ mới tỏa sáng.", "Gold at the bottom of the sea: hidden talent, discreet; shines once the right time and backer arrive."),
+    p("Lửa trong lò: nhiệt huyết, bền bỉ, giỏi rèn luyện bản thân và người khác; cần môi trường ổn định để giữ lửa.", "Fire in the furnace: passionate and steady, good at forging yourself and others; needs a stable setting to keep burning."),
+    p("Cây rừng lớn: rộng lượng, có tầm nhìn, thích che chở; hợp làm việc tập thể, dẫn dắt.", "Great forest wood: generous and far-sighted, protective; suited to teamwork and leading."),
+    p("Đất ven đường: chân chất, chịu khó, hay giúp người; thành công nhờ tích lũy từng bước.", "Roadside earth: down-to-earth, hard-working, helpful; succeeds by building up step by step."),
+    p("Kim loại mũi kiếm: sắc sảo, quyết đoán, cương trực; cần học mềm mỏng để tránh va chạm.", "Sword-edge metal: sharp, decisive, upright; should learn some softness to avoid clashes."),
+    p("Lửa trên đỉnh núi: nổi bật, nhiệt tình, thích tự do và khám phá; dễ bùng nhanh tắt nhanh.", "Mountain-top fire: stands out, enthusiastic, loves freedom and discovery; flares up and dies down quickly."),
+    p("Nước dưới khe: trong sáng, khéo léo, linh hoạt; âm thầm mà bền bỉ.", "Stream water: clear, tactful, flexible; quiet but persistent."),
+    p("Đất trên tường thành: vững vàng, có trách nhiệm, đáng tin; thích bảo vệ gia đình và tập thể.", "Rampart earth: solid, responsible, trustworthy; protects family and group."),
+    p("Kim loại trong nến sáp: thông minh, tinh tế, cầu toàn; cần được tôi luyện qua thử thách.", "Candle-wax metal: clever, refined, perfectionist; needs challenges to be tempered."),
+    p("Cây dương liễu: mềm mại, duyên dáng, giàu cảm xúc, dễ thích nghi; cần chỗ dựa vững.", "Willow wood: gentle, graceful, emotional, adaptable; needs firm support."),
+    p("Nước giữa dòng suối: thông minh, giao tiếp tốt, nhiều ý tưởng; đôi khi thiếu kiên định.", "Spring water: bright, communicative, full of ideas; sometimes inconsistent."),
+    p("Đất trên mái nhà: che chở, chu đáo, coi trọng gia đình; sống có nguyên tắc.", "Rooftop earth: sheltering, caring, family-minded; lives by principles."),
+    p("Lửa sấm sét: mạnh mẽ, bùng nổ, dám nghĩ dám làm; cần tiết chế nóng nảy.", "Thunderbolt fire: powerful, explosive, bold; should temper a quick temper."),
+    p("Cây tùng bách: kiên cường, chính trực, chịu được gian khó, được người tôn trọng.", "Pine and cypress wood: resilient, upright, endures hardship, earns respect."),
+    p("Dòng nước chảy dài: kiên trì, sâu sắc, có chí lớn và tầm nhìn xa.", "Long-flowing water: persistent, deep, ambitious and far-sighted."),
+    p("Vàng lẫn trong cát: giá trị thật cần thời gian sàng lọc; thực tế, thành công muộn mà chắc.", "Gold in the sand: true worth takes time to sift out; practical, succeeds late but surely."),
+    p("Lửa dưới chân núi: ấm áp, hiền hòa, chu đáo, sống tình cảm.", "Fire below the mountain: warm, gentle, attentive, affectionate."),
+    p("Cây đồng bằng: giản dị, hòa đồng, dễ gần, tiến lên nhờ chăm chỉ.", "Flatland wood: simple, sociable, approachable; advances through diligence."),
+    p("Đất trên vách: chắc chắn, kín đáo, đáng tin; hợp vai trò hỗ trợ, quản lý.", "Wall earth: solid, discreet, reliable; suited to support and management roles."),
+    p("Vàng pha bạch kim: thanh lịch, có gu, trọng danh dự; dễ được quý nhân để ý.", "Gold and platinum: elegant, tasteful, honour-minded; easily noticed by benefactors."),
+    p("Lửa ngọn đèn: soi sáng người khác, thông minh, tận tụy; hợp giáo dục, tư vấn.", "Lamp fire: lights the way for others, smart, devoted; suited to teaching and advising."),
+    p("Nước mưa trên trời: rộng lượng, lý tưởng, nuôi dưỡng mọi người; đôi khi xa thực tế.", "Heavenly rain water: generous, idealistic, nurturing; sometimes impractical."),
+    p("Đất đầm lớn: bao dung, nhẫn nại, giàu nội tâm.", "Great marsh earth: tolerant, patient, rich inner life."),
+    p("Vàng làm trang sức: tinh tế, yêu cái đẹp, khéo giao tiếp; coi trọng hình ảnh.", "Jewellery gold: refined, loves beauty, socially skilled; cares about image."),
+    p("Cây dâu tằm: cần cù, hữu ích, chăm lo gia đình; thành quả đến từ lao động bền bỉ.", "Mulberry wood: diligent, useful, family-caring; rewards come from steady work."),
+    p("Nước suối lớn: năng động, mạnh mẽ, nhiều tham vọng; cần định hướng để không phân tán.", "Great stream water: dynamic, strong, ambitious; needs direction to stay focused."),
+    p("Đất pha cát: linh hoạt, thực tế, dễ thích nghi nhưng cần nền tảng vững.", "Sandy earth: flexible, practical, adaptable, but needs a firm base."),
+    p("Lửa mặt trời: rực rỡ, lạc quan, có sức ảnh hưởng, thích dẫn dắt.", "Sunfire: radiant, optimistic, influential, likes to lead."),
+    p("Cây lựu đá: bền bỉ, sống nội tâm, tình cảm sâu sắc, thành công nhờ kiên trì.", "Pomegranate wood: enduring, introspective, deeply caring; succeeds through perseverance."),
+    p("Nước biển cả: bao la, phóng khoáng, nhiều hoài bão, tầm nhìn rộng.", "Ocean water: vast, free-spirited, full of dreams, wide vision."),
+  ];
+
+  const PILLAR = [p("Gốc gác, tổ tiên, thời thơ ấu (≈ 1–16 tuổi).", "Roots, ancestors, childhood (≈ age 1–16)."),
+    p("Cha mẹ, anh chị em, tuổi trẻ (≈ 17–32 tuổi); là mùa sinh nên quyết định hành nào vượng.", "Parents, siblings, youth (≈ age 17–32); the birth season, which sets the dominant element."),
+    p("Bản thân (can ngày = nhật chủ) và vợ/chồng (chi ngày), trung niên (≈ 33–48 tuổi).", "Yourself (day stem = day master) and your spouse (day branch), mid-life (≈ age 33–48)."),
+    p("Con cái, ước vọng, hậu vận (≈ từ 49 tuổi).", "Children, aspirations, later life (≈ from age 49).")];
+
+  // Index = CanChi.ELEMENTS (Kim, Thủy, Mộc, Hỏa, Thổ).
+  const STRONG = [p("Kim vượng: quyết đoán, nguyên tắc, trọng nghĩa; dễ cứng nhắc, cố chấp.", "Strong Metal: decisive, principled, loyal; can be rigid and stubborn."),
+    p("Thủy vượng: thông minh, linh hoạt, giao tiếp giỏi; dễ thay đổi, thiếu kiên định.", "Strong Water: smart, flexible, good communicator; changeable, inconsistent."),
+    p("Mộc vượng: nhân hậu, cầu tiến, sáng tạo; dễ bướng, khó nhường.", "Strong Wood: kind, ambitious, creative; can be headstrong."),
+    p("Hỏa vượng: nhiệt huyết, lạc quan, nổi bật; dễ nóng vội.", "Strong Fire: passionate, optimistic, stands out; can be hasty."),
+    p("Thổ vượng: điềm đạm, đáng tin, chịu khó; dễ bảo thủ, chậm thay đổi.", "Strong Earth: calm, reliable, hard-working; can be conservative, slow to change.")];
+  const WEAK = [p("Thiếu Kim: khó quyết đoán, khó giữ nguyên tắc; nên rèn kỷ luật.", "Lacking Metal: indecisive, hard to stick to rules; build discipline."),
+    p("Thiếu Thủy: khó thích nghi, ít linh hoạt; nên mở rộng giao tiếp, học hỏi.", "Lacking Water: slow to adapt, inflexible; widen your contacts and keep learning."),
+    p("Thiếu Mộc: thiếu động lực phát triển và kế hoạch; nên đặt mục tiêu dài hạn.", "Lacking Wood: weak drive and planning; set long-term goals."),
+    p("Thiếu Hỏa: thiếu nhiệt huyết, ngại thể hiện; nên chủ động hơn.", "Lacking Fire: low enthusiasm, shy to show yourself; be more proactive."),
+    p("Thiếu Thổ: thiếu ổn định, khó tích lũy; nên xây nền tảng tài chính và thói quen.", "Lacking Earth: unsettled, hard to save; build financial and habit foundations.")];
+
+  const COMPAT = { tamHop: p("3 tuổi hợp nhau nhất: làm ăn, kết bạn, hôn nhân thuận lợi.", "The three best-matched signs: good for business, friendship and marriage."),
+    lucHop: p("Cặp tuổi bổ trợ nhau: hợp kết hôn, cộng sự thân thiết.", "A complementary pair: good for marriage and close partnership."),
+    xung: p("Tuổi đối nghịch: dễ bất đồng, cần nhường nhịn khi hợp tác.", "Opposing sign: prone to disagreement; give way when working together."),
+    hai: p("Dễ hiểu lầm, ngấm ngầm cản trở nhau.", "Prone to misunderstandings and hidden obstruction.") };
+
+  const KUA_GROUP = { "Đông": p("Đông tứ mệnh (Khảm, Ly, Chấn, Tốn) hợp nhà, cửa, bàn làm việc quay về Bắc, Nam, Đông, Đông Nam; người cùng nhóm Đông hợp ở chung.", "East group (Kan, Li, Zhen, Xun): houses, doors and desks facing North, South, East or South-East; fits living with other East-group people."),
+    "Tây": p("Tây tứ mệnh (Càn, Khôn, Cấn, Đoài) hợp nhà, cửa, bàn làm việc quay về Tây, Tây Bắc, Tây Nam, Đông Bắc; người cùng nhóm Tây hợp ở chung.", "West group (Qian, Kun, Gen, Dui): houses, doors and desks facing West, North-West, South-West or North-East; fits living with other West-group people.") };
+
+  I18n.add(en);
+  return { NAP_AM, PILLAR, STRONG, WEAK, COMPAT, KUA_GROUP };
+})();
+// Tab SIM phong thủy: 8 quái, 64 quẻ (thượng, hạ, mức cát hung, lời quẻ), bát tinh cặp số, cửu tinh, ý nghĩa con số — cặp VI/EN, VI là khóa T().
+const SimText = (() => {
+  const en = {};
+  const p = (vi, enText) => { en[vi] = enText; return vi; };
+
+  // Tiên thiên order 1..8; el = index into CanChi.ELEMENTS (Kim, Thủy, Mộc, Hỏa, Thổ).
+  const TRIGRAM = [null, ["Càn", p("Trời", "Heaven"), 0], ["Đoài", p("Đầm", "Lake"), 0], ["Ly", p("Lửa", "Fire"), 3], ["Chấn", p("Sấm", "Thunder"), 2],
+    ["Tốn", p("Gió", "Wind"), 2], ["Khảm", p("Nước", "Water"), 1], ["Cấn", p("Núi", "Mountain"), 4], ["Khôn", p("Đất", "Earth"), 4]].map(t => t && { name: t[0], image: t[1], el: t[2] });
+
+  const RATING = { "Đại cát": p("Đại cát", "Very auspicious"), "Cát": p("Cát", "Auspicious"), "Bình": p("Bình", "Neutral"), "Hung": p("Hung", "Inauspicious") };
+
+  // King Wen order: [thượng, hạ, tên, mức, lời quẻ]; mức theo tuvitinh.com, chỉnh khi ≥ 2 nguồn khác nói ngược (Thái, Đoài, Khảm, Khốn, Đại Quá, Tùy, Lâm).
+  const H = (up, low, vi, enName, rating, meaning, enMeaning) => ({ up, low, name: p(vi, enName), rating, meaning: p(meaning, enMeaning) });
+  const HEX = [
+    H(1, 1, "Thuần Càn", "The Creative", "Đại cát", "Cương kiện, sáng tạo, hanh thông; tự cường không ngừng.", "Strong, creative and prosperous; keep striving."),
+    H(8, 8, "Thuần Khôn", "The Receptive", "Đại cát", "Nhu thuận, bao dung, bền bỉ; theo người đi trước thì được lợi.", "Yielding, tolerant and steady; following a good lead brings gain."),
+    H(6, 4, "Thủy Lôi Truân", "Difficulty at the Beginning", "Hung", "Gian nan buổi đầu, mọi việc còn vướng mắc; cần kiên nhẫn.", "A hard start, things are tangled; patience is needed."),
+    H(7, 6, "Sơn Thủy Mông", "Youthful Folly", "Hung", "Non nớt, mờ mịt; nên học hỏi và tìm người chỉ dẫn.", "Inexperience and confusion; learn and find a mentor."),
+    H(6, 1, "Thủy Thiên Nhu", "Waiting", "Cát", "Chờ thời, nuôi dưỡng sức lực; kiên nhẫn rồi sẽ hanh thông.", "Wait and build strength; patience leads to success."),
+    H(1, 6, "Thiên Thủy Tụng", "Conflict", "Hung", "Tranh chấp, kiện tụng; nên hòa giải, tránh đối đầu.", "Disputes and lawsuits; settle, avoid confrontation."),
+    H(8, 6, "Địa Thủy Sư", "The Army", "Cát", "Tập hợp lực lượng, cần kỷ luật và người dẫn dắt chính đáng.", "Gather forces with discipline under a rightful leader."),
+    H(6, 8, "Thủy Địa Tỷ", "Holding Together", "Cát", "Gần gũi, hợp tác, được người giúp đỡ.", "Closeness and cooperation; others help you."),
+    H(5, 1, "Phong Thiên Tiểu Súc", "Small Taming", "Bình", "Tích lũy nhỏ, việc còn bị kìm hãm; nên bền chí.", "Small gains, progress held back; persevere."),
+    H(1, 2, "Thiên Trạch Lý", "Treading", "Cát", "Thận trọng từng bước, giữ lễ thì vượt qua hiểm nguy.", "Tread carefully; courtesy carries you past danger."),
+    H(8, 1, "Địa Thiên Thái", "Peace", "Đại cát", "Thông suốt, hanh thông, trên dưới hòa hợp.", "Everything flows; harmony between high and low."),
+    H(1, 8, "Thiên Địa Bĩ", "Standstill", "Hung", "Bế tắc, trên dưới không thông; nên giữ mình chờ thời.", "Blocked and stagnant; keep low and wait."),
+    H(1, 3, "Thiên Hỏa Đồng Nhân", "Fellowship", "Cát", "Đồng lòng, hợp tác rộng rãi, được nhiều người ủng hộ.", "Shared purpose, broad cooperation and support."),
+    H(3, 1, "Hỏa Thiên Đại Hữu", "Great Possession", "Đại cát", "Sở hữu lớn, giàu có, thịnh vượng.", "Great wealth and abundance."),
+    H(8, 7, "Địa Sơn Khiêm", "Modesty", "Cát", "Khiêm tốn thì được tôn trọng, việc trước sau đều tốt.", "Modesty earns respect and a good outcome."),
+    H(4, 8, "Lôi Địa Dự", "Enthusiasm", "Cát", "Vui vẻ, hứng khởi, thuận lợi để hành động.", "Joyful energy; a good time to act."),
+    H(2, 4, "Trạch Lôi Tùy", "Following", "Cát", "Tùy thời, thuận theo lẽ phải thì hanh thông.", "Adapt to the times and follow what is right."),
+    H(7, 5, "Sơn Phong Cổ", "Work on the Decayed", "Hung", "Sự việc hư hỏng, tồn đọng cần sửa chữa.", "Things have decayed and need repair."),
+    H(8, 2, "Địa Trạch Lâm", "Approach", "Cát", "Lớn mạnh, tiến tới, được việc.", "Growing strength and progress."),
+    H(5, 8, "Phong Địa Quan", "Contemplation", "Bình", "Quan sát, chiêm nghiệm; chưa nên hành động vội.", "Observe and reflect before acting."),
+    H(3, 4, "Hỏa Lôi Phệ Hạp", "Biting Through", "Bình", "Cắn đứt trở ngại; phải quyết đoán, giữ công bằng.", "Bite through obstacles with decisiveness and fairness."),
+    H(7, 3, "Sơn Hỏa Bí", "Grace", "Cát", "Vẻ đẹp bề ngoài; việc nhỏ thì lợi.", "Outward beauty; good for small matters."),
+    H(7, 8, "Sơn Địa Bác", "Splitting Apart", "Hung", "Suy sụp, bị bào mòn; nên giữ yên, không nên tiến.", "Decline and erosion; stay put, do not advance."),
+    H(8, 4, "Địa Lôi Phục", "Return", "Bình", "Trở lại, hồi phục; vận tốt đang quay về.", "Recovery; good fortune is coming back."),
+    H(1, 4, "Thiên Lôi Vô Vọng", "Innocence", "Hung", "Chân thật, không vọng động thì yên ổn.", "Sincerity without rash moves keeps you safe."),
+    H(7, 1, "Sơn Thiên Đại Súc", "Great Taming", "Cát", "Tích lũy lớn, nuôi dưỡng tài đức.", "Great accumulation of resources and virtue."),
+    H(7, 4, "Sơn Lôi Di", "Nourishment", "Cát", "Nuôi dưỡng; cẩn trọng lời nói và ăn uống.", "Nourishment; mind your words and diet."),
+    H(2, 5, "Trạch Phong Đại Quá", "Great Exceeding", "Hung", "Quá tải, gánh nặng vượt sức; cần thận trọng.", "Overload beyond your strength; be careful."),
+    H(6, 6, "Thuần Khảm", "The Abysmal", "Hung", "Hiểm trở chồng chất; giữ lòng tin để vượt qua.", "Danger upon danger; keep faith to get through."),
+    H(3, 3, "Thuần Ly", "The Clinging", "Cát", "Sáng sủa, rực rỡ, nương tựa vào điều chính đáng.", "Brightness, clinging to what is right."),
+    H(2, 7, "Trạch Sơn Hàm", "Influence", "Cát", "Cảm ứng, giao hòa; thuận lợi tình cảm, hôn nhân.", "Mutual attraction; good for love and marriage."),
+    H(4, 5, "Lôi Phong Hằng", "Duration", "Cát", "Bền lâu, kiên định thì hanh thông.", "Constancy brings success."),
+    H(1, 7, "Thiên Sơn Độn", "Retreat", "Hung", "Lui đúng lúc để bảo toàn.", "Withdraw in time to preserve yourself."),
+    H(4, 1, "Lôi Thiên Đại Tráng", "Great Power", "Cát", "Mạnh mẽ, hưng thịnh; tránh quá cứng rắn.", "Strong and thriving; avoid being too forceful."),
+    H(3, 8, "Hỏa Địa Tấn", "Progress", "Cát", "Tiến lên, thăng tiến, được trọng dụng.", "Advancement and recognition."),
+    H(8, 3, "Địa Hỏa Minh Di", "Darkening of the Light", "Hung", "Ánh sáng bị che lấp, dễ tổn thương; nên ẩn nhẫn.", "Light obscured, easily hurt; endure quietly."),
+    H(5, 3, "Phong Hỏa Gia Nhân", "The Family", "Cát", "Gia đạo êm ấm, trong ngoài có nề nếp.", "A warm, well-ordered home."),
+    H(3, 2, "Hỏa Trạch Khuê", "Opposition", "Hung", "Chia lìa, bất đồng; việc nhỏ còn được, việc lớn khó thành.", "Discord; small matters only."),
+    H(6, 7, "Thủy Sơn Kiển", "Obstruction", "Hung", "Gian nan, trắc trở; nên dừng lại tìm người giúp.", "Hardship and obstacles; pause and seek help."),
+    H(4, 6, "Lôi Thủy Giải", "Deliverance", "Cát", "Khó khăn được tháo gỡ, nhẹ nhõm.", "Difficulties are released."),
+    H(7, 2, "Sơn Trạch Tổn", "Decrease", "Bình", "Bớt đi, hy sinh trước rồi sau được lợi.", "Give first, gain later."),
+    H(5, 4, "Phong Lôi Ích", "Increase", "Cát", "Tăng thêm, lợi ích, thuận lợi làm việc lớn.", "Benefit and growth; favourable for big undertakings."),
+    H(2, 1, "Trạch Thiên Quải", "Breakthrough", "Hung", "Quyết đoán, dứt khoát loại bỏ điều xấu.", "Resolutely remove what is wrong."),
+    H(1, 5, "Thiên Phong Cấu", "Coming to Meet", "Bình", "Gặp gỡ bất ngờ; cẩn trọng với cám dỗ.", "Unexpected encounters; beware of temptation."),
+    H(2, 8, "Trạch Địa Tụy", "Gathering Together", "Cát", "Tụ họp, đông đủ, thịnh vượng.", "People and prosperity gather."),
+    H(8, 5, "Địa Phong Thăng", "Pushing Upward", "Cát", "Đi lên, thăng tiến từng bước vững chắc.", "A steady rise."),
+    H(2, 6, "Trạch Thủy Khốn", "Oppression", "Hung", "Khốn cùng, bế tắc; giữ ý chí để vượt qua.", "Exhaustion and dead ends; hold on to your will."),
+    H(6, 5, "Thủy Phong Tỉnh", "The Well", "Bình", "Ổn định, nuôi người; cần bồi đắp thường xuyên.", "Steady and nourishing; needs regular upkeep."),
+    H(2, 3, "Trạch Hỏa Cách", "Revolution", "Cát", "Thay đổi, cải cách đúng thời thì tốt.", "Timely change is good."),
+    H(3, 5, "Hỏa Phong Đỉnh", "The Cauldron", "Cát", "Vững chãi, đổi mới thành công, được trọng vọng.", "Stability, successful renewal and esteem."),
+    H(4, 4, "Thuần Chấn", "The Arousing", "Bình", "Chấn động rồi yên; giữ bình tĩnh.", "Shock, then calm; stay composed."),
+    H(7, 7, "Thuần Cấn", "Keeping Still", "Bình", "Dừng lại đúng lúc, tĩnh tâm.", "Stop at the right time; calm the mind."),
+    H(5, 7, "Phong Sơn Tiệm", "Development", "Cát", "Tiến dần, vững vàng; tốt cho hôn nhân.", "Gradual, steady progress; good for marriage."),
+    H(4, 2, "Lôi Trạch Quy Muội", "The Marrying Maiden", "Hung", "Việc không chính danh, hấp tấp dễ hỏng.", "Improper or hasty moves fail."),
+    H(4, 3, "Lôi Hỏa Phong", "Abundance", "Cát", "Thịnh vượng, sung túc; giữ được lúc đỉnh cao.", "Prosperity at its peak; hold on to it."),
+    H(3, 7, "Hỏa Sơn Lữ", "The Wanderer", "Bình", "Bôn ba, chưa yên ổn.", "Travel and restlessness."),
+    H(5, 5, "Thuần Tốn", "The Gentle", "Bình", "Mềm mỏng, thuận theo thì việc nhỏ hanh thông.", "Gentleness; small matters succeed."),
+    H(2, 2, "Thuần Đoài", "The Joyous", "Đại cát", "Vui vẻ, hòa duyệt, giao tiếp thuận lợi.", "Cheerful, good relations and communication."),
+    H(5, 6, "Phong Thủy Hoán", "Dispersion", "Hung", "Ly tán rồi quy tụ; nên đoàn kết.", "Scattering, then reuniting; stay united."),
+    H(6, 2, "Thủy Trạch Tiết", "Limitation", "Cát", "Tiết chế, có chừng mực thì tốt.", "Moderation is good."),
+    H(5, 2, "Phong Trạch Trung Phu", "Inner Truth", "Cát", "Thành tín, được người tin cậy.", "Sincerity earns trust."),
+    H(4, 7, "Lôi Sơn Tiểu Quá", "Small Exceeding", "Bình", "Việc nhỏ được, việc lớn chưa nên.", "Small things yes, big things not yet."),
+    H(6, 3, "Thủy Hỏa Ký Tế", "After Completion", "Đại cát", "Việc đã thành; giữ gìn để khỏi suy.", "Things are done; guard against decline."),
+    H(3, 6, "Hỏa Thủy Vị Tế", "Before Completion", "Hung", "Chưa xong, còn cơ hội; cần thận trọng hoàn tất.", "Not yet done, still open; finish carefully."),
+  ].map((h, i) => ({ ...h, no: i + 1 }));
+
+  // Bát tinh (du niên) of a digit pair; good = cát tinh.
+  const STAR8 = [
+    ["Sinh Khí", 1, ["14", "41", "67", "76", "39", "93", "28", "82"], p("Quý nhân, lạc quan, nhiều bạn bè, cơ hội đến dễ dàng.", "Helpful people, optimism, many friends, easy opportunities.")],
+    ["Thiên Y", 1, ["13", "31", "68", "86", "49", "94", "27", "72"], p("Tài lộc, sức khỏe, được trời giúp, tiền đến tự nhiên.", "Wealth and health; money comes naturally.")],
+    ["Diên Niên", 1, ["19", "91", "78", "87", "34", "43", "26", "62"], p("Năng lực lãnh đạo, trách nhiệm, sự nghiệp bền vững.", "Leadership, responsibility, a lasting career.")],
+    ["Phục Vị", 1, ["11", "22", "33", "44", "66", "77", "88", "99"], p("Ổn định, kiên nhẫn, tích lũy; hơi bảo thủ.", "Stability, patience, saving; a little conservative.")],
+    ["Tuyệt Mệnh", 0, ["12", "21", "69", "96", "48", "84", "37", "73"], p("Liều lĩnh, thăng trầm lớn về tiền bạc và sức khỏe.", "Recklessness; big ups and downs in money and health.")],
+    ["Ngũ Quỷ", 0, ["18", "81", "79", "97", "36", "63", "24", "42"], p("Thất thường, nhiều biến động, dễ gặp thị phi.", "Erratic, turbulent, prone to gossip.")],
+    ["Lục Sát", 0, ["16", "61", "47", "74", "38", "83", "29", "92"], p("Vướng bận tình cảm, dễ lo âu, hao tổn.", "Emotional entanglements, worry and losses.")],
+    ["Họa Hại", 0, ["17", "71", "89", "98", "46", "64", "23", "32"], p("Khẩu thiệt, tranh cãi, dễ gặp rắc rối do lời nói.", "Quarrels and trouble caused by words.")],
+  ].map(([name, good, pairs, text]) => ({ name, good: !!good, pairs, text }));
+
+  const NINE_STAR = [null, ["Nhất Bạch", "1 White"], ["Nhị Hắc", "2 Black"], ["Tam Bích", "3 Jade"], ["Tứ Lục", "4 Green"], ["Ngũ Hoàng", "5 Yellow"],
+    ["Lục Bạch", "6 White"], ["Thất Xích", "7 Red"], ["Bát Bạch", "8 White"], ["Cửu Tử", "9 Purple"]].map(s => s && p(s[0], s[1]));
+
+  const DIGIT = [p("Số 0: khởi đầu, vô hạn, cân bằng.", "0: beginnings, infinity, balance."), p("Số 1 (Nhất): độc lập, đứng đầu, sinh sôi.", "1: independence, first place, growth."),
+    p("Số 2 (Nhị): cặp đôi, hòa hợp, mãi mãi.", "2: pairs, harmony, forever."), p("Số 3 (Tam): vững chắc, tài lộc (Thần tài khi đi với 9).", "3: stability and wealth (God of Wealth with 9)."),
+    p("Số 4 (Tứ): bốn mùa, ổn định; dân gian kiêng vì đọc gần “tử”.", "4: four seasons, stability; avoided by folk belief because it sounds like “death”."),
+    p("Số 5 (Ngũ): ngũ hành, ngũ phúc, trung tâm.", "5: five elements, five blessings, the centre."), p("Số 6 (Lục): lộc, thuận lợi, may mắn.", "6: prosperity, smooth luck."),
+    p("Số 7 (Thất): quyền lực, bí ẩn; có người kiêng vì “thất” là mất.", "7: power and mystery; some avoid it because “thất” also means loss."),
+    p("Số 8 (Bát): phát đạt, thịnh vượng.", "8: prosperity and success."), p("Số 9 (Cửu): trường cửu, viên mãn, quyền uy.", "9: longevity, fulfilment, authority.")];
+
+  I18n.add(en);
+  return { TRIGRAM, RATING, HEX, STAR8, NINE_STAR, DIGIT };
+})();
+// English UI strings of the SIM phong thủy tab (keys = Vietnamese source text).
+I18n.add({
+  "📱 SIM phong thủy": "📱 Phone number feng shui", "Chấm điểm SIM": "Score number", "Chấm điểm": "Score", "Luận giải": "Reading",
+  "Nạp SIM mẫu rồi chấm ngay": "Load a sample number and score it", "Số SIM 0912 345 678": "Number 0912 345 678",
+  "Số di động 10 chữ số (0… hoặc +84…); được có dấu cách, chấm, gạch": "10-digit Vietnamese mobile number (0… or +84…); spaces, dots and dashes are fine",
+  "Giới tính chủ SIM (dùng cho tứ trụ, cung mệnh)": "Owner's gender (used for the four pillars and Kua)",
+  "Ngày sinh chủ SIM (dd/mm/yyyy) theo lịch chọn bên cạnh; để trống thì chỉ chấm riêng dãy số": "Owner's birth date (dd/mm/yyyy) in the calendar picked next to it; leave empty to score the number alone",
+  "Chấm điểm và luận giải SIM (Enter)": "Score and read the number (Enter)",
+  "Âm dương · ngũ hành · tứ trụ · quẻ Kinh Dịch · cửu tinh · dân gian — tham khảo, giải trí": "Yin-yang · five elements · four pillars · I Ching · nine stars · folk beliefs — for fun only",
+  "Sảnh tiến 345678 · nam 1990": "Straight 345678 · male 1990", "Đuôi lộc phát 6868 · nữ sinh trước Tết": "Ending 6868 · female born before Tết",
+  "Thần tài 3979 · không rõ giờ sinh": "God of Wealth 3979 · birth time unknown", "Chỉ chấm số (+84, không ngày sinh)": "Number only (+84, no birth date)",
+  "Hành của SIM nuôi dưỡng mệnh chủ: được nâng đỡ, việc hanh thông.": "The number's element feeds the owner's: support and smooth progress.",
+  "Cùng hành nên tương trợ, ổn định; không thêm cũng không bớt.": "Same element, so mutually supportive and stable; neither adds nor takes away.",
+  "Chủ khắc SIM: chủ động kiểm soát được nhưng tốn sức hơn.": "The owner controls the number: manageable but takes more effort.",
+  "Chủ phải nuôi SIM: dễ hao tâm sức, tiền bạc.": "The owner has to feed the number: drains energy and money.",
+  "SIM khắc mệnh chủ: dân gian cho là dễ gặp trở ngại, nên tránh.": "The number attacks the owner's element: folk belief expects obstacles — avoid it.",
+  "Tứ trụ đang thiếu đúng hành này nhất — SIM bổ khuyết trực tiếp, tốt nhất.": "The four pillars lack exactly this element — the number fills the gap directly, the best case.",
+  "Hành này hỗ trợ dụng thần — SIM giúp cân bằng lá số, tốt.": "This element supports the useful element — the number helps balance the chart.",
+  "Hành trung tính với lá số: không giúp cũng không hại nhiều.": "A neutral element for this chart: little help, little harm.",
+  "Hành này nuôi kỵ thần — bất lợi gián tiếp.": "This element feeds the unfavourable one — an indirect drawback.",
+  "Hành này làm lá số lệch thêm — nên tránh.": "This element unbalances the chart further — avoid it.",
+  "Quẻ đại cát: nền tảng rất tốt.": "Very auspicious hexagram: a very good foundation.", "Quẻ cát: thuận lợi.": "Auspicious hexagram: favourable.",
+  "Quẻ bình: không tốt không xấu, tùy các tiêu chí khác.": "Neutral hexagram: neither good nor bad, depends on the other criteria.", "Quẻ hung: bất lợi.": "Inauspicious hexagram: unfavourable.",
+  "Rất hợp: nên giữ, dùng làm số chính lâu dài.": "An excellent match: keep it as your main number for the long run.",
+  "Hợp: dùng tốt; có thể cải thiện thêm ở các tiêu chí còn yếu.": "A good match: fine to use; the weaker criteria could still be improved.",
+  "Dùng được nhưng chưa nổi bật; nếu chọn số mới, ưu tiên khắc phục các tiêu chí còn yếu.": "Usable but unremarkable; when choosing a new number, fix the weaker criteria first.",
+  "Chưa hợp: nên cân nhắc đổi số, nhất là khi quẻ chủ hung hoặc SIM khắc mệnh.": "Not a good match: consider changing, especially with an inauspicious main hexagram or a number that attacks the owner.",
+  "Âm dương hài hòa: năng lượng cân bằng, dân gian cho là SIM “êm”, hợp dùng lâu dài.": "Yin and yang in harmony: balanced energy, a “smooth” number for long-term use.",
+  "Lệch nhẹ nhưng nghiêng đúng phía bù cho can năm sinh của chủ — xem như hài hòa.": "Slightly uneven, but leaning the way that offsets the owner's year stem — counts as harmonious.",
+  "Lệch nhẹ: vẫn chấp nhận được; tốt hơn nếu bên nhiều hơn bù được can năm sinh.": "Slightly uneven: acceptable; better if the majority offset the year stem.",
+  "Nghiêng âm rõ (nhiều số chẵn): dân gian cho là dễ trầm, chậm, thiếu bứt phá.": "Clearly yin-heavy (many even digits): folk belief sees it as slow and lacking drive.",
+  "Nghiêng dương rõ (nhiều số lẻ): dân gian cho là dễ nóng vội, hao tổn.": "Clearly yang-heavy (many odd digits): folk belief sees it as hasty and draining.",
+  "Mất cân bằng âm dương nặng: dân gian khuyên tránh dùng làm số chính.": "Badly unbalanced yin-yang: folk advice is not to use it as a main number.",
+  "Có số {v} của sao đang nắm vận — đón vượng khí thời vận (tài lộc, cơ hội) đến hết vận ({end}).": "Holds {v}, the star ruling this period — catches its prosperous qi (wealth, chances) until the period ends ({end}).",
+  "Có số của sao sắp vượng ({s}) — năng lượng đang lên, lợi về lâu dài.": "Holds a rising star's digit ({s}) — growing energy, good in the long run.",
+  "Chỉ có số {f} của sao vừa hết vận — năng lượng đang suy.": "Only holds {f}, the star whose period just ended — fading energy.",
+  "Không có số vượng/sinh khí của vận hiện tại — thiếu trợ lực thời vận.": "No prosperous or rising digit for this period — no support from the times.",
+  "{nut} nút: nhóm nút cao, dân gian rất chuộng.": "{nut} points: a high score, much prized by folk belief.", "{nut} nút: khá cao.": "{nut} points: fairly high.",
+  "{nut} nút: trung bình.": "{nut} points: average.", "{nut} nút: thấp, dân gian ít chuộng.": "{nut} points: low, not favoured by folk belief.",
+  "Đuôi số đẹp theo dân gian.": "A lucky ending by folk belief.", "Đuôi số dân gian kiêng.": "An ending folk belief avoids.", "Đuôi số bình thường.": "An ordinary ending.",
+  "{good}/{n} cặp số mang sao cát (Sinh Khí, Thiên Y, Diên Niên, Phục Vị).": "{good}/{n} digit pairs carry lucky stars (Life Generating, Heavenly Doctor, Longevity, Stability).",
+  "Nhập ngày sinh để biết SIM có hợp mệnh nạp âm của chủ không.": "Enter a birth date to see whether the number suits the owner's Nayin element.",
+  "Nhập ngày sinh để xác định hành tứ trụ còn thiếu.": "Enter a birth date to find the element the four pillars lack.",
+  "Cách tính: {how}": "How it is computed: {how}", "không có": "none", "Tổng kết": "Summary", "Cần cân nhắc": "To consider",
+  "📱 Xem SIM":"📱 Phone number", "Mở tab SIM phong thủy với ngày sinh chủ SIM là ngày đang chọn trên lịch": "Open the phone-number tab with the selected day as the owner's birth date",
+  "Mở tab SIM phong thủy với ngày giờ sinh, giới tính đang nhập ở đây": "Open the phone-number tab with the birth date, time and gender entered here",
+  "Mở tab Tử vi với ngày giờ sinh, giới tính của chủ SIM": "Open the Horoscope tab with the SIM owner's birth date, time and gender",
+  "Đã chép ngày sinh — nhập số SIM rồi bấm “Chấm điểm SIM”.": "Birth date copied — enter a phone number and press “Score number”.",
+  "Chưa nhập số SIM.": "No phone number entered.", "Số SIM chỉ gồm chữ số (được có dấu cách, chấm, gạch): “{t}”.": "A phone number holds digits only (spaces, dots, dashes allowed): “{t}”.",
+  "Số SIM phải có 10 chữ số, bắt đầu bằng 0 hoặc +84: “{t}”.": "The number must have 10 digits and start with 0 or +84: “{t}”.",
+  "Đã mở SIM từ link.": "Opened the number from the link.", "Chưa có số SIM để chia sẻ.": "No phone number to share yet.",
+  "Đã chấm SIM {sim}: {score}/10 · {verdict}": "Scored {sim}: {score}/10 · {verdict}",
+  "dụng thần": "useful element", "hỷ thần": "favourable element", "kỵ thần": "unfavourable element", "cừu thần": "hostile element", "nhàn thần": "idle element",
+  "Thể Dụng tỷ hòa": "Self and Matter in harmony", "Dụng sinh Thể": "Matter feeds Self", "Thể khắc Dụng": "Self controls Matter", "Thể sinh Dụng": "Self feeds Matter", "Dụng khắc Thể": "Matter attacks Self",
+  "Thể và Dụng cùng hành: mọi việc thuận hòa, dễ thành.": "Self and Matter share an element: things go smoothly and succeed easily.",
+  "Dụng sinh Thể: được giúp đỡ, có lợi — tốt nhất.": "Matter feeds Self: you are helped and gain — the best case.",
+  "Thể khắc Dụng: chủ động nắm được việc, thành công nhưng phải nỗ lực.": "Self controls Matter: you stay in charge and succeed, but with effort.",
+  "Thể sinh Dụng: hao tổn công sức, tiền bạc.": "Self feeds Matter: it drains your energy and money.",
+  "Dụng khắc Thể: bị áp chế, nhiều trở ngại.": "Matter attacks Self: pressure and many obstacles.",
+  "SIM và mệnh cùng hành (bình hòa)": "Number and owner share an element (neutral harmony)", "SIM sinh mệnh (tốt nhất)": "Number feeds the owner (best)",
+  "Mệnh khắc SIM (chế ngự được)": "Owner controls the number (manageable)", "Mệnh sinh SIM (hao tổn)": "Owner feeds the number (draining)", "SIM khắc mệnh (xấu)": "Number attacks the owner (bad)",
+  "Vượng khí": "Prosperous qi", "Sinh khí": "Growing qi", "Thoái khí": "Retreating qi",
+  "Rất tốt": "Excellent", "Chưa hợp": "Poor match",
+  "Lộc phát (68)": "Fortune & prosper (68)", "Phát lộc (86)": "Prosper & fortune (86)", "Thần tài nhỏ (39)": "Small God of Wealth (39)", "Thần tài lớn (79)": "Big God of Wealth (79)",
+  "Ông địa nhỏ (38)": "Small Earth God (38)", "Ông địa lớn (78)": "Big Earth God (78)",
+  "Lục quý {d}": "Six of a kind {d}", "Ngũ quý {d}": "Five of a kind {d}", "Tứ quý {d}": "Four of a kind {d}", "Tam hoa {d}": "Three of a kind {d}",
+  "Sảnh tiến {n} số": "{n}-digit straight", "Taxi {a}.{a}": "Taxi {a}.{a}", "Số lặp {a}": "Repeat {a}", "Số gánh {a}": "Mirror {a}", "Đuôi năm sinh {y}": "Birth-year ending {y}",
+  "Đuôi {a} (dân gian kiêng: “49 chưa qua, 53 đã tới”)": "Ending {a} (folk taboo: “49 not yet passed, 53 already here”)",
+  "Quẻ {no}: {name}": "Hexagram {no}: {name}", "{up} ({ui}) trên {low} ({li})": "{up} ({ui}) over {low} ({li})",
+  "Quẻ chủ — bản chất SIM": "Main hexagram — the number's nature", "Quẻ hỗ — diễn biến": "Nuclear hexagram — how it unfolds", "Quẻ biến — kết cục": "Changed hexagram — the outcome",
+  "Cách gieo: 5 số đầu cộng {a} → {a} mod 8 = {ra} → thượng quái {up}; 5 số cuối cộng {b} → {b} mod 8 = {rb} → hạ quái {low}; tổng {s} mod 6 = {m} → hào {m} động.":
+    "Casting: first 5 digits sum to {a} → {a} mod 8 = {ra} → upper trigram {up}; last 5 digits sum to {b} → {b} mod 8 = {rb} → lower trigram {low}; total {s} mod 6 = {m} → line {m} moves.",
+  "Nhập ngày sinh để xem tứ trụ, dụng thần và chấm thêm 2 tiêu chí hợp mệnh.": "Enter a birth date to see the four pillars, the useful element and 2 more owner-match criteria.",
+  "Nhật chủ {can} ({el}) {state}: hành cùng loại và hành sinh ra nó chiếm {pct}% lực (chi tháng tính gấp đôi).":
+    "Day master {can} ({el}) is {state}: its own and its parent element hold {pct}% of the strength (month branch counted twice).",
+  "vượng": "strong", "nhược": "weak",
+  "Mệnh vượng nên cần hành tiết chế (hành nó sinh ra, hành nó khắc, hành khắc nó); chọn hành yếu nhất trong số đó làm dụng thần.":
+    "A strong chart needs restraining elements (the one it feeds, the one it controls, the one that controls it); the weakest of them is the useful element.",
+  "Mệnh nhược nên cần hành cùng loại hoặc hành sinh ra nó; hành yếu hơn trong hai hành đó là dụng thần.":
+    "A weak chart needs its own element or the one that feeds it; the weaker of the two is the useful element.",
+  "Dụng thần {u}, hỷ thần {h}, kỵ thần {k}. SIM hành {sim} → {role}.": "Useful element {u}, favourable {h}, unfavourable {k}. The number is {sim} → {role}.",
+  "Không có cặp số nào (dãy chỉ gồm số 0 và 5).": "No digit pairs (the number has only 0s and 5s).",
+  "Bỏ qua số 0 và 5 (chỉ làm ẩn hoặc tăng lực), ghép từng cặp số liền nhau: {good}/{n} cặp cát.": "Skip 0 and 5 (they only hide or boost), then pair neighbouring digits: {good}/{n} lucky pairs.",
+  "Đuôi số không thuộc dạng số đẹp hay số kiêng phổ biến.": "The ending is neither a popular lucky pattern nor a taboo.",
+  "Hành nên có": "Elements to have", "Số nên nhiều": "Digits to favour", "Tổng rút gọn nên là": "Digit-sum root to aim for", "Số nên hạn chế": "Digits to limit",
+  "Ưu tiên quẻ chủ Cát/Đại cát, Dụng sinh Thể, âm dương 5/5 hoặc 4/6, nhiều cặp Sinh Khí – Thiên Y – Diên Niên.":
+    "Prefer an auspicious main hexagram, Matter feeding Self, a 5/5 or 4/6 yin-yang split and many Life Generating – Heavenly Doctor – Longevity pairs.",
+  "Quẻ Kinh Dịch (Mai Hoa)": "I Ching hexagrams (Plum Blossom)", "Tứ trụ bát tự & dụng thần": "Four pillars & useful element", "Bát tinh – năng lượng cặp số": "Eight stars — digit-pair energy",
+  "Cửu tinh đồ pháp": "Nine stars", "Ý nghĩa các con số & đuôi số": "Digit meanings & ending", "Gợi ý chọn SIM hợp mệnh": "How to pick a matching number",
+  "Âm dương cân bằng": "Yin-yang balance", "Ngũ hành SIM – bản mệnh": "Number element vs owner", "Bổ khuyết tứ trụ (dụng thần)": "Fills the four pillars' gap (useful element)",
+  "Quẻ chủ Kinh Dịch": "Main I Ching hexagram", "Quẻ hỗ (diễn biến)": "Nuclear hexagram (unfolding)", "Hành quẻ bát quái (Thể – Dụng)": "Trigram elements (Self – Matter)",
+  "Quan niệm dân gian": "Folk beliefs",
+  "Hành SIM = tổng các số rút gọn về 1–9, tra Hậu Thiên bát quái; so với mệnh nạp âm năm sinh.": "Number element = digit sum reduced to 1–9, looked up in the Later Heaven bagua; compared with the owner's Nayin element.",
+  "Tứ trụ giờ – ngày – tháng – năm sinh cho biết hành còn thiếu (dụng thần); SIM mang đúng hành đó là bổ khuyết tốt nhất.":
+    "The hour–day–month–year pillars show which element is lacking (the useful element); a number carrying it fills the gap best.",
+  "Thượng quái = tổng 5 số đầu mod 8, hạ quái = tổng 5 số cuối mod 8 (Mai Hoa Dịch số); quẻ chủ nói về bản chất SIM.":
+    "Upper trigram = first 5 digits mod 8, lower = last 5 digits mod 8 (Plum Blossom numerology); the main hexagram is the number's nature.",
+  "Quẻ hỗ lấy hào 2–4 và 3–5 của quẻ chủ, nói về diễn biến, quá trình sử dụng.": "The nuclear hexagram takes lines 2–4 and 3–5 of the main one and describes how use unfolds.",
+  "Quái có hào động là Dụng (sự việc), quái tĩnh là Thể (người dùng); Dụng sinh Thể hoặc tỷ hòa là tốt.":
+    "The trigram with the moving line is Matter (the affair), the still one is Self (the user); Matter feeding Self or harmony is good.",
+  "Số nút (tổng mod 10, càng cao càng tốt), tỷ lệ cặp số cát theo bát tinh, đuôi số đẹp/kiêng.": "Points (sum mod 10, higher is better), share of lucky pairs by the eight stars, lucky/taboo endings.",
+  "Cần ngày sinh": "Needs a birth date", "{even} số chẵn (âm) · {odd} số lẻ (dương)": "{even} even (yin) · {odd} odd (yang)",
+  "SIM hành {sim} · mệnh {menh} ({el})": "Number {sim} · owner {menh} ({el})", "SIM hành {sim} là {role} · dụng thần {u}, hỷ thần {h}": "Number {sim} is the {role} · useful {u}, favourable {h}",
+  "Thể {the} ({te}) · Dụng {dung} ({de}) — {rel}": "Self {the} ({te}) · Matter {dung} ({de}) — {rel}",
+  "{nut} nút · {good}/{n} cặp số cát": "{nut} points · {good}/{n} lucky pairs", "dương": "yang", "âm": "yin",
+  "{sex} · sinh {date} · tuổi {cc} · mệnh {menh}": "{sex} · born {date} · {cc} year · element {menh}",
+  "Chưa nhập ngày sinh: chỉ chấm các tiêu chí của riêng dãy số, quy về thang 10.": "No birth date: only the number's own criteria are scored, scaled to 10.",
+  "Không rõ nhà mạng": "Unknown carrier", "tổng {sum} · {nut} nút": "sum {sum} · {nut} points", "Chấm điểm 8 tiêu chí": "8-criteria score",
+  "Tổng {total}/{max} điểm → {score}/10.": "Total {total}/{max} points → {score}/10.",
+  "Chấm theo phương pháp phổ biến của các trang xem SIM phong thủy (Kinh Dịch Mai Hoa, ngũ hành, tứ trụ, cửu tinh, dân gian) — chỉ mang tính tham khảo, giải trí.":
+    "Scored with the methods common to Vietnamese feng shui number sites (Plum Blossom I Ching, five elements, four pillars, nine stars, folk beliefs) — for reference and fun only.",
+  "Nhập số SIM (và ngày sinh chủ SIM nếu có) rồi bấm “Chấm điểm SIM”, hoặc chọn một mẫu.": "Enter a phone number (and the owner's birth date if known), then press “Score number”, or pick a sample.",
+  "Không có số vượng/sinh khí": "No prosperous or rising digit",
+  "Tứ trụ bát tự: năm đổi ở Lập xuân, tháng theo tiết khí (có thể khác tab Tử vi, nơi tính theo năm/tháng âm lịch).":
+    "Bazi pillars: the year changes at the Start of Spring and the month follows the solar terms (may differ from the Horoscope tab, which uses the lunar year/month).",
+  "Vận {p} Huyền Không (20 năm/vận, vận 9: 2024–2043): sao {v} {vn} vượng khí, {s} sinh khí, {f} {fn} thoái khí. SIM này: {state}.":
+    "Flying-star period {p} (20 years each, period 9: 2024–2043): star {v} {vn} is prosperous, {s} rising, {f} {fn} retreating. This number: {state}.",
+  "Số chẵn là âm, số lẻ là dương; 5/5 là cân bằng nhất, 6/4 cũng tốt nếu bên nhiều hơn bù cho can năm sinh (can dương cần thêm âm, can âm cần thêm dương).":
+    "Even digits are yin, odd are yang; 5/5 is the best balance, 6/4 is as good when the majority offsets the birth-year stem (a yang stem needs more yin, a yin stem more yang).",
+  "Mỗi số 1–9 ứng một sao Cửu tinh (Lạc Thư); SIM có số của sao đang vượng theo vận Huyền Không (vận 9 → số 9) là tốt nhất, số sinh khí (1, 2) kế tiếp.":
+    "Each digit 1–9 is one of the Nine Stars (Lo Shu); a number holding the digit of the star ruling the current flying-star period (period 9 → 9) is best, rising digits (1, 2) come next.",
+  "Quẻ chủ Hung": "Inauspicious main hexagram",
+  "Điểm bị giới hạn ở {cap}/10: các trang xem SIM đều coi quẻ chủ là yếu tố quyết định, quẻ hung thì không nên dùng dù tiêu chí khác cao.":
+    "Score capped at {cap}/10: number feng shui sites treat the main hexagram as decisive — avoid an inauspicious one however good the rest is.",
+  "can năm dương nên cần nghiêng âm": "yang year stem, so leaning yin is best", "can năm âm nên cần nghiêng dương": "yin year stem, so leaning yang is best",
+  "Vận {p}: số vượng {v} · sinh khí {s} — {state}": "Period {p}: prosperous digit {v} · rising {s} — {state}",
+});
 // English for the shared core modules (ThemePicker markup, SavedSessions, ColFilter) — included by every tool that uses them.
 I18n.add({
   "Thêm thao tác": "More actions",
@@ -1017,7 +1398,7 @@ const LunarCal = (() => {
   const validSolar = (d, m, y) => { const r = jdToDate(jdFromDate(d, m, y)); return r.d === d && r.m === m && r.y === y; };
   const weekday = jd => (jd + 1) % 7;
 
-  return { TZ, MIN_YEAR, MAX_YEAR, jdFromDate, jdToDate, fromJd, toJd, leapMonthOf, validSolar, weekday };
+  return { TZ, MIN_YEAR, MAX_YEAR, jdFromDate, jdToDate, fromJd, toJd, leapMonthOf, validSolar, weekday, newMoon };
 })();
 // Can chi (stems/branches) of year/month/day/hour, nạp âm, ngũ hành and the 24 tiết khí with their start moment.
 const CanChi = (() => {
@@ -1200,6 +1581,24 @@ const Holidays = (() => {
 
   return { of };
 })();
+// Tuần trăng của 1 ngày: tuổi trăng lúc 20h giờ VN (khi trăng hiện rõ) tính từ điểm sóc gần nhất → 8 pha 🌑…🌘.
+const MoonPhase = (() => {
+  const SYNODIC = 29.530588853;
+  const ICON = ["🌑", "🌒", "🌓", "🌔", "🌕", "🌖", "🌗", "🌘"];
+  const NAME = ["Trăng non (sóc)", "Trăng lưỡi liềm đầu tháng", "Bán nguyệt đầu tháng (thượng huyền)", "Trăng khuyết đầu tháng",
+    "Trăng tròn (vọng)", "Trăng khuyết cuối tháng", "Bán nguyệt cuối tháng (hạ huyền)", "Trăng lưỡi liềm cuối tháng"];
+
+  // jd = civil day (integer JD = noon UT); → { idx 0..7, icon, name, age (days) }
+  function of(jd) {
+    const at = jd + (20 - 12 - LunarCal.TZ) / 24;
+    let k = Math.floor((at - 2415021.076998695) / SYNODIC) + 1;
+    while (LunarCal.newMoon(k) > at) k--;
+    const age = at - LunarCal.newMoon(k), idx = Math.round(age / SYNODIC * 8) % 8;
+    return { idx, icon: ICON[idx], name: NAME[idx], age };
+  }
+
+  return { of };
+})();
 // Free-text date → jd: "12/11/2026", "2026-11-12" (dương) or "âm 15/8/2026", "lunar 1/6n/2025" (âm, "n"/"nhuận"/"leap" = tháng nhuận).
 const DateText = (() => {
   const LUNAR_PREFIX = /^(?:âm(?:\s*lịch)?|am(?:\s*lich)?|al|lunar|l)\s*:?\s*/i;
@@ -1208,11 +1607,11 @@ const DateText = (() => {
   const RANGE = { error: "Chỉ hỗ trợ năm {min}–{max}.", params: { min: LunarCal.MIN_YEAR, max: LunarCal.MAX_YEAR } };
   const inRange = jd => jd >= LunarCal.jdFromDate(1, 1, LunarCal.MIN_YEAR) && jd <= LunarCal.jdFromDate(31, 12, LunarCal.MAX_YEAR);
 
-  // → { jd } or { error, params } (error is a Vietnamese i18n key).
-  function parse(text) {
+  // → { jd } or { error, params } (error is a Vietnamese i18n key). opts.lunar: read as lunar even without the "âm" prefix.
+  function parse(text, opts) {
     let s = String(text || "").trim().replace(/\s+/g, " ");
     if (!s) return { error: "Chưa nhập ngày." };
-    const lunar = LUNAR_PREFIX.test(s);
+    const lunar = !!opts?.lunar || LUNAR_PREFIX.test(s);
     s = s.replace(LUNAR_PREFIX, "");
     let d, m, y, leap = false, mm;
     const iso = /^(\d{4})-(\d{1,2})-(\d{1,2})$/.exec(s);
@@ -1243,7 +1642,7 @@ const DateText = (() => {
 
   return { parse, iso };
 })();
-// "Thử mẫu…" / ?demo=<key>: typical dates, a leap month, a term changeover and invalid inputs that must be reported.
+// "Thử mẫu…" / ?demo=<key>: typical dates, a leap month and a solar-term changeover.
 const DEMOS = (() => {
   const LIST = [
     ["tet", "Tết Nguyên Đán 2027", "lunar 1/1/2027"],
@@ -1251,22 +1650,15 @@ const DEMOS = (() => {
     ["leap", "Tháng nhuận (6 nhuận 2025)", "lunar 1/6n/2025"],
     ["solar", "Đổi dương → âm (12/11/2026)", "12/11/2026"],
     ["term", "Ngày giao tiết Lập đông 2026", "2026-11-07"],
-    ["bad-leap", "Lỗi: tháng nhuận không có", "lunar 15/7n/2026"],
-    ["bad-lunar", "Lỗi: ngày 30 của tháng thiếu", "lunar 30/12/2026"],
-    ["bad-solar", "Lỗi: ngày dương không tồn tại", "31/02/2026"],
   ];
   const find = k => LIST.find(x => x[0] === k);
   return { keys: LIST.map(x => x[0]), name: k => find(k)?.[1] ?? k, text: k => find(k)?.[2] ?? null };
 })();
-// "Thử mẫu…" of the Tử vi tab / ?demo=horo-*: fake people covering edge cases (sinh trước Tết, giờ Tý muộn, không rõ giờ, input lỗi).
+// "Thử mẫu…" of the Tử vi tab / ?demo=horo-*: sample births (11/01/1986 falls before Tết ⇒ lunar year Ất Sửu).
 const HORO_DEMOS = (() => {
   const LIST = [
-    ["horo-male", "Nam, có giờ sinh", { name: "Nguyen Van An", male: true, birth: "15/08/1990", time: "07:30" }],
-    ["horo-before-tet", "Nữ, sinh trước Tết", { name: "Tran Thi Mai", male: false, birth: "20/01/1985", time: "14:15" }],
-    ["horo-late-hour", "Sinh giờ Tý muộn (23:40)", { name: "Le Minh Khoa", male: true, birth: "12/11/2000", time: "23:40" }],
-    ["horo-no-hour", "Không rõ giờ sinh", { name: "Pham Thu Ha", male: false, birth: "01/01/2001", time: "" }],
-    ["horo-bad-date", "Lỗi: ngày sinh không tồn tại", { name: "Test User", male: true, birth: "31/02/1995", time: "08:00" }],
-    ["horo-bad-time", "Lỗi: giờ sinh sai", { name: "Test User", male: false, birth: "10/10/1995", time: "25:61" }],
+    ["horo-1986", "Nam, sinh 11/01/1986 lúc 01:30", { name: "", male: true, birth: "11/01/1986", time: "01:30" }],
+    ["horo-2015", "Nam, sinh 25/07/2015 lúc 10:30", { name: "", male: true, birth: "25/07/2015", time: "10:30" }],
   ];
   const find = k => LIST.find(x => x[0] === k);
   return { keys: LIST.map(x => x[0]), name: k => find(k)?.[1] ?? k, data: k => find(k)?.[2] ?? null };
@@ -1537,6 +1929,7 @@ const MonthGrid = (() => {
   const WEEK = ["T2", "T3", "T4", "T5", "T6", "T7", "CN"];
   const esc = s => Dom.esc(s);
 
+  const moon = jd => { const m = MoonPhase.of(jd); return `<i class="moon" title="${esc(T(m.name))}">${m.icon}</i>`; };
   const lunarLabel = l => l.d === 1 ? `${l.d}/${l.m}${l.leap ? T("n") : ""}` : String(l.d);
 
   // Facts for one day used by both the cell and the event list.
@@ -1553,11 +1946,11 @@ const MonthGrid = (() => {
     const title = T("Âm {d}/{m}/{y}", { d: l.d, m: l.m + (l.leap ? T("n") : ""), y: l.y }) + " · " + T(CanChi.CAN[info.p.can]) + " " + T(CanChi.CHI[info.p.chi])
       + " · " + T(god.name) + " (" + T(god.good ? "hoàng đạo" : "hắc đạo") + ")" + hol.map(h => " · " + T(h.name)).join("");
     return `<button type="button" class="${cls}" data-jd="${jd}" data-pane-go="1" tabindex="${jd === o.sel ? 0 : -1}" title="${esc(title)}" aria-pressed="${jd === o.sel}">`
-      + `<span class="sd">${s.d}</span><span class="ld">${esc(lunarLabel(l))}</span>${god.good ? '<i class="dot" aria-hidden="true"></i>' : ""}`
+      + `<span class="sd">${s.d}</span><span class="ld">${o.moon ? moon(jd) : ""}${esc(lunarLabel(l))}</span>${god.good ? '<i class="dot" aria-hidden="true"></i>' : ""}`
       + `<span class="ev${hol.length ? " hol" : term ? " term" : ""}">${esc(ev)}</span></button>`;
   }
 
-  // o: { y, m, sel, today, cc } → { html, events, lunarFrom, lunarTo }
+  // o: { y, m, sel, today, cc, moon } → { html, events, lunarFrom, lunarTo }
   function build(o) {
     const first = LunarCal.jdFromDate(1, o.m, o.y), days = LunarCal.jdFromDate(1, o.m % 12 + 1, o.y + (o.m === 12 ? 1 : 0)) - first;
     const lead = (LunarCal.weekday(first) + 6) % 7, total = Math.ceil((lead + days) / 7) * 7, events = [];
@@ -1584,6 +1977,7 @@ const DayDetail = (() => {
   const tag = (text, cls = "") => `<span class="tag ${cls}">${esc(text)}</span>`;
   const verdict = good => tag(T(good ? "tốt" : "xấu"), good ? "good" : "bad");
   const row = (label, value) => `<dt>${esc(T(label))}</dt><dd>${value}</dd>`;
+  const moonRow = m => esc(m.icon + " " + T(m.name)) + ` <small class="muted">${esc(T("tuổi trăng {a} ngày (lúc 20h)", { a: I18n.num(Math.round(m.age * 10) / 10) }))}</small>`;
   const pad = n => String(n).padStart(2, "0");
   const dmy = s => pad(s.d) + "/" + pad(s.m) + "/" + s.y;
 
@@ -1636,6 +2030,7 @@ const DayDetail = (() => {
       + row("Ngũ hành ngày", esc(T(rel.rule) + " (" + T(rel.canEl) + " – " + T(rel.chiEl) + "): " + T(rel.label)))
       + row("Tiết khí", esc(T(term.name)) + ` <small class="muted">${esc(T("từ {a} đến {b}", { a: moment(term.start), b: moment(term.end) }))}</small>`
         + (term.next ? " " + tag(T("{name} bắt đầu hôm nay", { name: T(term.next.name) }), "term") : ""))
+      + row("Tuần trăng", moonRow(MoonPhase.of(jd)))
       + `</dl></section><section><h3>${esc(T("Ngày tốt xấu"))}</h3><dl>`
       + row("Giờ hoàng đạo", hoang)
       + row("Trực", esc(T(truc.name)) + `<br><small><b>${esc(T("Nên:"))}</b> ${esc(T(truc.good))}<br><b>${esc(T("Kỵ:"))}</b> ${esc(T(truc.bad))}</small>`)
@@ -1718,10 +2113,22 @@ const HoroProfile = (() => {
   function balance(c) {
     const b = NatalExtra.elementBalance(c.pillars), max = Math.max(...b.counts) || 1;
     const bars = b.counts.map((n, i) => `<div class="el-row"><span>${esc(el(i))}</span><span class="el-bar"><i class="el-${i}" style="width:${Math.round(n / max * 100)}%"></i></span><b>${n}</b></div>`).join("");
-    const advice = b.missing.map(i => T("Thiếu hành {el}: nên bổ sung bằng màu {colors}, hướng {dirs}.", { el: el(i), colors: T(BirthChart.COLORS[i]), dirs: T(HoroDetail.ELEMENT[i].dirs) }));
+    const fix = i => T("Cách bổ sung: màu {colors}, hướng {dirs}.", { colors: T(BirthChart.COLORS[i]), dirs: T(HoroDetail.ELEMENT[i].dirs) });
     const summary = T("Hành vượng: {strong}.", { strong: b.strong.map(el).join(", ") }) + " " + (b.missing.length ? "" : T("Đủ cả 5 hành — ngũ hành khá cân bằng."));
-    return `<div class="el-chart">${bars}</div>` + para(summary) + advice.map(para).join("");
+    const strong = b.strong.map(i => T(NatalExplain.STRONG[i])), weak = b.missing.map(i => T(NatalExplain.WEAK[i]) + " " + fix(i));
+    return `<div class="el-chart">${bars}</div>` + para(summary) + strong.concat(weak).map(para).join("");
   }
+
+  // Short portrait combining age, nạp âm imagery, day master and kua.
+  function portrait(c, yp, dm, name) {
+    return para(T("{who} tuổi {cc} ({animal}), mệnh {na} thuộc hành {el}, nhật chủ {dm}, cung mệnh {kua} ({group} tứ mệnh).", { who: name || T("Bạn"),
+      cc: cc(yp), animal: T(HoroDetail.ANIMAL_NAME[yp.chi]), na: T(c.napAm), el: el(c.el), dm: T(CanChi.CAN[dm.can]), kua: T(c.kua.name), group: T(c.kua.group) }))
+      + para(T("Hình tượng mệnh: {text}", { text: T(NatalExplain.NAP_AM[CanChi.NAP_AM.indexOf(c.napAm)]) }));
+  }
+
+  const PILLARS = ["Năm", "Tháng", "Ngày", "Giờ"];
+  const pillarMeaning = () => `<ul class="arrows">${PILLARS.map((k, i) => `<li><b>${esc(T("Trụ {k}", { k: T(k) }))}</b>: ${esc(T(NatalExplain.PILLAR[i]))}</li>`).join("")}</ul>`;
+  const compatRow = (names, key) => esc(names) + `<br><small class="muted">${esc(T(NatalExplain.COMPAT[key]))}</small>`;
 
   function birthGrid(birth) {
     const g = NatalExtra.birthGrid(birth), order = [3, 6, 9, 2, 5, 8, 1, 4, 7];
@@ -1750,14 +2157,15 @@ const HoroProfile = (() => {
 
     box.innerHTML = `<div class="horo-hero"><b>${esc(name || T("(chưa nhập tên)"))}</b><span>${esc(sub)}</span>` + notes.map(x => `<small class="muted">${esc(x)}</small>`).join("") + `</div>`
       + det(T("Tổng quan"), dl([["Tuổi", esc(cc(yp) + " · " + T(HoroDetail.ANIMAL_NAME[yp.chi]))], ["Mệnh", esc(T(c.napAm) + " (" + el(c.el) + ")")],
-        ["Cung hoàng đạo", esc(z.sym + " " + T(z.name))], ["Nhật chủ", esc(T(CanChi.CAN[dm.can]))], ["Cung mệnh", esc(T(c.kua.name))], ["Số chủ đạo", numLine(num.lifePath, HoroText.NUMBER[num.lifePath])]]), true)
+        ["Cung hoàng đạo", esc(z.sym + " " + T(z.name))], ["Nhật chủ", esc(T(CanChi.CAN[dm.can]))], ["Cung mệnh", esc(T(c.kua.name))], ["Số chủ đạo", numLine(num.lifePath, HoroText.NUMBER[num.lifePath])]]) + portrait(c, yp, dm, name), true)
       + det(T("Tứ trụ & cân bằng ngũ hành"), `<table class="hours"><thead><tr><th>${esc(T("Trụ"))}</th><th>${esc(T("Can chi"))}</th><th>${esc(T("Can / Chi"))}</th><th>${esc(T("Nạp âm"))}</th></tr></thead><tbody>${pillarRows}</tbody></table>`
-        + balance(c) + para(T("Nhật chủ (can ngày sinh) {can}: {text}", { can: T(CanChi.CAN[dm.can]), text: T(HoroDetail.DAY_MASTER[dm.can]) })), true)
-      + det(T("Mệnh {name} ({el})", { name: T(c.napAm), el: el(c.el) }), dl([["Tính cách", esc(T(HoroText.ELEMENT[c.el]))], ["Điểm mạnh", esc(T(ed.strengths))], ["Điểm yếu", esc(T(ed.weaknesses))],
+        + pillarMeaning() + balance(c) + para(T("Nhật chủ (can ngày sinh) {can}: {text}", { can: T(CanChi.CAN[dm.can]), text: T(HoroDetail.DAY_MASTER[dm.can]) })), true)
+      + det(T("Mệnh {name} ({el})", { name: T(c.napAm), el: el(c.el) }), para(T(NatalExplain.NAP_AM[CanChi.NAP_AM.indexOf(c.napAm)])) + dl([["Tính cách", esc(T(HoroText.ELEMENT[c.el]))], ["Điểm mạnh", esc(T(ed.strengths))], ["Điểm yếu", esc(T(ed.weaknesses))],
         ["Nghề hợp", esc(T(ed.careers))], ["Sức khỏe cần chú ý", esc(T(ed.health))], ["Hướng hợp", esc(T(ed.dirs))],
         ["Màu hợp", esc(c.colors.good.map(x => T(x)).join(" · "))], ["Màu kỵ", esc(T(c.colors.bad))], ["Số hợp", esc(c.numbers.join(", "))]]), true)
       + det(T("Tuổi {animal} (12 con giáp)", { animal: T(CanChi.CHI[yp.chi]) }), para(T(animal.traits)) + para(T(animal.advice))
-        + dl([["Tam hợp", esc(c.compat.tamHop.map(chi).join(", "))], ["Lục hợp", esc(chi(c.compat.lucHop))], ["Xung", esc(chi(c.compat.xung))], ["Hại", esc(chi(c.compat.hai))]]))
+        + dl([["Tam hợp", compatRow(c.compat.tamHop.map(chi).join(", "), "tamHop")], ["Lục hợp", compatRow(chi(c.compat.lucHop), "lucHop")],
+          ["Xung", compatRow(chi(c.compat.xung), "xung")], ["Hại", compatRow(chi(c.compat.hai), "hai")]]))
       + det(T("Cung hoàng đạo: {name}", { name: z.sym + " " + T(z.name) }), dl([["Ngày", esc(z.dates)], ["Nguyên tố", esc(T(zEl))], ["Tính chất", esc(T(zMode))], ["Hành tinh chủ quản", esc(T(z.planet))],
         ["Tính cách", esc(T(z.traits))], ["Điểm mạnh", esc(T(z.strengths))], ["Điểm yếu", esc(T(z.weaknesses))], ["Tình yêu", esc(T(z.love))], ["Sự nghiệp", esc(T(z.career))],
         ["Hợp nhất", esc(best.join(", "))], ["Cũng hợp", esc(good.join(", "))]]))
@@ -1765,6 +2173,7 @@ const HoroProfile = (() => {
         ["Nhị thập bát tú", esc(T(star.name)) + " " + tag(star.good ? T("tốt") : T("xấu"), star.good ? "good" : "bad")], ["Tiết khí", esc(T(term.name))]])
         + para(T(god.good ? "Sinh ngày hoàng đạo: dân gian cho là được phù trợ, gặp nhiều thuận lợi." : "Sinh ngày hắc đạo: dân gian khuyên sống cẩn trọng, chăm tu dưỡng để hóa giải.")))
       + det(T("Phong thủy bát trạch"), para(T("Cung mệnh {name} ({el}) — {group} tứ mệnh", { name: T(c.kua.name), el: T(c.kua.el), group: T(c.kua.group) }))
+        + para(T(NatalExplain.KUA_GROUP[c.kua.group]))
         + para(T("Nên chọn hướng nhà, bàn làm việc, đầu giường theo 4 hướng tốt; tránh 4 hướng xấu.")) + dirs)
       + det(T("Thần số học"), dl([["Số chủ đạo", numLine(num.lifePath, HoroText.NUMBER[num.lifePath]) + "<br><small>" + esc(T(HoroText.LIFE_PATH[num.lifePath])) + "</small>"],
         ["Nghề hợp", esc(T(HoroDetail.CAREER[num.lifePath]))], ["Số ngày sinh", numLine(num.birthDay, HoroText.NUMBER[num.birthDay])],
@@ -1776,6 +2185,40 @@ const HoroProfile = (() => {
   }
 
   return { render };
+})();
+// Ngày sinh: nút 📅 mở bộ chọn ngày của trình duyệt, ghi lại theo radio dương/âm; giờ sinh: datalist 24 mốc giờ kèm canh giờ. Ô gõ tay vẫn giữ nguyên.
+const BirthPickers = (() => {
+  const pad = n => String(n).padStart(2, "0");
+  const iso = jd => { const s = LunarCal.jdToDate(jd); return `${s.y}-${pad(s.m)}-${pad(s.d)}`; };
+  const lunarText = jd => { const l = LunarCal.fromJd(jd); return `${pad(l.d)}/${pad(l.m)}${l.leap ? "n" : ""}/${l.y}`; };
+
+  function fillHours() {
+    $("birthHours").innerHTML = Array.from({ length: 24 }, (_, h) =>
+      `<option value="${pad(h)}:00">${Dom.esc(T("giờ {chi}", { chi: T(CanChi.CHI[Math.floor((h + 1) / 2) % 12]) }))}</option>`).join("");
+  }
+
+  // ids: { text, pick, lunar } (element ids); today: jd; onPick(): called after the text box is filled.
+  function attach({ text, pick, lunar }, today, onPick) {
+    const box = $(text), picker = $(pick);
+    fillHours();
+    picker.min = `${LunarCal.MIN_YEAR}-01-01`;
+    picker.max = iso(today);
+    // Opens on the date already typed (read with the selected calendar), else on today.
+    const sync = () => { const r = DateText.parse(box.value, { lunar: $(lunar).checked }); picker.value = r.jd && r.jd <= today ? iso(r.jd) : ""; };
+    picker.addEventListener("pointerdown", sync);
+    picker.addEventListener("click", () => { try { picker.showPicker(); } catch { /* the native tap already opens it */ } });
+    picker.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { sync(); try { picker.showPicker(); } catch { /* unsupported */ } } });
+    picker.addEventListener("change", () => {
+      if (!picker.value) return;
+      const [y, m, d] = picker.value.split("-").map(Number), jd = LunarCal.jdFromDate(d, m, y);
+      box.value = $(lunar).checked ? lunarText(jd) : `${pad(d)}/${pad(m)}/${y}`;
+      box.classList.remove("bad");
+      onPick();
+    });
+  }
+
+  I18n.onChange(fillHours);
+  return { attach, fillHours };
 })();
 // Tab Tử vi: đọc ô nhập (tên, giới tính, ngày/giờ sinh, năm xem), kiểm lỗi, dựng 2 pane; snapshot/open cho link chia sẻ.
 const HoroApp = (() => {
@@ -1793,7 +2236,7 @@ const HoroApp = (() => {
 
   function read() {
     const name = $("hName").value.trim().slice(0, MAX_NAME), male = $("hSex").value !== "f", year = +$("hYear").value;
-    const b = DateText.parse($("hBirth").value);
+    const b = DateText.parse($("hBirth").value, { lunar: $("hLunar").checked });
     if (b.error) return { error: b.error, params: b.params, field: "hBirth" };
     if (b.jd > deps.today) return { error: "Ngày sinh không được sau hôm nay.", field: "hBirth" };
     const t = parseTime($("hTime").value);
@@ -1825,11 +2268,18 @@ const HoroApp = (() => {
     $("hSex").value = p.male === false ? "f" : "m";
     $("hBirth").value = typeof p.birth === "string" ? p.birth : "";
     $("hTime").value = typeof p.time === "string" ? p.time : "";
+    $(p.lunar === true ? "hLunar" : "hSolar").checked = true;
     if (Number.isInteger(p.year) && p.year >= LunarCal.MIN_YEAR && p.year <= LunarCal.MAX_YEAR) $("hYear").value = p.year;
   }
 
   // Payload is untrusted: only known string/boolean/integer fields are copied into the inputs.
   function open(p) { deps.tab("horo"); fill(p); const ok = run(); PhoneLayout.show(0); return ok; }
+
+  // From another tab: b = { birth, lunar?, time?, male? } replaces only those fields (name and year stay), then reads.
+  function useBirth(b) {
+    if (!b.birth) { deps.tab("horo"); return; }
+    open({ ...snapshot(), ...b });
+  }
 
   function demo(key) {
     const p = HORO_DEMOS.data(key);
@@ -1839,7 +2289,7 @@ const HoroApp = (() => {
     return true;
   }
 
-  const snapshot = () => ({ tab: "horo", name: $("hName").value.trim(), male: $("hSex").value !== "f", birth: $("hBirth").value.trim(), time: $("hTime").value.trim(), year: +$("hYear").value });
+  const snapshot = () => ({ tab: "horo", name: $("hName").value.trim(), male: $("hSex").value !== "f", birth: $("hBirth").value.trim(), lunar: $("hLunar").checked, time: $("hTime").value.trim(), year: +$("hYear").value });
 
   function fillSelects() {
     $("horoDemo").innerHTML = `<option value="">${Dom.esc(T("Thử mẫu…"))}</option>` + HORO_DEMOS.keys.map(k => `<option value="${k}">${Dom.esc(T(HORO_DEMOS.name(k)))}</option>`).join("");
@@ -1857,26 +2307,541 @@ const HoroApp = (() => {
       $("hYear").value = LunarCal.fromJd(d.today).y;
     }
     $("hGo").onclick = run;
+    BirthPickers.attach({ text: "hBirth", pick: "hBirthPick", lunar: "hLunar" }, d.today, run);
     for (const id of ["hName", "hBirth", "hTime"]) $(id).onkeydown = e => { if (e.key === "Enter") { e.preventDefault(); run(); } };
     $("hYear").onchange = () => { if (ctx) run(); };
+    for (const id of ["hSolar", "hLunar"]) $(id).onchange = () => { if ($("hBirth").value.trim()) run(); };
     render();
     $("horoDemo").onchange = e => { const k = e.target.value; e.target.value = ""; if (k) demo(k); };
   }
 
   function relabel() { const sex = $("hSex").value; fillSelects(); $("hSex").value = sex; render(); }
 
-  return { init, open, demo, snapshot, relabel };
+  return { init, open, demo, snapshot, relabel, parseTime, useBirth };
 })();
-// App wiring: tabs Lịch | Tử vi, month navigation, date box (dương/âm), keyboard, share link #pako: / ?data= / ?demo=, theme, VI|EN.
+// "Thử mẫu…" of the SIM phong thủy tab / ?demo=sim-*: sample numbers + fake owners, incl. a lunar birth date, +84 input and no birth date.
+const SIM_DEMOS = (() => {
+  const LIST = [
+    ["sim-sequence", "Sảnh tiến 345678 · nam 1990", { sim: "0912 345 678", male: true, birth: "15/08/1990", time: "07:30" }],
+    ["sim-loc-phat", "Đuôi lộc phát 6868 · nữ sinh trước Tết", { sim: "0938.11.6868", male: false, birth: "20/01/1985", time: "14:15" }],
+    ["sim-than-tai", "Thần tài 3979 · không rõ giờ sinh", { sim: "0362 573 979", male: true, birth: "12/11/2000", time: "" }],
+    ["sim-lunar-birth", "Ngày sinh âm lịch (15/8/1990)", { sim: "0979 397 939", male: false, birth: "15/08/1990", lunar: true, time: "09:00" }],
+    ["sim-no-birth", "Chỉ chấm số (+84, không ngày sinh)", { sim: "+84 707 123 456", male: true, birth: "", time: "" }],
+  ];
+  const find = k => LIST.find(x => x[0] === k);
+  return { keys: LIST.map(x => x[0]), name: k => find(k)?.[1] ?? k, data: k => find(k)?.[2] ?? null };
+})();
+// Số SIM: chuẩn hóa (+84 → 0), nhà mạng, ngũ hành từng số, tổng → số nút + hành SIM (Hậu Thiên), bát tinh cặp số, đuôi số theo dân gian.
+const SimNumber = (() => {
+  // Hậu Thiên / Lạc Thư: 1 Khảm Thủy, 2 Khôn Thổ, 3–4 Chấn Tốn Mộc, 5 Trung cung Thổ, 6–7 Càn Đoài Kim, 8 Cấn Thổ, 9 Ly Hỏa; 0 theo dân gian là Thủy.
+  const DIGIT_EL = [1, 1, 4, 2, 2, 4, 0, 0, 4, 3];
+  const CARRIERS = [["Viettel", "32 33 34 35 36 37 38 39 86 96 97 98"], ["Vinaphone", "81 82 83 84 85 88 91 94"], ["MobiFone", "70 76 77 78 79 89 90 93"],
+    ["Vietnamobile", "52 56 58 92"], ["Gmobile", "59 99"], ["Itelecom", "87"], ["Reddi", "55"]].map(([name, list]) => [name, list.split(" ")]);
+  const ENDINGS = [["68", "Lộc phát (68)"], ["86", "Phát lộc (86)"], ["39", "Thần tài nhỏ (39)"], ["79", "Thần tài lớn (79)"], ["38", "Ông địa nhỏ (38)"], ["78", "Ông địa lớn (78)"]];
+
+  function parse(text) {
+    const raw = String(text || "").trim().slice(0, 40);
+    if (!raw) return { error: "Chưa nhập số SIM." };
+    if (/[^\d\s.+()-]/.test(raw)) return { error: "Số SIM chỉ gồm chữ số (được có dấu cách, chấm, gạch): “{t}”.", params: { t: raw } };
+    let d = raw.replace(/\D/g, "");
+    if (d.length === 11 && d.startsWith("84")) d = "0" + d.slice(2);
+    if (!/^0\d{9}$/.test(d)) return { error: "Số SIM phải có 10 chữ số, bắt đầu bằng 0 hoặc +84: “{t}”.", params: { t: raw } };
+    return { text: d, digits: [...d].map(Number) };
+  }
+
+  const carrier = text => CARRIERS.find(([, list]) => list.includes(text.slice(1, 3)))?.[0] || "";
+  const pretty = text => text.slice(0, 4) + " " + text.slice(4, 7) + " " + text.slice(7);
+  const sum = digits => digits.reduce((a, b) => a + b, 0);
+  const root = n => n ? 1 + (n - 1) % 9 : 0;
+  const nut = digits => sum(digits) % 10 || 10;
+
+  // Bát tinh: 0 and 5 do not form a star (they only hide / boost it), so they are skipped before pairing.
+  function pairs(digits) {
+    const d = digits.filter(x => x !== 0 && x !== 5), out = [];
+    for (let i = 1; i < d.length; i++) {
+      const pair = "" + d[i - 1] + d[i];
+      out.push({ pair, star: SimText.STAR8.find(s => s.pairs.includes(pair)) });
+    }
+    return out;
+  }
+
+  // Tail patterns people pay for (tứ quý, tam hoa, sảnh, taxi, lộc phát, thần tài…) and the ones they avoid (49, 53).
+  function folk(text) {
+    const tags = [], tail = n => text.slice(-n);
+    let same = 1;
+    while (same < 9 && text[9 - same] === text[9]) same++;
+    if (same >= 4) tags.push({ key: same >= 6 ? "Lục quý {d}" : same === 5 ? "Ngũ quý {d}" : "Tứ quý {d}", params: { d: text[9] }, good: true });
+    else if (same === 3) tags.push({ key: "Tam hoa {d}", params: { d: text[9] }, good: true });
+    let run = 1;
+    while (run < 9 && +text[9 - run] === +text[10 - run] - 1) run++;
+    if (run >= 3) tags.push({ key: "Sảnh tiến {n} số", params: { n: run }, good: true });
+    if (tail(6).slice(0, 3) === tail(3) && same < 3) tags.push({ key: "Taxi {a}.{a}", params: { a: tail(3) }, good: true });
+    else if (text[6] === text[8] && text[7] === text[9] && text[6] !== text[7]) tags.push({ key: "Số lặp {a}", params: { a: tail(4) }, good: true });
+    else if (text[6] === text[9] && text[7] === text[8] && text[6] !== text[7]) tags.push({ key: "Số gánh {a}", params: { a: tail(4) }, good: true });
+    const end = ENDINGS.find(([e]) => tail(2) === e);
+    if (end) tags.push({ key: end[1], params: {}, good: true });
+    if (+tail(4) >= 1950 && +tail(4) <= 2030) tags.push({ key: "Đuôi năm sinh {y}", params: { y: tail(4) }, good: true });
+    if (tail(2) === "49" || tail(2) === "53") tags.push({ key: "Đuôi {a} (dân gian kiêng: “49 chưa qua, 53 đã tới”)", params: { a: tail(2) }, good: false });
+    return { tags, ending: tags.some(t => !t.good) ? "bad" : tags.length ? "good" : "" };
+  }
+
+  return { DIGIT_EL, parse, carrier, pretty, sum, root, nut, pairs, folk, elementOf: n => DIGIT_EL[root(n)] };
+})();
+// Gieo quẻ Mai Hoa cho số SIM: thượng quái = tổng nửa đầu mod 8, hạ quái = tổng nửa sau mod 8 (Tiên thiên, 0 → Khôn), hào động = tổng mod 6; quẻ hỗ, quẻ biến, Thể – Dụng.
+const SimHexagram = (() => {
+  const tri = n => n % 8 || 8;
+  // Tiên thiên t → lines bottom→top (1 = dương): Càn 111, Đoài 110, Ly 101, Chấn 100, Tốn 011, Khảm 010, Cấn 001, Khôn 000.
+  const linesOf = t => { const b = 8 - t; return [(b >> 2) & 1, (b >> 1) & 1, b & 1]; };
+  const fromLines = l => 8 - (l[0] * 4 + l[1] * 2 + l[2]);
+  const byPair = new Map(SimText.HEX.map(h => [h.up * 10 + h.low, h]));
+
+  const make = (up, low) => ({ ...byPair.get(up * 10 + low), upper: SimText.TRIGRAM[up], lower: SimText.TRIGRAM[low], lines: [...linesOf(low), ...linesOf(up)] });
+  const fromSix = l => make(fromLines(l.slice(3)), fromLines(l.slice(0, 3)));
+
+  // Thể = quái tĩnh (chủ thể), Dụng = quái có hào động (sự việc); k = mức tốt 0…1.
+  function relation(dung, the) {
+    if (dung === the) return { key: "Thể Dụng tỷ hòa", k: 1 };
+    if (CanChi.generates(dung, the)) return { key: "Dụng sinh Thể", k: 1 };
+    if (CanChi.overcomes(the, dung)) return { key: "Thể khắc Dụng", k: 0.75 };
+    if (CanChi.generates(the, dung)) return { key: "Thể sinh Dụng", k: 0.25 };
+    return { key: "Dụng khắc Thể", k: 0 };
+  }
+
+  function cast(digits) {
+    const half = digits.length >> 1, add = arr => arr.reduce((a, b) => a + b, 0);
+    const sumUp = add(digits.slice(0, half)), sumLow = add(digits.slice(half)), total = sumUp + sumLow;
+    const main = make(tri(sumUp), tri(sumLow)), moving = total % 6 || 6, l = main.lines;
+    const mutual = fromSix([l[1], l[2], l[3], l[2], l[3], l[4]]);
+    const changed = fromSix(l.map((x, i) => i === moving - 1 ? 1 - x : x));
+    const dungLower = moving <= 3, the = dungLower ? main.upper : main.lower, dung = dungLower ? main.lower : main.upper;
+    return { sumUp, sumLow, total, main, mutual, changed, moving, the, dung, rel: relation(dung.el, the.el) };
+  }
+
+  return { cast };
+})();
+// Tứ trụ bát tự (Lập xuân / tiết khí) → lực ngũ hành (can 1 điểm, chi chia theo tàng can 1 · 0.7/0.3 · 0.6/0.3/0.1), nhật chủ vượng/nhược, dụng thần – hỷ – kỵ thần để chọn hành SIM bổ khuyết.
+const BaziUseful = (() => {
+  // Tàng can [can, weight] per chi, main stem first (Tý … Hợi).
+  const HIDDEN = [[[9, 1]], [[5, .6], [9, .3], [7, .1]], [[0, .6], [2, .3], [4, .1]], [[1, 1]], [[4, .6], [1, .3], [9, .1]], [[2, .6], [4, .3], [6, .1]],
+    [[3, .7], [5, .3]], [[5, .6], [3, .3], [1, .1]], [[6, .6], [8, .3], [4, .1]], [[7, 1]], [[4, .6], [7, .3], [3, .1]], [[8, .7], [0, .3]]];
+  const ROLE_K = { "dụng thần": 1, "hỷ thần": 0.75, "nhàn thần": 0.4, "cừu thần": 0.2, "kỵ thần": 0 };
+  const STRONG_AT = 0.45;
+
+  const addChi = (s, chi, f = 1) => { for (const [c, w] of HIDDEN[chi]) s[CanChi.CAN_EL[c]] += w * f; };
+
+  // Bát tự: năm đổi ở Lập xuân, tháng theo tiết khí lúc sinh (can tháng theo Ngũ Hổ Độn); ngày + giờ lấy từ BirthChart. t = { hour, minute } | null (≈ 12:00).
+  function solarPillars(chart, t) {
+    const at = chart.jd - 0.5 + (t ? t.hour + t.minute / 60 : 12) / 24, st = CanChi.solarTerm(chart.jd);
+    const idx = at >= st.end ? (st.idx + 1) % 24 : st.idx, s = LunarCal.jdToDate(chart.jd);
+    // Đông chí / Tiểu hàn / Đại hàn in Jan–Feb still belong to the previous bát tự year.
+    const year = CanChi.year(s.y - (s.m <= 2 && idx >= 18 && idx <= 20 ? 1 : 0)), chi = CanChi.termMonthChi(idx);
+    const month = CanChi.pair(((year.can % 5) * 2 + 2 + (chi + 10) % 12) % 10, chi);
+    return { year, month, day: chart.pillars.day, hour: chart.pillars.hour };
+  }
+
+  function strengths(pillars) {
+    const s = [0, 0, 0, 0, 0];
+    for (const p of [pillars.year, pillars.month, pillars.day, pillars.hour]) {
+      if (!p) continue;
+      s[CanChi.CAN_EL[p.can]] += 1;
+      addChi(s, p.chi);
+    }
+    return s.map(x => Math.round(x * 10) / 10);
+  }
+
+  function analyze(pillars) {
+    const s = strengths(pillars), E = CanChi.CAN_EL[pillars.day.can];
+    const gen = (E + 4) % 5, drain = (E + 1) % 5, wealth = (E + 2) % 5, officer = (E + 3) % 5;
+    // Lệnh tháng: the month branch counts twice when judging the day master's strength.
+    const w = s.slice();
+    addChi(w, pillars.month.chi);
+    const total = w.reduce((a, b) => a + b, 0), ratio = (w[E] + w[gen]) / total, strong = ratio >= STRONG_AT;
+    // Among the helpful elements the scarcer one is the dụng thần (what the SIM should supply).
+    const scarce = (a, b) => s[a] - s[b] || a - b, role = [];
+    if (strong) { const [u, h, n] = [drain, wealth, officer].sort(scarce); Object.assign(role, { [u]: "dụng thần", [h]: "hỷ thần", [n]: "nhàn thần", [gen]: "kỵ thần", [E]: "cừu thần" }); }
+    else { const [u, h] = [E, gen].sort(scarce); Object.assign(role, { [u]: "dụng thần", [h]: "hỷ thần", [officer]: "kỵ thần", [wealth]: "cừu thần", [drain]: "nhàn thần" }); }
+    return { pillars, strengths: s, dayEl: E, ratio, strong, role, useful: role.indexOf("dụng thần"), favor: role.indexOf("hỷ thần"), avoid: role.indexOf("kỵ thần") };
+  }
+
+  return { analyze, solarPillars, ROLE_K };
+})();
+// Chấm điểm SIM phong thủy thang 10 qua 8 tiêu chí (nhóm Âm dương 2 · Ngũ hành 3 · Kinh Dịch 3 · Cửu tinh 1 · Dân gian 1); tiêu chí cần ngày sinh bỏ qua khi không có, điểm quy đổi theo phần còn lại.
+const SimScore = (() => {
+  const RATING_K = { "Đại cát": 1, "Cát": 0.75, "Bình": 0.5, "Hung": 0 };
+  const r2 = x => Math.round(x * 100) / 100, HUNG_CAP = 4.9;
+
+  // a, b: element indexes (CanChi.ELEMENTS); SIM is judged by what it does to the owner's mệnh.
+  function natal(sim, menh) {
+    if (sim === menh) return { key: "SIM và mệnh cùng hành (bình hòa)", k: 0.75 };
+    if (CanChi.generates(sim, menh)) return { key: "SIM sinh mệnh (tốt nhất)", k: 1 };
+    if (CanChi.overcomes(menh, sim)) return { key: "Mệnh khắc SIM (chế ngự được)", k: 0.5 };
+    if (CanChi.generates(menh, sim)) return { key: "Mệnh sinh SIM (hao tổn)", k: 0.25 };
+    return { key: "SIM khắc mệnh (xấu)", k: 0 };
+  }
+
+  // Huyền Không: 20-year periods, vận 1 = 1864–1883 (vận 9 = 2024–2043). Scored by which star digits the number contains.
+  const period = year => ((Math.floor((year - 1864) / 20) % 9) + 9) % 9 + 1;
+  function nineStar(digits, year) {
+    const p = period(year), star = d => (p + d - 1) % 9 + 1, has = d => digits.includes(star(d));
+    const live = [star(1), star(2)].filter(d => digits.includes(d));
+    const [key, k] = has(0) ? ["Vượng khí", 1] : live.length ? ["Sinh khí", 0.6] : has(8) ? ["Thoái khí", 0.4] : ["Không có số vượng/sinh khí", 0];
+    return { period: p, end: 1864 + 20 * Math.floor((year - 1864) / 20) + 19, prosper: star(0), rising: [star(1), star(2)], fading: star(8), key, k };
+  }
+
+  // 5:5 is best; 6:4 is just as good when the majority balances the owner's year stem (can dương needs more even = âm digits, can âm more odd).
+  function yinYang(digits, yearCan) {
+    const even = digits.filter(d => d % 2 === 0).length, odd = digits.length - even, diff = Math.abs(even - odd);
+    const wantEven = yearCan === undefined ? null : yearCan % 2 === 0, balances = wantEven !== null && (even > odd) === wantEven;
+    return { even, odd, wantEven, k: diff === 0 || (diff === 2 && balances) ? 1 : diff === 2 ? 0.75 : diff === 4 ? 0.5 : 0 };
+  }
+
+  // input: { digits, text, chart|null, pillars|null (bát tự), year } → { criteria[], total, max, score, verdict, … }
+  function evaluate({ digits, text, chart, pillars, year }) {
+    const sum = SimNumber.sum(digits), el = SimNumber.elementOf(sum), hex = SimHexagram.cast(digits);
+    const pairs = SimNumber.pairs(digits), folk = SimNumber.folk(text), nut = SimNumber.nut(digits);
+    const bazi = pillars ? BaziUseful.analyze(pillars) : null;
+    const goodPairs = pairs.filter(p => p.star.good).length;
+    const folkK = 0.4 * nut / 10 + 0.4 * (pairs.length ? goodPairs / pairs.length : 0.5) + (folk.ending === "good" ? 0.2 : folk.ending === "bad" ? 0 : 0.1);
+    const yy = yinYang(digits, chart?.pillars.year.can), nat = chart && natal(el, chart.el), star = nineStar(digits, year);
+    const criteria = [
+      { id: "yinyang", max: 2, k: yy.k, yy },
+      { id: "natal", max: 1, k: nat ? nat.k : null, nat },
+      { id: "useful", max: 2, k: bazi ? BaziUseful.ROLE_K[bazi.role[el]] : null },
+      { id: "main", max: 1.5, k: RATING_K[hex.main.rating] },
+      { id: "mutual", max: 1, k: RATING_K[hex.mutual.rating] },
+      { id: "tidung", max: 0.5, k: hex.rel.k },
+      { id: "nine", max: 1, k: star.k, star },
+      { id: "folk", max: 1, k: folkK },
+    ].map(c => ({ ...c, pts: c.k === null ? null : r2(c.max * c.k) }));
+    const used = criteria.filter(c => c.pts !== null), total = r2(used.reduce((a, c) => a + c.pts, 0)), max = used.reduce((a, c) => a + c.max, 0);
+    // Sites treat a Hung main hexagram as disqualifying whatever the other points (simkinhdich: quẻ > điểm; viettopreview loại quẻ hung).
+    const raw = Math.round(total / max * 100) / 10, capped = hex.main.rating === "Hung" && raw > HUNG_CAP, score = capped ? HUNG_CAP : raw;
+    const verdict = score >= 8 ? "Rất tốt" : score >= 6.5 ? "Tốt" : score >= 5 ? "Trung bình" : "Chưa hợp";
+    return { criteria, total, max, raw, capped, score, verdict, sum, el, nut, hex, pairs, goodPairs, folk, bazi, star };
+  }
+
+  return { evaluate, nineStar, period };
+})();
+// Tab SIM phong thủy: tên + cách tính từng tiêu chí, ý nghĩa của kết quả (vì sao được/mất điểm), tổng kết điểm mạnh/yếu và lời khuyên.
+const SimExplain = (() => {
+  const NAME = { yinyang: "Âm dương cân bằng", natal: "Ngũ hành SIM – bản mệnh", useful: "Bổ khuyết tứ trụ (dụng thần)", main: "Quẻ chủ Kinh Dịch",
+    mutual: "Quẻ hỗ (diễn biến)", tidung: "Hành quẻ bát quái (Thể – Dụng)", nine: "Cửu tinh đồ pháp", folk: "Quan niệm dân gian" };
+  const HOW = { yinyang: "Số chẵn là âm, số lẻ là dương; 5/5 là cân bằng nhất, 6/4 cũng tốt nếu bên nhiều hơn bù cho can năm sinh (can dương cần thêm âm, can âm cần thêm dương).",
+    natal: "Hành SIM = tổng các số rút gọn về 1–9, tra Hậu Thiên bát quái; so với mệnh nạp âm năm sinh.",
+    useful: "Tứ trụ giờ – ngày – tháng – năm sinh cho biết hành còn thiếu (dụng thần); SIM mang đúng hành đó là bổ khuyết tốt nhất.",
+    main: "Thượng quái = tổng 5 số đầu mod 8, hạ quái = tổng 5 số cuối mod 8 (Mai Hoa Dịch số); quẻ chủ nói về bản chất SIM.",
+    mutual: "Quẻ hỗ lấy hào 2–4 và 3–5 của quẻ chủ, nói về diễn biến, quá trình sử dụng.",
+    tidung: "Quái có hào động là Dụng (sự việc), quái tĩnh là Thể (người dùng); Dụng sinh Thể hoặc tỷ hòa là tốt.",
+    nine: "Mỗi số 1–9 ứng một sao Cửu tinh (Lạc Thư); SIM có số của sao đang vượng theo vận Huyền Không (vận 9 → số 9) là tốt nhất, số sinh khí (1, 2) kế tiếp.",
+    folk: "Số nút (tổng mod 10, càng cao càng tốt), tỷ lệ cặp số cát theo bát tinh, đuôi số đẹp/kiêng." };
+  const REL = { "Thể Dụng tỷ hòa": "Thể và Dụng cùng hành: mọi việc thuận hòa, dễ thành.", "Dụng sinh Thể": "Dụng sinh Thể: được giúp đỡ, có lợi — tốt nhất.",
+    "Thể khắc Dụng": "Thể khắc Dụng: chủ động nắm được việc, thành công nhưng phải nỗ lực.", "Thể sinh Dụng": "Thể sinh Dụng: hao tổn công sức, tiền bạc.",
+    "Dụng khắc Thể": "Dụng khắc Thể: bị áp chế, nhiều trở ngại." };
+  const NATAL = { "SIM sinh mệnh (tốt nhất)": "Hành của SIM nuôi dưỡng mệnh chủ: được nâng đỡ, việc hanh thông.",
+    "SIM và mệnh cùng hành (bình hòa)": "Cùng hành nên tương trợ, ổn định; không thêm cũng không bớt.",
+    "Mệnh khắc SIM (chế ngự được)": "Chủ khắc SIM: chủ động kiểm soát được nhưng tốn sức hơn.",
+    "Mệnh sinh SIM (hao tổn)": "Chủ phải nuôi SIM: dễ hao tâm sức, tiền bạc.",
+    "SIM khắc mệnh (xấu)": "SIM khắc mệnh chủ: dân gian cho là dễ gặp trở ngại, nên tránh." };
+  const ROLE = { "dụng thần": "Tứ trụ đang thiếu đúng hành này nhất — SIM bổ khuyết trực tiếp, tốt nhất.",
+    "hỷ thần": "Hành này hỗ trợ dụng thần — SIM giúp cân bằng lá số, tốt.",
+    "nhàn thần": "Hành trung tính với lá số: không giúp cũng không hại nhiều.",
+    "cừu thần": "Hành này nuôi kỵ thần — bất lợi gián tiếp.",
+    "kỵ thần": "Hành này làm lá số lệch thêm — nên tránh." };
+  const RATING = { "Đại cát": "Quẻ đại cát: nền tảng rất tốt.", "Cát": "Quẻ cát: thuận lợi.", "Bình": "Quẻ bình: không tốt không xấu, tùy các tiêu chí khác.",
+    "Hung": "Quẻ hung: bất lợi." };
+  const ADVICE = { "Rất tốt": "Rất hợp: nên giữ, dùng làm số chính lâu dài.", "Tốt": "Hợp: dùng tốt; có thể cải thiện thêm ở các tiêu chí còn yếu.",
+    "Trung bình": "Dùng được nhưng chưa nổi bật; nếu chọn số mới, ưu tiên khắc phục các tiêu chí còn yếu.",
+    "Chưa hợp": "Chưa hợp: nên cân nhắc đổi số, nhất là khi quẻ chủ hung hoặc SIM khắc mệnh." };
+
+  function yinYang(yy) {
+    const diff = Math.abs(yy.even - yy.odd);
+    if (diff === 0) return T("Âm dương hài hòa: năng lượng cân bằng, dân gian cho là SIM “êm”, hợp dùng lâu dài.");
+    if (diff === 2) return T(yy.k === 1 ? "Lệch nhẹ nhưng nghiêng đúng phía bù cho can năm sinh của chủ — xem như hài hòa." : "Lệch nhẹ: vẫn chấp nhận được; tốt hơn nếu bên nhiều hơn bù được can năm sinh.");
+    if (diff === 4) return T(yy.even > yy.odd ? "Nghiêng âm rõ (nhiều số chẵn): dân gian cho là dễ trầm, chậm, thiếu bứt phá." : "Nghiêng dương rõ (nhiều số lẻ): dân gian cho là dễ nóng vội, hao tổn.");
+    return T("Mất cân bằng âm dương nặng: dân gian khuyên tránh dùng làm số chính.");
+  }
+
+  function nine(s) {
+    if (s.key === "Vượng khí") return T("Có số {v} của sao đang nắm vận — đón vượng khí thời vận (tài lộc, cơ hội) đến hết vận ({end}).", { v: s.prosper, end: s.end });
+    if (s.key === "Sinh khí") return T("Có số của sao sắp vượng ({s}) — năng lượng đang lên, lợi về lâu dài.", { s: s.rising.join(", ") });
+    if (s.key === "Thoái khí") return T("Chỉ có số {f} của sao vừa hết vận — năng lượng đang suy.", { f: s.fading });
+    return T("Không có số vượng/sinh khí của vận hiện tại — thiếu trợ lực thời vận.");
+  }
+
+  function folk(r) {
+    const nutText = r.nut >= 9 ? "{nut} nút: nhóm nút cao, dân gian rất chuộng." : r.nut >= 7 ? "{nut} nút: khá cao." : r.nut >= 5 ? "{nut} nút: trung bình." : "{nut} nút: thấp, dân gian ít chuộng.";
+    const ending = r.folk.ending === "good" ? T("Đuôi số đẹp theo dân gian.") : r.folk.ending === "bad" ? T("Đuôi số dân gian kiêng.") : T("Đuôi số bình thường.");
+    return T(nutText, { nut: r.nut }) + " " + T("{good}/{n} cặp số mang sao cát (Sinh Khí, Thiên Y, Diên Niên, Phục Vị).", { good: r.goodPairs, n: r.pairs.length }) + " " + ending;
+  }
+
+  // Meaning of one criterion's result (why it scored what it did).
+  function why(c, r) {
+    switch (c.id) {
+      case "yinyang": return yinYang(c.yy);
+      case "natal": return c.nat ? T(NATAL[c.nat.key]) : T("Nhập ngày sinh để biết SIM có hợp mệnh nạp âm của chủ không.");
+      case "useful": return r.bazi ? T(ROLE[r.bazi.role[r.el]]) : T("Nhập ngày sinh để xác định hành tứ trụ còn thiếu.");
+      case "main": return T(r.hex.main.meaning) + " " + T(RATING[r.hex.main.rating]);
+      case "mutual": return T(r.hex.mutual.meaning) + " " + T(RATING[r.hex.mutual.rating]);
+      case "tidung": return T(REL[r.hex.rel.key]);
+      case "nine": return nine(c.star);
+      default: return folk(r);
+    }
+  }
+
+  function summary(r) {
+    const used = r.criteria.filter(c => c.pts !== null), names = list => list.map(c => T(NAME[c.id])).join(", ");
+    return { advice: T(ADVICE[r.verdict]), strong: names(used.filter(c => c.k >= 0.75)), weak: names(used.filter(c => c.k < 0.4)) };
+  }
+
+  return { NAME, HOW, REL, why, summary };
+})();
+// Tab SIM phong thủy — pane "Chấm điểm": số + tổng điểm/10, dải chữ số (âm dương, ngũ hành), tổng kết, 8 tiêu chí kèm kết quả, ý nghĩa, cách tính.
+const SimScoreView = (() => {
+  const { esc, tag } = HoroView.ui;
+  const el = i => T(CanChi.ELEMENTS[i]);
+  const num = x => I18n.num(Math.round(x * 100) / 100);
+  const hexName = h => I18n.lang === "en" ? T(h.name) + " (" + h.name + ")" : h.name;
+  const kCls = k => k === null ? "" : k >= 0.75 ? "good" : k < 0.4 ? "bad" : "";
+  const verdictCls = v => v === "Rất tốt" || v === "Tốt" ? "good" : v === "Chưa hợp" ? "bad" : "";
+  const { NAME, HOW } = SimExplain;
+
+  function result(c, r, chart) {
+    const needBirth = T("Cần ngày sinh");
+    switch (c.id) {
+      case "yinyang": return T("{even} số chẵn (âm) · {odd} số lẻ (dương)", { even: c.yy.even, odd: c.yy.odd })
+        + (c.yy.wantEven === null ? "" : " · " + T(c.yy.wantEven ? "can năm dương nên cần nghiêng âm" : "can năm âm nên cần nghiêng dương"));
+      case "natal": return c.nat ? T("SIM hành {sim} · mệnh {menh} ({el})", { sim: el(r.el), menh: T(chart.napAm), el: el(chart.el) }) + " — " + T(c.nat.key) : needBirth;
+      case "useful": return r.bazi ? T("SIM hành {sim} là {role} · dụng thần {u}, hỷ thần {h}", { sim: el(r.el), role: T(r.bazi.role[r.el]), u: el(r.bazi.useful), h: el(r.bazi.favor) }) : needBirth;
+      case "main": return hexName(r.hex.main) + " · " + T(r.hex.main.rating);
+      case "mutual": return hexName(r.hex.mutual) + " · " + T(r.hex.mutual.rating);
+      case "tidung": return T("Thể {the} ({te}) · Dụng {dung} ({de}) — {rel}", { the: T(r.hex.the.name), te: el(r.hex.the.el), dung: T(r.hex.dung.name), de: el(r.hex.dung.el), rel: T(r.hex.rel.key) });
+      case "nine": return T("Vận {p}: số vượng {v} · sinh khí {s} — {state}", { p: c.star.period, v: c.star.prosper, s: c.star.rising.join(", "), state: T(c.star.key) });
+      default: return T("{nut} nút · {good}/{n} cặp số cát", { nut: r.nut, good: r.goodPairs, n: r.pairs.length })
+        + r.folk.tags.map(t => " · " + T(t.key, t.params)).join("");
+    }
+  }
+
+  function criterion(c, r, chart) {
+    const pct = c.pts === null ? 0 : Math.round(c.pts / c.max * 100);
+    const pts = c.pts === null ? "—" : num(c.pts) + "/" + num(c.max);
+    return `<div class="crit ${c.pts === null ? "off" : ""}"><div class="crit-head"><b>${esc(T(NAME[c.id]))}</b>${tag(pts, kCls(c.k))}</div>`
+      + `<span class="el-bar"><i class="crit-${kCls(c.k) || "mid"}" style="width:${pct}%"></i></span>`
+      + `<p>${esc(result(c, r, chart))}</p><p class="crit-why">${esc(SimExplain.why(c, r))}</p><small class="muted">${esc(T("Cách tính: {how}", { how: T(HOW[c.id]) }))}</small></div>`;
+  }
+
+  function summaryBlock(r) {
+    const s = SimExplain.summary(r), none = T("không có");
+    return `<section class="sim-summary"><h3>${esc(T("Tổng kết"))}</h3><p><b>${esc(s.advice)}</b></p><dl>`
+      + `<dt>${esc(T("Điểm mạnh"))}</dt><dd>${esc(s.strong || none)}</dd><dt>${esc(T("Cần cân nhắc"))}</dt><dd>${esc(s.weak || none)}</dd></dl></section>`;
+  }
+
+  function digitsStrip(digits) {
+    const yy = d => d % 2 ? T("dương") : T("âm");
+    return `<div class="sim-digits">` + digits.map(d => `<span><b>${d}</b><i class="el-${SimNumber.DIGIT_EL[d]}"></i>`
+      + `<small>${esc(el(SimNumber.DIGIT_EL[d]))}</small><small>${esc(yy(d))}</small></span>`).join("") + `</div>`;
+  }
+
+  function render(box, ctx) {
+    const { num: n, res: r, chart, carrier } = ctx;
+    const owner = chart ? T("{sex} · sinh {date} · tuổi {cc} · mệnh {menh}", { sex: T(ctx.male ? "Nam giới" : "Nữ giới"), date: HoroView.ui.dmy(ctx.birth) + (ctx.time ? " " + ctx.time : ""),
+      cc: HoroView.ui.cc(chart.pillars.year), menh: T(chart.napAm) }) : T("Chưa nhập ngày sinh: chỉ chấm các tiêu chí của riêng dãy số, quy về thang 10.");
+    box.innerHTML = `<div class="horo-hero sim-hero"><div><b class="sim-no">${esc(SimNumber.pretty(n.text))}</b>`
+      + `<span>${esc(carrier || T("Không rõ nhà mạng"))} · ${esc(T("tổng {sum} · {nut} nút", { sum: r.sum, nut: r.nut }))}</span><small class="muted">${esc(owner)}</small></div>`
+      + `<div class="sim-total"><b>${esc(I18n.num(r.score))}</b><span>/10</span>${tag(T(r.verdict), verdictCls(r.verdict))}${r.capped ? tag(T("Quẻ chủ Hung"), "bad") : ""}</div></div>`
+      + digitsStrip(n.digits) + summaryBlock(r)
+      + `<section><h3>${esc(T("Chấm điểm 8 tiêu chí"))}</h3>${r.criteria.map(c => criterion(c, r, chart)).join("")}`
+      + `<p class="muted">${esc(T("Tổng {total}/{max} điểm → {score}/10.", { total: num(r.total), max: num(r.max), score: I18n.num(r.raw) }))}</p>`
+      + (r.capped ? `<p>${tag(T("Quẻ chủ Hung"), "bad")} ${esc(T("Điểm bị giới hạn ở {cap}/10: các trang xem SIM đều coi quẻ chủ là yếu tố quyết định, quẻ hung thì không nên dùng dù tiêu chí khác cao.", { cap: I18n.num(r.score) }))}</p>` : "")
+      + `</section>`
+      + `<p class="muted disclaimer">${esc(T("Chấm theo phương pháp phổ biến của các trang xem SIM phong thủy (Kinh Dịch Mai Hoa, ngũ hành, tứ trụ, cửu tinh, dân gian) — chỉ mang tính tham khảo, giải trí."))}</p>`;
+  }
+
+  const empty = box => { box.innerHTML = `<p class="muted">${esc(T("Nhập số SIM (và ngày sinh chủ SIM nếu có) rồi bấm “Chấm điểm SIM”, hoặc chọn một mẫu."))}</p>`; };
+
+  return { render, empty, hexName };
+})();
+// Tab SIM phong thủy — pane "Luận giải": quẻ chủ/hỗ/biến (vẽ 6 hào), Thể – Dụng, tứ trụ + dụng thần, bát tinh cặp số, cửu tinh, ý nghĩa con số, gợi ý chọn SIM.
+const SimAnalysisView = (() => {
+  const { esc, tag, cc, dl } = HoroView.ui;
+  const el = i => T(CanChi.ELEMENTS[i]);
+  const det = (title, body, open) => `<details class="sec"${open ? " open" : ""}><summary>${esc(title)}</summary>${body}</details>`;
+  const para = text => `<p>${esc(text)}</p>`;
+  const ratingCls = r => r === "Hung" ? "bad" : r === "Bình" ? "" : "good";
+  const digitsOf = e => [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].filter(d => SimNumber.DIGIT_EL[d] === e);
+  const { REL } = SimExplain;
+
+  // Lines are stored bottom→top; drawn top→bottom, the moving line is highlighted.
+  const draw = (h, moving) => `<div class="hex" aria-hidden="true">${h.lines.map((x, i) => `<i class="${x ? "yang" : "yin"}${i === moving - 1 ? " mv" : ""}"></i>`).reverse().join("")}</div>`;
+  const hexCard = (label, h, moving) => `<div class="hex-card">${draw(h, moving)}<div><small class="muted">${esc(T(label))}</small>`
+    + `<b>${esc(T("Quẻ {no}: {name}", { no: h.no, name: SimScoreView.hexName(h) }))}</b>`
+    + `<span>${esc(T("{up} ({ui}) trên {low} ({li})", { up: T(h.upper.name), ui: T(h.upper.image), low: T(h.lower.name), li: T(h.lower.image) }))} ${tag(T(h.rating), ratingCls(h.rating))}</span>`
+    + `<small>${esc(T(h.meaning))}</small></div></div>`;
+
+  function hexSection(r) {
+    const h = r.hex;
+    return hexCard("Quẻ chủ — bản chất SIM", h.main, h.moving) + hexCard("Quẻ hỗ — diễn biến", h.mutual, 0) + hexCard("Quẻ biến — kết cục", h.changed, 0)
+      + para(T("Cách gieo: 5 số đầu cộng {a} → {a} mod 8 = {ra} → thượng quái {up}; 5 số cuối cộng {b} → {b} mod 8 = {rb} → hạ quái {low}; tổng {s} mod 6 = {m} → hào {m} động.",
+        { a: h.sumUp, ra: h.sumUp % 8, up: T(h.main.upper.name), b: h.sumLow, rb: h.sumLow % 8, low: T(h.main.lower.name), s: h.total, m: h.moving }))
+      + para(T(REL[h.rel.key]));
+  }
+
+  function baziSection(r, chart) {
+    if (!chart) return para(T("Nhập ngày sinh để xem tứ trụ, dụng thần và chấm thêm 2 tiêu chí hợp mệnh."));
+    const b = r.bazi, max = Math.max(...b.strengths) || 1, P = b.pillars, dm = P.day;
+    const rows = [["Năm", P.year], ["Tháng", P.month], ["Ngày", dm], ["Giờ", P.hour]].map(([k, q]) =>
+      `<tr><td>${esc(T(k))}</td><td><b>${esc(cc(q))}</b></td><td>${q ? esc(el(CanChi.CAN_EL[q.can]) + " / " + el(CanChi.CHI_EL[q.chi])) : ""}</td></tr>`).join("");
+    const roleCls = role => role === "dụng thần" || role === "hỷ thần" ? "good" : role === "kỵ thần" ? "bad" : "";
+    const bars = b.strengths.map((n, i) => `<div class="el-row sim-el"><span>${esc(el(i))}</span><span class="el-bar"><i class="el-${i}" style="width:${Math.round(n / max * 100)}%"></i></span>`
+      + `<b>${esc(I18n.num(n))}</b>${tag(T(b.role[i]), roleCls(b.role[i]))}</div>`).join("");
+    return para(T("Tứ trụ bát tự: năm đổi ở Lập xuân, tháng theo tiết khí (có thể khác tab Tử vi, nơi tính theo năm/tháng âm lịch)."))
+      + `<table class="hours"><tbody>${rows}</tbody></table><div class="el-chart">${bars}</div>`
+      + para(T("Nhật chủ {can} ({el}) {state}: hành cùng loại và hành sinh ra nó chiếm {pct}% lực (chi tháng tính gấp đôi).",
+        { can: T(CanChi.CAN[dm.can]), el: el(b.dayEl), state: T(b.strong ? "vượng" : "nhược"), pct: Math.round(b.ratio * 100) }))
+      + para(T(b.strong ? "Mệnh vượng nên cần hành tiết chế (hành nó sinh ra, hành nó khắc, hành khắc nó); chọn hành yếu nhất trong số đó làm dụng thần."
+        : "Mệnh nhược nên cần hành cùng loại hoặc hành sinh ra nó; hành yếu hơn trong hai hành đó là dụng thần."))
+      + para(T("Dụng thần {u}, hỷ thần {h}, kỵ thần {k}. SIM hành {sim} → {role}.", { u: el(b.useful), h: el(b.favor), k: el(b.avoid), sim: el(r.el), role: T(b.role[r.el]) }));
+  }
+
+  function pairSection(r) {
+    if (!r.pairs.length) return para(T("Không có cặp số nào (dãy chỉ gồm số 0 và 5)."));
+    return para(T("Bỏ qua số 0 và 5 (chỉ làm ẩn hoặc tăng lực), ghép từng cặp số liền nhau: {good}/{n} cặp cát.", { good: r.goodPairs, n: r.pairs.length }))
+      + `<ul class="arrows">${r.pairs.map(p => `<li><b class="num">${p.pair}</b> ${tag(T(p.star.name), p.star.good ? "good" : "bad")} <small>${esc(T(p.star.text))}</small></li>`).join("")}</ul>`;
+  }
+
+  function digitSection(r, digits) {
+    const seen = [...new Set(digits)].sort((a, b) => a - b);
+    const tags = r.folk.tags.map(t => tag(T(t.key, t.params), t.good ? "good" : "bad")).join(" ");
+    return (tags ? `<p>${tags}</p>` : para(T("Đuôi số không thuộc dạng số đẹp hay số kiêng phổ biến.")))
+      + `<ul class="arrows">${seen.map(d => `<li>${esc(T(SimText.DIGIT[d]))}</li>`).join("")}</ul>`;
+  }
+
+  function adviceSection(r) {
+    const b = r.bazi, roots = e => [1, 2, 3, 4, 5, 6, 7, 8, 9].filter(x => SimNumber.DIGIT_EL[x] === e).join(", ");
+    return dl([["Hành nên có", esc(el(b.useful) + " · " + el(b.favor))], ["Số nên nhiều", esc(digitsOf(b.useful).concat(digitsOf(b.favor)).join(", "))],
+      ["Tổng rút gọn nên là", esc(roots(b.useful) + " (" + el(b.useful) + ")")], ["Số nên hạn chế", esc(digitsOf(b.avoid).join(", ") + " (" + el(b.avoid) + ")")]])
+      + para(T("Ưu tiên quẻ chủ Cát/Đại cát, Dụng sinh Thể, âm dương 5/5 hoặc 4/6, nhiều cặp Sinh Khí – Thiên Y – Diên Niên."));
+  }
+
+  function render(box, ctx) {
+    const { res: r, chart, num: n } = ctx;
+    box.innerHTML = det(T("Quẻ Kinh Dịch (Mai Hoa)"), hexSection(r), true)
+      + det(T("Tứ trụ bát tự & dụng thần"), baziSection(r, chart), true)
+      + det(T("Bát tinh – năng lượng cặp số"), pairSection(r))
+      + det(T("Cửu tinh đồ pháp"), para(T("Vận {p} Huyền Không (20 năm/vận, vận 9: 2024–2043): sao {v} {vn} vượng khí, {s} sinh khí, {f} {fn} thoái khí. SIM này: {state}.",
+        { p: r.star.period, v: r.star.prosper, vn: T(SimText.NINE_STAR[r.star.prosper]), s: r.star.rising.map(d => d + " " + T(SimText.NINE_STAR[d])).join(", "),
+          f: r.star.fading, fn: T(SimText.NINE_STAR[r.star.fading]), state: T(r.star.key) })))
+      + det(T("Ý nghĩa các con số & đuôi số"), digitSection(r, n.digits))
+      + (chart ? det(T("Gợi ý chọn SIM hợp mệnh"), adviceSection(r)) : "")
+      + `<p class="muted disclaimer">${esc(T("Luận giải theo bảng tra dân gian và thần số học, chỉ mang tính tham khảo, giải trí — không thay cho quyết định của bạn."))}</p>`;
+  }
+
+  return { render };
+})();
+// Tab SIM phong thủy: đọc số SIM + giới tính, ngày/giờ sinh (tùy chọn), kiểm lỗi, chấm điểm, dựng 2 pane; snapshot/open cho link chia sẻ.
+const SimApp = (() => {
+  let deps, ctx = null;
+  const MAX = 40, pad = n => String(n).padStart(2, "0");
+
+  function read() {
+    const num = SimNumber.parse($("sNum").value), male = $("sSex").value !== "f";
+    if (num.error) return { ...num, field: "sNum" };
+    if (!$("sBirth").value.trim()) return { num, male, chart: null };
+    const b = DateText.parse($("sBirth").value, { lunar: $("sLunar").checked });
+    if (b.error) return { error: b.error, params: b.params, field: "sBirth" };
+    if (b.jd > deps.today) return { error: "Ngày sinh không được sau hôm nay.", field: "sBirth" };
+    const t = HoroApp.parseTime($("sTime").value);
+    if (t && t.error) return { ...t, field: "sTime" };
+    const birth = LunarCal.jdToDate(b.jd);
+    const chart = BirthChart.compute({ male, d: birth.d, m: birth.m, y: birth.y, hour: t?.hour, minute: t?.minute });
+    return { num, male, birth, time: t ? pad(t.hour) + ":" + pad(t.minute) : "", chart, pillars: BaziUseful.solarPillars(chart, t) };
+  }
+
+  function render() {
+    if (!ctx) { SimScoreView.empty($("sScore")); $("sDetail").innerHTML = ""; return; }
+    SimScoreView.render($("sScore"), ctx);
+    SimAnalysisView.render($("sDetail"), ctx);
+  }
+
+  function run() {
+    ["sNum", "sBirth", "sTime"].forEach(id => $(id).classList.remove("bad"));
+    const r = read();
+    if (r.error) { ctx = null; render(); $(r.field).classList.add("bad"); deps.status(() => "✖ " + T(r.error, r.params), "bad"); return false; }
+    const res = SimScore.evaluate({ ...r.num, chart: r.chart, pillars: r.pillars, year:LunarCal.jdToDate(deps.today).y });
+    ctx = { ...r, res, carrier: SimNumber.carrier(r.num.text) };
+    render();
+    deps.status(() => T("Đã chấm SIM {sim}: {score}/10 · {verdict}", { sim: SimNumber.pretty(r.num.text), score: I18n.num(res.score), verdict: T(res.verdict) }));
+    return true;
+  }
+
+  function fill(p) {
+    const str = (v, n = MAX) => typeof v === "string" ? v.slice(0, n) : "";
+    $("sNum").value = str(p.sim);
+    $("sSex").value = p.male === false ? "f" : "m";
+    $("sBirth").value = str(p.birth);
+    $("sTime").value = str(p.time, 10);
+    $(p.lunar === true ? "sLunar" : "sSolar").checked = true;
+  }
+
+  // Payload is untrusted: only known string/boolean fields are copied into the inputs.
+  function open(p) { deps.tab("sim"); fill(p); const ok = run(); PhoneLayout.show(0); return ok; }
+
+  // From another tab: b = { birth, lunar?, time?, male? } replaces the owner's birth; scores at once when a number is already typed.
+  function useBirth(b) {
+    deps.tab("sim");
+    fill({ ...snapshot(), ...b });
+    if ($("sNum").value.trim()) { run(); PhoneLayout.show(0); return; }
+    $("sNum").focus();
+    deps.status(() => T("Đã chép ngày sinh — nhập số SIM rồi bấm “Chấm điểm SIM”."));
+  }
+
+  function demo(key) {
+    const p = SIM_DEMOS.data(key);
+    if (!p) return false;
+    if (open(p)) deps.note(() => T("Đã nạp mẫu: {name}", { name: T(SIM_DEMOS.name(key)) }));
+    return true;
+  }
+
+  const snapshot = () => ({ tab: "sim", sim: $("sNum").value.trim(), male: $("sSex").value !== "f", birth: $("sBirth").value.trim(), lunar: $("sLunar").checked, time: $("sTime").value.trim() });
+
+  // First visit: reuse the owner already typed in the Tử vi tab.
+  function prefill() {
+    if ($("sBirth").value.trim() || !$("hBirth").value.trim()) return;
+    $("sBirth").value = $("hBirth").value; $("sTime").value = $("hTime").value; $("sSex").value = $("hSex").value;
+    $($("hLunar").checked ? "sLunar" : "sSolar").checked = true;
+  }
+
+  function fillSelects() {
+    $("simDemo").innerHTML = `<option value="">${Dom.esc(T("Thử mẫu…"))}</option>` + SIM_DEMOS.keys.map(k => `<option value="${k}">${Dom.esc(T(SIM_DEMOS.name(k)))}</option>`).join("");
+    $("sSex").innerHTML = `<option value="m">${Dom.esc(T("Nam giới"))}</option><option value="f">${Dom.esc(T("Nữ giới"))}</option>`;
+  }
+
+  // d: { today, status(fn, cls), note(fn, cls), tab(id) }
+  function init(d) {
+    deps = d;
+    fillSelects();
+    $("sGo").onclick = run;
+    BirthPickers.attach({ text: "sBirth", pick: "sBirthPick", lunar: "sLunar" }, d.today, () => { if ($("sNum").value.trim()) run(); });
+    for (const id of ["sNum", "sBirth", "sTime"]) $(id).onkeydown = e => { if (e.key === "Enter") { e.preventDefault(); run(); } };
+    for (const id of ["sSolar", "sLunar"]) $(id).onchange = () => { if ($("sNum").value.trim() && $("sBirth").value.trim()) run(); };
+    $("simDemo").onchange =e => { const k = e.target.value; e.target.value = ""; if (k) demo(k); };
+    render();
+  }
+
+  function relabel() { const sex = $("sSex").value; fillSelects(); $("sSex").value = sex; render(); }
+
+  return { init, open, demo, snapshot, prefill, relabel, useBirth };
+})();
+// App wiring: tabs Lịch | Tử vi | SIM phong thủy, month navigation, date box (dương/âm), keyboard, share link #pako: / ?data= / ?demo=, theme, VI|EN.
 (() => {
   const P = "web_tool.vietnamese-lunar-calendar.";
   const store = { get: (k, d) => { try { const v = localStorage.getItem(P + k); return v == null ? d : JSON.parse(v); } catch { return d; } },
     set: (k, v) => { try { localStorage.setItem(P + k, JSON.stringify(v)); } catch { /* storage blocked */ } } };
   const now = new Date(), today = LunarCal.jdFromDate(now.getDate(), now.getMonth() + 1, now.getFullYear());
   const MIN_JD = LunarCal.jdFromDate(1, 1, LunarCal.MIN_YEAR), MAX_JD = LunarCal.jdFromDate(31, 12, LunarCal.MAX_YEAR);
-  const st = { sel: today, y: 0, m: 0, cc: store.get("cc", false) };
+  const st = { sel: today, y: 0, m: 0, cc: store.get("cc", false), moon: store.get("moon", false) };
   let tab = "cal", lastNote = { fn: () => "", cls: "muted" };
-  const statusBy = { cal: { fn: () => "", cls: "" }, horo: { fn: () => "", cls: "" } };
+  const TABS = ["cal", "horo", "sim"];
+  const statusBy = { cal: { fn: () => "", cls: "" }, horo: { fn: () => "", cls: "" }, sim: { fn: () => "", cls: "" } };
 
   // Messages are closures so a language switch re-renders them in the new language.
   const note = (fn, cls = "muted") => { lastNote = { fn, cls }; const el = $("note"); el.textContent = fn(); el.className = cls; };
@@ -1885,11 +2850,13 @@ const HoroApp = (() => {
   const status = (fn, cls = "", owner = "cal") => { statusBy[owner] = { fn, cls }; if (owner === tab) paint(); };
 
   function setTab(id) {
-    tab = id === "horo" ? "horo" : "cal";
+    tab = TABS.includes(id) ? id : "cal";
     store.set("tab", tab);
     document.body.classList.toggle("tab-horo", tab === "horo");
+    document.body.classList.toggle("tab-sim", tab === "sim");
     document.querySelectorAll("#tabs [data-tab]").forEach(b => b.classList.toggle("on", b.dataset.tab === tab));
-    for (const [el, owner] of [["calBar", "cal"], ["calSwitch", "cal"], ["calWork", "cal"], ["horoBar", "horo"], ["horoSwitch", "horo"], ["horoWork", "horo"]]) $(el).hidden = owner !== tab;
+    for (const t of TABS) for (const part of ["Bar", "Switch", "Work"]) $(t + part).hidden = t !== tab;
+    if (tab === "sim") SimApp.prefill();
     paint();
   }
 
@@ -1900,7 +2867,7 @@ const HoroApp = (() => {
   }
 
   function renderMonth(focus) {
-    const r = MonthGrid.build({ y: st.y, m: st.m, sel: st.sel, today, cc: st.cc });
+    const r = MonthGrid.build({ y: st.y, m: st.m, sel: st.sel, today, cc: st.cc, moon: st.moon });
     $("grid").innerHTML = r.html;
     $("month").value = st.m; $("year").value = st.y;
     const lf = r.lunarFrom, lt = r.lunarTo, lab = l => l.d + "/" + l.m + (l.leap ? T("n") : "");
@@ -1916,6 +2883,7 @@ const HoroApp = (() => {
     const s = LunarCal.jdToDate(st.sel);
     st.y = s.y; st.m = s.m;
     $("q").classList.remove("bad");
+    $("toHoro").disabled = $("toSim").disabled = st.sel > today;
     renderMonth(focus);
     DayDetail.render($("detail"), st.sel, today);
     status(() => DayDetail.summary(st.sel));
@@ -1941,6 +2909,7 @@ const HoroApp = (() => {
 
   function demo(key) {
     if (key.startsWith("horo-") && HoroApp.demo(key)) return;
+    if (key.startsWith("sim-") && SimApp.demo(key)) return;
     const text = DEMOS.text(key);
     if (text === null) return note(() => T("✖ Không có mẫu “{key}”.", { key }), "bad");
     setTab("cal");
@@ -1955,16 +2924,19 @@ const HoroApp = (() => {
     try { p = await ShareCodec.decode(raw); } catch (e) { return note(() => T("✖ Link chia sẻ bị hỏng hoặc không đúng định dạng: {msg}", { msg: e.message }), "bad"); }
     if (p === null) p = { date: raw };
     if (p && p.tab === "horo") { if (HoroApp.open(p)) note(() => T("Đã mở lá số từ link.")); return; }
+    if (p && p.tab === "sim") { if (SimApp.open(p)) note(() => T("Đã mở SIM từ link.")); return; }
     if (!p || typeof p.date !== "string") return note(() => T("✖ Link không chứa ngày của Lịch vạn niên."), "bad");
     setTab("cal");
     if (typeof p.cc === "boolean") { st.cc = p.cc; $("cc").checked = p.cc; renderMonth(); }
+    if (typeof p.moon === "boolean") { st.moon = p.moon; $("moon").checked = p.moon; renderMonth(); }
     if (goText(p.date)) note(() => T("Đã mở ngày từ link."));
     PhoneLayout.show(1);
   }
 
   async function share() {
-    const payload = tab === "horo" ? HoroApp.snapshot() : { date: DateText.iso(st.sel), cc: st.cc };
+    const payload = tab === "horo" ? HoroApp.snapshot() : tab === "sim" ? SimApp.snapshot() : { date: DateText.iso(st.sel), cc: st.cc, moon: st.moon };
     if (tab === "horo" && !payload.birth) return note(() => T("Chưa có ngày sinh để chia sẻ."), "bad");
+    if (tab === "sim" && !payload.sim) return note(() => T("Chưa có số SIM để chia sẻ."), "bad");
     let link;
     try { const u = new URL(location.href); u.search = ""; u.hash = await ShareCodec.encode(payload); link = u.href; }
     catch (e) { return note(() => T("✖ Không tạo được link: {msg}", { msg: e.message }), "bad"); }
@@ -1990,6 +2962,7 @@ const HoroApp = (() => {
   ThemePicker.bind($("theme"), store);
   fillSelects();
   $("cc").checked = st.cc;
+  $("moon").checked = st.moon;
   $("prev").onclick = () => shiftMonth(-1);
   $("next").onclick = () => shiftMonth(1);
   $("today").onclick = () => select(today);
@@ -1999,15 +2972,24 @@ const HoroApp = (() => {
   $("go").onclick = go;
   $("q").onkeydown = e => { if (e.key === "Enter") { e.preventDefault(); go(); } };
   $("cc").onchange = () => { st.cc = $("cc").checked; store.set("cc", st.cc); renderMonth(); };
+  $("moon").onchange = () => { st.moon = $("moon").checked; store.set("moon", st.moon); renderMonth(); };
+  // Cross-tab buttons carry only the birth (date, calendar, time, gender); name / SIM number already typed in the target tab stay.
+  const selBirth = () => { const d = LunarCal.jdToDate(st.sel), p = n => String(n).padStart(2, "0"); return { birth: `${p(d.d)}/${p(d.m)}/${d.y}`, lunar: false }; };
+  const ownerOf = s => ({ birth: s.birth, lunar: s.lunar, time: s.time, male: s.male });
+  $("toHoro").onclick = () => HoroApp.useBirth(selBirth());
+  $("toSim").onclick = () => SimApp.useBirth(selBirth());
+  $("hToSim").onclick = () => SimApp.useBirth(ownerOf(HoroApp.snapshot()));
+  $("sToHoro").onclick = () => HoroApp.useBirth(ownerOf(SimApp.snapshot()));
   $("demo").onchange = e => { const k = e.target.value; e.target.value = ""; if (k) demo(k); };
   $("share").onclick = share;
   for (const box of [$("grid"), $("events")]) box.addEventListener("click", e => { const b = e.target.closest("[data-jd]"); if (b) select(+b.dataset.jd, { focus: box === $("grid") }); });
   $("grid").addEventListener("keydown", onGridKey);
   $("tabs").onclick = e => { const b = e.target.closest("[data-tab]"); if (b) setTab(b.dataset.tab); };
   HoroApp.init({ today, status: (fn, cls) => status(fn, cls, "horo"), note, tab: setTab });
+  SimApp.init({ today, status: (fn, cls) => status(fn, cls, "sim"), note, tab: setTab });
   I18n.onChange(() => {
     const saved = statusBy.cal;
-    fillSelects(); select(st.sel); statusBy.cal = saved; HoroApp.relabel(); paint(); note(lastNote.fn, lastNote.cls);
+    fillSelects(); select(st.sel); statusBy.cal = saved; HoroApp.relabel(); SimApp.relabel(); paint(); note(lastNote.fn, lastNote.cls);
   });
 
   const fromHash = () => { const h = location.hash.slice(1); try { return decodeURIComponent(h); } catch { return h; } };

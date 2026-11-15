@@ -112,5 +112,5 @@ const LunarCal = (() => {
   const validSolar = (d, m, y) => { const r = jdToDate(jdFromDate(d, m, y)); return r.d === d && r.m === m && r.y === y; };
   const weekday = jd => (jd + 1) % 7;
 
-  return { TZ, MIN_YEAR, MAX_YEAR, jdFromDate, jdToDate, fromJd, toJd, leapMonthOf, validSolar, weekday };
+  return { TZ, MIN_YEAR, MAX_YEAR, jdFromDate, jdToDate, fromJd, toJd, leapMonthOf, validSolar, weekday, newMoon };
 })();

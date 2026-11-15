@@ -1,13 +1,14 @@
-// App wiring: tabs Lịch | Tử vi, month navigation, date box (dương/âm), keyboard, share link #pako: / ?data= / ?demo=, theme, VI|EN.
+// App wiring: tabs Lịch | Tử vi | SIM phong thủy, month navigation, date box (dương/âm), keyboard, share link #pako: / ?data= / ?demo=, theme, VI|EN.
 (() => {
   const P = "web_tool.vietnamese-lunar-calendar.";
   const store = { get: (k, d) => { try { const v = localStorage.getItem(P + k); return v == null ? d : JSON.parse(v); } catch { return d; } },
     set: (k, v) => { try { localStorage.setItem(P + k, JSON.stringify(v)); } catch { /* storage blocked */ } } };
   const now = new Date(), today = LunarCal.jdFromDate(now.getDate(), now.getMonth() + 1, now.getFullYear());
   const MIN_JD = LunarCal.jdFromDate(1, 1, LunarCal.MIN_YEAR), MAX_JD = LunarCal.jdFromDate(31, 12, LunarCal.MAX_YEAR);
-  const st = { sel: today, y: 0, m: 0, cc: store.get("cc", false) };
+  const st = { sel: today, y: 0, m: 0, cc: store.get("cc", false), moon: store.get("moon", false) };
   let tab = "cal", lastNote = { fn: () => "", cls: "muted" };
-  const statusBy = { cal: { fn: () => "", cls: "" }, horo: { fn: () => "", cls: "" } };
+  const TABS = ["cal", "horo", "sim"];
+  const statusBy = { cal: { fn: () => "", cls: "" }, horo: { fn: () => "", cls: "" }, sim: { fn: () => "", cls: "" } };
 
   // Messages are closures so a language switch re-renders them in the new language.
   const note = (fn, cls = "muted") => { lastNote = { fn, cls }; const el = $("note"); el.textContent = fn(); el.className = cls; };
@@ -16,11 +17,13 @@
   const status = (fn, cls = "", owner = "cal") => { statusBy[owner] = { fn, cls }; if (owner === tab) paint(); };
 
   function setTab(id) {
-    tab = id === "horo" ? "horo" : "cal";
+    tab = TABS.includes(id) ? id : "cal";
     store.set("tab", tab);
     document.body.classList.toggle("tab-horo", tab === "horo");
+    document.body.classList.toggle("tab-sim", tab === "sim");
     document.querySelectorAll("#tabs [data-tab]").forEach(b => b.classList.toggle("on", b.dataset.tab === tab));
-    for (const [el, owner] of [["calBar", "cal"], ["calSwitch", "cal"], ["calWork", "cal"], ["horoBar", "horo"], ["horoSwitch", "horo"], ["horoWork", "horo"]]) $(el).hidden = owner !== tab;
+    for (const t of TABS) for (const part of ["Bar", "Switch", "Work"]) $(t + part).hidden = t !== tab;
+    if (tab === "sim") SimApp.prefill();
     paint();
   }
 
@@ -31,7 +34,7 @@
   }
 
   function renderMonth(focus) {
-    const r = MonthGrid.build({ y: st.y, m: st.m, sel: st.sel, today, cc: st.cc });
+    const r = MonthGrid.build({ y: st.y, m: st.m, sel: st.sel, today, cc: st.cc, moon: st.moon });
     $("grid").innerHTML = r.html;
     $("month").value = st.m; $("year").value = st.y;
     const lf = r.lunarFrom, lt = r.lunarTo, lab = l => l.d + "/" + l.m + (l.leap ? T("n") : "");
@@ -47,6 +50,7 @@
     const s = LunarCal.jdToDate(st.sel);
     st.y = s.y; st.m = s.m;
     $("q").classList.remove("bad");
+    $("toHoro").disabled = $("toSim").disabled = st.sel > today;
     renderMonth(focus);
     DayDetail.render($("detail"), st.sel, today);
     status(() => DayDetail.summary(st.sel));
@@ -72,6 +76,7 @@
 
   function demo(key) {
     if (key.startsWith("horo-") && HoroApp.demo(key)) return;
+    if (key.startsWith("sim-") && SimApp.demo(key)) return;
     const text = DEMOS.text(key);
     if (text === null) return note(() => T("✖ Không có mẫu “{key}”.", { key }), "bad");
     setTab("cal");
@@ -86,16 +91,19 @@
     try { p = await ShareCodec.decode(raw); } catch (e) { return note(() => T("✖ Link chia sẻ bị hỏng hoặc không đúng định dạng: {msg}", { msg: e.message }), "bad"); }
     if (p === null) p = { date: raw };
     if (p && p.tab === "horo") { if (HoroApp.open(p)) note(() => T("Đã mở lá số từ link.")); return; }
+    if (p && p.tab === "sim") { if (SimApp.open(p)) note(() => T("Đã mở SIM từ link.")); return; }
     if (!p || typeof p.date !== "string") return note(() => T("✖ Link không chứa ngày của Lịch vạn niên."), "bad");
     setTab("cal");
     if (typeof p.cc === "boolean") { st.cc = p.cc; $("cc").checked = p.cc; renderMonth(); }
+    if (typeof p.moon === "boolean") { st.moon = p.moon; $("moon").checked = p.moon; renderMonth(); }
     if (goText(p.date)) note(() => T("Đã mở ngày từ link."));
     PhoneLayout.show(1);
   }
 
   async function share() {
-    const payload = tab === "horo" ? HoroApp.snapshot() : { date: DateText.iso(st.sel), cc: st.cc };
+    const payload = tab === "horo" ? HoroApp.snapshot() : tab === "sim" ? SimApp.snapshot() : { date: DateText.iso(st.sel), cc: st.cc, moon: st.moon };
     if (tab === "horo" && !payload.birth) return note(() => T("Chưa có ngày sinh để chia sẻ."), "bad");
+    if (tab === "sim" && !payload.sim) return note(() => T("Chưa có số SIM để chia sẻ."), "bad");
     let link;
     try { const u = new URL(location.href); u.search = ""; u.hash = await ShareCodec.encode(payload); link = u.href; }
     catch (e) { return note(() => T("✖ Không tạo được link: {msg}", { msg: e.message }), "bad"); }
@@ -121,6 +129,7 @@
   ThemePicker.bind($("theme"), store);
   fillSelects();
   $("cc").checked = st.cc;
+  $("moon").checked = st.moon;
   $("prev").onclick = () => shiftMonth(-1);
   $("next").onclick = () => shiftMonth(1);
   $("today").onclick = () => select(today);
@@ -130,15 +139,24 @@
   $("go").onclick = go;
   $("q").onkeydown = e => { if (e.key === "Enter") { e.preventDefault(); go(); } };
   $("cc").onchange = () => { st.cc = $("cc").checked; store.set("cc", st.cc); renderMonth(); };
+  $("moon").onchange = () => { st.moon = $("moon").checked; store.set("moon", st.moon); renderMonth(); };
+  // Cross-tab buttons carry only the birth (date, calendar, time, gender); name / SIM number already typed in the target tab stay.
+  const selBirth = () => { const d = LunarCal.jdToDate(st.sel), p = n => String(n).padStart(2, "0"); return { birth: `${p(d.d)}/${p(d.m)}/${d.y}`, lunar: false }; };
+  const ownerOf = s => ({ birth: s.birth, lunar: s.lunar, time: s.time, male: s.male });
+  $("toHoro").onclick = () => HoroApp.useBirth(selBirth());
+  $("toSim").onclick = () => SimApp.useBirth(selBirth());
+  $("hToSim").onclick = () => SimApp.useBirth(ownerOf(HoroApp.snapshot()));
+  $("sToHoro").onclick = () => HoroApp.useBirth(ownerOf(SimApp.snapshot()));
   $("demo").onchange = e => { const k = e.target.value; e.target.value = ""; if (k) demo(k); };
   $("share").onclick = share;
   for (const box of [$("grid"), $("events")]) box.addEventListener("click", e => { const b = e.target.closest("[data-jd]"); if (b) select(+b.dataset.jd, { focus: box === $("grid") }); });
   $("grid").addEventListener("keydown", onGridKey);
   $("tabs").onclick = e => { const b = e.target.closest("[data-tab]"); if (b) setTab(b.dataset.tab); };
   HoroApp.init({ today, status: (fn, cls) => status(fn, cls, "horo"), note, tab: setTab });
+  SimApp.init({ today, status: (fn, cls) => status(fn, cls, "sim"), note, tab: setTab });
   I18n.onChange(() => {
     const saved = statusBy.cal;
-    fillSelects(); select(st.sel); statusBy.cal = saved; HoroApp.relabel(); paint(); note(lastNote.fn, lastNote.cls);
+    fillSelects(); select(st.sel); statusBy.cal = saved; HoroApp.relabel(); SimApp.relabel(); paint(); note(lastNote.fn, lastNote.cls);
   });
 
   const fromHash = () => { const h = location.hash.slice(1); try { return decodeURIComponent(h); } catch { return h; } };

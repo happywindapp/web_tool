@@ -9,10 +9,22 @@ const HoroProfile = (() => {
   function balance(c) {
     const b = NatalExtra.elementBalance(c.pillars), max = Math.max(...b.counts) || 1;
     const bars = b.counts.map((n, i) => `<div class="el-row"><span>${esc(el(i))}</span><span class="el-bar"><i class="el-${i}" style="width:${Math.round(n / max * 100)}%"></i></span><b>${n}</b></div>`).join("");
-    const advice = b.missing.map(i => T("Thiếu hành {el}: nên bổ sung bằng màu {colors}, hướng {dirs}.", { el: el(i), colors: T(BirthChart.COLORS[i]), dirs: T(HoroDetail.ELEMENT[i].dirs) }));
+    const fix = i => T("Cách bổ sung: màu {colors}, hướng {dirs}.", { colors: T(BirthChart.COLORS[i]), dirs: T(HoroDetail.ELEMENT[i].dirs) });
     const summary = T("Hành vượng: {strong}.", { strong: b.strong.map(el).join(", ") }) + " " + (b.missing.length ? "" : T("Đủ cả 5 hành — ngũ hành khá cân bằng."));
-    return `<div class="el-chart">${bars}</div>` + para(summary) + advice.map(para).join("");
+    const strong = b.strong.map(i => T(NatalExplain.STRONG[i])), weak = b.missing.map(i => T(NatalExplain.WEAK[i]) + " " + fix(i));
+    return `<div class="el-chart">${bars}</div>` + para(summary) + strong.concat(weak).map(para).join("");
   }
+
+  // Short portrait combining age, nạp âm imagery, day master and kua.
+  function portrait(c, yp, dm, name) {
+    return para(T("{who} tuổi {cc} ({animal}), mệnh {na} thuộc hành {el}, nhật chủ {dm}, cung mệnh {kua} ({group} tứ mệnh).", { who: name || T("Bạn"),
+      cc: cc(yp), animal: T(HoroDetail.ANIMAL_NAME[yp.chi]), na: T(c.napAm), el: el(c.el), dm: T(CanChi.CAN[dm.can]), kua: T(c.kua.name), group: T(c.kua.group) }))
+      + para(T("Hình tượng mệnh: {text}", { text: T(NatalExplain.NAP_AM[CanChi.NAP_AM.indexOf(c.napAm)]) }));
+  }
+
+  const PILLARS = ["Năm", "Tháng", "Ngày", "Giờ"];
+  const pillarMeaning = () => `<ul class="arrows">${PILLARS.map((k, i) => `<li><b>${esc(T("Trụ {k}", { k: T(k) }))}</b>: ${esc(T(NatalExplain.PILLAR[i]))}</li>`).join("")}</ul>`;
+  const compatRow = (names, key) => esc(names) + `<br><small class="muted">${esc(T(NatalExplain.COMPAT[key]))}</small>`;
 
   function birthGrid(birth) {
     const g = NatalExtra.birthGrid(birth), order = [3, 6, 9, 2, 5, 8, 1, 4, 7];
@@ -41,14 +53,15 @@ const HoroProfile = (() => {
 
     box.innerHTML = `<div class="horo-hero"><b>${esc(name || T("(chưa nhập tên)"))}</b><span>${esc(sub)}</span>` + notes.map(x => `<small class="muted">${esc(x)}</small>`).join("") + `</div>`
       + det(T("Tổng quan"), dl([["Tuổi", esc(cc(yp) + " · " + T(HoroDetail.ANIMAL_NAME[yp.chi]))], ["Mệnh", esc(T(c.napAm) + " (" + el(c.el) + ")")],
-        ["Cung hoàng đạo", esc(z.sym + " " + T(z.name))], ["Nhật chủ", esc(T(CanChi.CAN[dm.can]))], ["Cung mệnh", esc(T(c.kua.name))], ["Số chủ đạo", numLine(num.lifePath, HoroText.NUMBER[num.lifePath])]]), true)
+        ["Cung hoàng đạo", esc(z.sym + " " + T(z.name))], ["Nhật chủ", esc(T(CanChi.CAN[dm.can]))], ["Cung mệnh", esc(T(c.kua.name))], ["Số chủ đạo", numLine(num.lifePath, HoroText.NUMBER[num.lifePath])]]) + portrait(c, yp, dm, name), true)
       + det(T("Tứ trụ & cân bằng ngũ hành"), `<table class="hours"><thead><tr><th>${esc(T("Trụ"))}</th><th>${esc(T("Can chi"))}</th><th>${esc(T("Can / Chi"))}</th><th>${esc(T("Nạp âm"))}</th></tr></thead><tbody>${pillarRows}</tbody></table>`
-        + balance(c) + para(T("Nhật chủ (can ngày sinh) {can}: {text}", { can: T(CanChi.CAN[dm.can]), text: T(HoroDetail.DAY_MASTER[dm.can]) })), true)
-      + det(T("Mệnh {name} ({el})", { name: T(c.napAm), el: el(c.el) }), dl([["Tính cách", esc(T(HoroText.ELEMENT[c.el]))], ["Điểm mạnh", esc(T(ed.strengths))], ["Điểm yếu", esc(T(ed.weaknesses))],
+        + pillarMeaning() + balance(c) + para(T("Nhật chủ (can ngày sinh) {can}: {text}", { can: T(CanChi.CAN[dm.can]), text: T(HoroDetail.DAY_MASTER[dm.can]) })), true)
+      + det(T("Mệnh {name} ({el})", { name: T(c.napAm), el: el(c.el) }), para(T(NatalExplain.NAP_AM[CanChi.NAP_AM.indexOf(c.napAm)])) + dl([["Tính cách", esc(T(HoroText.ELEMENT[c.el]))], ["Điểm mạnh", esc(T(ed.strengths))], ["Điểm yếu", esc(T(ed.weaknesses))],
         ["Nghề hợp", esc(T(ed.careers))], ["Sức khỏe cần chú ý", esc(T(ed.health))], ["Hướng hợp", esc(T(ed.dirs))],
         ["Màu hợp", esc(c.colors.good.map(x => T(x)).join(" · "))], ["Màu kỵ", esc(T(c.colors.bad))], ["Số hợp", esc(c.numbers.join(", "))]]), true)
       + det(T("Tuổi {animal} (12 con giáp)", { animal: T(CanChi.CHI[yp.chi]) }), para(T(animal.traits)) + para(T(animal.advice))
-        + dl([["Tam hợp", esc(c.compat.tamHop.map(chi).join(", "))], ["Lục hợp", esc(chi(c.compat.lucHop))], ["Xung", esc(chi(c.compat.xung))], ["Hại", esc(chi(c.compat.hai))]]))
+        + dl([["Tam hợp", compatRow(c.compat.tamHop.map(chi).join(", "), "tamHop")], ["Lục hợp", compatRow(chi(c.compat.lucHop), "lucHop")],
+          ["Xung", compatRow(chi(c.compat.xung), "xung")], ["Hại", compatRow(chi(c.compat.hai), "hai")]]))
       + det(T("Cung hoàng đạo: {name}", { name: z.sym + " " + T(z.name) }), dl([["Ngày", esc(z.dates)], ["Nguyên tố", esc(T(zEl))], ["Tính chất", esc(T(zMode))], ["Hành tinh chủ quản", esc(T(z.planet))],
         ["Tính cách", esc(T(z.traits))], ["Điểm mạnh", esc(T(z.strengths))], ["Điểm yếu", esc(T(z.weaknesses))], ["Tình yêu", esc(T(z.love))], ["Sự nghiệp", esc(T(z.career))],
         ["Hợp nhất", esc(best.join(", "))], ["Cũng hợp", esc(good.join(", "))]]))
@@ -56,6 +69,7 @@ const HoroProfile = (() => {
         ["Nhị thập bát tú", esc(T(star.name)) + " " + tag(star.good ? T("tốt") : T("xấu"), star.good ? "good" : "bad")], ["Tiết khí", esc(T(term.name))]])
         + para(T(god.good ? "Sinh ngày hoàng đạo: dân gian cho là được phù trợ, gặp nhiều thuận lợi." : "Sinh ngày hắc đạo: dân gian khuyên sống cẩn trọng, chăm tu dưỡng để hóa giải.")))
       + det(T("Phong thủy bát trạch"), para(T("Cung mệnh {name} ({el}) — {group} tứ mệnh", { name: T(c.kua.name), el: T(c.kua.el), group: T(c.kua.group) }))
+        + para(T(NatalExplain.KUA_GROUP[c.kua.group]))
         + para(T("Nên chọn hướng nhà, bàn làm việc, đầu giường theo 4 hướng tốt; tránh 4 hướng xấu.")) + dirs)
       + det(T("Thần số học"), dl([["Số chủ đạo", numLine(num.lifePath, HoroText.NUMBER[num.lifePath]) + "<br><small>" + esc(T(HoroText.LIFE_PATH[num.lifePath])) + "</small>"],
         ["Nghề hợp", esc(T(HoroDetail.CAREER[num.lifePath]))], ["Số ngày sinh", numLine(num.birthDay, HoroText.NUMBER[num.birthDay])],
