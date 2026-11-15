@@ -76,7 +76,9 @@
   navigator.sendBeacon?.(gc + "?" + new URLSearchParams({ p, r: document.referrer.split("?")[0], t: document.title, s: screen.width }));
   addEventListener("DOMContentLoaded", () => {
     const el = document.querySelector(".gc-views");
-    if (el) fetch(gc + "er/" + encodeURIComponent(p) + ".json").then(r => r.status === 404 ? { count: "0" } : r.json())
+    // GoatCounter cache mỗi URL (kể cả 404) tới 4 giờ ⇒ đổi start mỗi 10 phút; mọi ngày trước khi ra mắt cho cùng tổng
+    const start = "2026-10-" + String(Math.floor(Date.now() / 6e5) % 28 + 1).padStart(2, "0");
+    if (el) fetch(gc + "er/" + encodeURIComponent(p) + ".json?start=" + start).then(r => r.status === 404 ? { count: "0" } : r.json())
       .then(j => { el.textContent = "👁 " + j.count; el.hidden = false; }).catch(() => {});
   }); }
 </script>
@@ -84,7 +86,7 @@
 <body>
 <header>
   <div class="wrap hero">
-    <span class="lang-switch" title="Ngôn ngữ"><span class="gc-views" title="Lượt truy cập (GoatCounter, số liệu có thể chậm tới 4 giờ)" hidden></span><button data-lang="vi">VI</button><button data-lang="en">EN</button></span>
+    <span class="lang-switch" title="Ngôn ngữ"><span class="gc-views" title="Lượt truy cập (GoatCounter, cập nhật mỗi ~10 phút)" hidden></span><button data-lang="vi">VI</button><button data-lang="en">EN</button></span>
     <h1>Web Tools</h1>
     <p class="lead">Bộ công cụ xử lý dữ liệu ngay trong trình duyệt.</p>
     <ul class="facts">
@@ -212,7 +214,7 @@ const T = I18n.t;
 // English UI strings, keyed by the Vietnamese source text.
 I18n.add({
   "Ngôn ngữ": "Language",
-  "Lượt truy cập (GoatCounter, số liệu có thể chậm tới 4 giờ)": "Visits (GoatCounter, may lag up to 4 hours)",
+  "Lượt truy cập (GoatCounter, cập nhật mỗi ~10 phút)": "Visits (GoatCounter, updates every ~10 minutes)",
   "Bộ công cụ xử lý dữ liệu ngay trong trình duyệt.": "Data tools that run right in your browser.",
   "Không cần cài đặt": "Nothing to install",
   "Mở trang là dùng được.": "Open the page and start working.",

@@ -2,7 +2,7 @@
 I18n.add({
   "Soạn & xem trước sơ đồ": "Diagram editor & preview",
   "← Trang chủ": "← Home",
-  "Ngôn ngữ": "Language", "Lượt truy cập (GoatCounter, số liệu có thể chậm tới 4 giờ)": "Visits (GoatCounter, may lag up to 4 hours)",
+  "Ngôn ngữ": "Language", "Lượt truy cập (GoatCounter, cập nhật mỗi ~10 phút)": "Visits (GoatCounter, updates every ~10 minutes)",
   "Loại sơ đồ": "Diagram type",
   "Mở file…": "Open file…",
   "Mở file (hoặc kéo-thả file vào trang)": "Open a file (or drag and drop it onto the page)",

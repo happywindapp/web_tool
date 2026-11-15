@@ -1,7 +1,7 @@
 // English UI strings, keyed by the Vietnamese source text.
 I18n.add({
   "← Trang chủ": "← Home",
-  "Ngôn ngữ": "Language", "Lượt truy cập (GoatCounter, số liệu có thể chậm tới 4 giờ)": "Visits (GoatCounter, may lag up to 4 hours)",
+  "Ngôn ngữ": "Language", "Lượt truy cập (GoatCounter, cập nhật mỗi ~10 phút)": "Visits (GoatCounter, updates every ~10 minutes)",
   "Tác giả:": "Author:",
   "Bảng giá chứng khoán": "Vietnam Stock Price Board",
   "Chép link chứa tab + danh mục + tuỳ chọn (nằm sau dấu #, không gửi lên máy chủ)": "Copy a link with the tab + watchlist + options (kept after the #, never sent to a server)",

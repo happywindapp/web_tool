@@ -179,7 +179,9 @@
   navigator.sendBeacon?.(gc + "?" + new URLSearchParams({ p, r: document.referrer.split("?")[0], t: document.title, s: screen.width }));
   addEventListener("DOMContentLoaded", () => {
     const el = document.querySelector(".gc-views");
-    if (el) fetch(gc + "er/" + encodeURIComponent(p) + ".json").then(r => r.status === 404 ? { count: "0" } : r.json())
+    // GoatCounter cache mỗi URL (kể cả 404) tới 4 giờ ⇒ đổi start mỗi 10 phút; mọi ngày trước khi ra mắt cho cùng tổng
+    const start = "2026-10-" + String(Math.floor(Date.now() / 6e5) % 28 + 1).padStart(2, "0");
+    if (el) fetch(gc + "er/" + encodeURIComponent(p) + ".json?start=" + start).then(r => r.status === 404 ? { count: "0" } : r.json())
       .then(j => { el.textContent = "👁 " + j.count; el.hidden = false; }).catch(() => {});
   }); }
 </script>
@@ -191,7 +193,7 @@
       <a href="../study.html" title="Về trang Ôn tập">← Ôn tập</a>
       <h1>Cơ bản về chứng khoán và TTCK</h1>
       <span id="timer" hidden title="Thời gian còn lại">60:00</span>
-      <span class="gc-views" title="Lượt truy cập (GoatCounter, số liệu có thể chậm tới 4 giờ)" hidden></span>
+      <span class="gc-views" title="Lượt truy cập (GoatCounter, cập nhật mỗi ~10 phút)" hidden></span>
     </div>
   </header>
   <div class="toolbar" id="toolbar" hidden>

@@ -1,6 +1,6 @@
 // English UI strings of Lịch vạn niên (keys = Vietnamese source text).
 I18n.add({
-  "Lịch vạn niên": "Vietnamese Lunar Calendar", "← Trang chủ": "← Home", "🔗 Chia sẻ link": "🔗 Share link", "Ngôn ngữ": "Language", "Lượt truy cập (GoatCounter, số liệu có thể chậm tới 4 giờ)": "Visits (GoatCounter, may lag up to 4 hours)", "Tác giả:": "Author:",
+  "Lịch vạn niên": "Vietnamese Lunar Calendar", "← Trang chủ": "← Home", "🔗 Chia sẻ link": "🔗 Share link", "Ngôn ngữ": "Language", "Lượt truy cập (GoatCounter, cập nhật mỗi ~10 phút)": "Visits (GoatCounter, updates every ~10 minutes)", "Tác giả:": "Author:",
   "Chép link mở đúng ngày / lá số đang xem (dữ liệu nằm sau dấu #, không gửi lên máy chủ)": "Copy a link that opens the selected day / reading (data stays after the #, never sent to a server)",
   "Nạp ngày mẫu rồi xem ngay": "Load a sample date and show it", "Thử mẫu…": "Try a sample…",
   "Tháng trước (PageUp)": "Previous month (PageUp)", "Tháng sau (PageDown)": "Next month (PageDown)", "Tháng dương lịch": "Solar month", "Năm dương lịch": "Solar year",

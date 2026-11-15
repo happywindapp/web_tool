@@ -238,7 +238,9 @@
   navigator.sendBeacon?.(gc + "?" + new URLSearchParams({ p, r: document.referrer.split("?")[0], t: document.title, s: screen.width }));
   addEventListener("DOMContentLoaded", () => {
     const el = document.querySelector(".gc-views");
-    if (el) fetch(gc + "er/" + encodeURIComponent(p) + ".json").then(r => r.status === 404 ? { count: "0" } : r.json())
+    // GoatCounter cache mỗi URL (kể cả 404) tới 4 giờ ⇒ đổi start mỗi 10 phút; mọi ngày trước khi ra mắt cho cùng tổng
+    const start = "2026-10-" + String(Math.floor(Date.now() / 6e5) % 28 + 1).padStart(2, "0");
+    if (el) fetch(gc + "er/" + encodeURIComponent(p) + ".json?start=" + start).then(r => r.status === 404 ? { count: "0" } : r.json())
       .then(j => { el.textContent = "👁 " + j.count; el.hidden = false; }).catch(() => {});
   }); }
 </script>
@@ -255,7 +257,7 @@
   <select id="savedSel" title="Mở lại một sơ đồ đã lưu trong trình duyệt này"></select>
   <button id="btnDelSaved" title="Xoá sơ đồ đang mở khỏi danh sách đã lưu" hidden>🗑</button>
   <label class="chk" title="Giao diện sáng / tối">Giao diện <select id="uiTheme"><option value="auto">Tự động</option><option value="light">Sáng</option><option value="dark">Tối</option></select></label>
-  <span class="seg lang-switch" title="Ngôn ngữ"><span class="gc-views" title="Lượt truy cập (GoatCounter, số liệu có thể chậm tới 4 giờ)" hidden></span><button data-lang="vi">VI</button><button data-lang="en">EN</button></span>
+  <span class="seg lang-switch" title="Ngôn ngữ"><span class="gc-views" title="Lượt truy cập (GoatCounter, cập nhật mỗi ~10 phút)" hidden></span><button data-lang="vi">VI</button><button data-lang="en">EN</button></span>
   <nav class="seg wb-nav" aria-label="Loại sơ đồ">
     <button data-engine="mermaid" title="Flowchart, sequence, ER, Gantt… — chạy offline">Mermaid</button>
     <button data-engine="plantuml" title="UML đầy đủ, C4 — chạy offline">PlantUML</button>
@@ -408,7 +410,7 @@ I18n.add({
 I18n.add({
   "Soạn & xem trước sơ đồ": "Diagram editor & preview",
   "← Trang chủ": "← Home",
-  "Ngôn ngữ": "Language", "Lượt truy cập (GoatCounter, số liệu có thể chậm tới 4 giờ)": "Visits (GoatCounter, may lag up to 4 hours)",
+  "Ngôn ngữ": "Language", "Lượt truy cập (GoatCounter, cập nhật mỗi ~10 phút)": "Visits (GoatCounter, updates every ~10 minutes)",
   "Loại sơ đồ": "Diagram type",
   "Mở file…": "Open file…",
   "Mở file (hoặc kéo-thả file vào trang)": "Open a file (or drag and drop it onto the page)",
