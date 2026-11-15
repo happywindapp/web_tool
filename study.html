@@ -16,7 +16,8 @@
          font:15px/1.55 "Segoe UI", Arial, sans-serif; }
   .wrap { width:100%; max-width:1120px; margin:0 auto; padding:0 24px; }
   header { background:#164e63; color:#ecfeff; padding-bottom:64px; }
-  .hero { padding-top:40px; }
+  .hero { position:relative; padding-top:40px; }
+  .gc-views { position:absolute; top:16px; right:24px; font-size:13px; font-weight:600; opacity:.85; white-space:nowrap; }
   h1 { margin:0; font-size:38px; line-height:1.15; letter-spacing:-.02em; font-weight:700; }
   .lead { margin:8px 0 0; font-size:17px; color:#c9ecf4; max-width:60ch; }
   .tools { display:grid; gap:20px; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); }
@@ -54,10 +55,23 @@
     a.card:hover, a.card:active, a.card:hover .open i { transform:none; }
   }
 </style>
+<!-- GoatCounter: chỉ gửi path (không query/hash); chạy local đếm thành /local/<tên file> để không lộ thư mục máy -->
+<script>
+{ const local = !location.protocol.startsWith("http") || ["localhost", "127.0.0.1"].includes(location.hostname);
+  const p = local ? "/local/" + location.pathname.split("/").pop() : location.pathname.replace(/index[.]html$/, "");
+  const gc = "https://quan111.goatcounter.com/count";
+  navigator.sendBeacon?.(gc + "?" + new URLSearchParams({ p, r: document.referrer.split("?")[0], t: document.title, s: screen.width }));
+  addEventListener("DOMContentLoaded", () => {
+    const el = document.querySelector(".gc-views");
+    if (el) fetch(gc + "er/" + encodeURIComponent(p) + ".json").then(r => r.status === 404 ? { count: "0" } : r.json())
+      .then(j => { el.textContent = "👁 " + j.count; el.hidden = false; }).catch(() => {});
+  }); }
+</script>
 </head>
 <body>
 <header>
   <div class="wrap hero">
+    <span class="gc-views" title="Lượt truy cập (GoatCounter, số liệu có thể chậm tới 4 giờ)" hidden></span>
     <h1>Ôn tập</h1>
     <p class="lead">Bài thi trắc nghiệm ôn luyện, chạy ngay trong trình duyệt.</p>
   </div>

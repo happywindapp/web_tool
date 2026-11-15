@@ -92,6 +92,8 @@ Xem `docs/tools/<tool>.md` — danh sách ở [`docs/tools/`](../tools/README.md
   .author { display:flex; flex-wrap:wrap; gap:2px 6px; padding:4px 16px 6px; background:var(--panel); font-size:12px; color:var(--muted); } .author a { color:var(--acc); } .author span:not(:first-child) { margin-left:10px; }
   ```
 
+- **Đếm lượt xem GoatCounter (bắt buộc mọi tool + trang mới, ADR #17):** chép nguyên đoạn `<!-- GoatCounter … --><script>…sendBeacon…</script>` từ `index.html` vào ngay trước `</head>` (tool build từ `src/` thì sửa template); có CSP thì thêm `https://quan111.goatcounter.com` vào `connect-src`; đặt badge `<span class="gc-views" title="Lượt truy cập (GoatCounter, số liệu có thể chậm tới 4 giờ)" hidden></span>` làm con đầu của `.lang-switch` (CSS chung ở `app-bar-tabs-toolbar-surfaces.css`) + thêm khoá đó vào từ điển EN. Không dùng `count.js` (gửi cả query).
+
 - **Song ngữ VI/EN (bắt buộc mọi tool + `index.html`):** nút `VI | EN` ở góc trên-phải header
   (`<span class="lang-switch"><button data-lang="vi">VI</button><button data-lang="en">EN</button></span>`, `position:absolute` góc phải). Màu riêng, khác nút thường: chọn = cam đậm `#c2410c`/chữ trắng; không chọn = vàng nhạt
   `#fef3c7`, chữ `#92400e`, viền `#fcd34d`, hover `#fde68a` (dark mode: `#422006`/`#fcd34d`, chọn `#ea580c`).

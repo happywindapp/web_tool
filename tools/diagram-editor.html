@@ -3,7 +3,7 @@
 <html lang="vi">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; worker-src blob:; style-src 'unsafe-inline'; img-src data: blob:; font-src data:; frame-src https://embed.diagrams.net">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; worker-src blob:; style-src 'unsafe-inline'; img-src data: blob:; font-src data:; frame-src https://embed.diagrams.net; connect-src https://quan111.goatcounter.com">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Soạn & xem trước sơ đồ</title>
 <style>
@@ -58,6 +58,8 @@
   :root { --tb:color-mix(in srgb, var(--acc) 10%, var(--panel)); --tb-ink:var(--ink); }
   header.top { background:#164e63; border-bottom:0; color:var(--ink); color-scheme:dark;
                --ink:#ecfeff; --muted:#a5d8e6; --btn:#1f6b85; --line:#4b93aa; --good:#86efac; --bad:#fecaca; --warn:#fde68a; }
+  .lang-switch .gc-views { align-self:center; margin-right:4px; font-size:12px; font-weight:600; color:var(--ink); opacity:.85; white-space:nowrap; }
+  @media (min-width:641px) { header.top:has(.gc-views:not([hidden])) { padding-right:200px; } }
   .wb-nav { flex:0 0 100%; gap:2px; margin-bottom:-8px; }
   .wb-nav button { padding:6px 14px; border:0; border-radius:6px 6px 0 0; background:transparent; }
   .wb-nav button:hover { background:var(--btn); }
@@ -228,6 +230,18 @@
     #split { display:none; }
   }
 </style>
+<!-- GoatCounter: chỉ gửi path (không query/hash); chạy local đếm thành /local/<tên file> để không lộ thư mục máy -->
+<script>
+{ const local = !location.protocol.startsWith("http") || ["localhost", "127.0.0.1"].includes(location.hostname);
+  const p = local ? "/local/" + location.pathname.split("/").pop() : location.pathname.replace(/index[.]html$/, "");
+  const gc = "https://quan111.goatcounter.com/count";
+  navigator.sendBeacon?.(gc + "?" + new URLSearchParams({ p, r: document.referrer.split("?")[0], t: document.title, s: screen.width }));
+  addEventListener("DOMContentLoaded", () => {
+    const el = document.querySelector(".gc-views");
+    if (el) fetch(gc + "er/" + encodeURIComponent(p) + ".json").then(r => r.status === 404 ? { count: "0" } : r.json())
+      .then(j => { el.textContent = "👁 " + j.count; el.hidden = false; }).catch(() => {});
+  }); }
+</script>
 </head>
 <body>
 <header class="top">
@@ -241,7 +255,7 @@
   <select id="savedSel" title="Mở lại một sơ đồ đã lưu trong trình duyệt này"></select>
   <button id="btnDelSaved" title="Xoá sơ đồ đang mở khỏi danh sách đã lưu" hidden>🗑</button>
   <label class="chk" title="Giao diện sáng / tối">Giao diện <select id="uiTheme"><option value="auto">Tự động</option><option value="light">Sáng</option><option value="dark">Tối</option></select></label>
-  <span class="seg lang-switch" title="Ngôn ngữ"><button data-lang="vi">VI</button><button data-lang="en">EN</button></span>
+  <span class="seg lang-switch" title="Ngôn ngữ"><span class="gc-views" title="Lượt truy cập (GoatCounter, số liệu có thể chậm tới 4 giờ)" hidden></span><button data-lang="vi">VI</button><button data-lang="en">EN</button></span>
   <nav class="seg wb-nav" aria-label="Loại sơ đồ">
     <button data-engine="mermaid" title="Flowchart, sequence, ER, Gantt… — chạy offline">Mermaid</button>
     <button data-engine="plantuml" title="UML đầy đủ, C4 — chạy offline">PlantUML</button>
@@ -394,7 +408,7 @@ I18n.add({
 I18n.add({
   "Soạn & xem trước sơ đồ": "Diagram editor & preview",
   "← Trang chủ": "← Home",
-  "Ngôn ngữ": "Language",
+  "Ngôn ngữ": "Language", "Lượt truy cập (GoatCounter, số liệu có thể chậm tới 4 giờ)": "Visits (GoatCounter, may lag up to 4 hours)",
   "Loại sơ đồ": "Diagram type",
   "Mở file…": "Open file…",
   "Mở file (hoặc kéo-thả file vào trang)": "Open a file (or drag and drop it onto the page)",

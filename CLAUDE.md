@@ -6,7 +6,7 @@
 ## Workspace là gì
 
 `c:/_web_tool` **chính là git repo** `happywindapp/web_tool` (nhánh `main`): bộ công cụ web tiện ích,
-mỗi tool là **1 file HTML tự chứa** trong `tools/`, chạy 100% client-side, không gọi mạng (ngoại lệ: tab draw.io — ADR #11; Bảng giá chứng khoán tải giá VPS — ADR #13).
+mỗi tool là **1 file HTML tự chứa** trong `tools/`, chạy 100% client-side, không gọi mạng (ngoại lệ: tab draw.io — ADR #11; Bảng giá chứng khoán tải giá VPS — ADR #13; đếm lượt xem GoatCounter — ADR #17).
 Tool hiện có: `tools/data-workbench.html` (format/tự sửa JSON·XML·HTML · chuyển đổi · bảng CSV · so sánh · CSS/JS) —
 **file sinh ra** từ `src/data-workbench/`, build `pwsh scripts/build-data-workbench-single-file.ps1` (ADR #7); `tools/fix-message-parser.html` (FIX 4.4 + Server Sàn) — **file sinh ra** từ `src/fix-message-parser/`, build `pwsh scripts/build-single-file-tool.ps1 -Tool fix-message-parser`; `tools/diagram-editor.html` (6 tab Mermaid · PlantUML · draw.io · DBML · D2 · Structurizr) — **file sinh ra** từ `src/diagram-editor/`, build `pwsh scripts/build-single-file-tool.ps1 -Tool diagram-editor`, thư viện ở `tools/vendor/` tạo bằng `scripts/vendor-diagram-renderers.ps1` (ADR #11); `tools/vn-stock-price-board.html` (bảng giá CK realtime, dữ liệu API công khai VPS) — **file sinh ra** từ `src/vn-stock-price-board/`, build `pwsh scripts/build-single-file-tool.ps1 -Tool vn-stock-price-board`.
 `tools/crypto-market-board.html` (Bảng giá Crypto & On-chain: Binance/CoinGecko/DeFiLlama/mempool.space, ADR #16) — **file sinh ra** từ `src/crypto-market-board/`, `pwsh scripts/build-single-file-tool.ps1 -Tool crypto-market-board`, doc `docs/tools/crypto-market-board.md`.

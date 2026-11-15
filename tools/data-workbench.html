@@ -57,6 +57,8 @@
   :root { --tb:color-mix(in srgb, var(--acc) 10%, var(--panel)); --tb-ink:var(--ink); }
   header.top { background:#164e63; border-bottom:0; color:var(--ink); color-scheme:dark;
                --ink:#ecfeff; --muted:#a5d8e6; --btn:#1f6b85; --line:#4b93aa; --good:#86efac; --bad:#fecaca; --warn:#fde68a; }
+  .lang-switch .gc-views { align-self:center; margin-right:4px; font-size:12px; font-weight:600; color:var(--ink); opacity:.85; white-space:nowrap; }
+  @media (min-width:641px) { header.top:has(.gc-views:not([hidden])) { padding-right:200px; } }
   .wb-nav { flex:0 0 100%; gap:2px; margin-bottom:-8px; }
   .wb-nav button { padding:6px 14px; border:0; border-radius:6px 6px 0 0; background:transparent; }
   .wb-nav button:hover { background:var(--btn); }
@@ -215,6 +217,18 @@
     #split { display:none; }
   }
 </style>
+<!-- GoatCounter: chỉ gửi path (không query/hash); chạy local đếm thành /local/<tên file> để không lộ thư mục máy -->
+<script>
+{ const local = !location.protocol.startsWith("http") || ["localhost", "127.0.0.1"].includes(location.hostname);
+  const p = local ? "/local/" + location.pathname.split("/").pop() : location.pathname.replace(/index[.]html$/, "");
+  const gc = "https://quan111.goatcounter.com/count";
+  navigator.sendBeacon?.(gc + "?" + new URLSearchParams({ p, r: document.referrer.split("?")[0], t: document.title, s: screen.width }));
+  addEventListener("DOMContentLoaded", () => {
+    const el = document.querySelector(".gc-views");
+    if (el) fetch(gc + "er/" + encodeURIComponent(p) + ".json").then(r => r.status === 404 ? { count: "0" } : r.json())
+      .then(j => { el.textContent = "👁 " + j.count; el.hidden = false; }).catch(() => {});
+  }); }
+</script>
 </head>
 <body>
 <header class="top">
@@ -228,7 +242,7 @@
   <button id="wb-del-saved" title="Xoá phiên đang mở khỏi trình duyệt" hidden>🗑</button>
   <label class="chk" title="Giao diện sáng / tối">Giao diện <select id="wb-theme"><option value="auto">Tự động</option><option value="light">Sáng</option><option value="dark">Tối</option></select></label>
   <span id="wb-note" class="muted"></span>
-  <span class="seg lang-switch" title="Ngôn ngữ"><button data-lang="vi">VI</button><button data-lang="en">EN</button></span>
+  <span class="seg lang-switch" title="Ngôn ngữ"><span class="gc-views" title="Lượt truy cập (GoatCounter, số liệu có thể chậm tới 4 giờ)" hidden></span><button data-lang="vi">VI</button><button data-lang="en">EN</button></span>
   <nav class="seg wb-nav">
     <button data-wb-tab="format">Format JSON · XML · HTML</button>
     <button data-wb-tab="convert">Chuyển đổi</button>
@@ -489,7 +503,7 @@ const T = I18n.t;
 // English labels for the static markup (template + partials): buttons, options, tooltips, placeholders, hints.
 I18n.add({
   "← Trang chủ": "← Home",
-  "Ngôn ngữ": "Language",
+  "Ngôn ngữ": "Language", "Lượt truy cập (GoatCounter, số liệu có thể chậm tới 4 giờ)": "Visits (GoatCounter, may lag up to 4 hours)",
   "Tác giả:": "Author:",
   "Chuyển đổi": "Convert",
   "Bảng CSV": "CSV table",

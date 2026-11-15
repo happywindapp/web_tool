@@ -4,7 +4,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src https://quan111.goatcounter.com">
 <title>Lịch vạn niên</title>
 <style>
   :root { --bg:#f8fafc; --panel:#fff; --line:#cbd5e1; --ink:#0f172a; --muted:#64748b; --acc:#0e7490;
@@ -58,6 +58,8 @@
   :root { --tb:color-mix(in srgb, var(--acc) 10%, var(--panel)); --tb-ink:var(--ink); }
   header.top { background:#164e63; border-bottom:0; color:var(--ink); color-scheme:dark;
                --ink:#ecfeff; --muted:#a5d8e6; --btn:#1f6b85; --line:#4b93aa; --good:#86efac; --bad:#fecaca; --warn:#fde68a; }
+  .lang-switch .gc-views { align-self:center; margin-right:4px; font-size:12px; font-weight:600; color:var(--ink); opacity:.85; white-space:nowrap; }
+  @media (min-width:641px) { header.top:has(.gc-views:not([hidden])) { padding-right:200px; } }
   .wb-nav { flex:0 0 100%; gap:2px; margin-bottom:-8px; }
   .wb-nav button { padding:6px 14px; border:0; border-radius:6px 6px 0 0; background:transparent; }
   .wb-nav button:hover { background:var(--btn); }
@@ -269,6 +271,18 @@
     #split { display:none; }
   }
 </style>
+<!-- GoatCounter: chỉ gửi path (không query/hash); chạy local đếm thành /local/<tên file> để không lộ thư mục máy -->
+<script>
+{ const local = !location.protocol.startsWith("http") || ["localhost", "127.0.0.1"].includes(location.hostname);
+  const p = local ? "/local/" + location.pathname.split("/").pop() : location.pathname.replace(/index[.]html$/, "");
+  const gc = "https://quan111.goatcounter.com/count";
+  navigator.sendBeacon?.(gc + "?" + new URLSearchParams({ p, r: document.referrer.split("?")[0], t: document.title, s: screen.width }));
+  addEventListener("DOMContentLoaded", () => {
+    const el = document.querySelector(".gc-views");
+    if (el) fetch(gc + "er/" + encodeURIComponent(p) + ".json").then(r => r.status === 404 ? { count: "0" } : r.json())
+      .then(j => { el.textContent = "👁 " + j.count; el.hidden = false; }).catch(() => {});
+  }); }
+</script>
 </head>
 <body>
 <header class="top">
@@ -279,7 +293,7 @@
   <label class="chk" title="Giao diện sáng / tối">Giao diện
     <select id="theme"><option value="auto">Tự động</option><option value="light">Sáng</option><option value="dark">Tối</option></select></label>
   <span id="note" class="muted"></span>
-  <span class="seg lang-switch" title="Ngôn ngữ"><button data-lang="vi">VI</button><button data-lang="en">EN</button></span>
+  <span class="seg lang-switch" title="Ngôn ngữ"><span class="gc-views" title="Lượt truy cập (GoatCounter, số liệu có thể chậm tới 4 giờ)" hidden></span><button data-lang="vi">VI</button><button data-lang="en">EN</button></span>
   <nav class="seg wb-nav" id="tabs"><button data-tab="cal">📅 Lịch</button><button data-tab="horo">🔮 Tử vi</button></nav>
 </header>
 <div class="toolbar" id="calBar">
@@ -398,7 +412,7 @@ const I18n = (() => {
 const T = I18n.t;
 // English UI strings of Lịch vạn niên (keys = Vietnamese source text).
 I18n.add({
-  "Lịch vạn niên": "Vietnamese Lunar Calendar", "← Trang chủ": "← Home", "🔗 Chia sẻ link": "🔗 Share link", "Ngôn ngữ": "Language", "Tác giả:": "Author:",
+  "Lịch vạn niên": "Vietnamese Lunar Calendar", "← Trang chủ": "← Home", "🔗 Chia sẻ link": "🔗 Share link", "Ngôn ngữ": "Language", "Lượt truy cập (GoatCounter, số liệu có thể chậm tới 4 giờ)": "Visits (GoatCounter, may lag up to 4 hours)", "Tác giả:": "Author:",
   "Chép link mở đúng ngày / lá số đang xem (dữ liệu nằm sau dấu #, không gửi lên máy chủ)": "Copy a link that opens the selected day / reading (data stays after the #, never sent to a server)",
   "Nạp ngày mẫu rồi xem ngay": "Load a sample date and show it", "Thử mẫu…": "Try a sample…",
   "Tháng trước (PageUp)": "Previous month (PageUp)", "Tháng sau (PageDown)": "Next month (PageDown)", "Tháng dương lịch": "Solar month", "Năm dương lịch": "Solar year",

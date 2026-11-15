@@ -1,7 +1,7 @@
 // English labels for the static markup (template + partials): buttons, options, tooltips, placeholders, hints.
 I18n.add({
   "← Trang chủ": "← Home",
-  "Ngôn ngữ": "Language",
+  "Ngôn ngữ": "Language", "Lượt truy cập (GoatCounter, số liệu có thể chậm tới 4 giờ)": "Visits (GoatCounter, may lag up to 4 hours)",
   "Tác giả:": "Author:",
   "Chuyển đổi": "Convert",
   "Bảng CSV": "CSV table",

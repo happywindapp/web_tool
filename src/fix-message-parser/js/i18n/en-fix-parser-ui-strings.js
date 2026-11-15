@@ -1,7 +1,7 @@
 // English UI strings, keyed by the Vietnamese source text.
 I18n.add({
   "← Trang chủ": "← Home",
-  "Ngôn ngữ": "Language",
+  "Ngôn ngữ": "Language", "Lượt truy cập (GoatCounter, số liệu có thể chậm tới 4 giờ)": "Visits (GoatCounter, may lag up to 4 hours)",
   "Tác giả:": "Author:",
   "Nạp dữ liệu mẫu rồi phân tích ngay": "Load sample data and parse it right away",
   "Thử mẫu…": "Try a sample…",

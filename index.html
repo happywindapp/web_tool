@@ -52,6 +52,7 @@
   .lang-switch button { font:inherit; font-size:13px; font-weight:600; padding:3px 10px; border:1px solid #fcd34d; border-radius:6px; background:#fef3c7; color:#92400e; cursor:pointer; }
   .lang-switch button:hover { background:#fde68a; }
   .lang-switch button.on { background:#c2410c; color:#fff; border-color:#c2410c; }
+  .gc-views { align-self:center; margin-right:4px; font-size:13px; font-weight:600; opacity:.85; white-space:nowrap; }
   @media (prefers-color-scheme: dark) { .lang-switch button { background:#422006; color:#fcd34d; border-color:#92400e; } .lang-switch button:hover { background:#713f12; } .lang-switch button.on { background:#ea580c; color:#fff; border-color:#ea580c; } }
   @media (max-width:640px) {
     .wrap { padding:0 16px; }
@@ -67,16 +68,28 @@
     a.card:hover, a.card:active, a.card:hover .open i { transform:none; }
   }
 </style>
+<!-- GoatCounter: chỉ gửi path (không query/hash); chạy local đếm thành /local/<tên file> để không lộ thư mục máy -->
+<script>
+{ const local = !location.protocol.startsWith("http") || ["localhost", "127.0.0.1"].includes(location.hostname);
+  const p = local ? "/local/" + location.pathname.split("/").pop() : location.pathname.replace(/index[.]html$/, "");
+  const gc = "https://quan111.goatcounter.com/count";
+  navigator.sendBeacon?.(gc + "?" + new URLSearchParams({ p, r: document.referrer.split("?")[0], t: document.title, s: screen.width }));
+  addEventListener("DOMContentLoaded", () => {
+    const el = document.querySelector(".gc-views");
+    if (el) fetch(gc + "er/" + encodeURIComponent(p) + ".json").then(r => r.status === 404 ? { count: "0" } : r.json())
+      .then(j => { el.textContent = "👁 " + j.count; el.hidden = false; }).catch(() => {});
+  }); }
+</script>
 </head>
 <body>
 <header>
   <div class="wrap hero">
-    <span class="lang-switch" title="Ngôn ngữ"><button data-lang="vi">VI</button><button data-lang="en">EN</button></span>
+    <span class="lang-switch" title="Ngôn ngữ"><span class="gc-views" title="Lượt truy cập (GoatCounter, số liệu có thể chậm tới 4 giờ)" hidden></span><button data-lang="vi">VI</button><button data-lang="en">EN</button></span>
     <h1>Web Tools</h1>
     <p class="lead">Bộ công cụ xử lý dữ liệu ngay trong trình duyệt.</p>
     <ul class="facts">
       <li><b>Không cần cài đặt</b>Mở trang là dùng được.</li>
-      <li><b>Dữ liệu ở lại trên máy</b>Không gửi lên máy chủ nào, trừ tab draw.io (khi bạn bấm kết nối) và 2 bảng giá chứng khoán / crypto (chỉ tải dữ liệu thị trường công khai).</li>
+      <li><b>Dữ liệu ở lại trên máy</b>Không gửi lên máy chủ nào, trừ tab draw.io (khi bạn bấm kết nối) và 2 bảng giá chứng khoán / crypto (chỉ tải dữ liệu thị trường công khai). Có đếm lượt xem ẩn danh (GoatCounter: chỉ gửi tên trang, không cookie).</li>
       <li><b>Dùng được offline</b>Tải file HTML về máy là chạy.</li>
     </ul>
   </div>
@@ -199,11 +212,12 @@ const T = I18n.t;
 // English UI strings, keyed by the Vietnamese source text.
 I18n.add({
   "Ngôn ngữ": "Language",
+  "Lượt truy cập (GoatCounter, số liệu có thể chậm tới 4 giờ)": "Visits (GoatCounter, may lag up to 4 hours)",
   "Bộ công cụ xử lý dữ liệu ngay trong trình duyệt.": "Data tools that run right in your browser.",
   "Không cần cài đặt": "Nothing to install",
   "Mở trang là dùng được.": "Open the page and start working.",
   "Dữ liệu ở lại trên máy": "Your data stays on your device",
-  "Không gửi lên máy chủ nào, trừ tab draw.io (khi bạn bấm kết nối) và 2 bảng giá chứng khoán / crypto (chỉ tải dữ liệu thị trường công khai).": "Nothing is sent to any server, except the draw.io tab (after you click Connect) and the stock / crypto boards (they only download public market data).",
+  "Không gửi lên máy chủ nào, trừ tab draw.io (khi bạn bấm kết nối) và 2 bảng giá chứng khoán / crypto (chỉ tải dữ liệu thị trường công khai). Có đếm lượt xem ẩn danh (GoatCounter: chỉ gửi tên trang, không cookie).": "Nothing is sent to any server, except the draw.io tab (after you click Connect) and the stock / crypto boards (they only download public market data). Page views are counted anonymously (GoatCounter: page name only, no cookies).",
   "Dùng được offline": "Works offline",
   "Tải file HTML về máy là chạy.": "Download the HTML file and run it.",
   "Mở công cụ": "Open tool",

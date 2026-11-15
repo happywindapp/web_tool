@@ -34,6 +34,7 @@
   .bar { display:flex; align-items:center; gap:12px; max-width:1100px; margin:0 auto; padding:10px 20px; }
   .bar a { color:#c9ecf4; text-decoration:none; font-size:14px; white-space:nowrap; padding:4px 8px; margin-left:-8px; border-radius:6px; }
   .bar h1 { flex:1; margin:0; font-size:17px; font-weight:650; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .gc-views { font-size:13px; font-weight:600; opacity:.85; white-space:nowrap; }
   #timer { display:inline-flex; align-items:center; gap:6px; padding:6px 14px; border-radius:99px; border:1px solid rgb(255 255 255 / .28); background:rgb(255 255 255 / .14);
            font:700 18px/1 "Cascadia Mono", Consolas, monospace; }
   #timer.warn { background:#f59e0b; border-color:#fcd34d; color:#1c1917; }
@@ -170,6 +171,18 @@
     #r-list .review[hidden] { display:block !important; }
   }
 </style>
+<!-- GoatCounter: chỉ gửi path (không query/hash); chạy local đếm thành /local/<tên file> để không lộ thư mục máy -->
+<script>
+{ const local = !location.protocol.startsWith("http") || ["localhost", "127.0.0.1"].includes(location.hostname);
+  const p = local ? "/local/" + location.pathname.split("/").pop() : location.pathname.replace(/index[.]html$/, "");
+  const gc = "https://quan111.goatcounter.com/count";
+  navigator.sendBeacon?.(gc + "?" + new URLSearchParams({ p, r: document.referrer.split("?")[0], t: document.title, s: screen.width }));
+  addEventListener("DOMContentLoaded", () => {
+    const el = document.querySelector(".gc-views");
+    if (el) fetch(gc + "er/" + encodeURIComponent(p) + ".json").then(r => r.status === 404 ? { count: "0" } : r.json())
+      .then(j => { el.textContent = "👁 " + j.count; el.hidden = false; }).catch(() => {});
+  }); }
+</script>
 </head>
 <body>
 <div class="top">
@@ -178,6 +191,7 @@
       <a href="../study.html" title="Về trang Ôn tập">← Ôn tập</a>
       <h1>Pháp luật về chứng khoán và TTCK</h1>
       <span id="timer" hidden title="Thời gian còn lại">60:00</span>
+      <span class="gc-views" title="Lượt truy cập (GoatCounter, số liệu có thể chậm tới 4 giờ)" hidden></span>
     </div>
   </header>
   <div class="toolbar" id="toolbar" hidden>

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src https://api.binance.com https://data-api.binance.vision wss://stream.binance.com:9443 wss://data-stream.binance.vision https://fapi.binance.com https://api.coingecko.com https://api.llama.fi https://stablecoins.llama.fi https://mempool.space https://api.blockchain.info wss://ws.blockchain.info https://api.alternative.me">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src https://api.binance.com https://data-api.binance.vision wss://stream.binance.com:9443 wss://data-stream.binance.vision https://fapi.binance.com https://api.coingecko.com https://api.llama.fi https://stablecoins.llama.fi https://mempool.space https://api.blockchain.info wss://ws.blockchain.info https://api.alternative.me https://quan111.goatcounter.com">
 <title>Bảng giá Crypto &amp; On-chain</title>
 <style>
 /* @include ../data-workbench/styles/base.css */
@@ -19,6 +19,18 @@
 /* @include styles/btc-wallet-whale.css */
 /* @include ../data-workbench/styles/phone-portrait-layout.css */
 </style>
+<!-- GoatCounter: chỉ gửi path (không query/hash); chạy local đếm thành /local/<tên file> để không lộ thư mục máy -->
+<script>
+{ const local = !location.protocol.startsWith("http") || ["localhost", "127.0.0.1"].includes(location.hostname);
+  const p = local ? "/local/" + location.pathname.split("/").pop() : location.pathname.replace(/index[.]html$/, "");
+  const gc = "https://quan111.goatcounter.com/count";
+  navigator.sendBeacon?.(gc + "?" + new URLSearchParams({ p, r: document.referrer.split("?")[0], t: document.title, s: screen.width }));
+  addEventListener("DOMContentLoaded", () => {
+    const el = document.querySelector(".gc-views");
+    if (el) fetch(gc + "er/" + encodeURIComponent(p) + ".json").then(r => r.status === 404 ? { count: "0" } : r.json())
+      .then(j => { el.textContent = "👁 " + j.count; el.hidden = false; }).catch(() => {});
+  }); }
+</script>
 </head>
 <body>
 <header class="top">
@@ -31,7 +43,7 @@
   <button id="undo" title="Lấy lại danh mục trước khi nạp mẫu / link chia sẻ" hidden>↶ Khôi phục danh mục trước</button>
   <label class="chk" title="Giao diện sáng / tối">Giao diện
     <select id="theme"><option value="auto">Tự động</option><option value="light">Sáng</option><option value="dark">Tối</option></select></label>
-  <span class="seg lang-switch" title="Ngôn ngữ"><button data-lang="vi">VI</button><button data-lang="en">EN</button></span>
+  <span class="seg lang-switch" title="Ngôn ngữ"><span class="gc-views" title="Lượt truy cập (GoatCounter, số liệu có thể chậm tới 4 giờ)" hidden></span><button data-lang="vi">VI</button><button data-lang="en">EN</button></span>
   <nav class="seg wb-nav" id="tabs"></nav>
 </header>
 <div class="toolbar">
