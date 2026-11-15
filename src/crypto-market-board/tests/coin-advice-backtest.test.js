@@ -6,7 +6,7 @@ const path = require("node:path");
 const vm = require("node:vm");
 
 const stock = ["technical-indicators-trend-and-bands.js", "technical-indicators-oscillators.js", "technical-outlook-scoring.js"].map(f => path.join(__dirname, "../../vn-stock-price-board/js/model", f));
-const files = stock.concat(["coin-trade-advice-rules.js", "coin-advice-backtest.js"].map(f => path.join(__dirname, "../js/model", f)));
+const files = stock.concat([path.join(__dirname, "../../vn-stock-price-board/js/model/plan-backtest-trade-simulator.js")], ["coin-trade-advice-rules.js", "coin-advice-backtest.js"].map(f => path.join(__dirname, "../js/model", f)));
 const ctx = vm.createContext({ setTimeout });
 vm.runInContext(files.map(f => fs.readFileSync(f, "utf8")).join("\n;\n") + "\n;globalThis.M = { CoinBacktest };", ctx);
 const { CoinBacktest } = ctx.M;

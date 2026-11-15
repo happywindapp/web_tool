@@ -44,7 +44,7 @@ const ScreenerRules = (() => {
   }
 
   const VALUE = { coin: it => it.row.sym, price: it => it.row.last, pct: it => it.row.pct, pct7d: it => it.row.pct7d, rsi: it => it.snap.rsi, score: it => it.snap.score,
-    vs200: it => it.snap.vsMa200, vol: it => it.snap.volRatio, sig: it => it.events.length ? it.events[0].barsAgo : null };
+    vs200: it => it.snap.vsMa200, vol: it => it.snap.volRatio, sig: it => { const x = it.events.find(ev => ev.barsAgo <= (it.within ?? Infinity)); return x ? x.barsAgo : null; } };
   const COLS = Object.keys(VALUE);
 
   // Stable sort; empty values always last.

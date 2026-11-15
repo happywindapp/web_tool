@@ -1,5 +1,6 @@
 // English for the "Bộ lọc" screener tab and technical-signal alerts.
 I18n.add({
+  "Đã đủ {n} cảnh báo tín hiệu — xoá bớt trước khi thêm.": "Already {n} signal alerts — delete some before adding.",
   "Bộ lọc": "Screener",
   "Quá bán trong xu hướng tăng": "Oversold in an uptrend", "Golden cross mới (≤ 10 phiên)": "Fresh golden cross (≤ 10 days)", "Vừa vượt MA200": "Just crossed above MA200",
   "Bứt phá đỉnh 20 phiên + KL ≥ 1,5×": "20-day breakout + volume ≥ 1.5×", "Quá mua RSI ≥ 75": "Overbought RSI ≥ 75", "Death cross / thủng MA200": "Death cross / below MA200",

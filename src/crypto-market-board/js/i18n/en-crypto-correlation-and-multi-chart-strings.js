@@ -1,5 +1,6 @@
 // English for the "Tương quan" and "Đa biểu đồ" tabs.
 I18n.add({
+  "Không tải được danh sách vốn hoá (CoinGecko) — đang thử lại; có thể chọn ★ Danh mục.": "Could not load the market-cap list (CoinGecko) — retrying; you can pick ★ Watchlist instead.",
   "Tương quan": "Correlation", "Đa biểu đồ": "Multi-chart",
   "Đang tải dữ liệu ngày {done}/{total}…": "Loading daily data {done}/{total}…",
   "Tương quan với BTC": "Correlation vs BTC", "Beta so với BTC": "Beta vs BTC", "Biến động năm": "Annualised volatility",

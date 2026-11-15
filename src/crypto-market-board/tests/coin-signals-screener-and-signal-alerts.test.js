@@ -140,6 +140,15 @@ test("SignalAlertRule.evaluate: candle hit on the last closed bar, never twice f
   assert.equal(SignalAlertRule.evaluate([alert()], { ...ctx2, bars: new Map([["BTC|1h", bars.slice(0, 20)]]) }).length, 0);
 });
 
+test("SignalAlertRule.evaluate: a bar that closed before the alert was armed never fires", () => {
+  const bars = mk([...flat(60), 100], [...flat(60, 1000), 3000]), closeMs = (bars[60].time + 3600) * 1000;
+  const ctx2 = { tz: 0, bars: new Map([["BTC|1h", bars]]), advice: new Map(), price: new Map() };
+  assert.equal(SignalAlertRule.evaluate([alert({ at: closeMs + 1 })], ctx2).length, 0);
+  assert.equal(SignalAlertRule.evaluate([alert({ at: closeMs })], ctx2).length, 1);
+  assert.equal(SignalAlertRule.evaluate([alert({ at: closeMs + 7200e3 })], { ...ctx2, tz: 7200 }).length, 0);
+  assert.equal(SignalAlertRule.evaluate([alert({ at: closeMs - 7200e3 })], { ...ctx2, tz: 7200 }).length, 1);
+});
+
 test("SignalAlertRule.evaluate: zone alerts fire when the price is inside the horizon's zone", () => {
   const adv = { horizons: [{ id: "short", buy: { lo: 90, hi: 95 }, sell: { lo: 110, hi: 120 } }, { id: "long", buy: { lo: 50, hi: 60 }, sell: { lo: 200, hi: 220 } }] };
   const run = (a, p) => SignalAlertRule.evaluate([a], { bars: new Map(), advice: new Map([["BTC", adv]]), price: new Map([["BTC", p]]) });

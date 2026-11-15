@@ -1,4 +1,4 @@
-// “👤 Của tôi”: hộp nhập ngày giờ sinh dương lịch + giới tính (localStorage, không vào link chia sẻ), dấu 🎂 ★ ⚠ trên lịch tháng, mục “Dành cho bạn” trong Chi tiết ngày.
+// “👤 Tôi”: hộp nhập ngày giờ sinh dương lịch + giới tính (localStorage, không vào link chia sẻ), dấu 🎂 ★ ⚠ trên lịch tháng, mục “Dành cho bạn” trong Chi tiết ngày.
 const Me = (() => {
   const esc = s => Dom.esc(s);
   const pad = n => String(n).padStart(2, "0");
@@ -29,7 +29,7 @@ const Me = (() => {
   }
 
   function section(jd) {
-    if (!pf) return `<section class="me-sec empty"><p class="muted">${esc(T("Nhập ngày giờ sinh ở nút 👤 Của tôi để xem ngày này hợp hay xung với bạn và lời khuyên riêng."))}</p></section>`;
+    if (!pf) return `<section class="me-sec empty"><p class="muted">${esc(T("Nhập ngày giờ sinh ở nút 👤 Tôi để xem ngày này hợp hay xung với bạn và lời khuyên riêng."))}</p></section>`;
     const r = eval_(jd), c = pf.chart, n = PersonalText.NUM[r.num], s = LunarCal.jdToDate(jd);
     const best = c.kua.dirs.find(d => d.good), dir = Almanac.directions(CanChi.day(jd));
     const lines = r.reasons.map(x => `<li class="${x.good ? "good" : "bad"}">${x.good ? "✓" : "✗"} ${esc(T(PersonalText.REASON[x.key], x.params))}</li>`).join("");

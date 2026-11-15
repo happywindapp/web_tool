@@ -25,7 +25,7 @@ const CoinAdvice = (() => {
         ["Thoát hẳn: khi đóng cửa {tf} dưới {s}.", { tf, s: stop }], ["Chỉ mua lại khi đóng cửa {tf} trên {r}.", { tf, r: sell.hi }]]
       : [["Mua gần {a} – {b}, bán gần {c} – {d}.", { a: buy.lo, b: buy.hi, c: sell.lo, d: sell.hi }],
         ["Chờ phá vỡ: đóng cửa {tf} trên {r} → theo tăng; dưới {s} → đứng ngoài.", { tf, r: sell.hi, s: buy.lo }]];
-    return { id, score, bucket: b, action, tone, buy, sell, stop: { v: stop, basis: "{n} ATR dưới vùng mua", n: stopAtr }, rr, timing, odds, oddsH };
+    return { id, score, bucket: b, action, tone, cold: action === COLD[0], buy, sell, stop: { v: stop, basis: "{n} ATR dưới vùng mua", n: stopAtr }, rr, timing, odds, oddsH };
   }
 
   // k = { h4, d1, w1 } candle arrays (oldest first); opt = { btc: daily bars | null, funding (%/8h), fng (0–100), qvol (USD), isBtc }.
@@ -33,7 +33,7 @@ const CoinAdvice = (() => {
     const fH = TechOutlook.frame(k.h4, "D", [6]), fD = TechOutlook.frame(k.d1, "D", [5, 20]), fW = TechOutlook.frame(k.w1, "W", [26]);
     if (!fD || !fD.atr || k.d1.length < 60) return null;
     const price = fD.close, cD = k.d1.map(b => b.close), cW = k.w1.map(b => b.close), atrD = fD.atr;
-    const pd = TechOutlook.pivots(k.d1[k.d1.length - 2]), pw = k.w1.length > 2 ? TechOutlook.pivots(k.w1[k.w1.length - 2]) : null;
+    const off = opt.closedOnly ? 1 : 2, pd = TechOutlook.pivots(k.d1[k.d1.length - off]), pw = k.w1.length > off ? TechOutlook.pivots(k.w1[k.w1.length - off]) : null;
     const ma50 = last(TA.sma(cD, 50)), ma200 = last(TA.sma(cD, 200)), ma40w = last(TA.sma(cW, 40)), lt = TechOutlook.longTerm(k.d1);
     const ath = Math.max(...k.w1.map(b => b.high), ...k.d1.map(b => b.high)), years = (last(k.w1).time - k.w1[0].time) / 31557600;
     const fall = (v, basis) => ({ v, basis });

@@ -12,13 +12,13 @@ const AdviceBacktestView = (() => {
   function card(r, rules) {
     const w = rules[r.id], row = (label, val, sub = "", cls = "") => `<div class="adv-row"><span>${e(T(label))}</span><b class="${cls}">${e(val)}</b>${sub ? `<em class="muted">${e(sub)}</em>` : ""}</div>`;
     const buy = r.entered
-      ? row("Số lần khuyến nghị mua", `${r.buyCalls}`, T("vào lệnh {n} lần ({p}%)", { n: r.entered, p: Fmt.en(r.entered / r.buyCalls * 100, 0) }))
+      ? row("Khuyến nghị mua (mô phỏng / tổng)", `${r.buyCalls} / ${r.buyAll}`, T("vào lệnh {n} lần ({p}%)", { n: r.entered, p: Fmt.en(r.entered / r.buyCalls * 100, 0) }))
         + row("Tỷ lệ thắng", `${Fmt.en(r.wins / r.entered * 100, 0)}%`, T("{n} lệnh có lãi sau phí", { n: r.wins }), r.wins / r.entered >= 0.5 ? "up" : "down")
         + row("Lãi trung bình / lệnh", pct(r.avg, 2), T("lệnh tệ nhất {w}", { w: pct(r.worst) }), Fmt.tone(r.avg))
         + row("Lãi gộp các lệnh", pct(r.compound), T("mua & giữ cùng kỳ {b}", { b: pct(r.bh) }), Fmt.tone(r.compound))
         + row("Sụt giảm tối đa", pct(r.maxDD), T("chuỗi lệnh nối tiếp"), "down")
         + row("Thời gian giữ trung bình", T("{d} ngày", { d: Fmt.en(r.avgDays, 1) }), T("chốt lời {a} · dừng lỗ {b} · hết hạn {c}", { a: r.targets, b: r.stops, c: r.entered - r.targets - r.stops }))
-      : row("Số lần khuyến nghị mua", `${r.buyCalls}`, r.buyCalls ? T("chưa có lần nào chạm vùng mua") : T("chưa có khuyến nghị mua nào"));
+      : row("Khuyến nghị mua (mô phỏng / tổng)", `${r.buyCalls} / ${r.buyAll}`, r.buyCalls ? T("chưa có lần nào chạm vùng mua") : T("chưa có khuyến nghị mua nào"));
     const sell = row("Khuyến nghị bán", `${r.sellCalls}`, r.sellCalls ? T("giá thấp hơn sau {w} ngày: {p}% số lần (thay đổi TB {m})", { w: w.win, p: Fmt.en(r.sellHits / r.sellCalls * 100, 0), m: pct(r.sellAvg) }) : "");
     return `<div class="ol-card adv-card"><div class="ol-h"><b>${e(T(TITLE[r.id]))}</b><span class="badge">${e(r.from ? `${day(r.from)} → ${day(r.to)}` : "")}</span></div>`
       + buy + sell + row("Trung lập (chờ)", `${r.neutral}`) + (r.pending ? row("Chưa kết thúc", `${r.pending}`, T("bỏ qua vì dữ liệu chưa đủ để chốt kết quả")) : "")
@@ -35,7 +35,7 @@ const AdviceBacktestView = (() => {
     const w = res.rules;
     return `<div class="ol-grid">${res.results.map(r => card(r, w)).join("")}</div>`
       + `<p class="sc-note">${e(T("Quy tắc: khuyến nghị mua → chờ giá chạm vùng mua trong {a} / {b} / {c} ngày (ngắn / trung / dài hạn), vào ở giá thấp hơn của giá mở cửa và đỉnh vùng mua; thoát khi chạm dừng lỗ hoặc vùng bán, nếu không thì sau {d} / {f} / {g} ngày. Nến vừa vào lệnh chỉ xét dừng lỗ; cùng nến chạm cả dừng lỗ và mục tiêu tính là dừng lỗ; gap qua mức thì khớp ở giá mở cửa. Phí {x}% mỗi chiều, không tính trượt giá, mỗi lệnh dùng toàn bộ vốn và các lệnh không chồng nhau.", { a: w.short.entry, b: w.medium.entry, c: w.long.entry, d: w.short.hold, f: w.medium.hold, g: w.long.hold, x: Fmt.en(res.fee * 100, 1) }))}</p>`
-      + `<p class="sc-note">${e(T("Khuyến nghị bán: so giá đóng cửa sau {a} / {b} / {c} ngày với giá lúc khuyến nghị (các lần có thể chồng nhau). Ngắn / trung hạn phát lại mỗi ngày trong ~2 năm gần nhất, dài hạn mỗi tuần trên toàn bộ lịch sử nến ngày ({n} nến). Chỉ dùng nến đã đóng tại thời điểm đó; bỏ qua funding, Fear & Greed, xu hướng BTC và thanh khoản. Quy tắc theo kỹ thuật, quá khứ không đảm bảo tương lai, không phải lời khuyên đầu tư.", { a: w.short.win, b: w.medium.win, c: w.long.win, n: bars }))}</p>`;
+      + `<p class="sc-note">${e(T("Khuyến nghị bán: so giá đóng cửa sau {a} / {b} / {c} ngày với giá lúc khuyến nghị (các lần có thể chồng nhau; “có thể hồi kỹ thuật” tính là trung lập). Ngắn / trung hạn phát lại mỗi ngày trong ~2 năm gần nhất, dài hạn mỗi tuần trên toàn bộ lịch sử nến ngày ({n} nến). Chỉ dùng nến đã đóng tại thời điểm đó; bỏ qua funding, Fear & Greed, xu hướng BTC và thanh khoản. Quy tắc theo kỹ thuật, quá khứ không đảm bảo tương lai, không phải lời khuyên đầu tư.", { a: w.short.win, b: w.medium.win, c: w.long.win, n: bars }))}</p>`;
   }
 
   async function run(box, tok, pair, key) {

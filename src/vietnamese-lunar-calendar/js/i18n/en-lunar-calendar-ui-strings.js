@@ -185,7 +185,7 @@ I18n.add({
   "{name} · còn {n} ngày → {next}": "{name} · {n} days → {next}",
   "Năm {y}: {p}% · còn {n} ngày": "{y}: {p}% done · {n} days left",
   "Còn {n} ngày → {date} {name}": "{n} days → {date} {name}",
-  "👤 Của tôi": "👤 Me",
+  "👤 Tôi": "👤 Me",
   "Nhập ngày giờ sinh của bạn để lịch hiện ngày hợp/xung và lời khuyên riêng (chỉ lưu trên máy này)": "Enter your birth date and time so the calendar shows your good/clashing days and personal advice (stored only on this device)",
   "👤 Ngày giờ sinh của tôi": "👤 My birth date & time",
   "Giờ sinh (để trống nếu không rõ)": "Birth time (leave empty if unknown)",
@@ -193,7 +193,7 @@ I18n.add({
   "Xóa": "Delete",
   "Sinh nhật dương lịch": "Birthday (solar)",
   "Sinh nhật âm lịch": "Birthday (lunar)",
-  "Nhập ngày giờ sinh ở nút 👤 Của tôi để xem ngày này hợp hay xung với bạn và lời khuyên riêng.": "Enter your birth date and time with the 👤 Me button to see whether this day suits you, with personal advice.",
+  "Nhập ngày giờ sinh ở nút 👤 Tôi để xem ngày này hợp hay xung với bạn và lời khuyên riêng.": "Enter your birth date and time with the 👤 Me button to see whether this day suits you, with personal advice.",
   "👤 Dành cho bạn · tuổi {cc}, mệnh {na}": "👤 For you · {cc} year, {na} destiny",
   "✎ Sửa": "✎ Edit",
   "điểm {s}": "score {s}",
@@ -235,4 +235,5 @@ I18n.add({
   "Ngày sinh không hợp lệ.": "Invalid birth date.",
   "= Âm {d}/{m}/{y} · tuổi {cc} · mệnh {na}": "= Lunar {d}/{m}/{y} · {cc} year · {na} destiny",
   "Chọn ngày sinh trên lịch": "Pick the birth date on a calendar",
+  "🔮 Tử Vi": "🔮 Horoscope",
 });

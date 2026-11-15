@@ -82,6 +82,9 @@
   body { grid-template-rows:auto auto 1fr auto auto; }
   .bar.monthnav { gap:4px; } .bar.monthnav #lunarRange { margin-left:6px; }
   .cal-opts { display:contents; }
+  .nb-ticker { flex:1 1 12em; min-width:0; max-width:28em; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; text-align:left;
+    border:1px dashed color-mix(in srgb, #f59e0b 60%, var(--line)); background:color-mix(in srgb, #f59e0b 10%, var(--panel)); }
+  .nb-ticker[hidden] { display:none; }
   .clock { margin-left:auto; font-size:20px; line-height:1; font-variant-numeric:tabular-nums; font-weight:700; color:var(--acc-ink); white-space:nowrap; }
   .toolbar .hint { font-size:12px; }
   @media (min-width: 901px) { .work { grid-template-columns:minmax(0, 1.15fr) minmax(0, 1fr); } }
@@ -460,8 +463,9 @@
     <label class="chk" title="Hiện tuần trăng (trăng non, lưỡi liềm, bán nguyệt, trăng tròn…) trong từng ô ngày"><input type="checkbox" id="moon">Mặt trăng</label>
     <label class="chk" title="Hiện thời tiết (icon, mô tả, nhiệt độ, độ ẩm) trong ô lịch và Chi tiết ngày — tải từ Open-Meteo, chỉ gửi tọa độ tỉnh/thành"><input type="checkbox" id="wx">Thời tiết</label>
     <span class="wx-opts" id="wxOpts"><select id="wxPlace" title="Tỉnh/thành lấy thời tiết (tọa độ trung tâm hành chính)"></select><button id="wxHere" title="Dùng vị trí hiện tại của trình duyệt (làm tròn ~1 km, chỉ lưu trên máy này; tên địa danh tra qua BigDataCloud)">📍</button></span>
-    <button id="meBtn" title="Nhập ngày giờ sinh của bạn để lịch hiện ngày hợp/xung và lời khuyên riêng (chỉ lưu trên máy này)">👤 Của tôi</button>
-    <button id="toHoro" title="Mở tab Tử vi với ngày sinh là ngày đang chọn trên lịch">🔮 Xem tử vi</button>
+    <button id="meBtn" title="Nhập ngày giờ sinh của bạn để lịch hiện ngày hợp/xung và lời khuyên riêng (chỉ lưu trên máy này)">👤 Tôi</button>
+    <button id="toHoro" title="Mở tab Tử vi với ngày sinh là ngày đang chọn trên lịch">🔮 Tử Vi</button>
+    <button type="button" id="nbTicker" class="nb-ticker" hidden></button>
   </span>
 </div>
 <div class="toolbar" id="horoBar" hidden>
@@ -826,7 +830,7 @@ I18n.add({
   "{name} · còn {n} ngày → {next}": "{name} · {n} days → {next}",
   "Năm {y}: {p}% · còn {n} ngày": "{y}: {p}% done · {n} days left",
   "Còn {n} ngày → {date} {name}": "{n} days → {date} {name}",
-  "👤 Của tôi": "👤 Me",
+  "👤 Tôi": "👤 Me",
   "Nhập ngày giờ sinh của bạn để lịch hiện ngày hợp/xung và lời khuyên riêng (chỉ lưu trên máy này)": "Enter your birth date and time so the calendar shows your good/clashing days and personal advice (stored only on this device)",
   "👤 Ngày giờ sinh của tôi": "👤 My birth date & time",
   "Giờ sinh (để trống nếu không rõ)": "Birth time (leave empty if unknown)",
@@ -834,7 +838,7 @@ I18n.add({
   "Xóa": "Delete",
   "Sinh nhật dương lịch": "Birthday (solar)",
   "Sinh nhật âm lịch": "Birthday (lunar)",
-  "Nhập ngày giờ sinh ở nút 👤 Của tôi để xem ngày này hợp hay xung với bạn và lời khuyên riêng.": "Enter your birth date and time with the 👤 Me button to see whether this day suits you, with personal advice.",
+  "Nhập ngày giờ sinh ở nút 👤 Tôi để xem ngày này hợp hay xung với bạn và lời khuyên riêng.": "Enter your birth date and time with the 👤 Me button to see whether this day suits you, with personal advice.",
   "👤 Dành cho bạn · tuổi {cc}, mệnh {na}": "👤 For you · {cc} year, {na} destiny",
   "✎ Sửa": "✎ Edit",
   "điểm {s}": "score {s}",
@@ -876,6 +880,7 @@ I18n.add({
   "Ngày sinh không hợp lệ.": "Invalid birth date.",
   "= Âm {d}/{m}/{y} · tuổi {cc} · mệnh {na}": "= Lunar {d}/{m}/{y} · {cc} year · {na} destiny",
   "Chọn ngày sinh trên lịch": "Pick the birth date on a calendar",
+  "🔮 Tử Vi": "🔮 Horoscope",
 });
 // English for almanac terms (can chi, nạp âm, tiết khí, thần, trực, 28 tú, hướng, ngày lễ) — keyed by the Vietnamese name.
 I18n.add({
@@ -6641,7 +6646,7 @@ const PersonalDay = (() => {
 
   return { profile, day, reduce9 };
 })();
-// “👤 Của tôi”: hộp nhập ngày giờ sinh dương lịch + giới tính (localStorage, không vào link chia sẻ), dấu 🎂 ★ ⚠ trên lịch tháng, mục “Dành cho bạn” trong Chi tiết ngày.
+// “👤 Tôi”: hộp nhập ngày giờ sinh dương lịch + giới tính (localStorage, không vào link chia sẻ), dấu 🎂 ★ ⚠ trên lịch tháng, mục “Dành cho bạn” trong Chi tiết ngày.
 const Me = (() => {
   const esc = s => Dom.esc(s);
   const pad = n => String(n).padStart(2, "0");
@@ -6672,7 +6677,7 @@ const Me = (() => {
   }
 
   function section(jd) {
-    if (!pf) return `<section class="me-sec empty"><p class="muted">${esc(T("Nhập ngày giờ sinh ở nút 👤 Của tôi để xem ngày này hợp hay xung với bạn và lời khuyên riêng."))}</p></section>`;
+    if (!pf) return `<section class="me-sec empty"><p class="muted">${esc(T("Nhập ngày giờ sinh ở nút 👤 Tôi để xem ngày này hợp hay xung với bạn và lời khuyên riêng."))}</p></section>`;
     const r = eval_(jd), c = pf.chart, n = PersonalText.NUM[r.num], s = LunarCal.jdToDate(jd);
     const best = c.kua.dirs.find(d => d.good), dir = Almanac.directions(CanChi.day(jd));
     const lines = r.reasons.map(x => `<li class="${x.good ? "good" : "bad"}">${x.good ? "✓" : "✗"} ${esc(T(PersonalText.REASON[x.key], x.params))}</li>`).join("");
@@ -6747,7 +6752,7 @@ const Me = (() => {
 // Bảng ghi chú chung dưới lịch tháng (không theo ngày): thêm / sửa / xóa, lưu localStorage, không vào link chia sẻ.
 const NoteBoard = (() => {
   const MAX = 500;
-  let o, notes = [], editing = null;
+  let o, notes = [], editing = null, tick = 0;
   const esc = s => Dom.esc(s);
   const clean = t => String(t || "").trim().slice(0, MAX);
 
@@ -6765,9 +6770,20 @@ const NoteBoard = (() => {
       + `<button type="button" data-nb-edit title="${esc(T("Sửa ghi chú"))}">✎</button><button type="button" data-nb-del title="${esc(T("Xóa ghi chú"))}">🗑</button></span></li>`;
   }
 
+  // Toolbar ticker next to “🔮 Tử Vi”: one note at a time (newest first), rotating every 5 s; hidden when there is none.
+  function ticker() {
+    const el = $("nbTicker"), list = [...notes].sort((a, b) => b.at - a.at);
+    el.hidden = !list.length;
+    if (!list.length) return;
+    const n = list[tick % list.length], first = n.text.split("\n")[0];
+    el.textContent = "📝 " + first + (list.length > 1 ? "  (" + (tick % list.length + 1) + "/" + list.length + ")" : "");
+    el.title = n.text;
+  }
+
   // Newest first.
   function render() {
     const list = [...notes].sort((a, b) => b.at - a.at);
+    ticker();
     $("nbList").innerHTML = list.length ? list.map(item).join("") : `<li class="muted empty">${esc(T("Chưa có ghi chú nào."))}</li>`;
   }
 
@@ -6801,6 +6817,8 @@ const NoteBoard = (() => {
     $("nbForm").onsubmit = add;
     $("nbText").onkeydown = e => { if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) add(e); };
     $("nbList").addEventListener("click", onList);
+    $("nbTicker").onclick = () => { PhoneLayout.show(0); document.querySelector(".noteboard").scrollIntoView({ behavior: "smooth", block: "center" }); $("nbText").focus({ preventScroll: true }); };
+    setInterval(() => { if (notes.length > 1) { tick++; ticker(); } }, 5000);
     render();
   }
 

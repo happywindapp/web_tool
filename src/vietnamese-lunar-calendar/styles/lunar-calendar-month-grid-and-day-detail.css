@@ -4,6 +4,9 @@
   body { grid-template-rows:auto auto 1fr auto auto; }
   .bar.monthnav { gap:4px; } .bar.monthnav #lunarRange { margin-left:6px; }
   .cal-opts { display:contents; }
+  .nb-ticker { flex:1 1 12em; min-width:0; max-width:28em; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; text-align:left;
+    border:1px dashed color-mix(in srgb, #f59e0b 60%, var(--line)); background:color-mix(in srgb, #f59e0b 10%, var(--panel)); }
+  .nb-ticker[hidden] { display:none; }
   .clock { margin-left:auto; font-size:20px; line-height:1; font-variant-numeric:tabular-nums; font-weight:700; color:var(--acc-ink); white-space:nowrap; }
   .toolbar .hint { font-size:12px; }
   @media (min-width: 901px) { .work { grid-template-columns:minmax(0, 1.15fr) minmax(0, 1fr); } }

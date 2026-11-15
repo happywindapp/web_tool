@@ -1,7 +1,7 @@
 // Bảng ghi chú chung dưới lịch tháng (không theo ngày): thêm / sửa / xóa, lưu localStorage, không vào link chia sẻ.
 const NoteBoard = (() => {
   const MAX = 500;
-  let o, notes = [], editing = null;
+  let o, notes = [], editing = null, tick = 0;
   const esc = s => Dom.esc(s);
   const clean = t => String(t || "").trim().slice(0, MAX);
 
@@ -19,9 +19,20 @@ const NoteBoard = (() => {
       + `<button type="button" data-nb-edit title="${esc(T("Sửa ghi chú"))}">✎</button><button type="button" data-nb-del title="${esc(T("Xóa ghi chú"))}">🗑</button></span></li>`;
   }
 
+  // Toolbar ticker next to “🔮 Tử Vi”: one note at a time (newest first), rotating every 5 s; hidden when there is none.
+  function ticker() {
+    const el = $("nbTicker"), list = [...notes].sort((a, b) => b.at - a.at);
+    el.hidden = !list.length;
+    if (!list.length) return;
+    const n = list[tick % list.length], first = n.text.split("\n")[0];
+    el.textContent = "📝 " + first + (list.length > 1 ? "  (" + (tick % list.length + 1) + "/" + list.length + ")" : "");
+    el.title = n.text;
+  }
+
   // Newest first.
   function render() {
     const list = [...notes].sort((a, b) => b.at - a.at);
+    ticker();
     $("nbList").innerHTML = list.length ? list.map(item).join("") : `<li class="muted empty">${esc(T("Chưa có ghi chú nào."))}</li>`;
   }
 
@@ -55,6 +66,8 @@ const NoteBoard = (() => {
     $("nbForm").onsubmit = add;
     $("nbText").onkeydown = e => { if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) add(e); };
     $("nbList").addEventListener("click", onList);
+    $("nbTicker").onclick = () => { PhoneLayout.show(0); document.querySelector(".noteboard").scrollIntoView({ behavior: "smooth", block: "center" }); $("nbText").focus({ preventScroll: true }); };
+    setInterval(() => { if (notes.length > 1) { tick++; ticker(); } }, 5000);
     render();
   }
 

@@ -19,15 +19,8 @@ const PicksData = (() => {
     if (running) return running;
     running = (async () => {
       const coins = [...new Set(Coins.list().map(g => g.sym))].map(Coins.row).filter(r => r.pair && MarketMath.tradable(r)).sort((a, b) => (a.rank || 1e9) - (b.rank || 1e9)).slice(0, N);
-      const rows = [];
-      let done = 0;
-      for (let i = 0; i < coins.length; i += POOL) {
-        await Promise.all(coins.slice(i, i + POOL).map(async r => {
-          try { const d = await DailyBars.get(r.pair); if (d.length >= 30) rows.push(rowOf(r, d)); }
-          catch (e) { console.warn("PicksData.load - klines fail", r.pair, e.message); }
-          onProgress(++done, coins.length);
-        }));
-      }
+      const bars = await DailyBars.many(coins.map(r => r.pair), onProgress);
+      const rows = coins.filter(r => bars.has(r.pair) && bars.get(r.pair).length >= 30).map(r => rowOf(r, bars.get(r.pair)));
       if (rows.length) cache = { rows, at: Date.now() };
       return cache || { rows, at: Date.now() };
     })();

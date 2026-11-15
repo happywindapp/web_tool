@@ -3,7 +3,7 @@ const MultiChartView = (() => {
   const IVS = [["15m", "15m"], ["1h", "1h"], ["4h", "4h"], ["1d", "1D"], ["1w", "1W"]], IV = IVS.map(x => x[0]), DEF = ["BTC", "ETH", "SOL", "BNB"], N = 4, BARS = 300, SHOW = 90;
   const e = s => Dom.esc(s ?? "");
   const tk = new Map();
-  let host = null, st = null, cells = [], timer = 0, themeWatch = null;
+  let host = null, st = null, cells = [], timer = 0, themeWatch = null, hiddenAt = 0;
 
   function clean(raw) {
     const r = raw && typeof raw === "object" ? raw : {}, saved = Array.isArray(r.cells) ? r.cells : [], base = [...new Set([...Watch.all(), ...DEF])].slice(0, N);
@@ -34,10 +34,12 @@ const MultiChartView = (() => {
     c.info.dataset.coin = sym;
     c.info.innerHTML = last ? `<b class="${tone}">${e(Fmt.money(last))}</b> <span class="${tone}">${e(Fmt.pct(pct, 1))}</span>` : "";
   }
-  function msg(i, key) { const p = cells[i].el.querySelector(".cmsg"); p.hidden = !key; p.textContent = key ? T(key) : ""; }
+  function msg(i, key) { cells[i].msgKey = key; const p = cells[i].el.querySelector(".cmsg"); p.hidden = !key; p.textContent = key ? T(key) : ""; }
 
   function stop(i) { const c = cells[i]; c.seq++; if (c.unsub) { c.unsub(); c.unsub = null; } c.chart.destroy(); c.last = null; c.args = null; }
-  const recolor = () => cells.forEach(c => { if (c.args) c.chart.render(c.args); });
+  const recolor = () => cells.forEach(c => { if (c.args) c.chart.render({ ...c.args, keep: true }); });
+  // Live stops while the page is hidden > 30 s → reload so the missed candles are not a gap.
+  const onVis = () => { if (document.hidden) hiddenAt = Date.now(); else if (host && hiddenAt && Date.now() - hiddenAt > 30e3) cells.forEach((c, i) => { if (c.on) start(i); }); };
 
   async function start(i) {
     const c = cells[i]; stop(i);
@@ -58,7 +60,7 @@ const MultiChartView = (() => {
     c.last = bars[bars.length - 1].close;
     c.args = { bars, type: "candle", scale: "normal", volume: true, inds: [], peaks: false, crosses: false, intraday: iv !== "1d" && iv !== "1w", from: Math.max(0, bars.length - SHOW), keep: false, compare: [] };
     c.chart.render(c.args);
-    c.unsub = Live.sub(`${pair.toLowerCase()}@kline_${iv}`, d => { if (!d || !d.k) return; const b = Spot.liveBar(d.k); c.chart.updateLast(b); c.last = b.close; head(i); });
+    c.unsub = Live.sub(`${pair.toLowerCase()}@kline_${iv}`, d => { if (!d || !d.k) return; const b = Spot.liveBar(d.k), a = bars, n = a.length - 1; if (a[n].time === b.time) a[n] = b; else if (b.time > a[n].time) a.push(b); c.chart.updateLast(b); c.last = b.close; head(i); });
     head(i); tickersSoon();
   }
 
@@ -103,12 +105,13 @@ const MultiChartView = (() => {
     el.addEventListener("change", onChange); el.addEventListener("click", onClick);
     timer = setInterval(tickers, 30000);
     themeWatch = new MutationObserver(recolor); themeWatch.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+    document.addEventListener("visibilitychange", onVis);
   }
   function unmount() {
     if (host) { host.removeEventListener("change", onChange); host.removeEventListener("click", onClick); cells.forEach((_, i) => stop(i)); }
-    clearInterval(timer); if (themeWatch) themeWatch.disconnect(); host = null; cells = [];
+    clearInterval(timer); if (themeWatch) themeWatch.disconnect(); document.removeEventListener("visibilitychange", onVis); host = null; cells = [];
   }
-  function relabel() { if (!host) return; bar(); titles(); cells.forEach((_, i) => head(i)); }
+  function relabel() { if (!host) return; bar(); titles(); cells.forEach((c, i) => { head(i); msg(i, c.msgKey); }); }
 
   return { id: "multi", label: "Đa biểu đồ", wide: true, mount, unmount, relabel, onTicks: () => { if (host) cells.forEach((_, i) => head(i)); } };
 })();

@@ -39,7 +39,7 @@ const ScreenerView = (() => {
 
   function outHtml() {
     if (!res) return `<p class="pad muted">${e(err ? T("Không tải được danh sách coin (CoinGecko) hoặc nến ngày để lọc.") : prog ? T("Đang phân tích {d}/{n} coin…", { d: prog[0], n: prog[1] }) : T("Đang tải…"))}</p>`;
-    const items = ScreenerRules.sort(res.items.map(it => ({ ...it, row: Coins.row(it.sym) })).filter(it => ScreenerRules.match(it, crit)), sort.col, sort.dir);
+    const items = ScreenerRules.sort(res.items.map(it => ({ ...it, row: Coins.row(it.sym), within: Math.max(10, crit.within) })).filter(it => ScreenerRules.match(it, crit)), sort.col, sort.dir);
     const arrow = c => c === sort.col ? (sort.dir === "asc" ? " ▲" : " ▼") : "";
     return `<div class="dsec"><b>${e(T("Kết quả: {n} / {t} coin", { n: items.length, t: res.items.length }))}</b></div>`
       + (items.length ? `<div class="cs-wrap"><table class="dtable cs-t"><thead><tr>${COLS.map(([k, l]) => `<th data-s="${k}" class="${k === "coin" || k === "sig" ? "l" : "r"}">${e(T(l))}${arrow(k)}</th>`).join("")}</tr></thead><tbody>${items.map(rowHtml).join("")}</tbody></table></div>`

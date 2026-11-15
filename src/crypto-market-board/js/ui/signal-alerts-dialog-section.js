@@ -36,6 +36,7 @@ const SignalAlertsUI = (() => {
     else if (a === "sdel") SignalAlerts.remove(id);
     else if (a === "sadd") {
       const sym = CoinParse.norm($("saSym").value);
+      if (SignalAlerts.all().length >= SignalAlerts.MAX) { PersonalUI.toast(T("Đã đủ {n} cảnh báo tín hiệu — xoá bớt trước khi thêm.", { n: SignalAlerts.MAX }), "down"); return true; }
       if (!CoinParse.isSymbol(sym) || !SignalAlerts.add(sym, $("saSig").value, $("saIv").value, $("saHz").value)) { PersonalUI.toast(T("Cảnh báo không hợp lệ: cần mã coin hợp lệ."), "down"); return true; }
       setTimeout(SignalPoll.run, 0);
     } else return false;

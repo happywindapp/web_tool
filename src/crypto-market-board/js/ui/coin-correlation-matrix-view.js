@@ -1,10 +1,9 @@
 // "Tương quan" tab: heatmap of daily-return correlation between coins (★ watchlist or top N by market cap) + per-coin correlation with BTC, beta, annualised volatility.
 const CorrView = (() => {
-  const UNI = ["watch", "10", "20", "30"], PERIODS = [30, 90, 180, 365], MAX_WATCH = 25, TTL = 15 * 60e3, POOL = 6, SORTS = ["sym", "corr", "beta", "vol"];
+  const UNI = ["watch", "10", "20", "30"], PERIODS = [30, 90, 180, 365], MAX_WATCH = 25, POOL = 6, SORTS = ["sym", "corr", "beta", "vol"];
   const saved = Prefs.get("corr.sort");
   const st = { u: UNI.includes(Prefs.get("corr.u")) ? Prefs.get("corr.u") : "10", d: PERIODS.includes(Prefs.get("corr.d")) ? Prefs.get("corr.d") : 90,
     sort: saved && SORTS.includes(saved.k) ? { k: saved.k, desc: !!saved.desc } : { k: "corr", desc: true } };
-  const cache = new Map();
   let host = null, data = null, prog = null, seq = 0, retry = 0;
   const e = s => Dom.esc(s ?? "");
   const num = (v, d = 2) => v == null ? "–" : Fmt.en(v, d);
@@ -25,19 +24,13 @@ const CorrView = (() => {
     return { syms: out, cut: 0 };
   }
 
-  async function daily(pair) {
-    const key = `${pair}|${st.d}`, hit = cache.get(key);
-    if (hit && Date.now() - hit.at < TTL) return hit.bars;
-    const bars = (await Spot.klines(pair, "1d", st.d + 2)).slice(0, -1);
-    cache.set(key, { at: Date.now(), bars });
-    return bars;
-  }
+  const daily = async pair => (await DailyBars.get(pair)).slice(0, -1).slice(-(st.d + 1));
 
   async function load() {
     const my = ++seq;
     clearTimeout(retry);
     const u = universe();
-    if (!u) { data = null; paint(); retry = setTimeout(() => { if (my === seq && host) load(); }, 1200); return; }
+    if (!u) { const err = st.u !== "watch" && Coins.spotBases().length && Coins.geckoError(); data = err ? { err } : null; paint(); retry = setTimeout(() => { if (my === seq && host) load(); }, err ? 15000 : 1200); return; }
     if (u.syms.length < 2) { data = { u, res: null }; paint(); return; }
     const need = [...new Set([...u.syms, "BTC"])].filter(s => Coins.pair(s)), jobs = need.slice(), series = {}, failed = [];
     prog = { done: 0, total: need.length }; data = null; paint();
@@ -67,7 +60,7 @@ const CorrView = (() => {
     const head = res.syms.map(s => `<th class="cr-col" data-coin="${e(s)}" title="${e(s)}"><span>${e(s)}</span></th>`).join("");
     const rows = res.syms.map((a, i) => `<tr><th class="cr-row" data-coin="${e(a)}">${e(a)}</th>${res.syms.map((b, j) => cell(a, b, res.matrix[i][j], text)).join("")}</tr>`).join("");
     return `<div class="cr-mx"><table><thead><tr><th class="cr-row"></th>${head}</tr></thead><tbody>${rows}</tbody></table></div>`
-      + `<div class="cr-legend"><span>−1</span><i></i><span>+1</span></div>`;
+      + `<div class="cr-legend"><span>−1</span><i></i><span>+1</span></div><p class="sc-note cr-tap"></p>`;
   }
 
   const HEAD = [["sym", "Coin"], ["corr", "Tương quan với BTC"], ["beta", "Beta so với BTC"], ["vol", "Biến động năm"]];
@@ -85,6 +78,7 @@ const CorrView = (() => {
   function body() {
     if (prog) return `<p class="pad muted cr-prog">${e(T("Đang tải dữ liệu ngày {done}/{total}…", prog))}</p>`;
     if (!data) return `<p class="pad muted">${e(T("Đang tải dữ liệu vốn hoá…"))}</p>`;
+    if (data.err) return `<p class="pad warn">${e(T("Không tải được danh sách vốn hoá (CoinGecko) — đang thử lại; có thể chọn ★ Danh mục."))}</p>`;
     if (data.u.empty) return `<p class="pad muted">${e(T("Danh mục ★ đang trống — thêm coin vào danh mục hoặc chọn Top 10 / 20 / 30."))}</p>`;
     if (!data.res) return `<p class="pad muted">${e(T("Cần ít nhất 2 coin có cặp USDT và đủ lịch sử để tính tương quan."))}${data.short && data.short.length ? " " + e(T("Bỏ qua (lịch sử ngắn hơn kỳ đã chọn): {l}.", { l: data.short.join(", ") })) : ""}</p>`;
     const r = data.res, lv = ReturnCorr.level(r.avg), notes = [];
@@ -112,6 +106,8 @@ const CorrView = (() => {
     load();
   }
   function onClick(ev) {
+    const td = ev.target.closest(".cr-mx td[title]"), tap = td && host.querySelector(".cr-tap");
+    if (tap) { tap.textContent = td.title; return; }
     const b = ev.target.closest("[data-sort]");
     if (!b || !SORTS.includes(b.dataset.sort)) return;
     st.sort = { k: b.dataset.sort, desc: st.sort.k === b.dataset.sort ? !st.sort.desc : b.dataset.sort !== "sym" };

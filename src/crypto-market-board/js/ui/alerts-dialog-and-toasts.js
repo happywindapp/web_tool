@@ -74,6 +74,7 @@ const PersonalUI = (() => {
     $("toolDlg").addEventListener("click", onClick);
     $("toolDlg").addEventListener("change", ev => { if (ev.target.id === "saSig") SignalAlertsUI.syncSelects(); });
     SignalPoll.start();
+    SignalAlerts.onChange(() => { if ($("toolDlg").open && $("toolDlg").dataset.kind === "alerts") render(); });
     $("toolDlg").addEventListener("click", ev => { if (ev.target === $("toolDlg")) $("toolDlg").close(); });
   }
 

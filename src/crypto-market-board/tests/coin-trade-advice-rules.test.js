@@ -55,6 +55,12 @@ test("overheated / washed-out trend: RSI extremes override the action", () => {
   assert.ok(CoinAdvice.build(smooth(-0.3)).horizons.some(h => h.action === "Có thể hồi kỹ thuật — không bắt đáy lớn"));
 });
 
+test("closedOnly (backtest replay): same shape, pivot zones still produced", () => {
+  const v = CoinAdvice.build(coin(0.2), { closedOnly: true });
+  assert.equal(v.horizons.length, 3);
+  assert.ok(v.horizons[0].buy.lo <= v.horizons[0].buy.hi && /Pivot|ATR|Giá/.test(v.horizons[0].buy.basis + v.horizons[0].sell.basis));
+});
+
 test("too little history → null", () => {
   assert.equal(CoinAdvice.build({ h4: series(50, 14400, 0.1), d1: series(40, 86400, 0.1), w1: series(10, 604800, 0.1) }), null);
 });
