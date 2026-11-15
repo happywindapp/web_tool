@@ -55,7 +55,7 @@ I18n.add({
   "Tết Dương lịch": "New Year's Day", "Thành lập Đảng Cộng sản Việt Nam": "Communist Party Founding Day", "Lễ Tình nhân": "Valentine's Day",
   "Thầy thuốc Việt Nam": "Vietnamese Doctors' Day", "Quốc tế Phụ nữ": "International Women's Day", "Thành lập Đoàn TNCS Hồ Chí Minh": "Youth Union Founding Day",
   "Giải phóng miền Nam": "Reunification Day", "Quốc tế Lao động": "International Labour Day", "Ngày sinh Chủ tịch Hồ Chí Minh": "President Ho Chi Minh's Birthday",
-  "Quốc tế Thiếu nhi": "International Children's Day", "Gia đình Việt Nam": "Vietnamese Family Day", "Thương binh Liệt sĩ": "War Invalids and Martyrs' Day",
+  "Quốc tế Thiếu nhi": "International Children's Day", "Gia đình Việt Nam": "Vietnamese Family Day", "Thương binh Liệt sĩ": "War Invalids and Martyrs' Day", "Ngày Văn hóa Việt Nam": "Vietnamese Culture Day",
   "Cách mạng Tháng Tám": "August Revolution Day", "Quốc khánh": "National Day", "Giải phóng Thủ đô": "Capital Liberation Day",
   "Doanh nhân Việt Nam": "Vietnamese Entrepreneurs' Day", "Phụ nữ Việt Nam": "Vietnamese Women's Day", "Nhà giáo Việt Nam": "Vietnamese Teachers' Day",
   "Quân đội Nhân dân Việt Nam": "People's Army Day", "Lễ Giáng sinh": "Christmas Day",

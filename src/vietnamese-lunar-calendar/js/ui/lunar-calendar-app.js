@@ -34,16 +34,19 @@
   }
 
   function renderMonth(focus) {
-    const r = MonthGrid.build({ y: st.y, m: st.m, sel: st.sel, today, cc: st.cc, moon: st.moon });
+    const r = MonthGrid.build({ y: st.y, m: st.m, sel: st.sel, today, cc: st.cc, moon: st.moon, wx: WeatherApp.days(), notes: DayNotes.days() });
     $("grid").innerHTML = r.html;
     $("month").value = st.m; $("year").value = st.y;
     const lf = r.lunarFrom, lt = r.lunarTo, lab = l => l.d + "/" + l.m + (l.leap ? T("n") : "");
     $("lunarRange").textContent = T("Âm {a} – {b}", { a: lab(lf), b: lab(lt) + "/" + lt.y });
     $("events").innerHTML = r.events.map(e => `<li><button type="button" data-jd="${e.jd}" data-pane-go="1" class="${e.term ? "term" : e.off ? "off" : ""}"><b>${e.d}</b> ${Dom.esc(T(e.name))}${e.lunar ? ` <small>${Dom.esc(T("(âm)"))}</small>` : ""}</button></li>`).join("");
+    $("history").innerHTML = HistoryView.render({ y: st.y, m: st.m, day: LunarCal.jdToDate(st.sel).d });
     $("prev").disabled = st.y === LunarCal.MIN_YEAR && st.m === 1;
     $("next").disabled = st.y === LunarCal.MAX_YEAR && st.m === 12;
     if (focus) $("grid").querySelector(".sel")?.focus({ preventScroll: true });
   }
+
+  const renderDay = () => DayDetail.render($("detail"), st.sel, today, { notes: DayNotes.section(st.sel), weather: WeatherApp.section(st.sel, today) });
 
   function select(jd, { focus = false } = {}) {
     st.sel = Math.min(MAX_JD, Math.max(MIN_JD, jd));
@@ -52,7 +55,7 @@
     $("q").classList.remove("bad");
     $("toHoro").disabled = $("toSim").disabled = st.sel > today;
     renderMonth(focus);
-    DayDetail.render($("detail"), st.sel, today);
+    renderDay();
     status(() => DayDetail.summary(st.sel));
   }
 
@@ -96,12 +99,13 @@
     setTab("cal");
     if (typeof p.cc === "boolean") { st.cc = p.cc; $("cc").checked = p.cc; renderMonth(); }
     if (typeof p.moon === "boolean") { st.moon = p.moon; $("moon").checked = p.moon; renderMonth(); }
+    if (typeof p.wx === "boolean" && p.wx !== WeatherApp.on()) WeatherApp.set(p.wx);
     if (goText(p.date)) note(() => T("Đã mở ngày từ link."));
     PhoneLayout.show(1);
   }
 
   async function share() {
-    const payload = tab === "horo" ? HoroApp.snapshot() : tab === "sim" ? SimApp.snapshot() : { date: DateText.iso(st.sel), cc: st.cc, moon: st.moon };
+    const payload = tab === "horo" ? HoroApp.snapshot() : tab === "sim" ? SimApp.snapshot() : { date: DateText.iso(st.sel), cc: st.cc, moon: st.moon, wx: WeatherApp.on() };
     if (tab === "horo" && !payload.birth) return note(() => T("Chưa có ngày sinh để chia sẻ."), "bad");
     if (tab === "sim" && !payload.sim) return note(() => T("Chưa có số SIM để chia sẻ."), "bad");
     let link;
@@ -149,19 +153,22 @@
   $("sToHoro").onclick = () => HoroApp.useBirth(ownerOf(SimApp.snapshot()));
   $("demo").onchange = e => { const k = e.target.value; e.target.value = ""; if (k) demo(k); };
   $("share").onclick = share;
-  for (const box of [$("grid"), $("events")]) box.addEventListener("click", e => { const b = e.target.closest("[data-jd]"); if (b) select(+b.dataset.jd, { focus: box === $("grid") }); });
+  for (const box of [$("grid"), $("events"), $("history"), $("detail")]) box.addEventListener("click", e => { const b = e.target.closest("[data-jd]"); if (b) select(+b.dataset.jd, { focus: box === $("grid") }); });
   $("grid").addEventListener("keydown", onGridKey);
   $("tabs").onclick = e => { const b = e.target.closest("[data-tab]"); if (b) setTab(b.dataset.tab); };
   HoroApp.init({ today, status: (fn, cls) => status(fn, cls, "horo"), note, tab: setTab });
   SimApp.init({ today, status: (fn, cls) => status(fn, cls, "sim"), note, tab: setTab });
   I18n.onChange(() => {
     const saved = statusBy.cal;
-    fillSelects(); select(st.sel); statusBy.cal = saved; HoroApp.relabel(); SimApp.relabel(); paint(); note(lastNote.fn, lastNote.cls);
+    fillSelects(); WeatherApp.relabel(); NoteBoard.render(); select(st.sel); statusBy.cal = saved; HoroApp.relabel(); SimApp.relabel(); paint(); note(lastNote.fn, lastNote.cls);
   });
 
   const fromHash = () => { const h = location.hash.slice(1); try { return decodeURIComponent(h); } catch { return h; } };
   window.addEventListener("hashchange", () => { if (location.hash.length > 1) { const h = fromHash(); cleanUrl(); openLink(h); } });
+  NoteBoard.init({ store });
+  DayNotes.init({ store, sel: () => st.sel, onChange: () => { renderMonth(); renderDay(); } });
   select(today);
+  WeatherApp.init({ store, note, onChange: () => { renderMonth(); renderDay(); } });
   const q = new URLSearchParams(location.search);
   setTab(q.get("tab") || store.get("tab", "cal"));
   const name = q.get("demo"), raw = location.hash.length > 1 ? fromHash() : q.get("data");

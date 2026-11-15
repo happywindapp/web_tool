@@ -1,0 +1,117 @@
+// Sự kiện lịch sử Việt Nam nổi tiếng theo tháng (dương lịch) cho lịch tháng — cặp VI/EN, VI là khóa T().
+const HistoryVietnam = (() => {
+  const en = {};
+  const p = (vi, enText) => { en[vi] = enText; return vi; };
+  // [tháng, ngày, năm, nội dung]
+  const LIST = [
+    [1, 1, 1946, p("Chính phủ Liên hiệp lâm thời do Chủ tịch Hồ Chí Minh đứng đầu ra mắt quốc dân tại Nhà hát Lớn Hà Nội.", "The Provisional Coalition Government led by President Hồ Chí Minh was presented to the nation at the Hanoi Opera House.")],
+    [1, 5, 2025, p("Đội tuyển Việt Nam thắng Thái Lan 3-2 ngay tại Bangkok, lần thứ ba vô địch Đông Nam Á (ASEAN Cup 2024).", "Vietnam beat Thailand 3-2 in Bangkok to win the 2024 ASEAN Cup, their third Southeast Asian title.")],
+    [1, 6, 1946, p("Tổng tuyển cử đầu tiên bầu Quốc hội nước Việt Nam Dân chủ Cộng hòa; lần đầu mọi công dân đủ 18 tuổi được đi bầu.", "The first general election chose the National Assembly of the Democratic Republic of Vietnam; every citizen aged 18 could vote for the first time.")],
+    [1, 11, 2007, p("Việt Nam chính thức trở thành thành viên thứ 150 của Tổ chức Thương mại Thế giới (WTO).", "Vietnam officially became the 150th member of the World Trade Organization (WTO).")],
+    [1, 27, 1973, p("Hiệp định Paris về chấm dứt chiến tranh, lập lại hòa bình ở Việt Nam được ký kết.", "The Paris Peace Accords on ending the war and restoring peace in Vietnam were signed.")],
+    [1, 27, 2018, p("U23 Việt Nam giành ngôi Á quân giải U23 châu Á trong trận chung kết dưới tuyết trắng ở Thường Châu (Trung Quốc).", "Vietnam's U23 team finished runners-up at the AFC U23 Championship after a snowy final in Changzhou, China.")],
+    [1, 28, 1941, p("Lãnh tụ Nguyễn Ái Quốc vượt cột mốc 108 về nước sau 30 năm bôn ba, đặt chân đến Pác Bó (Cao Bằng).", "Nguyễn Ái Quốc crossed border marker 108 and returned home after 30 years abroad, arriving at Pác Bó, Cao Bằng.")],
+    [1, 30, 1789, p("Vua Quang Trung đại phá quân Thanh ở Ngọc Hồi – Đống Đa, tiến vào Thăng Long đúng dịp Tết Kỷ Dậu.", "Emperor Quang Trung routed the Qing army at Ngọc Hồi – Đống Đa and entered Thăng Long during the Lunar New Year of 1789.")],
+
+    [2, 3, 1930, p("Hội nghị hợp nhất các tổ chức cộng sản tại Hồng Kông thành lập Đảng Cộng sản Việt Nam.", "A conference in Hong Kong merged the communist groups to found the Communist Party of Vietnam.")],
+    [2, 3, 1994, p("Tổng thống Mỹ Bill Clinton tuyên bố dỡ bỏ lệnh cấm vận thương mại đối với Việt Nam.", "U.S. President Bill Clinton announced the lifting of the trade embargo on Vietnam.")],
+    [2, 6, 2022, p("Đội tuyển nữ Việt Nam thắng Đài Bắc Trung Hoa 2-1, lần đầu giành vé dự World Cup nữ 2023.", "Vietnam's women's team beat Chinese Taipei 2-1 to qualify for the Women's World Cup (2023) for the first time.")],
+    [2, 9, 1930, p("Khởi nghĩa Yên Bái do Việt Nam Quốc dân Đảng lãnh đạo bùng nổ, với lãnh tụ Nguyễn Thái Học.", "The Yên Bái uprising, led by Nguyễn Thái Học and the Vietnamese Nationalist Party, broke out.")],
+    [2, 11, 1951, p("Đại hội đại biểu toàn quốc lần thứ II của Đảng khai mạc tại Chiêm Hóa (Tuyên Quang), giữa căn cứ Việt Bắc.", "The Party's 2nd National Congress opened in Chiêm Hóa, Tuyên Quang, in the heart of the Việt Bắc base.")],
+    [2, 26, 2022, p("U23 Việt Nam thắng Thái Lan 1-0, lần đầu vô địch giải U23 Đông Nam Á tại Phnom Penh.", "Vietnam's U23 team beat Thailand 1-0 in Phnom Penh to win the AFF U23 Championship for the first time.")],
+    [2, 27, 1955, p("Chủ tịch Hồ Chí Minh gửi thư cho Hội nghị cán bộ y tế với lời dạy “Lương y phải như từ mẫu”, nay là Ngày Thầy thuốc Việt Nam.", "President Hồ Chí Minh wrote to a health workers' conference that “a good doctor must be like a loving mother” — now Vietnamese Doctors' Day.")],
+    [2, 27, 2019, p("Hà Nội đăng cai Hội nghị thượng đỉnh Mỹ – Triều Tiên lần thứ hai, khẳng định vai trò cầu nối hòa bình.", "Hanoi hosted the second U.S.–North Korea summit, highlighting Vietnam's role as a host for peace talks.")],
+
+    [3, 6, 1946, p("Chủ tịch Hồ Chí Minh ký Hiệp định Sơ bộ với Pháp, tranh thủ thời gian hòa hoãn để chuẩn bị lực lượng.", "President Hồ Chí Minh signed the Preliminary Accord with France, gaining time to build up national strength.")],
+    [3, 9, 1945, p("Nhật đảo chính Pháp trên toàn Đông Dương, chấm dứt sự cai trị trực tiếp của thực dân Pháp.", "Japan staged a coup against the French across Indochina, ending direct French colonial rule.")],
+    [3, 9, 2010, p("82 bia tiến sĩ tại Văn Miếu – Quốc Tử Giám được UNESCO ghi danh là Di sản tư liệu thế giới.", "The 82 doctoral steles at the Temple of Literature were inscribed by UNESCO as documentary heritage.")],
+    [3, 10, 1975, p("Chiến dịch Tây Nguyên mở màn bằng trận đánh Buôn Ma Thuột, khởi đầu cuộc Tổng tiến công mùa Xuân 1975.", "The Central Highlands campaign opened with the battle of Buôn Ma Thuột, starting the Spring 1975 offensive.")],
+    [3, 13, 1954, p("Chiến dịch Điện Biên Phủ mở màn với trận tiến công cứ điểm Him Lam.", "The Điện Biên Phủ campaign opened with the assault on the Him Lam stronghold.")],
+    [3, 26, 1931, p("Đoàn Thanh niên Cộng sản Đông Dương, tiền thân Đoàn TNCS Hồ Chí Minh, được thành lập.", "The Indochinese Communist Youth Union, forerunner of the Hồ Chí Minh Communist Youth Union, was founded.")],
+    [3, 27, 1946, p("Chủ tịch Hồ Chí Minh ra “Lời kêu gọi toàn dân tập thể dục”, mốc khởi đầu Ngày Thể thao Việt Nam.", "President Hồ Chí Minh issued his “Call for all people to exercise”, the origin of Vietnam Sports Day.")],
+    [3, 29, 1973, p("Toán lính Mỹ cuối cùng rút khỏi miền Nam Việt Nam theo Hiệp định Paris.", "The last U.S. combat troops left South Vietnam under the Paris Peace Accords.")],
+
+    [4, 11, 1880, p("Nhà thờ Đức Bà Sài Gòn được khánh thành sau gần ba năm xây dựng bằng gạch đỏ chở từ Pháp sang.", "Saigon's Notre-Dame Cathedral was inaugurated after nearly three years of construction with red bricks shipped from France.")],
+    [4, 15, 1992, p("Quốc hội khóa VIII thông qua Hiến pháp 1992, thể chế hóa đường lối Đổi mới.", "The 8th National Assembly adopted the 1992 Constitution, enshrining the Đổi Mới reforms.")],
+    [4, 19, 1946, p("Chủ tịch Hồ Chí Minh gửi thư tới Đại hội các dân tộc thiểu số miền Nam ở Pleiku, nay là Ngày Văn hóa các dân tộc Việt Nam.", "President Hồ Chí Minh wrote to the Congress of Southern Ethnic Minorities in Pleiku — now Vietnam's Ethnic Cultures Day.")],
+    [4, 19, 2008, p("Vệ tinh viễn thông đầu tiên VINASAT-1 được phóng thành công từ Kourou (Guyane thuộc Pháp).", "VINASAT-1, Vietnam's first telecommunications satellite, was launched successfully from Kourou, French Guiana.")],
+    [4, 24, 2010, p("Cầu Cần Thơ khánh thành, từng là cầu dây văng có nhịp chính dài nhất Đông Nam Á.", "Cần Thơ Bridge opened — at the time the cable-stayed bridge with the longest main span in Southeast Asia.")],
+    [4, 25, 1976, p("Tổng tuyển cử bầu Quốc hội chung của nước Việt Nam thống nhất.", "A general election chose the first National Assembly of reunified Vietnam.")],
+    [4, 26, 1975, p("Chiến dịch Hồ Chí Minh chính thức mở màn, các cánh quân tiến về Sài Gòn.", "The Hồ Chí Minh Campaign officially began as forces converged on Saigon.")],
+    [4, 30, 1975, p("Xe tăng tiến vào Dinh Độc Lập, miền Nam hoàn toàn giải phóng, đất nước thống nhất.", "Tanks entered Independence Palace; the South was liberated and the country reunified.")],
+
+    [5, 7, 1954, p("Chiến thắng Điện Biên Phủ “lừng lẫy năm châu, chấn động địa cầu”, kết thúc thắng lợi kháng chiến chống Pháp.", "The victory at Điện Biên Phủ, “resounding across five continents”, brought the resistance against France to a close.")],
+    [5, 7, 2013, p("Vệ tinh quan sát Trái Đất đầu tiên VNREDSat-1 của Việt Nam được phóng lên quỹ đạo.", "VNREDSat-1, Vietnam's first Earth-observation satellite, was launched into orbit.")],
+    [5, 15, 1941, p("Đội Thiếu niên Tiền phong Hồ Chí Minh, tiền thân là Đội Nhi đồng Cứu vong, được thành lập.", "The Hồ Chí Minh Young Pioneers Organisation was founded, first as the Children's Salvation Corps.")],
+    [5, 19, 1890, p("Chủ tịch Hồ Chí Minh (Nguyễn Sinh Cung) chào đời tại làng Hoàng Trù, Nam Đàn, Nghệ An.", "President Hồ Chí Minh (born Nguyễn Sinh Cung) was born in Hoàng Trù village, Nam Đàn, Nghệ An.")],
+    [5, 19, 1941, p("Mặt trận Việt Minh ra đời tại Pác Bó, tập hợp toàn dân đấu tranh giành độc lập.", "The Việt Minh front was founded at Pác Bó, rallying the whole people for independence.")],
+    [5, 21, 2000, p("Cầu Mỹ Thuận, cây cầu dây văng đầu tiên của Việt Nam bắc qua sông Tiền, được khánh thành.", "Mỹ Thuận Bridge, Vietnam's first cable-stayed bridge, opened across the Tiền River.")],
+    [5, 22, 2022, p("U23 Việt Nam thắng Thái Lan 1-0 tại Mỹ Đình, bảo vệ thành công HCV bóng đá nam SEA Games 31.", "Vietnam's U23 team beat Thailand 1-0 at Mỹ Đình to defend the SEA Games 31 men's football gold.")],
+    [5, 27, 1994, p("Đường dây 500kV Bắc – Nam được đóng điện, thống nhất hệ thống điện quốc gia.", "The 500 kV North–South power line was energised, unifying the national power grid.")],
+
+    [6, 5, 1911, p("Người thanh niên Nguyễn Tất Thành rời bến Nhà Rồng trên tàu Amiral Latouche-Tréville, ra đi tìm đường cứu nước.", "Young Nguyễn Tất Thành left Nhà Rồng wharf aboard the Amiral Latouche-Tréville to seek a path to national salvation.")],
+    [6, 5, 2005, p("Hầm đường bộ Hải Vân, hầm đường bộ dài nhất Đông Nam Á khi đó, được khánh thành.", "The Hải Vân road tunnel, then the longest in Southeast Asia, was inaugurated.")],
+    [6, 7, 2019, p("Việt Nam trúng cử Ủy viên không thường trực Hội đồng Bảo an Liên Hợp Quốc nhiệm kỳ 2020–2021 với 192/193 phiếu.", "Vietnam was elected a non-permanent member of the UN Security Council for 2020–2021 with 192 of 193 votes.")],
+    [6, 18, 1919, p("Nguyễn Ái Quốc gửi “Bản yêu sách của nhân dân An Nam” tới Hội nghị Versailles.", "Nguyễn Ái Quốc sent the “Demands of the Annamese People” to the Versailles Peace Conference.")],
+    [6, 21, 1925, p("Báo Thanh Niên do Nguyễn Ái Quốc sáng lập ra số đầu tiên, nay là Ngày Báo chí Cách mạng Việt Nam.", "The first issue of Thanh Niên, founded by Nguyễn Ái Quốc, appeared — now Vietnam Revolutionary Press Day.")],
+    [6, 23, 2014, p("Quần thể danh thắng Tràng An được UNESCO công nhận là Di sản văn hóa và thiên nhiên thế giới.", "The Tràng An Landscape Complex was inscribed by UNESCO as a mixed cultural and natural World Heritage site.")],
+    [6, 26, 1986, p("Tấn dầu thô đầu tiên được khai thác từ mỏ Bạch Hổ, đưa Việt Nam vào danh sách nước khai thác dầu khí.", "The first tonne of crude oil was extracted from the Bạch Hổ field, making Vietnam an oil-producing country.")],
+    [6, 27, 2011, p("Thành nhà Hồ (Thanh Hóa) được UNESCO công nhận là Di sản văn hóa thế giới.", "The Citadel of the Hồ Dynasty in Thanh Hóa was inscribed as a UNESCO World Heritage site.")],
+
+    [7, 2, 1976, p("Quốc hội quyết định đặt tên nước là Cộng hòa xã hội chủ nghĩa Việt Nam; Sài Gòn – Gia Định đổi tên thành TP. Hồ Chí Minh.", "The National Assembly named the country the Socialist Republic of Vietnam and renamed Saigon – Gia Định as Hồ Chí Minh City.")],
+    [7, 3, 2003, p("Vườn quốc gia Phong Nha – Kẻ Bàng được UNESCO công nhận là Di sản thiên nhiên thế giới.", "Phong Nha – Kẻ Bàng National Park was inscribed as a UNESCO natural World Heritage site.")],
+    [7, 12, 1995, p("Việt Nam và Hoa Kỳ tuyên bố bình thường hóa quan hệ ngoại giao, mở ra chương mới trong quan hệ hai nước.", "Vietnam and the United States announced the normalisation of diplomatic relations, opening a new chapter.")],
+    [7, 20, 1954, p("Hiệp định Genève về đình chỉ chiến sự ở Việt Nam được ký kết, lập lại hòa bình ở Đông Dương.", "The Geneva Agreement on the cessation of hostilities in Vietnam was signed, restoring peace in Indochina.")],
+    [7, 23, 1980, p("Phi công Phạm Tuân bay vào vũ trụ trên tàu Soyuz 37, trở thành người châu Á đầu tiên lên vũ trụ.", "Pilot Phạm Tuân flew into space aboard Soyuz 37, becoming the first Asian in space.")],
+    [7, 27, 1947, p("Ngày Thương binh toàn quốc được tổ chức lần đầu, nay là Ngày Thương binh – Liệt sĩ.", "The first National Day for War Invalids was held — today's War Invalids and Martyrs Day.")],
+    [7, 28, 1995, p("Việt Nam chính thức gia nhập Hiệp hội các quốc gia Đông Nam Á (ASEAN), trở thành thành viên thứ bảy.", "Vietnam officially joined ASEAN, becoming its seventh member.")],
+    [7, 28, 2000, p("Phiên giao dịch chứng khoán đầu tiên diễn ra tại TP. Hồ Chí Minh với hai mã REE và SAM.", "Vietnam's first stock trading session took place in Hồ Chí Minh City with two listed tickers, REE and SAM.")],
+
+    [8, 1, 2020, p("Hiệp định Thương mại tự do Việt Nam – EU (EVFTA) chính thức có hiệu lực.", "The EU–Vietnam Free Trade Agreement (EVFTA) officially entered into force.")],
+    [8, 6, 2016, p("Xạ thủ Hoàng Xuân Vinh giành HCV 10m súng ngắn hơi tại Olympic Rio, tấm HCV Olympic đầu tiên của Việt Nam.", "Shooter Hoàng Xuân Vinh won the 10 m air pistol at the Rio Olympics, Vietnam's first Olympic gold medal.")],
+    [8, 16, 1945, p("Quốc dân Đại hội Tân Trào họp, tán thành chủ trương Tổng khởi nghĩa và bầu Ủy ban Dân tộc giải phóng.", "The National Congress at Tân Trào endorsed the general uprising and elected the National Liberation Committee.")],
+    [8, 19, 1945, p("Nhân dân Hà Nội giành chính quyền, thắng lợi then chốt của Cách mạng Tháng Tám.", "The people of Hanoi seized power — the decisive victory of the August Revolution.")],
+    [8, 19, 2010, p("GS Ngô Bảo Châu được trao Huy chương Fields nhờ chứng minh Bổ đề cơ bản của chương trình Langlands.", "Professor Ngô Bảo Châu received the Fields Medal for proving the Fundamental Lemma of the Langlands program.")],
+    [8, 25, 1945, p("Khởi nghĩa giành chính quyền thắng lợi ở Sài Gòn, cách mạng thành công trên cả ba miền.", "The uprising succeeded in Saigon, completing the revolution's victory across all three regions.")],
+    [8, 29, 1975, p("Lăng Chủ tịch Hồ Chí Minh tại Quảng trường Ba Đình được khánh thành.", "The Hồ Chí Minh Mausoleum on Ba Đình Square was inaugurated.")],
+    [8, 30, 1945, p("Vua Bảo Đại thoái vị tại Ngọ Môn (Huế), chấm dứt chế độ quân chủ phong kiến ở Việt Nam.", "Emperor Bảo Đại abdicated at the Noon Gate in Huế, ending the monarchy in Vietnam.")],
+
+    [9, 2, 1945, p("Tại Quảng trường Ba Đình, Chủ tịch Hồ Chí Minh đọc Tuyên ngôn Độc lập, khai sinh nước Việt Nam Dân chủ Cộng hòa.", "At Ba Đình Square, President Hồ Chí Minh read the Declaration of Independence, founding the Democratic Republic of Vietnam.")],
+    [9, 2, 1969, p("Chủ tịch Hồ Chí Minh qua đời tại Hà Nội, để lại bản Di chúc cho toàn Đảng, toàn dân.", "President Hồ Chí Minh passed away in Hanoi, leaving his Testament to the Party and the people.")],
+    [9, 7, 1945, p("Đài Tiếng nói Việt Nam phát đi buổi phát thanh đầu tiên từ Hà Nội.", "The Voice of Vietnam made its first radio broadcast from Hanoi.")],
+    [9, 8, 1945, p("Chủ tịch Hồ Chí Minh ký sắc lệnh lập Nha Bình dân học vụ, mở phong trào xóa nạn mù chữ.", "President Hồ Chí Minh signed the decree creating the Popular Education Department, launching the literacy campaign.")],
+    [9, 16, 2023, p("Vịnh Hạ Long – quần đảo Cát Bà được UNESCO công nhận là Di sản thiên nhiên thế giới liên tỉnh đầu tiên của Việt Nam.", "Hạ Long Bay – Cát Bà Archipelago was inscribed by UNESCO as Vietnam's first inter-provincial natural World Heritage site.")],
+    [9, 20, 1977, p("Việt Nam chính thức trở thành thành viên Liên Hợp Quốc.", "Vietnam officially became a member of the United Nations.")],
+    [9, 23, 1945, p("Nhân dân Nam Bộ đứng lên kháng chiến chống thực dân Pháp quay lại xâm lược.", "The people of the South rose up to resist the returning French colonial forces.")],
+    [9, 30, 2009, p("Dân ca Quan họ Bắc Ninh được UNESCO ghi danh là Di sản văn hóa phi vật thể đại diện của nhân loại.", "Quan họ Bắc Ninh folk songs were inscribed by UNESCO as Intangible Cultural Heritage of Humanity.")],
+
+    [10, 8, 2004, p("Hà Nội đăng cai Hội nghị cấp cao Á – Âu lần thứ 5 (ASEM 5) với sự tham dự của lãnh đạo hai châu lục.", "Hanoi hosted the 5th Asia–Europe Meeting summit (ASEM 5), gathering leaders from both continents.")],
+    [10, 10, 1954, p("Bộ đội tiến vào tiếp quản Thủ đô Hà Nội, Ngày Giải phóng Thủ đô.", "Troops marched in to take over Hanoi — the Capital Liberation Day.")],
+    [10, 10, 2010, p("Đại lễ kỷ niệm 1000 năm Thăng Long – Hà Nội được tổ chức trọng thể.", "Grand celebrations marked the 1,000th anniversary of Thăng Long – Hanoi.")],
+    [10, 13, 1945, p("Chủ tịch Hồ Chí Minh gửi thư cho giới công thương, nay là Ngày Doanh nhân Việt Nam.", "President Hồ Chí Minh wrote to the country's industrialists and traders — now Vietnamese Entrepreneurs' Day.")],
+    [10, 14, 1930, p("Nông hội Đỏ, tiền thân Hội Nông dân Việt Nam, được thành lập.", "The Red Peasants' Association, forerunner of the Vietnam Farmers' Union, was founded.")],
+    [10, 15, 1956, p("Hội Liên hiệp Thanh niên Việt Nam được thành lập tại Hà Nội.", "The Vietnam Youth Federation was founded in Hanoi.")],
+    [10, 16, 2007, p("Việt Nam lần đầu trúng cử Ủy viên không thường trực Hội đồng Bảo an Liên Hợp Quốc (nhiệm kỳ 2008–2009).", "Vietnam was elected a non-permanent member of the UN Security Council for the first time (2008–2009).")],
+    [10, 20, 1930, p("Hội Phụ nữ phản đế Việt Nam, tiền thân Hội Liên hiệp Phụ nữ Việt Nam, được thành lập.", "The Vietnam Anti-Imperialist Women's Association, forerunner of the Vietnam Women's Union, was founded.")],
+
+    [11, 6, 2021, p("Tuyến đường sắt đô thị Cát Linh – Hà Đông, tuyến metro đầu tiên của Việt Nam, chính thức vận hành thương mại.", "The Cát Linh – Hà Đông line, Vietnam's first urban metro, began commercial service.")],
+    [11, 7, 2003, p("Nhã nhạc cung đình Huế được UNESCO công nhận là Kiệt tác di sản truyền khẩu và phi vật thể của nhân loại.", "Huế royal court music (Nhã nhạc) was proclaimed by UNESCO a Masterpiece of the Oral and Intangible Heritage of Humanity.")],
+    [11, 9, 1946, p("Quốc hội thông qua bản Hiến pháp đầu tiên của nước Việt Nam Dân chủ Cộng hòa.", "The National Assembly adopted the first Constitution of the Democratic Republic of Vietnam.")],
+    [11, 14, 1998, p("Việt Nam chính thức trở thành thành viên Diễn đàn Hợp tác Kinh tế châu Á – Thái Bình Dương (APEC).", "Vietnam officially became a member of Asia-Pacific Economic Cooperation (APEC).")],
+    [11, 16, 2010, p("Hội Gióng ở đền Phù Đổng và đền Sóc được UNESCO ghi danh là Di sản văn hóa phi vật thể đại diện của nhân loại.", "The Gióng festival of Phù Đổng and Sóc temples was inscribed by UNESCO as Intangible Cultural Heritage of Humanity.")],
+    [11, 18, 1930, p("Hội Phản đế Đồng minh, tổ chức tiền thân Mặt trận Tổ quốc Việt Nam, ra đời — nay là Ngày hội Đại đoàn kết toàn dân tộc.", "The Anti-Imperialist Alliance, forerunner of the Vietnam Fatherland Front, was founded — now National Great Unity Day.")],
+    [11, 23, 1945, p("Chủ tịch Hồ Chí Minh ký Sắc lệnh 65 về bảo tồn cổ tích, nay là Ngày Di sản văn hóa Việt Nam.", "President Hồ Chí Minh signed Decree 65 on preserving antiquities — now Vietnam Cultural Heritage Day.")],
+    [11, 25, 2005, p("Không gian văn hóa Cồng chiêng Tây Nguyên được UNESCO công nhận là Kiệt tác di sản truyền khẩu và phi vật thể của nhân loại.", "The Space of Gong Culture in the Central Highlands was proclaimed a UNESCO Masterpiece of Intangible Heritage.")],
+
+    [12, 6, 2012, p("Tín ngưỡng thờ cúng Hùng Vương ở Phú Thọ được UNESCO ghi danh là Di sản văn hóa phi vật thể đại diện của nhân loại.", "The worship of the Hùng Kings in Phú Thọ was inscribed by UNESCO as Intangible Cultural Heritage of Humanity.")],
+    [12, 11, 1993, p("Quần thể di tích Cố đô Huế trở thành Di sản văn hóa thế giới đầu tiên của Việt Nam được UNESCO công nhận.", "The Complex of Huế Monuments became Vietnam's first UNESCO World Heritage site.")],
+    [12, 17, 1994, p("Vịnh Hạ Long được UNESCO công nhận là Di sản thiên nhiên thế giới.", "Hạ Long Bay was inscribed as a UNESCO natural World Heritage site.")],
+    [12, 18, 1986, p("Đại hội VI của Đảng bế mạc, khởi xướng công cuộc Đổi mới toàn diện đất nước.", "The Party's 6th Congress closed, launching the comprehensive Đổi Mới (Renovation) reforms.")],
+    [12, 19, 1946, p("Chủ tịch Hồ Chí Minh ra Lời kêu gọi toàn quốc kháng chiến: “Chúng ta thà hy sinh tất cả, chứ nhất định không chịu mất nước”.", "President Hồ Chí Minh issued the Call for National Resistance: “We would rather sacrifice everything than lose our country”.")],
+    [12, 22, 1944, p("Đội Việt Nam Tuyên truyền Giải phóng quân, tiền thân Quân đội nhân dân Việt Nam, thành lập tại Cao Bằng với 34 chiến sĩ.", "The Vietnam Propaganda Liberation Army, forerunner of the People's Army, was founded in Cao Bằng with 34 members.")],
+    [12, 22, 2024, p("Tuyến metro số 1 Bến Thành – Suối Tiên, tuyến metro đầu tiên của TP. Hồ Chí Minh, chính thức vận hành thương mại.", "Metro Line 1 Bến Thành – Suối Tiên, Hồ Chí Minh City's first metro line, began commercial service.")],
+    [12, 28, 2008, p("Đội tuyển Việt Nam hòa Thái Lan 1-1 tại Mỹ Đình, lần đầu vô địch AFF Cup nhờ bàn đánh đầu của Lê Công Vinh.", "Vietnam drew 1-1 with Thailand at Mỹ Đình to win the AFF Cup for the first time, thanks to Lê Công Vinh's header.")]
+  ];
+  I18n.add(en);
+  return LIST.map(([m, d, y, text]) => ({ m, d, y, text }));
+})();

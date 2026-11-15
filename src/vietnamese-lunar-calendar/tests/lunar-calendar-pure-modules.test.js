@@ -105,3 +105,12 @@ test("holidays: solar, lunar, leap month has none, Giao thừa on the last day o
   assert.equal(of("16/2/2026"), JSON.stringify(["Giao thừa"]));
   assert.equal(of("8/8/2025"), JSON.stringify([]));
 });
+
+test("holidays: 24/11 Văn hóa Việt Nam from 2026, 27/7 becomes a day off from 2027", () => {
+  const at = s => { const jd = jdOf(s), d = LunarCal.jdToDate(jd); return Holidays.of(d.d, d.m, LunarCal.fromJd(jd), d.y).map(h => h.name + (h.off ? "*" : "")).join(); };
+  assert.equal(at("24/11/2025"), "");
+  assert.equal(at("24/11/2026"), "Ngày Văn hóa Việt Nam*");
+  assert.equal(at("27/7/2026"), "Thương binh Liệt sĩ");
+  assert.equal(at("27/7/2027"), "Thương binh Liệt sĩ*");
+  assert.equal(at("2/9/1990"), "Quốc khánh*");
+});

@@ -27,10 +27,10 @@ thêm 11 ngày kiểm Khổng Minh (nhóm tháng 2 và 3) + trực quanh ngày g
 | Ô nhập / `?data=` | `12/11/2026`, `12-11-2026`, `2026-11-12` (dương) · `âm 15/8/2026`, `âm lịch: 15/8/2026`, `lunar 15/8/2026`, `al 15/8/2026` (âm) · tháng nhuận: `âm 1/6n/2025`, `âm 1/6 nhuận/2025`, `lunar 1/6leap/2025` |
 | `?demo=<key>` | Tab Lịch: `tet`, `mid-autumn`, `leap`, `solar`, `term`. Tab Tử vi: `horo-1986` (nam, 11/01/1986 01:30 — sinh trước Tết ⇒ tuổi Ất Sửu), `horo-2015` (nam, 25/07/2015 10:30). Tab SIM: `sim-sequence`, `sim-loc-phat`, `sim-than-tai`, `sim-lunar-birth`, `sim-no-birth`. Không còn mẫu lỗi (theo yêu cầu 11/2026) — lỗi nhập vẫn được báo khi gõ tay. Nạp rồi chạy, xoá `demo` khỏi URL |
 | `?tab=` | `cal` (mặc định), `horo` hoặc `sim`; không có thì mở tab dùng lần trước |
-| Link chia sẻ | `vietnamese-lunar-calendar.html#pako:<base64url(zlib(JSON))>`, payload tab Lịch `{ "date": "YYYY-MM-DD", "cc": bool, "moon": bool }` (`cc` = hiện can chi trong ô, `moon` = hiện tuần trăng); tab Tử vi `{ "tab": "horo", "name", "male": bool, "birth": "dd/mm/yyyy", "lunar": bool, "time": "HH:mm" hoặc "", "year": int }`; tab SIM `{ "tab": "sim", "sim": string, "male": bool, "birth": "dd/mm/yyyy" hoặc "", "lunar": bool, "time": "HH:mm" hoặc "" }` — tên, số SIM và ngày sinh nằm sau `#`, không lên server. Đọc thêm `#base64:`. `?data=` mang ngày thô (đi lên server — chỉ dùng cho chuỗi ngắn) |
-| localStorage | `web_tool.lang` (chung), `web_tool.vietnamese-lunar-calendar.theme`, `…cc`, `…moon`, `…tab`. Không lưu tên / ngày sinh |
+| Link chia sẻ | `vietnamese-lunar-calendar.html#pako:<base64url(zlib(JSON))>`, payload tab Lịch `{ "date": "YYYY-MM-DD", "cc": bool, "moon": bool, "wx": bool }` (`cc` = hiện can chi trong ô, `moon` = hiện tuần trăng, `wx` = bật thời tiết; tỉnh/vị trí **không** vào link); tab Tử vi `{ "tab": "horo", "name", "male": bool, "birth": "dd/mm/yyyy", "lunar": bool, "time": "HH:mm" hoặc "", "year": int }`; tab SIM `{ "tab": "sim", "sim": string, "male": bool, "birth": "dd/mm/yyyy" hoặc "", "lunar": bool, "time": "HH:mm" hoặc "" }` — tên, số SIM và ngày sinh nằm sau `#`, không lên server. Đọc thêm `#base64:`. `?data=` mang ngày thô (đi lên server — chỉ dùng cho chuỗi ngắn) |
+| localStorage | `web_tool.lang` (chung), `web_tool.vietnamese-lunar-calendar.theme`, `…cc`, `…moon`, `…tab`, `…wx`, `…wxPlace` (id tỉnh hoặc `here`), `…wxHere` (tọa độ làm tròn 0,01°), `…notes` (ghi chú chung), `…dayNotes` (ghi chú theo ngày `{id, jd, text, at}`). sessionStorage `…wx.<lat>,<lon>` = cache JSON Open-Meteo 30 phút. Không lưu tên / ngày sinh |
 
-- Payload không tin cậy: chỉ đọc `date` (string, qua `DateText.parse`) và `cc` (boolean). Link hỏng ⇒ báo ở `#note`, không đổi ngày đang xem.
+- Payload không tin cậy: chỉ đọc `date` (string, qua `DateText.parse`) và `cc`/`moon`/`wx` (boolean). Link hỏng ⇒ báo ở `#note`, không đổi ngày đang xem.
 - Tool không có "bài đang soạn" nên không cần `↶ Khôi phục bản trước`: nạp link/mẫu chỉ đổi ngày được chọn.
 - Ngày mở mặc định = hôm nay theo đồng hồ máy người dùng.
 
@@ -53,7 +53,12 @@ Mọi phép tính theo **giờ Việt Nam UTC+7** (không đổi theo múi giờ
 | Tuổi xung | Can chi có **chi đối xung** hoặc **can xung** (Giáp–Canh, Ất–Tân, Bính–Nhâm, Đinh–Quý; Mậu/Kỷ không có), chỉ giữ cặp có nạp âm khắc nhau (2 chiều) — áp cho ngày và tháng | `Almanac.clashes` |
 | Ngày kỵ | Nguyệt kỵ (5, 14, 23), Tam nương (3, 7, 13, 18, 22, 27), Dương công kỵ nhật (13 ngày cố định) | `Almanac.taboos` |
 | Tuần trăng | Tuổi trăng lúc 20h giờ VN = thời điểm − điểm sóc gần nhất (`LunarCal.newMoon`, cùng thuật toán đổi lịch) ⇒ 8 pha 🌑🌒🌓🌔🌕🌖🌗🌘 (`round(tuổi / 29.53 × 8) mod 8`). Checkbox **Mặt trăng** hiện icon trong ô ngày; chi tiết ngày luôn có dòng Tuần trăng. Test: mọi mùng 1 = 🌑, mọi rằm = 🌕 trong 2025–2026 | `MoonPhase.of` |
-| Ngày lễ | 20 ngày dương + 14 ngày âm + Giao thừa (ngày cuối tháng Chạp); tháng nhuận không có lễ âm; `off` = nghỉ lễ chính thức (nền đỏ nhạt) | `Holidays` |
+| Ngày lễ | 21 ngày dương + 14 ngày âm + Giao thừa (ngày cuối tháng Chạp); tháng nhuận không có lễ âm; `off` = nghỉ lễ chính thức (nền đỏ nhạt). Ngày dương có **năm áp dụng**: `off` = 1 (luôn nghỉ) hoặc năm bắt đầu nghỉ, `since` = năm bắt đầu có ngày đó. **24/11 Ngày Văn hóa Việt Nam**: có và nghỉ từ 2026 (Nghị quyết 28/2026/QH16, hiệu lực 01/07/2026). **27/7 Thương binh Liệt sĩ**: nghỉ từ 2027 theo dự thảo sửa Bộ luật Lao động (Bộ Nội vụ 09/11/2026, **chưa được Quốc hội thông qua** — user chốt 2026-11-15 đánh dấu trước; nếu luật không qua thì bỏ `2027` ở dòng đó) | `Holidays.of(d, m, lunar, year)` |
+| Thời tiết | Open-Meteo `/v1/forecast` 1 request/tỉnh: `daily` (mã WMO, nhiệt độ cao/thấp, độ ẩm TB, khả năng mưa tối đa, lượng mưa, gió max, UV max, mọc/lặn) `past_days=92` + `forecast_days=16`, `current` (nhiệt độ, cảm giác, độ ẩm, mã WMO), `timezone=Asia/Ho_Chi_Minh`. Mã WMO gộp 12 nhóm (Trời đẹp, Ít mây, Có mây, Nhiều mây, Sương mù, Mưa phùn, Mưa nhẹ, Mưa, Mưa to, Tuyết, Dông, Dông mưa đá). Địa điểm: 34 tỉnh/thành sau sáp nhập 07/2025, tọa độ trung tâm hành chính (tỉnh có trung tâm khác tên ghi kèm, vd `Gia Lai (Quy Nhơn)`), mặc định TP. Hồ Chí Minh; 📍 dùng `navigator.geolocation`, làm tròn 0,01° (~1 km). Checkbox **Thời tiết** mặc định bật: ô ngày có icon + mô tả + thấp–cao + 💧độ ẩm (điện thoại chỉ icon + nhiệt độ cao); Chi tiết ngày có mục Thời tiết (bây giờ, ngày đang chọn, 6 ô hôm nay + 5 ngày tới dàn hết chiều ngang — bấm 1 ngày để chọn; nút **Xem thêm ngày, chi tiết** mở bảng tới ~15 ngày: thời tiết, nhiệt độ, độ ẩm, khả năng + lượng mưa, gió max, UV, giờ mặt trời mọc/lặn) | `Weather`, `WeatherText`, `WeatherView`, `WeatherApp` |
+| Danh ngôn | Chi tiết ngày có 1 câu danh ngôn/tục ngữ dưới các nhãn (và dưới ghi chú ngày), chọn cố định theo ngày (băm `jd`) nên cùng ngày luôn cùng câu, ngày liền nhau không theo thứ tự nguồn. 393 câu song ngữ: 28 gốc + 201 Việt Nam (tục ngữ, ca dao, nhân vật lịch sử – văn hóa) + 164 thế giới; chỉ giữ câu có nguồn chắc chắn, bỏ các câu hay bị gán nhầm (Einstein, Twain, Gandhi…) | `QuotesClassic`, `QuotesVietnam`, `QuotesWorld` → `DailyQuote` |
+| Sách hay mỗi ngày | Dưới Danh ngôn: 1 quyển/ngày (băm `jd` khác danh ngôn): tên VI (bản dịch đã xuất bản), tác giả, năm, giới thiệu 1–2 câu. 320 quyển: 110 Việt Nam + 110 văn học thế giới + 100 phi hư cấu; năm âm = TCN | `BooksVietnam`, `BooksWorldLiterature`, `BooksWorldNonfiction` → `BookOfDay` |
+| Lịch sử | Cuối pane Lịch tháng: **Lịch sử thế giới** + **Lịch sử Việt Nam** của tháng đang xem, 8 sự kiện/tháng mỗi phần (192 sự kiện, ngày dương lịch, chỉ giữ sự kiện chắc ngày), xếp theo ngày; trùng ngày đang chọn thì tô nền; bấm ngày ⇒ chọn ngày đó năm đang xem | `HistoryWorld`, `HistoryVietnam`, `HistoryView` |
+| Ghi chú | **Bảng ghi chú chung** (dưới lịch tháng, bên phải danh sách ngày quan trọng): thêm (Ctrl+Enter) / sửa / xóa, mới nhất trên cùng, không theo ngày. **Ghi chú theo ngày**: nút 📝 ở thanh Chi tiết ngày hoặc trong mục “Ghi chú ngày này” (trên Danh ngôn) để thêm / sửa / xóa; ô ngày có ghi chú hiện 📝. Cả hai lưu localStorage (`…notes`, `…dayNotes`), tối đa 500 ký tự/ghi chú, không vào link chia sẻ | `NoteBoard`, `DayNotes` |
 
 Nội dung "nên/kỵ" của trực là tóm tắt phổ biến, tham khảo — không phải luật chuẩn duy nhất.
 
@@ -120,14 +125,18 @@ src/vietnamese-lunar-calendar/
   styles/lunar-calendar-month-grid-and-day-detail.css
   js/calendar/  lunar-solar-conversion-ho-ngoc-duc.js (LunarCal) · can-chi-solar-terms-nap-am.js (CanChi)
                 auspicious-days-hours-almanac.js (Almanac) · vietnam-solar-lunar-holidays.js (Holidays) · date-text-parser.js (DateText)
-  js/i18n/      en-lunar-calendar-ui-strings.js · en-almanac-terms.js
+  js/i18n/      en-lunar-calendar-ui-strings.js · en-almanac-terms.js · weather-codes-and-vn-provinces-vi-en.js (WeatherText)
+                daily-quotes-*.js (QuotesClassic/QuotesVietnam/QuotesWorld) · book-of-the-day-*.js (Books…) · *-history-events-by-month-vi-en.js (HistoryWorld/HistoryVietnam)
+  js/weather/   open-meteo-daily-weather-client.js (Weather: url, parse, load + cache)
   js/horoscope/ birth-chart-pillars-and-feng-shui.js (BirthChart) · yearly-fortune-stars-and-age-taboos.js (YearFortune)
                 pythagorean-numerology-name-and-birth.js (Numerology) · horoscope-interpretation-texts.js (HoroText)
   js/samples/   demo-dates-registry.js (DEMOS) · horoscope-demo-profiles.js (HORO_DEMOS)
   js/horoscope/ western-zodiac-and-element-balance.js (NatalExtra)
   js/ui/        month-grid-view.js (MonthGrid) · day-detail-pane.js (DayDetail) · horoscope-tab-view.js (HoroView) · horoscope-natal-profile-view.js (HoroProfile)
                 horoscope-tab-controller.js (HoroApp) · lunar-calendar-app.js (tab + điều phối)
-  tests/        lunar-calendar-pure-modules.test.js · horoscope-pure-modules.test.js · i18n-dictionary-coverage.test.js
+                weather-cell-and-forecast-view.js (WeatherView) · weather-location-controller.js (WeatherApp)
+                daily-quote-and-book-pickers.js (DailyQuote, BookOfDay) · history-this-month-view.js (HistoryView) · note-board-controller.js (NoteBoard) · day-notes-controller.js (DayNotes)
+  tests/        lunar-calendar-pure-modules.test.js · horoscope-pure-modules.test.js · i18n-dictionary-coverage.test.js · weather-open-meteo-parse.test.js · daily-quotes-books-history-data.test.js
 ```
 
 Ô nhập/mẫu/link → `DateText.parse` → `jd` → `select(jd)` → `MonthGrid.build` (lưới + sự kiện trong tháng) + `DayDetail.render` + thanh trạng thái.
@@ -152,4 +161,5 @@ Tab Lịch: **🔮 Xem tử vi** / **📱 Xem SIM** lấy ngày đang chọn (d�
 
 - Năm 1800–2199. Trước 1968 lịch VN thực tế có lúc dùng UTC+8; tool luôn tính UTC+7 (giống lịch Hồ Ngọc Đức).
 - Giờ giao tiết sai số vài phút (công thức Meeus rút gọn).
+- Thời tiết là request dữ liệu duy nhất của tool (ADR #18; ngoài beacon đếm lượt xem GoatCounter): chỉ có ~3 tháng qua + 16 ngày tới (tháng khác ô trống, chi tiết ghi “Chưa có dữ liệu”); là 1 điểm trên tọa độ trung tâm tỉnh, không phải trung bình cả tỉnh; ngày đã qua là số liệu mô hình/phân tích lại, không phải trạm đo. Không có mạng / bị chặn ⇒ mục Thời tiết báo `✖ Không tải được thời tiết`, lịch vẫn chạy. Open-Meteo miễn phí cho dùng phi thương mại (giới hạn 10k request/ngày/IP).
 - Dựng 1 tháng ≈ 42 ô × (đổi lịch + tiết khí) — tức thời; test round-trip 146k ngày chạy ~6 giây.

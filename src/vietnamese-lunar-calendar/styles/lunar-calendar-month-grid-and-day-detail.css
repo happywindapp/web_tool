@@ -18,6 +18,22 @@
   .day.full .ld { font-weight:700; }
   .day .moon { font-style:normal; font-size:13px; margin-right:2px; vertical-align:-1px; }
   .day .ev { font-size:10.5px; line-height:1.2; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%; padding-right:22px; }
+  .day .ev { min-height:1.2em; }
+  .day .wx { display:flex; flex-wrap:wrap; align-items:baseline; justify-self:stretch; gap:1px 3px; min-width:0; margin:7px 0 7px; font-size:10.5px; line-height:1.25; color:var(--muted); }
+  .wx .wi { font-size:12px; } .wx .wt { overflow:hidden; white-space:nowrap; text-overflow:ellipsis; min-width:0; flex:0 1 auto; }
+  .wx .wn { width:100%; white-space:nowrap; color:var(--ink); } .wx .rh { color:var(--muted); }
+  .day.sel .wx, .day.sel .wx .wn, .day.sel .wx .rh { color:#fff; }
+  .wx-opts { display:inline-flex; gap:4px; } .wx-opts[hidden] { display:none; } #wxPlace { max-width:13em; }
+  .wx-week { display:grid; grid-template-columns:repeat(6, minmax(0, 1fr)); gap:6px; }
+  .wx-head { display:flex; align-items:center; justify-content:space-between; gap:8px; margin:10px 0 6px; } .wx-head h4 { margin:0 !important; }
+  .wx-more { padding:2px 10px; font-size:12px; }
+  .wx-table { overflow-x:auto; margin-top:8px; } .wx-table td, .wx-table th { white-space:nowrap; }
+  .lnk { border:0; padding:0; background:none; color:var(--acc-ink); font:inherit; cursor:pointer; text-decoration:underline; }
+  .wx-week button { display:grid; justify-items:center; gap:1px; padding:4px 2px; border:1px solid var(--line); border-radius:8px; background:var(--panel); color:var(--ink); }
+  .wx-week .wi { font-size:20px; } .wx-week small { color:var(--muted); font-size:11px; }
+  #detail h4 { margin:10px 0 6px; font-size:12px; color:var(--muted); } #detail .quote { margin:12px 0 0; padding:8px 12px; border-left:3px solid var(--first); border-radius:6px; background:color-mix(in srgb, var(--first) 7%, var(--panel)); font-style:italic; }
+  #detail .book { padding:8px 12px; border:1px solid var(--line); border-radius:8px; } #detail .book h3 { margin-bottom:4px; } #detail .book p { margin:4px 0; }
+  #detail .quote cite { display:block; margin-top:4px; font-style:normal; font-size:12px; color:var(--muted); }
   .day .ev.hol { color:var(--hol); } .day .ev.term { color:var(--acc-ink); }
   .day .dot, .legend .dot { position:absolute; top:6px; right:6px; width:7px; height:7px; border-radius:50%; background:var(--hd); }
   .legend .dot { position:static; display:inline-block; }
@@ -29,13 +45,28 @@
   .day.sel .sd, .day.sel .ld, .day.sel .ev { color:#fff; }
   .day.sel .dot { background:#fff; }
   .day:focus-visible { outline:3px solid var(--warn); outline-offset:1px; }
-  @media (hover: hover) { .day:not(.sel):hover { background:var(--hover); } .events button:hover { background:var(--hover); } }
+  @media (hover: hover) { .day:not(.sel):hover { background:var(--hover); } .events button:hover, .wx-week button:hover { background:var(--hover); } }
   .legend { display:flex; flex-wrap:wrap; gap:4px 16px; margin:8px 2px; font-size:12px; }
   .legend .sw { display:inline-block; width:12px; height:12px; border:1px solid var(--line); border-radius:3px; vertical-align:-2px; }
   .legend .sw.off { background:var(--offbg); }
   .events { list-style:none; margin:4px 0 0; padding:0; display:grid; gap:2px; }
   .events button { width:100%; text-align:left; border:0; border-radius:6px; background:transparent; padding:4px 8px; }
   .events button b { display:inline-block; min-width:1.8em; }
+  .below { display:grid; grid-template-columns:minmax(0, 1fr) minmax(0, 1.2fr); gap:12px; align-items:start; margin-top:4px; }
+  .noteboard { border:1px solid var(--line); border-radius:10px; padding:8px 10px; background:color-mix(in srgb, #f59e0b 6%, var(--panel)); }
+  .nb-head { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:6px; } .nb-head .main { padding:2px 12px; }
+  .nb-add textarea, .nb-list textarea { width:100%; box-sizing:border-box; resize:vertical; font:inherit; font-size:13.5px; }
+  .nb-row { display:flex; justify-content:flex-end; gap:6px; margin-top:4px; }
+  .nb-list { list-style:none; margin:8px 0 0; padding:0; display:grid; gap:6px; max-height:360px; overflow:auto; }
+  .nb-list li { display:flex; align-items:flex-start; gap:6px; padding:6px 8px; border:1px solid var(--line); border-radius:8px; background:var(--panel); } .nb-list li.edit { display:block; } .nb-list li.empty { border-style:dashed; background:none; }
+  .nb-act { display:flex; flex:none; } .nb-act button { padding:0 6px; border:0; background:none; cursor:pointer; }
+  .nb-text { flex:1 1 auto; min-width:0; white-space:pre-wrap; overflow-wrap:anywhere; font-size:13.5px; }
+  .day-bar { display:flex; align-items:center; justify-content:space-between; } #dayNoteBtn { padding:2px 10px; }
+  .day .nmark { font-style:normal; font-size:11px; margin-left:3px; vertical-align:3px; }
+  #detail .day-notes .nb-list { max-height:none; margin-top:4px; } #detail .day-notes h3 { margin:0; } #detail .day-notes .nb-list textarea { width:100%; box-sizing:border-box; font:inherit; }
+  .hist { margin-top:14px; } .hist h3 { margin:0 0 6px; font-size:13px; text-transform:uppercase; letter-spacing:.04em; color:var(--acc-ink); }
+  .hist ul { list-style:none; margin:0; padding:0; display:grid; gap:6px; font-size:13.5px; line-height:1.45; }
+  .hist li { padding:4px 8px; border-radius:6px; } .hist li.on { background:var(--hdrow); } .hist .lnk, .hist b { margin-right:4px; font-weight:600; white-space:nowrap; }
   .events button.off { color:var(--hol); } .events button.term { color:var(--acc-ink); }
   #detail { font-size:14px; }
   .hero { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
@@ -92,6 +123,8 @@
     .day .sd { font-size:17px; }
     .day .ld { right:4px; bottom:2px; font-size:11px; }
     .day .ev { font-size:9.5px; padding-right:14px; }
+    .below { grid-template-columns:1fr; }
+    .day .wx { font-size:9.5px; margin:4px 0 4px; } .wx-week { grid-template-columns:repeat(3, minmax(0, 1fr)); } .wx .wt, .wx .tmin, .wx .rh { display:none; } .wx .wn { width:auto; }
     .day .dot { top:4px; right:4px; width:6px; height:6px; }
     #q { width:12em; }
     .hero .big { font-size:40px; }

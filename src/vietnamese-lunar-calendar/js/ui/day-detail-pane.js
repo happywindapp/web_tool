@@ -10,6 +10,9 @@ const DayDetail = (() => {
   const moonRow = m => esc(m.icon + " " + T(m.name)) + ` <small class="muted">${esc(T("tuổi trăng {a} ngày (lúc 20h)", { a: I18n.num(Math.round(m.age * 10) / 10) }))}</small>`;
   const pad = n => String(n).padStart(2, "0");
   const dmy = s => pad(s.d) + "/" + pad(s.m) + "/" + s.y;
+  const quote = jd => { const q = DailyQuote.of(jd); return `<blockquote class="quote">${esc(T(q.text))}<cite>— ${esc(T(q.by))}</cite></blockquote>`; };
+  const book = jd => { const b = BookOfDay.of(jd), y = b.year < 0 ? T("{y} TCN", { y: -b.year }) : String(b.year);
+    return `<section class="book"><h3>${esc(T("📚 Sách hay mỗi ngày"))}</h3><p><b>${esc(T(b.title))}</b> — ${esc(b.author)} (${esc(y)})</p><p>${esc(T(b.about))}</p></section>`; };
 
   function moment(localJd) {
     const total = Math.round((localJd + 0.5) * 1440), day = Math.floor(total / 1440), mins = total - day * 1440, s = LunarCal.jdToDate(day);
@@ -43,10 +46,11 @@ const DayDetail = (() => {
     return html + "</tbody></table>";
   }
 
-  function render(box, jd, today) {
+  // add: { notes, weather } HTML — notes above the quote, weather after the book.
+  function render(box, jd, today, add = {}) {
     const s = LunarCal.jdToDate(jd), l = LunarCal.fromJd(jd), p = CanChi.day(jd), mp = CanChi.month(l.m, l.y), yp = CanChi.year(l.y);
     const god = Almanac.dayGod(l.m, p.chi), term = CanChi.solarTerm(jd), truc = Almanac.truc(p.chi, term.idx), star = Almanac.mansion(jd);
-    const km = Almanac.khongMinh(l.m, l.d), dir = Almanac.directions(p), rel = Almanac.dayRelation(p), hol = Holidays.of(s.d, s.m, l), taboo = Almanac.taboos(l.d, l.m);
+    const km = Almanac.khongMinh(l.m, l.d), dir = Almanac.directions(p), rel = Almanac.dayRelation(p), hol = Holidays.of(s.d, s.m, l, s.y), taboo = Almanac.taboos(l.d, l.m);
     const na = q => esc(cc(q)) + ` <small class="muted">${esc(T(CanChi.napAm(q).name))}</small>`;
     const tags = [tag(T(god.name) + " · " + T(god.good ? "Hoàng đạo" : "Hắc đạo"), god.good ? "good" : "bad"),
       ...hol.map(h => tag(T(h.name), h.off ? "hol off" : "hol")), ...taboo.map(t => tag(T(t), "bad")),
@@ -54,7 +58,7 @@ const DayDetail = (() => {
     const tet = nextTet(jd, l);
     const hoang = [...Array(12).keys()].filter(h => Almanac.hourGod(p.chi, h).good).map(h => `${esc(T(CanChi.CHI[h]))} <small>(${HOURS[h]}h)</small>`).join(", ");
 
-    box.innerHTML = hero(jd, s, l) + `<div class="tags">${tags.join("")}</div>`
+    box.innerHTML = hero(jd, s, l) + `<div class="tags">${tags.join("")}</div>` + (add.notes || "") + quote(jd) + book(jd) + (add.weather || "")
       + `<section><h3>${esc(T("Can chi & ngũ hành"))}</h3><dl>`
       + row("Năm", na(yp)) + row("Tháng", na(mp)) + row("Ngày", na(p)) + row("Giờ đầu ngày", esc(cc(CanChi.hour(jd, 0))))
       + row("Ngũ hành ngày", esc(T(rel.rule) + " (" + T(rel.canEl) + " – " + T(rel.chiEl) + "): " + T(rel.label)))

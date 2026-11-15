@@ -1,0 +1,117 @@
+// Sự kiện lịch sử thế giới nổi tiếng theo tháng (dương lịch) cho lịch tháng — cặp VI/EN, VI là khóa T(); năm âm = TCN.
+const HistoryWorld = (() => {
+  const en = {};
+  const p = (vi, enText) => { en[vi] = enText; return vi; };
+  // [tháng, ngày, năm, nội dung]
+  const LIST = [
+    [1, 1, 1863, p("Tuyên ngôn Giải phóng Nô lệ của Tổng thống Abraham Lincoln có hiệu lực tại Hoa Kỳ.", "President Abraham Lincoln’s Emancipation Proclamation takes effect in the United States.")],
+    [1, 7, 1610, p("Galileo Galilei quan sát thấy các vệ tinh của Sao Mộc qua kính thiên văn tự chế, củng cố thuyết nhật tâm.", "Galileo Galilei observes the moons of Jupiter through his own telescope, strengthening the heliocentric view.")],
+    [1, 9, 2007, p("Steve Jobs giới thiệu chiếc iPhone đầu tiên, mở ra kỷ nguyên điện thoại thông minh màn hình cảm ứng.", "Steve Jobs unveils the first iPhone, ushering in the era of touchscreen smartphones.")],
+    [1, 10, 1920, p("Hội Quốc Liên chính thức ra đời khi Hòa ước Versailles có hiệu lực — tổ chức liên chính phủ đầu tiên vì hòa bình thế giới.", "The League of Nations comes into being as the Treaty of Versailles takes effect — the first intergovernmental body for world peace.")],
+    [1, 15, 2001, p("Bách khoa toàn thư mở Wikipedia ra mắt, cho phép mọi người cùng viết và sửa nội dung.", "Wikipedia, the free online encyclopedia that anyone can edit, is launched.")],
+    [1, 24, 1848, p("Vàng được phát hiện tại xưởng cưa Sutter ở California, khởi đầu “Cơn sốt vàng” làm thay đổi miền Tây nước Mỹ.", "Gold is found at Sutter’s Mill in California, sparking the Gold Rush that transformed the American West.")],
+    [1, 27, 1880, p("Thomas Edison được cấp bằng sáng chế cho bóng đèn sợi đốt, đặt nền móng cho chiếu sáng điện.", "Thomas Edison is granted a patent for his incandescent light bulb, laying the groundwork for electric lighting.")],
+    [1, 31, 1958, p("Hoa Kỳ phóng Explorer 1, vệ tinh nhân tạo đầu tiên của nước này, phát hiện vành đai bức xạ Van Allen.", "The United States launches Explorer 1, its first satellite, which discovers the Van Allen radiation belts.")],
+
+    [2, 4, 2004, p("Mark Zuckerberg cùng các bạn ở Đại học Harvard ra mắt mạng xã hội Facebook.", "Mark Zuckerberg and fellow Harvard students launch the social network Facebook.")],
+    [2, 7, 1992, p("Hiệp ước Maastricht được ký kết, đặt nền tảng cho Liên minh châu Âu và đồng tiền chung euro.", "The Maastricht Treaty is signed, laying the foundation for the European Union and the euro.")],
+    [2, 11, 1990, p("Nelson Mandela được trả tự do sau 27 năm tù, mở đường chấm dứt chế độ apartheid ở Nam Phi.", "Nelson Mandela is released after 27 years in prison, paving the way to end apartheid in South Africa.")],
+    [2, 12, 1809, p("Ngày sinh của nhà tự nhiên học Charles Darwin và Tổng thống Mỹ Abraham Lincoln — hai người sinh cùng một ngày.", "Naturalist Charles Darwin and US President Abraham Lincoln are both born on this very day.")],
+    [2, 18, 1930, p("Nhà thiên văn Clyde Tombaugh phát hiện Sao Diêm Vương tại Đài thiên văn Lowell, Hoa Kỳ.", "Astronomer Clyde Tombaugh discovers Pluto at Lowell Observatory in the United States.")],
+    [2, 20, 1962, p("John Glenn trở thành người Mỹ đầu tiên bay quanh quỹ đạo Trái Đất trên tàu Friendship 7.", "John Glenn becomes the first American to orbit Earth, aboard Friendship 7.")],
+    [2, 24, 1582, p("Giáo hoàng Grêgôriô XIII ban hành sắc chỉ cải cách lịch, khai sinh lịch Gregory — dương lịch dùng phổ biến ngày nay.", "Pope Gregory XIII issues the papal bull reforming the calendar, creating the Gregorian calendar used worldwide today.")],
+    [2, 28, 1953, p("James Watson và Francis Crick tìm ra cấu trúc xoắn kép của DNA, bước ngoặt của sinh học hiện đại.", "James Watson and Francis Crick work out the double-helix structure of DNA, a turning point in modern biology.")],
+
+    [3, 1, 1872, p("Yellowstone được thành lập, trở thành vườn quốc gia đầu tiên trên thế giới.", "Yellowstone is established as the world’s first national park.")],
+    [3, 10, 1876, p("Alexander Graham Bell thực hiện cuộc gọi điện thoại đầu tiên: “Ông Watson, lại đây, tôi cần gặp ông.”", "Alexander Graham Bell makes the first telephone call: “Mr. Watson, come here, I want to see you.”")],
+    [3, 12, 1989, p("Tim Berners-Lee trình đề xuất hệ thống quản lý thông tin tại CERN — tiền thân của World Wide Web.", "Tim Berners-Lee submits his information management proposal at CERN — the forerunner of the World Wide Web.")],
+    [3, 14, 1879, p("Nhà vật lý Albert Einstein, cha đẻ thuyết tương đối, chào đời tại Ulm, Đức.", "Physicist Albert Einstein, father of the theory of relativity, is born in Ulm, Germany.")],
+    [3, 15, -44, p("Julius Caesar bị ám sát tại Viện Nguyên lão La Mã vào ngày Ides tháng Ba, làm thay đổi tiến trình lịch sử La Mã.", "Julius Caesar is assassinated in the Roman Senate on the Ides of March, changing the course of Roman history.")],
+    [3, 18, 1965, p("Phi hành gia Alexei Leonov thực hiện chuyến đi bộ ngoài không gian đầu tiên của loài người.", "Cosmonaut Alexei Leonov performs humanity’s first spacewalk.")],
+    [3, 25, 1957, p("Hiệp ước Rome được ký kết, thành lập Cộng đồng Kinh tế châu Âu — tiền thân của EU.", "The Treaty of Rome is signed, creating the European Economic Community — forerunner of the EU.")],
+    [3, 31, 1889, p("Tháp Eiffel được khánh thành tại Paris, khi đó là công trình cao nhất thế giới.", "The Eiffel Tower is inaugurated in Paris, then the tallest structure in the world.")],
+
+    [4, 1, 1976, p("Steve Jobs, Steve Wozniak và Ronald Wayne thành lập công ty Apple Computer.", "Steve Jobs, Steve Wozniak and Ronald Wayne found Apple Computer.")],
+    [4, 3, 1973, p("Martin Cooper của Motorola thực hiện cuộc gọi đầu tiên bằng điện thoại di động cầm tay trên phố New York.", "Motorola’s Martin Cooper makes the first handheld mobile phone call on a New York street.")],
+    [4, 6, 1896, p("Thế vận hội Olympic hiện đại đầu tiên khai mạc tại Athens, Hy Lạp.", "The first modern Olympic Games open in Athens, Greece.")],
+    [4, 12, 1961, p("Yuri Gagarin bay vào vũ trụ trên tàu Vostok 1, trở thành con người đầu tiên bay quanh Trái Đất.", "Yuri Gagarin flies into space aboard Vostok 1, becoming the first human to orbit Earth.")],
+    [4, 15, 1912, p("Tàu Titanic chìm ở Bắc Đại Tây Dương sau khi va phải băng trôi trong chuyến đi đầu tiên.", "The Titanic sinks in the North Atlantic after striking an iceberg on her maiden voyage.")],
+    [4, 21, -753, p("Theo truyền thuyết, thành Rome được Romulus thành lập bên bờ sông Tiber.", "According to legend, Romulus founds the city of Rome on the banks of the Tiber.")],
+    [4, 22, 1970, p("Ngày Trái Đất đầu tiên được tổ chức, khởi đầu phong trào bảo vệ môi trường hiện đại.", "The first Earth Day is held, launching the modern environmental movement.")],
+    [4, 24, 1990, p("Kính viễn vọng không gian Hubble được phóng lên quỹ đạo trên tàu con thoi Discovery.", "The Hubble Space Telescope is launched into orbit aboard the Space Shuttle Discovery.")],
+
+    [5, 1, 1851, p("Đại Triển lãm khai mạc tại Cung điện Pha lê ở London — hội chợ thế giới đầu tiên.", "The Great Exhibition opens in London’s Crystal Palace — the first world’s fair.")],
+    [5, 6, 1954, p("Roger Bannister trở thành người đầu tiên chạy một dặm dưới 4 phút.", "Roger Bannister becomes the first person to run a mile in under four minutes.")],
+    [5, 8, 1945, p("Ngày Chiến thắng ở châu Âu: Đức đầu hàng, Chiến tranh thế giới thứ hai kết thúc tại châu Âu.", "Victory in Europe Day: Germany surrenders and the Second World War ends in Europe.")],
+    [5, 14, 1796, p("Bác sĩ Edward Jenner thử nghiệm vắc-xin đậu mùa đầu tiên, mở đầu ngành tiêm chủng.", "Dr Edward Jenner tests the first smallpox vaccine, giving birth to vaccination.")],
+    [5, 20, 1498, p("Nhà hàng hải Vasco da Gama cập bến Calicut, mở tuyến đường biển từ châu Âu sang Ấn Độ.", "Navigator Vasco da Gama reaches Calicut, opening the sea route from Europe to India.")],
+    [5, 21, 1927, p("Charles Lindbergh hạ cánh xuống Paris, hoàn thành chuyến bay một mình không nghỉ đầu tiên qua Đại Tây Dương.", "Charles Lindbergh lands in Paris, completing the first solo nonstop flight across the Atlantic.")],
+    [5, 24, 1844, p("Samuel Morse gửi bức điện tín đầu tiên “What hath God wrought” từ Washington tới Baltimore.", "Samuel Morse sends the first telegraph message, “What hath God wrought,” from Washington to Baltimore.")],
+    [5, 29, 1953, p("Edmund Hillary và Tenzing Norgay trở thành những người đầu tiên chinh phục đỉnh Everest.", "Edmund Hillary and Tenzing Norgay become the first to reach the summit of Mount Everest.")],
+
+    [6, 4, 1783, p("Anh em Montgolfier trình diễn công khai khinh khí cầu khí nóng đầu tiên tại Annonay, Pháp.", "The Montgolfier brothers give the first public demonstration of a hot-air balloon in Annonay, France.")],
+    [6, 6, 1944, p("Ngày D: quân Đồng Minh đổ bộ lên Normandy, mở mặt trận phía Tây trong Chiến tranh thế giới thứ hai.", "D-Day: Allied forces land in Normandy, opening the Western Front in the Second World War.")],
+    [6, 15, 1215, p("Vua John nước Anh đóng dấu Đại Hiến chương Magna Carta, giới hạn quyền lực nhà vua.", "King John of England seals Magna Carta, limiting the power of the crown.")],
+    [6, 16, 1963, p("Valentina Tereshkova trở thành người phụ nữ đầu tiên bay vào vũ trụ trên tàu Vostok 6.", "Valentina Tereshkova becomes the first woman in space aboard Vostok 6.")],
+    [6, 21, 1948, p("Máy tính Manchester Baby chạy chương trình lưu trữ đầu tiên trong lịch sử máy tính điện tử.", "The Manchester Baby runs the first stored program in the history of electronic computing.")],
+    [6, 23, 1894, p("Ủy ban Olympic Quốc tế được thành lập tại Paris theo sáng kiến của Pierre de Coubertin.", "The International Olympic Committee is founded in Paris on the initiative of Pierre de Coubertin.")],
+    [6, 26, 1945, p("Hiến chương Liên Hợp Quốc được ký kết tại San Francisco bởi đại diện 50 quốc gia.", "The Charter of the United Nations is signed in San Francisco by representatives of 50 nations.")],
+    [6, 30, 1908, p("Sự kiện Tunguska: một vụ nổ thiên thạch cực mạnh quật đổ hàng triệu cây rừng ở Siberia.", "The Tunguska event: a massive meteor air burst flattens millions of trees in Siberia.")],
+
+    [7, 1, 1867, p("Liên bang Canada được thành lập, ngày nay là Ngày Quốc khánh Canada.", "The Canadian Confederation is formed, now celebrated as Canada Day.")],
+    [7, 4, 1776, p("Tuyên ngôn Độc lập Hoa Kỳ được thông qua tại Philadelphia, khai sinh nước Mỹ.", "The US Declaration of Independence is adopted in Philadelphia, giving birth to the United States.")],
+    [7, 6, 1885, p("Louis Pasteur tiêm thành công vắc-xin dại cho cậu bé Joseph Meister.", "Louis Pasteur successfully gives the rabies vaccine to young Joseph Meister.")],
+    [7, 14, 1789, p("Người dân Paris chiếm ngục Bastille, biểu tượng mở đầu Cách mạng Pháp.", "Parisians storm the Bastille, the symbolic start of the French Revolution.")],
+    [7, 20, 1969, p("Tàu Apollo 11 đáp xuống Mặt Trăng; Neil Armstrong là người đầu tiên đặt chân lên đó.", "Apollo 11 lands on the Moon; Neil Armstrong becomes the first person to walk on it.")],
+    [7, 24, 1911, p("Nhà thám hiểm Hiram Bingham đến thành cổ Machu Picchu của người Inca, giới thiệu nó với thế giới.", "Explorer Hiram Bingham reaches the Inca citadel of Machu Picchu, bringing it to world attention.")],
+    [7, 25, 1978, p("Louise Brown chào đời ở Anh, em bé đầu tiên được sinh ra nhờ thụ tinh trong ống nghiệm.", "Louise Brown is born in England, the first baby conceived through in vitro fertilisation.")],
+    [7, 30, 1930, p("Uruguay vô địch World Cup đầu tiên sau khi thắng Argentina 4–2 trong trận chung kết tại Montevideo.", "Uruguay wins the first World Cup, beating Argentina 4–2 in the final in Montevideo.")],
+
+    [8, 3, 1492, p("Christopher Columbus giong buồm rời cảng Palos, Tây Ban Nha, bắt đầu chuyến vượt Đại Tây Dương.", "Christopher Columbus sets sail from Palos, Spain, beginning his voyage across the Atlantic.")],
+    [8, 6, 1991, p("Tim Berners-Lee công bố trang web đầu tiên, đưa World Wide Web đến với công chúng.", "Tim Berners-Lee publishes the first website, making the World Wide Web available to the public.")],
+    [8, 8, 1967, p("Hiệp hội các quốc gia Đông Nam Á (ASEAN) được thành lập theo Tuyên bố Bangkok.", "The Association of Southeast Asian Nations (ASEAN) is founded under the Bangkok Declaration.")],
+    [8, 12, 1981, p("IBM ra mắt máy tính cá nhân IBM PC, chuẩn mực cho máy tính văn phòng về sau.", "IBM launches the IBM Personal Computer, setting the standard for office computers.")],
+    [8, 15, 1947, p("Ấn Độ giành độc lập; Thủ tướng Jawaharlal Nehru đọc bài diễn văn “Hẹn ước với định mệnh”.", "India gains independence; Prime Minister Jawaharlal Nehru delivers his “Tryst with Destiny” speech.")],
+    [8, 22, 1864, p("Công ước Geneva đầu tiên được ký kết, bảo vệ thương binh và đặt nền móng cho luật nhân đạo quốc tế.", "The first Geneva Convention is signed, protecting wounded soldiers and founding international humanitarian law.")],
+    [8, 24, 2006, p("Hiệp hội Thiên văn Quốc tế xếp Sao Diêm Vương vào nhóm hành tinh lùn, Hệ Mặt Trời còn 8 hành tinh.", "The International Astronomical Union reclassifies Pluto as a dwarf planet, leaving eight planets.")],
+    [8, 28, 1963, p("Martin Luther King Jr. đọc bài diễn văn “Tôi có một giấc mơ” tại Washington.", "Martin Luther King Jr. delivers his “I Have a Dream” speech in Washington.")],
+
+    [9, 2, 1945, p("Nhật Bản ký văn kiện đầu hàng trên chiến hạm USS Missouri, Chiến tranh thế giới thứ hai kết thúc.", "Japan signs the instrument of surrender aboard USS Missouri, ending the Second World War.")],
+    [9, 4, 1998, p("Larry Page và Sergey Brin chính thức thành lập công ty Google.", "Larry Page and Sergey Brin officially incorporate Google.")],
+    [9, 6, 1522, p("Tàu Victoria của đoàn Magellan–Elcano về tới Tây Ban Nha, hoàn thành chuyến đi vòng quanh thế giới đầu tiên.", "The ship Victoria of the Magellan–Elcano expedition returns to Spain, completing the first circumnavigation of the globe.")],
+    [9, 17, 1787, p("Hiến pháp Hoa Kỳ được ký tại Philadelphia, bản hiến pháp thành văn lâu đời nhất còn hiệu lực.", "The US Constitution is signed in Philadelphia, the oldest written national constitution still in force.")],
+    [9, 19, 1893, p("New Zealand trở thành quốc gia đầu tiên trao quyền bầu cử toàn quốc cho phụ nữ.", "New Zealand becomes the first country to grant women the right to vote in national elections.")],
+    [9, 23, 1846, p("Sao Hải Vương được phát hiện nhờ tính toán toán học, do Johann Galle quan sát tại Berlin.", "Neptune is discovered through mathematical prediction, observed by Johann Galle in Berlin.")],
+    [9, 27, 1825, p("Tuyến đường sắt Stockton–Darlington khai trương, tuyến công cộng đầu tiên dùng đầu máy hơi nước.", "The Stockton and Darlington Railway opens, the first public railway to use steam locomotives.")],
+    [9, 28, 1928, p("Alexander Fleming phát hiện penicillin, mở ra kỷ nguyên thuốc kháng sinh.", "Alexander Fleming discovers penicillin, opening the age of antibiotics.")],
+
+    [10, 1, 1908, p("Ford giới thiệu mẫu xe Model T, đưa ô tô đến với đại chúng.", "Ford introduces the Model T, bringing the automobile to the masses.")],
+    [10, 3, 1990, p("Nước Đức tái thống nhất sau 45 năm chia cắt.", "Germany is reunified after 45 years of division.")],
+    [10, 4, 1957, p("Liên Xô phóng Sputnik 1, vệ tinh nhân tạo đầu tiên, mở đầu kỷ nguyên không gian.", "The Soviet Union launches Sputnik 1, the first artificial satellite, opening the Space Age.")],
+    [10, 12, 1492, p("Đoàn thám hiểm của Christopher Columbus đặt chân lên châu Mỹ tại quần đảo Bahamas.", "Christopher Columbus’s expedition makes landfall in the Americas in the Bahamas.")],
+    [10, 24, 1945, p("Liên Hợp Quốc chính thức ra đời khi Hiến chương có hiệu lực, vì hòa bình và hợp tác quốc tế.", "The United Nations is officially founded as its Charter takes effect, for peace and international cooperation.")],
+    [10, 28, 1886, p("Tượng Nữ thần Tự do, món quà của nước Pháp, được khánh thành tại New York.", "The Statue of Liberty, a gift from France, is dedicated in New York.")],
+    [10, 29, 1969, p("Thông điệp đầu tiên được gửi qua mạng ARPANET — tiền thân của Internet.", "The first message is sent over ARPANET — the forerunner of the Internet.")],
+    [10, 31, 1517, p("Martin Luther công bố 95 luận đề tại Wittenberg, khởi đầu cuộc Cải cách Kháng Cách.", "Martin Luther publishes his Ninety-five Theses in Wittenberg, starting the Protestant Reformation.")],
+
+    [11, 4, 1922, p("Howard Carter tìm thấy lối vào lăng mộ pharaoh Tutankhamun ở Thung lũng các vị vua, Ai Cập.", "Howard Carter finds the entrance to Pharaoh Tutankhamun’s tomb in Egypt’s Valley of the Kings.")],
+    [11, 8, 1895, p("Wilhelm Röntgen phát hiện tia X, mở ra ngành chẩn đoán hình ảnh y học.", "Wilhelm Röntgen discovers X-rays, opening the field of medical imaging.")],
+    [11, 9, 1989, p("Bức tường Berlin sụp đổ, mở đường cho nước Đức thống nhất và kết thúc Chiến tranh Lạnh.", "The Berlin Wall falls, paving the way for German reunification and the end of the Cold War.")],
+    [11, 11, 1918, p("Hiệp định đình chiến được ký tại Compiègne, chấm dứt giao tranh trong Chiến tranh thế giới thứ nhất.", "The Armistice is signed at Compiègne, ending the fighting of the First World War.")],
+    [11, 17, 1869, p("Kênh đào Suez được khánh thành, nối Địa Trung Hải với Biển Đỏ, rút ngắn đường biển Âu–Á.", "The Suez Canal opens, linking the Mediterranean and the Red Sea and shortening the sea route between Europe and Asia.")],
+    [11, 19, 1863, p("Abraham Lincoln đọc Diễn văn Gettysburg, một trong những bài diễn văn nổi tiếng nhất lịch sử Mỹ.", "Abraham Lincoln delivers the Gettysburg Address, one of the most famous speeches in American history.")],
+    [11, 24, 1859, p("Charles Darwin xuất bản cuốn “Nguồn gốc các loài”, trình bày thuyết tiến hóa bằng chọn lọc tự nhiên.", "Charles Darwin publishes “On the Origin of Species,” setting out evolution by natural selection.")],
+    [11, 27, 1895, p("Alfred Nobel ký di chúc dành phần lớn tài sản để lập ra Giải Nobel.", "Alfred Nobel signs his will, leaving most of his fortune to establish the Nobel Prizes.")],
+
+    [12, 1, 1955, p("Rosa Parks từ chối nhường ghế trên xe buýt ở Montgomery, khơi dậy phong trào dân quyền Mỹ.", "Rosa Parks refuses to give up her bus seat in Montgomery, sparking the US civil rights movement.")],
+    [12, 3, 1967, p("Bác sĩ Christiaan Barnard thực hiện ca ghép tim người đầu tiên tại Cape Town, Nam Phi.", "Dr Christiaan Barnard performs the first human heart transplant in Cape Town, South Africa.")],
+    [12, 10, 1948, p("Đại hội đồng Liên Hợp Quốc thông qua Tuyên ngôn Quốc tế Nhân quyền.", "The UN General Assembly adopts the Universal Declaration of Human Rights.")],
+    [12, 12, 2015, p("Thỏa thuận Paris về biến đổi khí hậu được gần 200 quốc gia thông qua.", "The Paris Agreement on climate change is adopted by nearly 200 countries.")],
+    [12, 14, 1911, p("Đoàn thám hiểm của Roald Amundsen trở thành những người đầu tiên đến Nam Cực.", "Roald Amundsen’s expedition becomes the first to reach the South Pole.")],
+    [12, 17, 1903, p("Anh em nhà Wright thực hiện chuyến bay có động cơ đầu tiên tại Kitty Hawk, Hoa Kỳ.", "The Wright brothers make the first powered airplane flight at Kitty Hawk, USA.")],
+    [12, 24, 1968, p("Apollo 8 bay vào quỹ đạo Mặt Trăng; phi hành đoàn chụp bức ảnh “Trái Đất mọc” nổi tiếng.", "Apollo 8 enters lunar orbit; its crew takes the famous “Earthrise” photograph.")],
+    [12, 25, 800, p("Charlemagne được Giáo hoàng Lêô III đăng quang Hoàng đế tại Rome.", "Charlemagne is crowned Emperor by Pope Leo III in Rome.")]
+  ];
+  I18n.add(en);
+  return LIST.map(([m, d, y, text]) => ({ m, d, y, text }));
+})();
