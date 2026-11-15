@@ -39,14 +39,14 @@ Header: 🔔 cảnh báo giá (giá ≥/≤, % 24h; thông báo trình duyệt) 
 
 - **Nguồn** (CSP `connect-src`, chỉ GET + WS): `api.binance.com` (dự phòng `data-api.binance.vision`), `wss://stream.binance.com:9443` (dự phòng `data-stream.binance.vision`),
   `fapi.binance.com`, `api.coingecko.com`, `api.llama.fi`, `stablecoins.llama.fi`, `mempool.space`, `api.blockchain.info`, `wss://ws.blockchain.info`, `api.alternative.me`.
-- **Tab** (`?tab=`): `watch` · `market` · `top100` · `top` · `trending` · `exchanges` · `network` · `spot` · `futures` · `defi` · `onchain` · `wallet`. Tab chi tiết: `overview` · `chart` · `book` · `deriv` · `profile`.
+- **Tab** (`?tab=`): `watch` · `market` · `screener` · `multi` · `corr` · `top100` · `top` · `trending` · `exchanges` · `network` · `spot` · `futures` · `defi` · `onchain` · `wallet`. Tab chi tiết: `overview` · `chart` · `advice` · `book` · `deriv` · `profile`.
 - **Ngoại lệ có chủ đích với checklist "Dữ liệu mẫu"**: **không** có dropdown `Thử mẫu…` trên toolbar (user yêu cầu bỏ 2026-11-15, giống Bảng giá CK); dữ liệu mẫu chỉ qua `?demo=<key>` — đừng thêm lại dropdown.
 - **`?demo=`**: `majors` · `layer1` · `layer2` · `defi` · `meme` · `ai` · `futures` (mở tab Phái sinh + chi tiết phái sinh BTC) · `broken` (token sai `NOT-A-COIN`, `12345`, `??` + mã không tồn tại `ZZZQQQ` ⇒ footer báo lỗi). Mẫu thay danh mục, giữ bản cũ cho `↶ Khôi phục danh mục trước`.
 - **Link chia sẻ** `#pako:` payload `{ tab, watch: [mã], opts: { rate, cur, pos, spark }, sort: { key, dir }, sym, dtab, chart: { range, interval, type, scale, volume, ind: [{ id, p }], cmp } }` — **không** kèm vị thế/cảnh báo.
   `?data=BTC,ETH` = danh mục thô (đi lên server, chỉ dữ liệu ngắn). Payload không tin cậy: mã `^[A-Z0-9]{1,15}$` (≤ 200), tab/sort/option chỉ nhận giá trị đã biết.
 - **Nhập mã**: không phân biệt hoa thường, bỏ `$`, bỏ hậu tố cặp (`BTCUSDT`, `ETH/USDT`, `SOL-USD`).
 - **File**: export `danh-muc-crypto-<yyyy-mm-dd>.json` `{ app: "crypto-market-board", version: 1, watch, holdings, alerts }`; import JSON đó hoặc TXT/CSV (cột đầu). CSV bảng: `bang-gia-crypto-<tab>-<ngày>.csv`, UTF-8 BOM.
-- **localStorage** `web_tool.crypto-market-board.*`: `watch`, `watchBackup`, `lists`, `opts`, `tab`, `sel`, `dtab`, `theme`, `chart`, `holdings`, `alerts`, `deriv.period`, `mk.*` (gồm `mk.hz` khung gợi ý), `net`, `trend`, `ex.sort`, `defi.*`, `onchain.*`, `wallet.*`.
+- **localStorage** `web_tool.crypto-market-board.*`: `watch`, `watchBackup`, `lists`, `opts`, `tab`, `sel`, `dtab`, `theme`, `chart`, `holdings`, `alerts`, `deriv.period`, `mk.*` (gồm `mk.hz` khung gợi ý), `net`, `trend`, `ex.sort`, `defi.*`, `onchain.*`, `wallet.*`, `scr.n` · `scr.crit` · `scr.preset` · `scr.sort` (Bộ lọc), `sigAlerts` (cảnh báo tín hiệu, tối đa 50, không nằm trong file xuất danh mục), `corr.u` · `corr.d` · `corr.sort` (Tương quan), `multi` (`{ layout, cells: [{ sym, iv }] }`).
   sessionStorage `…http:<url>` = cache phản hồi CoinGecko (giảm gọi lại khi F5).
 
 ## 4. Luật nghiệp vụ

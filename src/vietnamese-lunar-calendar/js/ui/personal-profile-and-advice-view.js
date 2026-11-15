@@ -47,19 +47,37 @@ const Me = (() => {
       + `<p class="muted me-note">${esc(T("Sinh {d}/{m}/{y}{t} · luận theo can chi, ngũ hành, thần số học — tham khảo, giải trí.", { d: pad(pf.me.d), m: pad(pf.me.m), y: pf.me.y, t: pf.me.hour === undefined ? "" : " " + pad(pf.me.hour) + ":" + pad(pf.me.minute) }))}</p></section>`;
   }
 
+  // Typed dd/mm/yyyy, not <input type=date> whose order follows the browser locale (mm/dd in en-US) → { v, err }.
+  function read() {
+    const text = $("meDate").value.trim(), r = text ? DateText.parse(text) : { error: "Nhập ngày sinh dạng ngày/tháng/năm, vd 11/01/1986." };
+    if (r.error) return { err: T(r.error, r.params) };
+    const t = HoroApp.parseTime($("meTime").value);
+    if (t && t.error) return { err: T(t.error, t.params) };
+    const s = LunarCal.jdToDate(r.jd);
+    return { v: valid({ d: s.d, m: s.m, y: s.y, hour: t ? t.hour : undefined, minute: t ? t.minute : undefined, male: $("meMale").checked }) };
+  }
+
+  function preview() {
+    const r = read(), el = $("mePreview");
+    if (!$("meDate").value.trim()) { el.textContent = ""; return; }
+    if (r.err || !r.v) { el.textContent = "✖ " + (r.err || T("Ngày sinh không hợp lệ.")); el.className = "me-preview bad"; return; }
+    const c = BirthChart.compute({ name: "", male: r.v.male, d: r.v.d, m: r.v.m, y: r.v.y }), l = c.lunar;
+    el.textContent = T("= Âm {d}/{m}/{y} · tuổi {cc} · mệnh {na}", { d: pad(l.d), m: pad(l.m) + (l.leap ? T("n") : ""), y: l.y, cc: cc(c.pillars.year), na: T(c.napAm) });
+    el.className = "me-preview good";
+  }
+
   function openDialog() {
     const v = pf ? pf.me : null;
-    $("meDate").value = v ? v.y + "-" + pad(v.m) + "-" + pad(v.d) : "";
+    $("meDate").value = v ? pad(v.d) + "/" + pad(v.m) + "/" + v.y : "";
     $("meTime").value = v && v.hour !== undefined ? pad(v.hour) + ":" + pad(v.minute) : "";
     $(v && !v.male ? "meFemale" : "meMale").checked = true;
+    preview();
     $("meDlg").showModal();
   }
 
   function save() {
-    const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec($("meDate").value), t = /^(\d{2}):(\d{2})/.exec($("meTime").value);
-    if (!m) { $("meDate").focus(); return; }
-    const v = valid({ y: +m[1], m: +m[2], d: +m[3], hour: t ? +t[1] : undefined, minute: t ? +t[2] : undefined, male: $("meMale").checked });
-    if (!v) { $("meDate").focus(); return; }
+    const { v } = read();
+    if (!v) { preview(); $("meDate").focus(); return; }
     o.store.set("me", v); set(v); $("meDlg").close(); o.onChange();
   }
 
@@ -68,6 +86,13 @@ const Me = (() => {
     o = opts;
     set(valid(o.store.get("me", null)));
     $("meBtn").onclick = openDialog;
+    for (const id of ["meDate", "meTime", "meMale", "meFemale"]) $(id).addEventListener("input", preview);
+    $("meDate").addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); save(); } });
+    const pk = $("meDatePick");
+    pk.min = "1900-01-01"; pk.max = LunarCal.MAX_YEAR + "-12-31";
+    pk.addEventListener("pointerdown", () => { const r = DateText.parse($("meDate").value); if (!r.error) { const s = LunarCal.jdToDate(r.jd); pk.value = s.y + "-" + pad(s.m) + "-" + pad(s.d); } });
+    pk.addEventListener("click", () => { try { pk.showPicker(); } catch { /* native tap opens it */ } });
+    pk.addEventListener("change", () => { const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(pk.value); if (m) { $("meDate").value = m[3] + "/" + m[2] + "/" + m[1]; preview(); } });
     $("meSave").onclick = save;
     $("meCancel").onclick = () => $("meDlg").close();
     $("meClear").onclick = () => { o.store.set("me", null); set(null); $("meDlg").close(); o.onChange(); };

@@ -22,7 +22,7 @@ const ScreenerView = (() => {
       + `<label>${e(T("Số coin xét"))}<select data-f="n">${SIZES.map(s => opt(s, T("Top {n}", { n: s }), n)).join("")}</select></label>`
       + maSel("ma50", "So với MA50") + maSel("ma200", "So với MA200")
       + NUM.map(([k, l]) => `<label>${e(T(l))}<input type="number" step="any" data-f="${k}" value="${e(crit[k])}"></label>`).join("") + `</div>`
-      + `<div class="scr-sigs"><span class="muted">${e(T("Tín hiệu xảy ra trong"))}</span><input type="number" min="0" max="${LOOK}" step="1" data-f="within" value="${crit.within}" class="scr-within"><span class="muted">${e(T("phiên gần nhất:"))}</span>`
+      + `<div class="cs-sigs"><span class="muted">${e(T("Tín hiệu xảy ra trong"))}</span><input type="number" min="0" max="${LOOK}" step="1" data-f="within" value="${crit.within}" class="cs-within"><span class="muted">${e(T("phiên gần nhất:"))}</span>`
       + CoinSignals.KEYS.map(k => `<label class="chk" title="${e(T(CoinSignals.META[k][1]))}"><input type="checkbox" data-sig="${k}"${crit.sig.includes(k) ? " checked" : ""}> ${e(T(CoinSignals.META[k][0]))}</label>`).join("") + `</div>`;
   }
 
@@ -34,21 +34,21 @@ const ScreenerView = (() => {
     const r = it.row, s = it.snap, show = Math.max(10, crit.within);
     return `<tr data-coin="${e(r.sym)}"><td class="l"><b>${e(r.sym)}</b></td><td class="r">${e(Fmt.money(r.last || s.price))}</td>${tone(r.pct)}${tone(r.pct7d)}`
       + `<td class="r">${e(cell(s.rsi))}</td><td class="r ${Fmt.tone(s.score)}">${e(s.score == null ? "" : Fmt.signed(s.score, 0))}</td>${tone(s.vsMa200)}<td class="r">${e(cell(s.volRatio, 2))}</td>`
-      + `<td class="l scr-chips">${it.events.filter(v => v.barsAgo <= show).map(chip).join("")}</td></tr>`;
+      + `<td class="l cs-chips">${it.events.filter(v => v.barsAgo <= show).map(chip).join("")}</td></tr>`;
   }
 
   function outHtml() {
-    if (!res) return `<p class="pad muted">${e(err ? T("Không tải được nến ngày để lọc.") : prog ? T("Đang phân tích {d}/{n} coin…", { d: prog[0], n: prog[1] }) : T("Đang tải…"))}</p>`;
+    if (!res) return `<p class="pad muted">${e(err ? T("Không tải được danh sách coin (CoinGecko) hoặc nến ngày để lọc.") : prog ? T("Đang phân tích {d}/{n} coin…", { d: prog[0], n: prog[1] }) : T("Đang tải…"))}</p>`;
     const items = ScreenerRules.sort(res.items.map(it => ({ ...it, row: Coins.row(it.sym) })).filter(it => ScreenerRules.match(it, crit)), sort.col, sort.dir);
     const arrow = c => c === sort.col ? (sort.dir === "asc" ? " ▲" : " ▼") : "";
     return `<div class="dsec"><b>${e(T("Kết quả: {n} / {t} coin", { n: items.length, t: res.items.length }))}</b></div>`
-      + (items.length ? `<div class="scr-wrap"><table class="dtable scr-t"><thead><tr>${COLS.map(([k, l]) => `<th data-s="${k}" class="${k === "coin" || k === "sig" ? "l" : "r"}">${e(T(l))}${arrow(k)}</th>`).join("")}</tr></thead><tbody>${items.map(rowHtml).join("")}</tbody></table></div>`
+      + (items.length ? `<div class="cs-wrap"><table class="dtable cs-t"><thead><tr>${COLS.map(([k, l]) => `<th data-s="${k}" class="${k === "coin" || k === "sig" ? "l" : "r"}">${e(T(l))}${arrow(k)}</th>`).join("")}</tr></thead><tbody>${items.map(rowHtml).join("")}</tbody></table></div>`
         : `<p class="pad muted">${e(T("Hiện không có coin nào đạt điều kiện."))}</p>`)
       + `<p class="sc-note">${e(T("Chỉ dùng nến ngày đã đóng (bỏ phiên đang chạy). Tín hiệu chọn nhiều ô = chỉ cần khớp 1 trong số đó. KL× = khối lượng phiên cuối / trung bình 20 phiên trước. Điểm = điểm kỹ thuật ngày (−100…+100). Chỉ là sàng lọc theo quy tắc, không phải lời khuyên đầu tư."))}</p>`;
   }
 
-  const paintOut = () => { const o = host && host.querySelector(".scr-out"); if (o) o.innerHTML = outHtml(); };
-  function paint() { if (host) host.innerHTML = `<div class="scr-form">${formHtml()}</div><div class="scr-out">${outHtml()}</div>`; }
+  const paintOut = () => { const o = host && host.querySelector(".cs-out"); if (o) o.innerHTML = outHtml(); };
+  function paint() { if (host) host.innerHTML = `<div class="cs-form">${formHtml()}</div><div class="cs-out">${outHtml()}</div>`; }
 
   async function build(coins, my) {
     const bars = await DailyBars.many(coins.map(r => r.pair), (a, b) => { prog = [a, b]; if (my === seq && (a % 6 === 0 || a === b)) paintOut(); });
@@ -83,7 +83,7 @@ const ScreenerView = (() => {
     const t = ev.target, f = t.dataset && t.dataset.f;
     if (!f && !t.dataset.sig) return;
     if (ev.type === "input" && t.type !== "number") return;
-    if (f === "preset") { preset = t.value; crit = ScreenerRules.preset(preset); save(); paint(); return; }
+    if (f === "preset") { preset = t.value; if (preset) crit = ScreenerRules.preset(preset); save(); paint(); return; }
     if (f === "n") { n = +t.value; save(); load(); return; }
     crit = readCrit(); preset = ""; save();
     const p = host.querySelector('[data-f="preset"]'); if (p) p.value = "";

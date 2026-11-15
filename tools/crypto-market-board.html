@@ -437,12 +437,12 @@
   .bt-bar { display:flex; flex-wrap:wrap; align-items:center; gap:6px 10px; padding:4px 12px; } .bt-status { font-size:12px; }
   .bt-scroll { overflow-x:auto; margin:4px 8px; } .bt-trades { margin:4px 10px; font-size:12px; } .bt-trades summary { cursor:pointer; color:var(--muted); }
   .bt-scroll .dtable { font-size:11.5px; white-space:nowrap; } .bt-scroll td.r, .bt-scroll th.r { text-align:right; }
-  .scr-sigs { display:flex; flex-wrap:wrap; align-items:center; gap:4px 12px; padding:2px 12px 8px; font-size:12px; }
-  .scr-within { width:56px; padding:3px 6px; border:1px solid var(--line); border-radius:4px; background:var(--btn); color:var(--ink); font:inherit; }
-  .scr-wrap { overflow-x:auto; }
-  .scr-t th, .scr-t td { white-space:nowrap; } .scr-t th.r, .scr-t td.r { text-align:right; } .scr-t th[data-s] { cursor:pointer; user-select:none; }
-  .scr-t tbody tr { cursor:pointer; } .scr-t td.scr-chips { white-space:normal; min-width:220px; }
-  @media (max-width: 640px) { .scr-within { font-size:16px; } }
+  .cs-sigs { display:flex; flex-wrap:wrap; align-items:center; gap:4px 12px; padding:2px 12px 8px; font-size:12px; }
+  .cs-within { width:56px; padding:3px 6px; border:1px solid var(--line); border-radius:4px; background:var(--btn); color:var(--ink); font:inherit; }
+  .cs-wrap { overflow-x:auto; }
+  .cs-t th, .cs-t td { white-space:nowrap; } .cs-t th.r, .cs-t td.r { text-align:right; } .cs-t th[data-s] { cursor:pointer; user-select:none; }
+  .cs-t tbody tr { cursor:pointer; } .cs-t td.cs-chips { white-space:normal; min-width:220px; }
+  @media (max-width: 640px) { .cs-within { font-size:16px; } }
   /* "DeFi & Doanh thu" tab (df- prefix). */
   .df { padding-bottom: 12px; }
   .df .dsec { display: flex; align-items: center; gap: 6px; margin-top: 6px; padding: 8px 12px 2px; border-top: 1px solid var(--line); } .df .dsec b { margin-right: auto; }
@@ -568,7 +568,7 @@
   .mc-sym { width:5.4em; flex:none; font-weight:700; text-transform:uppercase; }
   .mc-info { flex:1 1 auto; min-width:0; min-height:0; padding:0 2px; border:0; background:none; font:inherit; font-size:12.5px; text-align:left; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; cursor:pointer; }
   .mc-full { flex:none; min-height:0; padding:1px 8px; }
-  .mc-box { height:clamp(240px, 34vh, 400px); }
+  .mc-box { height:clamp(220px, 28vh, 380px); }
   .mc-1x2 .mc-box { height:clamp(300px, 56vh, 560px); }
   @media (hover:hover) { .mc-info:hover { text-decoration:underline; } .cr-list tbody tr:hover { background:var(--hover); } }
   @media (max-width: 640px) {
@@ -1657,7 +1657,7 @@ I18n.add({
   "Bộ lọc kỹ thuật": "Technical screener", "nến ngày đã đóng cửa · top coin có cặp USDT trên Binance": "closed daily candles · top coins with a Binance USDT pair",
   "Mẫu bộ lọc": "Preset", "Tuỳ chỉnh": "Custom", "Số coin xét": "Coins scanned", "So với MA50": "Vs MA50", "So với MA200": "Vs MA200",
   "Tín hiệu xảy ra trong": "Signals within the last", "phiên gần nhất:": "days:", "{n} phiên trước": "{n} days ago", "phiên vừa đóng": "last closed day",
-  "Không tải được nến ngày để lọc.": "Could not load daily candles to screen.", "Kết quả: {n} / {t} coin": "Results: {n} / {t} coins",
+  "Không tải được danh sách coin (CoinGecko) hoặc nến ngày để lọc.": "Could not load the coin list (CoinGecko) or daily candles to screen.", "Kết quả: {n} / {t} coin": "Results: {n} / {t} coins",
   "Chỉ dùng nến ngày đã đóng (bỏ phiên đang chạy). Tín hiệu chọn nhiều ô = chỉ cần khớp 1 trong số đó. KL× = khối lượng phiên cuối / trung bình 20 phiên trước. Điểm = điểm kỹ thuật ngày (−100…+100). Chỉ là sàng lọc theo quy tắc, không phải lời khuyên đầu tư.":
     "Only closed daily candles are used (the running day is dropped). With several signals ticked, matching any one is enough. Vol × = last day's volume / average of the previous 20 days. Score = daily technical score (−100…+100). A rule-based screen, not investment advice.",
   "Báo khi giá hiện tại nằm trong vùng của khung {h} ở tab Khuyến nghị.": "Fires when the current price is inside the {h} zone of the Advice tab.",
@@ -5224,7 +5224,7 @@ const ScreenerView = (() => {
       + `<label>${e(T("Số coin xét"))}<select data-f="n">${SIZES.map(s => opt(s, T("Top {n}", { n: s }), n)).join("")}</select></label>`
       + maSel("ma50", "So với MA50") + maSel("ma200", "So với MA200")
       + NUM.map(([k, l]) => `<label>${e(T(l))}<input type="number" step="any" data-f="${k}" value="${e(crit[k])}"></label>`).join("") + `</div>`
-      + `<div class="scr-sigs"><span class="muted">${e(T("Tín hiệu xảy ra trong"))}</span><input type="number" min="0" max="${LOOK}" step="1" data-f="within" value="${crit.within}" class="scr-within"><span class="muted">${e(T("phiên gần nhất:"))}</span>`
+      + `<div class="cs-sigs"><span class="muted">${e(T("Tín hiệu xảy ra trong"))}</span><input type="number" min="0" max="${LOOK}" step="1" data-f="within" value="${crit.within}" class="cs-within"><span class="muted">${e(T("phiên gần nhất:"))}</span>`
       + CoinSignals.KEYS.map(k => `<label class="chk" title="${e(T(CoinSignals.META[k][1]))}"><input type="checkbox" data-sig="${k}"${crit.sig.includes(k) ? " checked" : ""}> ${e(T(CoinSignals.META[k][0]))}</label>`).join("") + `</div>`;
   }
 
@@ -5236,21 +5236,21 @@ const ScreenerView = (() => {
     const r = it.row, s = it.snap, show = Math.max(10, crit.within);
     return `<tr data-coin="${e(r.sym)}"><td class="l"><b>${e(r.sym)}</b></td><td class="r">${e(Fmt.money(r.last || s.price))}</td>${tone(r.pct)}${tone(r.pct7d)}`
       + `<td class="r">${e(cell(s.rsi))}</td><td class="r ${Fmt.tone(s.score)}">${e(s.score == null ? "" : Fmt.signed(s.score, 0))}</td>${tone(s.vsMa200)}<td class="r">${e(cell(s.volRatio, 2))}</td>`
-      + `<td class="l scr-chips">${it.events.filter(v => v.barsAgo <= show).map(chip).join("")}</td></tr>`;
+      + `<td class="l cs-chips">${it.events.filter(v => v.barsAgo <= show).map(chip).join("")}</td></tr>`;
   }
 
   function outHtml() {
-    if (!res) return `<p class="pad muted">${e(err ? T("Không tải được nến ngày để lọc.") : prog ? T("Đang phân tích {d}/{n} coin…", { d: prog[0], n: prog[1] }) : T("Đang tải…"))}</p>`;
+    if (!res) return `<p class="pad muted">${e(err ? T("Không tải được danh sách coin (CoinGecko) hoặc nến ngày để lọc.") : prog ? T("Đang phân tích {d}/{n} coin…", { d: prog[0], n: prog[1] }) : T("Đang tải…"))}</p>`;
     const items = ScreenerRules.sort(res.items.map(it => ({ ...it, row: Coins.row(it.sym) })).filter(it => ScreenerRules.match(it, crit)), sort.col, sort.dir);
     const arrow = c => c === sort.col ? (sort.dir === "asc" ? " ▲" : " ▼") : "";
     return `<div class="dsec"><b>${e(T("Kết quả: {n} / {t} coin", { n: items.length, t: res.items.length }))}</b></div>`
-      + (items.length ? `<div class="scr-wrap"><table class="dtable scr-t"><thead><tr>${COLS.map(([k, l]) => `<th data-s="${k}" class="${k === "coin" || k === "sig" ? "l" : "r"}">${e(T(l))}${arrow(k)}</th>`).join("")}</tr></thead><tbody>${items.map(rowHtml).join("")}</tbody></table></div>`
+      + (items.length ? `<div class="cs-wrap"><table class="dtable cs-t"><thead><tr>${COLS.map(([k, l]) => `<th data-s="${k}" class="${k === "coin" || k === "sig" ? "l" : "r"}">${e(T(l))}${arrow(k)}</th>`).join("")}</tr></thead><tbody>${items.map(rowHtml).join("")}</tbody></table></div>`
         : `<p class="pad muted">${e(T("Hiện không có coin nào đạt điều kiện."))}</p>`)
       + `<p class="sc-note">${e(T("Chỉ dùng nến ngày đã đóng (bỏ phiên đang chạy). Tín hiệu chọn nhiều ô = chỉ cần khớp 1 trong số đó. KL× = khối lượng phiên cuối / trung bình 20 phiên trước. Điểm = điểm kỹ thuật ngày (−100…+100). Chỉ là sàng lọc theo quy tắc, không phải lời khuyên đầu tư."))}</p>`;
   }
 
-  const paintOut = () => { const o = host && host.querySelector(".scr-out"); if (o) o.innerHTML = outHtml(); };
-  function paint() { if (host) host.innerHTML = `<div class="scr-form">${formHtml()}</div><div class="scr-out">${outHtml()}</div>`; }
+  const paintOut = () => { const o = host && host.querySelector(".cs-out"); if (o) o.innerHTML = outHtml(); };
+  function paint() { if (host) host.innerHTML = `<div class="cs-form">${formHtml()}</div><div class="cs-out">${outHtml()}</div>`; }
 
   async function build(coins, my) {
     const bars = await DailyBars.many(coins.map(r => r.pair), (a, b) => { prog = [a, b]; if (my === seq && (a % 6 === 0 || a === b)) paintOut(); });
@@ -5285,7 +5285,7 @@ const ScreenerView = (() => {
     const t = ev.target, f = t.dataset && t.dataset.f;
     if (!f && !t.dataset.sig) return;
     if (ev.type === "input" && t.type !== "number") return;
-    if (f === "preset") { preset = t.value; crit = ScreenerRules.preset(preset); save(); paint(); return; }
+    if (f === "preset") { preset = t.value; if (preset) crit = ScreenerRules.preset(preset); save(); paint(); return; }
     if (f === "n") { n = +t.value; save(); load(); return; }
     crit = readCrit(); preset = ""; save();
     const p = host.querySelector('[data-f="preset"]'); if (p) p.value = "";
@@ -5309,7 +5309,7 @@ const MultiChartView = (() => {
   const IVS = [["15m", "15m"], ["1h", "1h"], ["4h", "4h"], ["1d", "1D"], ["1w", "1W"]], IV = IVS.map(x => x[0]), DEF = ["BTC", "ETH", "SOL", "BNB"], N = 4, BARS = 300, SHOW = 90;
   const e = s => Dom.esc(s ?? "");
   const tk = new Map();
-  let host = null, st = null, cells = [], timer = 0;
+  let host = null, st = null, cells = [], timer = 0, themeWatch = null;
 
   function clean(raw) {
     const r = raw && typeof raw === "object" ? raw : {}, saved = Array.isArray(r.cells) ? r.cells : [], base = [...new Set([...Watch.all(), ...DEF])].slice(0, N);
@@ -5342,7 +5342,8 @@ const MultiChartView = (() => {
   }
   function msg(i, key) { const p = cells[i].el.querySelector(".cmsg"); p.hidden = !key; p.textContent = key ? T(key) : ""; }
 
-  function stop(i) { const c = cells[i]; c.seq++; if (c.unsub) { c.unsub(); c.unsub = null; } c.chart.destroy(); c.last = null; }
+  function stop(i) { const c = cells[i]; c.seq++; if (c.unsub) { c.unsub(); c.unsub = null; } c.chart.destroy(); c.last = null; c.args = null; }
+  const recolor = () => cells.forEach(c => { if (c.args) c.chart.render(c.args); });
 
   async function start(i) {
     const c = cells[i]; stop(i);
@@ -5361,7 +5362,8 @@ const MultiChartView = (() => {
     if (!bars.length) { msg(i, "Không có dữ liệu nến."); return; }
     msg(i, null);
     c.last = bars[bars.length - 1].close;
-    c.chart.render({ bars, type: "candle", scale: "normal", volume: true, inds: [], peaks: false, crosses: false, intraday: iv !== "1d" && iv !== "1w", from: Math.max(0, bars.length - SHOW), keep: false, compare: [] });
+    c.args = { bars, type: "candle", scale: "normal", volume: true, inds: [], peaks: false, crosses: false, intraday: iv !== "1d" && iv !== "1w", from: Math.max(0, bars.length - SHOW), keep: false, compare: [] };
+    c.chart.render(c.args);
     c.unsub = Live.sub(`${pair.toLowerCase()}@kline_${iv}`, d => { if (!d || !d.k) return; const b = Spot.liveBar(d.k); c.chart.updateLast(b); c.last = b.close; head(i); });
     head(i); tickersSoon();
   }
@@ -5406,10 +5408,11 @@ const MultiChartView = (() => {
     bar(); titles(); layout();
     el.addEventListener("change", onChange); el.addEventListener("click", onClick);
     timer = setInterval(tickers, 30000);
+    themeWatch = new MutationObserver(recolor); themeWatch.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
   }
   function unmount() {
     if (host) { host.removeEventListener("change", onChange); host.removeEventListener("click", onClick); cells.forEach((_, i) => stop(i)); }
-    clearInterval(timer); host = null; cells = [];
+    clearInterval(timer); if (themeWatch) themeWatch.disconnect(); host = null; cells = [];
   }
   function relabel() { if (!host) return; bar(); titles(); cells.forEach((_, i) => head(i)); }
 
@@ -7248,7 +7251,7 @@ const SignalAlerts = (() => {
 })();
 
 const SignalPoll = (() => {
-  let busy = false;
+  let busy = false, again = false;
 
   async function gather(need) {
     const ctx = { bars: new Map(), advice: new Map(), price: new Map() };
@@ -7261,15 +7264,14 @@ const SignalPoll = (() => {
     await Promise.all([...need.zones].map(async sym => {
       const pair = Coins.pair(sym);
       if (!pair) return;
-      ctx.price.set(sym, Coins.row(sym).last);
-      try { ctx.advice.set(sym, await AdviceView.load(sym, pair)); }
+      try { const v = await AdviceView.load(sym, pair); ctx.advice.set(sym, v); ctx.price.set(sym, v ? v.price : null); }
       catch (e) { console.warn("SignalPoll.gather - advice fail", sym, e.message); }
     }));
     return ctx;
   }
 
   async function run() {
-    if (busy) return [];
+    if (busy) { again = true; return []; }
     busy = true;
     try {
       const list = SignalAlerts.all(), need = SignalAlertRule.needs(list);
@@ -7278,7 +7280,7 @@ const SignalPoll = (() => {
       if (hits.length) PersonalUI.onSignalHits(hits);
       return hits;
     } catch (e) { console.warn("SignalPoll.run - check signal alerts fail", e.message); return []; }
-    finally { busy = false; }
+    finally { busy = false; if (again) { again = false; setTimeout(run); } }
   }
 
   function start() { setInterval(run, 300e3); setTimeout(run, 8000); }

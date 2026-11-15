@@ -113,7 +113,8 @@
   #detail .me-sec p { margin:6px 0; } #detail .me-note { font-size:11.5px; } #detail .me-bd { font-weight:700; color:var(--hol); }
   dialog.me-dialog { width:min(420px, 94vw); padding:0; border:1px solid var(--line); border-radius:12px; background:var(--panel); color:var(--ink); }
   dialog.me-dialog::backdrop { background:rgba(15, 23, 42, .55); } .me-form { display:grid; gap:10px; padding:12px 14px; } .me-form label { display:grid; gap:4px; }
-  .me-form .cal-kind label { display:inline-flex; } .me-form p { margin:0; font-size:12px; }
+  .me-form .cal-kind label { display:inline-flex; } .me-date { display:flex; gap:6px; } .me-date input[type=text] { flex:1 1 auto; min-width:0; }
+  .me-preview { font-weight:600; } .me-preview.good { color:var(--good); } .me-preview.bad { color:var(--bad); } .me-preview:empty { display:none; } .me-form p { margin:0; font-size:12px; }
   .aclock { cursor:pointer; } .clock.alarm { color:var(--hd); }
   .al-row { display:flex; flex-wrap:wrap; align-items:center; gap:6px; } .al-row input[type=number] { width:4.5em; margin-right:4px; } .al-row [hidden] { display:none; }
   .al-list { list-style:none; margin:0; padding:0; display:grid; gap:4px; max-height:180px; overflow:auto; }

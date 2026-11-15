@@ -31,7 +31,7 @@
   .mc-sym { width:5.4em; flex:none; font-weight:700; text-transform:uppercase; }
   .mc-info { flex:1 1 auto; min-width:0; min-height:0; padding:0 2px; border:0; background:none; font:inherit; font-size:12.5px; text-align:left; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; cursor:pointer; }
   .mc-full { flex:none; min-height:0; padding:1px 8px; }
-  .mc-box { height:clamp(240px, 34vh, 400px); }
+  .mc-box { height:clamp(220px, 28vh, 380px); }
   .mc-1x2 .mc-box { height:clamp(300px, 56vh, 560px); }
   @media (hover:hover) { .mc-info:hover { text-decoration:underline; } .cr-list tbody tr:hover { background:var(--hover); } }
   @media (max-width: 640px) {

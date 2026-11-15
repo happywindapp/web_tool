@@ -188,7 +188,6 @@ I18n.add({
   "👤 Của tôi": "👤 Me",
   "Nhập ngày giờ sinh của bạn để lịch hiện ngày hợp/xung và lời khuyên riêng (chỉ lưu trên máy này)": "Enter your birth date and time so the calendar shows your good/clashing days and personal advice (stored only on this device)",
   "👤 Ngày giờ sinh của tôi": "👤 My birth date & time",
-  "Ngày sinh (dương lịch)": "Birth date (solar)",
   "Giờ sinh (để trống nếu không rõ)": "Birth time (leave empty if unknown)",
   "Chỉ lưu trên trình duyệt này, không gửi đi đâu, không nằm trong link chia sẻ.": "Stored only in this browser, never sent anywhere, not included in share links.",
   "Xóa": "Delete",
@@ -230,4 +229,10 @@ I18n.add({
   "Giờ này đã qua — chọn giờ khác hoặc ngày khác trên lịch.": "That time has passed — pick another time or another day on the calendar.",
   "Báo thức gần nhất: {at}": "Next alarm: {at}",
   "Bấm để đặt báo thức / đếm ngược": "Click to set an alarm / countdown",
+  "Ngày sinh dương lịch (ngày/tháng/năm)": "Solar birth date (day/month/year)",
+  "Ngày/tháng/năm dương lịch, vd 11/01/1986": "Solar day/month/year, e.g. 11/01/1986",
+  "Nhập ngày sinh dạng ngày/tháng/năm, vd 11/01/1986.": "Enter the birth date as day/month/year, e.g. 11/01/1986.",
+  "Ngày sinh không hợp lệ.": "Invalid birth date.",
+  "= Âm {d}/{m}/{y} · tuổi {cc} · mệnh {na}": "= Lunar {d}/{m}/{y} · {cc} year · {na} destiny",
+  "Chọn ngày sinh trên lịch": "Pick the birth date on a calendar",
 });

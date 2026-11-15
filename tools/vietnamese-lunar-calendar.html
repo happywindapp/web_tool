@@ -191,7 +191,8 @@
   #detail .me-sec p { margin:6px 0; } #detail .me-note { font-size:11.5px; } #detail .me-bd { font-weight:700; color:var(--hol); }
   dialog.me-dialog { width:min(420px, 94vw); padding:0; border:1px solid var(--line); border-radius:12px; background:var(--panel); color:var(--ink); }
   dialog.me-dialog::backdrop { background:rgba(15, 23, 42, .55); } .me-form { display:grid; gap:10px; padding:12px 14px; } .me-form label { display:grid; gap:4px; }
-  .me-form .cal-kind label { display:inline-flex; } .me-form p { margin:0; font-size:12px; }
+  .me-form .cal-kind label { display:inline-flex; } .me-date { display:flex; gap:6px; } .me-date input[type=text] { flex:1 1 auto; min-width:0; }
+  .me-preview { font-weight:600; } .me-preview.good { color:var(--good); } .me-preview.bad { color:var(--bad); } .me-preview:empty { display:none; } .me-form p { margin:0; font-size:12px; }
   .aclock { cursor:pointer; } .clock.alarm { color:var(--hd); }
   .al-row { display:flex; flex-wrap:wrap; align-items:center; gap:6px; } .al-row input[type=number] { width:4.5em; margin-right:4px; } .al-row [hidden] { display:none; }
   .al-list { list-style:none; margin:0; padding:0; display:grid; gap:4px; max-height:180px; overflow:auto; }
@@ -561,8 +562,9 @@
 <dialog id="meDlg" class="me-dialog">
   <div class="wxc-head"><b>👤 Ngày giờ sinh của tôi</b></div>
   <div class="me-form">
-    <label>Ngày sinh (dương lịch)<input type="date" id="meDate" min="1900-01-01" max="2199-12-31"></label>
-    <label>Giờ sinh (để trống nếu không rõ)<input type="time" id="meTime"></label>
+    <label>Ngày sinh dương lịch (ngày/tháng/năm)<span class="me-date"><input type="text" id="meDate" autocomplete="off" placeholder="11/01/1986" title="Ngày/tháng/năm dương lịch, vd 11/01/1986"><span class="pick-wrap"><span aria-hidden="true">📅</span><input type="date" id="meDatePick" title="Chọn ngày sinh trên lịch"></span></span></label>
+    <label>Giờ sinh (để trống nếu không rõ)<input type="text" id="meTime" list="birthHours" autocomplete="off" placeholder="07:30" title="Giờ sinh: gõ (07:30, 7h30) hoặc chọn trong danh sách sổ xuống; để trống nếu không rõ"></label>
+    <p id="mePreview" class="me-preview"></p>
     <span class="cal-kind"><label class="chk"><input type="radio" name="meSex" id="meMale" checked>Nam giới</label><label class="chk"><input type="radio" name="meSex" id="meFemale">Nữ giới</label></span>
     <p class="muted">Chỉ lưu trên trình duyệt này, không gửi đi đâu, không nằm trong link chia sẻ.</p>
     <div class="nb-row"><button id="meClear">Xóa</button><button id="meCancel">Hủy</button><button id="meSave" class="main">Lưu</button></div>
@@ -827,7 +829,6 @@ I18n.add({
   "👤 Của tôi": "👤 Me",
   "Nhập ngày giờ sinh của bạn để lịch hiện ngày hợp/xung và lời khuyên riêng (chỉ lưu trên máy này)": "Enter your birth date and time so the calendar shows your good/clashing days and personal advice (stored only on this device)",
   "👤 Ngày giờ sinh của tôi": "👤 My birth date & time",
-  "Ngày sinh (dương lịch)": "Birth date (solar)",
   "Giờ sinh (để trống nếu không rõ)": "Birth time (leave empty if unknown)",
   "Chỉ lưu trên trình duyệt này, không gửi đi đâu, không nằm trong link chia sẻ.": "Stored only in this browser, never sent anywhere, not included in share links.",
   "Xóa": "Delete",
@@ -869,6 +870,12 @@ I18n.add({
   "Giờ này đã qua — chọn giờ khác hoặc ngày khác trên lịch.": "That time has passed — pick another time or another day on the calendar.",
   "Báo thức gần nhất: {at}": "Next alarm: {at}",
   "Bấm để đặt báo thức / đếm ngược": "Click to set an alarm / countdown",
+  "Ngày sinh dương lịch (ngày/tháng/năm)": "Solar birth date (day/month/year)",
+  "Ngày/tháng/năm dương lịch, vd 11/01/1986": "Solar day/month/year, e.g. 11/01/1986",
+  "Nhập ngày sinh dạng ngày/tháng/năm, vd 11/01/1986.": "Enter the birth date as day/month/year, e.g. 11/01/1986.",
+  "Ngày sinh không hợp lệ.": "Invalid birth date.",
+  "= Âm {d}/{m}/{y} · tuổi {cc} · mệnh {na}": "= Lunar {d}/{m}/{y} · {cc} year · {na} destiny",
+  "Chọn ngày sinh trên lịch": "Pick the birth date on a calendar",
 });
 // English for almanac terms (can chi, nạp âm, tiết khí, thần, trực, 28 tú, hướng, ngày lễ) — keyed by the Vietnamese name.
 I18n.add({
@@ -6683,19 +6690,37 @@ const Me = (() => {
       + `<p class="muted me-note">${esc(T("Sinh {d}/{m}/{y}{t} · luận theo can chi, ngũ hành, thần số học — tham khảo, giải trí.", { d: pad(pf.me.d), m: pad(pf.me.m), y: pf.me.y, t: pf.me.hour === undefined ? "" : " " + pad(pf.me.hour) + ":" + pad(pf.me.minute) }))}</p></section>`;
   }
 
+  // Typed dd/mm/yyyy, not <input type=date> whose order follows the browser locale (mm/dd in en-US) → { v, err }.
+  function read() {
+    const text = $("meDate").value.trim(), r = text ? DateText.parse(text) : { error: "Nhập ngày sinh dạng ngày/tháng/năm, vd 11/01/1986." };
+    if (r.error) return { err: T(r.error, r.params) };
+    const t = HoroApp.parseTime($("meTime").value);
+    if (t && t.error) return { err: T(t.error, t.params) };
+    const s = LunarCal.jdToDate(r.jd);
+    return { v: valid({ d: s.d, m: s.m, y: s.y, hour: t ? t.hour : undefined, minute: t ? t.minute : undefined, male: $("meMale").checked }) };
+  }
+
+  function preview() {
+    const r = read(), el = $("mePreview");
+    if (!$("meDate").value.trim()) { el.textContent = ""; return; }
+    if (r.err || !r.v) { el.textContent = "✖ " + (r.err || T("Ngày sinh không hợp lệ.")); el.className = "me-preview bad"; return; }
+    const c = BirthChart.compute({ name: "", male: r.v.male, d: r.v.d, m: r.v.m, y: r.v.y }), l = c.lunar;
+    el.textContent = T("= Âm {d}/{m}/{y} · tuổi {cc} · mệnh {na}", { d: pad(l.d), m: pad(l.m) + (l.leap ? T("n") : ""), y: l.y, cc: cc(c.pillars.year), na: T(c.napAm) });
+    el.className = "me-preview good";
+  }
+
   function openDialog() {
     const v = pf ? pf.me : null;
-    $("meDate").value = v ? v.y + "-" + pad(v.m) + "-" + pad(v.d) : "";
+    $("meDate").value = v ? pad(v.d) + "/" + pad(v.m) + "/" + v.y : "";
     $("meTime").value = v && v.hour !== undefined ? pad(v.hour) + ":" + pad(v.minute) : "";
     $(v && !v.male ? "meFemale" : "meMale").checked = true;
+    preview();
     $("meDlg").showModal();
   }
 
   function save() {
-    const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec($("meDate").value), t = /^(\d{2}):(\d{2})/.exec($("meTime").value);
-    if (!m) { $("meDate").focus(); return; }
-    const v = valid({ y: +m[1], m: +m[2], d: +m[3], hour: t ? +t[1] : undefined, minute: t ? +t[2] : undefined, male: $("meMale").checked });
-    if (!v) { $("meDate").focus(); return; }
+    const { v } = read();
+    if (!v) { preview(); $("meDate").focus(); return; }
     o.store.set("me", v); set(v); $("meDlg").close(); o.onChange();
   }
 
@@ -6704,6 +6729,13 @@ const Me = (() => {
     o = opts;
     set(valid(o.store.get("me", null)));
     $("meBtn").onclick = openDialog;
+    for (const id of ["meDate", "meTime", "meMale", "meFemale"]) $(id).addEventListener("input", preview);
+    $("meDate").addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); save(); } });
+    const pk = $("meDatePick");
+    pk.min = "1900-01-01"; pk.max = LunarCal.MAX_YEAR + "-12-31";
+    pk.addEventListener("pointerdown", () => { const r = DateText.parse($("meDate").value); if (!r.error) { const s = LunarCal.jdToDate(r.jd); pk.value = s.y + "-" + pad(s.m) + "-" + pad(s.d); } });
+    pk.addEventListener("click", () => { try { pk.showPicker(); } catch { /* native tap opens it */ } });
+    pk.addEventListener("change", () => { const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(pk.value); if (m) { $("meDate").value = m[3] + "/" + m[2] + "/" + m[1]; preview(); } });
     $("meSave").onclick = save;
     $("meCancel").onclick = () => $("meDlg").close();
     $("meClear").onclick = () => { o.store.set("me", null); set(null); $("meDlg").close(); o.onChange(); };

@@ -149,8 +149,9 @@
 <dialog id="meDlg" class="me-dialog">
   <div class="wxc-head"><b>👤 Ngày giờ sinh của tôi</b></div>
   <div class="me-form">
-    <label>Ngày sinh (dương lịch)<input type="date" id="meDate" min="1900-01-01" max="2199-12-31"></label>
-    <label>Giờ sinh (để trống nếu không rõ)<input type="time" id="meTime"></label>
+    <label>Ngày sinh dương lịch (ngày/tháng/năm)<span class="me-date"><input type="text" id="meDate" autocomplete="off" placeholder="11/01/1986" title="Ngày/tháng/năm dương lịch, vd 11/01/1986"><span class="pick-wrap"><span aria-hidden="true">📅</span><input type="date" id="meDatePick" title="Chọn ngày sinh trên lịch"></span></span></label>
+    <label>Giờ sinh (để trống nếu không rõ)<input type="text" id="meTime" list="birthHours" autocomplete="off" placeholder="07:30" title="Giờ sinh: gõ (07:30, 7h30) hoặc chọn trong danh sách sổ xuống; để trống nếu không rõ"></label>
+    <p id="mePreview" class="me-preview"></p>
     <span class="cal-kind"><label class="chk"><input type="radio" name="meSex" id="meMale" checked>Nam giới</label><label class="chk"><input type="radio" name="meSex" id="meFemale">Nữ giới</label></span>
     <p class="muted">Chỉ lưu trên trình duyệt này, không gửi đi đâu, không nằm trong link chia sẻ.</p>
     <div class="nb-row"><button id="meClear">Xóa</button><button id="meCancel">Hủy</button><button id="meSave" class="main">Lưu</button></div>

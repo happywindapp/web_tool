@@ -23,7 +23,7 @@ I18n.add({
   "Bộ lọc kỹ thuật": "Technical screener", "nến ngày đã đóng cửa · top coin có cặp USDT trên Binance": "closed daily candles · top coins with a Binance USDT pair",
   "Mẫu bộ lọc": "Preset", "Tuỳ chỉnh": "Custom", "Số coin xét": "Coins scanned", "So với MA50": "Vs MA50", "So với MA200": "Vs MA200",
   "Tín hiệu xảy ra trong": "Signals within the last", "phiên gần nhất:": "days:", "{n} phiên trước": "{n} days ago", "phiên vừa đóng": "last closed day",
-  "Không tải được nến ngày để lọc.": "Could not load daily candles to screen.", "Kết quả: {n} / {t} coin": "Results: {n} / {t} coins",
+  "Không tải được danh sách coin (CoinGecko) hoặc nến ngày để lọc.": "Could not load the coin list (CoinGecko) or daily candles to screen.", "Kết quả: {n} / {t} coin": "Results: {n} / {t} coins",
   "Chỉ dùng nến ngày đã đóng (bỏ phiên đang chạy). Tín hiệu chọn nhiều ô = chỉ cần khớp 1 trong số đó. KL× = khối lượng phiên cuối / trung bình 20 phiên trước. Điểm = điểm kỹ thuật ngày (−100…+100). Chỉ là sàng lọc theo quy tắc, không phải lời khuyên đầu tư.":
     "Only closed daily candles are used (the running day is dropped). With several signals ticked, matching any one is enough. Vol × = last day's volume / average of the previous 20 days. Score = daily technical score (−100…+100). A rule-based screen, not investment advice.",
   "Báo khi giá hiện tại nằm trong vùng của khung {h} ở tab Khuyến nghị.": "Fires when the current price is inside the {h} zone of the Advice tab.",

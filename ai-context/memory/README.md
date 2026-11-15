@@ -19,6 +19,7 @@
 
 - [sed-case-conversion-corrupts-vietnamese-utf8.md](sed-case-conversion-corrupts-vietnamese-utf8.md) —
   sed `\L`/`\U` phá chữ có dấu (byte rác `�`); đổi hoa/thường bằng Edit tool hoặc node.
+- [date-input-follows-browser-locale-use-dd-mm-yyyy-text.md](date-input-follows-browser-locale-use-dd-mm-yyyy-text.md) — `<input type=date>` gõ tay theo locale (en-US = mm/dd) ⇒ dùng ô chữ dd/mm/yyyy + 📅 chọn + dòng xem trước.
 
 - [bilingual-technique-names-in-explanations.md](bilingual-technique-names-in-explanations.md) —
   **bắt buộc mọi AI khi giải thích:** kỹ thuật/pattern/khái niệm quan trọng ghi song ngữ `English term (thuật ngữ tiếng Việt)`; chỉ thuật ngữ then chốt, lần đầu nhắc. Bản Claude: `~/.claude/CLAUDE.md`

@@ -31,7 +31,7 @@ const SignalAlerts = (() => {
 })();
 
 const SignalPoll = (() => {
-  let busy = false;
+  let busy = false, again = false;
 
   async function gather(need) {
     const ctx = { bars: new Map(), advice: new Map(), price: new Map() };
@@ -44,15 +44,14 @@ const SignalPoll = (() => {
     await Promise.all([...need.zones].map(async sym => {
       const pair = Coins.pair(sym);
       if (!pair) return;
-      ctx.price.set(sym, Coins.row(sym).last);
-      try { ctx.advice.set(sym, await AdviceView.load(sym, pair)); }
+      try { const v = await AdviceView.load(sym, pair); ctx.advice.set(sym, v); ctx.price.set(sym, v ? v.price : null); }
       catch (e) { console.warn("SignalPoll.gather - advice fail", sym, e.message); }
     }));
     return ctx;
   }
 
   async function run() {
-    if (busy) return [];
+    if (busy) { again = true; return []; }
     busy = true;
     try {
       const list = SignalAlerts.all(), need = SignalAlertRule.needs(list);
@@ -61,7 +60,7 @@ const SignalPoll = (() => {
       if (hits.length) PersonalUI.onSignalHits(hits);
       return hits;
     } catch (e) { console.warn("SignalPoll.run - check signal alerts fail", e.message); return []; }
-    finally { busy = false; }
+    finally { busy = false; if (again) { again = false; setTimeout(run); } }
   }
 
   function start() { setInterval(run, 300e3); setTimeout(run, 8000); }
