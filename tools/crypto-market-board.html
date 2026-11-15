@@ -364,6 +364,10 @@
 
   .ol-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:8px; padding:4px 8px; }
   .ol-card { padding:6px 0; border:1px solid var(--line); border-radius:8px; } .ol-card .stats { padding:4px 10px; }
+  .adv-row { display:flex; flex-wrap:wrap; align-items:baseline; gap:0 8px; padding:3px 10px; font-size:12.5px; font-variant-numeric:tabular-nums; }
+  .adv-row > span { color:var(--muted); } .adv-row > b { margin-left:auto; } .adv-row > em { flex-basis:100%; text-align:right; font-size:11px; font-style:normal; }
+  .adv-card .ol-h { flex-wrap:wrap; gap:4px 8px; } .adv-card .ol-h > b { white-space:nowrap; } .adv-card .ol-h .badge { white-space:normal; text-align:left; line-height:1.3; }
+  ul.insights.adv-when { margin:6px 10px 4px; } .adv-odds { margin:2px 10px; font-size:11.5px; } .adv-price { margin:4px 12px; font-size:13px; }
   .ol-h { display:flex; justify-content:space-between; align-items:center; padding:0 10px; } .badge.up { color:var(--up); border-color:var(--up); } .badge.down { color:var(--down); border-color:var(--down); } .badge.ref { color:var(--ref); border-color:var(--ref); }
   .ol-meter { position:relative; height:6px; margin:6px 10px; border-radius:3px; background:linear-gradient(90deg, var(--down), var(--ref), var(--up)); opacity:.8; }
   .ol-meter i { position:absolute; top:-4px; width:4px; height:14px; margin-left:-2px; border-radius:2px; background:var(--ink); }
@@ -680,6 +684,7 @@
         </section>
         <div id="dOutlook"></div>
       </section>
+      <section class="dpanel" data-tab="advice" hidden><div id="dAdvice"></div></section>
       <section class="dpanel" data-tab="book" hidden><div id="dBook"></div></section>
       <section class="dpanel" data-tab="deriv" hidden><div id="dDeriv"></div></section>
       <section class="dpanel" data-tab="profile" hidden><div id="dProfile"></div></section>
@@ -1516,6 +1521,59 @@ I18n.add({
   "Giao dịch chưa xác nhận lớn hơn ngưỡng (BTC)": "Unconfirmed transactions above the threshold (BTC)",
   "Tổng BTC gồm cả tiền thối về ví gửi nên có thể lớn hơn số tiền thực chuyển. Nhãn lấy từ sổ địa chỉ của bạn.": "Total BTC includes change returned to the sender, so it can exceed the amount actually transferred. Labels come from your address book.",
 });
+// English for the coin "Khuyến nghị" (advice) tab.
+I18n.add({
+  "Khuyến nghị": "Advice", "Hôm nay / ngắn hạn": "Today / short term", "1–5 ngày": "1–5 days", "Trung hạn": "Medium term", "2–8 tuần": "2–8 weeks",
+  "Dài hạn": "Long term", "6–24 tháng": "6–24 months",
+  "Mua / nắm giữ": "Buy / hold", "Mua dần khi điều chỉnh": "Buy on dips", "Chờ — mua thấp, bán cao trong biên độ": "Wait — buy low, sell high in the range",
+  "Hạn chế mua — bán khi hồi": "Avoid buying — sell into bounces", "Bán / đứng ngoài": "Sell / stay out",
+  "Không đuổi giá — chờ về vùng mua": "Don't chase — wait for the buy zone", "Có thể hồi kỹ thuật — không bắt đáy lớn": "Bounce possible — don't bottom-fish big",
+  "Vùng mua": "Buy zone", "Vùng bán / chốt lời": "Sell / take-profit zone", "Dừng lỗ": "Stop-loss", "Lời : lỗ": "Reward : risk",
+  "đáng giá": "worth it", "tạm được": "acceptable", "kém — chờ giá tốt hơn": "poor — wait for a better price",
+  "nếu mua ở vùng mua — chỉ tham khảo khi xu hướng còn giảm": "if bought in the buy zone — reference only while the trend is down",
+  "{n} ATR dưới vùng mua": "{n} ATR below the buy zone", "Điểm kỹ thuật {s} (−100…+100)": "Technical score {s} (−100…+100)",
+  "Thời điểm mua: khi giá lùi về {a} – {b} và có nến xác nhận (đóng cửa tăng, RSI quay lên).": "When to buy: when price pulls back to {a} – {b} with a confirming candle (up close, RSI turning up).",
+  "Mua bứt phá: khi đóng cửa {tf} trên {r} kèm khối lượng tăng.": "Breakout buy: on a {tf} close above {r} with rising volume.",
+  "Chốt lời dần: trong vùng {a} – {b}.": "Take profit gradually: in {a} – {b}.",
+  "Thời điểm bán: khi giá hồi lên {a} – {b} mà không vượt được.": "When to sell: when price bounces into {a} – {b} and fails to break it.",
+  "Thoát hẳn: khi đóng cửa {tf} dưới {s}.": "Exit fully: on a {tf} close below {s}.",
+  "Chỉ mua lại khi đóng cửa {tf} trên {r}.": "Only buy back on a {tf} close above {r}.",
+  "Mua gần {a} – {b}, bán gần {c} – {d}.": "Buy near {a} – {b}, sell near {c} – {d}.",
+  "Chờ phá vỡ: đóng cửa {tf} trên {r} → theo tăng; dưới {s} → đứng ngoài.": "Wait for a break: {tf} close above {r} → follow the rise; below {s} → stay out.",
+  "nến 4h": "4h", "nến ngày": "daily", "nến tuần": "weekly",
+  "Pivot S1 ngày": "Daily pivot S1", "Pivot S2 ngày": "Daily pivot S2", "Pivot R1 ngày": "Daily pivot R1", "Pivot R2 ngày": "Daily pivot R2",
+  "Pivot S1 tuần": "Weekly pivot S1", "Pivot R1 tuần": "Weekly pivot R1", "Pivot R2 tuần": "Weekly pivot R2",
+  "MA50 ngày": "Daily MA50", "MA200 ngày": "Daily MA200", "MA40 tuần": "Weekly MA40", "Đáy 20 ngày": "20-day low", "Đỉnh 20 ngày": "20-day high",
+  "Đáy 52 tuần": "52-week low", "Đỉnh 52 tuần": "52-week high", "Đỉnh lịch sử": "All-time high",
+  "Dải biến động 1 năm (−1σ)": "1-year volatility band (−1σ)", "Dải biến động 1 năm (+1σ)": "1-year volatility band (+1σ)",
+  "Giá hiện tại − 0,5 ATR": "Current price − 0.5 ATR", "Giá hiện tại + 0,75 ATR": "Current price + 0.75 ATR", "Giá hiện tại − 1 ATR": "Current price − 1 ATR",
+  "Giá hiện tại + 2 ATR": "Current price + 2 ATR", "Giá hiện tại − 1 ATR tuần": "Current price − 1 weekly ATR", "Giá hiện tại + 2 ATR tuần": "Current price + 2 weekly ATR",
+  "5 ngày": "5 days", "20 ngày": "20 days", "26 tuần": "26 weeks",
+  "Lịch sử: sau {n} lần có điểm tương tự, giá cao hơn {h} sau {p}% số lần (trung vị {m}%).": "History: after {n} bars with a similar score, price was higher {h} later {p}% of the time (median {m}%).",
+  "tự động theo quy tắc kỹ thuật — không phải lời khuyên đầu tư": "automatic, rule-based — not investment advice",
+  "{s} là stablecoin (giá neo ~1$) — không có khuyến nghị mua / bán theo giá.": "{s} is a stablecoin (pegged ~$1) — no price-based buy / sell advice.",
+  "Chưa đủ lịch sử giá (cần ≥ 60 nến ngày) để khuyến nghị.": "Not enough price history (needs ≥ 60 daily candles) for advice.",
+  "Giá tham chiếu {p} (đóng cửa nến ngày hiện tại)": "Reference price {p} (close of the current daily candle)",
+  "Khuyến nghị quan trọng khác": "Other key advice", "Không tải được nến để tính khuyến nghị.": "Could not load candles to compute the advice.",
+  "Cách tính: điểm kỹ thuật (MA20/50/200, RSI, MACD, ADX, Bollinger, khối lượng) quyết định hành động; vùng mua / bán lấy từ pivot, MA, đỉnh / đáy gần nhất ± một phần ATR; dừng lỗ dưới vùng mua 0,5–1 ATR. Ngắn hạn dùng nến 4h + ngày, trung hạn nến ngày, dài hạn nến tuần.":
+    "Method: the technical score (MA20/50/200, RSI, MACD, ADX, Bollinger, volume) sets the action; buy / sell zones come from the nearest pivot, MA or high / low ± part of an ATR; the stop sits 0.5–1 ATR below the buy zone. Short term uses 4h + daily candles, medium daily, long weekly.",
+  "Biến động trung bình {p}%/ngày — dừng lỗ nên cách điểm mua khoảng 1,5 ATR (≈ {q}%). Nếu chỉ chấp nhận mất 1% vốn mỗi lệnh, tỷ trọng tối đa ≈ {z}% vốn.":
+    "Average move {p}%/day — keep the stop about 1.5 ATR from entry (≈ {q}%). Risking 1% of capital per trade allows a position of about {z}% of capital.",
+  "Giá trên MA200 ngày ({a}): xu hướng dài hạn tăng — ưu tiên mua khi điều chỉnh, không bán khống.": "Price above the daily MA200 ({a}): long-term uptrend — prefer buying dips, don't short.",
+  "Giá dưới MA200 ngày ({a}): xu hướng dài hạn giảm — chỉ giao dịch ngắn, giảm tỷ trọng, chờ giá lấy lại MA200.": "Price below the daily MA200 ({a}): long-term downtrend — trade short-term only, cut exposure, wait for price to reclaim MA200.",
+  "RSI ngày {p}: quá mua — không mua đuổi, cân nhắc chốt lời từng phần.": "Daily RSI {p}: overbought — don't chase, consider taking partial profit.",
+  "RSI ngày {p}: quá bán — có thể hồi kỹ thuật, nhưng chờ nến đảo chiều rồi mới mua.": "Daily RSI {p}: oversold — a bounce is possible, but wait for a reversal candle before buying.",
+  "Giá cách đỉnh cao nhất {p}% (dữ liệu Binance ~{y} năm): trên đầu không còn kháng cự, biến động mạnh — dời dừng lỗ theo giá.": "Price is {p}% from its highest high (Binance data ~{y} years): no overhead resistance, big swings — trail the stop.",
+  "Giá thấp hơn đỉnh cao nhất {p}% (dữ liệu Binance ~{y} năm): rủi ro coin mất vị thế — chỉ mua lượng nhỏ, chia nhiều lần.": "Price is {p}% below its highest high (Binance data ~{y} years): the coin may be losing relevance — buy small, in several parts.",
+  "Funding {f}%/8h: phe Long đông và trả phí cao — dễ có cú quét Long, tránh dùng đòn bẩy.": "Funding {f}%/8h: longs are crowded and paying a lot — long squeeze risk, avoid leverage.",
+  "Funding âm ({f}%/8h): phe Short đông — giá tăng có thể kích hoạt short squeeze.": "Negative funding ({f}%/8h): shorts are crowded — a rise could trigger a short squeeze.",
+  "Chỉ số Sợ hãi & Tham lam {p} (sợ hãi tột độ): lịch sử thường là vùng tích luỹ tốt cho dài hạn — mua dần, không dồn hết vốn.": "Fear & Greed {p} (extreme fear): historically a good long-term accumulation zone — buy gradually, never all-in.",
+  "Chỉ số Sợ hãi & Tham lam {p} (tham lam tột độ): thị trường hưng phấn — chốt lời dần, tránh mua theo đám đông.": "Fear & Greed {p} (extreme greed): euphoric market — take profit gradually, don't follow the crowd.",
+  "BTC đang trong xu hướng giảm (khung ngày, điểm {p}) — altcoin thường giảm mạnh hơn BTC, nên giảm tỷ trọng.": "BTC is in a downtrend (daily, score {p}) — altcoins usually fall harder than BTC, reduce exposure.",
+  "BTC đang tăng (khung ngày, điểm {p}) — thuận lợi cho altcoin nếu dòng tiền lan sang.": "BTC is rising (daily, score {p}) — supportive for altcoins if money rotates in.",
+  "KL giao dịch 24h chỉ {m}: thanh khoản mỏng — dùng lệnh giới hạn, chia nhỏ lệnh, tránh lệnh thị trường.": "24h volume only {m}: thin liquidity — use limit orders, split orders, avoid market orders.",
+  "Chia vốn mua làm 3–4 lần (DCA) thay vì mua một lần; luôn đặt dừng lỗ trước khi vào lệnh và không dùng tiền vay.": "Split buys into 3–4 parts (DCA) instead of one; always set the stop-loss before entering and never use borrowed money.",
+});
 // English for the shared core modules (ThemePicker markup, SavedSessions, ColFilter) — included by every tool that uses them.
 I18n.add({
   "Thêm thao tác": "More actions",
@@ -2066,6 +2124,92 @@ const CoinPicks = (() => {
   }
 
   return { RULES, rank, reasons, TOP };
+})();
+// Pure rule-based advice for one coin: per horizon (today / medium / long) an action, when to buy / sell, buy zone, sell zone,
+// stop-loss, reward : risk and historical odds; plus other key notes (sizing by ATR, MA200, RSI, ATH, funding, Fear & Greed, BTC, liquidity).
+// Texts are Vietnamese keys + numeric params (the UI translates and formats). Needs TA + TechOutlook.
+const CoinAdvice = (() => {
+  const ACTION = { 2: ["Mua / nắm giữ", "up"], 1: ["Mua dần khi điều chỉnh", "up"], 0: ["Chờ — mua thấp, bán cao trong biên độ", "ref"],
+    "-1": ["Hạn chế mua — bán khi hồi", "down"], "-2": ["Bán / đứng ngoài", "down"] };
+  const HOT = ["Không đuổi giá — chờ về vùng mua", "ref"], COLD = ["Có thể hồi kỹ thuật — không bắt đáy lớn", "down"];
+  const ok = Number.isFinite, last = a => a[a.length - 1];
+  const nearestBelow = (price, list) => list.filter(c => ok(c.v) && c.v < price).sort((a, b) => b.v - a.v)[0];
+  const nearestAbove = (price, list) => list.filter(c => ok(c.v) && c.v > price * 1.003).sort((a, b) => a.v - b.v)[0];
+  function zone(L, w, price, side) {
+    if (side === "buy") { const hi = Math.min(L.v + w, price); return { lo: Math.min(L.v - w, hi), hi, basis: L.basis }; }
+    const lo = Math.max(L.v - w, price); return { lo, hi: Math.max(L.v + w, lo), basis: L.basis };
+  }
+
+  // One horizon from its score, RSI, buy / sell levels, ATR for the zone width, and odds.
+  function horizon(id, score, rsi, price, sup, res, atr, w, stopAtr, tf, odds, oddsH) {
+    const b = TechOutlook.bucket(score);
+    const [action, tone] = b >= 1 && rsi >= 75 ? HOT : b <= -1 && rsi <= 25 ? COLD : ACTION[b];
+    const buy = zone(sup, w * atr, price, "buy"), sell = zone(res, w * atr, price, "sell"), stop = buy.lo - stopAtr * atr;
+    const bm = (buy.lo + buy.hi) / 2, sm = (sell.lo + sell.hi) / 2, rr = bm > stop ? (sm - bm) / (bm - stop) : null;
+    const timing = b >= 1 ? [["Thời điểm mua: khi giá lùi về {a} – {b} và có nến xác nhận (đóng cửa tăng, RSI quay lên).", { a: buy.lo, b: buy.hi }],
+      ["Mua bứt phá: khi đóng cửa {tf} trên {r} kèm khối lượng tăng.", { tf, r: sell.lo }], ["Chốt lời dần: trong vùng {a} – {b}.", { a: sell.lo, b: sell.hi }]]
+      : b <= -1 ? [["Thời điểm bán: khi giá hồi lên {a} – {b} mà không vượt được.", { a: sell.lo, b: sell.hi }],
+        ["Thoát hẳn: khi đóng cửa {tf} dưới {s}.", { tf, s: stop }], ["Chỉ mua lại khi đóng cửa {tf} trên {r}.", { tf, r: sell.hi }]]
+      : [["Mua gần {a} – {b}, bán gần {c} – {d}.", { a: buy.lo, b: buy.hi, c: sell.lo, d: sell.hi }],
+        ["Chờ phá vỡ: đóng cửa {tf} trên {r} → theo tăng; dưới {s} → đứng ngoài.", { tf, r: sell.hi, s: buy.lo }]];
+    return { id, score, bucket: b, action, tone, buy, sell, stop: { v: stop, basis: "{n} ATR dưới vùng mua", n: stopAtr }, rr, timing, odds, oddsH };
+  }
+
+  // k = { h4, d1, w1 } candle arrays (oldest first); opt = { btc: daily bars | null, funding (%/8h), fng (0–100), qvol (USD), isBtc }.
+  function build(k, opt = {}) {
+    const fH = TechOutlook.frame(k.h4, "D", [6]), fD = TechOutlook.frame(k.d1, "D", [5, 20]), fW = TechOutlook.frame(k.w1, "W", [26]);
+    if (!fD || !fD.atr || k.d1.length < 60) return null;
+    const price = fD.close, cD = k.d1.map(b => b.close), cW = k.w1.map(b => b.close), atrD = fD.atr;
+    const pd = TechOutlook.pivots(k.d1[k.d1.length - 2]), pw = k.w1.length > 2 ? TechOutlook.pivots(k.w1[k.w1.length - 2]) : null;
+    const ma50 = last(TA.sma(cD, 50)), ma200 = last(TA.sma(cD, 200)), ma40w = last(TA.sma(cW, 40)), lt = TechOutlook.longTerm(k.d1);
+    const ath = Math.max(...k.w1.map(b => b.high), ...k.d1.map(b => b.high)), years = (last(k.w1).time - k.w1[0].time) / 31557600;
+    const fall = (v, basis) => ({ v, basis });
+
+    const out = [];
+    const sScore = fH ? Math.round((fH.score + fD.score) / 2) : fD.score;
+    out.push(horizon("short", sScore, fD.rsi, price,
+      nearestBelow(price, [fall(pd.s1, "Pivot S1 ngày"), fall(pd.s2, "Pivot S2 ngày")]) || fall(price - 0.5 * atrD, "Giá hiện tại − 0,5 ATR"),
+      nearestAbove(price, [fall(pd.r1, "Pivot R1 ngày"), fall(pd.r2, "Pivot R2 ngày")]) || fall(price + 0.75 * atrD, "Giá hiện tại + 0,75 ATR"),
+      atrD, 0.25, 0.5, "nến 4h", fD.odds[5], "5 ngày"));
+    out.push(horizon("medium", fD.score, fD.rsi, price,
+      nearestBelow(price, [fall(ma50, "MA50 ngày"), fall(fD.support, "Đáy 20 ngày"), fall(pw && pw.s1, "Pivot S1 tuần")]) || fall(price - atrD, "Giá hiện tại − 1 ATR"),
+      nearestAbove(price, [fall(fD.resistance, "Đỉnh 20 ngày"), fall(pw && pw.r1, "Pivot R1 tuần"), fall(pw && pw.r2, "Pivot R2 tuần"), fall(lt.hi52, "Đỉnh 52 tuần")])
+        || fall(price + 2 * atrD, "Giá hiện tại + 2 ATR"), atrD, 0.35, 1, "nến ngày", fD.odds[20], "20 ngày"));
+    if (fW && fW.atr) {
+      const band = lt.band1y || [];
+      out.push(horizon("long", fW.score, fW.rsi, price,
+        nearestBelow(price, [fall(ma200, "MA200 ngày"), fall(ma40w, "MA40 tuần"), fall(lt.lo52, "Đáy 52 tuần"), fall(band[0], "Dải biến động 1 năm (−1σ)")]) || fall(price - fW.atr, "Giá hiện tại − 1 ATR tuần"),
+        nearestAbove(price, [fall(lt.hi52, "Đỉnh 52 tuần"), fall(ath, "Đỉnh lịch sử"), fall(band[1], "Dải biến động 1 năm (+1σ)")]) || fall(price + 2 * fW.atr, "Giá hiện tại + 2 ATR tuần"),
+        fW.atr, 0.35, 1, "nến tuần", fW.odds[26], "26 tuần"));
+    }
+    return { price, horizons: out, notes: notes({ price, fD, ma200, ath, years, lt }, opt) };
+  }
+
+  // [tone, key, params]; money / price params are formatted by the UI.
+  function notes(x, opt) {
+    const n = [], atrPct = x.fD.atrPct, fromAth = (x.price / x.ath - 1) * 100;
+    if (ok(atrPct)) n.push([atrPct > 6 ? "down" : "ref", "Biến động trung bình {p}%/ngày — dừng lỗ nên cách điểm mua khoảng 1,5 ATR (≈ {q}%). Nếu chỉ chấp nhận mất 1% vốn mỗi lệnh, tỷ trọng tối đa ≈ {z}% vốn.",
+      { p: atrPct, q: 1.5 * atrPct, z: Math.min(100, 100 / (1.5 * atrPct)) }]);
+    if (ok(x.ma200)) n.push(x.price > x.ma200 ? ["up", "Giá trên MA200 ngày ({a}): xu hướng dài hạn tăng — ưu tiên mua khi điều chỉnh, không bán khống.", { a: x.ma200 }]
+      : ["down", "Giá dưới MA200 ngày ({a}): xu hướng dài hạn giảm — chỉ giao dịch ngắn, giảm tỷ trọng, chờ giá lấy lại MA200.", { a: x.ma200 }]);
+    const r = x.fD.rsi;
+    if (r >= 70) n.push(["down", "RSI ngày {p}: quá mua — không mua đuổi, cân nhắc chốt lời từng phần.", { p: r }]);
+    else if (r <= 30) n.push(["up", "RSI ngày {p}: quá bán — có thể hồi kỹ thuật, nhưng chờ nến đảo chiều rồi mới mua.", { p: r }]);
+    if (fromAth > -5) n.push(["ref", "Giá cách đỉnh cao nhất {p}% (dữ liệu Binance ~{y} năm): trên đầu không còn kháng cự, biến động mạnh — dời dừng lỗ theo giá.", { p: fromAth, y: x.years }]);
+    else if (fromAth < -70) n.push(["down", "Giá thấp hơn đỉnh cao nhất {p}% (dữ liệu Binance ~{y} năm): rủi ro coin mất vị thế — chỉ mua lượng nhỏ, chia nhiều lần.", { p: -fromAth, y: x.years }]);
+    if (ok(opt.funding) && opt.funding > 0.03) n.push(["down", "Funding {f}%/8h: phe Long đông và trả phí cao — dễ có cú quét Long, tránh dùng đòn bẩy.", { f: opt.funding }]);
+    else if (ok(opt.funding) && opt.funding < 0) n.push(["up", "Funding âm ({f}%/8h): phe Short đông — giá tăng có thể kích hoạt short squeeze.", { f: opt.funding }]);
+    if (opt.fng <= 25) n.push(["up", "Chỉ số Sợ hãi & Tham lam {p} (sợ hãi tột độ): lịch sử thường là vùng tích luỹ tốt cho dài hạn — mua dần, không dồn hết vốn.", { p: opt.fng }]);
+    else if (opt.fng >= 75) n.push(["down", "Chỉ số Sợ hãi & Tham lam {p} (tham lam tột độ): thị trường hưng phấn — chốt lời dần, tránh mua theo đám đông.", { p: opt.fng }]);
+    const btc = !opt.isBtc && opt.btc ? TechOutlook.frame(opt.btc, "D", [5]) : null;
+    if (btc && btc.bucket <= -1) n.push(["down", "BTC đang trong xu hướng giảm (khung ngày, điểm {p}) — altcoin thường giảm mạnh hơn BTC, nên giảm tỷ trọng.", { p: btc.score }]);
+    else if (btc && btc.bucket >= 1) n.push(["up", "BTC đang tăng (khung ngày, điểm {p}) — thuận lợi cho altcoin nếu dòng tiền lan sang.", { p: btc.score }]);
+    if (ok(opt.qvol) && opt.qvol < 5e6) n.push(["down", "KL giao dịch 24h chỉ {m}: thanh khoản mỏng — dùng lệnh giới hạn, chia nhỏ lệnh, tránh lệnh thị trường.", { m: opt.qvol }]);
+    n.push(["ref", "Chia vốn mua làm 3–4 lần (DCA) thay vì mua một lần; luôn đặt dừng lỗ trước khi vào lệnh và không dùng tiền vay.", {}]);
+    return n;
+  }
+
+  return { build, ACTION };
 })();
 // Indicator guide, part 1 (on-price indicators): what it measures, formula, how to read, worked crypto example, combos, crypto caveat.
 // imp = core indicator highlighted in the picker. Text is Vietnamese source, translated through T().
@@ -2693,17 +2837,19 @@ const ChartEvents = (() => {
 // Pure: notable line crossings for the full chart's cross dots — MA pair, price × longest MA, Ichimoku TK, SAR flip, oscillator zones, MACD, +DI/−DI, Stoch in zones.
 // Cross = { time, i, ind (index in inds), line (index of the line the dot sits on), price (y of the dot), kind, tone, v (first line's value), a?, b?, n?, l? }.
 const ChartCrosses = (() => {
-  const TONE = { obIn: "warn", obOut: "down", osIn: "warn", osOut: "up", adxUp: "warn", adxDown: "warn" };
+  const GAP = 3, TONE = { obIn: "warn", obOut: "down", osIn: "warn", osOut: "up", adxUp: "warn", adxDown: "warn" };
   const ok = (...xs) => xs.every(Number.isFinite);
   const above = (a, b, i) => ok(a[i - 1], b[i - 1], a[i], b[i]) && a[i - 1] <= b[i - 1] && a[i] > b[i];
 
   function detect(bars, inds = [], from = 0) {
     const n = bars.length, out = [], close = bars.map(b => b.close), lvl = v => new Array(n).fill(v);
-    // a crosses above b → kUp, below → kDn; the dot sits on line `line` at y(i).
+    // a crosses above b → kUp, below → kDn; the dot sits on line `line` at y(i). Re-crosses within GAP bars are whipsaw noise.
     const pair = (ind, line, a, b, kUp, kDn, { y = i => (a[i] + b[i]) / 2, when = () => true, ...extra } = {}) => {
-      for (let i = Math.max(1, from); i < n; i++) {
+      for (let i = Math.max(1, from), prev = -GAP; i < n; i++) {
         const kind = above(a, b, i) && when(i, 1) ? kUp : above(b, a, i) && when(i, -1) ? kDn : "";
-        if (kind) out.push({ time: bars[i].time, i, ind, line, price: y(i), kind, tone: TONE[kind] || (kind === kUp ? "up" : "down"), v: a[i], ...extra });
+        if (!kind || i - prev < GAP) { if (kind) prev = i; continue; }
+        prev = i;
+        out.push({ time: bars[i].time, i, ind, line, price: y(i), kind, tone: TONE[kind] || (kind === kUp ? "up" : "down"), v: a[i], ...extra });
       }
     };
     const mas = inds.map((x, k) => ({ x, k, v: x.lines[0].values, t: x.lines[0].title })).filter(o => ["sma", "ema", "wma"].includes(o.x.id)).sort((p, q) => p.x.p.n - q.x.p.n);
@@ -4078,17 +4224,19 @@ const TechChart = (() => {
     const track = e => { const r = el.getBoundingClientRect(); ptr = { x: e.clientX - r.left, y: e.clientY - r.top }; };
     el.addEventListener("pointermove", track);
     el.addEventListener("pointerdown", track);
-    el.addEventListener("pointerleave", () => { ptr = null; if (opt.tip) opt.tip.hidden = true; });
+    el.addEventListener("pointerleave", e => { if (e.pointerType === "touch") return; ptr = null; if (opt.tip) opt.tip.hidden = true; });
 
     // Native click → bar + price: the library drops a quick 2nd click at another spot (double-click guard), drawing needs every click.
+    // A short tap never moves the library's crosshair, so a touch tap opens the help box itself.
     let down = null;
-    el.addEventListener("pointerdown", e => { down = { x: e.clientX, y: e.clientY }; });
+    el.addEventListener("pointerdown", e => { down = { x: e.clientX, y: e.clientY, touch: e.pointerType === "touch" }; });
     el.addEventListener("click", e => {
-      if (!opt.onClick || !chart || !last || !down || Math.hypot(e.clientX - down.x, e.clientY - down.y) > 6) return;
+      if (!chart || !last || !down || Math.hypot(e.clientX - down.x, e.clientY - down.y) > 6) return;
       const r = el.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
-      if (y > chart.panes()[0].getHeight()) return;
       const i = Math.round(chart.timeScale().coordinateToLogical(x) ?? -1), b = last.bars[Math.min(i, last.bars.length - 1)];
       if (i < 0 || !b) return;
+      if (down.touch) tip(b.time);
+      if (!opt.onClick || y > chart.panes()[0].getHeight()) return;
       opt.onClick({ time: b.time, price: main.coordinateToPrice(y) });
     });
 
@@ -5882,6 +6030,67 @@ const OutlookView = (() => {
 
   return { open, close: () => { seq++; } };
 })();
+// "Khuyến nghị" tab: CoinAdvice on 4h / 1D / 1W Binance candles + funding, Fear & Greed, BTC trend — action, when to buy / sell,
+// buy / sell zones, stop-loss per horizon, and other key notes. Rule-based, refreshed each time the tab opens (1-min cache).
+const AdviceView = (() => {
+  const HORIZON = { short: ["Hôm nay / ngắn hạn", "1–5 ngày"], medium: ["Trung hạn", "2–8 tuần"], long: ["Dài hạn", "6–24 tháng"] };
+  const PRICE = new Set(["a", "b", "c", "d", "r", "s"]);
+  const cache = new Map();
+  let sym = "", seq = 0;
+  const e = s => Dom.esc(s ?? "");
+  // Translate a [key, params] pair: price params → coin price format, m → money, f → funding %, tf → translated word.
+  const fmt = (v, k) => typeof v !== "number" ? T(v) : PRICE.has(k) ? Fmt.price(v) : k === "m" ? Fmt.moneyBig(v) : k === "f" ? Fmt.en(v, 4) : Fmt.en(v, Number.isInteger(v) ? 0 : 1);
+  const tr = (key, p = {}) => T(key, Object.fromEntries(Object.entries(p).map(([k, v]) => [k, fmt(v, k)])));
+  const range = z => `${Fmt.price(z.lo)} – ${Fmt.price(z.hi)}`;
+
+  async function load(s, pair) {
+    const hit = cache.get(pair);
+    if (hit && Date.now() - hit.at < 60e3) return hit.v;
+    const isBtc = s === "BTC";
+    const [h4, d1, w1] = await Promise.all([Spot.klines(pair, "4h", 300), Spot.klines(pair, "1d", 1000), Spot.klines(pair, "1w", 400)]);
+    const [btc, fut, fng] = await Promise.allSettled([isBtc ? null : Spot.klines("BTCUSDT", "1d", 300), Futures.board(Coins.hasSpot, 60e3), FearGreed.history(1)]);
+    const f = fut.status === "fulfilled" ? fut.value.find(x => x.sym === s) : null;
+    const v = CoinAdvice.build({ h4, d1, w1 }, { isBtc, btc: btc.value || null, funding: f ? f.funding : null, fng: fng.status === "fulfilled" && fng.value[0] ? fng.value[0].v : null, qvol: Coins.row(s).qvol });
+    cache.set(pair, { at: Date.now(), v });
+    return v;
+  }
+
+  function card(h) {
+    const [title, span] = HORIZON[h.id], o = h.odds;
+    const row = (label, val, sub, cls = "") => `<div class="adv-row"><span>${e(T(label))}</span><b class="${cls}">${e(val)}</b><em class="muted">${e(sub)}</em></div>`;
+    return `<div class="ol-card adv-card"><div class="ol-h"><b>${e(T(title))} <span class="muted">· ${e(T(span))}</span></b><span class="badge ${h.tone}">${e(T(h.action))}</span></div>`
+      + `<div class="ol-meter" title="${e(T("Điểm kỹ thuật {s} (−100…+100)", { s: h.score }))}"><i style="left:${((h.score + 100) / 2).toFixed(0)}%"></i></div>`
+      + row("Vùng mua", range(h.buy), T(h.buy.basis), "up") + row("Vùng bán / chốt lời", range(h.sell), T(h.sell.basis), "down")
+      + row("Dừng lỗ", Fmt.price(h.stop.v), tr(h.stop.basis, { n: h.stop.n }), "down")
+      + row("Lời : lỗ", h.rr == null ? "—" : `1 : ${Fmt.en(Math.max(0, h.rr), 1)}`, T(h.tone === "down" ? "nếu mua ở vùng mua — chỉ tham khảo khi xu hướng còn giảm" : h.rr >= 2 ? "đáng giá" : h.rr >= 1 ? "tạm được" : "kém — chờ giá tốt hơn"), h.tone === "down" ? "" : h.rr >= 2 ? "up" : h.rr < 1 ? "down" : "")
+      + `<ul class="insights adv-when">${h.timing.map(([k, p]) => `<li>${e(tr(k, p))}</li>`).join("")}</ul>`
+      + (o && o.n ? `<p class="muted adv-odds">${e(T("Lịch sử: sau {n} lần có điểm tương tự, giá cao hơn {h} sau {p}% số lần (trung vị {m}%).", { n: o.n, h: T(h.oddsH), p: Fmt.en(o.up, 0), m: Fmt.signed(o.median, 1) }))}</p>` : "")
+      + `</div>`;
+  }
+
+  async function open(s) {
+    sym = s;
+    const my = ++seq, el = $("dAdvice"), pair = Coins.pair(s), head = `<div class="dsec"><b>${e(T("Khuyến nghị"))}</b><span class="muted">${e(T("tự động theo quy tắc kỹ thuật — không phải lời khuyên đầu tư"))}</span></div>`;
+    if (MarketMath.isStable(Coins.row(s))) { el.innerHTML = head + `<p class="pad muted">${e(T("{s} là stablecoin (giá neo ~1$) — không có khuyến nghị mua / bán theo giá.", { s }))}</p>`; return; }
+    if (!pair) { el.innerHTML = head + `<p class="pad muted">${e(T("Coin này không có cặp USDT trên Binance nên không có biểu đồ nến."))}</p>`; return; }
+    el.innerHTML = head + `<p class="pad muted">${e(T("Đang tính…"))}</p>`;
+    try {
+      const v = await load(s, pair);
+      if (my !== seq) return;
+      if (!v) { el.innerHTML = head + `<p class="pad muted">${e(T("Chưa đủ lịch sử giá (cần ≥ 60 nến ngày) để khuyến nghị."))}</p>`; return; }
+      el.innerHTML = head + `<p class="pad adv-price">${e(T("Giá tham chiếu {p} (đóng cửa nến ngày hiện tại)", { p: Fmt.price(v.price) }))}</p>`
+        + `<div class="ol-grid">${v.horizons.map(card).join("")}</div>`
+        + `<div class="dsec"><b>${e(T("Khuyến nghị quan trọng khác"))}</b></div><ul class="insights">${v.notes.map(([c, k, p]) => `<li class="${c}">${e(tr(k, p))}</li>`).join("")}</ul>`
+        + `<p class="sc-note">${e(T("Cách tính: điểm kỹ thuật (MA20/50/200, RSI, MACD, ADX, Bollinger, khối lượng) quyết định hành động; vùng mua / bán lấy từ pivot, MA, đỉnh / đáy gần nhất ± một phần ATR; dừng lỗ dưới vùng mua 0,5–1 ATR. Ngắn hạn dùng nến 4h + ngày, trung hạn nến ngày, dài hạn nến tuần."))}</p>`;
+    } catch (err) {
+      if (my !== seq) return;
+      console.warn("AdviceView.open - load klines fail", s, err.message);
+      el.innerHTML = head + `<div class="errbox">${e(T("Không tải được nến để tính khuyến nghị."))}</div>`;
+    }
+  }
+
+  return { open, close: () => { seq++; } };
+})();
 // "Sổ lệnh" tab: Binance order book (top 15 per side, depth bars, spread, bid/ask imbalance) + realtime aggregated trades with taker buy/sell split.
 const BookView = (() => {
   const LV = 15, KEEP = 50;
@@ -6065,9 +6274,9 @@ const ProfileView = (() => {
 
   return { open };
 })();
-// Detail pane tabs: Tổng quan · Kỹ thuật · Sổ lệnh · Phái sinh · Hồ sơ. Only the open tab loads / streams; switching coin reloads it.
+// Detail pane tabs: Tổng quan · Kỹ thuật · Khuyến nghị · Sổ lệnh · Phái sinh · Hồ sơ. Only the open tab loads / streams; switching coin reloads it.
 const DetailTabs = (() => {
-  const TABS = [["overview", "Tổng quan"], ["chart", "Kỹ thuật"], ["book", "Sổ lệnh"], ["deriv", "Phái sinh"], ["profile", "Hồ sơ"]];
+  const TABS = [["overview", "Tổng quan"], ["chart", "Kỹ thuật"], ["advice", "Khuyến nghị"], ["book", "Sổ lệnh"], ["deriv", "Phái sinh"], ["profile", "Hồ sơ"]];
   const IDS = new Set(TABS.map(t => t[0]));
   let cur = IDS.has(Prefs.get("dtab")) ? Prefs.get("dtab") : "overview", sym = "";
 
@@ -6076,6 +6285,7 @@ const DetailTabs = (() => {
   function activate() {
     CoinChart.show(cur === "chart", sym);
     if (cur === "chart") OutlookView.open(sym); else OutlookView.close();
+    if (cur === "advice") AdviceView.open(sym); else AdviceView.close();
     if (cur === "book") BookView.open(sym); else BookView.close();
     if (cur === "deriv") DerivView.open(sym); else DerivView.close();
     if (cur === "profile") ProfileView.open(sym);

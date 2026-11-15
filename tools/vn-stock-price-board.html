@@ -1170,6 +1170,53 @@ I18n.add({
   "%K cắt lên %D trong vùng quá bán: tín hiệu mua của Stochastic — tốt nhất khi cùng chiều xu hướng chính (giá trên MA dài).": "%K crosses above %D in oversold: Stochastic's buy signal — best when it agrees with the main trend (price above the long MA).",
   "%K cắt xuống %D trong vùng quá mua: tín hiệu bán của Stochastic — tốt nhất khi cùng chiều xu hướng chính (giá dưới MA dài).": "%K crosses below %D in overbought: Stochastic's sell signal — best when it agrees with the main trend (price below the long MA).",
 });
+// English for the tool's own buy / sell plan at the head of the "Khuyến nghị" tab (TradePlanView).
+I18n.add({
+  "Mua": "Buy", "Canh mua khi điều chỉnh": "Buy on pullback", "Mua thăm dò": "Starter buy", "Nắm giữ, chưa mua đuổi": "Hold, don't chase", "Quan sát, chờ phá vỡ": "Watch for a breakout",
+  "Đứng ngoài": "Stay out", "Bán khi hồi": "Sell into rallies", "Bán / hạ tỷ trọng": "Sell / reduce",
+  "Xu hướng tuần và ngày cùng tăng, chưa quá mua — có thể mua trong vùng giá bên dưới, ưu tiên nhịp chỉnh trong phiên.": "Weekly and daily trends are both up and not overbought — you can buy within the zone below, preferably on intraday dips.",
+  "Xu hướng tuần tăng nhưng khung ngày đang điều chỉnh — chờ giá về vùng hỗ trợ rồi có tín hiệu quay lên mới mua.": "The weekly trend is up but the daily chart is pulling back — wait for price to reach support and turn up before buying.",
+  "Khung tuần đi ngang, khung ngày bắt đầu tăng — mua thăm dò tỷ trọng nhỏ, mua thêm khi giá vượt kháng cự tuần.": "Weekly is sideways, daily is starting to rise — take a small starter position and add when price clears weekly resistance.",
+  "Xu hướng tăng nhưng RSI ngày đã quá mua — người đang có hàng tiếp tục nắm giữ, người chưa có chờ điều chỉnh, không mua đuổi.": "The trend is up but daily RSI is overbought — holders keep holding, others wait for a pullback instead of chasing.",
+  "Cả tuần và ngày đều đi ngang — chờ giá phá vỡ khỏi vùng tích luỹ (kèm khối lượng) rồi mới hành động.": "Both weekly and daily are sideways — wait for price to break out of the range (with volume) before acting.",
+  "Xu hướng chưa ủng hộ (đi ngang / giảm, có thể quá bán) — đứng ngoài, chờ tín hiệu đảo chiều rõ ràng.": "The trend is not supportive (sideways / down, maybe oversold) — stay out and wait for a clear reversal.",
+  "Xu hướng tuần giảm, khung ngày chỉ đang hồi kỹ thuật — tận dụng nhịp hồi để bán / hạ tỷ trọng, không mua mới.": "The weekly trend is down and the daily chart is only bouncing — use the bounce to sell / reduce, no new buys.",
+  "Xu hướng tuần và ngày cùng giảm — ưu tiên bán / hạ tỷ trọng, chưa bắt đáy.": "Weekly and daily trends are both down — prefer selling / reducing, don't try to catch the bottom.",
+  "Vùng mua hôm nay {a} – {b}; đặt lệnh giới hạn (LO) gần {a} thay vì mua đuổi.": "Today's buy zone {a} – {b}; place a limit order near {a} instead of chasing.",
+  "Trung hạn: mua dần khi giá về {a} – {b} (hỗ trợ khung tuần) và có nến rút chân / MACD ngày cắt lên.": "Medium term: buy gradually when price reaches {a} – {b} (weekly support) with a long lower wick / daily MACD crossing up.",
+  "Mua theo đà khi giá đóng cửa vượt {r} (đỉnh 20 phiên) với khối lượng > trung bình 20 phiên.": "Momentum buy when price closes above {r} (20-session high) on volume above the 20-session average.",
+  "Chốt lời ngắn hạn từng phần ở {a}{b}.": "Take short-term profits in parts at {a}{b}.",
+  "Cắt lỗ khi giá đóng cửa dưới {s} (kế hoạch trung hạn) — không bình quân giá xuống.": "Stop out when price closes below {s} (medium-term plan) — don't average down.",
+  "Bán khi khung tuần thủng hỗ trợ {s} hoặc MACD tuần cắt xuống đường tín hiệu.": "Sell when the weekly chart breaks support {s} or weekly MACD crosses below its signal line.",
+  "{n} phiên trước": "{n} sessions ago", "phiên gần nhất": "latest session", "Không có giao cắt quan trọng trong 10 phiên gần nhất.": "No key crossovers in the last 10 sessions.",
+  "Khuyến nghị thời điểm mua / bán": "Buy / sell timing", "Tuần: {w} · Ngày: {d}": "Week: {w} · Day: {d}", "Khi nào mua": "When to buy", "Khi nào bán": "When to sell",
+  "Tín hiệu giao cắt 10 phiên gần nhất": "Crossovers in the last 10 sessions", "chưa đủ dữ liệu": "not enough data",
+  "Khuyến nghị giá mua / bán (nghìn đồng)": "Suggested buy / sell prices (thousand VND)", "Vùng mua": "Buy zone", "Chốt lời": "Take profit", "Dừng lỗ": "Stop-loss", "Lãi / lỗ tiềm năng": "Potential gain / loss",
+  "Xu hướng đang giảm: vùng mua chỉ dùng khi có tín hiệu đảo chiều; người đang có hàng ưu tiên cột Chốt lời / Dừng lỗ.": "The trend is down: use the buy zone only after a reversal signal; holders should focus on the Take profit / Stop-loss columns.",
+  "Lãi / lỗ tính từ giữa vùng mua; R:R = lãi kỳ vọng ÷ rủi ro tới mức dừng lỗ, nên ≥ 2.": "Gain / loss measured from the middle of the buy zone; R:R = expected gain ÷ risk to the stop, ideally ≥ 2.",
+  "Tỷ trọng gợi ý tối đa ~{p}% vốn cho kế hoạch trung hạn (rủi ro 1% vốn, dừng lỗ {s}).": "Suggested max position ~{p}% of capital for the medium-term plan (risking 1% of capital, stop {s}).",
+  "Thanh khoản thấp ({v} tỷ/phiên): khó mua bán khối lượng lớn — dùng lệnh giới hạn, chia nhỏ lệnh.": "Low liquidity ({v} bn VND/session): large orders are hard to fill — use limit orders and split them.",
+  "Thanh khoản {v} tỷ/phiên (TB 20 phiên).": "Liquidity {v} bn VND/session (20-session average).",
+  "Biến động cao ({v}%/năm): giảm tỷ trọng, chấp nhận dừng lỗ rộng hơn.": "High volatility ({v}%/year): use a smaller position and a wider stop.",
+  "Giá hợp lý TB {f} ({u} so với giá hiện tại).": "Average fair value {f} ({u} vs the current price).",
+  "P/E cao hơn {p}% số ngày trong 5 năm — đắt so với lịch sử.": "P/E is above {p}% of days in 5 years — expensive versus its history.",
+  "P/E chỉ cao hơn {p}% số ngày trong 5 năm — rẻ so với lịch sử.": "P/E is above only {p}% of days in 5 years — cheap versus its history.",
+  "Altman Z {z}: vùng rủi ro tài chính — hạn chế nắm giữ dài hạn.": "Altman Z {z}: financial distress zone — avoid long-term holding.",
+  "Piotroski {s}/9: sức khỏe tài chính tốt.": "Piotroski {s}/9: financially healthy.", "Piotroski {s}/9: sức khỏe tài chính yếu.": "Piotroski {s}/9: financially weak.",
+  "Sát đỉnh 52 tuần ({h}): chờ vượt đỉnh có khối lượng hoặc mua khi điều chỉnh.": "Near the 52-week high ({h}): wait for a breakout on volume or buy on a pullback.",
+  "Sát đáy 52 tuần ({l}): chưa có tín hiệu tạo đáy thì chưa bắt đáy.": "Near the 52-week low ({l}): don't bottom-fish until a base forms.",
+  "Khung ngày và tuần ngược chiều — giảm khối lượng giao dịch, chờ hai khung đồng thuận.": "Daily and weekly disagree — trade smaller and wait for both to align.",
+  "Đồng thuận CTCK 12 tháng: {b} mua · {h} trung lập · {s} bán; mục tiêu TB {a} ({u}).": "Broker consensus (12 months): {b} buy · {h} neutral · {s} sell; average target {a} ({u}).",
+  "CTCK nghiêng về mua nhưng kỹ thuật đang giảm — nếu mua theo cơ bản nên giải ngân nhiều đợt.": "Brokers lean to buy but the technicals are falling — if buying on fundamentals, invest in several tranches.",
+  "Hôm nay: sàn {f} · tham chiếu {r} · trần {c}. Cổ phiếu mua hôm nay về tài khoản chiều T+2 mới bán được.": "Today: floor {f} · reference {r} · ceiling {c}. Shares bought today arrive on the afternoon of T+2 and can only be sold then.",
+  "Cổ phiếu mua hôm nay về tài khoản chiều T+2 mới bán được.": "Shares bought today arrive on the afternoon of T+2 and can only be sold then.",
+  "Lưu ý quan trọng khác": "Other key notes",
+  "Hôm nay (T+0 → T+3)": "Today (T+0 → T+3)", "Pivot ngày {p} · ATR {a}": "Daily pivot {p} · ATR {a}", "Trung hạn (1–3 tháng)": "Medium term (1–3 months)",
+  "Pivot tuần {p} · ATR tuần {a}": "Weekly pivot {p} · weekly ATR {a}", "Dài hạn (≥ 1 năm)": "Long term (≥ 1 year)", "Giá hợp lý {f}": "Fair value {f}", "mục tiêu CTCK {a}": "broker target {a}",
+  "Khuyến nghị của tool (tự tính)": "Tool's own recommendation (computed)",
+  "Khuyến nghị do tool tự tính theo quy tắc từ giá lịch sử, chỉ báo kỹ thuật, định giá và giá mục tiêu CTCK — không phải tư vấn đầu tư; luôn tự quyết định và quản lý rủi ro.":
+    "Recommendation computed by the tool from price history, technical indicators, valuation and broker targets using fixed rules — not investment advice; always decide for yourself and manage risk.",
+});
 // English for the shared core modules (ThemePicker markup, SavedSessions, ColFilter) — included by every tool that uses them.
 I18n.add({
   "Thêm thao tác": "More actions",
@@ -2109,6 +2156,73 @@ const ChartCrosses = (() => {
   }
 
   return { detect };
+})();
+// Pure rule-based trade plan: buy / sell timing from day + week outlook and recent crosses, buy zone · targets · stop for today / medium / long term, risk notes.
+// Prices in thousand VND. Inputs come from TechOutlook frames, TechOutlook.longTerm, Valuation.fairValues, analyst targets and the live quote.
+const TradePlan = (() => {
+  const fin = Number.isFinite;
+  // HOSE steps 10 / 50 / 100 đ by price; HNX / UPCOM 100 đ.
+  const tick = (p, ex) => ex === "HNX" || ex === "UPCOM" ? 0.1 : p < 10 ? 0.01 : p < 50 ? 0.05 : 0.1;
+  const round = (p, ex, dir = 0) => { if (!fin(p) || p <= 0) return null; const t = tick(p, ex), f = dir < 0 ? Math.floor : dir > 0 ? Math.ceil : Math.round; return +(f(p / t - 1e-9 * dir) * t).toFixed(2); };
+
+  // Action from the weekly trend (direction) and the daily trend (timing).
+  function timing(D, W) {
+    if (!D) return null;
+    const w = W ? W.bucket : D.bucket, d = D.bucket, hot = D.rsi >= 70, cold = D.rsi <= 30;
+    let action;
+    if (w >= 1) action = d >= 1 ? (hot ? "hold" : "buy") : "buyDip";
+    else if (w === 0) action = d >= 1 ? "probe" : d <= -1 ? "avoid" : "watch";
+    else action = d >= 1 ? "sellRally" : cold ? "avoid" : "sell";
+    const tone = { buy: "up", buyDip: "up", probe: "up", hold: "ref", watch: "ref", avoid: "down", sellRally: "down", sell: "down" }[action];
+    return { action, tone, hot, cold, conflict: !!W && D.bucket * W.bucket < 0 };
+  }
+
+  // One horizon from a TechOutlook frame: buy zone around pivot / S1, targets R1 / resistance, stop under the zone.
+  function fromFrame(fr, ex, band) {
+    if (!fr || !fin(fr.atr)) return null;
+    const { p, s1, r1, r2 } = fr.pivots, c = fr.close, a = fr.atr;
+    const hi = Math.min(c, p), lo = Math.max(s1, hi - a);
+    const t1 = r1 > c ? r1 : c + a, t2 = Math.max(r2, fin(fr.resistance) ? fr.resistance : 0, t1 + a / 2);
+    return finish({ lo, hi, t1, t2, stop: Math.min(lo, hi) - 0.75 * a }, ex, band);
+  }
+
+  // Long term: margin of safety under fair value (or MA250), target = fair value / analyst consensus, −15 % stop (52-week low when close by).
+  function longTerm(L, fair, analyst, ex) {
+    if (!L) return null;
+    const anchor = fin(fair) ? fair * 0.85 : L.ma250;
+    if (!fin(anchor)) return null;
+    const hi = Math.min(L.last, anchor), lo = L.band1y && L.band1y[0] < hi ? Math.max(hi * 0.9, L.band1y[0]) : hi * 0.9;
+    const goals = [fair, analyst].filter(v => fin(v) && v > 0), t1 = goals.length ? goals.reduce((s, v) => s + v, 0) / goals.length : L.band1y ? L.band1y[1] : null;
+    if (!fin(t1)) return null;
+    const stop = L.lo52 < lo && L.lo52 > lo * 0.85 ? L.lo52 * 0.97 : lo * 0.85;
+    return finish({ lo, hi, t1, t2: Math.max(t1, L.band1y ? L.band1y[1] : t1), stop }, ex, null);
+  }
+
+  // Tick rounding, today's price band (floor / ceiling) and reward : risk from the middle of the buy zone.
+  function finish(x, ex, band) {
+    const clamp = v => band ? Math.min(band.ceil || v, Math.max(band.floor || v, v)) : v;
+    const lo = round(clamp(Math.min(x.lo, x.hi)), ex, 1), hi = round(clamp(Math.max(x.lo, x.hi)), ex, -1) ?? lo;
+    const t1 = round(clamp(x.t1), ex, -1), t2 = round(clamp(x.t2), ex, -1), stop = round(clamp(x.stop), ex, -1);
+    if (![lo, hi, t1, stop].every(fin)) return null;
+    const mid = (lo + Math.max(lo, hi)) / 2, risk = mid - stop;
+    return { lo, hi: Math.max(lo, hi), t1, t2: t2 > t1 ? t2 : null, stop, rr: risk > 0 && t1 > mid ? (t1 - mid) / risk : null, stopPct: mid ? (stop / mid - 1) * 100 : null, upPct: mid ? (t1 / mid - 1) * 100 : null };
+  }
+
+  // Risk 1 % of capital per idea → position ≤ 1 % / stop distance, capped at 20 % (10 % when yearly volatility > 50 %).
+  const position = (stopPct, vol) => fin(stopPct) && stopPct < 0 ? Math.min(vol > 50 ? 10 : 20, 100 / -stopPct) : null;
+
+  // Average traded value over the last 20 sessions, in billion VND.
+  const liquidity = bars => { const t = bars.slice(-20).filter(b => b.close > 0 && b.volume >= 0); return t.length ? t.reduce((s, b) => s + b.close * b.volume, 0) / t.length / 1e6 : null; };
+
+  // Recent crosses on the daily chart with the usual set (SMA 20 / 50, RSI 14, MACD 12-26-9), newest first.
+  function recent(bars, k = 10) {
+    if (bars.length < 60) return [];
+    const inds = Indicators.compute([{ id: "sma", p: { n: 20 } }, { id: "sma", p: { n: 50 } }, { id: "rsi", p: { n: 14 } }, { id: "macd", p: { f: 12, s: 26, g: 9 } }], bars);
+    const n = bars.length;
+    return ChartCrosses.detect(bars, inds, n - k).map(x => ({ ...x, ago: n - 1 - x.i })).reverse();
+  }
+
+  return { tick, round, timing, fromFrame, longTerm, position, liquidity, recent };
 })();
 // Pure: one indicator drawn on a fixed simulated series (rise → top → fall → range → breakout) as an SVG string, for the indicator guide.
 const IndIllus = (() => {
@@ -3309,6 +3423,105 @@ const ChartCrossUI = (() => {
 
   return { html, mark, TITLE, TEXT };
 })();
+// "Khuyến nghị" tab head: the tool's own buy / sell timing, buy zone · take-profit · stop for today / medium / long term, and other key notes.
+const TradePlanView = (() => {
+  const e = s => Dom.esc(s ?? "");
+  const f2 = v => Number.isFinite(v) ? Fmt.en(v, 2) : "—";
+  const sp = v => Number.isFinite(v) ? Fmt.signed(v, 1) + "%" : "—";
+  const ACTION = { buy: "Mua", buyDip: "Canh mua khi điều chỉnh", probe: "Mua thăm dò", hold: "Nắm giữ, chưa mua đuổi", watch: "Quan sát, chờ phá vỡ",
+    avoid: "Đứng ngoài", sellRally: "Bán khi hồi", sell: "Bán / hạ tỷ trọng" };
+  const WHY = {
+    buy: "Xu hướng tuần và ngày cùng tăng, chưa quá mua — có thể mua trong vùng giá bên dưới, ưu tiên nhịp chỉnh trong phiên.",
+    buyDip: "Xu hướng tuần tăng nhưng khung ngày đang điều chỉnh — chờ giá về vùng hỗ trợ rồi có tín hiệu quay lên mới mua.",
+    probe: "Khung tuần đi ngang, khung ngày bắt đầu tăng — mua thăm dò tỷ trọng nhỏ, mua thêm khi giá vượt kháng cự tuần.",
+    hold: "Xu hướng tăng nhưng RSI ngày đã quá mua — người đang có hàng tiếp tục nắm giữ, người chưa có chờ điều chỉnh, không mua đuổi.",
+    watch: "Cả tuần và ngày đều đi ngang — chờ giá phá vỡ khỏi vùng tích luỹ (kèm khối lượng) rồi mới hành động.",
+    avoid: "Xu hướng chưa ủng hộ (đi ngang / giảm, có thể quá bán) — đứng ngoài, chờ tín hiệu đảo chiều rõ ràng.",
+    sellRally: "Xu hướng tuần giảm, khung ngày chỉ đang hồi kỹ thuật — tận dụng nhịp hồi để bán / hạ tỷ trọng, không mua mới.",
+    sell: "Xu hướng tuần và ngày cùng giảm — ưu tiên bán / hạ tỷ trọng, chưa bắt đáy.",
+  };
+
+  function timingHtml(t, D, W, today, med, sigs) {
+    const buyWhen = [
+      today && T("Vùng mua hôm nay {a} – {b}; đặt lệnh giới hạn (LO) gần {a} thay vì mua đuổi.", { a: f2(today.lo), b: f2(today.hi) }),
+      med && T("Trung hạn: mua dần khi giá về {a} – {b} (hỗ trợ khung tuần) và có nến rút chân / MACD ngày cắt lên.", { a: f2(med.lo), b: f2(med.hi) }),
+      Number.isFinite(D.resistance) && T("Mua theo đà khi giá đóng cửa vượt {r} (đỉnh 20 phiên) với khối lượng > trung bình 20 phiên.", { r: f2(D.resistance) }),
+    ].filter(Boolean);
+    const sellWhen = [
+      today && T("Chốt lời ngắn hạn từng phần ở {a}{b}.", { a: f2(today.t1), b: today.t2 ? " → " + f2(today.t2) : "" }),
+      med && T("Cắt lỗ khi giá đóng cửa dưới {s} (kế hoạch trung hạn) — không bình quân giá xuống.", { s: f2(med.stop) }),
+      W && Number.isFinite(W.support) && T("Bán khi khung tuần thủng hỗ trợ {s} hoặc MACD tuần cắt xuống đường tín hiệu.", { s: f2(W.support) }),
+    ].filter(Boolean);
+    const sig = sigs.length ? `<ul class="checks">${sigs.slice(0, 6).map(x => `<li><i class="${x.tone === "warn" ? "na" : x.tone === "up" ? "ok" : "no"}">●</i> ${e(T(ChartCrossUI.TITLE[x.kind]))} — ${e(x.ago ? T("{n} phiên trước", { n: x.ago }) : T("phiên gần nhất"))}</li>`).join("")}</ul>`
+      : `<p class="muted pad">${e(T("Không có giao cắt quan trọng trong 10 phiên gần nhất."))}</p>`;
+    const frames = T("Tuần: {w} · Ngày: {d}", { w: W ? T(W.label) + " " + Fmt.signed(W.score, 0) : "—", d: T(D.label) + " " + Fmt.signed(D.score, 0) });
+    const list = (title, items, cls) => `<div class="tcard"><b class="${cls}">${e(title)}</b><ul class="checks">${items.map(s => `<li>${e(s)}</li>`).join("")}</ul></div>`;
+    return `<div class="dsec"><b>${e(T("Khuyến nghị thời điểm mua / bán"))}</b></div>`
+      + `<p class="pad tsum"><span class="tag ${t.tone}">${e(T(ACTION[t.action]))}</span> ${e(T(WHY[t.action]))}`
+      + ` <span class="muted">${e(frames)}</span></p>`
+      + `<div class="tcards">${list(T("Khi nào mua"), buyWhen, "up")}${list(T("Khi nào bán"), sellWhen, "down")}`
+      + `<div class="tcard"><b>${e(T("Tín hiệu giao cắt 10 phiên gần nhất"))}</b>${sig}</div></div>`;
+  }
+
+  function priceTable(rows, down) {
+    const foot = down ? T("Xu hướng đang giảm: vùng mua chỉ dùng khi có tín hiệu đảo chiều; người đang có hàng ưu tiên cột Chốt lời / Dừng lỗ.")
+      : T("Lãi / lỗ tính từ giữa vùng mua; R:R = lãi kỳ vọng ÷ rủi ro tới mức dừng lỗ, nên ≥ 2.");
+    const cell = x => x ? `<td><b>${f2(x.lo)} – ${f2(x.hi)}</b></td><td class="up">${f2(x.t1)}${x.t2 ? ` → ${f2(x.t2)}` : ""}</td><td class="down">${f2(x.stop)}</td>`
+      + `<td><span class="up">${sp(x.upPct)}</span> / <span class="down">${sp(x.stopPct)}</span>${Number.isFinite(x.rr) ? ` · R:R ${Fmt.en(x.rr, 1)}` : ""}</td>` : `<td colspan="4" class="muted">${e(T("chưa đủ dữ liệu"))}</td>`;
+    return `<div class="dsec"><b>${e(T("Khuyến nghị giá mua / bán (nghìn đồng)"))}</b></div><div class="fscroll"><table class="dtable plan"><thead><tr><th>${e(T("Kỳ"))}</th><th>${e(T("Vùng mua"))}</th>`
+      + `<th>${e(T("Chốt lời"))}</th><th>${e(T("Dừng lỗ"))}</th><th>${e(T("Lãi / lỗ tiềm năng"))}</th></tr></thead><tbody>`
+      + rows.map(([name, how, x]) => `<tr><td><b>${e(T(name))}</b><div class="muted">${e(how)}</div></td>${cell(x)}</tr>`).join("") + `</tbody></table></div>`
+      + `<p class="muted pad">${e(foot)}</p>`;
+  }
+
+  function notes(x) {
+    const out = [], add = (tone, text) => out.push(`<li><i class="${tone}">${tone === "ok" ? "▲" : tone === "no" ? "▼" : "•"}</i> ${e(text)}</li>`);
+    if (Number.isFinite(x.pos)) add("na", T("Tỷ trọng gợi ý tối đa ~{p}% vốn cho kế hoạch trung hạn (rủi ro 1% vốn, dừng lỗ {s}).", { p: Fmt.en(x.pos, 0), s: sp(x.med.stopPct) }));
+    if (Number.isFinite(x.liq)) add(x.liq < 1 ? "no" : "ok", T(x.liq < 1 ? "Thanh khoản thấp ({v} tỷ/phiên): khó mua bán khối lượng lớn — dùng lệnh giới hạn, chia nhỏ lệnh." : "Thanh khoản {v} tỷ/phiên (TB 20 phiên).", { v: Fmt.en(x.liq, 1) }));
+    if (x.L && x.L.vol > 45) add("no", T("Biến động cao ({v}%/năm): giảm tỷ trọng, chấp nhận dừng lỗ rộng hơn.", { v: Fmt.en(x.L.vol, 0) }));
+    if (Number.isFinite(x.fair)) add(x.fairUp >= 15 ? "ok" : x.fairUp <= -10 ? "no" : "na", T("Giá hợp lý TB {f} ({u} so với giá hiện tại).", { f: f2(x.fair), u: sp(x.fairUp) }));
+    if (x.pe && Number.isFinite(x.pe.percentile) && (x.pe.percentile >= 80 || x.pe.percentile <= 20)) add(x.pe.percentile >= 80 ? "no" : "ok", T(x.pe.percentile >= 80 ? "P/E cao hơn {p}% số ngày trong 5 năm — đắt so với lịch sử." : "P/E chỉ cao hơn {p}% số ngày trong 5 năm — rẻ so với lịch sử.", { p: Fmt.en(x.pe.percentile, 0) }));
+    if (x.alt && x.alt.zone === "distress") add("no", T("Altman Z {z}: vùng rủi ro tài chính — hạn chế nắm giữ dài hạn.", { z: Fmt.en(x.alt.z, 2) }));
+    if (x.pio && x.pio.known >= 6 && (x.pio.score <= 3 || x.pio.score >= 7)) add(x.pio.score >= 7 ? "ok" : "no", T(x.pio.score >= 7 ? "Piotroski {s}/9: sức khỏe tài chính tốt." : "Piotroski {s}/9: sức khỏe tài chính yếu.", { s: x.pio.score }));
+    if (x.L && x.L.fromHi52 > -3) add("na", T("Sát đỉnh 52 tuần ({h}): chờ vượt đỉnh có khối lượng hoặc mua khi điều chỉnh.", { h: f2(x.L.hi52) }));
+    if (x.L && x.L.fromLo52 < 5) add("no", T("Sát đáy 52 tuần ({l}): chưa có tín hiệu tạo đáy thì chưa bắt đáy.", { l: f2(x.L.lo52) }));
+    if (x.t.conflict) add("na", T("Khung ngày và tuần ngược chiều — giảm khối lượng giao dịch, chờ hai khung đồng thuận."));
+    if (x.cons) add(x.cons.up > x.cons.down ? "ok" : x.cons.down > x.cons.up ? "no" : "na", T("Đồng thuận CTCK 12 tháng: {b} mua · {h} trung lập · {s} bán; mục tiêu TB {a} ({u}).", { b: x.cons.up, h: x.cons.mid, s: x.cons.down, a: f2(x.cons.avg), u: sp(x.cons.upPct) }));
+    if (x.cons && x.cons.up > x.cons.down && x.t.tone === "down") add("na", T("CTCK nghiêng về mua nhưng kỹ thuật đang giảm — nếu mua theo cơ bản nên giải ngân nhiều đợt."));
+    add("na", T(x.band ? "Hôm nay: sàn {f} · tham chiếu {r} · trần {c}. Cổ phiếu mua hôm nay về tài khoản chiều T+2 mới bán được." : "Cổ phiếu mua hôm nay về tài khoản chiều T+2 mới bán được.", x.band || {}));
+    return `<div class="dsec"><b>${e(T("Lưu ý quan trọng khác"))}</b></div><ul class="checks pad">${out.join("")}</ul>`;
+  }
+
+  // d = { list (analyst calls), tech (OutlookView.load), val (ValTab.load | null) }; q = live quote of the symbol (or null).
+  function html(d, q) {
+    const tech = d.tech;
+    if (!tech || tech.empty || !tech.D) return "";
+    const D = tech.D, W = tech.W, L = tech.L, price = q && (q.last || q.ref) || D.close, ex = q && q.ex;
+    const band = q && q.ceil && q.floor ? { ceil: q.ceil, floor: q.floor, f: f2(q.floor), r: f2(q.ref), c: f2(q.ceil) } : null;
+    const v = d.val && (d.val.years.length || Object.keys(d.val.r).length) ? ValTab.compute(d.val, price) : null, fair = v ? v.fair.average : null;
+    const cons = consensus(d.list, price), t = TradePlan.timing(D, W);
+    const today = TradePlan.fromFrame(D, ex, band), med = TradePlan.fromFrame(W, ex, null), long = TradePlan.longTerm(L, fair, cons && cons.avg, ex);
+    const rows = [["Hôm nay (T+0 → T+3)", T("Pivot ngày {p} · ATR {a}", { p: f2(D.pivots.p), a: f2(D.atr) }), today],
+      ["Trung hạn (1–3 tháng)", W ? T("Pivot tuần {p} · ATR tuần {a}", { p: f2(W.pivots.p), a: f2(W.atr) }) : "", med],
+      ["Dài hạn (≥ 1 năm)", [Number.isFinite(fair) && T("Giá hợp lý {f}", { f: f2(fair) }), cons && T("mục tiêu CTCK {a}", { a: f2(cons.avg) }), Number.isFinite(L.ma250) && "MA250 " + f2(L.ma250)].filter(Boolean).join(" · "), long]];
+    return `<div class="dsec"><b>${e(T("Khuyến nghị của tool (tự tính)"))}</b></div>` + timingHtml(t, D, W, today, med, TradePlan.recent(tech.bars || []))
+      + priceTable(rows, t.tone === "down")
+      + notes({ t, med, pos: med && TradePlan.position(med.stopPct, L.vol), liq: TradePlan.liquidity(tech.bars || []), L, fair, fairUp: fair ? (fair / price - 1) * 100 : null,
+        pe: v && v.band.pe, alt: v && v.alt, pio: v && v.pio, cons, band })
+      + `<p class="muted pad">${e(T("Khuyến nghị do tool tự tính theo quy tắc từ giá lịch sử, chỉ báo kỹ thuật, định giá và giá mục tiêu CTCK — không phải tư vấn đầu tư; luôn tự quyết định và quản lý rủi ro."))}</p>`;
+  }
+
+  // Analyst calls from the last 12 months: counts by side and their average target.
+  function consensus(list, price) {
+    const since = new Date(Date.now() - 365 * 864e5).toISOString().slice(0, 10), recent = (list || []).filter(x => (x.reportDate || "") >= since && +x.targetPrice > 0);
+    if (!recent.length) return null;
+    const side = x => { const c = String(x.type || "").toUpperCase(); return /BUY|OUTPERFORM|OVERWEIGHT|ADD|ACCUM/.test(c) ? 1 : /SELL|UNDER|REDUCE/.test(c) ? -1 : 0; };
+    const avg = recent.reduce((s, x) => s + +x.targetPrice, 0) / recent.length;
+    return { up: recent.filter(x => side(x) > 0).length, mid: recent.filter(x => !side(x)).length, down: recent.filter(x => side(x) < 0).length, avg, upPct: price ? (avg / price - 1) * 100 : null };
+  }
+
+  return { html, consensus };
+})();
 // Detailed guide per indicator (Vietnamese source, English in en-indicator-guide-strings.js): what it is, how to read it, worked examples, combinations, caveats.
 const IND_GUIDE = {
   sma: {
@@ -3526,17 +3739,19 @@ const TechChart = (() => {
     const track = e => { const r = el.getBoundingClientRect(); ptr = { x: e.clientX - r.left, y: e.clientY - r.top }; };
     el.addEventListener("pointermove", track);
     el.addEventListener("pointerdown", track);
-    el.addEventListener("pointerleave", () => { ptr = null; if (opt.tip) opt.tip.hidden = true; });
+    el.addEventListener("pointerleave", e => { if (e.pointerType === "touch") return; ptr = null; if (opt.tip) opt.tip.hidden = true; });
 
     // Native click → bar + price: the library drops a quick 2nd click at another spot (double-click guard), drawing needs every click.
+    // A short tap never moves the library's crosshair, so a touch tap opens the help box itself.
     let down = null;
-    el.addEventListener("pointerdown", e => { down = { x: e.clientX, y: e.clientY }; });
+    el.addEventListener("pointerdown", e => { down = { x: e.clientX, y: e.clientY, touch: e.pointerType === "touch" }; });
     el.addEventListener("click", e => {
-      if (!opt.onClick || !chart || !last || !down || Math.hypot(e.clientX - down.x, e.clientY - down.y) > 6) return;
+      if (!chart || !last || !down || Math.hypot(e.clientX - down.x, e.clientY - down.y) > 6) return;
       const r = el.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
-      if (y > chart.panes()[0].getHeight()) return;
       const i = Math.round(chart.timeScale().coordinateToLogical(x) ?? -1), b = last.bars[Math.min(i, last.bars.length - 1)];
       if (i < 0 || !b) return;
+      if (down.touch) tip(b.time);
+      if (!opt.onClick || y > chart.panes()[0].getHeight()) return;
       opt.onClick({ time: b.time, price: main.coordinateToPrice(y) });
     });
 
@@ -3955,7 +4170,7 @@ const OutlookView = (() => {
     const now = Math.floor(Date.now() / 1000), daily = await History.load(sym, "D", now - 11 * 366 * 86400, now);
     if (daily.length < 60) return { empty: true };
     return { D: TechOutlook.frame(daily, "D", [1, 5]), W: TechOutlook.frame(ChartRange.shape(daily, "1W"), "W", [1, 4]),
-      M: TechOutlook.frame(ChartRange.shape(daily, "1M"), "M", [1, 12]), L: TechOutlook.longTerm(daily) };
+      M: TechOutlook.frame(ChartRange.shape(daily, "1M"), "M", [1, 12]), L: TechOutlook.longTerm(daily), bars: daily };
   }
 
   // One readable sentence per signal (Vietnamese source keys, translated via T).
@@ -4866,7 +5081,7 @@ const DetailTabs = (() => {
     ["events", "Sự kiện"], ["profile", "Hồ sơ"], ["recs", "Khuyến nghị"]];
   const IDS = new Set(TABS.map(x => x[0]));
   const PANEL = { overview: "dRatios", valuation: "dValuation", chart: "dOutlook", news: "dNews", finance: "dFinance", events: "dEvents", profile: "dProfile", recs: "dRecs" };
-  let tab = IDS.has(Prefs.get("dtab")) ? Prefs.get("dtab") : "overview", sym = "", seq = 0, last = 0, data = {}, loaded = {}, newsBusy = false;
+  let tab = IDS.has(Prefs.get("dtab")) ? Prefs.get("dtab") : "overview", sym = "", seq = 0, last = 0, quote = null, data = {}, loaded = {}, newsBusy = false;
   const req = {};
 
   function bar() {
@@ -4887,7 +5102,7 @@ const DetailTabs = (() => {
     else if (k === "finance") el.innerHTML = FinView.html(d, lang);
     else if (k === "events") el.innerHTML = TabHtml.dividends(d.divs, last) + TabHtml.events(d.list);
     else if (k === "profile") el.innerHTML = TabHtml.profile(d.p, d.h, lang);
-    else if (k === "recs") el.innerHTML = TabHtml.recs(d, last);
+    else if (k === "recs") el.innerHTML = TradePlanView.html(d, quote) + TabHtml.recs(d.list, last);
   }
 
   const FETCH = {
@@ -4898,7 +5113,12 @@ const DetailTabs = (() => {
     finance: s => FinView.load(s),
     events: async s => { const [list, divs] = await Promise.all([Finfo.events(s, I18n.lang), Finfo.dividends(s).catch(() => [])]); return { list, divs }; },
     profile: async s => { const [p, h] = await Promise.all([Finfo.profile(s), Finfo.shareholders(s)]); return { p, h }; },
-    recs: s => Finfo.recommendations(s),
+    // Reuses the Kỹ thuật / Định giá data when those tabs were opened; only the analyst list is required.
+    recs: async s => {
+      const opt = (v, f) => v ? Promise.resolve(v) : f(s).catch(err => { console.warn("DetailTabs.recs - optional part fail", s, err); return null; });
+      const [list, tech, val] = await Promise.all([Finfo.recommendations(s), opt(data.chart, OutlookView.load), opt(data.valuation, ValTab.load)]);
+      return { list, tech, val };
+    },
   };
 
   async function load(k = tab, force = false) {
@@ -4936,7 +5156,7 @@ const DetailTabs = (() => {
 
   function setSymbol(s) {
     if (s === sym) return;
-    sym = s; seq++; data = {}; loaded = {}; last = 0;
+    sym = s; seq++; data = {}; loaded = {}; last = 0; quote = null;
     load("overview");
     if (tab !== "overview") load(tab);
   }
@@ -4957,7 +5177,7 @@ const DetailTabs = (() => {
     I18n.onChange(() => { bar(); delete data.events; loaded.events = ""; Object.keys(data).forEach(render); if (tab === "events") load("events"); });
   }
 
-  return { init, show, setSymbol, reload: k => load(k, true), onQuote: q => { if (q && q.sym === sym) last = q.last || q.ref; }, get: () => tab, IDS };
+  return { init, show, setSymbol, reload: k => load(k, true), onQuote: q => { if (q && q.sym === sym) { last = q.last || q.ref; quote = q; } }, get: () => tab, IDS };
 })();
 // 🔗 share link (#pako: payload = tab + watchlist + options + sort + selected symbol), ?data= / ?demo= / ?tab= intake, demo dropdown.
 const ShareDemo = (() => {

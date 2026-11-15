@@ -1,6 +1,6 @@
-// Detail pane tabs: Tổng quan · Kỹ thuật · Sổ lệnh · Phái sinh · Hồ sơ. Only the open tab loads / streams; switching coin reloads it.
+// Detail pane tabs: Tổng quan · Kỹ thuật · Khuyến nghị · Sổ lệnh · Phái sinh · Hồ sơ. Only the open tab loads / streams; switching coin reloads it.
 const DetailTabs = (() => {
-  const TABS = [["overview", "Tổng quan"], ["chart", "Kỹ thuật"], ["book", "Sổ lệnh"], ["deriv", "Phái sinh"], ["profile", "Hồ sơ"]];
+  const TABS = [["overview", "Tổng quan"], ["chart", "Kỹ thuật"], ["advice", "Khuyến nghị"], ["book", "Sổ lệnh"], ["deriv", "Phái sinh"], ["profile", "Hồ sơ"]];
   const IDS = new Set(TABS.map(t => t[0]));
   let cur = IDS.has(Prefs.get("dtab")) ? Prefs.get("dtab") : "overview", sym = "";
 
@@ -9,6 +9,7 @@ const DetailTabs = (() => {
   function activate() {
     CoinChart.show(cur === "chart", sym);
     if (cur === "chart") OutlookView.open(sym); else OutlookView.close();
+    if (cur === "advice") AdviceView.open(sym); else AdviceView.close();
     if (cur === "book") BookView.open(sym); else BookView.close();
     if (cur === "deriv") DerivView.open(sym); else DerivView.close();
     if (cur === "profile") ProfileView.open(sym);

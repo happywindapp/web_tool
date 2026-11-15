@@ -10,7 +10,7 @@ const OutlookView = (() => {
     const now = Math.floor(Date.now() / 1000), daily = await History.load(sym, "D", now - 11 * 366 * 86400, now);
     if (daily.length < 60) return { empty: true };
     return { D: TechOutlook.frame(daily, "D", [1, 5]), W: TechOutlook.frame(ChartRange.shape(daily, "1W"), "W", [1, 4]),
-      M: TechOutlook.frame(ChartRange.shape(daily, "1M"), "M", [1, 12]), L: TechOutlook.longTerm(daily) };
+      M: TechOutlook.frame(ChartRange.shape(daily, "1M"), "M", [1, 12]), L: TechOutlook.longTerm(daily), bars: daily };
   }
 
   // One readable sentence per signal (Vietnamese source keys, translated via T).

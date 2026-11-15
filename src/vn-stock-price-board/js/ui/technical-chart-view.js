@@ -41,17 +41,19 @@ const TechChart = (() => {
     const track = e => { const r = el.getBoundingClientRect(); ptr = { x: e.clientX - r.left, y: e.clientY - r.top }; };
     el.addEventListener("pointermove", track);
     el.addEventListener("pointerdown", track);
-    el.addEventListener("pointerleave", () => { ptr = null; if (opt.tip) opt.tip.hidden = true; });
+    el.addEventListener("pointerleave", e => { if (e.pointerType === "touch") return; ptr = null; if (opt.tip) opt.tip.hidden = true; });
 
     // Native click → bar + price: the library drops a quick 2nd click at another spot (double-click guard), drawing needs every click.
+    // A short tap never moves the library's crosshair, so a touch tap opens the help box itself.
     let down = null;
-    el.addEventListener("pointerdown", e => { down = { x: e.clientX, y: e.clientY }; });
+    el.addEventListener("pointerdown", e => { down = { x: e.clientX, y: e.clientY, touch: e.pointerType === "touch" }; });
     el.addEventListener("click", e => {
-      if (!opt.onClick || !chart || !last || !down || Math.hypot(e.clientX - down.x, e.clientY - down.y) > 6) return;
+      if (!chart || !last || !down || Math.hypot(e.clientX - down.x, e.clientY - down.y) > 6) return;
       const r = el.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
-      if (y > chart.panes()[0].getHeight()) return;
       const i = Math.round(chart.timeScale().coordinateToLogical(x) ?? -1), b = last.bars[Math.min(i, last.bars.length - 1)];
       if (i < 0 || !b) return;
+      if (down.touch) tip(b.time);
+      if (!opt.onClick || y > chart.panes()[0].getHeight()) return;
       opt.onClick({ time: b.time, price: main.coordinateToPrice(y) });
     });
 

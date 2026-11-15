@@ -4,7 +4,7 @@ const DetailTabs = (() => {
     ["events", "Sự kiện"], ["profile", "Hồ sơ"], ["recs", "Khuyến nghị"]];
   const IDS = new Set(TABS.map(x => x[0]));
   const PANEL = { overview: "dRatios", valuation: "dValuation", chart: "dOutlook", news: "dNews", finance: "dFinance", events: "dEvents", profile: "dProfile", recs: "dRecs" };
-  let tab = IDS.has(Prefs.get("dtab")) ? Prefs.get("dtab") : "overview", sym = "", seq = 0, last = 0, data = {}, loaded = {}, newsBusy = false;
+  let tab = IDS.has(Prefs.get("dtab")) ? Prefs.get("dtab") : "overview", sym = "", seq = 0, last = 0, quote = null, data = {}, loaded = {}, newsBusy = false;
   const req = {};
 
   function bar() {
@@ -25,7 +25,7 @@ const DetailTabs = (() => {
     else if (k === "finance") el.innerHTML = FinView.html(d, lang);
     else if (k === "events") el.innerHTML = TabHtml.dividends(d.divs, last) + TabHtml.events(d.list);
     else if (k === "profile") el.innerHTML = TabHtml.profile(d.p, d.h, lang);
-    else if (k === "recs") el.innerHTML = TabHtml.recs(d, last);
+    else if (k === "recs") el.innerHTML = TradePlanView.html(d, quote) + TabHtml.recs(d.list, last);
   }
 
   const FETCH = {
@@ -36,7 +36,12 @@ const DetailTabs = (() => {
     finance: s => FinView.load(s),
     events: async s => { const [list, divs] = await Promise.all([Finfo.events(s, I18n.lang), Finfo.dividends(s).catch(() => [])]); return { list, divs }; },
     profile: async s => { const [p, h] = await Promise.all([Finfo.profile(s), Finfo.shareholders(s)]); return { p, h }; },
-    recs: s => Finfo.recommendations(s),
+    // Reuses the Kỹ thuật / Định giá data when those tabs were opened; only the analyst list is required.
+    recs: async s => {
+      const opt = (v, f) => v ? Promise.resolve(v) : f(s).catch(err => { console.warn("DetailTabs.recs - optional part fail", s, err); return null; });
+      const [list, tech, val] = await Promise.all([Finfo.recommendations(s), opt(data.chart, OutlookView.load), opt(data.valuation, ValTab.load)]);
+      return { list, tech, val };
+    },
   };
 
   async function load(k = tab, force = false) {
@@ -74,7 +79,7 @@ const DetailTabs = (() => {
 
   function setSymbol(s) {
     if (s === sym) return;
-    sym = s; seq++; data = {}; loaded = {}; last = 0;
+    sym = s; seq++; data = {}; loaded = {}; last = 0; quote = null;
     load("overview");
     if (tab !== "overview") load(tab);
   }
@@ -95,5 +100,5 @@ const DetailTabs = (() => {
     I18n.onChange(() => { bar(); delete data.events; loaded.events = ""; Object.keys(data).forEach(render); if (tab === "events") load("events"); });
   }
 
-  return { init, show, setSymbol, reload: k => load(k, true), onQuote: q => { if (q && q.sym === sym) last = q.last || q.ref; }, get: () => tab, IDS };
+  return { init, show, setSymbol, reload: k => load(k, true), onQuote: q => { if (q && q.sym === sym) { last = q.last || q.ref; quote = q; } }, get: () => tab, IDS };
 })();

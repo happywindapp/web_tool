@@ -160,7 +160,8 @@ Dựa trên quy tắc + thống kê lịch sử của chính mã (không dùng A
 
 - Mỗi dòng: checkbox (đang hiện trên chart = tích; `(n)` khi bật nhiều bộ tham số) · rê chuột = giải thích ngắn (`ChartHelp.desc`) · nút **?** mở hộp hướng dẫn chi tiết.
 - Chỉ báo quan trọng (`Indicators.CORE` = SMA, EMA, BB, RSI, MACD) có ★, viền trái + nền màu accent.
-- Checkbox "Đánh dấu Đỉnh / Đáy" (`st.peaks`, mặc định bật, lưu trong Prefs "chart") ẩn/hiện marker `swingHigh`/`swingLow`; Cao nhất/Thấp nhất của khoảng và các tín hiệu khác vẫn hiện.
+- Checkbox "Đánh dấu Đỉnh / Đáy" (`st.peaks`, mặc định tắt, lưu trong Prefs "chart") ẩn/hiện marker `swingHigh`/`swingLow`; Cao nhất/Thấp nhất của khoảng và các tín hiệu khác vẫn hiện.
+- Checkbox "Điểm giao cắt quan trọng" (`st.crosses`, mặc định bật): `ChartCrosses.detect` (pure, `js/model/chart-line-crosses-detector.js`) tìm MA nhanh × MA chậm, giá × MA dài nhất, Tenkan × Kijun, đảo chiều SAR, MACD × Signal / × 0, ROC × 0, +DI × −DI, ADX × 25, %K × %D trong vùng 20/80, vào/rời vùng quá mua–quá bán (RSI, CCI, %R, MFI); bỏ cắt lặp trong 3 nến (whipsaw). `ChartCrossUI` (`js/ui/chart-cross-points.js`) vẽ chấm `atPriceMiddle` ngay trên đường bị cắt và giải thích chi tiết khi rê chuột / chạm trong 16 px. Chỉ bật khi controller truyền `s.crosses` ⇒ Bảng giá Crypto (dùng chung `technical-chart-view.js`) không bị ảnh hưởng.
 - Khung riêng bật bao nhiêu cũng được (tổng ≤ `Indicators.MAX` = 12): Full chart giữ khung giá ≥ 340 px, mỗi pane chỉ báo ≥ 130 px; không đủ chỗ thì vùng chart cuộn dọc
   (lăn chuột trên pane chỉ báo = cuộn, trên khung giá = zoom như cũ; điện thoại vuốt dọc), mỗi pane có nhãn tên ở góc trên-trái. Đủ chỗ thì giữ bố cục cũ (khung giá ≥ ½ chiều cao).
 - Hộp hướng dẫn (`#indHelpDlg`, mở chồng lên Full chart, Esc chỉ đóng hộp này): **Là gì · Cách đọc · Ví dụ minh họa (có số liệu) · Phối hợp với chỉ báo khác · Lưu ý**,
