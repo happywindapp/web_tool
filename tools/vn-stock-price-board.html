@@ -1253,6 +1253,24 @@ I18n.add({
   "Khuyến nghị do tool tự tính theo quy tắc từ giá lịch sử, chỉ báo kỹ thuật, định giá và giá mục tiêu CTCK — không phải tư vấn đầu tư; luôn tự quyết định và quản lý rủi ro.":
     "Recommendation computed by the tool from price history, technical indicators, valuation and broker targets using fixed rules — not investment advice; always decide for yourself and manage risk.",
 });
+// English for the trade-plan backtest ("Kiểm chứng quá khứ") in the "Khuyến nghị" tab.
+I18n.add({
+  "Kiểm chứng quá khứ": "Backtest", "phát lại khuyến nghị của tool trên lịch sử, không nhìn trước tương lai": "replays the tool's own advice over history, without look-ahead",
+  "▶ Kiểm chứng quá khứ": "▶ Run backtest", "▶ Chạy lại kiểm chứng": "▶ Run backtest again", "Đã chạy {n} lần phát lại trong {s} giây.": "Replayed {n} steps in {s} s.",
+  "Đang phát lại lịch sử… {p}%": "Replaying history… {p}%", "Chưa đủ lịch sử giá (cần ≥ {n} phiên) để kiểm chứng.": "Not enough price history (needs ≥ {n} sessions) for a backtest.",
+  "Không chạy được kiểm chứng.": "Could not run the backtest.",
+  "Hôm nay (T+0 → T+3)": "Today (T+0 → T+3)", "Trung hạn (1–3 tháng)": "Medium term (1–3 months)", "Dài hạn (≥ 1 năm)": "Long term (≥ 1 year)",
+  "Giai đoạn": "Period", "Khuyến nghị mua (mô phỏng / tổng)": "Buy calls (simulated / total)", "Vào được lệnh": "Entered", "Tỷ lệ thắng (sau phí, thuế)": "Win rate (after fees, tax)",
+  "Lãi trung bình / lệnh": "Average return / trade", "Lệnh tệ nhất": "Worst trade", "Lãi gộp các lệnh": "Compounded return", "Mua & giữ cùng kỳ": "Buy & hold, same period",
+  "Sụt giảm tối đa": "Max drawdown", "Giữ trung bình (phiên)": "Average hold (sessions)", "Chốt lời · dừng lỗ · hết hạn": "Target · stop · time exit",
+  "Khuyến nghị bán: giá thấp hơn sau kỳ": "Sell calls: price lower after the window", "Trung lập (chờ)": "Neutral (wait)",
+  "Khuyến nghị": "Advice", "Vào": "Entry", "Giá vào": "Entry price", "Giá ra": "Exit price", "Kết thúc": "Exit", "Phiên": "Sessions", "Lãi / lỗ": "P / L",
+  "Chốt lời": "Take profit", "Dừng lỗ": "Stop-loss", "Hết hạn giữ": "Time exit", "Lệnh gần nhất — {h} ({n})": "Latest trades — {h} ({n})",
+  "Quy tắc: khuyến nghị mua → chờ giá chạm vùng mua trong {a} / {b} / {c} phiên (hôm nay / trung / dài hạn), vào ở giá thấp hơn của giá mở cửa và đỉnh vùng mua; cổ phiếu về tài khoản T+2 mới được bán; thoát khi chạm dừng lỗ hoặc chốt lời (mục tiêu 1), nếu không thì sau {d} / {f} / {g} phiên. Cùng phiên chạm cả dừng lỗ và chốt lời tính là dừng lỗ; gap qua mức thì khớp ở giá mở cửa. Phí mua {x}%, bán {y}% (gồm thuế 0,1%), không tính trượt giá; mỗi lệnh dùng toàn bộ vốn, các lệnh không chồng nhau.":
+    "Rules: buy call → wait for price to reach the buy zone within {a} / {b} / {c} sessions (today / medium / long term), fill at the lower of the open and the top of the zone; shares arrive at T+2 and only then can be sold; exit at the stop or the take-profit (target 1), otherwise after {d} / {f} / {g} sessions. A session touching both stop and target counts as the stop; a gap through a level fills at the open. Buy fee {x}%, sell {y}% (incl. 0.1% tax), no slippage; each trade uses the full capital and trades do not overlap.",
+  "Khuyến nghị bán: so giá đóng cửa sau {a} / {b} / {c} phiên với giá lúc khuyến nghị. Hôm nay / trung hạn phát lại mỗi phiên trong ~2 năm gần nhất, dài hạn mỗi tuần trên toàn bộ lịch sử ({n} phiên). Dài hạn chỉ dùng mốc MA250 vì không có giá hợp lý / mục tiêu CTCK theo thời gian; không áp biên độ trần / sàn của từng phiên. Quá khứ không đảm bảo tương lai, không phải tư vấn đầu tư.":
+    "Sell calls: compare the close after {a} / {b} / {c} sessions with the price at the call. Today / medium term are replayed every session over roughly the last 2 years, long term weekly over the whole history ({n} sessions). Long term uses only the MA250 anchor because fair values / broker targets over time are not available; daily price limits are not applied. Past results do not guarantee the future, not investment advice.",
+});
 // English for the backtest table, technical-signal alerts, "Dòng tiền" tab, futures tab, correlation dialog and the Full chart multi layout.
 I18n.add({
   "Tín hiệu": "Signal", "Số lần": "Count", "Sau {n} phiên": "After {n} sessions", "Lần gần nhất": "Last seen", "Mọi phiên (tham chiếu)": "All sessions (baseline)",
@@ -2378,6 +2396,97 @@ const SignalBacktest = (() => {
   }
 
   return { run, H, YEARS };
+})();
+// Trade replay shared by the stock and crypto advice backtests: buy-zone entry, stop / target / time exit, fees, non-overlapping trades.
+// cost = { buy, sell (fee fractions), settle (bars after entry before any exit can fill; 0 = the entry bar may still stop out), shift (s added to a call's bar time) }.
+const PlanSim = (() => {
+  const done = (j, k, entry, exit, reason, cost) => ({ entered: true, from: j, to: k, entry, exit, reason, days: k - j, ret: exit * (1 - cost.sell) / (entry * (1 + cost.buy)) - 1 });
+
+  // From entry bar j: stop first (gap → open), then target (gap → open), else close of the last hold bar. The entry bar never takes profit.
+  function hold(d1, c, r, j, entry, cost) {
+    const end = j + Math.max(r.hold, cost.settle);
+    for (let k = j + cost.settle; k <= end; k++) {
+      if (k >= d1.length) return { pending: true };
+      const b = d1[k];
+      if (b.low <= c.stop) return done(j, k, entry, Math.min(b.open, c.stop), "stop", cost);
+      if (k > j && b.high >= c.target) return done(j, k, entry, Math.max(b.open, c.target), "target", cost);
+      if (k === end) return done(j, k, entry, b.close, "time", cost);
+    }
+  }
+
+  // Buy-side call at bar c.i: fills at min(open, zone high) on the first bar touching the zone within the entry window.
+  function simulateBuy(d1, c, r, cost) {
+    for (let j = c.i + 1; j <= c.i + r.entry; j++) {
+      if (j >= d1.length) return { pending: true };
+      if (d1[j].low <= c.hi) return hold(d1, c, r, j, Math.min(d1[j].open, c.hi), cost);
+    }
+    return { entered: false };
+  }
+
+  function equityStats(rets) {
+    let eq = 1, peak = 1, dd = 0;
+    for (const x of rets) { eq *= 1 + x; peak = Math.max(peak, eq); dd = Math.min(dd, eq / peak - 1); }
+    return { compound: eq - 1, maxDD: dd };
+  }
+
+  // calls [{ i, price, tone, lo, hi, target, stop }] of one horizon → non-overlapping buy trades, sell-side hit rate (close lower after r.win bars), neutral count.
+  function evaluate(id, calls, d1, r, cost) {
+    const buys = [], sells = [], out = { id, calls: calls.length, neutral: 0, pending: 0, buyAll: 0 };
+    let free = 0;
+    for (const c of calls) {
+      if (c.tone === "ref") out.neutral++;
+      else if (c.tone === "down" && c.i + r.win < d1.length) sells.push(d1[c.i + r.win].close / c.price - 1);
+      else if (c.tone === "up" && ++out.buyAll && c.i >= free) {
+        const s = simulateBuy(d1, c, r, cost);
+        if (s.pending) { out.pending++; continue; }
+        buys.push({ at: d1[c.i].time + cost.shift, zone: [c.lo, c.hi], stop: c.stop, target: c.target, ...s, t0: s.entered ? d1[s.from].time : null, t1: s.entered ? d1[s.to].time : null });
+        free = s.entered ? s.to : c.i + r.entry;
+      }
+    }
+    const trades = buys.filter(b => b.entered), recent = trades.slice(-15).reverse(), rets = trades.map(t => t.ret), avg = a => a.length ? a.reduce((s, x) => s + x, 0) / a.length : null;
+    const first = calls.length ? calls[0].i : 0, firstClose = calls.length ? calls[0].price : null;
+    return { ...out, buyCalls: buys.length, entered: trades.length, wins: rets.filter(x => x > 0).length, avg: avg(rets), worst: rets.length ? Math.min(...rets) : null,
+      avgDays: avg(trades.map(t => t.days)), stops: trades.filter(t => t.reason === "stop").length, targets: trades.filter(t => t.reason === "target").length,
+      ...equityStats(rets), sellCalls: sells.length, sellHits: sells.filter(x => x < 0).length, sellAvg: avg(sells),
+      bh: firstClose ? d1[d1.length - 1].close / firstClose - 1 : null, from: calls.length ? d1[first].time : null, to: d1[d1.length - 1].time, trades: recent };
+  }
+
+  return { simulateBuy, evaluate, equityStats };
+})();
+// Pure: replays the tool's own trade plan (TradePlan timing + zones) over completed daily bars without look-ahead, scored by PlanSim.
+// VN rules: shares sellable from T+2, buy fee 0.15 %, sell fee 0.15 % + 0.1 % tax. Long term has no historical fair value / analyst target → MA250 anchor only.
+const PlanBacktest = (() => {
+  const COST = { buy: 0.0015, sell: 0.0025, settle: 2, shift: 0 };
+  const RULES = { short: { entry: 3, hold: 5, win: 5 }, medium: { entry: 15, hold: 40, win: 20 }, long: { entry: 60, hold: 250, win: 250 } };
+  const IDS = Object.keys(RULES), START = 260, WIN = 600, DAILY_SPAN = 500, WEEK = 5;
+  const sleep = () => new Promise(r => setTimeout(r, 0));
+
+  // Plan as of the close of session i (only bars 0…i are visible).
+  function decisionAt(daily, i, ex) {
+    const d = daily.slice(Math.max(0, i + 1 - WIN), i + 1), D = TechOutlook.frame(d, "D", [1, 5]);
+    if (!D) return null;
+    const W = TechOutlook.frame(ChartRange.shape(d, "1W"), "W", [1, 4]), t = TradePlan.timing(D, W);
+    return { price: D.close, tone: t.tone, action: t.action, plans: { short: TradePlan.fromFrame(D, ex, null), medium: TradePlan.fromFrame(W, ex, null), long: TradePlan.longTerm(TechOutlook.longTerm(d), null, null, ex) } };
+  }
+
+  // Daily steps for short + medium over the last ~2 years, weekly steps for long over the whole history. opt: { onProgress(f), cancelled(), pause }.
+  async function run(daily, ex, opt = {}) {
+    const n = daily.length, dFrom = Math.max(START, n - 1 - DAILY_SPAN), pause = opt.pause || sleep, calls = { short: [], medium: [], long: [] };
+    const weekly = i => (n - 1 - i) % WEEK === 0, steps = [];
+    for (let i = START; i < n; i++) if (i >= dFrom || weekly(i)) steps.push(i);
+    let t0 = Date.now();
+    for (let s = 0; s < steps.length; s++) {
+      const i = steps[s], v = decisionAt(daily, i, ex);
+      if (v) for (const id of IDS) {
+        const x = v.plans[id];
+        if (x && (id === "long" ? weekly(i) : i >= dFrom)) calls[id].push({ i, price: v.price, tone: v.tone, lo: x.lo, hi: x.hi, target: x.t1, stop: x.stop });
+      }
+      if (Date.now() - t0 > 40) { if (opt.onProgress) opt.onProgress((s + 1) / steps.length); await pause(); if (opt.cancelled && opt.cancelled()) return null; t0 = Date.now(); }
+    }
+    return { rules: RULES, cost: COST, steps: steps.length, bars: n, results: IDS.map(id => PlanSim.evaluate(id, calls[id], daily, RULES[id], COST)) };
+  }
+
+  return { run, decisionAt, RULES, COST, START };
 })();
 // Pure: per-ticker state for technical-signal alerts — yesterday's indicator values vs the same indicators with today's live price appended.
 const SignalState = (() => {
@@ -3916,6 +4025,80 @@ const TradePlanView = (() => {
   }
 
   return { html, consensus };
+})();
+// "Khuyến nghị" tab: on-demand replay of the tool's own trade plan over history (PlanBacktest) — per-horizon results table, cached 30 min per ticker.
+const PlanBacktestView = (() => {
+  const TITLE = { short: "Hôm nay (T+0 → T+3)", medium: "Trung hạn (1–3 tháng)", long: "Dài hạn (≥ 1 năm)" };
+  const REASON = { target: "Chốt lời", stop: "Dừng lỗ", time: "Hết hạn giữ" };
+  const cache = new Map();
+  let seq = 0, busy = "", status = "";
+  const e = s => Dom.esc(s ?? "");
+  const day = t => t ? new Date(t * 1000).toISOString().slice(0, 10).split("-").reverse().join("/") : "—";
+  const pct = (x, d = 1) => x == null ? "—" : `<span class="${x > 0 ? "up" : x < 0 ? "down" : ""}">${e(Fmt.signed(x * 100, d))}%</span>`;
+  const hit = sym => { const c = cache.get(sym); return c && Date.now() - c.at < 30 * 60e3 ? c.res : null; };
+
+  function table(res) {
+    const R = res.results, cols = R.map(r => `<th>${e(T(TITLE[r.id]))}</th>`).join("");
+    const row = (label, f) => `<tr><td>${e(T(label))}</td>${R.map(r => `<td>${f(r)}</td>`).join("")}</tr>`;
+    const share = (a, b) => b ? `${a} <span class="muted">(${Fmt.en(a / b * 100, 0)}%)</span>` : "—";
+    return `<div class="fscroll"><table class="dtable bt plan-bt"><thead><tr><th></th>${cols}</tr></thead><tbody>`
+      + row("Giai đoạn", r => r.from ? `${day(r.from)} → ${day(r.to)}` : "—")
+      + row("Khuyến nghị mua (mô phỏng / tổng)", r => `${r.buyCalls} / ${r.buyAll}`)
+      + row("Vào được lệnh", r => share(r.entered, r.buyCalls))
+      + row("Tỷ lệ thắng (sau phí, thuế)", r => share(r.wins, r.entered))
+      + row("Lãi trung bình / lệnh", r => pct(r.avg, 2))
+      + row("Lệnh tệ nhất", r => pct(r.worst))
+      + row("Lãi gộp các lệnh", r => pct(r.compound))
+      + row("Mua & giữ cùng kỳ", r => pct(r.bh))
+      + row("Sụt giảm tối đa", r => pct(r.maxDD))
+      + row("Giữ trung bình (phiên)", r => r.avgDays == null ? "—" : Fmt.en(r.avgDays, 1))
+      + row("Chốt lời · dừng lỗ · hết hạn", r => r.entered ? `${r.targets} · ${r.stops} · ${r.entered - r.targets - r.stops}` : "—")
+      + row("Khuyến nghị bán: giá thấp hơn sau kỳ", r => r.sellCalls ? `${share(r.sellHits, r.sellCalls)} · ${pct(r.sellAvg)}` : "—")
+      + row("Trung lập (chờ)", r => `${r.neutral}`) + `</tbody></table></div>`;
+  }
+
+  function trades(r) {
+    if (!r.trades.length) return "";
+    const th = ["Khuyến nghị", "Vào", "Giá vào", "Giá ra", "Kết thúc", "Phiên", "Lãi / lỗ"].map(h => `<th>${e(T(h))}</th>`).join("");
+    const rows = r.trades.map(t => `<tr><td>${day(t.at)}</td><td>${day(t.t0)}</td><td>${Fmt.en(t.entry, 2)}</td><td>${Fmt.en(t.exit, 2)}</td><td>${e(T(REASON[t.reason]))}</td><td>${t.days}</td><td>${pct(t.ret, 2)}</td></tr>`).join("");
+    return `<details class="pad"><summary>${e(T("Lệnh gần nhất — {h} ({n})", { h: T(TITLE[r.id]), n: r.trades.length }))}</summary><div class="fscroll"><table class="dtable"><thead><tr>${th}</tr></thead><tbody>${rows}</tbody></table></div></details>`;
+  }
+
+  // Section markup for the ticker: button, progress line, results (if cached).
+  function html(sym) {
+    const res = hit(sym), run = busy === sym, w = PlanBacktest.RULES, c = PlanBacktest.COST, label = res ? T("▶ Chạy lại kiểm chứng") : T("▶ Kiểm chứng quá khứ");
+    const head = `<div class="dsec"><b>${e(T("Kiểm chứng quá khứ"))}</b> <span class="muted">${e(T("phát lại khuyến nghị của tool trên lịch sử, không nhìn trước tương lai"))}</span></div>`
+      + `<p class="pad"><button class="main" data-act="planBt"${run ? " disabled" : ""}>${e(label)}</button> <span class="muted" id="planBtStatus">${e(run ? status : res ? T("Đã chạy {n} lần phát lại trong {s} giây.", { n: res.steps, s: Fmt.en(res.secs, 1) }) : "")}</span></p>`;
+    if (!res) return `<div id="planBt">${head}</div>`;
+    return `<div id="planBt">${head}${table(res)}${res.results.map(trades).join("")}`
+      + `<p class="muted pad">${e(T("Quy tắc: khuyến nghị mua → chờ giá chạm vùng mua trong {a} / {b} / {c} phiên (hôm nay / trung / dài hạn), vào ở giá thấp hơn của giá mở cửa và đỉnh vùng mua; cổ phiếu về tài khoản T+2 mới được bán; thoát khi chạm dừng lỗ hoặc chốt lời (mục tiêu 1), nếu không thì sau {d} / {f} / {g} phiên. Cùng phiên chạm cả dừng lỗ và chốt lời tính là dừng lỗ; gap qua mức thì khớp ở giá mở cửa. Phí mua {x}%, bán {y}% (gồm thuế 0,1%), không tính trượt giá; mỗi lệnh dùng toàn bộ vốn, các lệnh không chồng nhau.", { a: w.short.entry, b: w.medium.entry, c: w.long.entry, d: w.short.hold, f: w.medium.hold, g: w.long.hold, x: Fmt.en(c.buy * 100, 2), y: Fmt.en(c.sell * 100, 2) }))}</p>`
+      + `<p class="muted pad">${e(T("Khuyến nghị bán: so giá đóng cửa sau {a} / {b} / {c} phiên với giá lúc khuyến nghị. Hôm nay / trung hạn phát lại mỗi phiên trong ~2 năm gần nhất, dài hạn mỗi tuần trên toàn bộ lịch sử ({n} phiên). Dài hạn chỉ dùng mốc MA250 vì không có giá hợp lý / mục tiêu CTCK theo thời gian; không áp biên độ trần / sàn của từng phiên. Quá khứ không đảm bảo tương lai, không phải tư vấn đầu tư.", { a: w.short.win, b: w.medium.win, c: w.long.win, n: res.bars }))}</p></div>`;
+  }
+
+  const paint = sym => { const el = $("planBt"); if (el && el.isConnected) el.outerHTML = html(sym); };
+
+  // bars: completed daily bars of sym; ex: exchange for price steps.
+  async function start(sym, bars, ex) {
+    if (busy === sym) return;
+    const tok = ++seq;
+    if (!bars || bars.length < PlanBacktest.START + 50) { busy = ""; status = ""; paint(sym); const s = $("planBtStatus"); if (s) s.textContent = T("Chưa đủ lịch sử giá (cần ≥ {n} phiên) để kiểm chứng.", { n: PlanBacktest.START + 50 }); return; }
+    busy = sym; status = T("Đang phát lại lịch sử… {p}%", { p: 0 }); paint(sym);
+    try {
+      const t0 = performance.now();
+      const res = await PlanBacktest.run(bars, ex, { cancelled: () => tok !== seq, onProgress: f => { status = T("Đang phát lại lịch sử… {p}%", { p: Fmt.en(f * 100, 0) }); const s = $("planBtStatus"); if (s) s.textContent = status; } });
+      if (!res || tok !== seq) return;
+      res.secs = (performance.now() - t0) / 1000;
+      cache.set(sym, { at: Date.now(), res });
+    } catch (err) {
+      console.warn("PlanBacktestView.start - backtest fail", sym, err.message);
+      if (tok === seq) { busy = ""; paint(sym); const s = $("planBtStatus"); if (s) s.textContent = T("Không chạy được kiểm chứng."); }
+      return;
+    }
+    if (tok !== seq) return;
+    busy = ""; paint(sym);
+  }
+
+  return { html, start, cancel: () => { seq++; busy = ""; } };
 })();
 // "Khuyến nghị" tab: backtest table of the important crosses on this ticker (SignalBacktest) — how often each fired and what price did next.
 const SignalBacktestView = (() => {
@@ -5814,7 +5997,7 @@ const DetailTabs = (() => {
     else if (k === "finance") el.innerHTML = FinView.html(d, lang);
     else if (k === "events") el.innerHTML = TabHtml.dividends(d.divs, last) + TabHtml.events(d.list);
     else if (k === "profile") el.innerHTML = TabHtml.profile(d.p, d.h, lang);
-    else if (k === "recs") el.innerHTML = TradePlanView.html(d, quote) + SignalBacktestView.html(d.bt) + TabHtml.recs(d.list, last);
+    else if (k === "recs") el.innerHTML = TradePlanView.html(d, quote) + (d.tech && d.tech.bars ? PlanBacktestView.html(sym) : "") + SignalBacktestView.html(d.bt) + TabHtml.recs(d.list, last);
   }
 
   const FETCH = {
@@ -5868,7 +6051,7 @@ const DetailTabs = (() => {
 
   function setSymbol(s) {
     if (s === sym) return;
-    sym = s; seq++; data = {}; loaded = {}; last = 0; quote = null;
+    sym = s; seq++; data = {}; loaded = {}; last = 0; quote = null; PlanBacktestView.cancel();
     load("overview");
     if (tab !== "overview") load(tab);
   }
@@ -5885,6 +6068,7 @@ const DetailTabs = (() => {
     });
     $("dValuation").addEventListener("change", e => { const el = e.target.closest('input[data-act="dcf"]'); if (el && ValTab.edit(data.valuation, el)) render("valuation"); });
     $("dNews").addEventListener("click", e => { if (e.target.closest('[data-act="moreNews"]')) moreNews(); });
+    $("dRecs").addEventListener("click", e => { const t = data.recs && data.recs.tech; if (t && t.bars && e.target.closest('[data-act="planBt"]')) PlanBacktestView.start(sym, SignalState.completed(t.bars, QuoteModel.vnDate(), Infinity), quote && quote.ex); });
     // Events come per locale → refetch; the rest only re-render from memory.
     I18n.onChange(() => { bar(); delete data.events; loaded.events = ""; Object.keys(data).forEach(render); if (tab === "events") load("events"); });
   }

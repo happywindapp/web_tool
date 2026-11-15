@@ -25,7 +25,7 @@ const DetailTabs = (() => {
     else if (k === "finance") el.innerHTML = FinView.html(d, lang);
     else if (k === "events") el.innerHTML = TabHtml.dividends(d.divs, last) + TabHtml.events(d.list);
     else if (k === "profile") el.innerHTML = TabHtml.profile(d.p, d.h, lang);
-    else if (k === "recs") el.innerHTML = TradePlanView.html(d, quote) + SignalBacktestView.html(d.bt) + TabHtml.recs(d.list, last);
+    else if (k === "recs") el.innerHTML = TradePlanView.html(d, quote) + (d.tech && d.tech.bars ? PlanBacktestView.html(sym) : "") + SignalBacktestView.html(d.bt) + TabHtml.recs(d.list, last);
   }
 
   const FETCH = {
@@ -79,7 +79,7 @@ const DetailTabs = (() => {
 
   function setSymbol(s) {
     if (s === sym) return;
-    sym = s; seq++; data = {}; loaded = {}; last = 0; quote = null;
+    sym = s; seq++; data = {}; loaded = {}; last = 0; quote = null; PlanBacktestView.cancel();
     load("overview");
     if (tab !== "overview") load(tab);
   }
@@ -96,6 +96,7 @@ const DetailTabs = (() => {
     });
     $("dValuation").addEventListener("change", e => { const el = e.target.closest('input[data-act="dcf"]'); if (el && ValTab.edit(data.valuation, el)) render("valuation"); });
     $("dNews").addEventListener("click", e => { if (e.target.closest('[data-act="moreNews"]')) moreNews(); });
+    $("dRecs").addEventListener("click", e => { const t = data.recs && data.recs.tech; if (t && t.bars && e.target.closest('[data-act="planBt"]')) PlanBacktestView.start(sym, SignalState.completed(t.bars, QuoteModel.vnDate(), Infinity), quote && quote.ex); });
     // Events come per locale → refetch; the rest only re-render from memory.
     I18n.onChange(() => { bar(); delete data.events; loaded.events = ""; Object.keys(data).forEach(render); if (tab === "events") load("events"); });
   }

@@ -1,0 +1,18 @@
+// English for the trade-plan backtest ("Kiểm chứng quá khứ") in the "Khuyến nghị" tab.
+I18n.add({
+  "Kiểm chứng quá khứ": "Backtest", "phát lại khuyến nghị của tool trên lịch sử, không nhìn trước tương lai": "replays the tool's own advice over history, without look-ahead",
+  "▶ Kiểm chứng quá khứ": "▶ Run backtest", "▶ Chạy lại kiểm chứng": "▶ Run backtest again", "Đã chạy {n} lần phát lại trong {s} giây.": "Replayed {n} steps in {s} s.",
+  "Đang phát lại lịch sử… {p}%": "Replaying history… {p}%", "Chưa đủ lịch sử giá (cần ≥ {n} phiên) để kiểm chứng.": "Not enough price history (needs ≥ {n} sessions) for a backtest.",
+  "Không chạy được kiểm chứng.": "Could not run the backtest.",
+  "Hôm nay (T+0 → T+3)": "Today (T+0 → T+3)", "Trung hạn (1–3 tháng)": "Medium term (1–3 months)", "Dài hạn (≥ 1 năm)": "Long term (≥ 1 year)",
+  "Giai đoạn": "Period", "Khuyến nghị mua (mô phỏng / tổng)": "Buy calls (simulated / total)", "Vào được lệnh": "Entered", "Tỷ lệ thắng (sau phí, thuế)": "Win rate (after fees, tax)",
+  "Lãi trung bình / lệnh": "Average return / trade", "Lệnh tệ nhất": "Worst trade", "Lãi gộp các lệnh": "Compounded return", "Mua & giữ cùng kỳ": "Buy & hold, same period",
+  "Sụt giảm tối đa": "Max drawdown", "Giữ trung bình (phiên)": "Average hold (sessions)", "Chốt lời · dừng lỗ · hết hạn": "Target · stop · time exit",
+  "Khuyến nghị bán: giá thấp hơn sau kỳ": "Sell calls: price lower after the window", "Trung lập (chờ)": "Neutral (wait)",
+  "Khuyến nghị": "Advice", "Vào": "Entry", "Giá vào": "Entry price", "Giá ra": "Exit price", "Kết thúc": "Exit", "Phiên": "Sessions", "Lãi / lỗ": "P / L",
+  "Chốt lời": "Take profit", "Dừng lỗ": "Stop-loss", "Hết hạn giữ": "Time exit", "Lệnh gần nhất — {h} ({n})": "Latest trades — {h} ({n})",
+  "Quy tắc: khuyến nghị mua → chờ giá chạm vùng mua trong {a} / {b} / {c} phiên (hôm nay / trung / dài hạn), vào ở giá thấp hơn của giá mở cửa và đỉnh vùng mua; cổ phiếu về tài khoản T+2 mới được bán; thoát khi chạm dừng lỗ hoặc chốt lời (mục tiêu 1), nếu không thì sau {d} / {f} / {g} phiên. Cùng phiên chạm cả dừng lỗ và chốt lời tính là dừng lỗ; gap qua mức thì khớp ở giá mở cửa. Phí mua {x}%, bán {y}% (gồm thuế 0,1%), không tính trượt giá; mỗi lệnh dùng toàn bộ vốn, các lệnh không chồng nhau.":
+    "Rules: buy call → wait for price to reach the buy zone within {a} / {b} / {c} sessions (today / medium / long term), fill at the lower of the open and the top of the zone; shares arrive at T+2 and only then can be sold; exit at the stop or the take-profit (target 1), otherwise after {d} / {f} / {g} sessions. A session touching both stop and target counts as the stop; a gap through a level fills at the open. Buy fee {x}%, sell {y}% (incl. 0.1% tax), no slippage; each trade uses the full capital and trades do not overlap.",
+  "Khuyến nghị bán: so giá đóng cửa sau {a} / {b} / {c} phiên với giá lúc khuyến nghị. Hôm nay / trung hạn phát lại mỗi phiên trong ~2 năm gần nhất, dài hạn mỗi tuần trên toàn bộ lịch sử ({n} phiên). Dài hạn chỉ dùng mốc MA250 vì không có giá hợp lý / mục tiêu CTCK theo thời gian; không áp biên độ trần / sàn của từng phiên. Quá khứ không đảm bảo tương lai, không phải tư vấn đầu tư.":
+    "Sell calls: compare the close after {a} / {b} / {c} sessions with the price at the call. Today / medium term are replayed every session over roughly the last 2 years, long term weekly over the whole history ({n} sessions). Long term uses only the MA250 anchor because fair values / broker targets over time are not available; daily price limits are not applied. Past results do not guarantee the future, not investment advice.",
+});
