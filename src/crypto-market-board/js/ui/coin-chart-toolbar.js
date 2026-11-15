@@ -32,8 +32,11 @@ const CoinBar = (() => {
     const group = (pane, title) => `<div class="ipg"><b>${e(T(title))}</b>` + Object.entries(Indicators.DEFS).filter(([, d]) => d.pane === pane && !d.intraday)
       .sort((a, b) => imp(b[0]) - imp(a[0])).map(item).join("") + `</div>`;
     const main = group("main", "Trên biểu đồ giá"), own = group("own", "Khung riêng");
+    const peaks = `<div class="ipi ipk"><label><input type="checkbox" data-c="peaks"${s.peaks ? " checked" : ""}><span class="ipt"><b>${e(T("Đánh dấu Đỉnh / Đáy"))}</b><em>${e(T("Hiện / ẩn nhãn Đỉnh, Đáy trên biểu đồ giá"))}</em></span></label></div>`
+      + `<div class="ipi ipk"><label><input type="checkbox" data-c="crosses"${s.crosses ? " checked" : ""}><span class="ipt"><b><span class="xdot">●</span> ${e(T("Điểm giao cắt quan trọng"))}</b>`
+      + `<em>${e(T("Chấm tại chỗ các đường cắt nhau (MA, MACD, RSI 70/30, +DI/−DI…); rê chuột hoặc chạm vào chấm để xem giải thích"))}</em></span></label></div>`;
     return `<details class="ipick"${open ? " open" : ""}><summary title="${e(T("Bật / tắt chỉ báo kỹ thuật"))}">${e(T("+ Chỉ báo…"))} <span class="badge">${s.ind.length}</span></summary>`
-      + `<div class="ipop"><p class="iph">${e(T("Tick để hiện trên biểu đồ · ★ = chỉ báo quan trọng · ? = giải thích chi tiết"))}</p>${main}${own}</div></details>`;
+      + `<div class="ipop"><p class="iph">${e(T("Tick để hiện trên biểu đồ · ★ = chỉ báo quan trọng · ? = giải thích chi tiết"))}</p>${peaks}${main}${own}</div></details>`;
   }
 
   function full(s, tool, pickOpen) {

@@ -207,6 +207,7 @@
   .indrow.core { border-left-color:var(--acc); background:color-mix(in srgb, var(--acc) 14%, transparent); }
   .indrow.core label > b { color:var(--acc); }
   .indnote { color:var(--muted); font-size:11px; }
+  .xdot { color:#eab308; }
   .indrow label { flex:1 1 auto; min-width:0; }
   .qbtn { flex:none; width:20px; height:20px; padding:0; border:1px solid var(--line); border-radius:50%; background:var(--btn); color:var(--acc); font-size:12px; font-weight:700; line-height:1; cursor:pointer; }
   .qbtn:hover, .qbtn:focus-visible { border-color:var(--acc); background:var(--acc); color:#fff; }
@@ -941,6 +942,7 @@ I18n.add({
   "Bật / tắt chỉ báo kỹ thuật": "Show / hide technical indicators",
   "Nhiều khung chỉ báo: lăn chuột trên khung chỉ báo hoặc vuốt dọc để cuộn xem hết.": "Many indicator panes: use the wheel over an indicator pane or swipe up / down to scroll through them.",
   "Chỉ báo quan trọng, dùng phổ biến nhất": "Key indicators, the most widely used",
+  "Đánh dấu Đỉnh / Đáy": "Mark peaks / troughs", "Hiện / ẩn nhãn Đỉnh, Đáy trên biểu đồ giá": "Show / hide peak and trough labels on the price chart",
 });
 // English for the indicator guide (IND_GUIDE in js/ui/indicator-guide-content.js), keyed by the Vietnamese source text.
 I18n.add({
@@ -1117,6 +1119,56 @@ I18n.add({
   "Chỉ báo sau": "Next indicator",
   "Đóng": "Close",
   "Bật trên biểu đồ": "Show on chart",
+});
+// English for the full chart's cross dots (ChartCrossUI) and their menu toggle.
+I18n.add({
+  "Điểm giao cắt quan trọng": "Key crossover points",
+  "Chấm tại chỗ các đường cắt nhau (MA, MACD, RSI 70/30, +DI/−DI…); rê chuột hoặc chạm vào chấm để xem giải thích": "Dots where lines cross (MA, MACD, RSI 70/30, +DI/−DI…); hover or tap a dot for the explanation",
+  "Giá vượt lên MA": "Price crosses above MA", "Giá thủng MA": "Price breaks below MA", "Tenkan cắt lên Kijun": "Tenkan crosses above Kijun", "Tenkan cắt xuống Kijun": "Tenkan crosses below Kijun",
+  "SAR đảo chiều tăng": "SAR flips bullish", "SAR đảo chiều giảm": "SAR flips bearish", "Cắt lên mức 0": "Crosses above 0", "Cắt xuống mức 0": "Crosses below 0",
+  "Vào vùng quá mua": "Enters overbought", "Rời vùng quá mua": "Leaves overbought", "Vào vùng quá bán": "Enters oversold", "Rời vùng quá bán": "Leaves oversold",
+  "ADX vượt 25": "ADX rises above 25", "ADX xuống dưới 25": "ADX falls below 25", "+DI cắt lên −DI": "+DI crosses above −DI", "+DI cắt xuống −DI": "+DI crosses below −DI",
+  "%K cắt lên %D": "%K crosses above %D", "%K cắt xuống %D": "%K crosses below %D",
+  "{a} cắt lên {b} tại {p}: trung bình ngắn hạn vượt dài hạn, xu hướng chuyển sang tăng. Đáng tin hơn khi khối lượng tăng và giá đứng vững trên {b}; thị trường đi ngang hay cho tín hiệu giả. Xác nhận bằng MACD > 0 hoặc ADX > 25.":
+    "{a} crosses above {b} at {p}: the short-term average overtakes the long-term one and the trend turns up. More reliable with rising volume and price holding above {b}; sideways markets give many false signals. Confirm with MACD > 0 or ADX > 25.",
+  "{a} cắt xuống {b} tại {p}: trung bình ngắn hạn rơi dưới dài hạn, xu hướng chuyển sang giảm. Thường là lúc giảm tỷ trọng; giá lấy lại nhanh {b} thì tín hiệu mất hiệu lực. Xác nhận bằng MACD < 0 hoặc −DI trên +DI.":
+    "{a} crosses below {b} at {p}: the short-term average drops under the long-term one and the trend turns down. Often a time to cut exposure; if price quickly regains {b} the signal is void. Confirm with MACD < 0 or −DI above +DI.",
+  "Giá đóng cửa vượt lên {b} ({p}): giá lấy lại đường trung bình, xu hướng có thể đảo sang tăng và {b} trở thành hỗ trợ. Chờ giá giữ trên đường 2–3 phiên, kèm khối lượng, để tránh bẫy tăng giá.":
+    "Close crosses above {b} ({p}): price regains the average, the trend may turn up and {b} becomes support. Wait for 2–3 sessions holding above it, with volume, to avoid a bull trap.",
+  "Giá đóng cửa thủng {b} ({p}): mất hỗ trợ của đường trung bình, cảnh báo xu hướng yếu đi; {b} có thể thành kháng cự. Không lấy lại được trong vài phiên thì cân nhắc dừng lỗ / giảm tỷ trọng.":
+    "Close breaks below {b} ({p}): the average's support is lost, a warning that the trend is weakening; {b} may turn into resistance. If it is not regained within a few sessions, consider a stop-loss / cutting exposure.",
+  "Tenkan cắt lên Kijun ({p}): tín hiệu tăng sớm của Ichimoku. Mạnh khi xảy ra trên mây, trung bình trong mây, yếu khi dưới mây; Kijun thường dùng làm mức dừng lỗ.":
+    "Tenkan crosses above Kijun ({p}): Ichimoku's early bullish signal. Strong above the cloud, moderate inside it, weak below it; Kijun is often used as the stop-loss level.",
+  "Tenkan cắt xuống Kijun ({p}): tín hiệu giảm sớm của Ichimoku. Mạnh khi xảy ra dưới mây, yếu khi giá còn trên mây.":
+    "Tenkan crosses below Kijun ({p}): Ichimoku's early bearish signal. Strong below the cloud, weak while price is still above it.",
+  "Parabolic SAR chuyển xuống dưới giá ({p}): đảo chiều sang xu hướng tăng; các chấm SAR tiếp theo là mức dừng lỗ dời dần lên. Thị trường đi ngang hay đảo liên tục — chỉ nên theo khi ADX > 25.":
+    "Parabolic SAR moves below price ({p}): the trend flips up; the next SAR dots are a stop-loss that trails upward. Sideways markets flip it back and forth — follow it only when ADX > 25.",
+  "Parabolic SAR chuyển lên trên giá ({p}): đảo chiều sang xu hướng giảm, tín hiệu thoát vị thế mua. Thị trường đi ngang hay đảo liên tục — kết hợp ADX để lọc.":
+    "Parabolic SAR moves above price ({p}): the trend flips down, a signal to exit long positions. Sideways markets flip it back and forth — filter with ADX.",
+  "MACD cắt lên đường Signal: động lượng chuyển sang tăng. Xảy ra dưới mức 0 là tín hiệu hồi sớm (rủi ro hơn), trên 0 là xác nhận xu hướng tăng; histogram chuyển dương cùng lúc.":
+    "MACD crosses above Signal: momentum turns up. Below 0 it is an early rebound signal (riskier), above 0 it confirms the uptrend; the histogram turns positive at the same time.",
+  "MACD cắt xuống đường Signal: động lượng chuyển sang giảm. Xảy ra trên mức 0 là cảnh báo điều chỉnh, dưới 0 là xác nhận xu hướng giảm.":
+    "MACD crosses below Signal: momentum turns down. Above 0 it warns of a pullback, below 0 it confirms the downtrend.",
+  "{n} vượt lên trên 0: động lượng chuyển hẳn sang dương — xác nhận đà tăng, chậm hơn nhưng chắc hơn các tín hiệu cắt nhau ngắn hạn.":
+    "{n} rises above 0: momentum turns positive — confirms the uptrend, slower but more solid than short-term crossover signals.",
+  "{n} xuống dưới 0: động lượng chuyển sang âm — xác nhận đà giảm; tránh mua mới cho đến khi quay lại trên 0.":
+    "{n} falls below 0: momentum turns negative — confirms the downtrend; avoid new buys until it is back above 0.",
+  "{n} vượt {l} ({v}): vào vùng quá mua, giá đang tăng nóng. Chưa phải tín hiệu bán — trong xu hướng mạnh chỉ báo có thể ở đây lâu; chờ nó quay xuống dưới {l}.":
+    "{n} rises above {l} ({v}): enters overbought, price is running hot. Not a sell signal yet — in a strong trend it can stay here a long time; wait for it to drop back below {l}.",
+  "{n} quay xuống dưới {l} ({v}): rời vùng quá mua — tín hiệu chốt lời / bán phổ biến, mạnh hơn khi có phân kỳ âm (giá đỉnh cao hơn, chỉ báo đỉnh thấp hơn).":
+    "{n} drops back below {l} ({v}): leaves overbought — a common take-profit / sell signal, stronger with bearish divergence (higher price peak, lower indicator peak).",
+  "{n} xuống dưới {l} ({v}): vào vùng quá bán, lực bán đang mạnh. Chưa nên bắt đáy — chờ chỉ báo quay lên trên {l} hoặc có nến đảo chiều.":
+    "{n} falls below {l} ({v}): enters oversold, selling pressure is strong. Don't catch the bottom yet — wait for it to climb back above {l} or for a reversal candle.",
+  "{n} quay lên trên {l} ({v}): rời vùng quá bán — tín hiệu mua / hồi phục phổ biến, đáng tin hơn khi có phân kỳ dương và giá giữ được đáy gần nhất.":
+    "{n} climbs back above {l} ({v}): leaves oversold — a common buy / rebound signal, more reliable with bullish divergence and price holding its latest low.",
+  "ADX vượt 25 ({v}): xu hướng đang mạnh lên — các tín hiệu theo xu hướng (MA, MACD, SAR) đáng tin hơn. ADX không cho biết chiều: xem +DI / −DI.":
+    "ADX rises above 25 ({v}): the trend is strengthening — trend-following signals (MA, MACD, SAR) become more reliable. ADX has no direction: check +DI / −DI.",
+  "ADX xuống dưới 25 ({v}): xu hướng yếu đi, thị trường có thể chuyển sang đi ngang — ưu tiên chỉ báo dao động (RSI, Stochastic), mua thấp bán cao trong biên độ.":
+    "ADX falls below 25 ({v}): the trend is fading and the market may go sideways — favour oscillators (RSI, Stochastic) and buy low / sell high within the range.",
+  "+DI cắt lên −DI: phe mua chiếm ưu thế — tín hiệu tăng, đáng tin khi ADX > 25 và đang đi lên.": "+DI crosses above −DI: buyers take control — a bullish signal, reliable when ADX > 25 and rising.",
+  "+DI cắt xuống −DI: phe bán chiếm ưu thế — tín hiệu giảm, đáng tin khi ADX > 25 và đang đi lên.": "+DI crosses below −DI: sellers take control — a bearish signal, reliable when ADX > 25 and rising.",
+  "%K cắt lên %D trong vùng quá bán: tín hiệu mua của Stochastic — tốt nhất khi cùng chiều xu hướng chính (giá trên MA dài).": "%K crosses above %D in oversold: Stochastic's buy signal — best when it agrees with the main trend (price above the long MA).",
+  "%K cắt xuống %D trong vùng quá mua: tín hiệu bán của Stochastic — tốt nhất khi cùng chiều xu hướng chính (giá dưới MA dài).": "%K crosses below %D in overbought: Stochastic's sell signal — best when it agrees with the main trend (price below the long MA).",
 });
 // English for the shared core modules (ThemePicker markup, SavedSessions, ColFilter) — included by every tool that uses them.
 I18n.add({
@@ -2014,6 +2066,49 @@ const ChartEvents = (() => {
   }
 
   return { detect, MAX };
+})();
+// Pure: notable line crossings for the full chart's cross dots — MA pair, price × longest MA, Ichimoku TK, SAR flip, oscillator zones, MACD, +DI/−DI, Stoch in zones.
+// Cross = { time, i, ind (index in inds), line (index of the line the dot sits on), price (y of the dot), kind, tone, v (first line's value), a?, b?, n?, l? }.
+const ChartCrosses = (() => {
+  const GAP = 3, TONE = { obIn: "warn", obOut: "down", osIn: "warn", osOut: "up", adxUp: "warn", adxDown: "warn" };
+  const ok = (...xs) => xs.every(Number.isFinite);
+  const above = (a, b, i) => ok(a[i - 1], b[i - 1], a[i], b[i]) && a[i - 1] <= b[i - 1] && a[i] > b[i];
+
+  function detect(bars, inds = [], from = 0) {
+    const n = bars.length, out = [], close = bars.map(b => b.close), lvl = v => new Array(n).fill(v);
+    // a crosses above b → kUp, below → kDn; the dot sits on line `line` at y(i). Re-crosses within GAP bars are whipsaw noise.
+    const pair = (ind, line, a, b, kUp, kDn, { y = i => (a[i] + b[i]) / 2, when = () => true, ...extra } = {}) => {
+      for (let i = Math.max(1, from), prev = -GAP; i < n; i++) {
+        const kind = above(a, b, i) && when(i, 1) ? kUp : above(b, a, i) && when(i, -1) ? kDn : "";
+        if (!kind || i - prev < GAP) { if (kind) prev = i; continue; }
+        prev = i;
+        out.push({ time: bars[i].time, i, ind, line, price: y(i), kind, tone: TONE[kind] || (kind === kUp ? "up" : "down"), v: a[i], ...extra });
+      }
+    };
+    const mas = inds.map((x, k) => ({ x, k, v: x.lines[0].values, t: x.lines[0].title })).filter(o => ["sma", "ema", "wma"].includes(o.x.id)).sort((p, q) => p.x.p.n - q.x.p.n);
+    if (mas.length) {
+      const f = mas[0], s = mas[mas.length - 1];
+      if (s !== f) pair(s.k, 0, f.v, s.v, "maUp", "maDown", { a: f.t, b: s.t });
+      pair(s.k, 0, close, s.v, "pxUp", "pxDown", { y: i => s.v[i], b: s.t });
+    }
+    inds.forEach((x, k) => {
+      const L = x.lines.map(l => l.values), t = x.lines[0].title, lv = x.def.levels || [];
+      if (x.id === "ichi") pair(k, 1, L[0], L[1], "tkUp", "tkDown");
+      else if (x.id === "psar") pair(k, 0, close, L[0], "sarUp", "sarDown", { y: i => L[0][i] });
+      else if (x.id === "macd") { pair(k, 1, L[1], L[2], "sigUp", "sigDown"); pair(k, 1, L[1], lvl(0), "zeroUp", "zeroDown", { y: () => 0, n: x.lines[1].title }); }
+      else if (x.id === "roc") pair(k, 0, L[0], lvl(0), "zeroUp", "zeroDown", { y: () => 0, n: t });
+      else if (x.id === "adx") { pair(k, 1, L[1], L[2], "diUp", "diDown"); pair(k, 0, L[0], lvl(25), "adxUp", "adxDown", { y: () => 25 }); }
+      else if (x.id === "stoch") pair(k, 0, L[0], L[1], "stUp", "stDown", { when: (i, dir) => dir > 0 ? Math.min(L[0][i - 1], L[1][i - 1]) <= 20 : Math.max(L[0][i - 1], L[1][i - 1]) >= 80 });
+      else if (lv.length === 2) {
+        const [lo, hi] = [Math.min(...lv), Math.max(...lv)];
+        pair(k, 0, L[0], lvl(hi), "obIn", "obOut", { y: () => hi, n: t, l: hi });
+        pair(k, 0, L[0], lvl(lo), "osOut", "osIn", { y: () => lo, n: t, l: lo });
+      }
+    });
+    return out.sort((p, q) => p.time - q.time);
+  }
+
+  return { detect };
 })();
 // Pure: one indicator drawn on a fixed simulated series (rise → top → fall → range → breakout) as an SVG string, for the indicator guide.
 const IndIllus = (() => {
@@ -3168,6 +3263,52 @@ const ChartHelp = (() => {
 
   return { desc, interp, tipHtml, eventText, short, major, TITLE };
 })();
+// Full-chart cross dots: wording for ChartCrosses kinds, dots pinned on the crossing line, tooltip html for the dots under the cursor.
+const ChartCrossUI = (() => {
+  const e = s => Dom.esc(s ?? "");
+  const TITLE = { maUp: "Giao cắt vàng", maDown: "Giao cắt tử thần", pxUp: "Giá vượt lên MA", pxDown: "Giá thủng MA", tkUp: "Tenkan cắt lên Kijun", tkDown: "Tenkan cắt xuống Kijun",
+    sarUp: "SAR đảo chiều tăng", sarDown: "SAR đảo chiều giảm", sigUp: "MACD cắt lên", sigDown: "MACD cắt xuống", zeroUp: "Cắt lên mức 0", zeroDown: "Cắt xuống mức 0",
+    obIn: "Vào vùng quá mua", obOut: "Rời vùng quá mua", osIn: "Vào vùng quá bán", osOut: "Rời vùng quá bán", adxUp: "ADX vượt 25", adxDown: "ADX xuống dưới 25",
+    diUp: "+DI cắt lên −DI", diDown: "+DI cắt xuống −DI", stUp: "%K cắt lên %D", stDown: "%K cắt xuống %D" };
+  const TEXT = {
+    maUp: "{a} cắt lên {b} tại {p}: trung bình ngắn hạn vượt dài hạn, xu hướng chuyển sang tăng. Đáng tin hơn khi khối lượng tăng và giá đứng vững trên {b}; thị trường đi ngang hay cho tín hiệu giả. Xác nhận bằng MACD > 0 hoặc ADX > 25.",
+    maDown: "{a} cắt xuống {b} tại {p}: trung bình ngắn hạn rơi dưới dài hạn, xu hướng chuyển sang giảm. Thường là lúc giảm tỷ trọng; giá lấy lại nhanh {b} thì tín hiệu mất hiệu lực. Xác nhận bằng MACD < 0 hoặc −DI trên +DI.",
+    pxUp: "Giá đóng cửa vượt lên {b} ({p}): giá lấy lại đường trung bình, xu hướng có thể đảo sang tăng và {b} trở thành hỗ trợ. Chờ giá giữ trên đường 2–3 phiên, kèm khối lượng, để tránh bẫy tăng giá.",
+    pxDown: "Giá đóng cửa thủng {b} ({p}): mất hỗ trợ của đường trung bình, cảnh báo xu hướng yếu đi; {b} có thể thành kháng cự. Không lấy lại được trong vài phiên thì cân nhắc dừng lỗ / giảm tỷ trọng.",
+    tkUp: "Tenkan cắt lên Kijun ({p}): tín hiệu tăng sớm của Ichimoku. Mạnh khi xảy ra trên mây, trung bình trong mây, yếu khi dưới mây; Kijun thường dùng làm mức dừng lỗ.",
+    tkDown: "Tenkan cắt xuống Kijun ({p}): tín hiệu giảm sớm của Ichimoku. Mạnh khi xảy ra dưới mây, yếu khi giá còn trên mây.",
+    sarUp: "Parabolic SAR chuyển xuống dưới giá ({p}): đảo chiều sang xu hướng tăng; các chấm SAR tiếp theo là mức dừng lỗ dời dần lên. Thị trường đi ngang hay đảo liên tục — chỉ nên theo khi ADX > 25.",
+    sarDown: "Parabolic SAR chuyển lên trên giá ({p}): đảo chiều sang xu hướng giảm, tín hiệu thoát vị thế mua. Thị trường đi ngang hay đảo liên tục — kết hợp ADX để lọc.",
+    sigUp: "MACD cắt lên đường Signal: động lượng chuyển sang tăng. Xảy ra dưới mức 0 là tín hiệu hồi sớm (rủi ro hơn), trên 0 là xác nhận xu hướng tăng; histogram chuyển dương cùng lúc.",
+    sigDown: "MACD cắt xuống đường Signal: động lượng chuyển sang giảm. Xảy ra trên mức 0 là cảnh báo điều chỉnh, dưới 0 là xác nhận xu hướng giảm.",
+    zeroUp: "{n} vượt lên trên 0: động lượng chuyển hẳn sang dương — xác nhận đà tăng, chậm hơn nhưng chắc hơn các tín hiệu cắt nhau ngắn hạn.",
+    zeroDown: "{n} xuống dưới 0: động lượng chuyển sang âm — xác nhận đà giảm; tránh mua mới cho đến khi quay lại trên 0.",
+    obIn: "{n} vượt {l} ({v}): vào vùng quá mua, giá đang tăng nóng. Chưa phải tín hiệu bán — trong xu hướng mạnh chỉ báo có thể ở đây lâu; chờ nó quay xuống dưới {l}.",
+    obOut: "{n} quay xuống dưới {l} ({v}): rời vùng quá mua — tín hiệu chốt lời / bán phổ biến, mạnh hơn khi có phân kỳ âm (giá đỉnh cao hơn, chỉ báo đỉnh thấp hơn).",
+    osIn: "{n} xuống dưới {l} ({v}): vào vùng quá bán, lực bán đang mạnh. Chưa nên bắt đáy — chờ chỉ báo quay lên trên {l} hoặc có nến đảo chiều.",
+    osOut: "{n} quay lên trên {l} ({v}): rời vùng quá bán — tín hiệu mua / hồi phục phổ biến, đáng tin hơn khi có phân kỳ dương và giá giữ được đáy gần nhất.",
+    adxUp: "ADX vượt 25 ({v}): xu hướng đang mạnh lên — các tín hiệu theo xu hướng (MA, MACD, SAR) đáng tin hơn. ADX không cho biết chiều: xem +DI / −DI.",
+    adxDown: "ADX xuống dưới 25 ({v}): xu hướng yếu đi, thị trường có thể chuyển sang đi ngang — ưu tiên chỉ báo dao động (RSI, Stochastic), mua thấp bán cao trong biên độ.",
+    diUp: "+DI cắt lên −DI: phe mua chiếm ưu thế — tín hiệu tăng, đáng tin khi ADX > 25 và đang đi lên.",
+    diDown: "+DI cắt xuống −DI: phe bán chiếm ưu thế — tín hiệu giảm, đáng tin khi ADX > 25 và đang đi lên.",
+    stUp: "%K cắt lên %D trong vùng quá bán: tín hiệu mua của Stochastic — tốt nhất khi cùng chiều xu hướng chính (giá trên MA dài).",
+    stDown: "%K cắt xuống %D trong vùng quá mua: tín hiệu bán của Stochastic — tốt nhất khi cùng chiều xu hướng chính (giá dưới MA dài).",
+  };
+  const num = v => Number.isFinite(v) ? v.toFixed(1) : "";
+
+  const text = x => T(TEXT[x.kind], { a: x.a || "", b: x.b || "", n: x.n || "", l: x.l ?? "", v: num(x.v), p: TechChart.fmtPrice(x.price) });
+  const html = list => list.map(x => `<div class="tip-ev"><b class="${x.tone === "warn" ? "ref" : x.tone}">● ${e(T(TITLE[x.kind]))}</b> ${e(text(x))}</div>`).join("");
+
+  // crosses carry .s (the series of the crossing line); one markers primitive per series.
+  function mark(LW, crosses, c) {
+    const by = new Map();
+    for (const x of crosses) (by.get(x.s) || by.set(x.s, []).get(x.s)).push(x);
+    by.forEach((list, s) => LW.createSeriesMarkers(s, list.map(x => ({ time: x.time, position: "atPriceMiddle", price: x.price, shape: "circle", size: 0.7,
+      color: x.tone === "up" ? c.up : x.tone === "down" ? c.down : "#eab308" }))));
+  }
+
+  return { html, mark, TITLE, TEXT };
+})();
 // Detailed guide per indicator (Vietnamese source, English in en-indicator-guide-strings.js): what it is, how to read it, worked examples, combinations, caveats.
 const IND_GUIDE = {
   sma: {
@@ -3353,7 +3494,7 @@ const TechChart = (() => {
   // opt: { legend: HTMLElement, tip?: HTMLElement (full chart help box), onClick(point), compact }
   function create(el, opt) {
     const LW = globalThis.LightweightCharts;
-    let chart = null, main = null, vol = null, last = null, overlays = [], paneInds = [], evByTime = new Map(), ptr = null;
+    let chart = null, main = null, vol = null, last = null, overlays = [], paneInds = [], evByTime = new Map(), ptr = null, crosses = [];
     const box = el.parentElement, PRICE_MIN = 340, PANE_MIN = 130;
     // Full chart: every indicator pane keeps ≥ PANE_MIN px; when they don't fit, the host grows and the box scrolls.
     function fitPanes() {
@@ -3382,7 +3523,9 @@ const TechChart = (() => {
         e.preventDefault(); e.stopPropagation(); box.scrollTop += e.deltaY;
       }, { capture: true, passive: false });
     }
-    el.addEventListener("pointermove", e => { const r = el.getBoundingClientRect(); ptr = { x: e.clientX - r.left, y: e.clientY - r.top }; });
+    const track = e => { const r = el.getBoundingClientRect(); ptr = { x: e.clientX - r.left, y: e.clientY - r.top }; };
+    el.addEventListener("pointermove", track);
+    el.addEventListener("pointerdown", track);
     el.addEventListener("pointerleave", () => { ptr = null; if (opt.tip) opt.tip.hidden = true; });
 
     // Native click → bar + price: the library drops a quick 2nd click at another spot (double-click guard), drawing needs every click.
@@ -3454,10 +3597,12 @@ const TechChart = (() => {
       });
       let pane = 0;
       overlays = []; paneInds = [];
-      for (const ind of s.inds) {
+      const indSer = [];
+      for (const [k, ind] of s.inds.entries()) {
         if (ind.def.pane === "own" && opt.compact) continue;
         const p = ind.def.pane === "own" ? ++pane : 0;
         const series = ind.lines.map(ln => addLine(bars, ln, p));
+        indSer[k] = { series, p };
         overlays.push(...ind.lines.map((ln, i) => ({ ln, s: series[i], id: ind.id })));
         if (p) { series[0].priceScale().applyOptions({ mode: 0 }); paneInds[p] = ind; }
         if (p && ind.def.levels) for (const lv of ind.def.levels) series[series.length - 1].createPriceLine({ price: lv, color: c.muted, lineWidth: 1, lineStyle: LW.LineStyle.Dotted, axisLabelVisible: false });
@@ -3467,12 +3612,14 @@ const TechChart = (() => {
       // Full chart: mark peaks / troughs / crosses / signal points; hovering a marked bar explains it.
       evByTime = new Map();
       if (!opt.compact) {
-        const evs = ChartEvents.detect(s.bars, s.inds, s.from);
+        const evs = ChartEvents.detect(s.bars, s.inds, s.from).filter(ev => s.peaks !== false || !/^swing/.test(ev.kind));
         for (const ev of evs) (evByTime.get(ev.time) || evByTime.set(ev.time, []).get(ev.time)).push(ev);
         LW.createSeriesMarkers(main, evs.map(ev => ({ time: ev.time, position: ev.pos === "above" ? "aboveBar" : "belowBar",
           color: ev.tone === "up" ? c.up : ev.tone === "down" ? c.down : "#eab308", text: ChartHelp.short(ev.kind),
           ...(ChartHelp.major(ev.kind) ? { shape: ev.pos === "above" ? "arrowDown" : "arrowUp" } : { shape: "circle", size: 0.4 }) })));
       }
+      crosses = opt.compact || !s.crosses ? [] : ChartCrosses.detect(s.bars, s.inds, s.from).filter(x => indSer[x.ind]).map(x => ({ ...x, pane: indSer[x.ind].p, s: indSer[x.ind].series[x.line] }));
+      if (crosses.length) ChartCrossUI.mark(LW, crosses, c);
       chart.subscribeCrosshairMove(p => { legend(p.time); tip(p.time); });
       if (keep) chart.timeScale().setVisibleLogicalRange(keep);
       else chart.timeScale().setVisibleLogicalRange({ from: s.from, to: bars.length + 3 });
@@ -3486,7 +3633,10 @@ const TechChart = (() => {
       if (time == null || !ptr || !last || !chart) { opt.tip.hidden = true; return; }
       const pi = paneAt(ptr.y), i = last.bars.findIndex(b => b.time === time), ind = pi > 0 ? paneInds[pi] : null;
       const pane = ind ? { id: ind.id, name: ind.def.name, reading: i >= 0 ? ChartHelp.interp(ind.id, ind.lines.map(l => l.values[i])) : "" } : null;
-      const html = ChartHelp.tipHtml(pi === 0 ? evByTime.get(time) || [] : [], pane);
+      // A cross dot counts as hovered within 16 px of it (crosshair already snaps to its bar).
+      const top = chart.panes().slice(0, pi).reduce((t, pn) => t + pn.getHeight() + 1, 0);
+      const hits = crosses.filter(x => x.pane === pi && x.time === time && Math.abs(top + (x.s.priceToCoordinate(x.price) ?? -99) - ptr.y) <= 16);
+      const html = (hits.length ? ChartCrossUI.html(hits) : "") + ChartHelp.tipHtml(pi === 0 ? evByTime.get(time) || [] : [], pane);
       if (!html) { opt.tip.hidden = true; return; }
       opt.tip.innerHTML = html; opt.tip.hidden = false;
       const w = el.clientWidth, tw = opt.tip.offsetWidth, th = opt.tip.offsetHeight;
@@ -3523,7 +3673,7 @@ const TechChart = (() => {
       fit: () => chart && chart.timeScale().fitContent(),
       scrolls: () => !!el.style.height,
       screenshot: () => chart && chart.takeScreenshot(),
-      destroy: () => { if (chart) chart.remove(); chart = main = vol = last = null; el.style.height = ""; if (tags) tags.innerHTML = ""; },
+      destroy: () => { if (chart) chart.remove(); chart = main = vol = last = null; crosses = []; el.style.height = ""; if (tags) tags.innerHTML = ""; },
     };
   }
 
@@ -3604,7 +3754,8 @@ const ChartBar = (() => {
       + `<label class="chk"><input type="checkbox" data-c="volume"${s.volume ? " checked" : ""}>${e(T("Khối lượng"))}</label>`
       + `<label class="chk" title="${e(T("So sánh tối đa 5 mã hoặc chỉ số, cách nhau bằng dấu phẩy (thang % thay đổi)"))}">${e(T("So sánh"))}<input type="text" class="cmpin" data-c="cmp" value="${e(s.cmp.join(", "))}" placeholder="VNINDEX, VCB…" spellcheck="false" autocomplete="off"></label>`
       + `<details class="indmenu"><summary title="${e(T("Bật / tắt chỉ báo kỹ thuật"))}">${e(T("+ Chỉ báo…"))}</summary><div class="indpanel">`
-      + `<span class="indnote">★ ${e(T("Chỉ báo quan trọng, dùng phổ biến nhất"))}</span><b>${e(T("Trên biểu đồ giá"))}</b>${addOpts("main", s.ind)}<b>${e(T("Khung riêng"))}</b>${addOpts("own", s.ind)}</div></details>`
+      + `<span class="indnote">★ ${e(T("Chỉ báo quan trọng, dùng phổ biến nhất"))}</span><label title="${e(T("Hiện / ẩn nhãn Đỉnh, Đáy trên biểu đồ giá"))}"><input type="checkbox" data-c="peaks"${s.peaks ? " checked" : ""}> ${e(T("Đánh dấu Đỉnh / Đáy"))}</label>`
+      + `<label title="${e(T("Chấm tại chỗ các đường cắt nhau (MA, MACD, RSI 70/30, +DI/−DI…); rê chuột hoặc chạm vào chấm để xem giải thích"))}"><input type="checkbox" data-c="crosses"${s.crosses ? " checked" : ""}> <span class="xdot">●</span> ${e(T("Điểm giao cắt quan trọng"))}</label><b>${e(T("Trên biểu đồ giá"))}</b>${addOpts("main", s.ind)}<b>${e(T("Khung riêng"))}</b>${addOpts("own", s.ind)}</div></details>`
       + `<span class="seg tools">${TOOLS.map(([k, icon, tip]) => `<button data-c="tool" data-v="${k}" title="${e(T(tip))}"${k === tool ? ' class="on"' : ""}>${icon}</button>`).join("")}`
       + `<button data-c="clearDraw" title="${e(T("Xoá mọi hình vẽ"))}">🗑</button></span>`
       + `<button data-c="fit" title="${e(T("Xem toàn bộ dữ liệu"))}">⤢</button>`
@@ -3638,7 +3789,7 @@ const ChartCtl = (() => {
     const range = ChartRange.RANGES.some(x => x.k === r.range) ? r.range : "1Y";
     return { range, interval: ChartRange.fix(range, ChartRange.INTERVALS.some(x => x.k === r.interval) ? r.interval : "1D"),
       type: TYPES.includes(r.type) ? r.type : "candle", scale: SCALES.includes(r.scale) ? r.scale : "normal",
-      volume: r.volume !== false, ind: Indicators.clean(r.ind),
+      volume: r.volume !== false, peaks: r.peaks === true, crosses: r.crosses !== false, ind: Indicators.clean(r.ind),
       // Up to 5 overlay tickers; older saves / links carried compare: true for VNINDEX only.
       cmp: WatchParse.clean(Array.isArray(r.cmp) ? r.cmp : r.compare === true ? ["VNINDEX"] : [], 5) };
   }
@@ -3692,7 +3843,7 @@ const ChartCtl = (() => {
     msg(null);
     const intra = ChartRange.intraday(st.interval);
     const inds = Indicators.compute(st.ind.filter(x => !Indicators.DEFS[x.id].intraday || intra), data.bars);
-    const s = { bars: data.bars, type: st.type, scale: data.cmp && data.cmp.length ? "pct" : st.scale, volume: st.volume, inds, intraday: intra, keep,
+    const s = { bars: data.bars, type: st.type, scale: data.cmp && data.cmp.length ? "pct" : st.scale, volume: st.volume, peaks: st.peaks, crosses: st.crosses, inds, intraday: intra, keep,
       from: ChartRange.firstVisible(data.bars, st.range), compare: data.cmp || [] };
     mini.render(s);
     if (dlgOpen) { full.render(s); draw.apply(full); head(); }
@@ -3732,7 +3883,7 @@ const ChartCtl = (() => {
     if (c === "range") { st.range = v; st.interval = ChartRange.fix(v, st.interval); }
     else if (c === "interval") { if (!ChartRange.valid(st.range, v)) return; st.interval = v; }
     else if (c === "type" || c === "scale") st[c] = v;
-    else if (c === "volume") st.volume = el.checked;
+    else if (["volume", "peaks", "crosses"].includes(c)) st[c] = el.checked;
     else if (c === "cmp") st.cmp = WatchParse.parse(el.value).symbols.slice(0, 5);
     else if (c === "toggleInd") { if (!Object.hasOwn(Indicators.DEFS, v)) return; st.ind = el.checked ? Indicators.add(st.ind, v) : st.ind.filter(x => x.id !== v); }
     else if (c === "indHelp") { IndGuide.open(v, guideHooks); return; }

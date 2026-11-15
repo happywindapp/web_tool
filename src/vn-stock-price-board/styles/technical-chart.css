@@ -39,6 +39,7 @@
   .indrow.core { border-left-color:var(--acc); background:color-mix(in srgb, var(--acc) 14%, transparent); }
   .indrow.core label > b { color:var(--acc); }
   .indnote { color:var(--muted); font-size:11px; }
+  .xdot { color:#eab308; }
   .indrow label { flex:1 1 auto; min-width:0; }
   .qbtn { flex:none; width:20px; height:20px; padding:0; border:1px solid var(--line); border-radius:50%; background:var(--btn); color:var(--acc); font-size:12px; font-weight:700; line-height:1; cursor:pointer; }
   .qbtn:hover, .qbtn:focus-visible { border-color:var(--acc); background:var(--acc); color:#fff; }

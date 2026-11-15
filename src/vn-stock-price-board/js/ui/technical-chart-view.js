@@ -9,7 +9,7 @@ const TechChart = (() => {
   // opt: { legend: HTMLElement, tip?: HTMLElement (full chart help box), onClick(point), compact }
   function create(el, opt) {
     const LW = globalThis.LightweightCharts;
-    let chart = null, main = null, vol = null, last = null, overlays = [], paneInds = [], evByTime = new Map(), ptr = null;
+    let chart = null, main = null, vol = null, last = null, overlays = [], paneInds = [], evByTime = new Map(), ptr = null, crosses = [];
     const box = el.parentElement, PRICE_MIN = 340, PANE_MIN = 130;
     // Full chart: every indicator pane keeps ≥ PANE_MIN px; when they don't fit, the host grows and the box scrolls.
     function fitPanes() {
@@ -38,7 +38,9 @@ const TechChart = (() => {
         e.preventDefault(); e.stopPropagation(); box.scrollTop += e.deltaY;
       }, { capture: true, passive: false });
     }
-    el.addEventListener("pointermove", e => { const r = el.getBoundingClientRect(); ptr = { x: e.clientX - r.left, y: e.clientY - r.top }; });
+    const track = e => { const r = el.getBoundingClientRect(); ptr = { x: e.clientX - r.left, y: e.clientY - r.top }; };
+    el.addEventListener("pointermove", track);
+    el.addEventListener("pointerdown", track);
     el.addEventListener("pointerleave", () => { ptr = null; if (opt.tip) opt.tip.hidden = true; });
 
     // Native click → bar + price: the library drops a quick 2nd click at another spot (double-click guard), drawing needs every click.
@@ -110,10 +112,12 @@ const TechChart = (() => {
       });
       let pane = 0;
       overlays = []; paneInds = [];
-      for (const ind of s.inds) {
+      const indSer = [];
+      for (const [k, ind] of s.inds.entries()) {
         if (ind.def.pane === "own" && opt.compact) continue;
         const p = ind.def.pane === "own" ? ++pane : 0;
         const series = ind.lines.map(ln => addLine(bars, ln, p));
+        indSer[k] = { series, p };
         overlays.push(...ind.lines.map((ln, i) => ({ ln, s: series[i], id: ind.id })));
         if (p) { series[0].priceScale().applyOptions({ mode: 0 }); paneInds[p] = ind; }
         if (p && ind.def.levels) for (const lv of ind.def.levels) series[series.length - 1].createPriceLine({ price: lv, color: c.muted, lineWidth: 1, lineStyle: LW.LineStyle.Dotted, axisLabelVisible: false });
@@ -123,12 +127,14 @@ const TechChart = (() => {
       // Full chart: mark peaks / troughs / crosses / signal points; hovering a marked bar explains it.
       evByTime = new Map();
       if (!opt.compact) {
-        const evs = ChartEvents.detect(s.bars, s.inds, s.from);
+        const evs = ChartEvents.detect(s.bars, s.inds, s.from).filter(ev => s.peaks !== false || !/^swing/.test(ev.kind));
         for (const ev of evs) (evByTime.get(ev.time) || evByTime.set(ev.time, []).get(ev.time)).push(ev);
         LW.createSeriesMarkers(main, evs.map(ev => ({ time: ev.time, position: ev.pos === "above" ? "aboveBar" : "belowBar",
           color: ev.tone === "up" ? c.up : ev.tone === "down" ? c.down : "#eab308", text: ChartHelp.short(ev.kind),
           ...(ChartHelp.major(ev.kind) ? { shape: ev.pos === "above" ? "arrowDown" : "arrowUp" } : { shape: "circle", size: 0.4 }) })));
       }
+      crosses = opt.compact || !s.crosses ? [] : ChartCrosses.detect(s.bars, s.inds, s.from).filter(x => indSer[x.ind]).map(x => ({ ...x, pane: indSer[x.ind].p, s: indSer[x.ind].series[x.line] }));
+      if (crosses.length) ChartCrossUI.mark(LW, crosses, c);
       chart.subscribeCrosshairMove(p => { legend(p.time); tip(p.time); });
       if (keep) chart.timeScale().setVisibleLogicalRange(keep);
       else chart.timeScale().setVisibleLogicalRange({ from: s.from, to: bars.length + 3 });
@@ -142,7 +148,10 @@ const TechChart = (() => {
       if (time == null || !ptr || !last || !chart) { opt.tip.hidden = true; return; }
       const pi = paneAt(ptr.y), i = last.bars.findIndex(b => b.time === time), ind = pi > 0 ? paneInds[pi] : null;
       const pane = ind ? { id: ind.id, name: ind.def.name, reading: i >= 0 ? ChartHelp.interp(ind.id, ind.lines.map(l => l.values[i])) : "" } : null;
-      const html = ChartHelp.tipHtml(pi === 0 ? evByTime.get(time) || [] : [], pane);
+      // A cross dot counts as hovered within 16 px of it (crosshair already snaps to its bar).
+      const top = chart.panes().slice(0, pi).reduce((t, pn) => t + pn.getHeight() + 1, 0);
+      const hits = crosses.filter(x => x.pane === pi && x.time === time && Math.abs(top + (x.s.priceToCoordinate(x.price) ?? -99) - ptr.y) <= 16);
+      const html = (hits.length ? ChartCrossUI.html(hits) : "") + ChartHelp.tipHtml(pi === 0 ? evByTime.get(time) || [] : [], pane);
       if (!html) { opt.tip.hidden = true; return; }
       opt.tip.innerHTML = html; opt.tip.hidden = false;
       const w = el.clientWidth, tw = opt.tip.offsetWidth, th = opt.tip.offsetHeight;
@@ -179,7 +188,7 @@ const TechChart = (() => {
       fit: () => chart && chart.timeScale().fitContent(),
       scrolls: () => !!el.style.height,
       screenshot: () => chart && chart.takeScreenshot(),
-      destroy: () => { if (chart) chart.remove(); chart = main = vol = last = null; el.style.height = ""; if (tags) tags.innerHTML = ""; },
+      destroy: () => { if (chart) chart.remove(); chart = main = vol = last = null; crosses = []; el.style.height = ""; if (tags) tags.innerHTML = ""; },
     };
   }
 

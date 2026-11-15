@@ -10,7 +10,7 @@ const CoinChart = (() => {
     const r = raw && typeof raw === "object" ? raw : {};
     const range = RK.includes(r.range) ? r.range : "1Y";
     return { range, interval: CoinBar.fix(range, IV.includes(r.interval) ? r.interval : "1d"), type: TYPES.includes(r.type) ? r.type : "candle", scale: SCALES.includes(r.scale) ? r.scale : "normal",
-      volume: r.volume !== false, ind: Indicators.clean(r.ind), cmp: CoinParse.clean(Array.isArray(r.cmp) ? r.cmp : [], 3) };
+      volume: r.volume !== false, peaks: r.peaks !== false, crosses: r.crosses === true, ind: Indicators.clean(r.ind), cmp: CoinParse.clean(Array.isArray(r.cmp) ? r.cmp : [], 3) };
   }
   const save = () => Prefs.set("chart", st);
   const say = (id, key, p) => { const el = $(id); el.hidden = !key; el.textContent = key ? T(key, p) : ""; };
@@ -68,7 +68,7 @@ const CoinChart = (() => {
     if (!data.bars.length) { [mini, full].forEach(v => v.destroy()); msg("Không có dữ liệu nến."); return; }
     msg(null);
     const intraday = !["1d", "1w", "1M"].includes(st.interval), inds = Indicators.compute(st.ind, data.bars);
-    const s = { bars: data.bars, type: st.type, scale: data.cmp.length ? "pct" : st.scale, volume: st.volume, inds, intraday, from: Math.max(0, data.bars.length - CoinBar.need(st.range, st.interval)), keep, compare: data.cmp };
+    const s = { bars: data.bars, type: st.type, scale: data.cmp.length ? "pct" : st.scale, volume: st.volume, peaks: st.peaks, crosses: st.crosses, inds, intraday, from: Math.max(0, data.bars.length - CoinBar.need(st.range, st.interval)), keep, compare: data.cmp };
     if (active) mini.render(s);
     if (dlgOpen) { full.render(s); draw.apply(full); }
   }
@@ -95,6 +95,7 @@ const CoinChart = (() => {
     else if (c === "type" && TYPES.includes(v)) st.type = v;
     else if (c === "scale" && SCALES.includes(v)) st.scale = v;
     else if (c === "volume") st.volume = el.checked;
+    else if (c === "peaks" || c === "crosses") { st[c] = el.checked; pickOpen = true; }
     else if (c === "cmp") st.cmp = CoinParse.parse(el.value).symbols.slice(0, 3);
     else if (c === "ind" && Object.hasOwn(Indicators.DEFS, v)) { st.ind = el.checked ? Indicators.add(st.ind, v) : st.ind.filter(x => x.id !== v); pickOpen = true; }
     else if (c === "rm") st.ind = st.ind.filter((_, i) => i !== +el.dataset.i);

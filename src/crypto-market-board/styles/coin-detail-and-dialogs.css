@@ -70,6 +70,7 @@
           padding:8px 10px; border:1px solid var(--line); border-radius:8px; background:var(--panel); box-shadow:0 6px 18px rgb(0 0 0 / .3); }
   .ipg > b { display:block; margin:2px 0 4px; color:var(--muted); font-size:11.5px; text-transform:uppercase; }
   .ipop { width:min(720px, 94vw); max-height:70vh; } .iph { grid-column:1 / -1; margin:0 0 2px; color:var(--muted); font-size:11.5px; }
+  .ipk { grid-column:1 / -1; border-color:var(--line); }
   .ipi { display:flex; align-items:flex-start; gap:4px; margin:2px 0; padding:4px 4px 4px 6px; border:1px solid transparent; border-radius:6px; }
   .ipi label { flex:1; display:flex; align-items:flex-start; gap:6px; min-width:0; font-size:12.5px; cursor:pointer; }
   .ipi input { margin-top:3px; flex:none; } .ipt { min-width:0; } .ipt > span { color:var(--muted); font-size:11.5px; }

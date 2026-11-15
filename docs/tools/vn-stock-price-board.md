@@ -160,6 +160,7 @@ Dựa trên quy tắc + thống kê lịch sử của chính mã (không dùng A
 
 - Mỗi dòng: checkbox (đang hiện trên chart = tích; `(n)` khi bật nhiều bộ tham số) · rê chuột = giải thích ngắn (`ChartHelp.desc`) · nút **?** mở hộp hướng dẫn chi tiết.
 - Chỉ báo quan trọng (`Indicators.CORE` = SMA, EMA, BB, RSI, MACD) có ★, viền trái + nền màu accent.
+- Checkbox "Đánh dấu Đỉnh / Đáy" (`st.peaks`, mặc định bật, lưu trong Prefs "chart") ẩn/hiện marker `swingHigh`/`swingLow`; Cao nhất/Thấp nhất của khoảng và các tín hiệu khác vẫn hiện.
 - Khung riêng bật bao nhiêu cũng được (tổng ≤ `Indicators.MAX` = 12): Full chart giữ khung giá ≥ 340 px, mỗi pane chỉ báo ≥ 130 px; không đủ chỗ thì vùng chart cuộn dọc
   (lăn chuột trên pane chỉ báo = cuộn, trên khung giá = zoom như cũ; điện thoại vuốt dọc), mỗi pane có nhãn tên ở góc trên-trái. Đủ chỗ thì giữ bố cục cũ (khung giá ≥ ½ chiều cao).
 - Hộp hướng dẫn (`#indHelpDlg`, mở chồng lên Full chart, Esc chỉ đóng hộp này): **Là gì · Cách đọc · Ví dụ minh họa (có số liệu) · Phối hợp với chỉ báo khác · Lưu ý**,

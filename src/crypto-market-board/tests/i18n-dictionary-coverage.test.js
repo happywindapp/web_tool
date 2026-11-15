@@ -16,7 +16,7 @@ const UI_JS = f => f.endsWith(".js") && !/\/(i18n|lib)\//.test(f);
 const KEEP = new Set(["Phan Ngọc Minh Quân"]);
 
 const ctx = vm.createContext({ localStorage: { getItem: () => "en" } });
-vm.runInContext([read("../data-workbench/js/core/i18n-ui-language-vi-en.js"), read("../data-workbench/js/i18n/en-shared-theme-sessions-filters.js"), read("../vn-stock-price-board/js/i18n/en-stock-board-ui-strings.js"), read("../vn-stock-price-board/js/i18n/en-stock-board-chart-help-strings.js"), ...walk("js/i18n").map(read)].join("\n;\n") + "\n;globalThis.I = I18n;", ctx);
+vm.runInContext([read("../data-workbench/js/core/i18n-ui-language-vi-en.js"), read("../data-workbench/js/i18n/en-shared-theme-sessions-filters.js"), read("../vn-stock-price-board/js/i18n/en-stock-board-ui-strings.js"), read("../vn-stock-price-board/js/i18n/en-stock-board-chart-help-strings.js"), read("../vn-stock-price-board/js/i18n/en-chart-cross-points-strings.js"), ...walk("js/i18n").map(read)].join("\n;\n") + "\n;globalThis.I = I18n;", ctx);
 
 function jsKeys() {
   const keys = new Map();
