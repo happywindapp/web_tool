@@ -64,6 +64,13 @@ Bài thi ôn tập: `study.html` + `study/<MA_DE>.html` (card vào `study.html`,
 - **Code Quality Gates (BẮT BUỘC):** self-review diff theo checklist trước khi báo "xong"; checklist backend/API; ngã rẽ thiết kế ⇒ hỏi user. Chi tiết: `~/.claude/rules/code-quality-gates.md` + `ai-context/memory/code-quality-gates-self-review-checklist-design-forks.md`.
 - **Giải thích song ngữ:** kỹ thuật/pattern/khái niệm quan trọng ghi `English term (thuật ngữ tiếng Việt)`, chỉ thuật ngữ then chốt. Chi tiết: `ai-context/memory/bilingual-technique-names-in-explanations.md`.
 
+## Plugin ưu tiên (Claude Code)
+
+> Claude tự gọi theo `~/.claude/rules/plugin-routing.md` — user không cần gõ lệnh. Phần riêng của project:
+
+- JS (`typescript-lsp`) chẩn đoán tự động.
+- Tool HTML mới → `anthropic-skills:frontend-design` hoặc `playground:playground`; review → `design:accessibility-review`, `design:design-critique`.
+
 ## Bản đồ điều hướng
 
 1. `ai-context/project-context.md` — toàn cảnh project (đọc đầu tiên).
