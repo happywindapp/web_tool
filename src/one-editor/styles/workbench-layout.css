@@ -1,0 +1,53 @@
+  /* Explorer | View 1 | splitter | View 2; ≤ 900px stacks, ≤ 640px becomes the 3-page carousel of phone-portrait-layout.css */
+  /* .pane-switch is display:none above 640px, so it takes no row here (phones switch body to flex). */
+  body { grid-template-rows:auto auto minmax(0, 1fr) auto auto; }
+  #work { display:grid; grid-template-columns:240px minmax(0, var(--v1, 1fr)) 6px minmax(0, var(--v2, 1fr)); gap:0 6px; padding:8px 12px; min-height:0; }
+  .group { position:relative; grid-template-rows:auto minmax(0, 1fr); }
+  .group.focused { border-color:var(--acc); }
+  .group > .host, .group > .empty { grid-row:2; grid-column:1; min-height:0; min-width:0; }
+  .host { overflow:hidden; background:var(--code); }
+  .host .cm-editor { height:100%; font-size:13px; }
+  .host .cm-editor.cm-focused { outline:0; }
+  .group > .empty { display:none; place-content:center; padding:24px; text-align:center; color:var(--muted); }
+  .group > .empty p { margin:0 0 6px; max-width:420px; }
+  .group.is-empty > .host { visibility:hidden; }
+  .group.is-empty > .empty { display:grid; }
+  .group.drop-target, #explorerPane.drop-target { outline:3px dashed var(--acc); outline-offset:-3px; }
+  #split { cursor:col-resize; border-radius:3px; touch-action:none; }
+  #split:hover, #split:focus-visible { background:var(--line); outline:0; }
+
+  #explorerPane { grid-template-rows:auto minmax(0, 1fr); }
+  #explorerPane .bar input { flex:1 1 auto; min-width:0; padding:3px 8px; }
+  #explorer { overflow:auto; padding:2px 0 12px; font-size:13px; }
+
+  .statusbar { display:flex; flex-wrap:wrap; gap:2px 14px; align-items:center; padding:4px 16px; background:var(--panel); border-top:1px solid var(--line); font-size:12px; color:var(--muted); }
+  .statusbar #status { flex:1 1 320px; min-width:0; color:var(--ink); }
+  .statusbar #status.good { color:var(--good); } .statusbar #status.bad { color:var(--bad); } .statusbar #status.warn { color:var(--warn); }
+  .statusbar #status.jump { cursor:pointer; text-decoration:underline dotted; }
+  .statusbar button.link { padding:0 4px; border:0; background:transparent; color:inherit; font:inherit; }
+  .statusbar .tiny { flex:0 0 100%; font-size:11px; }
+
+  @media (max-height:600px) and (min-width:641px) { .statusbar .tiny { display:none; } }
+  @media (min-width:641px) {
+    body.no-explorer #explorerPane { display:none; }
+    body.no-explorer #work { grid-template-columns:minmax(0, var(--v1, 1fr)) 6px minmax(0, var(--v2, 1fr)); }
+  }
+  @media (min-width:641px) and (max-width:900px) {
+    #work, body.no-explorer #work { grid-template-columns:minmax(0, 1fr); grid-template-rows:auto repeat(2, minmax(280px, 1fr)); gap:8px; overflow-y:auto; }
+    body.no-explorer #work { grid-template-rows:repeat(2, minmax(280px, 1fr)); }
+    #explorerPane { max-height:30vh; }
+    #split { display:none; }
+  }
+  @media (max-width:640px) {
+    #work { grid-template-columns:none; grid-template-rows:minmax(0, 1fr); gap:0; padding:0; }
+    .host .cm-editor { font-size:16px; }
+    #explorer { font-size:15px; }
+    #explorerPane .bar input { font-size:16px; }
+    #stCount, #stEol, #stSrc, #stStore:not(.bad) { display:none; }
+  }
+  /* Phone / tablet landscape: the page scrolls, Explorer spans the top, both views side by side. */
+  @media (max-height:500px) and (min-width:641px) and (pointer:coarse) {
+    #work, body.no-explorer #work { grid-template-columns:repeat(2, minmax(0, 1fr)); grid-template-rows:auto 85dvh; overflow:visible; }
+    #explorerPane { grid-column:1 / -1; max-height:40dvh; }
+    #split { display:none; }
+  }

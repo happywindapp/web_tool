@@ -70,15 +70,21 @@ src/one-editor/
 8. Test node module thuần (registry, fuzzy, language-detect, layout tree, share state).
 
 ## Todo List
-- [ ] Template + màu + core include
-- [ ] CommandRegistry + keymap + CM6
-- [ ] language-detect + test
-- [ ] Tab + split view + clone
-- [ ] Notes IndexedDB + local FS + explorer + kéo-thả
-- [ ] Palette, Quick Open, Go to, bookmark, find/replace
-- [ ] Hot exit + status bar
-- [ ] Demo + share link + VI/EN + mobile
-- [ ] Test node
+- [x] Template + màu + core include (1a)
+- [ ] CommandRegistry + keymap (1b) — CM6 + phím tắt cơ bản xong ở 1a
+- [x] language-detect + test (1a)
+- [ ] Split 1/2/3 cột · 2 hàng · 2×2 + clone view (1b) — 2 view + tab + kéo tab qua view xong ở 1a
+- [x] Notes IndexedDB + local FS + explorer + kéo-thả (1a; tạo/đổi tên/xoá file trên đĩa → 1b)
+- [ ] Palette, Quick Open, Go to symbol, bookmark (1b) — find/replace + go to line của CM có sẵn ở 1a
+- [x] Hot exit + status bar (1a)
+- [x] Demo + share link + VI/EN + mobile (1a; demo `split-2x2` → 1b)
+- [x] Test node (1a)
+
+## Phase 1a — kết quả (2026-11-18)
+- Code `src/one-editor/` → `tools/one-editor.html` (~121 KB); chưa có card `index.html` / `docs/tools/` (để phase 6).
+- Có: Explorer | View 1 | View 2, CM6 từ `tools/vendor/codemirror-6.43.15` (gói ngôn ngữ nạp lười), tab 4 loại (ghi chú · file · tạm · kết quả), ghi chú + hot exit IndexedDB, mở/lưu file (FS Access, fallback input/tải xuống, giữ CRLF/BOM), kéo-thả file/folder/tab, nhận diện ngôn ngữ (đuôi → shebang/modeline → nội dung), `OutputLink` (JSON đẹp/gọn, live, lỗi bấm tới dòng), link chia sẻ `#pako:`, `?demo=` (`js`, `output-link`, `json-broken`, `multi-tab`, `markdown`, `large`), VI/EN, 4 dải desktop/mobile.
+- Kiểm: `node --test` 10/10 (nhận diện nội dung 35/35 mẫu); headless Chrome `file://` 38/38 (luồng chính + ma trận 9 kích thước). Chưa thử máy iOS/Android thật, chưa thử Firefox/Safari.
+- 1b còn: CommandRegistry + Palette/Quick Open/Go to symbol/bookmark, layout 3 cột/2 hàng/2×2 + clone, thao tác file/folder trên đĩa trong Explorer, mở lại tab vừa đóng, ghim tab, minimap/zoom/Zen.
 
 ## Success Criteria
 - Nhận diện đúng ≥ 90% bộ mẫu test (có đuôi file 100%); split 2×2 kéo tab qua lại được; F5 khôi phục đúng layout + tab chưa lưu.

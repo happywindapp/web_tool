@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'unsafe-inline'; img-src data: blob:; font-src data:; connect-src https://quan111.goatcounter.com">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>One Editor</title>
+<style>
+/* @include ../data-workbench/styles/base.css */
+/* @include ../data-workbench/styles/app-bar-tabs-toolbar-surfaces.css */
+/* @include ../data-workbench/styles/theme-filter-popover-chips.css */
+  :root[data-theme="dark"] { color-scheme:dark; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { color-scheme:dark; } }
+/* @include styles/workbench-layout.css */
+/* @include styles/tabs-and-explorer-tree.css */
+/* @include ../data-workbench/styles/phone-portrait-layout.css */
+</style>
+<!-- GoatCounter: chỉ gửi path (không query/hash); chạy local đếm thành /local/<tên file> để không lộ thư mục máy -->
+<script>
+{ const local = !location.protocol.startsWith("http") || ["localhost", "127.0.0.1"].includes(location.hostname);
+  const p = local ? "/local/" + location.pathname.split("/").pop() : location.pathname.replace(/index[.]html$/, "");
+  const gc = "https://quan111.goatcounter.com/count";
+  navigator.sendBeacon?.(gc + "?" + new URLSearchParams({ p, r: document.referrer.split("?")[0], t: document.title, s: screen.width }));
+  addEventListener("DOMContentLoaded", () => {
+    const el = document.querySelector(".gc-views");
+    // GoatCounter cache mỗi URL (kể cả 404) tới 4 giờ ⇒ đổi start mỗi 10 phút; mọi ngày trước khi ra mắt cho cùng tổng
+    const start = "2026-10-" + String(Math.floor(Date.now() / 6e5) % 28 + 1).padStart(2, "0");
+    if (el) fetch(gc + "er/" + encodeURIComponent(p) + ".json?start=" + start).then(r => r.status === 404 ? { count: "0" } : r.json())
+      .then(j => { el.textContent = "👁 " + j.count; el.hidden = false; }).catch(() => {});
+  }); }
+</script>
+</head>
+<body>
+<header class="top">
+  <a class="btn" href="../index.html">← Trang chủ</a>
+  <h1>One Editor</h1>
+  <button class="more-toggle" title="Thêm thao tác" aria-expanded="false">⋯</button>
+  <button id="btnShare" title="Chép link chứa các tab đang mở (dữ liệu nằm sau dấu #, không gửi lên máy chủ)">🔗 Chia sẻ link</button>
+  <label class="chk" title="Giao diện sáng / tối">Giao diện <select id="uiTheme"><option value="auto">Tự động</option><option value="light">Sáng</option><option value="dark">Tối</option></select></label>
+  <button id="btnClear" title="Xoá mọi ghi chú và tab đã lưu trong IndexedDB của trình duyệt này">🗑 Xoá dữ liệu đã lưu</button>
+  <span class="seg lang-switch" title="Ngôn ngữ"><span class="gc-views" title="Lượt truy cập (GoatCounter, cập nhật mỗi ~10 phút)" hidden></span><button data-lang="vi">VI</button><button data-lang="en">EN</button></span>
+</header>
+<div class="toolbar">
+  <button id="btnRun" class="main" title="Chạy phép đã chọn trên tab đang mở — kết quả ra tab liên kết ở view kia (Ctrl+Enter)">▶ Chạy</button>
+  <button id="btnExplorer" title="Ẩn / hiện Explorer (Ctrl+B)">☰</button>
+  <button id="btnNew" title="Ghi chú mới — tự lưu trong trình duyệt (Alt+N)">+ Ghi chú</button>
+  <button id="btnOpen" title="Mở file trên máy (Ctrl+O) — hoặc kéo-thả vào View 1 / View 2">Mở file…</button>
+  <button id="btnFolder" title="Mở folder vào Explorer (Chrome/Edge: bắt đầu ở folder của file đang mở)">Mở folder…</button>
+  <button id="btnSave" title="Lưu (Ctrl+S): file → ghi đè lên đĩa; ghi chú → đã tự lưu trong trình duyệt">💾 Lưu</button>
+  <button id="btnSaveAs" title="Lưu thành file mới (Ctrl+Shift+S); trình duyệt không hỗ trợ thì tải xuống">Lưu thành…</button>
+  <select id="demo" title="Nạp dữ liệu mẫu thành tab tạm (không đè bài đang sửa)" data-i18n-skip></select>
+  <span class="sep"></span>
+  <label class="chk" title="Ngôn ngữ của tab đang mở — mặc định tự nhận theo tên file, shebang / modeline rồi nội dung">Ngôn ngữ <select id="langSel" data-i18n-skip></select></label>
+  <label class="chk" title="Xuống dòng mềm (Alt+Z)"><input id="chkWrap" type="checkbox"> Xuống dòng</label>
+  <span class="sep"></span>
+  <select id="opSel" title="Phép chạy: kết quả ra tab liên kết ở view kia" data-i18n-skip></select>
+  <button id="btnSwap" title="Đổi chỗ View 1 ⇆ View 2">⇆</button>
+</div>
+<div class="seg pane-switch"><button>Explorer</button><button>View 1</button><button>View 2</button></div>
+<main id="work" class="pane-scroller">
+  <aside class="pane" id="explorerPane">
+    <div class="bar"><b>Explorer</b><input id="exFilter" type="text" placeholder="Lọc theo tên…" spellcheck="false"></div>
+    <div id="explorer" data-i18n-skip></div>
+  </aside>
+  <section class="pane group" data-group="0" aria-label="View 1">
+    <div class="gbar"><div class="tabs" role="tablist" data-i18n-skip></div><button class="gnew" title="Ghi chú mới ở view này (Alt+N)">+</button><button class="gmove" title="Chuyển tab đang mở sang view kia">⇥</button></div>
+    <div class="host" data-i18n-skip></div>
+    <div class="empty"><p><b>View 1</b></p><p>Kéo-thả file hoặc folder vào đây, bấm + để tạo ghi chú, hoặc chọn một mẫu ở “Thử mẫu…”.</p></div>
+  </section>
+  <div id="split" tabindex="0" role="separator" aria-orientation="vertical" title="Kéo để đổi độ rộng 2 view (← → khi đang chọn, nhấp đúp về 50/50)"></div>
+  <section class="pane group" data-group="1" aria-label="View 2">
+    <div class="gbar"><div class="tabs" role="tablist" data-i18n-skip></div><button class="gnew" title="Ghi chú mới ở view này (Alt+N)">+</button><button class="gmove" title="Chuyển tab đang mở sang view kia">⇤</button></div>
+    <div class="host" data-i18n-skip></div>
+    <div class="empty"><p><b>View 2</b></p><p>Bấm ▶ Chạy khi đang ở View 1 thì kết quả hiện ở đây thành tab liên kết (⇢), sửa nguồn là tab tự cập nhật.</p></div>
+  </section>
+</main>
+<footer class="statusbar">
+  <span id="status" data-i18n-skip></span>
+  <span id="stPos" data-i18n-skip></span>
+  <span id="stCount" data-i18n-skip></span>
+  <button id="stLang" class="link" title="Đổi ngôn ngữ của tab" data-i18n-skip></button>
+  <span id="stEol" data-i18n-skip></span>
+  <span id="stSrc" data-i18n-skip></span>
+  <span id="stStore" data-i18n-skip></span>
+  <span class="tiny">Chạy hoàn toàn trên máy bạn: ghi chú và tab đang mở chỉ lưu trong IndexedDB của trình duyệt này, file chỉ đọc/ghi khi bạn chọn — không gửi dữ liệu đi đâu.</span>
+</footer>
+<div class="author">
+  <span>Tác giả:</span><b><a href="https://happywindapp.github.io/CV/cv_quan_phan.html">Phan Ngọc Minh Quân</a></b>
+  <span>GitHub Source:</span><a href="https://github.com/happywindapp/web_tool/">github.com/happywindapp/web_tool</a>
+</div>
+<script>
+// @include ../data-workbench/js/core/i18n-ui-language-vi-en.js
+// @include ../data-workbench/js/i18n/en-shared-theme-sessions-filters.js
+// @include js/i18n/en-one-editor-strings.js
+// @include js/i18n/vi-codemirror-phrases.js
+// @include ../data-workbench/js/core/text-utils.js
+// @include ../data-workbench/js/core/dom-and-storage-helpers.js
+// @include ../data-workbench/js/core/share-link-codec.js
+// @include ../data-workbench/js/core/theme-picker-auto-light-dark.js
+// @include ../data-workbench/js/core/phone-pane-switcher.js
+// @include ../data-workbench/js/parsers/format-detect.js
+// @include js/core/one-editor-vendor-paths.js
+// @include js/editor/language-detect.js
+// @include js/core/output-operations.js
+// @include js/core/share-link-state.js
+// @include js/core/demo-samples.js
+// @include js/providers/notes-indexeddb-provider.js
+// @include js/providers/local-file-system-access-provider.js
+// @include js/editor/codemirror-setup.js
+// @include js/editor/language-loader.js
+// @include js/workbench/document-store.js
+// @include js/workbench/status-bar.js
+// @include js/workbench/tab-strip.js
+// @include js/workbench/editor-views.js
+// @include js/workbench/output-link.js
+// @include js/workbench/open-file-flow.js
+// @include js/workbench/explorer-tree.js
+// @include js/workbench/file-drop-zone.js
+// @include js/workbench/hot-exit-session.js
+// @include js/workbench/toolbar-actions.js
+// @include js/workbench/split-resizer.js
+// @include js/core/share-link-and-demo-loader.js
+// @include js/core/app-boot.js
+</script>
+</body>
+</html>

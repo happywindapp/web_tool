@@ -48,7 +48,7 @@ Thứ tự đề xuất: **v1 = 0 → 1 → 2 → 3 → 6**, rồi 7 → 8 → 9
 | # | Việc | Cỡ | Trạng thái |
 |---|------|----|-----------|
 | 0 | [Spike + ADR + đăng ký OAuth](phase-00-spike-and-adr.md) | S | ✅ (đăng ký OAuth hoãn cùng phase 4–5) |
-| 1 | [Workbench: editor, split, explorer, kéo-thả, nhận diện ngôn ngữ](phase-01-core-editor-workbench.md) | L | ⬜ |
+| 1 | [Workbench: editor, split, explorer, kéo-thả, nhận diện ngôn ngữ](phase-01-core-editor-workbench.md) | L | 🟡 1a ✅ (2026-11-18), 1b ⬜ |
 | 2 | [Bộ Notepad++ + compare 2 view + format tự động](phase-02-notepadpp-text-tools.md) | M–L | ⬜ |
 | 3 | [Live preview: sơ đồ/chart, Markdown, HTML](phase-03-live-preview-diagram-chart.md) | M | ⬜ |
 | 4 | [Google Drive provider](phase-04-google-drive-provider.md) | M | ⏸ hoãn (user 2026-11-18) |

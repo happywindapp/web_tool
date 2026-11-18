@@ -29,7 +29,7 @@
 
 ## Đang làm (in progress)
 
-- [ ] **One Editor** `tools/one-editor.html` (VS Code + Sublime + Notepad++ + online notepad): plan `plans/261118-0209-one-editor/` (phase 0–9), ADR #19–#22. Phase 0 ✅ (vendor CM6/Prettier/sql-formatter, spike); phase 4–5 cloud hoãn; chờ user "làm" để vào phase 1a (2026-11-18)
+- [ ] **One Editor** `tools/one-editor.html` (VS Code + Sublime + Notepad++ + online notepad): plan `plans/261118-0209-one-editor/` (phase 0–9), ADR #19–#22. Phase 0 ✅ (vendor CM6/Prettier/sql-formatter, spike); phase 4–5 cloud hoãn; **phase 1a ✅** (2026-11-18: workbench 3 phần, tab, ghi chú + hot exit IndexedDB, file local, kéo-thả, nhận diện ngôn ngữ, OutputLink) — tiếp phase 1b
 
 - _(trống)_
 
