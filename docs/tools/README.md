@@ -10,6 +10,7 @@ Mỗi tool trong `tools/` có đúng 1 file doc ở đây, cùng tên: `tools/<x
 | Lịch vạn niên (lịch dương–âm, đổi ngày, ngày/giờ tốt xấu) | [vietnamese-lunar-calendar.md](vietnamese-lunar-calendar.md) |
 | Bảng giá chứng khoán (HOSE · HNX · UPCOM, dữ liệu VPS) | [vn-stock-price-board.md](vn-stock-price-board.md) |
 | Bảng giá Crypto & On-chain (Binance, CoinGecko, DeFiLlama, mempool.space) | [crypto-market-board.md](crypto-market-board.md) |
+| One Editor (soạn code + text: view/tab, ghi chú, file + folder, format, so sánh, Notepad++, preview sơ đồ/Markdown/HTML, tìm/thay trong file, dịch + đọc to + từ điển) | [one-editor.md](one-editor.md) |
 
 ## Khung 1 file doc tool
 

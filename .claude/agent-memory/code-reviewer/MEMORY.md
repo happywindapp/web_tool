@@ -1,1 +1,4 @@
-- [Vendor path blocked by scout hook](vendor-path-blocked-by-scout-hook.md) — printf trick to grep tools/vendor/mermaid; headless Chrome + local http server to test "no network"
+- [Node probe harness: TZ + i18n scan](node-probe-harness-tz-and-i18n-check.md) — vm-load pure modules, process.env.TZ for DST, scan VI strings missing EN
+- [Vendor path blocked by scout hook](vendor-path-blocked-by-scout-hook.md) — printf trick for tools/vendor; headless Chrome + local /leak server to test network leaks and SvgSanitizer bypasses
+- [SVG builder: control chars + dup ids](inline-svg-builder-xml-control-chars-and-dup-ids.md) — \x1b/\f break DOMParser SVG; inline gradient ids clash with hidden panes
+- [file:// iframe shares IndexedDB](file-url-iframe-shares-indexeddb-with-main-page.md) — unsandboxed file:// frame/worker reads main page IDB despite origin "null"

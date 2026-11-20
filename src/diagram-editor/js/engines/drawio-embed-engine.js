@@ -12,14 +12,14 @@ const DrawioEmbed = (() => {
     if (!frame || e.source !== frame.contentWindow || e.origin !== ORIGIN || typeof e.data !== "string") return;
     let m;
     try { m = JSON.parse(e.data); } catch { return; }
-    if (m.event === "init") { live = true; clearTimeout(timer); send(pending ?? ""); pending = null; handlers.onReady(); }
+    if (m.event === "init") { live = true; clearTimeout(timer); send(pending ?? shown ?? ""); pending = null; handlers.onReady(); }
     else if (m.event === "autosave" && typeof m.xml === "string") changed(m.xml, false);
     else if (m.event === "save" && typeof m.xml === "string") changed(m.xml, true);
     else if (m.event === "export" && typeof m.data === "string") handlers.onExport(m.data, m.format);
   }
 
   function connect(xml, box, lang) {
-    pending = xml;
+    pending = xml; live = false; shown = null;
     frame?.remove();
     frame = document.createElement("iframe");
     frame.title = "draw.io";

@@ -6,13 +6,41 @@ const path = require("node:path");
 const vm = require("node:vm");
 
 const root = path.join(__dirname, "..");
-const ctx = vm.createContext({ T: (s, p) => p ? s.replace(/\{(\w+)\}/g, (m, k) => k in p ? String(p[k]) : m) : s, File, Blob, Uint8Array, TextDecoder });
+const eq = (a, b, msg) => assert.deepEqual(JSON.parse(JSON.stringify(a)), b, msg);
+const ctx = vm.createContext({ T: (s, p) => p ? s.replace(/\{(\w+)\}/g, (m, k) => k in p ? String(p[k]) : m) : s, File, Blob, Uint8Array, TextDecoder, TextEncoder });
 const src = f => fs.readFileSync(path.join(root, f), "utf8");
 vm.runInContext([
   "../data-workbench/js/core/text-utils.js", "../data-workbench/js/parsers/format-detect.js", "js/editor/language-detect.js",
-  "js/core/output-operations.js", "js/core/share-link-state.js", "js/core/demo-samples.js", "js/providers/local-file-system-access-provider.js",
-].map(src).join("\n;\n") + "\n;Object.assign(globalThis, { LangDetect, OutputOps, ShareState, DEMOS, LocalFs });", ctx);
-const { LangDetect: L, OutputOps, ShareState, DEMOS, LocalFs } = ctx;
+  "js/core/layout-presets.js", "js/core/fuzzy-match.js", "js/core/command-registry.js",
+  "js/core/output-operations.js", "js/core/share-link-state.js", "js/core/demo-samples.js", "js/notepadpp/encoding-detect-convert.js", "js/providers/local-file-system-access-provider.js",
+  "js/editor/search-in-selection.js", "js/core/hex-dump.js",
+].map(src).join("\n;\n") + "\n;Object.assign(globalThis, { LangDetect, OutputOps, ShareState, DEMOS, LocalFs, Layouts, Fuzzy, Commands, SearchInSelection, HexDump });", ctx);
+const { LangDetect: L, OutputOps, ShareState, DEMOS, LocalFs, Layouts, Fuzzy, Commands, SearchInSelection, HexDump } = ctx;
+
+test("hex dump: offset, two 8-byte groups, ascii column, truncation note", () => {
+  const bytes = new Uint8Array([0x4d, 0x5a, 0x90, 0x00, 0x41, 0x42, 0x0a, 0xff, 0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x7e, 0x20]);
+  const rows = HexDump.format(bytes, 100).split("\n");
+  assert.equal(rows[0], "00000000  4d 5a 90 00 41 42 0a ff  30 31 32 33 34 35 36 37  |MZ..AB..01234567|");
+  assert.equal(rows[1], "00000010  7e 20" + " ".repeat(18) + "  " + " ".repeat(23) + "  |~ |");
+  assert.match(rows[2], /18 .*100/);
+});
+
+test("indent detection: tabs, 2 / 4 spaces, default 2", () => {
+  const TAB = String.fromCharCode(9);
+  assert.equal(L.indentOf("func main() {\n" + TAB + "x := 1\n" + TAB + "if x {\n" + TAB + TAB + "y()\n" + TAB + "}\n}"), TAB);
+  assert.equal(L.indentOf("def f():\n    a = 1\n    if a:\n        b()\n"), "    ");
+  assert.equal(L.indentOf("a:\n  b:\n    c: 1\n  d: 2\n"), "  ");
+  assert.equal(L.indentOf("no indentation here\nat all\n"), "  ");
+});
+
+test("replace in selection: literal, escapes, regex groups, case flag", () => {
+  const r = (q, text) => SearchInSelection.replacement({ search: "", replace: "", regexp: false, literal: false, caseSensitive: false, ...q }, text);
+  assert.equal(r({ replace: "x" }, "abc"), "x");
+  assert.equal(r({ replace: "a\\nb" }, "q"), "a\nb");
+  assert.equal(r({ replace: "a\\nb", literal: true }, "q"), "a\\nb");
+  assert.equal(r({ regexp: true, search: "(\\w+)@(\\w+)", replace: "$2 at $1" }, "user@host"), "host at user");
+  assert.equal(r({ regexp: true, search: "abc", replace: "Z" }, "ABC"), "Z");
+});
 
 test("language by file name: every listed extension maps back to its id", () => {
   const cases = { "app.ts": "TypeScript", "x.JSON": "JSON", "README.md": "Markdown", "a/b/c.py": "Python", "C:\\w\\Main.java": "Java", "Program.cs": "C#",
@@ -73,28 +101,83 @@ test("language by content: ≥ 90% of the sample table, short text stays plain",
   assert.ok(Date.now() - t0 < 100, "long single lines must stay fast: " + (Date.now() - t0) + "ms");
 });
 
+const cmDir = path.join(root, "..", "..", "tools", "vendor", "codemirror-6.43.15");
+const cm = { navigator: { userAgent: "node", platform: "", vendor: "" }, setTimeout, clearTimeout };
+cm.globalThis = cm;
+vm.createContext(cm);
+vm.runInContext(fs.readFileSync(path.join(cmDir, "codemirror-core.min.js"), "utf8"), cm);
+vm.runInContext(fs.readFileSync(path.join(cmDir, "codemirror-languages.min.js"), "utf8"), cm);
+vm.runInContext(src("js/editor/document-symbols.js") + "\n;globalThis.Symbols = Symbols;", cm);
+
+test("minimap bundle attaches to the shared CodeMirror instance", () => {
+  vm.runInContext(fs.readFileSync(path.join(cmDir, "codemirror-minimap.min.js"), "utf8"), cm);
+  const ext = cm.CM.minimap.showMinimap.of({ create: () => ({ dom: {} }), displayText: "blocks" });
+  const state = cm.CM.state.EditorState.create({ doc: "a", extensions: [ext] });
+  assert.equal(state.facet(cm.CM.minimap.showMinimap).displayText, "blocks");
+});
+
 test("every language id with a highlighter exists in the vendored CodeMirror language-data", () => {
-  const dir = path.join(root, "..", "..", "tools", "vendor", "codemirror-6.43.15");
-  const cm = { navigator: { userAgent: "node", platform: "", vendor: "" } };
-  cm.globalThis = cm;
-  vm.createContext(cm);
-  vm.runInContext(fs.readFileSync(path.join(dir, "codemirror-core.min.js"), "utf8"), cm);
-  vm.runInContext(fs.readFileSync(path.join(dir, "codemirror-languages.min.js"), "utf8"), cm);
   const { LanguageDescription } = cm.CM.language;
   for (const id of L.ids.filter(L.highlighter)) assert.ok(LanguageDescription.matchLanguageName(cm.CM.languages, id, false), id);
 });
 
+test("go to symbol: syntax tree for JS / Python / Go / Markdown, regex fallback otherwise", async () => {
+  const names = async (lang, text) => {
+    const desc = lang && cm.CM.language.LanguageDescription.matchLanguageName(cm.CM.languages, lang, false);
+    const state = cm.CM.state.EditorState.create({ doc: text, extensions: desc ? [await desc.load()] : [] });
+    return cm.Symbols.list(state).map(s => s.label + ":" + s.line);
+  };
+  eq(await names("JavaScript", "function a() {}\nclass B {\n  run() {}\n}\nconst c = 1;\nexport const d = x => x;"), ["a:1", "B:2", "run:3", "d:6"]);
+  eq(await names("Python", "def f(x):\n    pass\n\nclass K:\n    def m(self):\n        pass\n"), ["f:1", "K:4", "m:5"]);
+  eq(await names("Go", "package main\n\nfunc main() {}\n\ntype Order struct{}\n"), ["main:3", "Order:5"]);
+  eq(await names("Markdown", "# Top\ntext\n## Sub\n"), ["Top:1", "Sub:3"]);
+  eq(await names("", "public class Order {\n  public static void Main() {}\n}\n"), ["Order:1"]);
+});
+
 test("share payload: round trip, untrusted fields dropped", () => {
   const p = ShareState.parse(ShareState.build([[{ name: "a.json", lang: "JSON", text: "{}" }], [{ name: "b", lang: "", text: "x" }]], true));
-  assert.deepEqual(JSON.parse(JSON.stringify(p)), { views: [[{ name: "a.json", lang: "JSON", text: "{}" }], [{ name: "b", lang: "", text: "x" }]], wrap: true, run: "" });
+  eq(JSON.parse(JSON.stringify(p)), { views: [[{ name: "a.json", lang: "JSON", text: "{}" }], [{ name: "b", lang: "", text: "x" }]], layout: "", wrap: true, run: "", compare: false });
+  const four = ShareState.parse({ views: [[{ t: "1" }], [{ t: "2" }], [{ t: "3" }], [{ t: "4" }], [{ t: "5" }]] });
+  eq([four.views.length, four.layout], [4, "4g"]);
+  assert.equal(ShareState.parse({ views: [[{ t: "1" }], [], [{ t: "3" }]], layout: "2c" }).layout, "3c");
+  assert.equal(ShareState.parse({ views: [[{ t: "1" }], [{ t: "2" }]], layout: "2r" }).layout, "2r");
+  assert.equal(ShareState.parse({ views: [[{ t: "1" }], [], [], []] }).views.length, 2);
   const q = ShareState.parse({ views: [[{ n: "../../etc/passwd", l: "<script>", t: "x", handle: "h" }, { n: "no text" }, 5]], run: "rm -rf", wrap: "yes" });
   assert.equal(q.views[0].length, 1);
   assert.equal(q.views[0][0].name, ".._.._etc_passwd");
   assert.equal(q.views[0][0].lang, "");
-  assert.deepEqual([q.run, q.wrap, q.views[1].length], ["", false, 0]);
+  eq([q.run, q.wrap, q.views[1].length], ["", false, 0]);
   assert.throws(() => ShareState.parse({ views: [[], []] }));
   assert.throws(() => ShareState.parse("text"));
   assert.equal(ShareState.parse({ views: [Array.from({ length: 99 }, () => ({ t: "" }))] }).views[0].length, ShareState.MAX_TABS);
+});
+
+test("layouts: view counts and 'the other view'", () => {
+  eq(Layouts.LIST.map(l => l.n), [1, 2, 3, 2, 4]);
+  eq([1, 2, 3, 4, 9].map(Layouts.forCount), ["1", "2c", "3c", "4g", "4g"]);
+  eq([Layouts.other(0, 1), Layouts.other(0, 2), Layouts.other(1, 2), Layouts.other(2, 3), Layouts.other(3, 4)], [-1, 1, 0, 0, 0]);
+});
+
+test("fuzzy: subsequence match, word starts and runs rank first", () => {
+  assert.equal(Fuzzy.score("xyz", "orders.js"), null);
+  const ranked = Fuzzy.filter("oj", [{ label: "config.yaml" }, { label: "lorem-ojx.txt" }, { label: "orders.js" }]).map(x => x.label);
+  eq(ranked, ["orders.js", "lorem-ojx.txt"]);
+  eq(Fuzzy.score("gts", "Go to symbol").hits, [0, 3, 6]);
+  assert.equal(Fuzzy.filter("", [{ label: "a" }, { label: "b" }]).length, 2);
+});
+
+test("commands: shortcut strings by physical key, palette list honours when()", () => {
+  const ev = (code, key, mods = {}) => ({ code, key, ctrlKey: false, metaKey: false, altKey: false, shiftKey: false, ...mods });
+  assert.equal(Commands.keyOf(ev("KeyP", "P", { ctrlKey: true, shiftKey: true })), "Ctrl+Shift+p");
+  assert.equal(Commands.keyOf(ev("Digit5", "%", { altKey: true, shiftKey: true })), "Alt+Shift+5");
+  assert.equal(Commands.keyOf(ev("F2", "F2", { ctrlKey: true })), "Ctrl+F2");
+  let ran = 0;
+  Commands.add("t1", "Test", "Ctrl+k", () => ran++);
+  Commands.add("t2", "Hidden", null, () => ran++, () => false);
+  eq(Commands.all().map(c => c.id), ["t1"]);
+  Commands.run("t2"); Commands.run("t1");
+  assert.equal(ran, 1);
+  assert.equal(Commands.keyLabel(Commands.all()[0]), "Ctrl+K");
 });
 
 test("output ops: pretty / minify JSON, error carries the source line", () => {
@@ -108,16 +191,16 @@ test("demos: every payload parses and names / content detect as intended", () =>
   for (const [key, d] of Object.entries(DEMOS)) assert.ok(ShareState.parse(d.payload()).views.flat().length, key);
   const tabs = ShareState.parse(DEMOS["multi-tab"].payload()).views.flat();
   const ids = Object.fromEntries(tabs.map(t => [t.name, L.detect(t.name, t.text).id]));
-  assert.deepEqual(ids, { "README.md": "Markdown", "app.py": "Python", "snippet": "Go", "query.sql": "SQL", "config.yaml": "YAML", "deploy": "Shell" });
+  eq(ids, { "README.md": "Markdown", "app.py": "Python", "snippet": "Go", "query.sql": "SQL", "config.yaml": "YAML", "deploy": "Shell" });
   assert.equal(DEMOS.large.payload().views[0][0].t.split("\n").length, 50001);
   assert.throws(() => OutputOps.get("json-pretty").run(DEMOS["json-broken"].payload().views[0][0].t), e => e.line === 6);
 });
 
 test("local files: CRLF / BOM / binary detected on read and restored on save", async () => {
   const crlf = await LocalFs.readText(new File([String.fromCharCode(0xfeff) + "a\r\nb\r\n"], "x.txt"));
-  assert.deepEqual([crlf.text, crlf.eol, crlf.bom, crlf.binary], ["a\nb\n", "\r\n", true, false]);
-  assert.equal(LocalFs.encode(crlf.text, crlf), String.fromCharCode(0xfeff) + "a\r\nb\r\n");
+  eq([crlf.text, crlf.eol, crlf.bom, crlf.binary], ["a\nb\n", "\r\n", true, false]);
+  assert.equal(Buffer.from(LocalFs.encode(crlf.text, crlf)).toString("hex"), "efbbbf610d0a620d0a");
   assert.equal((await LocalFs.readText(new File([new Uint8Array([80, 75, 3, 4, 0, 0])], "z.zip"))).binary, true);
   const cp1252 = await LocalFs.readText(new File([new Uint8Array([99, 97, 102, 0xe9])], "latin.txt"));
-  assert.deepEqual([cp1252.notUtf8, cp1252.binary], [true, false]);
+  eq([cp1252.enc, cp1252.guessed, cp1252.binary, cp1252.text], ["windows-1252", true, false, "caf" + String.fromCharCode(0xe9)]);
 });

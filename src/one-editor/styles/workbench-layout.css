@@ -1,12 +1,25 @@
-  /* Explorer | View 1 | splitter | View 2; ≤ 900px stacks, ≤ 640px becomes the 3-page carousel of phone-portrait-layout.css */
+  /* Explorer + 1–4 views by layout (#work.lay-*); ≤ 900px stacks, ≤ 640px becomes the carousel of phone-portrait-layout.css */
   /* .pane-switch is display:none above 640px, so it takes no row here (phones switch body to flex). */
   body { grid-template-rows:auto auto minmax(0, 1fr) auto auto; }
-  #work { display:grid; grid-template-columns:240px minmax(0, var(--v1, 1fr)) 6px minmax(0, var(--v2, 1fr)); gap:0 6px; padding:8px 12px; min-height:0; }
+  #work { --exw:270px; display:grid; gap:6px; padding:8px 12px; min-height:0; }
+  #explorerPane { grid-area:ex; } #split { grid-area:sp; }
+  .group[data-group="0"] { grid-area:g0; } .group[data-group="1"] { grid-area:g1; } .group[data-group="2"] { grid-area:g2; } .group[data-group="3"] { grid-area:g3; }
+  #work.lay-1 { grid-template:"ex g0" minmax(0, 1fr) / var(--exw) minmax(0, 1fr); }
+  #work.lay-2c { grid-template:"ex g0 sp g1" minmax(0, 1fr) / var(--exw) minmax(0, var(--v1, 1fr)) 4px minmax(0, var(--v2, 1fr)); }
+  /* grid-template with area strings rejects repeat(), so the columns are spelled out. */
+  #work.lay-3c { grid-template:"ex g0 g1 g2" minmax(0, 1fr) / var(--exw) minmax(0, var(--c1, 1fr)) minmax(0, var(--c2, 1fr)) minmax(0, var(--c3, 1fr)); }
+  #work.lay-2r { grid-template:"ex g0" minmax(0, var(--r1, 1fr)) "ex g1" minmax(0, var(--r2, 1fr)) / var(--exw) minmax(0, 1fr); }
+  #work.lay-4g { grid-template:"ex g0 g1" minmax(0, var(--r1, 1fr)) "ex g2 g3" minmax(0, var(--r2, 1fr)) / var(--exw) minmax(0, var(--c1, 1fr)) minmax(0, var(--c2, 1fr)); }
+  #work.gap-x { cursor:col-resize; } #work.gap-y { cursor:row-resize; }
+  .host .cm-editor .cm-bookmark { background:color-mix(in srgb, var(--warn) 14%, transparent); box-shadow:inset 3px 0 0 var(--warn); }
+  body.zen { grid-template-rows:minmax(0, 1fr); }
+  body.zen > header.top, body.zen > .toolbar, body.zen > .statusbar, body.zen > .author { display:none; }
+  .zen-exit { position:fixed; top:6px; right:12px; z-index:40; opacity:.8; }
   .group { position:relative; grid-template-rows:auto minmax(0, 1fr); }
   .group.focused { border-color:var(--acc); }
   .group > .host, .group > .empty { grid-row:2; grid-column:1; min-height:0; min-width:0; }
   .host { overflow:hidden; background:var(--code); }
-  .host .cm-editor { height:100%; font-size:13px; }
+  .host .cm-editor { height:100%; font-size:var(--ed-font, 13px); }
   .host .cm-editor.cm-focused { outline:0; }
   .group > .empty { display:none; place-content:center; padding:24px; text-align:center; color:var(--muted); }
   .group > .empty p { margin:0 0 6px; max-width:420px; }
@@ -16,9 +29,19 @@
   #split { cursor:col-resize; border-radius:3px; touch-action:none; }
   #split:hover, #split:focus-visible { background:var(--line); outline:0; }
 
-  #explorerPane { grid-template-rows:auto minmax(0, 1fr); }
+  #explorerPane { grid-template-columns:minmax(0, 1fr); grid-template-rows:auto minmax(0, 1fr); }
+  .activity { display:flex; gap:2px; padding:3px 6px; background:var(--gut); border-bottom:1px solid var(--line); }
+  .activity button { padding:4px 12px; border:0; border-radius:6px 6px 0 0; background:transparent; font-size:16px; }
+  .activity button.on { background:color-mix(in srgb, var(--acc) 20%, transparent); box-shadow:inset 0 -2px 0 var(--acc); }
+  .side { display:flex; flex-direction:column; min-width:0; min-height:0; }
   #explorerPane .bar input { flex:1 1 auto; min-width:0; padding:3px 8px; }
-  #explorer { overflow:auto; padding:2px 0 12px; font-size:13px; }
+  #explorer, #sxResults { flex:1 1 0; min-height:0; overflow:auto; padding:2px 0 12px; font-size:13px; }
+  .sx-form { display:flex; flex-wrap:wrap; gap:4px 8px; align-items:center; padding:6px 8px; border-bottom:1px solid var(--line); }
+  .sx-form input[type=text] { flex:1 1 100%; min-width:0; padding:3px 8px; }
+  .sx-doc { margin:8px 8px 2px 10px; font-size:12px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .sx-hit { font-family:Consolas, "Cascadia Mono", monospace; font-size:12px; }
+  .sx-hit b { color:var(--acc); background:color-mix(in srgb, var(--acc) 15%, transparent); }
+  .sx-hit small { color:var(--muted); }
 
   .statusbar { display:flex; flex-wrap:wrap; gap:2px 14px; align-items:center; padding:4px 16px; background:var(--panel); border-top:1px solid var(--line); font-size:12px; color:var(--muted); }
   .statusbar #status { flex:1 1 320px; min-width:0; color:var(--ink); }
@@ -29,25 +52,47 @@
 
   @media (max-height:600px) and (min-width:641px) { .statusbar .tiny { display:none; } }
   @media (min-width:641px) {
-    body.no-explorer #explorerPane { display:none; }
-    body.no-explorer #work { grid-template-columns:minmax(0, var(--v1, 1fr)) 6px minmax(0, var(--v2, 1fr)); }
+    body.no-explorer #explorerPane, body.zen #explorerPane { display:none; }
+    body.no-explorer #work, body.zen #work { --exw:0px; }
   }
   @media (min-width:641px) and (max-width:900px) {
-    #work, body.no-explorer #work { grid-template-columns:minmax(0, 1fr); grid-template-rows:auto repeat(2, minmax(280px, 1fr)); gap:8px; overflow-y:auto; }
-    body.no-explorer #work { grid-template-rows:repeat(2, minmax(280px, 1fr)); }
+    #work.pane-scroller { grid-template:none; grid-template-columns:minmax(0, 1fr); grid-template-rows:auto; grid-auto-rows:minmax(280px, 1fr); gap:8px; overflow-y:auto; }
+    body.no-explorer #work.pane-scroller, body.zen #work.pane-scroller { grid-template-rows:none; }
+    #work > * { grid-area:auto; }
     #explorerPane { max-height:30vh; }
     #split { display:none; }
   }
   @media (max-width:640px) {
-    #work { grid-template-columns:none; grid-template-rows:minmax(0, 1fr); gap:0; padding:0; }
-    .host .cm-editor { font-size:16px; }
+    #work.pane-scroller { grid-template:none; grid-auto-flow:column; grid-auto-columns:100%; grid-template-rows:minmax(0, 1fr); gap:0; padding:0; }
+    #work > * { grid-area:auto; }
+    .host .cm-editor { font-size:max(16px, var(--ed-font, 13px)); }
+    #qpInput { font-size:16px; }
+    .toolbar .desktop-only, #work .cm-minimap-gutter { display:none; }
     #explorer { font-size:15px; }
-    #explorerPane .bar input { font-size:16px; }
-    #stCount, #stEol, #stSrc, #stStore:not(.bad) { display:none; }
+    #explorerPane .bar input, .sx-form input[type=text] { font-size:16px; }
+    .activity button { min-height:40px; }
+    #stCount, #stEol, #stIndent, #stSrc, #stStore:not(.bad) { display:none; }
   }
-  /* Phone / tablet landscape: the page scrolls, Explorer spans the top, both views side by side. */
+  /* Phone / tablet landscape: the page scrolls, Explorer spans the top, views two per row. */
   @media (max-height:500px) and (min-width:641px) and (pointer:coarse) {
-    #work, body.no-explorer #work { grid-template-columns:repeat(2, minmax(0, 1fr)); grid-template-rows:auto 85dvh; overflow:visible; }
+    #work.pane-scroller { grid-template:none; grid-template-columns:repeat(2, minmax(0, 1fr)); grid-template-rows:auto; grid-auto-rows:85dvh; overflow:visible; }
+    #work > * { grid-area:auto; }
     #explorerPane { grid-column:1 / -1; max-height:40dvh; }
     #split { display:none; }
   }
+/* Compare 2 views (phase 2a) */
+.cm-editor .cmp-del { background: color-mix(in srgb, #e5534b 13%, transparent); }
+.cm-editor .cmp-add { background: color-mix(in srgb, #2da44e 13%, transparent); }
+.cm-editor .cmp-del-ch { background: color-mix(in srgb, #e5534b 38%, transparent); border-radius: 2px; }
+.cm-editor .cmp-add-ch { background: color-mix(in srgb, #2da44e 38%, transparent); border-radius: 2px; }
+.cm-editor .cmp-gap { box-shadow: inset 0 2px 0 #d29922; }
+body.comparing #btnCompare { background: var(--acc); color: #fff; border-color: var(--acc); }
+/* Hidden characters + macro recording (phase 2b) */
+.cm-editor .cm-eol-mark { color: var(--muted); opacity: .55; font-size: .72em; margin-left: 3px; user-select: none; }
+body.recording .statusbar { box-shadow: inset 0 2px 0 #e5534b; }
+.cm-editor .cmp-gutter .cm-gutterElement { width: 14px; padding: 0; text-align: center; }
+.cm-editor .cmp-gutter .cmp-g-del { background: color-mix(in srgb, #e5534b 45%, transparent); }
+.cm-editor .cmp-gutter .cmp-g-add { background: color-mix(in srgb, #2da44e 45%, transparent); }
+.cm-editor .cmp-arrow { cursor: pointer; font-weight: 700; color: var(--ink); }
+  /* Long sample names must not push the toolbar onto a third row (the open list shows them in full). */
+  #demo { max-width:min(20em, 62vw); }

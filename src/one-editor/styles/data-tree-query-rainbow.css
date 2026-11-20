@@ -1,0 +1,29 @@
+  /* Data tools: tree pane, JSONPath / XPath query pane, Rainbow CSV column colours, Problems count. */
+  .pv-tree, .pv-query { overflow:auto; padding:8px 12px 24px; background:var(--bg); color:var(--ink); font:13px/1.55 Consolas, "Cascadia Mono", monospace; }
+  .pv-tree details { padding-left:16px; }
+  .pv-tree > details, .pv-tree > .tleaf { padding-left:0; }
+  .pv-tree .tleaf { padding-left:30px; }
+  .pv-tree summary { cursor:pointer; }
+  .pv-tree .tn { cursor:pointer; border-radius:3px; padding:0 2px; overflow-wrap:anywhere; }
+  .pv-tree .tn:hover { background:var(--hover); }
+  .pv-tree .tn.on { background:color-mix(in srgb, var(--acc) 22%, transparent); }
+  .pv-tree .tk { color:var(--tn); }
+  .pv-tree .ta { color:var(--an); }
+  .pv-tree .tm { color:var(--muted); }
+  .pv-tree .tv-str { color:var(--s); }
+  .pv-tree .tv-num { color:var(--n); }
+  .pv-tree .tv-lit { color:var(--l); }
+  .pv-tree .tmore { margin:2px 0 2px 30px; padding:0 8px; }
+  .dq-input { width:24em; max-width:100%; font-family:Consolas, "Cascadia Mono", monospace; }
+  .pv-query table { border-collapse:collapse; width:100%; }
+  .pv-query td { padding:3px 8px 3px 0; border-bottom:1px solid var(--line); vertical-align:top; overflow-wrap:anywhere; }
+  .pv-query tr[onclick], .pv-query tr { cursor:pointer; }
+  .pv-query tr:hover td { background:var(--hover); }
+  .dq-n, .dq-line { color:var(--muted); white-space:nowrap; }
+  .dq-path { color:var(--tn); }
+  .dq-val { color:var(--s); white-space:pre-wrap; }
+  .rb0 { color:var(--tn); } .rb1 { color:var(--n); } .rb2 { color:var(--s); } .rb3 { color:var(--k); }
+  .rb4 { color:var(--l); } .rb5 { color:var(--acc); } .rb6 { color:var(--bad); } .rb7 { color:var(--muted); }
+  #stLint { font-weight:600; }
+  #stLint:empty { display:none; }
+  @media (max-width:640px) { .dq-input { width:100%; } .pv-query td { font-size:12px; } }

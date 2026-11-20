@@ -1,0 +1,89 @@
+  /* Phase 9: invisible-char pane, batch replace + SQL dialogs, recipe / regex / run / code-image panes. */
+  .pv-invisible, .pv-recipe, .pv-regex, .pv-run, .pv-codeimg { overflow:auto; background:var(--bg); color:var(--ink); }
+  .iv-sum { display:flex; flex-direction:column; gap:4px; padding:8px 12px; border-bottom:1px solid var(--line); }
+  .iv-kind { display:flex; flex-wrap:wrap; gap:6px; align-items:center; }
+  .iv-kind b { font-weight:600; margin-right:4px; }
+  .iv-list { padding:4px 0 24px; font:13px/1.5 Consolas, "Cascadia Mono", monospace; }
+  .iv-row { display:flex; gap:10px; padding:0 12px; cursor:pointer; white-space:pre; }
+  .iv-row:hover { background:var(--hover); }
+  .iv-row code { flex:none; color:var(--acc); }
+  .iv-name { flex:none; min-width:12em; color:var(--muted); }
+  .iv-ctx { min-width:0; overflow:hidden; text-overflow:ellipsis; }
+  .iv-ctx mark, .rx-src mark { background:color-mix(in srgb, var(--warn) 30%, transparent); color:inherit; border-radius:2px; }
+
+  dialog.br-dlg { width:min(900px, calc(100vw - 16px)); max-height:86dvh; }
+  .br-head, .br-foot { display:flex; flex-wrap:wrap; gap:6px; align-items:center; padding:10px 12px; }
+  .br-head select { min-width:0; max-width:240px; }
+  .br-foot .muted { flex:1; font-size:12px; color:var(--muted); }
+  .br-rows { overflow:auto; padding:0 12px; display:flex; flex-direction:column; gap:6px; }
+  .br-row { display:grid; grid-template-columns:auto minmax(0, 1fr) auto minmax(0, 1fr) auto auto auto 4.5em auto; gap:6px; align-items:center; }
+  .br-row.off .br-in { opacity:.5; }
+  .br-in { min-width:0; font-family:Consolas, "Cascadia Mono", monospace; }
+  .br-n { font-size:12px; color:var(--acc); text-align:right; }
+  .br-result { margin:4px 12px 0; min-height:1.4em; font-size:13px; }
+  .br-dlg label.chk, .sql-dlg label.chk { display:inline-flex; align-items:center; gap:3px; font-size:12px; }
+  .sql-f { display:flex; flex-direction:column; gap:2px; font-size:13px; }
+  .sql-f span { color:var(--muted); font-size:12px; }
+
+  .rc-steps { display:flex; flex-direction:column; gap:6px; padding:8px 12px; }
+  .rc-step { border:1px solid var(--line); border-left:4px solid var(--good); border-radius:6px; background:var(--panel); padding:6px 8px; }
+  .rc-step.off { opacity:.55; border-left-color:var(--muted); }
+  .rc-step.bad { border-left-color:var(--bad); }
+  .rc-top { display:flex; flex-wrap:wrap; gap:6px; align-items:center; }
+  .rc-top b { font-weight:600; }
+  .rc-grip { cursor:grab; color:var(--muted); user-select:none; }
+  .rc-state { flex:1; min-width:8em; font-size:12px; color:var(--muted); overflow-wrap:anywhere; }
+  .rc-step.bad .rc-state { color:var(--bad); }
+  .rc-args { display:flex; flex-wrap:wrap; gap:6px; margin-top:6px; }
+  .rc-arg { flex:1; min-width:8em; font-family:Consolas, "Cascadia Mono", monospace; }
+  .rc-out-head { padding:6px 12px; border-top:1px solid var(--line); font-size:12px; color:var(--muted); }
+  .rc-out-head.bad { color:var(--bad); }
+  .rc-out { margin:0; padding:4px 12px 24px; white-space:pre-wrap; overflow-wrap:anywhere; font:13px/1.5 Consolas, "Cascadia Mono", monospace; }
+  .rc-add, .rc-saved { max-width:12em; }
+
+  .cm-rx-a { background:color-mix(in srgb, #f59e0b 30%, transparent); border-radius:2px; }
+  .cm-rx-b { background:color-mix(in srgb, #0ea5e9 30%, transparent); border-radius:2px; }
+  .pv-bar .rx-pat { flex:2; min-width:8em; font-family:Consolas, "Cascadia Mono", monospace; }
+  .pv-bar .rx-flags { width:4.5em; font-family:Consolas, "Cascadia Mono", monospace; }
+  .pv-bar .rx-repl { flex:1; min-width:7em; font-family:Consolas, "Cascadia Mono", monospace; }
+  .pv-regex .rp-warn { margin:8px 12px; }
+  .rx-sec { padding:4px 12px 8px; }
+  .rx-sec h4 { margin:6px 0; font-size:13px; }
+  .rx-src { margin:0; padding:6px 8px; border:1px solid var(--line); border-radius:6px; background:var(--code); white-space:pre-wrap; overflow-wrap:anywhere; font:13px/1.5 Consolas, "Cascadia Mono", monospace; max-height:40vh; overflow:auto; }
+  .rx-src mark.rx-a { background:color-mix(in srgb, #f59e0b 35%, transparent); color:inherit; }
+  .rx-src mark.rx-b { background:color-mix(in srgb, #0ea5e9 35%, transparent); color:inherit; }
+  .rx-tab { border-collapse:collapse; font:12px/1.4 Consolas, "Cascadia Mono", monospace; display:block; overflow-x:auto; }
+  .rx-tab th, .rx-tab td { border:1px solid var(--line); padding:2px 6px; text-align:left; white-space:pre; }
+  .rx-tab tr:hover td { background:var(--hover); cursor:pointer; }
+  .rx-none { color:var(--muted); }
+  .rx-bad { margin:8px 12px; color:var(--bad); white-space:pre-wrap; }
+  .rx-exp { margin:0; padding-left:18px; font-size:13px; }
+  .rx-exp code { color:var(--acc); }
+  .pv-run { display:flex; flex-direction:column; overflow:hidden; }
+  .run-host { flex:1 1 50%; min-height:120px; border-bottom:1px solid var(--line); background:#fff; }
+  .run-host.js { flex:0 0 0; min-height:0; border:0; overflow:hidden; }
+  .run-frame { width:100%; height:100%; border:0; display:block; }
+  .run-con { flex:1 1 50%; overflow:auto; padding:4px 0 16px; font:12px/1.5 Consolas, "Cascadia Mono", monospace; }
+  .run-row { display:flex; gap:8px; padding:1px 12px; border-bottom:1px solid color-mix(in srgb, var(--line) 50%, transparent); white-space:pre-wrap; overflow-wrap:anywhere; }
+  .run-ic { flex:none; width:1em; color:var(--muted); }
+  .run-warn { color:var(--warn); background:color-mix(in srgb, var(--warn) 8%, transparent); }
+  .run-error { color:var(--bad); background:color-mix(in srgb, var(--bad) 8%, transparent); }
+  .run-info .run-ic { color:var(--acc); }
+  .run-line { flex:none; padding:0 4px; font-size:11px; }
+  .run-tx { min-width:0; }
+  .run-old { margin:8px 12px; white-space:pre-wrap; color:var(--muted); }
+
+  .pv-codeimg { display:flex; }
+  .ci-box { margin:auto; padding:16px; max-width:100%; }
+  .ci-box svg { display:block; max-width:100%; height:auto; }
+
+  @media (max-width: 640px) {
+    .pv-bar .rx-pat, .pv-bar .rx-flags, .pv-bar .rx-repl { font-size:16px; }
+    .rc-arg, .rc-add, .rc-saved, .rc-args select { font-size:16px; }
+    .br-row { grid-template-columns:auto minmax(0, 1fr) auto auto; padding:6px 0; border-bottom:1px solid var(--line); }
+    .br-row .br-in { grid-column:2 / 4; }
+    .br-row .br-arrow { display:none; }
+    .br-row > button { grid-row:1; grid-column:4; }
+    .br-in, .br-head select, .sql-f input, .sql-f select { font-size:16px; }
+    .iv-name { min-width:0; }
+  }

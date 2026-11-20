@@ -1,0 +1,30 @@
+// English strings for phase 8d in the main page (commands, markup, Goto Anything, password links, locked notes placeholder), keyed by the Vietnamese source text.
+I18n.add({
+  "Bộ phím: {name}": "Key profile: {name}", "Vim: bật / tắt (chế độ phím Vim)": "Vim: on / off (Vim key mode)", "Emmet: bật / tắt (HTML · CSS · JSX)": "Emmet: on / off (HTML · CSS · JSX)",
+  "Emmet: mở rộng viết tắt ở con trỏ (Ctrl+E)": "Emmet: expand the abbreviation at the cursor (Ctrl+E)", "Emmet chỉ chạy trong tab HTML / CSS / JSX.": "Emmet works in HTML / CSS / JSX tabs only.",
+  "Emmet: bật (HTML · CSS · JSX — Tab hoặc Ctrl+E để mở rộng viết tắt).": "Emmet: on (HTML · CSS · JSX — Tab or Ctrl+E expands an abbreviation).", "Emmet: tắt.": "Emmet: off.",
+  "Không nạp được Emmet ({file}).": "Could not load Emmet ({file}).",
+  "Không nạp được phần mở rộng editor ({file}) — cần file này nằm cạnh one-editor.html.": "Could not load the editor extras ({file}) — this file must sit next to one-editor.html.",
+  "Snippet: chèn…": "Snippet: insert…", "Snippet: lưu vùng chọn thành snippet…": "Snippet: save the selection as a snippet…", "Snippet: xoá snippet đã lưu…": "Snippet: delete a saved snippet…",
+  "Phiên: lưu các tab + layout với tên…": "Session: save the tabs + layout under a name…", "Phiên: mở phiên đã lưu…": "Session: open a saved session…",
+  "Bật / tắt thước cột 80 / 120": "Toggle the 80 / 120 column rulers", "Bật / tắt tô màu cặp ngoặc": "Toggle bracket pair colours",
+  "Bật / tắt ô màu cạnh mã màu CSS": "Toggle colour swatches next to CSS colours", "Bật / tắt breadcrumbs (đường dẫn symbol trên editor)": "Toggle breadcrumbs (symbol path above the editor)",
+  "Mở rộng vùng chọn theo cú pháp": "Expand the selection by syntax", "Thu hẹp vùng chọn (ngược lại lần mở rộng)": "Shrink the selection (undo an expand)",
+  "Outline: danh sách hàm / class / tiêu đề của tab (sidebar)": "Outline: functions / classes / headings of the tab (sidebar)",
+  "Ghi chú: đặt mật khẩu (lưu mã hoá AES-GCM)…": "Note: set a password (stored AES-GCM encrypted)…", "Ghi chú: khoá lại ngay (ẩn nội dung)": "Note: lock now (hide the content)",
+  "Ghi chú: mở khoá…": "Note: unlock…", "Ghi chú: bỏ mật khẩu (lưu thường)": "Note: remove the password (store as plain text)",
+  "🔒 Chia sẻ link có mật khẩu (AES-GCM)": "🔒 Share a password-protected link (AES-GCM)", "Mật khẩu cho link chia sẻ": "Password for the share link",
+  "Link này có mật khẩu — nhập mật khẩu để mở": "This link has a password — type it to open the link", "🔒 Link đã mã hoá — gửi mật khẩu qua kênh khác.": "🔒 The link is encrypted — send the password another way.",
+  "🔒 Ghi chú đã khoá — Command Palette → “Ghi chú: mở khoá…” để nhập mật khẩu.": "🔒 Locked note — Command Palette → “Note: unlock…” to type the password.",
+  "Emmet + ô màu CSS (Ctrl+E)": "Emmet + CSS colour swatches (Ctrl+E)", "Outline + breadcrumbs (Markdown)": "Outline + breadcrumbs (Markdown)",
+  "Đã huỷ mở link có mật khẩu.": "Opening the password link was cancelled.", "Thử lại:": "Try again:",
+  // Goto Anything
+  "Tìm tab / file… (> lệnh, @ symbol, : dòng, file@symbol, file:dòng, #từ)": "Find a tab / file… (> commands, @ symbols, : line, file@symbol, file:line, #word)",
+  "Gõ từ cần tìm trong tab sau dấu #": "Type the word to find in the tab after #", "{name} — tới dòng {n}": "{name} — go to line {n}",
+  // Markup
+  "Outline — hàm, class, tiêu đề của tab đang mở": "Outline — functions, classes, headings of the open tab", "Lọc symbol…": "Filter symbols…",
+  "Phiên có tên: lưu / mở bộ tab + layout (lưu trong trình duyệt này)": "Named sessions: save / open a set of tabs + layout (kept in this browser)",
+  "Lưu các tab + layout thành phiên có tên": "Save the tabs + layout as a named session", "Xoá phiên đang mở khỏi trình duyệt": "Delete the open session from this browser",
+  "Mật khẩu": "Password", "Mật khẩu (ít nhất 8 ký tự)": "Password (at least 8 characters)", "Nhập lại mật khẩu": "Repeat the password", "Huỷ": "Cancel",
+  "Mật khẩu không nằm trong link và không được lưu ở đâu — quên là không mở lại được.": "The password is not in the link and is not stored anywhere — forget it and the content cannot be opened again.",
+});

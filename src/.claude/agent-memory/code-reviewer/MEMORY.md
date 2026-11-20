@@ -1,0 +1,1 @@
+- [Files change mid-review](review-files-change-mid-review.md) — re-read One Editor files before reporting; check T() strings exist in js/i18n dictionaries

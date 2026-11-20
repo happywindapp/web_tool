@@ -1,6 +1,6 @@
-// IndexedDB (ADR #20): "docs" holds notes + every open tab (hot exit), "meta" holds the layout. Blocked or failing storage ⇒ ok=false and the tool runs without saving.
+// IndexedDB (ADR #20): "docs" holds notes + every open tab (hot exit), "meta" holds the layout, "history" + "historyText" the local history. Blocked or failing storage ⇒ ok=false and the tool runs without saving.
 const NotesDb = (() => {
-  const NAME = "web_tool.one-editor", VERSION = 1;
+  const NAME = "web_tool.one-editor", VERSION = 2, STORES = ["docs", "meta", "history", "historyText"];
   let db = null, ok = false, error = "";
 
   const req = r => new Promise((res, rej) => { r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); });
@@ -10,9 +10,15 @@ const NotesDb = (() => {
   async function open() {
     try {
       const r = indexedDB.open(NAME, VERSION);
-      r.onupgradeneeded = () => { r.result.createObjectStore("docs", { keyPath: "id" }); r.result.createObjectStore("meta"); };
+      r.onupgradeneeded = () => {
+        const d = r.result, has = n => d.objectStoreNames.contains(n);
+        if (!has("docs")) d.createObjectStore("docs", { keyPath: "id" });
+        if (!has("meta")) d.createObjectStore("meta");
+        if (!has("history")) d.createObjectStore("history", { keyPath: "id" });
+        if (!has("historyText")) d.createObjectStore("historyText");
+      };
       db = await req(r);
-      db.onversionchange = () => db.close();
+      db.onversionchange = () => { db.close(); fail(new Error(T("Một tab mới hơn của One Editor đã nâng cấp dữ liệu — tải lại trang này (F5) để lưu tiếp."))); StatusBar.msg(error, "warn"); };
       ok = true;
     } catch (e) { fail(e); }
     return ok;
@@ -38,12 +44,37 @@ const NotesDb = (() => {
     return true;
   }
 
+  async function getMeta(key) {
+    if (!ok) return undefined;
+    try { return await req(db.transaction("meta", "readonly").objectStore("meta").get(key)); } catch (e) { fail(e); return undefined; }
+  }
+
+  async function putMeta(key, value) {
+    if (!ok) return false;
+    const t = db.transaction("meta", "readwrite");
+    t.objectStore("meta").put(value, key);
+    await done(t);
+    return true;
+  }
+
   async function clear() {
     if (!ok) return;
-    const t = db.transaction(["docs", "meta"], "readwrite");
-    t.objectStore("docs").clear(); t.objectStore("meta").clear();
+    const t = db.transaction(STORES, "readwrite");
+    STORES.forEach(n => t.objectStore(n).clear());
     await done(t);
   }
 
-  return { open, loadAll, save, clear, get ok() { return ok; }, get error() { return error; } };
+  // Local history: "history" keeps { id, key, name, t, size, sum, handle? } (cheap to list), "historyText" the text under the same id.
+  const histList = async () => ok ? req(db.transaction("history", "readonly").objectStore("history").getAll()) : [];
+  const histText = async id => ok ? req(db.transaction("historyText", "readonly").objectStore("historyText").get(id)) : undefined;
+  async function histWrite(rec, text, dropIds) {
+    if (!ok) return false;
+    const t = db.transaction(["history", "historyText"], "readwrite"), h = t.objectStore("history"), x = t.objectStore("historyText");
+    for (const id of dropIds) { h.delete(id); x.delete(id); }
+    if (rec) { h.put(rec); x.put(text, rec.id); }
+    await done(t);
+    return true;
+  }
+
+  return { open, loadAll, save, getMeta, putMeta, clear, histList, histText, histWrite, get ok() { return ok; }, get error() { return error; } };
 })();

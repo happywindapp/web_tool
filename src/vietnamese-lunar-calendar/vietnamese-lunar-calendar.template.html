@@ -16,6 +16,7 @@
 <!-- GoatCounter: chỉ gửi path (không query/hash); chạy local đếm thành /local/<tên file> để không lộ thư mục máy -->
 <script>
 { const local = !location.protocol.startsWith("http") || ["localhost", "127.0.0.1"].includes(location.hostname);
+  if (!local) document.documentElement.classList.add("hosted");
   const p = local ? "/local/" + location.pathname.split("/").pop() : location.pathname.replace(/index[.]html$/, "");
   const gc = "https://quan111.goatcounter.com/count";
   navigator.sendBeacon?.(gc + "?" + new URLSearchParams({ p, r: document.referrer.split("?")[0], t: document.title, s: screen.width }));
@@ -53,7 +54,7 @@
   </span>
 </div>
 <div class="toolbar" id="horoBar" hidden>
-  <select id="horoDemo" title="Nạp hồ sơ mẫu rồi xem ngay"></select>
+  <select id="horoDemo" class="demo-picker" title="Nạp hồ sơ mẫu rồi xem ngay"></select>
   <input type="text" id="hName" class="name" autocomplete="off" spellcheck="false" maxlength="80" placeholder="Họ và tên" title="Họ và tên (dùng cho thần số học; có dấu hay không đều được)">
   <select id="hSex" title="Giới tính (ảnh hưởng cung mệnh, sao chiếu mệnh)"></select>
   <input type="text" id="hBirth" class="date" autocomplete="off" placeholder="Ngày sinh 15/08/1990" title="Ngày sinh (dd/mm/yyyy) theo lịch chọn bên cạnh; tháng nhuận âm lịch thêm “n” (15/6n/2025)">
@@ -66,7 +67,7 @@
   <span class="muted hint">Nhập ngày sinh (thêm giờ sinh, họ tên nếu có) → xem tứ trụ, mệnh, hướng hợp, thần số học và vận hạn từng năm</span>
 </div>
 <div class="toolbar" id="simBar" hidden>
-  <select id="simDemo" title="Nạp SIM mẫu rồi chấm ngay"></select>
+  <select id="simDemo" class="demo-picker" title="Nạp SIM mẫu rồi chấm ngay"></select>
   <input type="text" id="sNum" inputmode="tel" autocomplete="off" spellcheck="false" maxlength="40" placeholder="Số SIM 0912 345 678" title="Số di động 10 chữ số (0… hoặc +84…); được có dấu cách, chấm, gạch">
   <select id="sSex" title="Giới tính chủ SIM (dùng cho tứ trụ, cung mệnh)"></select>
   <input type="text" id="sBirth" class="date" autocomplete="off" placeholder="Ngày sinh 15/08/1990" title="Ngày sinh chủ SIM (dd/mm/yyyy) theo lịch chọn bên cạnh; để trống thì chỉ chấm riêng dãy số">

@@ -10,6 +10,12 @@
   .tab:focus-visible { outline:2px solid var(--acc); outline-offset:-2px; }
   .tab .x { min-width:22px; padding:0 4px; border:0; background:transparent; color:inherit; line-height:1.3; }
   .gbar > button { flex:none; border:0; border-left:1px solid var(--line); border-radius:0; background:transparent; padding:2px 10px; }
+  .tab-rename { width:auto; min-width:6em; max-width:min(200px, 50vw); padding:1px 4px; border:1px solid var(--acc); border-radius:3px; background:var(--panel); color:var(--ink); font:inherit; user-select:text; }
+  .tab-menu { position:fixed; z-index:60; display:flex; flex-direction:column; min-width:240px; max-width:calc(100vw - 8px); padding:4px 0; border:1px solid var(--line);
+              border-radius:8px; background:var(--panel); color:var(--ink); box-shadow:0 8px 24px rgb(0 0 0 / .25); }
+  .tab-menu > button { display:flex; justify-content:space-between; gap:16px; padding:6px 14px; border:0; border-radius:0; background:transparent; color:inherit; text-align:left; }
+  .tab-menu > button small { color:var(--muted); }
+  .tab-menu > button:focus-visible { outline:none; background:color-mix(in srgb, var(--acc) 16%, transparent); }
 
   .ex-sec h3 { display:flex; align-items:center; gap:2px; margin:8px 6px 2px 10px; font-size:11px; letter-spacing:.04em; text-transform:uppercase; color:var(--muted); }
   .ex-sec h3 > span { flex:1 1 auto; }
@@ -21,14 +27,32 @@
   .ex-open { margin:2px 14px 6px; }
   details.ex-dir > summary { padding:3px 8px 3px 14px; cursor:pointer; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .ex-kids { padding-left:12px; }
+  .ex-acts { display:inline-flex; visibility:hidden; }
+  .ex-row:hover .ex-acts, .ex-row:focus-within .ex-acts, summary:hover .ex-acts, summary:focus-within .ex-acts { visibility:visible; }
+  @media (hover:none) { .ex-acts { visibility:visible; } }
+
+  dialog.qp { width:min(640px, calc(100vw - 16px)); max-height:70dvh; margin:10dvh auto auto; padding:0; border:1px solid var(--line); border-radius:10px;
+              background:var(--panel); color:var(--ink); box-shadow:0 16px 48px rgb(0 0 0 / .3); }
+  dialog.qp[open] { display:flex; flex-direction:column; }
+  dialog.qp::backdrop { background:rgb(0 0 0 / .25); }
+  #qpInput { margin:10px; padding:8px 10px; }
+  #qpList { list-style:none; margin:0; padding:0 0 8px; overflow:auto; }
+  #qpList li { display:flex; justify-content:space-between; gap:12px; padding:6px 14px; cursor:pointer; }
+  #qpList li > span { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  #qpList li b { color:var(--acc); }
+  #qpList li small { flex:none; max-width:45%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--muted); }
+  #qpList li.on { background:color-mix(in srgb, var(--acc) 16%, transparent); }
+  #qpList li.none { color:var(--muted); cursor:default; }
 
   @media (hover:hover) {
     .tab:hover, .ex-item:hover, details.ex-dir > summary:hover { background:var(--hover); color:var(--ink); }
     .tab .x:hover, .ex-act:hover, .gbar > button:hover { background:var(--line); color:var(--ink); }
+    .tab-menu > button:hover { background:var(--hover); }
   }
   @media (max-width:640px) {
     .tab { min-height:38px; max-width:60vw; }
     .tab .x { min-width:32px; min-height:32px; }
+    .tab-menu > button { min-height:40px; }
     .gbar > button { min-height:38px; padding:2px 12px; }
     .ex-item, details.ex-dir > summary { padding-top:7px; padding-bottom:7px; }
     .ex-act { min-width:38px; min-height:36px; }

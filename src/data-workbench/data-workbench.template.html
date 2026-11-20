@@ -16,6 +16,7 @@
 <!-- GoatCounter: chỉ gửi path (không query/hash); chạy local đếm thành /local/<tên file> để không lộ thư mục máy -->
 <script>
 { const local = !location.protocol.startsWith("http") || ["localhost", "127.0.0.1"].includes(location.hostname);
+  if (!local) document.documentElement.classList.add("hosted");
   const p = local ? "/local/" + location.pathname.split("/").pop() : location.pathname.replace(/index[.]html$/, "");
   const gc = "https://quan111.goatcounter.com/count";
   navigator.sendBeacon?.(gc + "?" + new URLSearchParams({ p, r: document.referrer.split("?")[0], t: document.title, s: screen.width }));

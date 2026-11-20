@@ -15,6 +15,7 @@
 <!-- GoatCounter: chỉ gửi path (không query/hash); chạy local đếm thành /local/<tên file> để không lộ thư mục máy -->
 <script>
 { const local = !location.protocol.startsWith("http") || ["localhost", "127.0.0.1"].includes(location.hostname);
+  if (!local) document.documentElement.classList.add("hosted");
   const p = local ? "/local/" + location.pathname.split("/").pop() : location.pathname.replace(/index[.]html$/, "");
   const gc = "https://quan111.goatcounter.com/count";
   navigator.sendBeacon?.(gc + "?" + new URLSearchParams({ p, r: document.referrer.split("?")[0], t: document.title, s: screen.width }));
@@ -51,7 +52,7 @@
 </header>
 <div class="toolbar">
   <label class="btn" title="Mở file (hoặc kéo-thả file vào trang)">Mở file…<input id="file" type="file"></label>
-  <select id="demo" title="Nạp sơ đồ mẫu rồi vẽ ngay"></select>
+  <select id="demo" class="demo-picker" title="Nạp sơ đồ mẫu rồi vẽ ngay"></select>
   <span class="sep"></span>
   <span id="engineOpts" class="opts"></span>
   <select id="pickSel" hidden></select>
@@ -116,6 +117,7 @@ const $ = id => document.getElementById(id);
 // @include js/core/svg-output-sanitizer.js
 // @include js/core/svg-png-exporter.js
 // @include js/core/source-highlighter.js
+// @include js/core/pan-zoom-controller.js
 // @include js/core/preview-pan-zoom.js
 // @include js/core/version-history.js
 // @include js/samples/mermaid-samples.js

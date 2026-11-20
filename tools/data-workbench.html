@@ -63,6 +63,8 @@
   .wb-nav button { padding:6px 14px; border:0; border-radius:6px 6px 0 0; background:transparent; }
   .wb-nav button:hover { background:var(--btn); }
   .wb-nav button.on { background:var(--tb); color:var(--tb-ink); font-weight:600; }
+  /* "Thử mẫu…" is a local testing aid: hidden on the published site, ?demo=<key> still works */
+  .hosted .demo-picker { display:none !important; }
   .toolbar { background:var(--tb); --line:color-mix(in srgb, var(--acc) 40%, var(--panel)); --muted:color-mix(in srgb, var(--ink) 65%, var(--panel)); }
   .ed { display:grid; grid-template-columns:auto 1fr; min-height:0; }
   .gut { margin:0; padding:8px 6px 8px 10px; text-align:right; color:var(--c); background:var(--gut); overflow:hidden; user-select:none;
@@ -220,6 +222,7 @@
 <!-- GoatCounter: chỉ gửi path (không query/hash); chạy local đếm thành /local/<tên file> để không lộ thư mục máy -->
 <script>
 { const local = !location.protocol.startsWith("http") || ["localhost", "127.0.0.1"].includes(location.hostname);
+  if (!local) document.documentElement.classList.add("hosted");
   const p = local ? "/local/" + location.pathname.split("/").pop() : location.pathname.replace(/index[.]html$/, "");
   const gc = "https://quan111.goatcounter.com/count";
   navigator.sendBeacon?.(gc + "?" + new URLSearchParams({ p, r: document.referrer.split("?")[0], t: document.title, s: screen.width }));
@@ -266,7 +269,7 @@
     <button id="fmt-min" data-pane-go="1">Thu gọn 1 dòng</button>
     <button id="fmt-escape" data-pane-go="1" title="Thu gọn rồi bọc thành 1 chuỗi JSON (thoát &quot; và xuống dòng) để nhúng vào JSON/code khác">Thành chuỗi JSON</button>
     <button id="fmt-clear" data-pane-go="0">Xoá</button>
-    <select id="fmt-demo"><option value="">Thử file mẫu…</option><option value="json">JSON lỗi</option><option value="xml">XML lỗi</option><option value="html">HTML lỗi</option><option value="nested">JSON lồng trong log</option></select>
+    <select id="fmt-demo" class="demo-picker"><option value="">Thử file mẫu…</option><option value="json">JSON lỗi</option><option value="xml">XML lỗi</option><option value="html">HTML lỗi</option><option value="nested">JSON lồng trong log</option></select>
     <span class="muted" id="fmt-kind-now"></span>
   </div>
   <div class="seg pane-switch"><button>Nội dung gốc</button><button>Kết quả</button></div>
@@ -306,7 +309,7 @@
     <span class="sep"></span>
     <button id="cv-run" class="main" title="Ctrl+Enter" data-pane-go="1">Chuyển đổi</button>
     <button id="cv-clear" data-pane-go="0">Xoá</button>
-    <select id="cv-demo"><option value="">Thử dữ liệu mẫu…</option><option value="json">JSON → CSV</option><option value="csv">CSV → JSON</option><option value="xml">XML → JSON</option><option value="yaml">YAML → JSON</option></select>
+    <select id="cv-demo" class="demo-picker"><option value="">Thử dữ liệu mẫu…</option><option value="json">JSON → CSV</option><option value="csv">CSV → JSON</option><option value="xml">XML → JSON</option><option value="yaml">YAML → JSON</option></select>
   </div>
   <div class="seg pane-switch"><button>Dữ liệu nguồn</button><button>Kết quả</button></div>
   <div class="work pane-scroller">
@@ -345,7 +348,7 @@
     <select id="csv-eol" title="Kiểu xuống dòng khi tải về"><option value="crlf">CRLF (Windows/Excel)</option><option value="lf">LF (Linux/Mac)</option></select>
     <select id="csv-send"></select>
     <button id="csv-clear">Xoá</button>
-    <select id="csv-demo"><option value="">Thử file mẫu…</option><option value="csv">CSV có lỗi</option></select>
+    <select id="csv-demo" class="demo-picker"><option value="">Thử file mẫu…</option><option value="csv">CSV có lỗi</option></select>
   </div>
   <div class="grid-area">
     <div id="csv-paste" class="paste" hidden>
@@ -372,7 +375,7 @@
     <button id="df-swap">⇄ Đổi bên</button>
     <button id="df-next">↓ Chỗ khác tiếp theo</button>
     <button id="df-clear" data-pane-go="0">Xoá</button>
-    <select id="df-demo"><option value="">Thử mẫu…</option><option value="json">JSON 2 phiên bản</option><option value="text">File cấu hình</option></select>
+    <select id="df-demo" class="demo-picker"><option value="">Thử mẫu…</option><option value="json">JSON 2 phiên bản</option><option value="text">File cấu hình</option></select>
   </div>
   <div class="seg pane-switch"><button>Bên trái (cũ)</button><button>Bên phải (mới)</button><button>Kết quả</button></div>
   <div class="diff-body pane-scroller">
@@ -409,7 +412,7 @@
     <button id="cf-run" class="main" title="Ctrl+Enter" data-pane-go="1">Format</button>
     <button id="cf-min" data-pane-go="1" title="Bỏ chú thích và khoảng trắng thừa (chỉ CSS)">Thu gọn CSS</button>
     <button id="cf-clear" data-pane-go="0">Xoá</button>
-    <select id="cf-demo"><option value="">Thử mẫu…</option><option value="css">CSS 1 dòng</option><option value="js">JS 1 dòng</option></select>
+    <select id="cf-demo" class="demo-picker"><option value="">Thử mẫu…</option><option value="css">CSS 1 dòng</option><option value="js">JS 1 dòng</option></select>
     <span class="muted" id="cf-lang-now"></span>
   </div>
   <div class="seg pane-switch"><button>Mã gốc</button><button>Kết quả</button></div>
@@ -807,6 +810,7 @@ I18n.add({
   "Không có phần tử XML nào → bọc nội dung trong <root>": "No XML element found → content wrapped in <root>",
   "XML phải có đúng 1 phần tử gốc (đang có {n} và có chữ nằm ngoài) → bọc trong <root>": "XML must have exactly 1 root element (found {n}, plus text outside) → wrapped in <root>",
   "XML phải có đúng 1 phần tử gốc (đang có {n}) → bọc trong <root>": "XML must have exactly 1 root element (found {n}) → wrapped in <root>",
+  "Cần JSON là object hoặc mảng object để sinh kiểu.": "Types need a JSON object or an array of objects.",
 });
 // English for the shared core modules (ThemePicker markup, SavedSessions, ColFilter) — included by every tool that uses them.
 I18n.add({
@@ -839,7 +843,14 @@ I18n.add({
 // Pure text helpers shared by parsers and tabs (no DOM, so node tests can load them).
 const TextUtil = (() => {
   const stripBom = s => s.charCodeAt(0) === 0xfeff ? s.slice(1) : s;
-  const lineCol = (s, i) => { const pre = s.slice(0, i).split("\n"); return { line: pre.length, col: pre[pre.length - 1].length + 1 }; };
+  // Line starts are cached for the last text: parsers call this once per auto-fix on the same big string.
+  let lastText = null, starts = [0];
+  function lineCol(s, i) {
+    if (s !== lastText) { lastText = s; starts = [0]; for (let k = s.indexOf("\n"); k >= 0; k = s.indexOf("\n", k + 1)) starts.push(k + 1); }
+    let lo = 0, hi = starts.length - 1;
+    while (lo < hi) { const m = (lo + hi + 1) >> 1; if (starts[m] <= i) lo = m; else hi = m - 1; }
+    return { line: lo + 1, col: i - starts[lo] + 1 };
+  }
   const INDENT = { "2": "  ", "3": "   ", "4": "    ", "8": "        ", tab: "\t" };
   const indentUnit = v => INDENT[v] ?? "  ";
   const countLines = s => { let n = 1; for (let i = s.indexOf("\n"); i >= 0; i = s.indexOf("\n", i + 1)) n++; return n; };
@@ -1481,8 +1492,15 @@ const JsonTool = (() => {
       return { t: "num", raw };
     }
 
+    // Every node keeps "at" = its start offset in the (BOM-stripped) text, so a tree view can jump to it.
     function value(depth) {
       ws();
+      const at = i, n = value1(depth);
+      if (!("at" in n)) n.at = at;
+      return n;
+    }
+
+    function value1(depth) {
       const c = s[i];
       if (c === undefined) { fix(T("Thiếu giá trị ở cuối file → null")); return { t: "lit", v: "null" }; }
       if (c === "{") return obj(depth);

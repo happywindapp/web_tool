@@ -27,8 +27,9 @@ const Explorer = (() => {
   }
 
   function treeNode(node, hit) {
-    if (!node.dir) return hit(node.name) ? row(fileIcon(node.name) + " " + node.name, node.path, () => openNode(node)) : null;
-    const d = el("details", "ex-dir"), kids = el("div", "ex-kids"), sum = el("summary", "", "📁 " + node.name);
+    if (!node.dir) return hit(node.name) ? row(fileIcon(node.name) + " " + node.name, node.path, () => openNode(node), ExplorerDisk.buttons(node)) : null;
+    const d = el("details", "ex-dir"), kids = el("div", "ex-kids"), sum = el("summary");
+    sum.append(el("span", "ex-dname", "📁 " + node.name), ...ExplorerDisk.buttons(node));
     sum.title = node.path;
     d.append(sum, kids);
     const fill = () => kids.replaceChildren(...node.children.map(c => treeNode(c, hit)).filter(Boolean));
@@ -54,6 +55,14 @@ const Explorer = (() => {
       [btn("ex-act", "✎", T("Đổi tên"), () => TabStrip.rename(d)), btn("ex-act", "🗑", T("Xoá ghi chú"), del)]);
   }
 
+  function recentSection(hit) {
+    const items = RecentFiles.list().filter(r => hit(r.name));
+    const rows = items.map(r => row(fileIcon(r.name) + " " + r.name, T("Mở lại — lần mở trước: {at}", { at: new Date(r.at).toLocaleString(I18n.lang) }), () => RecentFiles.open(r),
+      [btn("ex-act", "✕", T("Bỏ khỏi danh sách"), () => RecentFiles.remove(r))]));
+    const empty = LocalFs.canPick ? T("Chưa có file nào mở gần đây.") : T("Trình duyệt này không giữ được file để mở lại (cần Chrome / Edge).");
+    return section(T("Gần đây"), rows.length ? rows : [el("p", "ex-empty", empty)], items.length ? [btn("ex-act", "🗑", T("Xoá danh sách Gần đây"), () => RecentFiles.clear())] : []);
+  }
+
   function draw() {
     raf = 0;
     const q = filter.value.trim().toLowerCase(), hit = s => !q || s.toLowerCase().includes(q);
@@ -64,6 +73,7 @@ const Explorer = (() => {
         : [el("p", "ex-empty", T("Chưa mở tab nào."))]),
       section(T("Ghi chú"), notes.length ? notes.map(noteRow) : [el("p", "ex-empty", NotesDb.ok ? T("Chưa có ghi chú — bấm + để tạo.") : T("Trình duyệt chặn IndexedDB — ghi chú không được lưu."))],
         [btn("ex-act", "+", T("Ghi chú mới (Alt+N)"), () => Actions.newNote(Views.focused))]),
+      recentSection(hit),
     ];
     if (root) {
       const tree = treeNode(root, hit);
@@ -77,6 +87,13 @@ const Explorer = (() => {
   const render = () => { if (!raf) raf = requestAnimationFrame(draw); };
   function setRoot(node) { root = node; if (root) root.open = true; render(); }
 
+  // Files of the folders already read (Quick Open does not walk the disk).
+  function loadedFiles() {
+    const out = [], walk = n => { if (!n.dir) out.push(n); else (n.children || []).forEach(walk); };
+    if (root) walk(root);
+    return out;
+  }
+
   filter.addEventListener("input", render);
-  return { render, setRoot };
+  return { render, setRoot, loadedFiles, openNode, root: () => root };
 })();

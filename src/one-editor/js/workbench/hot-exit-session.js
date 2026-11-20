@@ -4,19 +4,29 @@ const HotExit = (() => {
   const removed = new Set();
   const schedule = () => { if (stopped) return; clearTimeout(timer); timer = setTimeout(flush, 700); };
 
-  const serialize = d => ({
-    id: d.id, kind: d.kind, name: d.name, lang: d.lang, text: Docs.text(d), handle: d.handle || null, dirty: d.dirty, edited: d.edited,
-    readOnly: d.readOnly, eol: d.eol, bom: d.bom, link: d.link, updated: d.updated,
+  // A clean file with a handle is re-read from disk on reopen, so only the handle is stored.
+  const handleOnly = d => d.kind === "file" && !d.dirty && !!d.handle;
+  // A large-file tab keeps only its handle + chunk; without a handle (dropped file) a note says to open the file again.
+  const bigText = d => d.handle ? "" : T("Tab file lớn “{name}”: trình duyệt không giữ file kéo-thả qua F5 — mở lại file để xem tiếp.", { name: d.big.file.name });
+  // A password note is written only encrypted; a result tab of one never keeps its text.
+  const secret = d => !!(d && (d.crypt || d.sealed));
+  const serialize = (d, sealed) => ({
+    id: d.id, kind: d.kind, name: d.name, lang: d.lang, text: secret(d) || secret(d.link && Docs.get(d.link.src)) ? "" : d.big ? bigText(d) : handleOnly(d) ? "" : Docs.text(d), stale: d.big ? !!d.handle : handleOnly(d), sealed: sealed || d.sealed || undefined,
+    bigStart: d.big && d.handle ? d.big.start : null, handle: d.handle || null, dirty: d.dirty, edited: d.edited,
+    readOnly: d.readOnly, eol: d.eol, eolMixed: d.eolMixed, eolList: d.eolMixed ? (d.state ? MixedEol.codesOf(d.state) : d.eolList) : null, bom: d.bom, enc: d.enc, link: d.link, updated: d.updated, pinned: d.pinned, hex: d.hex,
   });
 
   async function flush() {
     clearTimeout(timer);
     if (stopped || !NotesDb.ok) return;
-    const docs = Docs.list().filter(d => d.pending), gone = [...removed];
+    // Clones are views of another tab: their text lives in the original.
+    const docs = Docs.list().filter(d => d.pending && d.kind !== "clone" && !d.hist), gone = [...removed];
     docs.forEach(d => { d.pending = false; });
     removed.clear();
     try {
-      await NotesDb.save(docs.map(serialize), gone, { v: 1, ...Views.snapshot(), wrap: CmSetup.settings.wrap });
+      const sealed = new Map();
+      for (const d of docs) if (d.crypt) sealed.set(d, await Locks.sealDoc(d));
+      await NotesDb.save(docs.map(d => serialize(d, sealed.get(d))), gone, { v: 1, ...Views.snapshot(), wrap: CmSetup.settings.wrap });
       failed = false;
       StatusBar.storage(true);
     } catch (e) {
@@ -30,15 +40,20 @@ const HotExit = (() => {
 
   async function restore() {
     const { docs, session } = await NotesDb.loadAll();
-    for (const r of docs) if (r && typeof r.id === "string" && typeof r.text === "string") Docs.create({ ...r, pending: false });
-    const groups = session && Array.isArray(session.groups) ? session.groups.slice(0, 2) : [];
+    for (const r of docs) if (r && typeof r.id === "string" && typeof r.text === "string" && r.kind !== "clone") {
+      const d = Docs.create({ ...r, pending: false });
+      const s = r.sealed;
+      if (r.kind === "note" && s && typeof s.salt === "string" && typeof s.iv === "string" && typeof s.ct === "string") Object.assign(d, { sealed: { salt: s.salt, iv: s.iv, ct: s.ct, it: Number.isInteger(s.it) ? s.it : 310000 }, readOnly: true, text: T("🔒 Ghi chú đã khoá — Command Palette → “Ghi chú: mở khoá…” để nhập mật khẩu.") });
+    }
+    const groups = session && Array.isArray(session.groups) ? session.groups.slice(0, Layouts.MAX) : [];
     if (session) CmSetup.settings.wrap = session.wrap === true;
+    Views.setLayout(session && Layouts.get(session.layout) ? session.layout : groups.length > 2 ? Layouts.forCount(groups.length) : "2c");
     groups.forEach((g, gi) => (Array.isArray(g.tabs) ? g.tabs : []).forEach(id => { const d = Docs.get(id); if (d) Views.add(d, gi); }));
     // Tabs missing from the layout (another browser tab wrote it last, or a crash): unsaved work comes back in View 1, the rest is dropped.
     for (const d of Docs.list()) if (d.kind !== "note" && Views.where(d.id) < 0) {
       if (d.dirty || d.edited) Views.add(d, 0); else Docs.remove(d.id);
     }
-    [0, 1].forEach(gi => {
+    Views.groups.slice(0, Views.count).forEach((g0, gi) => {
       const tabs = Views.tabsOf(gi), id = tabs.includes(groups[gi]?.active) ? groups[gi].active : tabs[0];
       if (id) Views.activate(gi, id, false);
     });
@@ -59,5 +74,5 @@ const HotExit = (() => {
   // Before wiping storage: no more writes from this page.
   const stop = () => { stopped = true; clearTimeout(timer); };
 
-  return { init, restore, flush, schedule, stop };
+  return { init, restore, flush, schedule, stop, secret };
 })();

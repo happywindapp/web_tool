@@ -1,7 +1,8 @@
-// Splitter between View 1 and View 2 (desktop > 900px): drag, or focus it and use ←/→; the ratio is remembered in this browser.
+// Resizing views (desktop > 900px): the #split bar in 2 columns (drag, ←/→, double-click = 50/50); in 3 columns / 2 rows / 2×2 the gap between two views is the handle. Ratios are remembered per layout.
 const Split = (() => {
   const clamp = r => Math.min(0.85, Math.max(0.15, r));
   let ratio = 0.5;
+  const fr = { c: [1, 1, 1], r: [1, 1] };
 
   function apply(r) {
     ratio = clamp(r);
@@ -10,8 +11,48 @@ const Split = (() => {
     w.style.setProperty("--v2", (1 - ratio) + "fr");
   }
 
+  function applyTracks() {
+    const w = $("work");
+    fr.c.forEach((v, k) => w.style.setProperty("--c" + (k + 1), v + "fr"));
+    fr.r.forEach((v, k) => w.style.setProperty("--r" + (k + 1), v + "fr"));
+  }
+
+  // Layout change: load that layout's saved tracks (equal when none).
+  function load() {
+    const saved = Prefs.get("tracks-" + Views.layout, null);
+    fr.c = Array.isArray(saved?.c) && saved.c.length === 3 ? saved.c.map(Number) : [1, 1, 1];
+    fr.r = Array.isArray(saved?.r) && saved.r.length === 2 ? saved.r.map(Number) : [1, 1];
+    applyTracks();
+  }
+
+  // Column / row index of view gi in the current layout (2 columns uses #split instead).
+  const col = gi => Views.layout === "3c" ? gi : Views.layout === "4g" ? gi % 2 : -1;
+  const row = gi => Views.layout === "2r" ? gi : Views.layout === "4g" ? gi >> 1 : -1;
+
+  // The two views on each side of the point when it lies in a gap between them.
+  function gapAt(x, y) {
+    if (!["3c", "2r", "4g"].includes(Views.layout) || !matchMedia("(min-width: 901px)").matches) return null;
+    const vis = Views.groups.slice(0, Views.count).map(g => ({ gi: g.i, r: g.el.getBoundingClientRect() }));
+    for (const a of vis) for (const b of vis) {
+      if (a.r.right <= x && b.r.left >= x && b.r.left - a.r.right < 16 && y > Math.max(a.r.top, b.r.top) && y < Math.min(a.r.bottom, b.r.bottom)) return { axis: "x", a, b };
+      if (a.r.bottom <= y && b.r.top >= y && b.r.top - a.r.bottom < 16 && x > Math.max(a.r.left, b.r.left) && x < Math.min(a.r.right, b.r.right)) return { axis: "y", a, b };
+    }
+    return null;
+  }
+
+  function dragGap(work, e, gap) {
+    const x = gap.axis === "x", list = x ? fr.c : fr.r, i = x ? col(gap.a.gi) : row(gap.a.gi), j = x ? col(gap.b.gi) : row(gap.b.gi);
+    const start = x ? gap.a.r.left : gap.a.r.top, span = x ? gap.b.r.right - gap.a.r.left : gap.b.r.bottom - gap.a.r.top, sum = list[i] + list[j];
+    work.setPointerCapture(e.pointerId);
+    const move = ev => { const k = clamp(((x ? ev.clientX : ev.clientY) - start) / span); list[i] = +(sum * k).toFixed(3); list[j] = +(sum - list[i]).toFixed(3); applyTracks(); };
+    const up = () => { work.removeEventListener("pointermove", move); Prefs.set("tracks-" + Views.layout, fr); };
+    work.addEventListener("pointermove", move);
+    work.addEventListener("pointerup", up, { once: true });
+    work.addEventListener("pointercancel", up, { once: true });
+  }
+
   function init() {
-    const bar = $("split");
+    const bar = $("split"), work = $("work");
     apply(+Prefs.get("split", 0.5) || 0.5);
     bar.addEventListener("pointerdown", e => {
       e.preventDefault();
@@ -31,7 +72,26 @@ const Split = (() => {
       Prefs.set("split", ratio);
     });
     bar.addEventListener("dblclick", () => { apply(0.5); Prefs.set("split", ratio); });
-  }
 
-  return { init };
+    work.addEventListener("pointermove", e => {
+      if (e.target !== work || e.buttons) return;
+      const g = gapAt(e.clientX, e.clientY);
+      work.classList.toggle("gap-x", g?.axis === "x");
+      work.classList.toggle("gap-y", g?.axis === "y");
+    });
+    work.addEventListener("pointerdown", e => {
+      const g = e.target === work && gapAt(e.clientX, e.clientY);
+      if (g) { e.preventDefault(); dragGap(work, e, g); }
+    });
+    work.addEventListener("dblclick", e => {
+      if (e.target !== work || !gapAt(e.clientX, e.clientY)) return;
+      fr.c = [1, 1, 1]; fr.r = [1, 1];
+      applyTracks();
+      Prefs.set("tracks-" + Views.layout, fr);
+    });
+    Views.onChange(() => { if (Views.layout !== lastLayout) { lastLayout = Views.layout; load(); } });
+  }
+  let lastLayout = "";
+
+  return { init, gapAt };
 })();

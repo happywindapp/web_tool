@@ -1,0 +1,27 @@
+// One Editor power tools (phase 9), loaded on first use by PowerTools: cron, SQL from data, JSON Schema, batch replace, invisible chars, Markdown tables (9a), recipe (9b), regex tester + run code (9c), code → image (9d).
+// @include js/i18n/en-one-editor-power-tools-lazy-strings.js
+// @include styles/power-tools-panes-dialogs.css
+// @include js/extras/power-pane-helpers.js
+// @include js/extras/cron-expression-parser.js
+// @include js/extras/cron-expression-explain.js
+// @include js/extras/data-to-sql-statements.js
+// @include js/extras/sql-options-dialog.js
+// @include js/extras/json-to-json-schema.js
+// @include js/extras/batch-replace-rules.js
+// @include js/extras/batch-replace-dialog.js
+// @include js/extras/unicode-invisible-inspector.js
+// @include js/extras/invisible-pane-view.js
+// @include js/extras/markdown-table-tools.js
+// @include js/extras/markdown-table-actions.js
+// @include js/extras/transform-recipe-ops.js
+// @include js/extras/transform-recipe-runner.js
+// @include js/extras/recipe-op-and-store.js
+// @include js/extras/recipe-pane-view.js
+// @include js/extras/regex-tester-core.js
+// @include js/extras/regex-tester-op.js
+// @include js/extras/regex-tester-pane-view.js
+// @include js/extras/run-code-pane-view.js
+// @include js/extras/code-snippet-to-image.js
+// @include js/extras/code-image-op-and-pane.js
+// @include js/extras/power-tools-demos.js
+// @include js/extras/power-tools-ops.js

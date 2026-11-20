@@ -1,0 +1,3 @@
+@replit/codemirror-minimap 0.5.2
+License: MIT (declared in package.json; the npm package ships no LICENSE file)
+Source and license text: https://github.com/replit/codemirror-minimap

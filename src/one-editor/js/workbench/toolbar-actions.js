@@ -36,10 +36,17 @@ const Actions = (() => {
   };
 
   async function save(asNew = false) {
-    const doc = activeOrWarn();
-    if (!doc) return;
+    const active = activeOrWarn();
+    if (!active) return;
+    const doc = Docs.root(active);
+    if (doc.stale) { FileOpen.reload(doc, true); return; }
     if (doc.readOnly) { StatusBar.msg(T("Tab chỉ đọc — không lưu."), "warn"); return; }
-    const data = LocalFs.encode(Docs.text(doc), doc), before = doc.state;
+    const fmtError = await FormatActions.beforeSave(doc);
+    let data;
+    const savedText = Docs.text(doc);
+    try { data = LocalFs.encode(MixedEol.textOf(doc), MixedEol.optsOf(doc)); }
+    catch (e) { StatusBar.msg(e.message, "bad", e.line ? () => Views.revealLine(doc, e.line) : null); return; }
+    const before = doc.state;
     // Typing during the (possibly slow or permission-prompting) write keeps the tab dirty.
     const dirtyAfter = () => doc.state !== before;
     try {
@@ -47,24 +54,33 @@ const Actions = (() => {
         await LocalFs.writeHandle(doc.handle, data);
         Docs.update(doc, { dirty: dirtyAfter() }, "dirty");
         StatusBar.msg(T("✔ Đã lưu “{name}”.", { name: doc.name }), "good");
+        EditorExtras.use(() => LocalHistory.snap(doc, true, savedText));
+        Tail.sync(doc);
         return;
       }
       if (!asNew && doc.kind === "note") {
         await HotExit.flush();
         StatusBar.msg(NotesDb.ok ? T("✔ Ghi chú tự lưu trong trình duyệt. Muốn ra file thì dùng “Lưu thành…”.") : T("⚠ Trình duyệt chặn IndexedDB — dùng “Lưu thành…” để giữ nội dung."), NotesDb.ok ? "good" : "warn");
+        EditorExtras.use(() => LocalHistory.snap(doc, true, savedText));
         return;
       }
       const r = await LocalFs.saveAs(suggestName(doc), data);
       if (!r) return;
+      if (r.handle) RecentFiles.add(r.handle);
       // A note stays a note (the file is a copy); other tabs now point at the saved file.
       if (r.handle && doc.kind !== "note") { Docs.update(doc, { kind: "file", handle: r.handle, dirty: dirtyAfter(), link: null }); if (r.name !== doc.name) Docs.rename(doc, r.name); }
       StatusBar.msg(r.downloaded ? T("✔ Đã tải xuống “{name}”.", { name: r.name }) : T("✔ Đã lưu “{name}”.", { name: r.name }), "good");
+      EditorExtras.use(() => LocalHistory.snap(doc, true, savedText));
     } catch (e) { StatusBar.msg(T("Không lưu được: {msg}", { msg: e.message }), "bad"); }
+    finally { if (fmtError) FormatActions.saveFormatFailed(doc, fmtError); }
   }
 
   function run() {
     const doc = activeOrWarn();
-    if (doc) OutputLink.run(doc, $("opSel").value);
+    if (!doc) return;
+    // Typed just now: settle the language first so an unpicked op follows it (re-detection otherwise waits for a typing pause).
+    Docs.recheck(Docs.root(doc));
+    OutputLink.run(doc, $("opSel").value);
   }
 
   function closeTab() { const doc = Views.activeDoc(); if (doc) Views.close(doc.id); }
@@ -79,7 +95,72 @@ const Actions = (() => {
   function setLang(value) {
     const doc = activeOrWarn();
     if (!doc) return;
-    Docs.update(doc, { lang: LangDetect.ids.includes(value) ? value : "" }, "lang");
+    Docs.update(Docs.root(doc), { lang: LangDetect.ids.includes(value) ? value : "" }, "lang");
+  }
+
+  // ⇥ / drag target on touch: the active tab of view gi goes to "the other" view (a second view is opened when there is only one).
+  function moveTab(gi = Views.focused) {
+    const doc = Views.activeDoc(gi);
+    if (!doc) return;
+    if (Views.count < 2) Views.setLayout("2c");
+    const to = Views.other(gi);
+    Views.move(doc.id, to);
+    PhoneLayout.show(to + 1);
+  }
+
+  function cloneTab() {
+    const doc = activeOrWarn();
+    if (!doc) return;
+    if (Views.count < 2) Views.setLayout("2c");
+    const to = Views.other(Views.focused);
+    CloneSync.cloneTo(doc, to);
+    PhoneLayout.show(to + 1);
+  }
+
+  function setLayout(id) {
+    Views.setLayout(id);
+    $("layoutSel").value = Views.layout;
+    HotExit.schedule();
+  }
+
+  // Editor font size (also what Ctrl+= / Ctrl+- / Ctrl+0 change instead of the browser zoom).
+  function zoom(step) {
+    const px = step ? Math.min(28, Math.max(9, (Prefs.get("font", 13) | 0) + step)) : 13;
+    Prefs.set("font", px);
+    $("work").style.setProperty("--ed-font", px + "px");
+    Views.groups.forEach(g => g.view.requestMeasure());
+    StatusBar.msg(T("Cỡ chữ editor: {px}px", { px }));
+  }
+
+  // The minimap bundle (~17 KB) loads the first time it is turned on; the choice is remembered in this browser.
+  async function setMinimap(on) {
+    $("chkMinimap").checked = !!on;
+    if (on && !CM.minimap) {
+      try { await VendorPaths.load("cmMinimap"); }
+      catch (e) { $("chkMinimap").checked = false; StatusBar.msg(T("Không nạp được minimap ({file}).", { file: e.message }), "bad"); return; }
+    }
+    if (on) CmSetup.enableMinimap();
+    CmSetup.settings.minimap = !!on;
+    Prefs.set("minimap", !!on);
+    Views.applySettings();
+  }
+
+  // Indent guides (~5 KB bundle) are on by default; loaded after the editor is ready so they never delay typing.
+  async function setGuides(on) {
+    if (on && !CM.indentMarkers) {
+      try { await VendorPaths.load("cmIndentMarkers"); }
+      catch (e) { StatusBar.msg(T("Không nạp được đường thụt lề ({file}).", { file: e.message }), "bad"); return; }
+    }
+    if (on) CmSetup.enableGuides();
+    CmSetup.settings.guides = !!on;
+    Prefs.set("guides", !!on);
+    Views.applySettings();
+  }
+
+  function toggleZen() {
+    const on = document.body.classList.toggle("zen");
+    $("btnZenExit").hidden = !on;
+    StatusBar.msg(on ? T("Chế độ Zen — Alt+Shift+Z hoặc nút ✕ để thoát.") : "");
   }
 
   function toggleExplorer() {
@@ -88,22 +169,11 @@ const Actions = (() => {
   }
 
   async function clearData() {
-    if (!confirm(T("Xoá mọi ghi chú và tab đã lưu trong trình duyệt này? Không khôi phục được."))) return;
+    if (!confirm(T("Xoá mọi ghi chú, tab đã lưu và lịch sử cục bộ trong trình duyệt này? Không khôi phục được."))) return;
     HotExit.stop();
     try { await NotesDb.clear(); } catch (e) { StatusBar.msg(T("Không xoá được: {msg}", { msg: e.message }), "bad"); return; }
     location.replace(location.pathname);
   }
 
-  // Shortcuts the browser lets a page take (Ctrl+N/T/W are reserved, hence Alt+N / Alt+W).
-  const KEYS = {
-    "Alt+n": () => newNote(), "Ctrl+o": openFiles, "Ctrl+s": () => save(false), "Ctrl+Shift+s": () => save(true),
-    "Ctrl+Enter": run, "Ctrl+b": toggleExplorer, "Alt+z": () => setWrap(!CmSetup.settings.wrap), "Alt+w": closeTab,
-  };
-  function onKey(e) {
-    const key = /^Key[A-Z]$/.test(e.code) ? e.code.slice(3).toLowerCase() : e.key;
-    const fn = KEYS[(e.ctrlKey || e.metaKey ? "Ctrl+" : "") + (e.altKey ? "Alt+" : "") + (e.shiftKey ? "Shift+" : "") + key];
-    if (fn) { e.preventDefault(); e.stopPropagation(); fn(); }
-  }
-
-  return { newNote, openFiles, openFolder, save, run, closeTab, setWrap, setLang, toggleExplorer, clearData, onKey };
+  return { newNote, openFiles, openFolder, save, suggestName, run, closeTab, setWrap, setLang, moveTab, cloneTab, setLayout, zoom, setMinimap, setGuides, toggleZen, toggleExplorer, clearData };
 })();

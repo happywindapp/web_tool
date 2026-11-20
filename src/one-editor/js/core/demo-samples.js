@@ -121,6 +121,7 @@ Open a file in **View 1**, run an operation, and the result appears in **View 2*
     "output-link": { label: "JSON ⇢ JSON đẹp ở View 2", payload: () => ({ v: 1, views: [[t("trade.json", TRADE_JSON)], []], run: "json-pretty" }) },
     "json-broken": { label: "JSON lỗi (báo dòng lỗi)", payload: () => ({ v: 1, views: [[t("broken-trade.json", BROKEN_JSON)], []], run: "json-pretty" }) },
     "multi-tab": { label: "Nhiều tab, tự nhận diện ngôn ngữ", payload: () => ({ v: 1, views: [[t("README.md", README_MD), t("app.py", APP_PY), t("snippet", SNIPPET_GO)], [t("query.sql", QUERY_SQL), t("config.yaml", CONFIG_YAML), t("deploy", DEPLOY_SH)]] }) },
+    "split-2x2": { label: "Lưới 2×2, 4 view", payload: () => ({ v: 1, layout: "4g", views: [[t("orders.js", ORDERS_JS)], [t("query.sql", QUERY_SQL)], [t("app.py", APP_PY)], [t("config.yaml", CONFIG_YAML)]] }) },
     "markdown": { label: "Markdown", payload: () => ({ v: 1, views: [[t("guide.md", GUIDE_MD)], []], wrap: true }) },
     "large": { label: "File lớn 50.000 dòng", payload: () => ({ v: 1, views: [[t("large-50k.log", largeLog())], []] }) },
   };

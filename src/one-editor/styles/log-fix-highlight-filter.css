@@ -1,0 +1,12 @@
+  /* Log / FIX line colours (no CM grammar) + the line filter pane. */
+  .lg-err { color:var(--bad); font-weight:700; } .lg-warn { color:var(--warn); font-weight:700; } .lg-info { color:var(--acc); font-weight:600; } .lg-dbg { color:var(--muted); }
+  .lg-time { color:var(--k); } .lg-id { color:var(--l); } .lg-ip { color:var(--tn); } .lg-str { color:var(--s); } .lg-num { color:var(--n); }
+  .fx-h { color:var(--k); font-weight:600; } .fx-b { color:var(--tn); font-weight:600; } .fx-t { color:var(--muted); font-weight:600; }
+  .fx-v { color:var(--s); } .fx-mt { color:var(--bad); font-weight:700; }
+  .pv-filter { overflow:auto; padding:6px 0 24px; background:var(--bg); color:var(--ink); font:13px/1.5 Consolas, "Cascadia Mono", monospace; }
+  .lf-row { display:flex; gap:10px; padding:0 12px; cursor:pointer; white-space:pre-wrap; overflow-wrap:anywhere; }
+  .lf-row:hover { background:var(--hover); }
+  .lf-ctx { color:var(--muted); }
+  .lf-n { flex:none; min-width:4em; text-align:right; color:var(--muted); user-select:none; }
+  .lf-gap { padding:0 12px; color:var(--muted); }
+  .pv-bar label.chk { display:inline-flex; align-items:center; gap:3px; font-size:12px; }

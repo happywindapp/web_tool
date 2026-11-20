@@ -1,0 +1,59 @@
+  /* Preview tab: the view's editor hides and the drawing shows in its place; the canvas stays light like Diagram Editor. */
+  .group > .pvhost { grid-row:2; grid-column:1; min-height:0; min-width:0; display:none; }
+  .group.is-preview > .pvhost { display:grid; }
+  .group.is-preview > .host { visibility:hidden; }
+  .pv { display:grid; grid-template-rows:auto minmax(0, 1fr) auto auto; min-height:0; }
+  .pv-bar { display:flex; flex-wrap:wrap; align-items:center; gap:4px; padding:4px 6px; border-bottom:1px solid var(--line); background:var(--panel); }
+  .pv-bar button { padding:2px 8px; }
+  .pv-tools { display:flex; flex-wrap:wrap; align-items:center; gap:4px; }
+  .pv-body { display:grid; min-height:0; min-width:0; }
+  .pv-body > * { min-height:0; min-width:0; }
+  .pv-body.stale > * { opacity:.35; }
+  .pv-type { margin-right:auto; color:var(--muted); font-size:12px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; min-width:0; }
+  .pv-pct { min-width:58px; }
+  .pv-view { position:relative; overflow:hidden; contain:strict; cursor:grab; user-select:none; touch-action:none; background-color:#fff;
+             background-image:radial-gradient(rgba(100, 116, 139, .22) 1px, transparent 1px); background-size:18px 18px; }
+  .pv-view.grab { cursor:grabbing; }
+  .pv-stage { position:absolute; left:0; top:0; transform-origin:0 0; transform:translate(0, 0); }
+  .pv-stage svg { display:block; }
+  .pv-note { padding:6px 10px; color:var(--muted); font-size:12px; white-space:pre-wrap; border-top:1px solid var(--line); }
+  .pv-err { margin:0; max-height:40%; overflow:auto; padding:8px 10px; font-size:12px; white-space:pre-wrap; color:var(--bad); border-top:2px solid var(--bad);
+            background:color-mix(in srgb, var(--bad) 8%, var(--panel)); }
+  /* Renders off-screen-but-visible so the browser does not throttle it; never clickable or focusable. */
+  .pv-sandbox { position:fixed; left:0; top:0; width:100vw; height:100vh; border:0; opacity:0; pointer-events:none; z-index:-1; }
+  /* Markdown: page-like reading surface in the app theme. */
+  .pv-md { overflow:auto; padding:16px 24px 40vh; line-height:1.6; color:var(--ink); background:var(--bg); font-size:14px; overflow-wrap:anywhere; }
+  .pv-md > :first-child { margin-top:0; }
+  .pv-md h1, .pv-md h2 { border-bottom:1px solid var(--line); padding-bottom:.25em; }
+  .pv-md a { color:var(--acc); }
+  .pv-md code { font-family:ui-monospace, Consolas, monospace; font-size:.92em; background:var(--panel); border:1px solid var(--line); border-radius:4px; padding:0 4px; }
+  .pv-md pre { background:var(--panel); border:1px solid var(--line); border-radius:6px; padding:10px 12px; overflow:auto; }
+  .pv-md pre code { border:0; padding:0; background:none; }
+  .pv-md blockquote { margin:0 0 1em; padding:0 12px; border-left:4px solid var(--line); color:var(--muted); }
+  .pv-md table { border-collapse:collapse; margin:0 0 1em; display:block; overflow:auto; max-width:100%; }
+  .pv-md th, .pv-md td { border:1px solid var(--line); padding:4px 10px; }
+  .pv-md th { background:var(--panel); }
+  .pv-md img { max-width:100%; }
+  .pv-md li.task { list-style:none; }
+  .pv-md li.task > input { margin:0 .4em 0 -1.3em; }
+  .pv-md hr { border:0; border-top:1px solid var(--line); }
+  .pv-md .md-diagram { margin:0 0 1em; padding:12px; background:#fff; border:1px solid var(--line); border-radius:6px; overflow:auto; }
+  .pv-md .md-diagram img { display:block; margin:0 auto; height:auto; }
+  .pv-md .md-diagram-wait { margin:0; color:#64748b; background:none; border:0; }
+  .pv-md .md-diagram-err { margin:0; color:var(--bad); background:none; border:0; white-space:pre-wrap; }
+  /* HTML: the page as a browser would show it, on white. */
+  .pv-html { display:grid; background:#fff; }
+  .pv-frame { width:100%; height:100%; border:0; background:#fff; }
+  /* CSV / JSON table */
+  .pv-table { overflow:auto; background:var(--bg); }
+  .pv-table table { border-collapse:collapse; font-size:12px; font-family:ui-monospace, Consolas, monospace; }
+  .pv-table th, .pv-table td { border:1px solid var(--line); padding:3px 8px; text-align:left; white-space:pre; max-width:40ch; overflow:hidden; text-overflow:ellipsis; }
+  .pv-table th { position:sticky; top:0; background:var(--panel); z-index:1; }
+  .pv-table td:first-child, .pv-table th:first-child { color:var(--muted); text-align:right; }
+  /* draw.io: consent gate, then the embed editor. */
+  .pv-dio { display:grid; min-height:0; }
+  .pv-dio-gate { padding:24px; max-width:560px; align-self:start; }
+  .pv-dio-gate button { margin:0 8px 8px 0; }
+  .pv-dio-fail { color:var(--bad); }
+  .pv-dio-frame { display:grid; min-height:0; }
+  .pv-dio-frame iframe { width:100%; height:100%; border:0; }

@@ -109,7 +109,7 @@ I18n.add({
   "Tổng {total}/{max} điểm → {score}/10.": "Total {total}/{max} points → {score}/10.",
   "Chấm theo phương pháp phổ biến của các trang xem SIM phong thủy (Kinh Dịch Mai Hoa, ngũ hành, tứ trụ, cửu tinh, dân gian) — chỉ mang tính tham khảo, giải trí.":
     "Scored with the methods common to Vietnamese feng shui number sites (Plum Blossom I Ching, five elements, four pillars, nine stars, folk beliefs) — for reference and fun only.",
-  "Nhập số SIM (và ngày sinh chủ SIM nếu có) rồi bấm “Chấm điểm SIM”, hoặc chọn một mẫu.": "Enter a phone number (and the owner's birth date if known), then press “Score number”, or pick a sample.",
+  "Nhập số SIM (và ngày sinh chủ SIM nếu có) rồi bấm “Chấm điểm SIM”.": "Enter a phone number (and the owner's birth date if known), then press “Score number”.", "Hoặc chọn một mẫu.": "Or pick a sample.",
   "Không có số vượng/sinh khí": "No prosperous or rising digit",
   "Tứ trụ bát tự: năm đổi ở Lập xuân, tháng theo tiết khí (có thể khác tab Tử vi, nơi tính theo năm/tháng âm lịch).":
     "Bazi pillars: the year changes at the Start of Spring and the month follows the solar terms (may differ from the Horoscope tab, which uses the lunar year/month).",

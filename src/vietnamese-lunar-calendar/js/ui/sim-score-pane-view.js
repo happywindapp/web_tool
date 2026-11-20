@@ -59,7 +59,7 @@ const SimScoreView = (() => {
       + `<p class="muted disclaimer">${esc(T("Chấm theo phương pháp phổ biến của các trang xem SIM phong thủy (Kinh Dịch Mai Hoa, ngũ hành, tứ trụ, cửu tinh, dân gian) — chỉ mang tính tham khảo, giải trí."))}</p>`;
   }
 
-  const empty = box => { box.innerHTML = `<p class="muted">${esc(T("Nhập số SIM (và ngày sinh chủ SIM nếu có) rồi bấm “Chấm điểm SIM”, hoặc chọn một mẫu."))}</p>`; };
+  const empty = box => { box.innerHTML = `<p class="muted">${esc(T("Nhập số SIM (và ngày sinh chủ SIM nếu có) rồi bấm “Chấm điểm SIM”."))}<span class="demo-picker"> ${esc(T("Hoặc chọn một mẫu."))}</span></p>`; };
 
   return { render, empty, hexName };
 })();

@@ -1,7 +1,14 @@
 // Pure text helpers shared by parsers and tabs (no DOM, so node tests can load them).
 const TextUtil = (() => {
   const stripBom = s => s.charCodeAt(0) === 0xfeff ? s.slice(1) : s;
-  const lineCol = (s, i) => { const pre = s.slice(0, i).split("\n"); return { line: pre.length, col: pre[pre.length - 1].length + 1 }; };
+  // Line starts are cached for the last text: parsers call this once per auto-fix on the same big string.
+  let lastText = null, starts = [0];
+  function lineCol(s, i) {
+    if (s !== lastText) { lastText = s; starts = [0]; for (let k = s.indexOf("\n"); k >= 0; k = s.indexOf("\n", k + 1)) starts.push(k + 1); }
+    let lo = 0, hi = starts.length - 1;
+    while (lo < hi) { const m = (lo + hi + 1) >> 1; if (starts[m] <= i) lo = m; else hi = m - 1; }
+    return { line: lo + 1, col: i - starts[lo] + 1 };
+  }
   const INDENT = { "2": "  ", "3": "   ", "4": "    ", "8": "        ", tab: "\t" };
   const indentUnit = v => INDENT[v] ?? "  ";
   const countLines = s => { let n = 1; for (let i = s.indexOf("\n"); i >= 0; i = s.indexOf("\n", i + 1)) n++; return n; };

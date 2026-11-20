@@ -15,6 +15,7 @@
 <!-- GoatCounter: chỉ gửi path (không query/hash); chạy local đếm thành /local/<tên file> để không lộ thư mục máy -->
 <script>
 { const local = !location.protocol.startsWith("http") || ["localhost", "127.0.0.1"].includes(location.hostname);
+  if (!local) document.documentElement.classList.add("hosted");
   const p = local ? "/local/" + location.pathname.split("/").pop() : location.pathname.replace(/index[.]html$/, "");
   const gc = "https://quan111.goatcounter.com/count";
   navigator.sendBeacon?.(gc + "?" + new URLSearchParams({ p, r: document.referrer.split("?")[0], t: document.title, s: screen.width }));
@@ -32,7 +33,7 @@
   <a class="btn" href="../index.html">← Trang chủ</a>
   <h1>FIX Parser</h1>
   <button class="more-toggle" title="Thêm thao tác" aria-expanded="false">⋯</button>
-  <select id="demo" title="Nạp dữ liệu mẫu rồi phân tích ngay"></select>
+  <select id="demo" class="demo-picker" title="Nạp dữ liệu mẫu rồi phân tích ngay"></select>
   <label class="btn" title="Mở file log / message FIX (hoặc kéo-thả file vào trang)">Mở file…<input type="file" id="file" data-pane-go="1" accept=".log,.txt,.fix,.out,.messages,.csv"></label>
   <button id="share" title="Chép link chứa dữ liệu + tuỳ chọn (dữ liệu nằm sau dấu #, không gửi lên máy chủ)">🔗 Chia sẻ link</button>
   <button id="undo" title="Lấy lại nội dung đang soạn trước khi nạp mẫu / link / che dữ liệu" hidden>↶ Khôi phục bản trước</button>

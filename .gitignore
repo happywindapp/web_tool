@@ -6,9 +6,8 @@ server-config.md
 secrets.*
 
 
-# Personal working notes / reports
-plans/reports/*
-!plans/reports/.gitkeep
+# Plans + reports của AI — chỉ giữ local, KHÔNG commit
+plans/
 
 # Office / temp artifacts
 *.xlsx

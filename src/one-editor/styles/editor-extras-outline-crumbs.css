@@ -1,0 +1,20 @@
+  /* Editor extras: breadcrumbs panel, bracket pair colours, colour swatches, Outline list, sessions row, password dialog. */
+  .oe-crumbs { display:flex; flex-wrap:nowrap; align-items:center; gap:2px; overflow:hidden; padding:1px 8px; font-size:12px; color:var(--muted); background:var(--panel); border-bottom:1px solid var(--line); white-space:nowrap; }
+  .oe-crumbs button { min-height:24px; border:0; background:transparent; padding:0 3px; color:inherit; font:inherit; cursor:pointer; overflow:hidden; text-overflow:ellipsis; max-width:24em; }
+  .oe-crumbs button:hover { color:var(--ink); background:var(--hover); }
+  .brk0 { color:#d97706; } .brk1 { color:#c026d3; } .brk2 { color:#2563eb; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme=light]) .brk0 { color:#fbbf24; } :root:not([data-theme=light]) .brk1 { color:#e879f9; } :root:not([data-theme=light]) .brk2 { color:#60a5fa; } }
+  :root[data-theme=dark] .brk0 { color:#fbbf24; } :root[data-theme=dark] .brk1 { color:#e879f9; } :root[data-theme=dark] .brk2 { color:#60a5fa; }
+  .oe-swatch { display:inline-block; width:0.8em; height:0.8em; margin:0 3px 0 1px; vertical-align:-0.05em; border:1px solid var(--muted); border-radius:2px; }
+  #outline { flex:1; overflow:auto; min-height:0; padding:4px 0; }
+  .ol-item { display:block; width:100%; text-align:left; border:0; border-radius:0; background:transparent; padding:3px 8px; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font:12.5px Consolas, "Cascadia Mono", monospace; }
+  .ol-item:hover { background:var(--hover); }
+  .ol-item.on { background:color-mix(in srgb, var(--acc) 18%, transparent); font-weight:600; }
+  .ss-row { display:flex; gap:4px; padding:4px 8px; border-bottom:1px solid var(--line); }
+  .ss-row select { flex:1; min-width:0; }
+  .ss-row button { padding:2px 8px; }
+  .pw-dlg form { display:flex; flex-direction:column; gap:8px; padding:14px; min-width:min(360px, 86vw); }
+  .pw-dlg p { margin:0; }
+  .pw-dlg .muted { font-size:12px; }
+  .pw-acts { display:flex; gap:8px; justify-content:flex-end; }
+  @media (max-width:640px) { .ol-item { min-height:38px; padding-top:8px; padding-bottom:8px; font-size:14px; } .oe-crumbs button { min-height:30px; } #pwInput, #pwInput2, #olFilter { font-size:16px; } }

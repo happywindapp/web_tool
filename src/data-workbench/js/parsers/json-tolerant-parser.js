@@ -69,8 +69,15 @@ const JsonTool = (() => {
       return { t: "num", raw };
     }
 
+    // Every node keeps "at" = its start offset in the (BOM-stripped) text, so a tree view can jump to it.
     function value(depth) {
       ws();
+      const at = i, n = value1(depth);
+      if (!("at" in n)) n.at = at;
+      return n;
+    }
+
+    function value1(depth) {
       const c = s[i];
       if (c === undefined) { fix(T("Thiếu giá trị ở cuối file → null")); return { t: "lit", v: "null" }; }
       if (c === "{") return obj(depth);

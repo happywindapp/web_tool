@@ -30,13 +30,46 @@ const LocalFs = (() => {
     catch (e) { if (aborted(e)) return null; throw e; }
   }
 
-  function fromHandle(h, path = h.name) {
-    if (h.kind !== "directory") return { name: h.name, path, dir: false, read: async () => ({ file: await h.getFile(), handle: h }) };
-    return { name: h.name, path, dir: true, children: null, handle: h, list: async () => {
+  // Handle-based nodes (Chrome/Edge) can be changed on disk: they carry handle + parent.
+  function fromHandle(h, path = h.name, parent = null) {
+    if (h.kind !== "directory") return { name: h.name, path, dir: false, handle: h, parent, read: async () => ({ file: await h.getFile(), handle: h }) };
+    const node = { name: h.name, path, dir: true, children: null, handle: h, parent, list: async () => {
       const out = [];
-      for await (const c of h.values()) { out.push(fromHandle(c, path + "/" + c.name)); if (out.length >= MAX_ENTRIES) break; }
+      for await (const c of h.values()) { out.push(fromHandle(c, path + "/" + c.name, node)); if (out.length >= MAX_ENTRIES) break; }
       return sortNodes(out);
     } };
+    return node;
+  }
+
+  async function writable(dirHandle) {
+    const opts = { mode: "readwrite" };
+    if ((await dirHandle.queryPermission?.(opts)) === "granted" || (await dirHandle.requestPermission?.(opts)) === "granted") return;
+    throw new Error(T("Trình duyệt không cho ghi vào folder."));
+  }
+
+  async function exists(dir, name) {
+    for await (const k of dir.keys()) if (k === name) return true;
+    return false;
+  }
+
+  // dir node + name → new file (empty) or folder; refuses to overwrite.
+  async function create(dirNode, name, folder) {
+    await writable(dirNode.handle);
+    if (await exists(dirNode.handle, name)) throw new Error(T("“{name}” đã có trong folder.", { name }));
+    return folder ? dirNode.handle.getDirectoryHandle(name, { create: true }) : dirNode.handle.getFileHandle(name, { create: true });
+  }
+
+  async function remove(node) {
+    await writable(node.parent.handle);
+    await node.parent.handle.removeEntry(node.name, { recursive: node.dir });
+  }
+
+  // FileSystemHandle.move() is newer than the rest of the API ⇒ feature-checked.
+  async function rename(node, name) {
+    if (typeof node.handle.move !== "function") throw new Error(T("Trình duyệt này chưa hỗ trợ đổi tên trên đĩa."));
+    await writable(node.parent.handle);
+    if (await exists(node.parent.handle, name)) throw new Error(T("“{name}” đã có trong folder.", { name }));
+    await node.handle.move(name);
   }
 
   async function readAllEntries(reader) {
@@ -70,20 +103,15 @@ const LocalFs = (() => {
     return root;
   }
 
-  // → { text, binary, notUtf8, bom, eol }; text uses "\n" (CodeMirror's model), eol/bom are restored on save.
-  async function readText(file) {
-    const buf = await file.arrayBuffer(), head = new Uint8Array(buf, 0, Math.min(8192, buf.byteLength));
-    const bom = head[0] === 0xef && head[1] === 0xbb && head[2] === 0xbf;
-    // Non-UTF-8 bytes would become U+FFFD and be lost on save, so such files open read-only.
-    let text, notUtf8 = false;
-    try { text = new TextDecoder("utf-8", { fatal: true }).decode(buf); }
-    catch { text = new TextDecoder().decode(buf); notUtf8 = true; }
-    const eol = /\r\n/.test(text.slice(0, 100000)) ? "\r\n" : "\n";
-    if (eol === "\r\n") text = text.replace(/\r\n/g, "\n");
-    return { text, binary: head.includes(0), notUtf8, bom, eol };
+  // → { text ("\n" lines, CodeMirror model), binary, enc, guessed, bom, eol, eolMixed, readOnly }; forced: reopen with that encoding.
+  async function readText(file, forced) {
+    const bytes = new Uint8Array(await file.arrayBuffer()), det = forced ? { enc: forced, guessed: false } : Encoding.detect(bytes);
+    const { text, bom } = Encoding.decode(bytes, det.enc), e = Encoding.eolOf(text);
+    return { text: text.replace(/\r\n?/g, "\n"), binary: !det.enc.startsWith("utf-16") && bytes.subarray(0, 8192).includes(0), enc: det.enc, guessed: det.guessed, bom, eol: e.eol, eolMixed: e.mixed, eolList: e.codes, readOnly: !Encoding.writable(det.enc) };
   }
 
-  const encode = (text, { eol = "\n", bom = false } = {}) => (bom ? String.fromCharCode(0xfeff) : "") + (eol === "\r\n" ? text.replace(/\n/g, "\r\n") : text);
+  // → bytes in the tab encoding (default UTF-8); throws with .line/.col on a character the encoding cannot hold.
+  const encode = (text, { eol = "\n", bom = false, enc = "utf-8" } = {}) => Encoding.encode(eol === "\n" ? text : text.replace(/\n/g, eol), enc || "utf-8", bom);
 
   async function writeHandle(handle, data) {
     const opts = { mode: "readwrite" };
@@ -101,5 +129,5 @@ const LocalFs = (() => {
     catch (e) { if (aborted(e)) return null; throw e; }
   }
 
-  return { pickFiles, pickDirectory, fromHandle, fromEntry, readText, encode, writeHandle, saveAs, canPick, canDir, canSave };
+  return { pickFiles, pickDirectory, fromHandle, fromEntry, readText, encode, writeHandle, saveAs, create, remove, rename, canPick, canDir, canSave, MAX_ENTRIES };
 })();

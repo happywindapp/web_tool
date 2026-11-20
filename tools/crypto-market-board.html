@@ -64,6 +64,8 @@
   .wb-nav button { padding:6px 14px; border:0; border-radius:6px 6px 0 0; background:transparent; }
   .wb-nav button:hover { background:var(--btn); }
   .wb-nav button.on { background:var(--tb); color:var(--tb-ink); font-weight:600; }
+  /* "Thử mẫu…" is a local testing aid: hidden on the published site, ?demo=<key> still works */
+  .hosted .demo-picker { display:none !important; }
   .toolbar { background:var(--tb); --line:color-mix(in srgb, var(--acc) 40%, var(--panel)); --muted:color-mix(in srgb, var(--ink) 65%, var(--panel)); }
   :root[data-theme="light"] { --bg:#f8fafc; --panel:#fff; --line:#cbd5e1; --ink:#0f172a; --muted:#64748b; --good:#15803d; --bad:#b91c1c; --warn:#b45309; --code:#f8fafc; --btn:#fff; --gut:#f1f5f9; --hover:#f1f5f9;
           --k:#7c3aed; --s:#047857; --n:#b45309; --l:#be185d; --tn:#1d4ed8; --an:#7c3aed; --av:#047857; --c:#94a3b8; --add:#dcfce7; --del:#fee2e2; --add2:#86efac; --del2:#fca5a5; }
@@ -1766,7 +1768,14 @@ const ShareCodec = (() => {
 // Pure text helpers shared by parsers and tabs (no DOM, so node tests can load them).
 const TextUtil = (() => {
   const stripBom = s => s.charCodeAt(0) === 0xfeff ? s.slice(1) : s;
-  const lineCol = (s, i) => { const pre = s.slice(0, i).split("\n"); return { line: pre.length, col: pre[pre.length - 1].length + 1 }; };
+  // Line starts are cached for the last text: parsers call this once per auto-fix on the same big string.
+  let lastText = null, starts = [0];
+  function lineCol(s, i) {
+    if (s !== lastText) { lastText = s; starts = [0]; for (let k = s.indexOf("\n"); k >= 0; k = s.indexOf("\n", k + 1)) starts.push(k + 1); }
+    let lo = 0, hi = starts.length - 1;
+    while (lo < hi) { const m = (lo + hi + 1) >> 1; if (starts[m] <= i) lo = m; else hi = m - 1; }
+    return { line: lo + 1, col: i - starts[lo] + 1 };
+  }
   const INDENT = { "2": "  ", "3": "   ", "4": "    ", "8": "        ", tab: "\t" };
   const indentUnit = v => INDENT[v] ?? "  ";
   const countLines = s => { let n = 1; for (let i = s.indexOf("\n"); i >= 0; i = s.indexOf("\n", i + 1)) n++; return n; };

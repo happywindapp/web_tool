@@ -5,17 +5,17 @@ const LangDetect = (() => {
     "JavaScript": "js mjs cjs", "TypeScript": "ts mts cts", "JSX": "jsx", "TSX": "tsx",
     "JSON": "json jsonc json5 map har ipynb webmanifest geojson babelrc eslintrc",
     "HTML": "html htm xhtml shtml", "CSS": "css", "SCSS": "scss", "LESS": "less", "Markdown": "md markdown mkd",
-    "XML": "xml xsd xsl xslt svg wsdl config csproj vbproj props targets plist resx pom nuspec xaml kml gpx rss atom dtsx",
+    "XML": "xml xsd xsl xslt svg drawio dio wsdl config csproj vbproj props targets plist resx pom nuspec xaml kml gpx rss atom dtsx",
     "YAML": "yaml yml", "SQL": "sql", "Python": "py pyw", "Go": "go", "Java": "java", "C#": "cs", "C": "c h",
     "C++": "cpp cc cxx hpp hh hxx", "Rust": "rs", "PHP": "php", "Ruby": "rb", "Kotlin": "kt kts", "Swift": "swift",
     "Scala": "scala", "Groovy": "groovy gradle", "Lua": "lua", "Perl": "pl pm", "R": "r", "Dart": "dart", "VB.NET": "vb",
     "Shell": "sh bash zsh ksh", "PowerShell": "ps1 psm1 psd1", "Dockerfile": "dockerfile", "TOML": "toml",
     "Properties files": "properties ini cfg conf env", "diff": "diff patch", "ProtoBuf": "proto", "Vue": "vue",
-    "Mermaid": "mmd mermaid", "PlantUML": "puml plantuml pu iuml", "D2": "d2", "DBML": "dbml", "FIX": "fix",
-    "CSV": "csv", "TSV": "tsv tab", "Log": "log", [PLAIN]: "txt text",
+    "Mermaid": "mmd mermaid", "PlantUML": "puml plantuml pu iuml", "D2": "d2", "DBML": "dbml", "Structurizr": "dsl", "Graphviz": "dot gv", "FIX": "fix",
+    "CSV": "csv", "TSV": "tsv tab", "Log": "log", "GraphQL": "graphql gql", [PLAIN]: "txt text",
   };
   const NAMES = { dockerfile: "Dockerfile", jenkinsfile: "Groovy", gemfile: "Ruby", rakefile: "Ruby", ".env": "Properties files", ".editorconfig": "Properties files", ".gitignore": PLAIN };
-  const NO_HIGHLIGHT = new Set(["Mermaid", "PlantUML", "D2", "DBML", "FIX", "CSV", "TSV", "Log", PLAIN]);
+  const NO_HIGHLIGHT = new Set(["Mermaid", "PlantUML", "D2", "DBML", "Structurizr", "Graphviz", "FIX", "CSV", "TSV", "Log", "GraphQL", PLAIN]);
   const BY_EXT = {}, ALIAS = {};
   for (const [id, exts] of Object.entries(EXT)) {
     ALIAS[id.toLowerCase()] = id;
@@ -58,6 +58,8 @@ const LangDetect = (() => {
   const RULES = {
     Mermaid: [[/^\s*(?:graph|flowchart)\s+(?:TD|TB|BT|RL|LR)\b|^\s*(?:sequenceDiagram|classDiagram|stateDiagram(?:-v2)?|erDiagram|gantt|pie|journey|gitGraph|mindmap|timeline|xychart-beta|sankey-beta|quadrantChart|requirementDiagram|block-beta|C4Context|C4Container|C4Component)\b/gm, 6, 1]],
     PlantUML: [[/^\s*@start(?:uml|mindmap|wbs|gantt|json|yaml|salt)\b/gm, 6, 1]],
+    Structurizr: [[/^\s*workspace\b[^{\n]*\{/gm, 4, 1], [/^\s*(?:model|views)\s*\{/gm, 2, 2], [/=\s*(?:person|softwareSystem|container)\b/g, 2]],
+    Graphviz: [[/^\s*(?:strict\s+)?(?:di)?graph(?:[ \t]+(?:"[^"\n]*"|[\w.]+))?\s*\{/gm, 6, 1]],
     FIX: [[/(?:^|\cA|\|)8=FIXT?\.\d\.\d(?:\cA|\|)/gm, 6, 1], [/(?:\cA|\|)35=\w{1,2}(?:\cA|\|)/g, 2, 1]],
     DBML: [[/^\s*Table\s+[\w."]+(?:\s+as\s+\w+)?\s*(?:\[[^\]]*\])?\s*\{/gm, 3], [/^\s*Ref\s*\w*\s*:/gm, 2], [/\[(?:pk|primary key|not null|increment|unique|ref:)[^\]]*\]/gi, 1], [/^\s*Enum\s+[\w."]+\s*\{/gm, 2]],
     D2: [[/^\s*direction:\s*(?:right|down|left|up)\s*$/gm, 4, 1], [/^\s*[\w.]+\.(?:shape|style\.[\w-]+|icon):\s*\S/gm, 2], [/^\s*shape:\s*\w+/gm, 2], [/^\s*[\w ."]+?\s*(?:<->|->|--)\s*[\w ."]+?(?::\s*.*)?$/gm, 1]],
@@ -114,9 +116,28 @@ const LangDetect = (() => {
     return { id: PLAIN, by: "none" };
   }
 
+  // Indent unit of a text: "\t" when tab-indented lines win, else the most common step between indent levels (2 / 4 / 8 spaces).
+  function indentOf(text) {
+    let tabs = 0, spaces = 0, prev = 0;
+    const steps = {};
+    for (const line of text.slice(0, 200000).split("\n", 2000)) {
+      const m = /^([ \t]*)\S/.exec(line);
+      if (!m) continue;
+      const lead = m[1];
+      if (lead.startsWith("\t")) { tabs++; continue; }
+      const n = lead.length, step = Math.abs(n - prev);
+      if (n) spaces++;
+      if (step >= 2 && step <= 8) steps[step] = (steps[step] || 0) + 1;
+      prev = n;
+    }
+    if (tabs > spaces) return "\t";
+    const best = Object.entries(steps).sort((a, b) => b[1] - a[1] || a[0] - b[0])[0];
+    return " ".repeat(best ? +best[0] : 2);
+  }
+
   const ids = [PLAIN, ...Object.keys(EXT).filter(k => k !== PLAIN).sort((a, b) => a.localeCompare(b))];
   const highlighter = id => NO_HIGHLIGHT.has(id) || !Object.hasOwn(EXT, id) ? "" : id;
   const extOf = id => Object.hasOwn(EXT, id) ? EXT[id].split(" ")[0] : "txt";
 
-  return { detect, byName, byHeader, byContent, ids, highlighter, extOf, PLAIN };
+  return { detect, byName, byHeader, byContent, indentOf, ids, highlighter, extOf, PLAIN };
 })();

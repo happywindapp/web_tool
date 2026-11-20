@@ -18,11 +18,11 @@ const LangLoader = (() => {
       const s = await support(id);
       if (Docs.effectiveLang(doc) !== id || !Docs.get(doc.id) || !doc.state) return;
       doc.langApplied = id;
-      Views.applyEffect(doc, CmSetup.langEffect(s));
+      Views.applyEffect(doc, CmSetup.langEffect([s || [], EditorExtras.emmetFor(id)]));
     } catch (e) {
       StatusBar.msg(T("Không nạp được gói tô màu ngôn ngữ ({file}).", { file: e.message }), "bad");
     }
   }
 
-  return { apply };
+  return { apply, support };
 })();

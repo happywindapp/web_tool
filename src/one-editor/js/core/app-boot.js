@@ -10,17 +10,25 @@ const Toolbar = (() => {
   const opt = (v, text) => { const o = document.createElement("option"); o.value = v; o.textContent = text; return o; };
 
   function sync() {
-    const doc = Views.activeDoc(), sel = $("langSel");
+    const doc = Views.activeDoc() && Docs.root(Views.activeDoc()), sel = $("langSel");
     if (sel.options.length !== LangDetect.ids.length + 1) sel.replaceChildren(opt("", ""), ...LangDetect.ids.map(id => opt(id, id)));
     sel.options[0].textContent = T("Tự nhận ({lang})", { lang: doc ? doc.detected.id : "—" });
     sel.value = doc ? doc.lang : "";
     sel.disabled = !doc;
+    if (Views.activeDoc()) $("opSel").value = RunOp.of(Views.activeDoc());
+    $("layoutSel").value = Views.layout;
   }
 
   function fill() {
     $("demo").replaceChildren(opt("", T("Thử mẫu…")), ...Object.entries(DEMOS).map(([k, d]) => opt(k, T(d.label))));
+    $("layoutSel").replaceChildren(...Layouts.LIST.map(l => opt(l.id, T(l.label))));
     const op = $("opSel").value;
-    $("opSel").replaceChildren(...OutputOps.ids.map(id => opt(id, T(OutputOps.get(id).label) + " ⇢")));
+    const groups = {};
+    for (const id of OutputOps.ids) {
+      const op = OutputOps.get(id);
+      (groups[op.group] ??= Object.assign(document.createElement("optgroup"), { label: T(op.group) })).append(opt(id, T(op.label) + " ⇢"));
+    }
+    $("opSel").replaceChildren(...Object.values(groups));
     if (op) $("opSel").value = op;
     sync();
   }
@@ -36,6 +44,7 @@ function wireOneEditor() {
   on("btnSave", "click", () => Actions.save(false));
   on("btnSaveAs", "click", () => Actions.save(true));
   on("btnRun", "click", Actions.run);
+  on("opSel", "change", e => RunOp.pick(Views.activeDoc(), e.target.value));
   on("btnSwap", "click", () => Views.swap());
   on("btnExplorer", "click", Actions.toggleExplorer);
   on("btnShare", "click", ShareLoader.share);
@@ -45,8 +54,27 @@ function wireOneEditor() {
   on("demo", "change", e => { const k = e.target.value; e.target.value = ""; ShareLoader.loadDemo(k); });
   on("uiTheme", "change", () => Views.applySettings());
   on("stLang", "click", () => $("langSel").focus());
+  on("btnPalette", "click", () => QuickPick.open(">"));
+  on("layoutSel", "change", e => Actions.setLayout(e.target.value));
+  on("btnZenExit", "click", Actions.toggleZen);
+  on("chkMinimap", "change", e => Actions.setMinimap(e.target.checked));
+  on("btnFind", "click", () => Commands.run("find"));
+  on("btnFormat", "click", () => Commands.run("formatOut"));
+  on("btnCompare", "click", Compare.toggle);
+  PreviewPane.init();
+  Speech.init();
+  FormatActions.load();
+  Compare.init();
+  Macro.init();
+  CmSetup.settings.hidden = Prefs.get("hidden", false) === true;
+  CmSetup.settings.numHover = Prefs.get("numhover", true) !== false;
+  CmSetup.settings.lint = Prefs.get("lint", true) !== false;
+  on("stEol", "click", EncodingActions.pick);
+  on("stLint", "click", () => Commands.run("problems"));
   matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => Views.applySettings());
-  document.addEventListener("keydown", Actions.onKey, true);
+  registerOneEditorCommands();
+  document.addEventListener("keydown", Commands.onKey, true);
+  $("work").style.setProperty("--ed-font", (Prefs.get("font", 13) | 0 || 13) + "px");
   // Phone carousel: the view swiped into sight becomes the focused one (new tabs, status bar, ▶ Run follow it).
   const work = $("work");
   work.addEventListener("scroll", Dom.debounce(() => {
@@ -54,13 +82,17 @@ function wireOneEditor() {
     if (page > 0) Views.focus(page - 1);
   }, 150), { passive: true });
   Split.init();
+  SideBar.init();
+  ExportActions.init();
 
   Docs.on((type, doc) => {
     if (type === "edit" || type === "dirty") OutputLink.sourceEdited(doc);
-    if (type === "lang" || type === "rename") LangLoader.apply(doc);
+    if (type === "lang" || type === "rename") Docs.family(doc).forEach(LangLoader.apply);
     if (type === "kept") StatusBar.msg(T("Đã giữ “{name}” trong Ghi chú.", { name: doc.name }), "good");
+    if (type === "handEdited") StatusBar.msg(T("“{name}” đã sửa tay: tab không tự cập nhật theo nguồn nữa, ▶ Chạy sẽ hỏi trước khi ghi đè.", { name: doc.name }), "warn");
     if (type === "edit") return;
-    Views.groups.forEach(g => { if (g.tabs.includes(doc.id)) TabStrip.render(g); });
+    const ids = Docs.family(doc).map(d => d.id);
+    Views.groups.forEach(g => { if (g.tabs.some(id => ids.includes(id))) TabStrip.render(g); });
     Explorer.render();
     Toolbar.sync();
     StatusBar.refresh();
@@ -87,6 +119,11 @@ function wireOneEditor() {
   await HotExit.restore();
   $("chkWrap").checked = CmSetup.settings.wrap;
   Views.applySettings();
+  if (Prefs.get("minimap", false) === true) Actions.setMinimap(true);
+  if (Prefs.get("guides", true) !== false) Actions.setGuides(true);
+  await RecentFiles.load();
+  // Extras (breadcrumbs, bracket colours, snippets, key profile, sessions) load after the editor is usable.
+  EditorExtras.use(async () => { KeyProfiles.init(); Aids.apply(); await Snippets.load(); await Sessions.init(); });
   StatusBar.storage(NotesDb.ok, NotesDb.error);
   StatusBar.msg(T("Sẵn sàng. Kéo-thả file / folder vào View 1 hoặc View 2, hoặc bấm + để tạo ghi chú."));
   await ShareLoader.fromUrl();

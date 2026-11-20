@@ -64,6 +64,8 @@
   .wb-nav button { padding:6px 14px; border:0; border-radius:6px 6px 0 0; background:transparent; }
   .wb-nav button:hover { background:var(--btn); }
   .wb-nav button.on { background:var(--tb); color:var(--tb-ink); font-weight:600; }
+  /* "Thử mẫu…" is a local testing aid: hidden on the published site, ?demo=<key> still works */
+  .hosted .demo-picker { display:none !important; }
   .toolbar { background:var(--tb); --line:color-mix(in srgb, var(--acc) 40%, var(--panel)); --muted:color-mix(in srgb, var(--ink) 65%, var(--panel)); }
   :root[data-theme="light"] { --bg:#f8fafc; --panel:#fff; --line:#cbd5e1; --ink:#0f172a; --muted:#64748b; --good:#15803d; --bad:#b91c1c; --warn:#b45309; --code:#f8fafc; --btn:#fff; --gut:#f1f5f9; --hover:#f1f5f9;
           --k:#7c3aed; --s:#047857; --n:#b45309; --l:#be185d; --tn:#1d4ed8; --an:#7c3aed; --av:#047857; --c:#94a3b8; --add:#dcfce7; --del:#fee2e2; --add2:#86efac; --del2:#fca5a5; }
@@ -432,6 +434,7 @@
 <!-- GoatCounter: chỉ gửi path (không query/hash); chạy local đếm thành /local/<tên file> để không lộ thư mục máy -->
 <script>
 { const local = !location.protocol.startsWith("http") || ["localhost", "127.0.0.1"].includes(location.hostname);
+  if (!local) document.documentElement.classList.add("hosted");
   const p = local ? "/local/" + location.pathname.split("/").pop() : location.pathname.replace(/index[.]html$/, "");
   const gc = "https://quan111.goatcounter.com/count";
   navigator.sendBeacon?.(gc + "?" + new URLSearchParams({ p, r: document.referrer.split("?")[0], t: document.title, s: screen.width }));
@@ -469,7 +472,7 @@
   </span>
 </div>
 <div class="toolbar" id="horoBar" hidden>
-  <select id="horoDemo" title="Nạp hồ sơ mẫu rồi xem ngay"></select>
+  <select id="horoDemo" class="demo-picker" title="Nạp hồ sơ mẫu rồi xem ngay"></select>
   <input type="text" id="hName" class="name" autocomplete="off" spellcheck="false" maxlength="80" placeholder="Họ và tên" title="Họ và tên (dùng cho thần số học; có dấu hay không đều được)">
   <select id="hSex" title="Giới tính (ảnh hưởng cung mệnh, sao chiếu mệnh)"></select>
   <input type="text" id="hBirth" class="date" autocomplete="off" placeholder="Ngày sinh 15/08/1990" title="Ngày sinh (dd/mm/yyyy) theo lịch chọn bên cạnh; tháng nhuận âm lịch thêm “n” (15/6n/2025)">
@@ -482,7 +485,7 @@
   <span class="muted hint">Nhập ngày sinh (thêm giờ sinh, họ tên nếu có) → xem tứ trụ, mệnh, hướng hợp, thần số học và vận hạn từng năm</span>
 </div>
 <div class="toolbar" id="simBar" hidden>
-  <select id="simDemo" title="Nạp SIM mẫu rồi chấm ngay"></select>
+  <select id="simDemo" class="demo-picker" title="Nạp SIM mẫu rồi chấm ngay"></select>
   <input type="text" id="sNum" inputmode="tel" autocomplete="off" spellcheck="false" maxlength="40" placeholder="Số SIM 0912 345 678" title="Số di động 10 chữ số (0… hoặc +84…); được có dấu cách, chấm, gạch">
   <select id="sSex" title="Giới tính chủ SIM (dùng cho tứ trụ, cung mệnh)"></select>
   <input type="text" id="sBirth" class="date" autocomplete="off" placeholder="Ngày sinh 15/08/1990" title="Ngày sinh chủ SIM (dd/mm/yyyy) theo lịch chọn bên cạnh; để trống thì chỉ chấm riêng dãy số">
@@ -1459,7 +1462,7 @@ I18n.add({
   "Tổng {total}/{max} điểm → {score}/10.": "Total {total}/{max} points → {score}/10.",
   "Chấm theo phương pháp phổ biến của các trang xem SIM phong thủy (Kinh Dịch Mai Hoa, ngũ hành, tứ trụ, cửu tinh, dân gian) — chỉ mang tính tham khảo, giải trí.":
     "Scored with the methods common to Vietnamese feng shui number sites (Plum Blossom I Ching, five elements, four pillars, nine stars, folk beliefs) — for reference and fun only.",
-  "Nhập số SIM (và ngày sinh chủ SIM nếu có) rồi bấm “Chấm điểm SIM”, hoặc chọn một mẫu.": "Enter a phone number (and the owner's birth date if known), then press “Score number”, or pick a sample.",
+  "Nhập số SIM (và ngày sinh chủ SIM nếu có) rồi bấm “Chấm điểm SIM”.": "Enter a phone number (and the owner's birth date if known), then press “Score number”.", "Hoặc chọn một mẫu.": "Or pick a sample.",
   "Không có số vượng/sinh khí": "No prosperous or rising digit",
   "Tứ trụ bát tự: năm đổi ở Lập xuân, tháng theo tiết khí (có thể khác tab Tử vi, nơi tính theo năm/tháng âm lịch).":
     "Bazi pillars: the year changes at the Start of Spring and the month follows the solar terms (may differ from the Horoscope tab, which uses the lunar year/month).",
@@ -4107,7 +4110,14 @@ const ShareCodec = (() => {
 // Pure text helpers shared by parsers and tabs (no DOM, so node tests can load them).
 const TextUtil = (() => {
   const stripBom = s => s.charCodeAt(0) === 0xfeff ? s.slice(1) : s;
-  const lineCol = (s, i) => { const pre = s.slice(0, i).split("\n"); return { line: pre.length, col: pre[pre.length - 1].length + 1 }; };
+  // Line starts are cached for the last text: parsers call this once per auto-fix on the same big string.
+  let lastText = null, starts = [0];
+  function lineCol(s, i) {
+    if (s !== lastText) { lastText = s; starts = [0]; for (let k = s.indexOf("\n"); k >= 0; k = s.indexOf("\n", k + 1)) starts.push(k + 1); }
+    let lo = 0, hi = starts.length - 1;
+    while (lo < hi) { const m = (lo + hi + 1) >> 1; if (starts[m] <= i) lo = m; else hi = m - 1; }
+    return { line: lo + 1, col: i - starts[lo] + 1 };
+  }
   const INDENT = { "2": "  ", "3": "   ", "4": "    ", "8": "        ", tab: "\t" };
   const indentUnit = v => INDENT[v] ?? "  ";
   const countLines = s => { let n = 1; for (let i = s.indexOf("\n"); i >= 0; i = s.indexOf("\n", i + 1)) n++; return n; };
@@ -6131,7 +6141,7 @@ const SimScoreView = (() => {
       + `<p class="muted disclaimer">${esc(T("Chấm theo phương pháp phổ biến của các trang xem SIM phong thủy (Kinh Dịch Mai Hoa, ngũ hành, tứ trụ, cửu tinh, dân gian) — chỉ mang tính tham khảo, giải trí."))}</p>`;
   }
 
-  const empty = box => { box.innerHTML = `<p class="muted">${esc(T("Nhập số SIM (và ngày sinh chủ SIM nếu có) rồi bấm “Chấm điểm SIM”, hoặc chọn một mẫu."))}</p>`; };
+  const empty = box => { box.innerHTML = `<p class="muted">${esc(T("Nhập số SIM (và ngày sinh chủ SIM nếu có) rồi bấm “Chấm điểm SIM”."))}<span class="demo-picker"> ${esc(T("Hoặc chọn một mẫu."))}</span></p>`; };
 
   return { render, empty, hexName };
 })();

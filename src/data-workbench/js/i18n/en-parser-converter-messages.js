@@ -77,4 +77,5 @@ I18n.add({
   "Không có phần tử XML nào → bọc nội dung trong <root>": "No XML element found → content wrapped in <root>",
   "XML phải có đúng 1 phần tử gốc (đang có {n} và có chữ nằm ngoài) → bọc trong <root>": "XML must have exactly 1 root element (found {n}, plus text outside) → wrapped in <root>",
   "XML phải có đúng 1 phần tử gốc (đang có {n}) → bọc trong <root>": "XML must have exactly 1 root element (found {n}) → wrapped in <root>",
+  "Cần JSON là object hoặc mảng object để sinh kiểu.": "Types need a JSON object or an array of objects.",
 });
