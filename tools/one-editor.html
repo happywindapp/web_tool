@@ -64,8 +64,8 @@
   .wb-nav button { padding:6px 14px; border:0; border-radius:6px 6px 0 0; background:transparent; }
   .wb-nav button:hover { background:var(--btn); }
   .wb-nav button.on { background:var(--tb); color:var(--tb-ink); font-weight:600; }
-  /* "Thử mẫu…" is a local testing aid: hidden on the published site, ?demo=<key> still works */
-  .hosted .demo-picker { display:none !important; }
+  /* A select is as wide as its longest option; cap it so long sample names don't widen the toolbar (the open list shows them in full) */
+  select.demo-picker { max-width:9.5em; text-overflow:ellipsis; }
   .toolbar { background:var(--tb); --line:color-mix(in srgb, var(--acc) 40%, var(--panel)); --muted:color-mix(in srgb, var(--ink) 65%, var(--panel)); }
   :root[data-theme="light"] { --bg:#f8fafc; --panel:#fff; --line:#cbd5e1; --ink:#0f172a; --muted:#64748b; --good:#15803d; --bad:#b91c1c; --warn:#b45309; --code:#f8fafc; --btn:#fff; --gut:#f1f5f9; --hover:#f1f5f9;
           --k:#7c3aed; --s:#047857; --n:#b45309; --l:#be185d; --tn:#1d4ed8; --an:#7c3aed; --av:#047857; --c:#94a3b8; --add:#dcfce7; --del:#fee2e2; --add2:#86efac; --del2:#fca5a5; }
@@ -176,8 +176,6 @@ body.recording .statusbar { box-shadow: inset 0 2px 0 #e5534b; }
 .cm-editor .cmp-gutter .cmp-g-del { background: color-mix(in srgb, #e5534b 45%, transparent); }
 .cm-editor .cmp-gutter .cmp-g-add { background: color-mix(in srgb, #2da44e 45%, transparent); }
 .cm-editor .cmp-arrow { cursor: pointer; font-weight: 700; color: var(--ink); }
-  /* Long sample names must not push the toolbar onto a third row (the open list shows them in full). */
-  #demo { max-width:min(20em, 62vw); }
   /* Per-view tab strip and the Explorer rows (buttons, so touch / keyboard / mouse behave the same) */
   .gbar { display:flex; align-items:stretch; min-width:0; background:var(--gut); border-bottom:1px solid var(--line); }
   .tabs { display:flex; flex:1 1 auto; min-width:0; overflow-x:auto; scrollbar-width:thin; }
@@ -188,7 +186,10 @@ body.recording .statusbar { box-shadow: inset 0 2px 0 #e5534b; }
   .tab.on { background:var(--code); color:var(--ink); }
   .group.focused .tab.on { box-shadow:inset 0 2px 0 var(--acc); font-weight:600; }
   .tab:focus-visible { outline:2px solid var(--acc); outline-offset:-2px; }
-  .tab .x { min-width:22px; padding:0 4px; border:0; background:transparent; color:inherit; line-height:1.3; }
+  .tab .x, .tab .pin { min-width:22px; padding:0 4px; border:0; background:transparent; color:inherit; line-height:1.3; }
+  .tab .pin { display:none; font-size:.85em; }
+  .tab.on .pin, .tab.pinned .pin { display:inline-block; }
+  .tab:not(.pinned) .pin, .ex-pin:not(.on) { opacity:.45; filter:grayscale(1); }
   .gbar > button { flex:none; border:0; border-left:1px solid var(--line); border-radius:0; background:transparent; padding:2px 10px; }
   .tab-rename { width:auto; min-width:6em; max-width:min(200px, 50vw); padding:1px 4px; border:1px solid var(--acc); border-radius:3px; background:var(--panel); color:var(--ink); font:inherit; user-select:text; }
   .tab-menu { position:fixed; z-index:60; display:flex; flex-direction:column; min-width:240px; max-width:calc(100vw - 8px); padding:4px 0; border:1px solid var(--line);
@@ -226,12 +227,12 @@ body.recording .statusbar { box-shadow: inset 0 2px 0 #e5534b; }
 
   @media (hover:hover) {
     .tab:hover, .ex-item:hover, details.ex-dir > summary:hover { background:var(--hover); color:var(--ink); }
-    .tab .x:hover, .ex-act:hover, .gbar > button:hover { background:var(--line); color:var(--ink); }
+    .tab .x:hover, .tab .pin:hover, .ex-act:hover, .gbar > button:hover { background:var(--line); color:var(--ink); }
     .tab-menu > button:hover { background:var(--hover); }
   }
   @media (max-width:640px) {
     .tab { min-height:38px; max-width:60vw; }
-    .tab .x { min-width:32px; min-height:32px; }
+    .tab .x, .tab .pin { min-width:32px; min-height:32px; }
     .tab-menu > button { min-height:40px; }
     .gbar > button { min-height:38px; padding:2px 12px; }
     .ex-item, details.ex-dir > summary { padding-top:7px; padding-bottom:7px; }
@@ -572,6 +573,7 @@ body.recording .statusbar { box-shadow: inset 0 2px 0 #e5534b; }
   <button id="btnSave" title="Lưu (Ctrl+S): file → ghi đè lên đĩa; ghi chú → đã tự lưu trong trình duyệt">💾 Lưu</button>
   <button id="btnSaveAs" title="Lưu thành file mới (Ctrl+Shift+S); trình duyệt không hỗ trợ thì tải xuống">Lưu thành…</button>
   <button id="btnFind" title="Tìm / thay trong tab đang mở (Ctrl+F) — có tìm / thay trong vùng chọn">🔍 Tìm</button>
+  <button id="btnRefresh" title="Làm mới từ đĩa: đọc lại mọi tab file (kể cả tab chưa đọc lại sau F5) và các folder đang mở trong Explorer">🔄 Làm mới</button>
   <button id="btnFormat" title="Format tab đang mở theo ngôn ngữ — kết quả ra tab liên kết ở view kia (Shift+Alt+F: format tại chỗ)">✨ Format</button>
   <select id="demo" class="demo-picker" title="Nạp dữ liệu mẫu thành tab tạm (không đè bài đang sửa)" data-i18n-skip></select>
   <span class="sep"></span>
@@ -1702,7 +1704,7 @@ const I18n = (() => {
     apply();
   }
 
-  return { t, num, set, init, add: d => Object.assign(EN, d), onChange: f => listeners.push(f), get lang() { return lang; } };
+  return { t, num, set, init, add: d => Object.assign(EN, d), has: vi => Object.hasOwn(EN, vi), onChange: f => listeners.push(f), get lang() { return lang; } };
 })();
 const T = I18n.t;
 // English for the shared core modules (ThemePicker markup, SavedSessions, ColFilter) — included by every tool that uses them.
@@ -2330,6 +2332,8 @@ I18n.add({
   "Tên": "Name", "Kiểu": "Type", "Nhóm": "Group", "Giá trị": "Value", "Không có trong từ điển FIX 4.4 / 5.0SP2": "Not in the FIX 4.4 / 5.0SP2 dictionary",
   "Không nạp được từ điển FIX ({file}).": "Could not load the FIX dictionary ({file}).",
   "Đã mở “{name}” trong FIX Parser (tab mới; dữ liệu nằm sau dấu #, không gửi đi đâu).": "Opened “{name}” in FIX Parser (new tab; the data stays after the #, nothing is sent).",
+  "FIX → Chi tiết message": "FIX → Message detail",
+  "Không nạp được Message detail FIX ({file}) — cần file này nằm cạnh one-editor.html.": "Could not load the FIX Message detail ({file}) — this file must sit next to one-editor.html.",
 });
 // English strings for phase 8d in the main page (commands, markup, Goto Anything, password links, locked notes placeholder), keyed by the Vietnamese source text.
 I18n.add({
@@ -2337,7 +2341,6 @@ I18n.add({
   "Emmet: mở rộng viết tắt ở con trỏ (Ctrl+E)": "Emmet: expand the abbreviation at the cursor (Ctrl+E)", "Emmet chỉ chạy trong tab HTML / CSS / JSX.": "Emmet works in HTML / CSS / JSX tabs only.",
   "Emmet: bật (HTML · CSS · JSX — Tab hoặc Ctrl+E để mở rộng viết tắt).": "Emmet: on (HTML · CSS · JSX — Tab or Ctrl+E expands an abbreviation).", "Emmet: tắt.": "Emmet: off.",
   "Không nạp được Emmet ({file}).": "Could not load Emmet ({file}).",
-  "Không nạp được phần mở rộng editor ({file}) — cần file này nằm cạnh one-editor.html.": "Could not load the editor extras ({file}) — this file must sit next to one-editor.html.",
   "Snippet: chèn…": "Snippet: insert…", "Snippet: lưu vùng chọn thành snippet…": "Snippet: save the selection as a snippet…", "Snippet: xoá snippet đã lưu…": "Snippet: delete a saved snippet…",
   "Phiên: lưu các tab + layout với tên…": "Session: save the tabs + layout under a name…", "Phiên: mở phiên đã lưu…": "Session: open a saved session…",
   "Bật / tắt thước cột 80 / 120": "Toggle the 80 / 120 column rulers", "Bật / tắt tô màu cặp ngoặc": "Toggle bracket pair colours",
@@ -2361,6 +2364,48 @@ I18n.add({
   "Mật khẩu": "Password", "Mật khẩu (ít nhất 8 ký tự)": "Password (at least 8 characters)", "Nhập lại mật khẩu": "Repeat the password", "Huỷ": "Cancel",
   "Mật khẩu không nằm trong link và không được lưu ở đâu — quên là không mở lại được.": "The password is not in the link and is not stored anywhere — forget it and the content cannot be opened again.",
 });
+// English strings for the editor extras (key profiles, Vim, snippets, sessions, Outline, password dialog, locked notes); inlined in one-editor.html.
+I18n.add({
+  "Bộ phím: {name} — phím của ứng dụng (Ctrl+P, Ctrl+Shift+P…) giữ nguyên.": "Key profile: {name} — the app's shortcuts (Ctrl+P, Ctrl+Shift+P…) stay the same.",
+  "Không nạp được Vim ({file}).": "Could not load Vim ({file}).", "Vim: bật — Esc về Normal, i để gõ, :w lưu.": "Vim: on — Esc for Normal, i to type, :w saves.", "Vim: tắt.": "Vim: off.",
+  // Snippets
+  "snippet": "snippet", "Không lưu được snippet: {msg}": "Could not save the snippet: {msg}",
+  "Chưa có snippet cho ngôn ngữ này — bôi đen đoạn code rồi “Snippet: lưu vùng chọn…”.": "No snippet for this language yet — select some code, then “Snippet: save the selection…”.",
+  "Chọn snippet để chèn": "Pick a snippet to insert", "Bôi đen đoạn code cần lưu thành snippet trước.": "Select the code to save as a snippet first.",
+  "Tên gọi tắt của snippet (gõ tên này rồi chọn trong gợi ý):": "Snippet prefix (type it, then pick it from the suggestions):", "của tôi · {lang}": "mine · {lang}",
+  "✔ Đã lưu snippet “{prefix}” cho {lang} (trong trình duyệt này).": "✔ Snippet “{prefix}” saved for {lang} (in this browser).", "Chưa có snippet nào của bạn.": "You have no snippets yet.",
+  "Đã xoá snippet “{prefix}”.": "Snippet “{prefix}” deleted.", "Chọn snippet của bạn để xoá": "Pick one of your snippets to delete",
+  // Sessions
+  "Không lưu được phiên: {msg}": "Could not save the session: {msg}", "Phiên {date}": "Session {date}",
+  "Chưa có phiên nào — “Phiên: lưu…” hoặc 💾 trong Explorer.": "No session yet — “Session: save…” or 💾 in the Explorer.",
+  "Chọn phiên để mở (tab của phiên được thêm, tab đang mở giữ nguyên)": "Pick a session to open (its tabs are added, open tabs stay)",
+  // Outline
+  "Tab đang mở không có symbol.": "The open tab has no symbols.", "Không có symbol khớp.": "No matching symbol.",
+  // Password + locked notes
+  "Sai mật khẩu hoặc dữ liệu đã hỏng.": "Wrong password or damaged data.", "Mật khẩu cần ít nhất 8 ký tự.": "The password needs at least 8 characters.", "Hai lần nhập không khớp.": "The two entries differ.",
+  "Đặt mật khẩu cho “{name}”": "Set a password for “{name}”", "Mật khẩu của “{name}”": "Password of “{name}”",
+  "🔒 “{name}” giờ chỉ lưu dạng mã hoá. Quên mật khẩu là không mở lại được.": "🔒 “{name}” is now stored encrypted only. Forget the password and it cannot be opened again.",
+  "Ghi chú này chưa có mật khẩu.": "This note has no password.", "🔒 Đã khoá “{name}”.": "🔒 “{name}” locked.", "Ghi chú này không bị khoá.": "This note is not locked.",
+  "🔓 Đã mở khoá “{name}” — vẫn lưu dạng mã hoá; F5 / đóng trang là khoá lại.": "🔓 “{name}” unlocked — still stored encrypted; F5 / closing the page locks it again.",
+  "Mở khoá ghi chú trước.": "Unlock the note first.", "Bỏ mật khẩu — “{name}” sẽ lưu dạng thường trong trình duyệt?": "Remove the password — store “{name}” as plain text in this browser?",
+  "Đã bỏ mật khẩu của “{name}”.": "Password of “{name}” removed.", "trình duyệt chặn IndexedDB": "the browser blocks IndexedDB",
+  "Không xoá được bản thường cũ của ghi chú (lịch sử / phiên): {msg}": "Could not delete the note's older plain copies (history / sessions): {msg}",
+  // Local history (8c)
+  "Tab này không có lịch sử cục bộ.": "This tab has no local history.", "Tab lớn hơn 5 MB — không chụp lịch sử cục bộ.": "Tab larger than 5 MB — no local history snapshot.",
+  "Không đổi so với bản lịch sử gần nhất — không chụp thêm.": "Unchanged since the latest snapshot — no new snapshot.",
+  "✔ Đã chụp bản lịch sử của “{name}”.": "✔ Snapshot of “{name}” saved.", "Không ghi được lịch sử cục bộ: {msg}": "Could not write the local history: {msg}",
+  "Không đọc được lịch sử cục bộ: {msg}": "Could not read the local history: {msg}",
+  "“{name}” chưa có bản lịch sử — bản được chụp mỗi lần Ctrl+S, hoặc dùng lệnh “Lịch sử cục bộ: chụp bản ngay”.":
+    "“{name}” has no history yet — a snapshot is taken on every Ctrl+S, or use “Local history: take a snapshot now”.",
+  "mới nhất": "latest", "Chọn bản lịch sử để so sánh với “{name}”": "Pick a version to compare with “{name}”", "Không đọc được bản lịch sử này.": "Could not read this version.",
+  "So sánh “{name}” với bản lúc {time} — lệnh “Lịch sử cục bộ: khôi phục…” để ghi bản đó vào tab gốc (Ctrl+Z được).":
+    "Comparing “{name}” with the version of {time} — “Local history: restore…” writes it into the original tab (Ctrl+Z works).",
+  "Tab gốc của bản lịch sử này đã đóng.": "The original tab of this version is closed.", "Tab gốc đang chỉ đọc — đọc lại file (Ctrl+S) rồi khôi phục.": "The original tab is read-only — reload the file (Ctrl+S), then restore.",
+  "Thay toàn bộ nội dung “{name}” bằng bản lúc {time}? Ctrl+Z để hoàn tác.": "Replace all of “{name}” with the version of {time}? Ctrl+Z undoes it.",
+  "✔ Đã khôi phục bản lúc {time} vào “{name}” — chưa ghi đĩa, Ctrl+S để lưu.": "✔ Restored the version of {time} into “{name}” — not written to disk yet, Ctrl+S to save.",
+  "“{name}” chưa có bản lịch sử.": "“{name}” has no history yet.", "Xoá {n} bản lịch sử của “{name}”?": "Delete {n} history version(s) of “{name}”?",
+  "✔ Đã xoá {n} bản lịch sử.": "✔ Deleted {n} history version(s).", "Không xoá được lịch sử cục bộ: {msg}": "Could not delete the local history: {msg}",
+});
 // English strings for the phase 9 power tools entry in the main page (op / command / demo labels).
 I18n.add({
   "Cron: giải thích + lần chạy kế": "Cron: explanation + next runs", "Thay hàng loạt (regex / chuỗi)": "Batch replace (regex / text)", "Ký tự vô hình (zero-width, NBSP, SOH…)": "Invisible characters (zero-width, NBSP, SOH…)",
@@ -2374,6 +2419,44 @@ I18n.add({
   "Markdown: căn thẳng bảng": "Markdown: align tables", "Markdown: chèn / cập nhật mục lục": "Markdown: insert / update the table of contents",
   "Không nạp được bộ công cụ mở rộng ({file}) — cần file này nằm cạnh one-editor.html.": "Could not load the power tools ({file}) — this file must sit next to one-editor.html.",
   "Link có regex — chưa tự chạy; bấm ▶ Chạy để chạy “{op}”.": "The link has a regex — not run yet; press ▶ Run to run “{op}”.",
+});
+// English strings for disk change sync (🔄 refresh, focus / FileSystemObserver check, save guard), keyed by the Vietnamese source text.
+I18n.add({
+  "🔄 Làm mới từ đĩa: folder Explorer + các tab file": "🔄 Refresh from disk: Explorer folder + file tabs",
+  "Đọc lại từ đĩa / so sánh với bản trên đĩa…": "Reload from disk / compare with the disk copy…",
+  "Làm mới từ đĩa: đọc lại folder và các file bị sửa bên ngoài": "Refresh from disk: re-read the folder and files changed outside",
+  "File đã bị sửa bên ngoài — chuột phải → “Đọc lại từ đĩa / so sánh…”": "The file was changed outside — right-click → “Reload from disk / compare…”",
+  "đổi trên đĩa": "changed on disk", "trên đĩa": "on disk", "Xử lý file đổi trên đĩa": "Handle the file changed on disk",
+  "⚠ {names} đã bị sửa bên ngoài trong khi tab có thay đổi chưa lưu — bấm để chọn: đọc lại / giữ bản của bạn / so sánh.": "⚠ {names} changed outside while the tab has unsaved changes — click to choose: reload / keep yours / compare.",
+  "{names} không còn trên đĩa (bị xoá / đổi tên) — tab vẫn giữ nội dung, dùng “Lưu thành…” nếu cần.": "{names} no longer on disk (deleted / renamed) — the tab keeps its content, use “Save as…” if needed.",
+  "Không làm mới được folder: {msg}": "Could not refresh the folder: {msg}",
+  "🔄 Đã đọc lại từ đĩa: {names}.": "🔄 Reloaded from disk: {names}.",
+  "🔄 Đã làm mới — folder và các tab file khớp với đĩa.": "🔄 Refreshed — the folder and file tabs match the disk.",
+  "Không đọc được “{name}” từ đĩa: {msg}": "Could not read “{name}” from disk: {msg}",
+  "Đã đọc lại “{name}” từ đĩa — Ctrl+Z để lấy lại bản của bạn.": "Reloaded “{name}” from disk — Ctrl+Z brings your version back.",
+  "Giữ bản của bạn — Lưu (Ctrl+S) sẽ ghi đè “{name}” trên đĩa.": "Keeping your version — Save (Ctrl+S) will overwrite “{name}” on disk.",
+  "⟲ Đọc lại từ đĩa — bỏ thay đổi của tôi (Ctrl+Z vẫn lấy lại được)": "⟲ Reload from disk — drop my changes (Ctrl+Z still brings them back)",
+  "✎ Giữ bản của tôi — lần Lưu tới ghi đè bản trên đĩa": "✎ Keep my version — the next Save overwrites the disk copy",
+  "⇄ So sánh bản của tôi với bản trên đĩa (2 view)": "⇄ Compare my version with the disk copy (2 views)",
+  "“{name}” — chọn cách xử lý với bản trên đĩa": "“{name}” — choose what to do with the disk copy",
+  "Chỉ tab file mở bằng Mở file / Explorer (Chrome / Edge) mới đọc lại từ đĩa được.": "Only a file tab opened with Open file / Explorer (Chrome / Edge) can be reloaded from disk.",
+  "“{name}” khớp với bản trên đĩa.": "“{name}” matches the disk copy.",
+  "“{name}” đã bị sửa bên ngoài sau lần mở / lưu gần nhất. Ghi đè bản trên đĩa bằng bản của bạn?": "“{name}” was changed outside since it was last opened / saved. Overwrite the disk copy with yours?",
+  "Chưa lưu “{name}” — bấm để chọn: đọc lại / giữ bản của bạn / so sánh.": "“{name}” not saved — click to choose: reload / keep yours / compare.",
+  "🔄 Làm mới": "🔄 Refresh",
+  "Làm mới từ đĩa: đọc lại mọi tab file (kể cả tab chưa đọc lại sau F5) và các folder đang mở trong Explorer": "Refresh from disk: re-read every file tab (including tabs not read again since F5) and the folders open in Explorer",
+  "{names} cần bạn cho phép đọc lại từ đĩa — bấm vào đây.": "{names} need your permission to be read from disk again — click here.",
+  "{names} đổi trên đĩa và lớn hơn 50 MB — mở lại file để xem theo đoạn.": "{names} changed on disk and is over 50 MB — open the file again to view it in chunks.",
+  "Không kiểm được {names} (chưa được cấp quyền hoặc lỗi đọc).": "Could not check {names} (no permission or a read error).",
+});
+// English strings for pinning: the Explorer "Pinned" section (folders, files, notes) and pinned tabs, keyed by the Vietnamese source text.
+I18n.add({
+  "Đã ghim": "Pinned", "Bỏ ghim": "Unpin", "Mở file": "Open file", "Mở folder này trong Explorer": "Open this folder in the Explorer",
+  "Ghim / bỏ ghim vào mục Đã ghim": "Pin / unpin to the Pinned section", "Ghim / bỏ ghim vào mục Đã ghim (Explorer)": "Pin / unpin to Pinned (Explorer)",
+  "Bỏ ghim tab": "Unpin tab", "Ghim tab (Ctrl+K Shift+Enter)": "Pin tab (Ctrl+K Shift+Enter)",
+  "Ghim tab (luôn ở đầu view, hỏi lại trước khi đóng)": "Pin tab (kept first in the view, asks before closing)",
+  "Tab “{name}” đang ghim. Vẫn đóng?": "Tab “{name}” is pinned. Close it anyway?",
+  "Đã ghim “{name}” — xem ở mục Đã ghim của Explorer.": "Pinned “{name}” — see Pinned in the Explorer.", "Đã bỏ ghim “{name}”.": "Unpinned “{name}”.",  "“{name}” không còn trên đĩa — đã bỏ ghim.": "“{name}” is no longer on disk — unpinned.",
 });
 // Vietnamese for CodeMirror's own UI (search panel, go to line, folding); CodeMirror keys its phrases by the English text.
 const CM_PHRASES_VI = {
@@ -3560,10 +3643,7 @@ const VendorPaths = (() => {
     cmEmmet: CM_DIR + "codemirror-emmet.min.js",
     sqlFormatter: "vendor/sql-formatter-15.9.0.min.js",
     prettier: P_DIR + "standalone.js",
-    dataTools: "one-editor-data-tools.js",
-    fixDict: "one-editor-fix-dictionary.js",
-    editorExtras: "one-editor-editor-extras.js",
-    powerTools: "one-editor-power-tools.js",
+    extras: "one-editor-extras.js",
   };
   for (const p of ["babel", "estree", "typescript", "postcss", "html", "markdown", "yaml", "graphql"]) PATHS["prettier-" + p] = P_DIR + "plugins/" + p + ".js";
   const loading = {};
@@ -3870,6 +3950,7 @@ const OutputOps = (() => {
     // pane + text: the translation shows in a pane and also stays as the tab's text (export, copy, share).
     "translate": { label: "Dịch", group: "Dịch", lang: same, live: d => Translate.liveOn(d), pane: true, restore: d => Translate.restored(d), run: (t, c) => Translate.run(t, c) },
     "filter": { label: "Lọc dòng (log)", group: "Log", lang: same, live: true, pane: true, run: async (t, c) => { await DataOps.load(); return LineFilter.run(t, c); } },
+    "fix-detail": { label: "FIX → Chi tiết message", group: "Log", lang: "JSON", live: true, pane: true, run: (t, c) => FixDetailOp.run(t, c) },
     "tree": { label: "Cây JSON / XML", group: "Dữ liệu", lang: "Plain Text", live: true, pane: true, run: (t, c) => DataOps.tree(t, c) },
     "query": { label: "Truy vấn JSONPath / XPath", group: "Dữ liệu", lang: "JSON", live: true, pane: true, run: (t, c) => DataOps.query(t, c) },
     "jwt": { label: "JWT decode (không kiểm chữ ký)", group: "Công cụ dev", lang: "JSON", live: true, pane: true, restore: d => DevReport.restore(d), run: t => DevReport.jwt(t) },
@@ -4713,9 +4794,9 @@ ORD-4,INITECH,BUY,20,9.75,DARK,cancelled by client
 2026-11-20 09:15:07.012 INFO  upstream reconnected
 2026-11-20 09:15:08.300 DEBUG cache hit ratio=0.97
 `;
-  const FIX = `8=FIX.4.4|9=148|35=D|34=1080|49=CLIENT01|52=20261120-09:15:03.004|56=BROKER|11=ORD-1001|21=1|38=100|40=2|44=25.40|54=1|55=ACME|59=0|60=20261120-09:15:03|10=128|
-8=FIX.4.4|9=162|35=8|34=2211|49=BROKER|52=20261120-09:15:03.120|56=CLIENT01|6=0|11=ORD-1001|14=0|17=EXEC-1|37=OID-77|39=0|54=1|55=ACME|150=0|151=100|10=045|
-8=FIX.4.4|9=171|35=8|34=2212|49=BROKER|52=20261120-09:15:04.877|56=CLIENT01|6=0|11=ORD-1003|14=0|17=EXEC-2|37=NONE|39=8|54=2|55=GLOBX|58=Price outside band|150=8|151=0|10=201|
+  const FIX = `8=FIX.4.4|9=137|35=D|34=1080|49=CLIENT01|52=20261120-09:15:03.004|56=BROKER|11=ORD-1001|21=1|38=100|40=2|44=25.40|54=1|55=ACME|59=0|60=20261120-09:15:03|10=246|
+8=FIX.4.4|9=133|35=8|34=2211|49=BROKER|52=20261120-09:15:03.120|56=CLIENT01|6=0|11=ORD-1001|14=0|17=EXEC-1|37=OID-77|39=0|54=1|55=ACME|150=0|151=100|10=133|
+8=FIX.4.4|9=152|35=8|34=2212|49=BROKER|52=20261120-09:15:04.877|56=CLIENT01|6=0|11=ORD-1003|14=0|17=EXEC-2|37=NONE|39=8|54=2|55=GLOBX|58=Price outside band|150=8|151=0|10=221|
 `;
   const one = (name, text, run) => () => ({ v: 1, views: [[t(name, text)], []], run });
 
@@ -4760,7 +4841,7 @@ Limits are checked before an order is stored.
     "emmet-html": { label: "Emmet + ô màu CSS (Ctrl+E)", payload: () => ({ v: 1, views: [[t("orders.html", HTML)], []] }),
       after: () => { const v = Views.activeView(); v.dispatch({ selection: { anchor: v.state.doc.length - 1 } }); v.focus(); } },
     "outline-md": { label: "Outline + breadcrumbs (Markdown)", payload: () => ({ v: 1, views: [[t("handbook.md", GUIDE)], []] }),
-      after: () => { SideBar.show("outline"); const v = Views.activeView(); v.dispatch({ selection: { anchor: v.state.doc.toString().indexOf("T+2") } }); } },
+      after: () => { SideBar.show("outline"); EditorExtras.use(() => { if (!Aids.settings().crumbs) Aids.toggle("crumbs"); }); const v = Views.activeView(); v.dispatch({ selection: { anchor: v.state.doc.toString().indexOf("T+2") } }); } },
   });
 })();
 // Phase 9 demo labels; content + follow-up step: PowerDemos (lazy bundle).
@@ -4902,6 +4983,14 @@ const LocalFs = (() => {
     throw new Error(T("Trình duyệt không cho ghi vào folder."));
   }
 
+  // A handle kept in IndexedDB loses its permission on reload; asking needs a click.
+  async function readable(h) {
+    const opts = { mode: "read" };
+    let perm = h.queryPermission ? await h.queryPermission(opts) : "granted";
+    if (perm !== "granted" && h.requestPermission) perm = await h.requestPermission(opts);
+    return perm === "granted";
+  }
+
   async function exists(dir, name) {
     for await (const k of dir.keys()) if (k === name) return true;
     return false;
@@ -4984,7 +5073,7 @@ const LocalFs = (() => {
     catch (e) { if (aborted(e)) return null; throw e; }
   }
 
-  return { pickFiles, pickDirectory, fromHandle, fromEntry, readText, encode, writeHandle, saveAs, create, remove, rename, canPick, canDir, canSave, MAX_ENTRIES };
+  return { pickFiles, pickDirectory, fromHandle, fromEntry, readText, encode, writeHandle, saveAs, readable, create, remove, rename, canPick, canDir, canSave, MAX_ENTRIES };
 })();
 // Notepad++ bookmarks: Ctrl+F2 toggles the current line, F2 / Shift+F2 jump to the next / previous one (wrapping); kept per tab in a StateField that follows edits.
 const Bookmarks = (() => {
@@ -5466,7 +5555,7 @@ const MixedEol = (() => {
 const CmSetup = (() => {
   let C = null, themes = null, onUpdate = null, minimap = null, guides = null;
   const comp = {}, extra = { vim: [], keys: [], aids: [] };
-  const settings = { wrap: false, minimap: false, guides: false, hidden: false, numHover: true, lint: true };
+  const settings = { wrap: true, minimap: false, guides: false, hidden: false, numHover: true, lint: true };
 
   const isDark = () => {
     const t = document.documentElement.dataset.theme;
@@ -5597,6 +5686,7 @@ const Docs = (() => {
       text, state: null, handle: init.handle || null, dirty: !!init.dirty, edited: !!init.edited, readOnly: !!init.readOnly, stale: !!init.stale && !!init.handle,
       eol: init.eol === "\r\n" || init.eol === "\r" ? init.eol : "\n", eolMixed: !!init.eolMixed, eolList: typeof init.eolList === "string" ? init.eolList : null, bom: !!init.bom,
       bigStart: Number.isFinite(init.bigStart) ? init.bigStart : null,
+      disk: init.disk && Number.isFinite(init.disk.size) && Number.isFinite(init.disk.mod) ? { size: init.disk.size, mod: init.disk.mod } : null,
       enc: [...Encoding.WRITABLE, ...Encoding.READ_ONLY].includes(init.enc) ? init.enc : "utf-8", link: init.link && typeof init.link.src === "string" ? { src: init.link.src, op: init.link.op, ...(init.link.opts && typeof init.link.opts === "object" ? { opts: init.link.opts } : {}) } : null,
       updated: +init.updated || Date.now(), pending: init.pending ?? true, scrollTop: 0, langApplied: null, pinned: !!init.pinned, hex: !!init.hex,
       cloneOf: init.kind === "clone" ? init.cloneOf : null,
@@ -5705,7 +5795,7 @@ const StatusBar = (() => {
     set("stIndent", unit === "\t" ? T("Thụt lề: Tab") : T("Thụt lề: {n} dấu cách", { n: unit.length }));
     const nl = CM.lint.diagnosticCount(st);
     set("stLint", nl ? "⚠ " + I18n.num(nl) : "");
-    set("stSrc", TabStrip.ICON[doc.kind] + " " + T(SHORT[doc.kind]) + (doc.kind === "output" && doc.edited ? " ✎" : "") + (doc.stale ? " · " + T("chưa đọc lại") : "") + (Tail.on(Docs.root(doc).id) ? " · 🔁 " + T("theo dõi") : ""));
+    set("stSrc", TabStrip.ICON[doc.kind] + " " + T(SHORT[doc.kind]) + (doc.kind === "output" && doc.edited ? " ✎" : "") + (doc.stale ? " · " + T("chưa đọc lại") : "") + (Docs.root(doc).diskChanged ? " · ⚠ " + T("đổi trên đĩa") : "") + (Tail.on(Docs.root(doc).id) ? " · 🔁 " + T("theo dõi") : ""));
     $("stSrc").title = T(TabStrip.sourceOf(doc));
   }
 
@@ -5729,7 +5819,7 @@ const StatusBar = (() => {
 
   return { refresh, msg, storage, redraw: () => { draw(); storage(NotesDb.ok, storageNote); } };
 })();
-// Tab strip of one view: click to show, click the active tab's name / double-click / right-click menu to rename in place, × / middle-click / Alt+W to close, drag onto another view to move it (⇥ does the same on touch).
+// Tab strip of one view: click to show, click the active tab's name / double-click / right-click menu to rename in place, 📌 to pin, × / middle-click / Alt+W to close, drag onto another view to move it (⇥ does the same on touch).
 const TabStrip = (() => {
   let editing = null;
   const TAB_TYPE = "application/x-one-editor-tab";
@@ -5755,12 +5845,16 @@ const TabStrip = (() => {
       tab.setAttribute("aria-selected", doc.id === g.active);
       const name = document.createElement("span");
       name.className = "name";
-      name.textContent = (doc.pinned ? "📌 " : "") + ICON[doc.kind] + " " + doc.name + (doc.kind === "output" && doc.edited ? " ✎" : "");
+      name.textContent = ICON[doc.kind] + " " + doc.name + (doc.kind === "output" && doc.edited ? " ✎" : "") + (Docs.root(doc).diskChanged ? " ⚠" : "");
+      if (Docs.root(doc).diskChanged) tab.title += "\n⚠ " + T("File đã bị sửa bên ngoài — chuột phải → “Đọc lại từ đĩa / so sánh…”");
       const x = document.createElement("button");
       x.className = "x";
       x.textContent = Docs.root(doc).dirty ? "●" : "×";
       x.title = T("Đóng (Alt+W)");
-      tab.append(name, x);
+      const pin = document.createElement("button");
+      Object.assign(pin, { className: "pin", textContent: "📌", title: doc.pinned ? T("Bỏ ghim tab") : T("Ghim tab (Ctrl+K Shift+Enter)") });
+      pin.setAttribute("aria-pressed", doc.pinned);
+      tab.append(name, pin, x);
       return tab;
     }));
     strip.querySelector(".tab.on")?.scrollIntoView({ block: "nearest", inline: "nearest" });
@@ -5804,10 +5898,11 @@ const TabStrip = (() => {
         const id = idOf(e);
         if (!id) return;
         if (e.target.closest(".x")) Views.close(id);
+        else if (e.target.closest(".pin")) Views.togglePin(Docs.get(id));
         else if (id === g.active && Views.focused === g.i && e.target.closest(".name")) rename(Docs.get(id));
         else Views.activate(g.i, id);
       });
-      strip.addEventListener("dblclick", e => { const d = Docs.get(idOf(e)); if (d) rename(d); });
+      strip.addEventListener("dblclick", e => { const d = !e.target.closest(".pin") && Docs.get(idOf(e)); if (d) rename(d); });
       strip.addEventListener("auxclick", e => { if (e.button === 1 && idOf(e)) { e.preventDefault(); Views.close(idOf(e)); } });
       strip.addEventListener("contextmenu", e => {
         if (e.target.closest(".tab-rename")) return;
@@ -5818,7 +5913,7 @@ const TabStrip = (() => {
         TabMenu.open(g.i, tab?.dataset.id || g.active, byKey ? r.left : e.clientX, byKey ? r.bottom : e.clientY);
       });
       strip.addEventListener("keydown", e => {
-        const id = idOf(e);
+        const id = !e.target.closest("button") && idOf(e);
         if (!id) return;
         if (e.key === "Enter" || e.key === " ") { e.preventDefault(); Views.activate(g.i, id); }
         else if (e.key === "Delete") Views.close(id);
@@ -5838,7 +5933,7 @@ const TabStrip = (() => {
 })();
 // Right-click / Menu key on a tab (or the empty tab strip = its active tab): the tab commands from the registry — rename, pin, move, clone, close.
 const TabMenu = (() => {
-  const IDS = ["renameTab", "pinTab", "moveTab", "cloneTab", "closeTab", "closeOthers", "closeRight"];
+  const IDS = ["renameTab", "pinTab", "pinItem", "moveTab", "cloneTab", "diskReload", "closeTab", "closeOthers", "closeRight"];
   let menu = null;
 
   const onDown = e => { if (menu && !menu.contains(e.target)) close(); };
@@ -5895,7 +5990,7 @@ const TabMenu = (() => {
 const Views = (() => {
   const groups = [...document.querySelectorAll(".group")].map((el, i) => ({ i, el, host: el.querySelector(".host"), tabs: [], active: null, view: null }));
   let focused = 0, layout = "2c", count = 2;
-  const listeners = [], closed = [];
+  const listeners = [], closed = [], cursorFns = [];
   const changed = () => { listeners.forEach(f => f()); StatusBar.refresh(); };
   const userEdit = u => u.transactions.some(tr => tr.annotation(CM.state.Transaction.userEvent) !== undefined);
 
@@ -5922,6 +6017,7 @@ const Views = (() => {
       Macro.typed(u);
     }
     if (u.docChanged || u.selectionSet || u.transactions.some(t => t.effects.length)) StatusBar.refresh();
+    if (u.selectionSet && !u.docChanged) cursorFns.forEach(f => f(doc, u.state));
   }
 
   function setFocused(i, force) {
@@ -5966,7 +6062,7 @@ const Views = (() => {
   function open(doc, gi = focused, focus = true) {
     if (!doc || !Docs.get(doc.id)) return;
     const at = where(doc.id);
-    if (at >= 0) gi = at; else { gi = Math.min(gi, count - 1); groups[gi].tabs.push(doc.id); }
+    if (at >= 0) gi = at; else { gi = Math.min(gi, count - 1); groups[gi].tabs.push(doc.id); pinFirst(groups[gi]); }
     activate(gi, doc.id, focus);
   }
 
@@ -6002,16 +6098,18 @@ const Views = (() => {
     return gi;
   }
 
-  // false when the user keeps an unsaved file open. Closing an original also closes its clones.
+  // false when the user keeps an unsaved file or a pinned tab open. Closing an original also closes its clones.
   function close(id, force = false) {
     const doc = Docs.get(id);
     if (!doc || where(id) < 0) return false;
-    if (!force && doc.kind === "file" && doc.dirty && !confirm(T("“{name}” chưa lưu. Đóng và bỏ thay đổi?", { name: doc.name }))) return false;
+    const unsaved = doc.kind === "file" && doc.dirty;
+    if (!force && unsaved && !confirm(T("“{name}” chưa lưu. Đóng và bỏ thay đổi?", { name: doc.name }))) return false;
+    if (!force && !unsaved && doc.pinned && !confirm(T("Tab “{name}” đang ghim. Vẫn đóng?", { name: doc.name }))) return false;
     if (doc.kind !== "clone") {
       for (const c of Docs.family(doc).slice(1)) { detach(c.id); Docs.remove(c.id); }
       // Notes stay in Docs (reopened by id); texts over 5 MB are not kept for reopening.
       const text = doc.kind === "note" ? "" : Docs.text(doc);
-      if (text.length <= 5e6 && !PreviewPane.isPreview(doc)) closed.push({ id, gi: where(id), kind: doc.kind, name: doc.name, lang: doc.lang, text, handle: doc.handle, stale: doc.stale, eol: doc.eol, bom: doc.bom, dirty: doc.dirty, readOnly: doc.readOnly });
+      if (text.length <= 5e6 && !PreviewPane.isPreview(doc)) closed.push({ id, gi: where(id), kind: doc.kind, name: doc.name, lang: doc.lang, text, handle: doc.handle, stale: doc.stale, eol: doc.eol, bom: doc.bom, dirty: doc.dirty, readOnly: doc.readOnly, disk: doc.disk });
       if (closed.length > 20) closed.shift();
     }
     detach(id);
@@ -6027,12 +6125,13 @@ const Views = (() => {
     open(Docs.get(s.id) || Docs.create({ ...s, id: undefined, kind }), Math.min(s.gi, count - 1));
   }
 
-  // Pinned tabs stay first and are skipped by "close others / to the right".
+  // Pinned tabs stay first, are skipped by "close others / to the right" and ask before closing alone.
   function togglePin(doc) {
     Docs.update(doc, { pinned: !doc.pinned });
     const g = groups[where(doc.id)];
-    if (g) { g.tabs.sort((a, b) => Docs.get(b).pinned - Docs.get(a).pinned); refresh(g); }
+    if (g) { pinFirst(g); refresh(g); }
   }
+  function pinFirst(g) { g.tabs.sort((a, b) => Docs.get(b).pinned - Docs.get(a).pinned); }
 
   function closeMany(gi, keepId, rightOnly) {
     const tabs = groups[gi].tabs, from = rightOnly ? tabs.indexOf(keepId) + 1 : 0;
@@ -6044,6 +6143,7 @@ const Views = (() => {
     if (from < 0 || from === to || to < 0 || to >= count || !Docs.get(id)) return;
     detach(id);
     groups[to].tabs.push(id);
+    pinFirst(groups[to]);
     activate(to, id, true);
   }
 
@@ -6065,11 +6165,11 @@ const Views = (() => {
     else if (doc.state) doc.state = doc.state.update({ effects }).state;
   }
 
-  function replaceText(doc, text) {
+  function replaceText(doc, text, annotations) {
     const g = groups.find(x => x.active === doc.id);
-    if (g) { g.view.dispatch({ changes: { from: 0, to: g.view.state.doc.length, insert: text } }); return; }
+    if (g) { g.view.dispatch({ changes: { from: 0, to: g.view.state.doc.length, insert: text }, annotations }); return; }
     if (doc.state) {
-      const tr = doc.state.update({ changes: { from: 0, to: doc.state.doc.length, insert: text } });
+      const tr = doc.state.update({ changes: { from: 0, to: doc.state.doc.length, insert: text }, annotations });
       doc.state = tr.state;
       CloneSync.forward(doc, tr.changes, false);
     } else doc.text = text;
@@ -6094,6 +6194,7 @@ const Views = (() => {
     revealLine, applySettings, snapshot, refresh, renderAll: () => groups.forEach(refresh), focus: i => setFocused(Math.min(Math.max(i | 0, 0), count - 1)),
     activeView: (i = focused) => groups[i].view, tabsOf: i => [...groups[i].tabs], groups,
     get focused() { return focused; }, get count() { return count; }, get layout() { return layout; }, onChange: f => listeners.push(f),
+    onCursor: f => cursorFns.push(f),
   };
 })();
 // Clone view (same tab in two views): each copy keeps its own EditorState (cursor, scroll, folds) and every change is replayed on the others.
@@ -8592,13 +8693,13 @@ const NumHover = (() => {
 
   return { tokenAt, render, extension };
 })();
-// Entry of the data tools (phase 8b + the 8a line filter): the tree / query / filter panes live in tools/one-editor-data-tools.js, loaded on first use; the query text of each source tab stays here.
+// Entry of the data tools (phase 8b + the 8a line filter): the tree / query / filter panes live in tools/one-editor-extras.js, loaded on first use; the query text of each source tab stays here.
 const DataOps = (() => {
   const states = new Map();
   let ready = null;
 
   async function load() {
-    ready ??= VendorPaths.load("dataTools").then(() => { PreviewPane.addView("tree", PvTree); PreviewPane.addView("query", PvQuery); PreviewPane.addView("filter", PvFilter); })
+    ready ??= VendorPaths.load("extras").then(() => { PreviewPane.addView("tree", PvTree); PreviewPane.addView("query", PvQuery); PreviewPane.addView("filter", PvFilter); })
       .catch(e => { ready = null; throw new Error(T("Không nạp được công cụ dữ liệu ({file}) — cần file này nằm cạnh one-editor.html.", { file: e.message })); });
     return ready;
   }
@@ -8808,10 +8909,10 @@ const LogFixMarks = (() => {
 
   return { logSpans, fixSpans, extension, FIX, SOH };
 })();
-// FIX tabs: hover a tag=value ⇒ tag name, type, group and the meaning of the value, from the FIX Parser dictionary (tools/one-editor-fix-dictionary.js, loaded on first hover); open the tab in FIX Parser.
+// FIX tabs: hover a tag=value ⇒ tag name, type, group and the meaning of the value, from the FIX Parser dictionary (tools/one-editor-extras.js, loaded on first hover); open the tab in FIX Parser.
 const FixHover = (() => {
   let dict = null, ext = null;
-  const load = () => dict ??= VendorPaths.load("fixDict").then(() => FixDict.get("fix44")).catch(e => { dict = null; throw e; });
+  const load = () => dict ??= VendorPaths.load("extras").then(() => FixDict.get("fix44")).catch(e => { dict = null; throw e; });
 
   // A dictionary + tag + value → { title, rows } (pure once the dictionary is there).
   function describe(d, tag, value) {
@@ -8850,6 +8951,27 @@ const FixHover = (() => {
   }
 
   return { describe, extension, openInParser, load };
+})();
+// "fix-detail" op: FIX Parser's Message detail for a FIX tab; the pane lives in tools/one-editor-extras.js, loaded on first run.
+const FixDetailOp = (() => {
+  let ready = null;
+  // Click / tap / arrow keys in the FIX tab: its detail pane shows the message on the cursor line.
+  const follow = Dom.debounce((doc, st) => {
+    const src = Docs.root(doc), out = Docs.list().find(d => d.kind === "output" && d.link?.src === src.id && d.link.op === "fix-detail");
+    if (out) PreviewPane.viewOf(out.id)?.at?.(st.doc.lineAt(st.selection.main.head).number);
+  }, 120);
+  const load = () => ready ??= VendorPaths.load("extras").then(() => { PreviewPane.addView("fixdetail", PvFixDetail); Views.onCursor(follow); })
+    .catch(e => { ready = null; throw new Error(T("Không nạp được Message detail FIX ({file}) — cần file này nằm cạnh one-editor.html.", { file: e.message })); });
+
+  async function run(text, c) {
+    if (!text.trim()) return { text: "", view: { kind: "fixdetail", empty: true } };
+    await load();
+    const st = Docs.get(c.id)?.state, line = st ? st.doc.lineAt(st.selection.main.head).number : 0;
+    const r = FixDetailModel.build(text, line);
+    return { text: r.text, notes: r.notes, view: { kind: "fixdetail", srcId: c.id, ...r } };
+  }
+
+  return { run };
 })();
 // Follow a file on disk (tail -f, Chrome / Edge file handles): every second read only the new bytes (Blob.slice) and append them; scroll to the end unless the user scrolled up.
 const Tail = (() => {
@@ -8930,10 +9052,10 @@ const Tail = (() => {
   const toggle = doc => { doc = Docs.root(doc); if (on(doc.id)) stop(doc.id); else start(doc); };
   return { toggle, on, stop, tick, sync };
 })();
-// Phase 8d editor extras live in tools/one-editor-editor-extras.js (loaded after the editor is ready / on first use); Vim and Emmet are vendored bundles loaded when turned on.
+// Phase 8d editor extras are inlined in one-editor.html and run after the editor is ready; Vim and Emmet are vendored bundles loaded when turned on.
 const EditorExtras = (() => {
-  let ready = null, emmetLoading = null;
-  const load = () => ready ??= VendorPaths.load("editorExtras").catch(e => { ready = null; throw new Error(T("Không nạp được phần mở rộng editor ({file}) — cần file này nằm cạnh one-editor.html.", { file: e.message })); });
+  let emmetLoading = null;
+  const load = () => Promise.resolve();
   // Runs fn once the extras are there; a failed load is reported on the status bar.
   const use = fn => load().then(fn).catch(e => StatusBar.msg(e.message, "bad"));
 
@@ -8959,11 +9081,11 @@ const EditorExtras = (() => {
 
   return { load, use, emmetFor, setEmmet, emmetOn, isEmmetLang: id => !!EMMET[id] };
 })();
-// Phase 9 tools: tools/one-editor-power-tools.js, loaded on first use; per-source op settings live here (links / demos preset them).
+// Phase 9 tools: tools/one-editor-extras.js, loaded on first use; per-source op settings live here (links / demos preset them).
 const PowerTools = (() => {
   let ready = null;
   const states = new Map();
-  const load = () => ready ??= VendorPaths.load("powerTools").then(() => PowerOps.init())
+  const load = () => ready ??= VendorPaths.load("extras").then(() => PowerOps.init())
     .catch(e => { ready = null; throw new Error(T("Không nạp được bộ công cụ mở rộng ({file}) — cần file này nằm cạnh one-editor.html.", { file: e.message })); });
   const use = fn => load().then(fn).catch(e => StatusBar.msg(e.message, "bad"));
   const op = name => async (t, c) => { await load(); return PowerOps[name](t, c); };
@@ -9799,8 +9921,14 @@ const FileOpen = (() => {
     return null;
   }
 
-  // show = false: added to view gi without switching to it (replace in files).
+  // show = false: added to view gi without switching to it (replace in files). The file read is the baseline DiskSync compares with.
   async function open(file, handle, gi, show = true) {
+    const doc = await read(file, handle, gi, show);
+    if (doc && handle && !doc.disk) doc.disk = DiskSync.stamp(file);
+    return doc;
+  }
+
+  async function read(file, handle, gi, show) {
     const dup = handle && await sameOpen(handle);
     if (handle && show) RecentFiles.add(handle);
     if (dup) { if (show) Views.open(dup, Views.where(dup.id) >= 0 ? Views.where(dup.id) : gi); else Views.add(dup, gi); return dup; }
@@ -9849,7 +9977,7 @@ const FileOpen = (() => {
       if (doc.bigStart != null) { await BigFile.attach(doc, file); return; }
       const r = doc.hex ? { text: await HexDump.ofFile(file), eol: "\n", bom: false, binary: true } : await LocalFs.readText(file, doc.enc && doc.enc !== "utf-8" ? doc.enc : undefined);
       if (!Docs.get(doc.id)) return;
-      Object.assign(doc, { stale: false, text: r.text, state: null, eol: r.eol, eolMixed: r.eolMixed, eolList: r.eolList, bom: r.bom, enc: r.enc, readOnly: r.binary || r.readOnly, detected: LangDetect.detect(doc.name, r.text) });
+      Object.assign(doc, { stale: false, disk: DiskSync.stamp(file), diskChanged: false, text: r.text, state: null, eol: r.eol, eolMixed: r.eolMixed, eolList: r.eolList, bom: r.bom, enc: r.enc, readOnly: r.binary || r.readOnly, detected: LangDetect.detect(doc.name, r.text) });
       const gi = Views.where(doc.id);
       if (gi >= 0 && Views.groups[gi].active === doc.id) Views.activate(gi, doc.id, false);
       Docs.update(doc, {});
@@ -9861,7 +9989,7 @@ const FileOpen = (() => {
 
   return { open, openMany, reload };
 })();
-// Explorer: open tabs, notes (IndexedDB) and a local folder tree loaded lazily; every row is a button so touch and keyboard work like the mouse.
+// Explorer: pinned items, open tabs, notes (IndexedDB) and a local folder tree loaded lazily; every row is a button so touch and keyboard work like the mouse.
 const Explorer = (() => {
   const box = $("explorer"), filter = $("exFilter");
   let root = null, raf = 0;
@@ -9870,6 +9998,15 @@ const Explorer = (() => {
   const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
   const btn = (cls, text, title, onClick) => { const b = el("button", cls, text); b.title = title; b.onclick = onClick; return b; };
   const row = (label, title, onClick, extra = []) => { const r = el("div", "ex-row"); r.append(btn("ex-item", label, title, onClick), ...extra); return r; };
+  // Pinned ⇒ always shown; otherwise only on hover / focus (always on touch), like the disk actions.
+  function pinAct(on, title, onClick) {
+    const b = btn("ex-act ex-pin" + (on ? " on" : ""), "📌", title, onClick);
+    b.setAttribute("aria-pressed", on);
+    if (on) return b;
+    const s = el("span", "ex-acts");
+    s.append(b);
+    return s;
+  }
   function section(title, rows, tools = []) {
     const s = el("section", "ex-sec"), h = el("h3");
     h.append(el("span", "", title), ...tools);
@@ -9908,20 +10045,30 @@ const Explorer = (() => {
     return d;
   }
 
+  function openNote(d) { Views.open(d, Views.where(d.id) >= 0 ? Views.where(d.id) : Views.focused); PhoneLayout.show(Views.where(d.id) + 1); }
+  const PIN_ITEM = "Ghim / bỏ ghim vào mục Đã ghim";
+
   function noteRow(d) {
     const del = () => {
       if (!confirm(T("Xoá ghi chú “{name}”? Không khôi phục được.", { name: d.name }))) return;
       Views.close(d.id, true);
       Docs.remove(d.id);
     };
-    return row("📝 " + d.name, T("Mở ghi chú"), () => { Views.open(d, Views.where(d.id) >= 0 ? Views.where(d.id) : Views.focused); PhoneLayout.show(Views.where(d.id) + 1); },
-      [btn("ex-act", "✎", T("Đổi tên"), () => TabStrip.rename(d)), btn("ex-act", "🗑", T("Xoá ghi chú"), del)]);
+    return row("📝 " + d.name, T("Mở ghi chú"), () => openNote(d),
+      [pinAct(Pinned.hasNote(d), T(PIN_ITEM), () => Pinned.toggleNote(d)), btn("ex-act", "✎", T("Đổi tên"), () => TabStrip.rename(d)), btn("ex-act", "🗑", T("Xoá ghi chú"), del)]);
+  }
+
+  function pinnedSection(hit) {
+    const items = Pinned.items().filter(p => hit(Pinned.nameOf(p)));
+    const icon = p => p.kind === "dir" ? "📁" : p.kind === "note" ? "📝" : fileIcon(p.name);
+    const title = p => T(p.kind === "dir" ? "Mở folder này trong Explorer" : p.kind === "note" ? "Mở ghi chú" : "Mở file");
+    return items.length ? section(T("Đã ghim"), items.map(p => row(icon(p) + " " + Pinned.nameOf(p), title(p), () => Pinned.open(p), [btn("ex-act", "✕", T("Bỏ ghim"), () => Pinned.remove(p))]))) : null;
   }
 
   function recentSection(hit) {
     const items = RecentFiles.list().filter(r => hit(r.name));
     const rows = items.map(r => row(fileIcon(r.name) + " " + r.name, T("Mở lại — lần mở trước: {at}", { at: new Date(r.at).toLocaleString(I18n.lang) }), () => RecentFiles.open(r),
-      [btn("ex-act", "✕", T("Bỏ khỏi danh sách"), () => RecentFiles.remove(r))]));
+      [pinAct(false, T(PIN_ITEM), () => Pinned.toggleHandle(r.handle)), btn("ex-act", "✕", T("Bỏ khỏi danh sách"), () => RecentFiles.remove(r))]));
     const empty = LocalFs.canPick ? T("Chưa có file nào mở gần đây.") : T("Trình duyệt này không giữ được file để mở lại (cần Chrome / Edge).");
     return section(T("Gần đây"), rows.length ? rows : [el("p", "ex-empty", empty)], items.length ? [btn("ex-act", "🗑", T("Xoá danh sách Gần đây"), () => RecentFiles.clear())] : []);
   }
@@ -9930,25 +10077,44 @@ const Explorer = (() => {
     raf = 0;
     const q = filter.value.trim().toLowerCase(), hit = s => !q || s.toLowerCase().includes(q);
     const open = Views.groups.flatMap(g => g.tabs.map(id => [g.i, Docs.get(id)])).filter(([, d]) => d && hit(d.name));
-    const notes = Docs.notes().filter(d => hit(d.name)).sort((a, b) => b.updated - a.updated);
+    const notes = Docs.notes().filter(d => hit(d.name)).sort((a, b) => Pinned.hasNote(b) - Pinned.hasNote(a) || b.updated - a.updated);
+    const refreshBtn = () => btn("ex-act", "🔄", T("Làm mới từ đĩa: đọc lại folder và các file bị sửa bên ngoài"), () => DiskSync.checkAll());
+    const tabPin = d => pinAct(d.pinned, T(d.pinned ? "Bỏ ghim tab" : "Ghim tab (luôn ở đầu view, hỏi lại trước khi đóng)"), () => Views.togglePin(d));
     const sections = [
-      section(T("Đang mở"), open.length ? open.map(([gi, d]) => row(TabStrip.ICON[d.kind] + " " + d.name + (d.dirty ? " ●" : ""), T("View {n}", { n: gi + 1 }), () => { Views.activate(gi, d.id); PhoneLayout.show(gi + 1); }))
-        : [el("p", "ex-empty", T("Chưa mở tab nào."))]),
+      pinnedSection(hit),
+      section(T("Đang mở"), open.length ? open.map(([gi, d]) => row(TabStrip.ICON[d.kind] + " " + d.name + (d.dirty ? " ●" : "") + (d.diskChanged ? " ⚠" : ""), T("View {n}", { n: gi + 1 }), () => { Views.activate(gi, d.id); PhoneLayout.show(gi + 1); }, [tabPin(d)]))
+        : [el("p", "ex-empty", T("Chưa mở tab nào."))], Docs.list().some(d => d.kind === "file" && d.handle) ? [refreshBtn()] : []),
       section(T("Ghi chú"), notes.length ? notes.map(noteRow) : [el("p", "ex-empty", NotesDb.ok ? T("Chưa có ghi chú — bấm + để tạo.") : T("Trình duyệt chặn IndexedDB — ghi chú không được lưu."))],
         [btn("ex-act", "+", T("Ghi chú mới (Alt+N)"), () => Actions.newNote(Views.focused))]),
       recentSection(hit),
     ];
     if (root) {
       const tree = treeNode(root, hit);
-      sections.push(section(T("Folder"), [tree], [btn("ex-act", "✕", T("Đóng folder"), () => setRoot(null))]));
+      sections.push(section(T("Folder"), [tree], [...(root.handle ? [refreshBtn()] : []), btn("ex-act", "✕", T("Đóng folder"), () => setRoot(null))]));
     } else {
       sections.push(section(T("Folder"), [el("p", "ex-empty", T("Chưa mở folder. Kéo folder vào đây hoặc bấm:")), btn("ex-open", T("📂 Mở folder…"), T("Mở folder trên máy"), () => Actions.openFolder())]));
     }
-    box.replaceChildren(...sections);
+    box.replaceChildren(...sections.filter(Boolean));
   }
 
   const render = () => { if (!raf) raf = requestAnimationFrame(draw); };
-  function setRoot(node) { root = node; if (root) root.open = true; render(); }
+  function setRoot(node) { root = node; if (root) root.open = true; render(); DiskSync.rewatch(); }
+
+  // Open folders are listed again; known entries keep their node (open state, row buttons), closed folders are read when opened next.
+  async function relist(node) {
+    const key = c => c.name + (c.dir ? "/" : ""), old = new Map((node.children || []).map(c => [key(c), c]));
+    node.children = (await node.list()).map(c => old.get(key(c)) || c);
+    for (const c of node.children) {
+      if (c.dir && c.open && c.children) await relist(c).catch(() => { c.children = null; });
+      else if (c.dir) c.children = null;
+    }
+  }
+  async function refresh() {
+    if (!root || !root.handle || !root.children) return;
+    const sig = () => { const out = [], walk = n => { out.push(n.path); (n.children || []).forEach(walk); }; walk(root); return out.join("\n"); };
+    const before = sig();
+    try { await relist(root); } finally { if (sig() !== before) render(); }
+  }
 
   // Files of the folders already read (Quick Open does not walk the disk).
   function loadedFiles() {
@@ -9958,9 +10124,9 @@ const Explorer = (() => {
   }
 
   filter.addEventListener("input", render);
-  return { render, setRoot, loadedFiles, openNode, root: () => root };
+  return { render, setRoot, refresh, loadedFiles, openNode, openNote, root: () => root };
 })();
-// Explorer actions on disk for handle-based folders (Chrome/Edge): new file / folder, rename, delete — each asks first, then refreshes the parent folder.
+// Explorer actions on disk for handle-based folders (Chrome/Edge): pin, new file / folder, rename, delete — disk changes ask first, then refresh the parent folder.
 const ExplorerDisk = (() => {
   const askName = (msg, value = "") => { const n = ShareState.cleanName(prompt(msg, value) ?? ""); return n && n !== "." && n !== ".." ? n : ""; };
   const reload = dir => { dir.children = null; dir.open = true; Explorer.render(); };
@@ -9986,9 +10152,11 @@ const ExplorerDisk = (() => {
     const name = askName(T("Tên mới trên đĩa:"), node.name);
     if (!name || name === node.name) return;
     try {
-      const docs = node.dir ? [] : await openDocsOf(node.handle);
+      const docs = node.dir ? [] : await openDocsOf(node.handle), pin = await Pinned.find(node.handle);
       await LocalFs.rename(node, name);
-      docs.forEach(d => Docs.rename(d, name));
+      if (pin) Pinned.renamed(pin, node.handle);
+      // move() renamed node.handle only: the tab's own handle still points at the old name.
+      docs.forEach(d => { d.handle = node.handle; Docs.rename(d, name); DiskSync.mark(d); });
       reload(node.parent);
       StatusBar.msg(T("Đã đổi tên thành “{name}”.", { name }), "good");
     } catch (e) { fail(e); }
@@ -10016,10 +10184,9 @@ const ExplorerDisk = (() => {
       x.onclick = e => { e.preventDefault(); e.stopPropagation(); fn(); };
       return x;
     };
-    const out = [];
+    const out = [b("📌", T("Ghim / bỏ ghim vào mục Đã ghim"), () => Pinned.toggleHandle(node.handle))];
     if (node.dir) out.push(b("+📄", T("File mới trong folder này"), () => newEntry(node, false)), b("+📁", T("Folder mới trong folder này"), () => newEntry(node, true)));
     if (node.parent) out.push(b("✎", T("Đổi tên trên đĩa"), () => rename(node)), b("🗑", T("Xoá khỏi đĩa"), () => remove(node)));
-    if (!out.length) return [];
     const span = document.createElement("span");
     span.className = "ex-acts";
     span.append(...out);
@@ -10027,6 +10194,175 @@ const ExplorerDisk = (() => {
   }
 
   return { buttons };
+})();
+// Changes made on disk by other apps: size + lastModified vs what the tab last read / wrote; a clean tab reloads, an edited tab gets ⚠ and a choice. Runs on 🔄, window focus and FileSystemObserver events.
+const DiskSync = (() => {
+  const MAX_AUTO = 50 * 1024 * 1024, TIP = "Xử lý file đổi trên đĩa";
+  let busy = false, queued = null, treeWanted = false, obs = null;
+  const stamp = f => ({ size: f.size, mod: f.lastModified });
+  const same = (a, b) => a.size === b.size && a.mod === b.mod;
+  const names = list => list.map(d => "“" + d.name + "”").join(", ");
+  const tooBig = (doc, f) => !doc.hex && f.size > MAX_AUTO;
+  const watched = d => d.kind === "file" && d.handle && !d.stale && !d.reloading && !d.saving && !d.big && !Tail.on(d.id);
+  const readOf = (doc, f) => doc.hex ? HexDump.ofFile(f).then(text => ({ text })) : LocalFs.readText(f, doc.enc && doc.enc !== "utf-8" ? doc.enc : undefined);
+  const show = doc => { const gi = Views.where(doc.id) >= 0 ? Views.where(doc.id) : Views.focused; Views.open(doc, gi); return gi; };
+
+  async function mark(doc) {
+    try { doc.disk = stamp(await doc.handle.getFile()); } catch { doc.disk = null; }
+    if (doc.diskChanged) Docs.update(doc, { diskChanged: false }, "dirty");
+  }
+
+  // Through Views.replaceText: cursor mapping and clones keep working; one undo step of its own brings the old text back.
+  // auto: typing during the read wins — false is returned and the caller flags the tab instead.
+  async function reload(doc, f, auto = false) {
+    const r = await readOf(doc, f);
+    if (!Docs.get(doc.id) || (auto && doc.dirty)) return false;
+    if (r.text !== Docs.text(doc)) Views.replaceText(doc, r.text, CM.commands.isolateHistory.of("full"));
+    if (!doc.hex) {
+      Object.assign(doc, { eol: r.eol, eolMixed: r.eolMixed, eolList: r.eolList, bom: r.bom });
+      if (r.eolMixed && doc.state) Views.applyEffect(doc, MixedEol.effect(doc.state.doc, r.eolList));
+    }
+    Docs.update(doc, { file: f, disk: stamp(f), diskChanged: false, dirty: false }, "dirty");
+    if (Tail.on(doc.id)) Tail.sync(doc);
+    return true;
+  }
+
+  function flag(doc) {
+    if (doc.diskChanged) return "conflict";
+    Docs.update(doc, { diskChanged: true }, "dirty");
+    return "fresh";
+  }
+
+  // → same | reloaded | conflict (already flagged) | fresh (newly flagged) | big | gone | skip (no permission…)
+  async function check(doc) {
+    let f;
+    try { f = await doc.handle.getFile(); }
+    catch (e) {
+      if (e.name !== "NotFoundError") return "skip";
+      Docs.update(doc, { handle: null, dirty: true, disk: null, diskChanged: false }, "dirty");
+      return "gone";
+    }
+    if (doc.disk && same(doc.disk, stamp(f))) return "same";
+    // No baseline (older session): a clean tab is compared by text, an edited one cannot be told apart.
+    if (!doc.disk && doc.dirty) { doc.disk = stamp(f); return "same"; }
+    if (doc.dirty) return flag(doc);
+    if (tooBig(doc, f)) { doc.disk = stamp(f); return "big"; }
+    const before = Docs.text(doc);
+    if (!await reload(doc, f, true)) return Docs.get(doc.id) ? flag(doc) : "skip";
+    return Docs.text(doc) === before ? "same" : "reloaded";
+  }
+
+  function report(o, quiet, treeErr) {
+    const conflicts = quiet ? o.fresh : [...o.fresh, ...o.conflict];
+    const grant = async () => { for (const d of o.perm) await FileOpen.reload(d, true); };
+    if (conflicts.length) StatusBar.msg(T("⚠ {names} đã bị sửa bên ngoài trong khi tab có thay đổi chưa lưu — bấm để chọn: đọc lại / giữ bản của bạn / so sánh.", { names: names(conflicts) }), "warn", () => resolve(conflicts[0]), T(TIP));
+    else if (o.gone.length) StatusBar.msg(T("{names} không còn trên đĩa (bị xoá / đổi tên) — tab vẫn giữ nội dung, dùng “Lưu thành…” nếu cần.", { names: names(o.gone) }), "warn");
+    else if (o.perm.length) StatusBar.msg(T("{names} cần bạn cho phép đọc lại từ đĩa — bấm vào đây.", { names: names(o.perm) }), "warn", grant, T("Bấm để đọc lại file"));
+    else if (o.big.length) StatusBar.msg(T("{names} đổi trên đĩa và lớn hơn 50 MB — mở lại file để xem theo đoạn.", { names: names(o.big) }), "warn");
+    else if (treeErr && !quiet) StatusBar.msg(T("Không làm mới được folder: {msg}", { msg: treeErr.message }), "bad");
+    else if (o.skip.length && !quiet) StatusBar.msg(T("Không kiểm được {names} (chưa được cấp quyền hoặc lỗi đọc).", { names: names(o.skip) }), "warn");
+    else if (o.reloaded.length) StatusBar.msg(T("🔄 Đã đọc lại từ đĩa: {names}.", { names: names(o.reloaded) }), "good");
+    else if (!quiet) StatusBar.msg(T("🔄 Đã làm mới — folder và các tab file khớp với đĩa."), "good");
+  }
+
+  // 🔄 (quiet = false): every file tab incl. ones not read again since F5 + the open folders. Focus: tabs only; observer: tabs + folders.
+  async function checkAll(quiet = false, tree = !quiet) {
+    if (busy) { queued = queued ? { quiet: queued.quiet && quiet, tree: queued.tree || tree } : { quiet, tree }; return; }
+    busy = true;
+    const out = { reloaded: [], conflict: [], fresh: [], gone: [], big: [], skip: [], perm: [] };
+    let treeErr = null;
+    try {
+      if (!quiet) for (const d of Docs.list().filter(d => d.kind === "file" && d.handle && d.stale)) { await FileOpen.reload(d); if (d.stale && Docs.get(d.id)) out.perm.push(d); }
+      for (const d of Docs.list().filter(watched)) { const s = await check(d).catch(() => "skip"); if (out[s]) out[s].push(d); }
+      if (tree) await Explorer.refresh().catch(e => { treeErr = e; });
+    } finally { busy = false; }
+    report(out, quiet, treeErr);
+    if (queued) { const q = queued; queued = null; checkAll(q.quiet, q.tree); }
+  }
+
+  async function withFile(doc, fn) {
+    try { await fn(await doc.handle.getFile()); }
+    catch (e) { StatusBar.msg(T("Không đọc được “{name}” từ đĩa: {msg}", { name: doc.name, msg: e.message }), "bad"); }
+  }
+
+  const take = doc => withFile(doc, async f => {
+    if (tooBig(doc, f)) { StatusBar.msg(T("{names} đổi trên đĩa và lớn hơn 50 MB — mở lại file để xem theo đoạn.", { names: names([doc]) }), "warn"); return; }
+    show(doc);
+    if (await reload(doc, f)) StatusBar.msg(T("Đã đọc lại “{name}” từ đĩa — Ctrl+Z để lấy lại bản của bạn.", { name: doc.name }), "good");
+  });
+  const keep = doc => withFile(doc, async f => {
+    Docs.update(doc, { disk: stamp(f), diskChanged: false }, "dirty");
+    StatusBar.msg(T("Giữ bản của bạn — Lưu (Ctrl+S) sẽ ghi đè “{name}” trên đĩa.", { name: doc.name }), "good");
+  });
+  // The disk copy opens read-only in the other view, then Compare (copy blocks with the arrows, then save).
+  const compare = doc => withFile(doc, async f => {
+    if (tooBig(doc, f)) { StatusBar.msg(T("{names} đổi trên đĩa và lớn hơn 50 MB — mở lại file để xem theo đoạn.", { names: names([doc]) }), "warn"); return; }
+    const r = await readOf(doc, f), gi = show(doc);
+    if (Views.count < 2) Views.setLayout("2c");
+    Views.open(Docs.create({ kind: "temp", name: doc.name + " ⇠ " + T("trên đĩa"), text: r.text, readOnly: true }), Views.other(gi));
+    Views.focus(gi);
+    Compare.start(gi);
+  });
+
+  function resolve(doc) {
+    if (!Docs.get(doc.id) || !doc.handle) return;
+    QuickPick.pick([
+      { label: T("⟲ Đọc lại từ đĩa — bỏ thay đổi của tôi (Ctrl+Z vẫn lấy lại được)"), detail: "", run: () => take(doc) },
+      { label: T("✎ Giữ bản của tôi — lần Lưu tới ghi đè bản trên đĩa"), detail: "", run: () => keep(doc) },
+      { label: T("⇄ So sánh bản của tôi với bản trên đĩa (2 view)"), detail: "", run: () => compare(doc) },
+    ], T("“{name}” — chọn cách xử lý với bản trên đĩa", { name: doc.name }));
+  }
+
+  // Tab menu / palette on one tab: edited ⇒ the choice; clean ⇒ check now.
+  async function one(doc) {
+    doc = Docs.root(doc);
+    if (doc.kind !== "file" || !doc.handle || doc.big) { StatusBar.msg(T("Chỉ tab file mở bằng Mở file / Explorer (Chrome / Edge) mới đọc lại từ đĩa được."), "warn"); return; }
+    if (doc.stale) { FileOpen.reload(doc, true); return; }
+    if (doc.dirty || doc.diskChanged) { resolve(doc); return; }
+    const s = await check(doc).catch(() => "skip");
+    if (s === "same") StatusBar.msg(T("“{name}” khớp với bản trên đĩa.", { name: doc.name }), "good");
+    else report({ reloaded: [], conflict: [], fresh: [], gone: [], big: [], skip: [], perm: [], [s]: [doc] }, false, null);
+  }
+
+  // Save guard: the file changed since the tab last read / wrote it ⇒ ask before overwriting.
+  async function guard(doc) {
+    let f;
+    try { f = await doc.handle.getFile(); } catch { return true; }
+    if (!doc.disk || same(doc.disk, stamp(f))) return true;
+    if (confirm(T("“{name}” đã bị sửa bên ngoài sau lần mở / lưu gần nhất. Ghi đè bản trên đĩa bằng bản của bạn?", { name: doc.name }))) return true;
+    StatusBar.msg(T("Chưa lưu “{name}” — bấm để chọn: đọc lại / giữ bản của bạn / so sánh.", { name: doc.name }), "warn", () => resolve(doc), T(TIP));
+    return false;
+  }
+
+  // saving: the focus check that a permission prompt or confirm() triggers skips the tab mid-write.
+  async function write(doc, data) {
+    doc.saving = true;
+    try { await LocalFs.writeHandle(doc.handle, data); await mark(doc); }
+    finally { doc.saving = false; }
+  }
+
+  const soon = Dom.debounce(() => { const tree = treeWanted; treeWanted = false; checkAll(true, tree); }, 300);
+
+  // FileSystemObserver (newer Chromium): any change under the folder or an open file runs the quiet check.
+  async function watch() {
+    if (typeof FileSystemObserver !== "function") return;
+    try {
+      obs?.disconnect();
+      obs = new FileSystemObserver(() => { treeWanted = true; soon(); });
+      const root = Explorer.root(), handles = Docs.list().filter(d => d.kind === "file" && d.handle).map(d => d.handle);
+      if (root?.handle) handles.unshift(root.handle);
+      await Promise.all(handles.map(h => obs.observe(h, h.kind === "directory" ? { recursive: true } : {}).catch(() => { /* not allowed: focus still checks */ })));
+    } catch { obs = null; }
+  }
+  const rewatch = Dom.debounce(watch, 500);
+
+  function init() {
+    addEventListener("focus", () => soon());
+    document.addEventListener("visibilitychange", () => { if (!document.hidden) soon(); });
+    Docs.on(type => { if (type === "create" || type === "remove" || type === "meta") rewatch(); });
+  }
+
+  return { init, stamp, mark, guard, write, checkAll, one, resolve, rewatch };
 })();
 // Explorer "Recent": the last 20 local files opened with a handle (Chrome/Edge), kept in IndexedDB; reopening asks for read permission on the click.
 const RecentFiles = (() => {
@@ -10059,10 +10395,7 @@ const RecentFiles = (() => {
 
   async function open(item) {
     try {
-      const opts = { mode: "read" };
-      let perm = item.handle.queryPermission ? await item.handle.queryPermission(opts) : "granted";
-      if (perm !== "granted" && item.handle.requestPermission) perm = await item.handle.requestPermission(opts);
-      if (perm !== "granted") { StatusBar.msg(T("Trình duyệt chưa cho đọc lại “{name}”.", { name: item.name }), "warn"); return; }
+      if (!(await LocalFs.readable(item.handle))) { StatusBar.msg(T("Trình duyệt chưa cho đọc lại “{name}”.", { name: item.name }), "warn"); return; }
       await FileOpen.openMany([{ file: await item.handle.getFile(), handle: item.handle }], Views.focused);
     } catch (e) {
       if (e.name === "NotFoundError") { remove(item); StatusBar.msg(T("“{name}” không còn trên đĩa — đã bỏ khỏi danh sách Gần đây.", { name: item.name }), "warn"); }
@@ -10071,6 +10404,79 @@ const RecentFiles = (() => {
   }
 
   return { load, add, remove, clear, open, list: () => list };
+})();
+// Explorer "Pinned": folders and files (handles, Chrome/Edge) and notes (by id) kept in IndexedDB; a pinned folder opens as the Explorer root.
+const Pinned = (() => {
+  let list = [], ready = false;
+
+  const persist = () => NotesDb.putMeta("pinned", list).catch(e => console.warn("One Editor pinned:", e));
+  const changed = () => { persist(); Explorer.render(); };
+  const valid = p => p && (p.kind === "note" ? Docs.get(p.id)?.kind === "note" : (p.kind === "dir" || p.kind === "file") && p.handle && typeof p.name === "string");
+  const nameOf = p => p.kind === "note" ? Docs.get(p.id)?.name || "" : p.name;
+  const hasNote = doc => list.some(p => p.kind === "note" && p.id === doc.id);
+  const canPin = doc => { const r = Docs.root(doc); return r.kind === "note" || !!r.handle; };
+
+  // After the hot-exit restore, so pinned notes can be checked against the restored ones.
+  async function init() {
+    const saved = await NotesDb.getMeta("pinned");
+    list = Array.isArray(saved) ? saved.filter(valid) : [];
+    Docs.on((type, doc) => { if (type === "remove" && hasNote(doc)) { list = list.filter(p => p.id !== doc.id); persist(); } });
+    ready = true;
+  }
+
+  function remove(item) { list = list.filter(p => p !== item); changed(); }
+
+  async function find(handle) {
+    for (const p of list) if (p.handle && await p.handle.isSameEntry(handle).catch(() => false)) return p;
+    return null;
+  }
+
+  // A disk rename moves only that handle object: the pinned copy follows it.
+  function renamed(item, handle) { Object.assign(item, { handle, name: handle.name }); changed(); }
+
+  // find() is async: a quick double click would otherwise pin the same entry twice.
+  let busy = false;
+  async function toggleHandle(handle) {
+    if (!ready || busy || !handle || typeof handle.isSameEntry !== "function") return;
+    busy = true;
+    try {
+      const hit = await find(handle);
+      if (hit) { remove(hit); StatusBar.msg(T("Đã bỏ ghim “{name}”.", { name: hit.name }), "good"); return; }
+      list.push({ kind: handle.kind === "directory" ? "dir" : "file", name: handle.name, handle });
+      changed();
+      StatusBar.msg(T("Đã ghim “{name}” — xem ở mục Đã ghim của Explorer.", { name: handle.name }), "good");
+    } finally { busy = false; }
+  }
+
+  function toggleNote(doc) {
+    if (!ready) return;
+    const on = !hasNote(doc);
+    list = on ? [...list, { kind: "note", id: doc.id }] : list.filter(p => p.id !== doc.id);
+    changed();
+    StatusBar.msg(T(on ? "Đã ghim “{name}” — xem ở mục Đã ghim của Explorer." : "Đã bỏ ghim “{name}”.", { name: doc.name }), "good");
+  }
+
+  // The tab's note, or its file on disk (canPin gates the command).
+  function toggleDoc(doc) {
+    const r = Docs.root(doc);
+    if (r.kind === "note") toggleNote(r); else toggleHandle(r.handle);
+  }
+
+  async function open(p) {
+    if (p.kind === "note") { const d = Docs.get(p.id); if (d) Explorer.openNote(d); return; }
+    try {
+      if (!(await LocalFs.readable(p.handle))) { StatusBar.msg(T("Trình duyệt chưa cho đọc lại “{name}”.", { name: p.name }), "warn"); return; }
+      if (p.kind === "file") { await FileOpen.openMany([{ file: await p.handle.getFile(), handle: p.handle }], Views.focused); return; }
+      await p.handle.keys().next();
+      Explorer.setRoot(LocalFs.fromHandle(p.handle));
+      StatusBar.msg(T("Đã mở folder “{name}”.", { name: p.name }), "good");
+    } catch (e) {
+      if (e.name === "NotFoundError") { remove(p); StatusBar.msg(T("“{name}” không còn trên đĩa — đã bỏ ghim.", { name: p.name }), "warn"); }
+      else StatusBar.msg(T("Không mở được “{name}”: {msg}", { name: p.name, msg: e.message }), "bad");
+    }
+  }
+
+  return { init, items: () => list, nameOf, hasNote, canPin, find, renamed, toggleHandle, toggleNote, toggleDoc, open, remove };
 })();
 // What Find in files searches: open tabs + notes (live text), then the Explorer folder read from disk; binaries, files over the limit and .git / node_modules (unless asked) are skipped and counted.
 const FindSources = (() => {
@@ -10616,7 +11022,7 @@ const HotExit = (() => {
   const serialize = (d, sealed) => ({
     id: d.id, kind: d.kind, name: d.name, lang: d.lang, text: secret(d) || secret(d.link && Docs.get(d.link.src)) ? "" : d.big ? bigText(d) : handleOnly(d) ? "" : Docs.text(d), stale: d.big ? !!d.handle : handleOnly(d), sealed: sealed || d.sealed || undefined,
     bigStart: d.big && d.handle ? d.big.start : null, handle: d.handle || null, dirty: d.dirty, edited: d.edited,
-    readOnly: d.readOnly, eol: d.eol, eolMixed: d.eolMixed, eolList: d.eolMixed ? (d.state ? MixedEol.codesOf(d.state) : d.eolList) : null, bom: d.bom, enc: d.enc, link: d.link, updated: d.updated, pinned: d.pinned, hex: d.hex,
+    readOnly: d.readOnly, eol: d.eol, eolMixed: d.eolMixed, eolList: d.eolMixed ? (d.state ? MixedEol.codesOf(d.state) : d.eolList) : null, bom: d.bom, enc: d.enc, link: d.link, updated: d.updated, pinned: d.pinned, hex: d.hex, disk: d.disk,
   });
 
   async function flush() {
@@ -10649,7 +11055,7 @@ const HotExit = (() => {
       if (r.kind === "note" && s && typeof s.salt === "string" && typeof s.iv === "string" && typeof s.ct === "string") Object.assign(d, { sealed: { salt: s.salt, iv: s.iv, ct: s.ct, it: Number.isInteger(s.it) ? s.it : 310000 }, readOnly: true, text: T("🔒 Ghi chú đã khoá — Command Palette → “Ghi chú: mở khoá…” để nhập mật khẩu.") });
     }
     const groups = session && Array.isArray(session.groups) ? session.groups.slice(0, Layouts.MAX) : [];
-    if (session) CmSetup.settings.wrap = session.wrap === true;
+    if (session) CmSetup.settings.wrap = session.wrap !== false;
     Views.setLayout(session && Layouts.get(session.layout) ? session.layout : groups.length > 2 ? Layouts.forCount(groups.length) : "2c");
     groups.forEach((g, gi) => (Array.isArray(g.tabs) ? g.tabs : []).forEach(id => { const d = Docs.get(id); if (d) Views.add(d, gi); }));
     // Tabs missing from the layout (another browser tab wrote it last, or a crash): unsaved work comes back in View 1, the rest is dropped.
@@ -10682,7 +11088,7 @@ const HotExit = (() => {
 // ▶ Run's operation per tab: the one picked by hand for it, else a default fitting its language; a result tab shows the op that made it.
 const RunOp = (() => {
   const picked = new Map();
-  const BY_LANG = { JSON: "json-pretty", JavaScript: "run-code", HTML: "run-code", Log: "filter" };
+  const BY_LANG = { JSON: "json-pretty", JavaScript: "run-code", HTML: "run-code", Log: "filter", FIX: "fix-detail" };
   const keyOf = doc => doc.kind === "output" && doc.link ? doc.link.src : Docs.root(doc).id;
 
   function suggest(doc) {
@@ -10753,7 +11159,8 @@ const Actions = (() => {
     const dirtyAfter = () => doc.state !== before;
     try {
       if (!asNew && doc.kind === "file" && doc.handle) {
-        await LocalFs.writeHandle(doc.handle, data);
+        if (!await DiskSync.guard(doc)) return;
+        await DiskSync.write(doc, data);
         Docs.update(doc, { dirty: dirtyAfter() }, "dirty");
         StatusBar.msg(T("✔ Đã lưu “{name}”.", { name: doc.name }), "good");
         EditorExtras.use(() => LocalHistory.snap(doc, true, savedText));
@@ -10770,7 +11177,7 @@ const Actions = (() => {
       if (!r) return;
       if (r.handle) RecentFiles.add(r.handle);
       // A note stays a note (the file is a copy); other tabs now point at the saved file.
-      if (r.handle && doc.kind !== "note") { Docs.update(doc, { kind: "file", handle: r.handle, dirty: dirtyAfter(), link: null }); if (r.name !== doc.name) Docs.rename(doc, r.name); }
+      if (r.handle && doc.kind !== "note") { Docs.update(doc, { kind: "file", handle: r.handle, dirty: dirtyAfter(), link: null }); if (r.name !== doc.name) Docs.rename(doc, r.name); await DiskSync.mark(doc); }
       StatusBar.msg(r.downloaded ? T("✔ Đã tải xuống “{name}”.", { name: r.name }) : T("✔ Đã lưu “{name}”.", { name: r.name }), "good");
       EditorExtras.use(() => LocalHistory.snap(doc, true, savedText));
     } catch (e) { StatusBar.msg(T("Không lưu được: {msg}", { msg: e.message }), "bad"); }
@@ -10974,7 +11381,8 @@ const Split = (() => {
   }
   let lastLayout = "";
 
-  return { init, gapAt };
+  const set = r => { apply(r); Prefs.set("split", ratio); };
+  return { init, gapAt, set, ratio: () => ratio };
 })();
 // All One Editor commands. Ctrl+N/T/W/Shift+T and Ctrl+1…8 belong to the browser, hence the Alt variants.
 function registerOneEditorCommands() {
@@ -10996,12 +11404,15 @@ function registerOneEditorCommands() {
   C("openFolder", "Mở folder…", null, A.openFolder);
   C("save", "Lưu", "Ctrl+s", () => A.save(false), hasDoc);
   C("saveAs", "Lưu thành…", "Ctrl+Shift+s", () => A.save(true), hasDoc);
+  C("diskRefresh", "🔄 Làm mới từ đĩa: folder Explorer + các tab file", null, () => DiskSync.checkAll());
+  C("diskReload", "Đọc lại từ đĩa / so sánh với bản trên đĩa…", null, withDoc(d => DiskSync.one(d)), () => hasDoc() && !!Docs.root(doc()).handle);
   C("closeTab", "Đóng tab", "Alt+w", A.closeTab, hasDoc);
   C("closeOthers", "Đóng các tab khác trong view (trừ tab ghim)", null, withDoc(d => V.closeMany(V.focused, d.id, false)), hasDoc);
   C("closeRight", "Đóng các tab bên phải (trừ tab ghim)", null, withDoc(d => V.closeMany(V.focused, d.id, true)), hasDoc);
   C("reopen", "Mở lại tab vừa đóng", "Alt+Shift+t", () => V.reopen());
   C("renameTab", "Đổi tên tab", null, withDoc(d => TabStrip.rename(d)), hasDoc);
-  C("pinTab", "Ghim / bỏ ghim tab", null, withDoc(d => V.togglePin(d)), hasDoc);
+  C("pinTab", "Ghim / bỏ ghim tab", "Ctrl+k Shift+Enter", withDoc(d => V.togglePin(d)), hasDoc);
+  C("pinItem", "Ghim / bỏ ghim vào mục Đã ghim (Explorer)", null, withDoc(d => Pinned.toggleDoc(d)), () => hasDoc() && Pinned.canPin(doc()));
 
   C("bookmark", "Bookmark: bật / tắt ở dòng này", "Ctrl+F2", () => Bookmarks.toggleLine(view()), hasDoc);
   C("bookmarkNext", "Bookmark: tới cái kế tiếp", "F2", () => Bookmarks.jump(view(), 1), hasDoc);
@@ -11360,6 +11771,605 @@ const ShareLoader = (() => {
 
   return { fromUrl, loadDemo, share };
 })();
+// Named saves in localStorage (newest first, ≤ 30): 💾 asks a name and saves snapshot() · pick one in the <select> to reopen · 🗑 deletes the open one.
+const SavedSessions = ({ select, saveBtn, delBtn, store, key = "saved", snapshot, open, suggestName = () => "", isEmpty = p => !String(p.text || "").trim(), note, keep = () => {} }) => {
+  const MAX = 30;
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  let current = null;
+  // Stored entries are only trusted after this shape check; the tool's open() still validates its own payload fields.
+  const list = () => (store.get(key, []) || []).filter(a => a && typeof a.id === "string" && typeof a.name === "string" && a.payload && typeof a.payload === "object");
+
+  function fill() {
+    const items = list(), head = esc(T("📂 Đã lưu ({n})", { n: items.length }));
+    select.innerHTML = `<option value="">${head}</option>` +
+      items.map(a => `<option value="${esc(a.id)}">${esc(`${a.name} · ${new Date(a.t).toLocaleString(I18n.lang)}`)}</option>`).join("");
+    delBtn.hidden = !current;
+  }
+
+  function save() {
+    const p = snapshot();
+    if (isEmpty(p)) return note(T("Chưa có dữ liệu để lưu."), "bad");
+    const name = prompt(T("Tên bản lưu (lưu trong trình duyệt này):"), current ? current.name : suggestName());
+    if (!name || !name.trim()) return;
+    const id = current && current.name === name.trim() ? current.id : Date.now().toString(36);
+    const entry = { id, name: name.trim().slice(0, 80), t: Date.now(), payload: p };
+    if (!store.set(key, [entry, ...list().filter(a => a.id !== id)].slice(0, MAX))) return note(T("✖ Không lưu được — bộ nhớ trình duyệt đầy hoặc bị chặn."), "bad");
+    current = entry;
+    fill();
+    note(T("✔ Đã lưu “{name}”.", { name: entry.name }), "good");
+  }
+
+  function openId(id) {
+    const a = list().find(x => x.id === id);
+    if (!a) return;
+    keep();
+    open(a.payload);
+    current = a;
+    fill();
+    note(T("Đã mở “{name}”.", { name: a.name }), "muted");
+  }
+
+  function remove() {
+    if (!current || !confirm(T("Xoá “{name}” khỏi trình duyệt?", { name: current.name }))) return;
+    store.set(key, list().filter(a => a.id !== current.id));
+    current = null;
+    fill();
+  }
+
+  select.onchange = () => { const v = select.value; select.value = ""; if (v) openId(v); };
+  saveBtn.onclick = save;
+  delBtn.onclick = remove;
+  fill();
+  return { fill, forget: () => { current = null; fill(); } };
+};
+// Key profiles: VS Code (default — CodeMirror's own keys already match it), Sublime Text, Notepad++ (editor keys only, the app's shortcuts stay); Vim (vendored, loaded when on) above any profile.
+const KeyProfiles = (() => {
+  const NAMES = { vscode: "VS Code", sublime: "Sublime Text", notepadpp: "Notepad++" };
+  const cmd = name => v => CM.commands[name](v);
+  const text = id => () => { NppActions.text(id); return true; }, lines = id => () => { NppActions.lines(id); return true; };
+  const PROFILES = {
+    vscode: [],
+    sublime: [["Mod-Shift-d", cmd("copyLineDown")], ["Mod-Shift-ArrowUp", cmd("moveLineUp")], ["Mod-Shift-ArrowDown", cmd("moveLineDown")], ["Mod-m", cmd("cursorMatchingBracket")], ["Mod-j", lines("join")], ["Mod-Shift-u", text("upper")], ["Mod-u", text("lower")]],
+    notepadpp: [["Mod-d", cmd("copyLineDown")], ["Mod-Shift-l", cmd("deleteLine")], ["Mod-Shift-ArrowUp", cmd("moveLineUp")], ["Mod-Shift-ArrowDown", cmd("moveLineDown")], ["Mod-u", text("lower")], ["Mod-Shift-u", text("upper")], ["Mod-j", lines("join")], ["Mod-q", cmd("toggleComment")]],
+  };
+  const current = () => Object.hasOwn(PROFILES, Prefs.get("keys", "vscode")) ? Prefs.get("keys", "vscode") : "vscode";
+  const ext = id => PROFILES[id].length ? CM.state.Prec.high(CM.view.keymap.of(PROFILES[id].map(([key, run]) => ({ key, run, preventDefault: true })))) : [];
+
+  function set(id, quiet = false) {
+    Prefs.set("keys", id);
+    CmSetup.setExtra("keys", ext(id));
+    if (!quiet) StatusBar.msg(T("Bộ phím: {name} — phím của ứng dụng (Ctrl+P, Ctrl+Shift+P…) giữ nguyên.", { name: NAMES[id] }), "good");
+  }
+
+  async function setVim(on, quiet = false) {
+    if (on && !CM.vim) {
+      try { await VendorPaths.load("cmVim"); }
+      catch (e) { StatusBar.msg(T("Không nạp được Vim ({file}).", { file: e.message }), "bad"); return; }
+    }
+    // ":w" saves like Ctrl+S.
+    if (on && !CM.vim.wired) { CM.vim.wired = true; CM.vim.Vim.defineEx("write", "w", () => Actions.save(false)); }
+    Prefs.set("vim", !!on);
+    CmSetup.setExtra("vim", on ? CM.state.Prec.highest(CM.vim.vim({ status: true })) : []);
+    if (!quiet) StatusBar.msg(on ? T("Vim: bật — Esc về Normal, i để gõ, :w lưu.") : T("Vim: tắt."), "good");
+  }
+
+  // Applies the remembered choices once the extras are loaded.
+  function init() {
+    if (current() !== "vscode") set(current(), true);
+    if (Prefs.get("vim", false) === true) setVim(true, true);
+  }
+
+  return { set, setVim, init, PROFILES, current };
+})();
+// Snippets: a built-in set per language + the user's own (IndexedDB meta "snippets"), offered in autocomplete by prefix and from the Palette; ${1:field} placeholders, Tab moves on.
+const Snippets = (() => {
+  const JS = ["JavaScript", "TypeScript", "JSX", "TSX"];
+  const BUILT = [
+    ["log", JS, "console.log(${1:value});", "console.log"], ["fn", JS, "function ${1:name}(${2:args}) {\n\t${3}\n}", "function"],
+    ["afn", JS, "const ${1:name} = (${2:args}) => {\n\t${3}\n};", "arrow function"], ["forof", JS, "for (const ${1:item} of ${2:items}) {\n\t${3}\n}", "for … of"],
+    ["try", JS, "try {\n\t${1}\n} catch (${2:e}) {\n\t${3}\n}", "try / catch"], ["imp", JS, "import { ${2:name} } from \"${1:module}\";", "import"],
+    ["def", ["Python"], "def ${1:name}(${2:args}):\n    ${3:pass}", "def"], ["ifmain", ["Python"], "if __name__ == \"__main__\":\n    ${1:main()}", "__main__"],
+    ["func", ["Go"], "func ${1:name}(${2:args}) ${3:error} {\n\t${4}\n}", "func"], ["iferr", ["Go"], "if err != nil {\n\treturn ${1:err}\n}", "if err != nil"],
+    ["sel", ["SQL"], "SELECT ${1:*}\nFROM ${2:table}\nWHERE ${3:1 = 1};", "SELECT"], ["upd", ["SQL"], "UPDATE ${1:table}\nSET ${2:col} = ${3:value}\nWHERE ${4:id} = ${5:1};", "UPDATE"],
+    ["flex", ["CSS", "SCSS", "LESS"], "display: flex;\nalign-items: ${1:center};\ngap: ${2:8px};", "flexbox"], ["media", ["CSS", "SCSS", "LESS"], "@media (max-width: ${1:640px}) {\n\t${2}\n}", "@media"],
+    ["table", ["Markdown"], "| ${1:Col} | ${2:Col} |\n| --- | --- |\n| ${3} | ${4} |", "table"], ["code", ["Markdown"], "```${1:js}\n${2}\n```", "code block"],
+    ["class", ["C#", "Java"], "public class ${1:Name}\n{\n\t${2}\n}", "class"],
+  ].map(([prefix, langs, body, desc]) => ({ prefix, langs, body, desc }));
+  let mine = [], loading = null;
+
+  const load = () => loading ??= NotesDb.getMeta("snippets").then(v => { mine = Array.isArray(v) ? v.filter(s => s && typeof s.prefix === "string" && typeof s.body === "string") : []; }, () => { mine = []; });
+  // true when written; IndexedDB blocked / failing is reported.
+  const store = () => NotesDb.putMeta("snippets", mine).then(ok => ok || Promise.reject(new Error(T("trình duyệt chặn IndexedDB")))).then(() => true, e => { StatusBar.msg(T("Không lưu được snippet: {msg}", { msg: e.message }), "bad"); return false; });
+  const forLang = lang => [...mine.filter(s => !s.lang || s.lang === lang).map(s => ({ ...s, own: true })), ...BUILT.filter(s => s.langs.includes(lang))];
+  const langOf = view => { const g = Views.groups.find(x => x.view === view), d = g && Docs.get(g.active); return d ? Docs.effectiveLang(d) : ""; };
+
+  function source(ctx) {
+    const w = ctx.matchBefore(/[\w$-]+/);
+    if (!w || (w.from === w.to && !ctx.explicit)) return null;
+    const list = forLang(langOf(ctx.view)).filter(s => s.prefix.startsWith(w.text));
+    return list.length ? { from: w.from, options: list.map(s => CM.autocomplete.snippetCompletion(s.body, { label: s.prefix, detail: s.desc || T("snippet"), type: "text", boost: s.own ? 2 : 1 })) } : null;
+  }
+  const extension = () => CM.state.EditorState.languageData.of(() => [{ autocomplete: source }]);
+
+  async function pick() {
+    await load();
+    const v = Views.activeView(), list = forLang(langOf(v));
+    if (!list.length) { StatusBar.msg(T("Chưa có snippet cho ngôn ngữ này — bôi đen đoạn code rồi “Snippet: lưu vùng chọn…”."), "warn"); return; }
+    QuickPick.pick(list.map(s => ({ label: s.prefix + (s.own ? " ★" : ""), detail: s.desc || s.body.split("\n")[0].slice(0, 60), run: () => { const r = v.state.selection.main; CM.autocomplete.snippet(s.body)(v, null, r.from, r.to); v.focus(); } })), T("Chọn snippet để chèn"));
+  }
+
+  async function saveSelection() {
+    await load();
+    const v = Views.activeView(), r = v.state.selection.main, body = v.state.sliceDoc(r.from, r.to);
+    if (!body.trim()) { StatusBar.msg(T("Bôi đen đoạn code cần lưu thành snippet trước."), "warn"); return; }
+    const prefix = (prompt(T("Tên gọi tắt của snippet (gõ tên này rồi chọn trong gợi ý):"), "") || "").trim();
+    if (!prefix) return;
+    const lang = langOf(v), esc = body.replace(/\\(?=[{}])/g, "\\\\").replace(/([$#])\{/g, "$1\\{");
+    mine = [{ prefix, body: esc, lang, desc: T("của tôi · {lang}", { lang }) }, ...mine.filter(s => !(s.prefix === prefix && s.lang === lang))].slice(0, 500);
+    if (await store()) StatusBar.msg(T("✔ Đã lưu snippet “{prefix}” cho {lang} (trong trình duyệt này).", { prefix, lang }), "good");
+  }
+
+  async function pickDelete() {
+    await load();
+    if (!mine.length) { StatusBar.msg(T("Chưa có snippet nào của bạn."), "warn"); return; }
+    QuickPick.pick(mine.map(s => ({ label: "🗑 " + s.prefix, detail: s.lang || "*", run: async () => { mine = mine.filter(x => x !== s); if (await store()) StatusBar.msg(T("Đã xoá snippet “{prefix}”.", { prefix: s.prefix }), "good"); } })), T("Chọn snippet của bạn để xoá"));
+  }
+
+  return { load, extension, source, pick, saveSelection, pickDelete, BUILT };
+})();
+// Visual aids: column rulers 80 / 120, bracket pair colours (from the syntax tree), colour swatches next to CSS colours, breadcrumbs panel; expand / shrink the selection by syntax.
+const Aids = (() => {
+  const DEF = { rulers: false, brackets: true, swatches: true, crumbs: false }, OPEN = new Set(["(", "[", "{"]), PAIRS = new Set(["(", ")", "[", "]", "{", "}"]);
+  const COLOR = /#(?:[\da-f]{8}|[\da-f]{6}|[\da-f]{3,4})\b|\b(?:rgba?|hsla?)\([^()\n]{3,60}\)/gi, COLOR_LANGS = new Set(["CSS", "SCSS", "LESS", "HTML", "Vue", "SVG", "JSX", "TSX"]);
+  const settings = () => ({ ...DEF, ...Prefs.get("aids", {}) });
+  const D = () => CM.view.Decoration, docOf = view => { const g = Views.groups.find(x => x.view === view); return g && Docs.get(g.active); };
+
+  const rulers = () => CM.view.EditorView.theme({ ".cm-content": { backgroundImage: ["80ch", "120ch"].map(c => `linear-gradient(to right, transparent calc(${c} + 6px), var(--line) calc(${c} + 6px), var(--line) calc(${c} + 7px), transparent calc(${c} + 7px))`).join(", ") } });
+
+  // Depth = enclosing nodes that open with a bracket; colours cycle over 3.
+  function bracketMarks(view) {
+    const b = new CM.state.RangeSetBuilder(), tree = CM.language.syntaxTree(view.state), marks = [0, 1, 2].map(k => D().mark({ class: "brk" + k }));
+    for (const { from, to } of view.visibleRanges) tree.iterate({ from, to, enter: n => {
+      if (!PAIRS.has(n.name) || n.to - n.from !== 1) return;
+      let depth = 0;
+      for (let p = n.node.parent; p; p = p.parent) if (p.firstChild && OPEN.has(p.firstChild.name)) depth++;
+      if (depth) b.add(n.from, n.to, marks[(depth - 1) % 3]);
+    } });
+    return b.finish();
+  }
+
+  // Built on first use: this module is defined before the CodeMirror core has loaded.
+  let SwatchClass = null;
+  const Swatch = () => SwatchClass ??= class extends CM.view.WidgetType {
+    constructor(c) { super(); this.c = c; }
+    eq(o) { return o.c === this.c; }
+    toDOM() { const s = document.createElement("span"); s.className = "oe-swatch"; s.style.background = this.c; s.title = this.c; return s; }
+  };
+  function swatchMarks(view) {
+    const d = docOf(view), b = new CM.state.RangeSetBuilder();
+    if (!d || !COLOR_LANGS.has(Docs.effectiveLang(d))) return b.finish();
+    for (const { from, to } of view.visibleRanges) {
+      const text = view.state.doc.sliceString(from, to);
+      for (const m of text.matchAll(COLOR)) if (CSS.supports("color", m[0])) b.add(from + m.index, from + m.index, D().widget({ widget: new (Swatch())(m[0]), side: -1 }));
+    }
+    return b.finish();
+  }
+  const plugin = build => CM.view.ViewPlugin.fromClass(class {
+    constructor(v) { this.decorations = build(v); }
+    update(u) { if (u.docChanged || u.viewportChanged || CM.language.syntaxTree(u.startState) !== CM.language.syntaxTree(u.state) || u.transactions.some(t => t.effects.length)) this.decorations = build(u.view); }
+  }, { decorations: v => v.decorations });
+
+  // Breadcrumbs: file › heading path (Markdown) or › the symbol the cursor is in / after.
+  function crumbs(view) {
+    const dom = document.createElement("div");
+    dom.className = "oe-crumbs";
+    let syms = null, at = null;
+    function draw(state) {
+      const d = docOf(view);
+      if (!d) { dom.replaceChildren(); return; }
+      const key = CM.language.syntaxTree(state).length ? CM.language.syntaxTree(state) : state.doc;
+      if (at !== key) { at = key; syms = state.doc.length < 3e5 ? Symbols.list(state) : []; }
+      const line = state.doc.lineAt(state.selection.main.head).number, chain = [];
+      for (const s of syms) {
+        if (s.line > line) break;
+        const lvl = /^H(\d)$/.exec(s.kind);
+        if (lvl) { chain.length = Math.min(chain.length, +lvl[1] - 1); chain.push(s); } else { chain.length = 0; chain.push(s); }
+      }
+      const item = (text, fn) => Object.assign(document.createElement("button"), { type: "button", textContent: text, onclick: fn });
+      const parts = [item(d.name, () => QuickPick.open("@"))];
+      for (const s of chain.filter(Boolean)) parts.push(document.createTextNode(" › "), item(s.label, () => Views.revealLine(d, s.line)));
+      dom.replaceChildren(...parts);
+    }
+    // Redrawn 200 ms after typing / moving stops: the symbol list walks the whole syntax tree.
+    let timer = 0;
+    draw(view.state);
+    return { dom, top: true, update: u => { if (u.docChanged || u.selectionSet) { clearTimeout(timer); timer = setTimeout(() => draw(view.state), 200); } }, destroy: () => clearTimeout(timer) };
+  }
+
+  function build() {
+    const s = settings(), out = [];
+    if (s.rulers) out.push(rulers());
+    if (s.brackets) out.push(plugin(bracketMarks));
+    if (s.swatches) out.push(plugin(swatchMarks));
+    if (s.crumbs) out.push(CM.view.showPanel.of(crumbs));
+    return out;
+  }
+  const apply = () => CmSetup.setExtra("aids", [build(), Snippets.extension()]);
+
+  function toggle(id) {
+    const s = settings();
+    s[id] = !s[id];
+    Prefs.set("aids", s);
+    apply();
+  }
+
+  // Expand = selectParentSyntax; shrink walks back the selections it replaced (per view, until the user moves).
+  const stacks = new WeakMap();
+  function expand(view) {
+    const before = view.state.selection, st = stacks.get(view) || [];
+    CM.commands.selectParentSyntax(view);
+    if (!view.state.selection.eq(before)) { st.push({ sel: before, after: view.state.selection }); stacks.set(view, st); }
+  }
+  function shrink(view) {
+    const st = stacks.get(view) || [], top = st[st.length - 1];
+    if (!top || !view.state.selection.eq(top.after)) { stacks.delete(view); return; }
+    st.pop();
+    view.dispatch({ selection: top.sel });
+  }
+
+  return { apply, toggle, expand, shrink, settings };
+})();
+// Outline / Function List sidebar: symbols of the active tab (functions, classes, headings by level), filter box, click ⇒ the line; follows tab switches and edits.
+const Outline = (() => {
+  const box = $("outline"), filter = $("olFilter");
+  let timer = 0, wired = false;
+  const visible = () => !document.querySelector('[data-side-panel="outline"]').hidden;
+
+  function render() {
+    if (!visible()) return;
+    const d = Views.activeDoc();
+    const el = (tag, cls, text) => Object.assign(document.createElement(tag), { className: cls, textContent: text });
+    if (!d || PreviewPane.isPane(d) || d.hex) { box.replaceChildren(el("p", "muted", T("Tab đang mở không có symbol."))); return; }
+    // Symbols come from the syntax tree: render again once the tab's language pack is applied.
+    if (d.state && d.langApplied !== Docs.effectiveLang(d)) LangLoader.apply(d).then(() => { if (d.langApplied === Docs.effectiveLang(d)) later(); });
+    const st = Views.activeView().state, line = st.doc.lineAt(st.selection.main.head).number, q = filter.value.trim();
+    let list = st.doc.length < 2e6 ? Symbols.list(st) : [];
+    if (q) list = Fuzzy.filter(q, list);
+    const cur = q ? null : list.filter(s => s.line <= line).pop();
+    if (!list.length) { box.replaceChildren(el("p", "muted", q ? T("Không có symbol khớp.") : T("Tab đang mở không có symbol."))); return; }
+    box.replaceChildren(...list.slice(0, 2000).map(s => {
+      const lvl = /^H(\d)$/.exec(s.kind), b = el("button", "ol-item" + (s === cur ? " on" : ""), s.label);
+      b.type = "button";
+      b.style.paddingLeft = (lvl ? (+lvl[1] - 1) * 12 + 8 : 8) + "px";
+      b.title = (s.kind ? s.kind + " · " : "") + T("dòng {n}", { n: s.line });
+      b.onclick = () => { Views.revealLine(d, s.line); PhoneLayout.show(Views.where(d.id) + 1); };
+      return b;
+    }));
+  }
+  const later = () => { clearTimeout(timer); timer = setTimeout(render, 300); };
+
+  function show() {
+    if (!wired) {
+      wired = true;
+      filter.addEventListener("input", later);
+      Views.onChange(later);
+      Docs.on(type => { if (type === "edit" || type === "lang") later(); });
+    }
+    render();
+    filter.focus();
+  }
+
+  return { show, render };
+})();
+// Named sessions: save / open / delete the open tabs + layout under a name (SavedSessions UI), kept in IndexedDB meta "sessions" so big sessions fit; clean file tabs keep only their handle.
+const Sessions = (() => {
+  let cache = [], ui = null;
+  const store = { get: (k, d) => cache || d, set: (k, v) => { cache = v; NotesDb.putMeta("sessions", v).catch(e => StatusBar.msg(T("Không lưu được phiên: {msg}", { msg: e.message }), "bad")); return NotesDb.ok; } };
+
+  // Tabs per view; a clean file with a handle is re-read on open, notes are linked by id, everything else carries its text.
+  function snapshot() {
+    const rec = d => {
+      const base = { kind: d.kind, name: d.name, lang: d.lang, id: d.id };
+      if (d.kind === "file" && d.handle && !d.dirty && !d.big && !d.hex) return { ...base, handle: d.handle };
+      if (d.crypt || d.sealed) return { ...base, kind: "note" };
+      if (HotExit.secret(d.link && Docs.get(d.link.src))) return null;
+      return { ...base, text: Docs.text(d) };
+    };
+    const groups = Views.groups.slice(0, Views.count).map(g => ({ tabs: g.tabs.map(Docs.get).filter(d => d && d.kind !== "clone" && !PreviewPane.isPane(d)).map(rec).filter(Boolean), active: g.active }));
+    return { v: 1, layout: Views.layout, focused: Views.focused, groups };
+  }
+
+  // Untrusted shape: known fields only; nothing already open is replaced.
+  function open(p) {
+    if (!p || !Array.isArray(p.groups)) return;
+    if (Layouts.get(p.layout) && Layouts.get(p.layout).n > Views.count) Actions.setLayout(p.layout);
+    let first = null;
+    p.groups.slice(0, Views.count).forEach((g, gi) => (Array.isArray(g.tabs) ? g.tabs : []).forEach(r => {
+      if (!r || typeof r.name !== "string") return;
+      let d = typeof r.id === "string" && Docs.get(r.id);
+      if (!d && r.kind === "file" && r.handle) d = Docs.create({ kind: "file", name: r.name, lang: r.lang, handle: r.handle, stale: true, text: "" });
+      else if (!d && typeof r.text === "string") d = Docs.create({ kind: r.kind === "note" ? "note" : "temp", name: r.name, lang: r.lang, text: r.text });
+      if (!d) return;
+      Views.add(d, gi);
+      if (r.id === g.active || !first) first = first || d;
+      if (r.id === g.active) Views.activate(Views.where(d.id), d.id, false);
+    }));
+    Views.groups.slice(0, Views.count).forEach(g => { if (g.tabs.length && !g.tabs.includes(g.active)) Views.activate(g.i, g.tabs[0], false); });
+    Views.renderAll();
+    if (first) Views.focus(Views.where(first.id));
+    HotExit.schedule();
+  }
+
+  async function init() {
+    try { const v = await NotesDb.getMeta("sessions"); cache = Array.isArray(v) ? v : []; } catch { cache = []; }
+    ui = SavedSessions({ select: $("ssSel"), saveBtn: $("ssSave"), delBtn: $("ssDel"), store, key: "sessions", snapshot, open,
+      suggestName: () => T("Phiên {date}", { date: new Date().toLocaleString(I18n.lang) }), isEmpty: p => !p.groups.some(g => g.tabs.length), note: (m, cls) => StatusBar.msg(m, cls) });
+    I18n.onChange(() => ui.fill());
+  }
+
+  const save = () => $("ssSave").click();
+  function pick() {
+    if (!cache.length) { StatusBar.msg(T("Chưa có phiên nào — “Phiên: lưu…” hoặc 💾 trong Explorer."), "warn"); return; }
+    QuickPick.pick(cache.map(a => ({ label: "🗂 " + a.name, detail: new Date(a.t).toLocaleString(I18n.lang), run: () => { $("ssSel").value = a.id; $("ssSel").onchange(); } })), T("Chọn phiên để mở (tab của phiên được thêm, tab đang mở giữ nguyên)"));
+  }
+
+  return { init, save, pick, snapshot, open };
+})();
+// Password protection (WebCrypto): PBKDF2-SHA-256 600 000 rounds → AES-GCM 256. Share link "#enc:" = base64url(version 1 | salt 16 | iv 12 | ciphertext of the "pako:…" payload); the password is never in the link or stored.
+const Crypt = (() => {
+  const ITER = 600000, te = new TextEncoder(), td = new TextDecoder();
+  const b64u = bytes => { let s = ""; for (let i = 0; i < bytes.length; i += 0x8000) s += String.fromCharCode(...bytes.subarray(i, i + 0x8000)); return btoa(s).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, ""); };
+  const unb64u = s => Uint8Array.from(atob(s.replace(/-/g, "+").replace(/_/g, "/")), c => c.charCodeAt(0));
+  const bad = () => new Error(T("Sai mật khẩu hoặc dữ liệu đã hỏng."));
+
+  async function key(pw, salt, iterations = ITER) {
+    const base = await crypto.subtle.importKey("raw", te.encode(pw), "PBKDF2", false, ["deriveKey"]);
+    return crypto.subtle.deriveKey({ name: "PBKDF2", salt, iterations, hash: "SHA-256" }, base, { name: "AES-GCM", length: 256 }, false, ["encrypt", "decrypt"]);
+  }
+  const salt = () => crypto.getRandomValues(new Uint8Array(16));
+
+  // Text ⇄ { iv, ct } with an already derived key (locked notes keep the key in memory while unlocked).
+  async function seal(text, k) {
+    const iv = crypto.getRandomValues(new Uint8Array(12)), ct = new Uint8Array(await crypto.subtle.encrypt({ name: "AES-GCM", iv }, k, te.encode(text)));
+    return { iv: b64u(iv), ct: b64u(ct) };
+  }
+  async function unseal(rec, k) {
+    try { return td.decode(await crypto.subtle.decrypt({ name: "AES-GCM", iv: unb64u(rec.iv) }, k, unb64u(rec.ct))); } catch { throw bad(); }
+  }
+
+  async function encodeLink(obj, pw) {
+    const s = salt(), iv = crypto.getRandomValues(new Uint8Array(12)), plain = te.encode(await ShareCodec.encode(obj));
+    const ct = new Uint8Array(await crypto.subtle.encrypt({ name: "AES-GCM", iv }, await key(pw, s), plain)), all = new Uint8Array(29 + ct.length);
+    all[0] = 1; all.set(s, 1); all.set(iv, 17); all.set(ct, 29);
+    return "enc:" + b64u(all);
+  }
+  // Any failure (wrong password, cut link, tampering) is the same message: nothing about the content leaks.
+  async function decodeLink(hash, pw) {
+    let obj;
+    try {
+      const all = unb64u(hash.replace(/^enc:/, ""));
+      if (all[0] !== 1) throw bad();
+      const plain = await crypto.subtle.decrypt({ name: "AES-GCM", iv: all.subarray(17, 29) }, await key(pw, all.subarray(1, 17)), all.subarray(29));
+      obj = await ShareCodec.decode(td.decode(plain));
+    } catch { throw bad(); }
+    if (!obj) throw bad();
+    return obj;
+  }
+
+  // Password dialog → the password, or null when cancelled; confirm asks twice; at least 8 characters.
+  function ask({ title, confirm = false }) {
+    const dlg = $("pwDlg"), a = $("pwInput"), b = $("pwInput2"), msg = $("pwMsg");
+    $("pwTitle").textContent = title;
+    a.value = b.value = ""; msg.textContent = "";
+    b.hidden = !confirm;
+    return new Promise(done => {
+      dlg.querySelector("form").onsubmit = e => {
+        if (e.submitter && e.submitter.value === "cancel") return;
+        const err = a.value.length < 8 ? T("Mật khẩu cần ít nhất 8 ký tự.") : confirm && a.value !== b.value ? T("Hai lần nhập không khớp.") : "";
+        if (err) { e.preventDefault(); msg.textContent = err; }
+      };
+      dlg.onclose = () => { const pw = dlg.returnValue === "ok" ? a.value : null; a.value = b.value = ""; done(pw); };
+      dlg.returnValue = "";
+      dlg.showModal();
+      a.focus();
+    });
+  }
+
+  return { key, salt, seal, unseal, encodeLink, decodeLink, ask, b64u, unb64u, bad, ITER };
+})();
+// Locked notes: with a password the note is stored only encrypted (hot exit writes { salt, iv, ct }); after F5 it opens locked until the password is typed again — the key is never stored.
+const Locks = (() => {
+  const PLACEHOLDER = () => T("🔒 Ghi chú đã khoá — Command Palette → “Ghi chú: mở khoá…” để nhập mật khẩu.");
+
+  // Hot exit calls this for every unlocked note with a password, just before writing it.
+  const sealDoc = async d => ({ salt: d.crypt.salt, it: d.crypt.it, ...(await Crypt.seal(Docs.text(d), d.crypt.key)) });
+  // Clones and result tabs (format, preview, translate…) of a note would show its text: closed when it locks.
+  const closeCopies = doc => Docs.list().filter(d => d.cloneOf === doc.id || (d.link && d.link.src === doc.id)).forEach(d => Views.close(d.id, true));
+
+  // Plain copies made before the password: local history snapshots and the text inside saved sessions.
+  async function dropPlainCopies(doc) {
+    try {
+      const recs = await NotesDb.histList(), ids = recs.filter(r => r.key === "note:" + doc.id).map(r => r.id);
+      if (ids.length) await NotesDb.histWrite(null, "", ids);
+      const ss = await NotesDb.getMeta("sessions");
+      if (Array.isArray(ss)) await NotesDb.putMeta("sessions", ss.map(a => ({ ...a, payload: { ...a.payload, groups: (a.payload?.groups || []).map(g => ({ ...g, tabs: (g.tabs || []).map(t => t && t.id === doc.id ? { ...t, text: undefined } : t) })) } })));
+    } catch (e) { StatusBar.msg(T("Không xoá được bản thường cũ của ghi chú (lịch sử / phiên): {msg}", { msg: e.message }), "warn"); }
+  }
+
+  // Shows new text in the tab (read-only while locked), like a file re-read from disk.
+  function show(doc, text, readOnly) {
+    Object.assign(doc, { text, state: null, readOnly, langApplied: null });
+    const gi = Views.where(doc.id);
+    if (gi >= 0 && Views.groups[gi].active === doc.id) Views.activate(gi, doc.id, false);
+    Docs.update(doc, {});
+  }
+
+  async function lock(doc) {
+    if (doc.kind !== "note" || doc.sealed) return;
+    const pw = await Crypt.ask({ title: T("Đặt mật khẩu cho “{name}”", { name: doc.name }), confirm: true });
+    if (!pw) return;
+    const salt = Crypt.b64u(Crypt.salt());
+    doc.crypt = { key: await Crypt.key(pw, Crypt.unb64u(salt)), salt, it: Crypt.ITER };
+    Docs.update(doc, {});
+    await HotExit.flush();
+    await dropPlainCopies(doc);
+    StatusBar.msg(T("🔒 “{name}” giờ chỉ lưu dạng mã hoá. Quên mật khẩu là không mở lại được.", { name: doc.name }), "good");
+  }
+
+  async function relock(doc) {
+    if (!doc.crypt) { StatusBar.msg(T("Ghi chú này chưa có mật khẩu."), "warn"); return; }
+    doc.sealed = await sealDoc(doc);
+    doc.crypt = null;
+    closeCopies(doc);
+    show(doc, PLACEHOLDER(), true);
+    await HotExit.flush();
+    StatusBar.msg(T("🔒 Đã khoá “{name}”.", { name: doc.name }), "good");
+  }
+
+  async function unlock(doc) {
+    if (!doc.sealed) { StatusBar.msg(T("Ghi chú này không bị khoá."), "warn"); return; }
+    const pw = await Crypt.ask({ title: T("Mật khẩu của “{name}”", { name: doc.name }) });
+    if (!pw) return;
+    try {
+      const it = doc.sealed.it || 310000, k = await Crypt.key(pw, Crypt.unb64u(doc.sealed.salt), it), text = await Crypt.unseal(doc.sealed, k);
+      doc.crypt = { key: k, salt: doc.sealed.salt, it };
+      doc.sealed = null;
+      show(doc, text, false);
+      StatusBar.msg(T("🔓 Đã mở khoá “{name}” — vẫn lưu dạng mã hoá; F5 / đóng trang là khoá lại.", { name: doc.name }), "good");
+    } catch { StatusBar.msg(Crypt.bad().message, "bad"); }
+  }
+
+  async function removePassword(doc) {
+    if (doc.sealed) { StatusBar.msg(T("Mở khoá ghi chú trước."), "warn"); return; }
+    if (!doc.crypt || !confirm(T("Bỏ mật khẩu — “{name}” sẽ lưu dạng thường trong trình duyệt?", { name: doc.name }))) return;
+    doc.crypt = null;
+    Docs.update(doc, {});
+    StatusBar.msg(T("Đã bỏ mật khẩu của “{name}”.", { name: doc.name }), "good");
+  }
+
+  return { sealDoc, lock, relock, unlock, removePassword, PLACEHOLDER };
+})();
+// Local history: a snapshot of the tab on every successful Ctrl+S (or on demand) in IndexedDB — ≤ 50 per file, ≤ 100 MB in all, oldest first out; compare with any snapshot, restore it (Ctrl+Z works).
+const LocalHistory = (() => {
+  const PER_KEY = 50, TOTAL = 100 * 1024 * 1024, MAX_TEXT = 5 * 1024 * 1024;
+
+  // FNV-1a: same sum + size as the newest snapshot of the file ⇒ unchanged, no new snapshot.
+  function sum(text) {
+    let h = 0x811c9dc5;
+    for (let i = 0; i < text.length; i++) { h ^= text.charCodeAt(i); h = Math.imul(h, 0x01000193); }
+    return (h >>> 0).toString(36);
+  }
+
+  // records: [{ id, key, t, size, sum }] + a new snapshot rec → { skip, drop: ids to delete } (pure).
+  function plan(records, rec, perKey = PER_KEY, total = TOTAL) {
+    const same = records.filter(r => r.key === rec.key).sort((a, b) => b.t - a.t);
+    if (same[0] && same[0].sum === rec.sum && same[0].size === rec.size) return { skip: true, drop: [] };
+    const drop = new Set(same.slice(perKey - 1).map(r => r.id));
+    let used = rec.size + records.reduce((s, r) => s + (drop.has(r.id) ? 0 : r.size), 0);
+    for (const r of [...records].sort((a, b) => a.t - b.t)) {
+      if (used <= total) break;
+      if (!drop.has(r.id)) { drop.add(r.id); used -= r.size; }
+    }
+    return { skip: false, drop: [...drop] };
+  }
+
+  // Notes by id; files by their disk entry (same name + isSameEntry), so two "config.json" from two folders keep separate histories.
+  async function keyOf(doc, records) {
+    if (doc.histKey && doc.histKey.handle === doc.handle) return doc.histKey.key;
+    let key = doc.kind === "note" ? "note:" + doc.id : "tab:" + doc.id;
+    if (doc.kind === "file" && doc.handle) {
+      key = "";
+      const seen = new Set();
+      for (const r of records) if (r.handle && r.name === doc.name && !seen.has(r.key)) {
+        seen.add(r.key);
+        try { if (await r.handle.isSameEntry(doc.handle)) { key = r.key; break; } } catch { /* stale handle: not this file */ }
+      }
+      key ||= "file:" + doc.name + ":" + Date.now().toString(36);
+    }
+    doc.histKey = { key, handle: doc.handle };
+    return key;
+  }
+
+  // Password notes never get a plain-text snapshot.
+  const usable = doc => !!doc && !doc.hex && !doc.big && !doc.hist && !doc.crypt && !doc.sealed && !PreviewPane.isPane(doc);
+
+  // quiet: after Ctrl+S — only a failure is reported (the save itself already said ✔).
+  async function snap(doc, quiet = true, text = null) {
+    doc = doc && Docs.root(doc);
+    if (!usable(doc) || !NotesDb.ok) { if (!quiet) StatusBar.msg(NotesDb.ok ? T("Tab này không có lịch sử cục bộ.") : T("⚠ Không lưu được — trình duyệt chặn IndexedDB"), "warn"); return false; }
+    text ??= Docs.text(doc);
+    if (text.length > MAX_TEXT) { if (!quiet) StatusBar.msg(T("Tab lớn hơn 5 MB — không chụp lịch sử cục bộ."), "warn"); return false; }
+    try {
+      const records = await NotesDb.histList(), key = await keyOf(doc, records);
+      const rec = { id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6), key, name: doc.name, t: Date.now(), size: text.length, sum: sum(text), handle: doc.kind === "file" ? doc.handle : null };
+      const p = plan(records, rec);
+      if (p.skip) { if (!quiet) StatusBar.msg(T("Không đổi so với bản lịch sử gần nhất — không chụp thêm."), "warn"); return false; }
+      await NotesDb.histWrite(rec, text, p.drop);
+      if (!quiet) StatusBar.msg(T("✔ Đã chụp bản lịch sử của “{name}”.", { name: doc.name }), "good");
+      return true;
+    } catch (e) {
+      console.warn("One Editor local history:", e);
+      StatusBar.msg(T("Không ghi được lịch sử cục bộ: {msg}", { msg: e.message }), "warn");
+      return false;
+    }
+  }
+
+  const when = t => new Date(t).toLocaleString(I18n.lang);
+  const kb = n => I18n.num(Math.max(1, Math.round(n / 1024))) + " KB";
+  const sourceOf = doc => doc && doc.hist ? Docs.get(doc.hist.src) : doc && Docs.root(doc);
+
+  async function pick() {
+    const src = sourceOf(Views.activeDoc());
+    if (!usable(src)) { StatusBar.msg(T("Tab này không có lịch sử cục bộ."), "warn"); return; }
+    let mine;
+    try { const records = await NotesDb.histList(), key = await keyOf(src, records); mine = records.filter(r => r.key === key).sort((a, b) => b.t - a.t); }
+    catch (e) { StatusBar.msg(T("Không đọc được lịch sử cục bộ: {msg}", { msg: e.message }), "bad"); return; }
+    if (!mine.length) { StatusBar.msg(T("“{name}” chưa có bản lịch sử — bản được chụp mỗi lần Ctrl+S, hoặc dùng lệnh “Lịch sử cục bộ: chụp bản ngay”.", { name: src.name }), "warn"); return; }
+    QuickPick.pick(mine.map((r, i) => ({ label: "🕘 " + when(r.t) + " · " + kb(r.size), detail: DevNum.ago(r.t) + (i ? "" : " · " + T("mới nhất")), run: () => open(src, r) })),
+      T("Chọn bản lịch sử để so sánh với “{name}”", { name: src.name }));
+  }
+
+  // The snapshot opens read-only in the other view and the two are compared side by side.
+  async function open(src, r) {
+    let text;
+    try { text = await NotesDb.histText(r.id); } catch (e) { text = null; console.warn("One Editor local history:", e); }
+    if (typeof text !== "string" || !Docs.get(src.id)) { StatusBar.msg(T("Không đọc được bản lịch sử này."), "bad"); return; }
+    Docs.list().filter(d => d.hist && d.hist.src === src.id).forEach(d => Views.close(d.id, true));
+    if (Views.where(src.id) < 0) Views.open(src, Views.focused, false);
+    if (Views.count < 2) Views.setLayout("2c");
+    const at = Views.where(src.id), snapDoc = Docs.create({ kind: "temp", name: src.name + " @ " + when(r.t), lang: Docs.effectiveLang(src), text, readOnly: true });
+    snapDoc.hist = { src: src.id, t: r.t };
+    Views.activate(at, src.id, false);
+    Views.open(snapDoc, Views.other(at), false);
+    Compare.start(at);
+    StatusBar.msg(T("So sánh “{name}” với bản lúc {time} — lệnh “Lịch sử cục bộ: khôi phục…” để ghi bản đó vào tab gốc (Ctrl+Z được).", { name: src.name, time: when(r.t) }), "good");
+  }
+
+  const viewing = () => { const d = Views.activeDoc(); return d && d.hist ? d : d && Docs.list().find(x => x.hist && x.hist.src === Docs.root(d).id) || null; };
+
+  function restore() {
+    const snapDoc = viewing(), src = snapDoc && Docs.get(snapDoc.hist.src);
+    if (!src) { StatusBar.msg(T("Tab gốc của bản lịch sử này đã đóng."), "warn"); return; }
+    if (src.readOnly || src.stale) { StatusBar.msg(T("Tab gốc đang chỉ đọc — đọc lại file (Ctrl+S) rồi khôi phục."), "warn"); return; }
+    if (!confirm(T("Thay toàn bộ nội dung “{name}” bằng bản lúc {time}? Ctrl+Z để hoàn tác.", { name: src.name, time: when(snapDoc.hist.t) }))) return;
+    Views.replaceText(src, Docs.text(snapDoc));
+    StatusBar.msg(T("✔ Đã khôi phục bản lúc {time} vào “{name}” — chưa ghi đĩa, Ctrl+S để lưu.", { name: src.name, time: when(snapDoc.hist.t) }), "good");
+  }
+
+  async function clear() {
+    const src = sourceOf(Views.activeDoc());
+    if (!usable(src)) { StatusBar.msg(T("Tab này không có lịch sử cục bộ."), "warn"); return; }
+    try {
+      const records = await NotesDb.histList(), key = await keyOf(src, records), ids = records.filter(r => r.key === key).map(r => r.id);
+      if (!ids.length) { StatusBar.msg(T("“{name}” chưa có bản lịch sử.", { name: src.name }), "warn"); return; }
+      if (!confirm(T("Xoá {n} bản lịch sử của “{name}”?", { n: ids.length, name: src.name }))) return;
+      await NotesDb.histWrite(null, "", ids);
+      StatusBar.msg(T("✔ Đã xoá {n} bản lịch sử.", { n: ids.length }), "good");
+    } catch (e) { StatusBar.msg(T("Không xoá được lịch sử cục bộ: {msg}", { msg: e.message }), "bad"); }
+  }
+
+  return { plan, sum, snap, snapNow: () => snap(Views.activeDoc(), false), pick, restore, clear, viewing };
+})();
 // Boot: load the CodeMirror core, wire controls and listeners, restore the hot-exit session, then open ?demo= / ?data= / a share link.
 const Prefs = (() => {
   const P = "web_tool.one-editor.";
@@ -11409,7 +12419,7 @@ function wireOneEditor() {
   on("opSel", "change", e => RunOp.pick(Views.activeDoc(), e.target.value));
   on("btnSwap", "click", () => Views.swap());
   on("btnExplorer", "click", Actions.toggleExplorer);
-  on("btnShare", "click", ShareLoader.share);
+  on("btnShare", "click", () => ShareLoader.share());
   on("btnClear", "click", Actions.clearData);
   on("chkWrap", "change", e => Actions.setWrap(e.target.checked));
   on("langSel", "change", e => Actions.setLang(e.target.value));
@@ -11421,6 +12431,7 @@ function wireOneEditor() {
   on("btnZenExit", "click", Actions.toggleZen);
   on("chkMinimap", "change", e => Actions.setMinimap(e.target.checked));
   on("btnFind", "click", () => Commands.run("find"));
+  on("btnRefresh", "click", () => DiskSync.checkAll());
   on("btnFormat", "click", () => Commands.run("formatOut"));
   on("btnCompare", "click", Compare.toggle);
   PreviewPane.init();
@@ -11446,6 +12457,7 @@ function wireOneEditor() {
   Split.init();
   SideBar.init();
   ExportActions.init();
+  DiskSync.init();
 
   Docs.on((type, doc) => {
     if (type === "edit" || type === "dirty") OutputLink.sourceEdited(doc);
@@ -11484,6 +12496,7 @@ function wireOneEditor() {
   if (Prefs.get("minimap", false) === true) Actions.setMinimap(true);
   if (Prefs.get("guides", true) !== false) Actions.setGuides(true);
   await RecentFiles.load();
+  await Pinned.init();
   // Extras (breadcrumbs, bracket colours, snippets, key profile, sessions) load after the editor is usable.
   EditorExtras.use(async () => { KeyProfiles.init(); Aids.apply(); await Snippets.load(); await Sessions.init(); });
   StatusBar.storage(NotesDb.ok, NotesDb.error);

@@ -2,7 +2,7 @@
 const CmSetup = (() => {
   let C = null, themes = null, onUpdate = null, minimap = null, guides = null;
   const comp = {}, extra = { vim: [], keys: [], aids: [] };
-  const settings = { wrap: false, minimap: false, guides: false, hidden: false, numHover: true, lint: true };
+  const settings = { wrap: true, minimap: false, guides: false, hidden: false, numHover: true, lint: true };
 
   const isDark = () => {
     const t = document.documentElement.dataset.theme;

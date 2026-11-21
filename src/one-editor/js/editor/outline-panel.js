@@ -9,6 +9,8 @@ const Outline = (() => {
     const d = Views.activeDoc();
     const el = (tag, cls, text) => Object.assign(document.createElement(tag), { className: cls, textContent: text });
     if (!d || PreviewPane.isPane(d) || d.hex) { box.replaceChildren(el("p", "muted", T("Tab đang mở không có symbol."))); return; }
+    // Symbols come from the syntax tree: render again once the tab's language pack is applied.
+    if (d.state && d.langApplied !== Docs.effectiveLang(d)) LangLoader.apply(d).then(() => { if (d.langApplied === Docs.effectiveLang(d)) later(); });
     const st = Views.activeView().state, line = st.doc.lineAt(st.selection.main.head).number, q = filter.value.trim();
     let list = st.doc.length < 2e6 ? Symbols.list(st) : [];
     if (q) list = Fuzzy.filter(q, list);

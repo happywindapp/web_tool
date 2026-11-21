@@ -10,10 +10,7 @@ const VendorPaths = (() => {
     cmEmmet: CM_DIR + "codemirror-emmet.min.js",
     sqlFormatter: "vendor/sql-formatter-15.9.0.min.js",
     prettier: P_DIR + "standalone.js",
-    dataTools: "one-editor-data-tools.js",
-    fixDict: "one-editor-fix-dictionary.js",
-    editorExtras: "one-editor-editor-extras.js",
-    powerTools: "one-editor-power-tools.js",
+    extras: "one-editor-extras.js",
   };
   for (const p of ["babel", "estree", "typescript", "postcss", "html", "markdown", "yaml", "graphql"]) PATHS["prettier-" + p] = P_DIR + "plugins/" + p + ".js";
   const loading = {};

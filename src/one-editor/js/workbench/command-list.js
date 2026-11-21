@@ -18,12 +18,15 @@ function registerOneEditorCommands() {
   C("openFolder", "Mở folder…", null, A.openFolder);
   C("save", "Lưu", "Ctrl+s", () => A.save(false), hasDoc);
   C("saveAs", "Lưu thành…", "Ctrl+Shift+s", () => A.save(true), hasDoc);
+  C("diskRefresh", "🔄 Làm mới từ đĩa: folder Explorer + các tab file", null, () => DiskSync.checkAll());
+  C("diskReload", "Đọc lại từ đĩa / so sánh với bản trên đĩa…", null, withDoc(d => DiskSync.one(d)), () => hasDoc() && !!Docs.root(doc()).handle);
   C("closeTab", "Đóng tab", "Alt+w", A.closeTab, hasDoc);
   C("closeOthers", "Đóng các tab khác trong view (trừ tab ghim)", null, withDoc(d => V.closeMany(V.focused, d.id, false)), hasDoc);
   C("closeRight", "Đóng các tab bên phải (trừ tab ghim)", null, withDoc(d => V.closeMany(V.focused, d.id, true)), hasDoc);
   C("reopen", "Mở lại tab vừa đóng", "Alt+Shift+t", () => V.reopen());
   C("renameTab", "Đổi tên tab", null, withDoc(d => TabStrip.rename(d)), hasDoc);
-  C("pinTab", "Ghim / bỏ ghim tab", null, withDoc(d => V.togglePin(d)), hasDoc);
+  C("pinTab", "Ghim / bỏ ghim tab", "Ctrl+k Shift+Enter", withDoc(d => V.togglePin(d)), hasDoc);
+  C("pinItem", "Ghim / bỏ ghim vào mục Đã ghim (Explorer)", null, withDoc(d => Pinned.toggleDoc(d)), () => hasDoc() && Pinned.canPin(doc()));
 
   C("bookmark", "Bookmark: bật / tắt ở dòng này", "Ctrl+F2", () => Bookmarks.toggleLine(view()), hasDoc);
   C("bookmarkNext", "Bookmark: tới cái kế tiếp", "F2", () => Bookmarks.jump(view(), 1), hasDoc);

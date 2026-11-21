@@ -2,15 +2,26 @@
   .toolbar { padding:6px 16px; }
   .toolbar .hint { margin-left:auto; font-size:12px; }
   .work { grid-template-columns:minmax(0, 3fr) minmax(320px, 2fr); }
-  .left { display:grid; grid-template-rows:minmax(110px, 30%) minmax(0, 1fr); gap:10px; min-height:0; }
+  .left { display:grid; grid-template-rows:minmax(110px, 1fr) minmax(0, 1fr); gap:10px; min-height:0; }
   .left.collapsed { grid-template-rows:auto minmax(0, 1fr); }
   .left.collapsed .ed { display:none; }
+  /* ▥ 3 cột (wide screens only): the left stack dissolves so input · table · detail sit side by side. */
+  @media (min-width: 901px) {
+    .work.c3 { grid-template-columns:minmax(0, 1fr) minmax(0, 1.3fr) minmax(320px, 1fr); }
+    .work.c3:has(.left.collapsed) { grid-template-columns:auto minmax(0, 1.6fr) minmax(320px, 1fr); }
+    .work.c3 .left { display:contents; }
+  }
+  @media (max-width: 900px) { label.c3-opt { display:none; } }
   .ed { position:relative; min-height:0; overflow:hidden; }
   .ed > .code { position:absolute; inset:0; }
   .ed.hl-on #src { color:transparent; background:transparent; caret-color:var(--ink); }
   .ed:not(.hl-on) pre.hl { display:none; }
   pre.hl { margin:0; pointer-events:none; overflow:hidden; }
+  /* ↵ wrap: textarea and its colour layer must break at the same character, so both reserve the scrollbar gutter. */
+  body.wrap .ed > .code { white-space:pre-wrap; overflow-wrap:anywhere; scrollbar-gutter:stable; }
+  body.wrap table.grid td { white-space:pre-wrap; overflow-wrap:anywhere; vertical-align:top; }
   pre.hl.probe { pointer-events:auto; z-index:2; cursor:help; }
+  pre.hl .hl-sel { background:color-mix(in srgb, var(--acc) 22%, transparent); border-radius:2px; }
   pre.hl .hl-x { color:var(--muted); } pre.hl .hl-d { color:var(--c); } pre.hl .hl-f:hover { background:var(--hover); }
   table.grid th[data-col] { cursor:pointer; } table.grid th[data-col]:hover { color:var(--acc); }
   dialog .row { display:flex; flex-wrap:wrap; gap:6px; align-items:center; }

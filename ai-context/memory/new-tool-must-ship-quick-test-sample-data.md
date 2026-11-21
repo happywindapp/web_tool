@@ -9,7 +9,7 @@ tính năng tự sửa/báo lỗi không ai thấy vì input của họ hợp l�
 
 - Theo checklist **"Dữ liệu mẫu để test nhanh"** ở `docs/architecture/README.md` mục 3 (nguồn chân lý).
 - Dropdown `Thử mẫu…` trong toolbar: chọn là nạp + chạy luôn; tool nhiều tab ⇒ mỗi tab 1 dropdown.
-- Dropdown (và chữ gợi ý nhắc tới nó) gắn `class="demo-picker"` ⇒ chỉ hiện khi chạy local; trên GitHub Pages (`html.hosted`) bị ẩn, `?demo=` vẫn chạy (user chốt 2026-11-21).
+- Dropdown gắn `class="demo-picker"` ⇒ hiện cả local lẫn GitHub Pages, bị giới hạn `max-width:9.5em` cho gọn chiều ngang (user chốt lại 2026-11-21: bỏ ẩn trên Pages).
 - URL `?demo=<key>` nạp + chạy (link thử nhanh, test tự động); xoá `demo` khỏi URL sau khi nạp.
 - ≥ 1 mẫu hợp lệ + ≥ 1 mẫu lỗi/ca khó; mỗi chế độ chính 1 mẫu; dữ liệu giả, nhỏ, gom trong 1 hằng `DEMOS`/`SAMPLES`.
 - Tên mẫu dịch VI/EN, **nội dung mẫu viết bằng English** (cố định); nạp mẫu không âm thầm làm mất nháp; ghi key `?demo=` vào `docs/tools/<tool>.md`.

@@ -2,7 +2,7 @@
 
 > File: [`tools/diagram-editor.html`](../../tools/diagram-editor.html) — **file sinh ra** từ `src/diagram-editor/`, build
 > `pwsh scripts/build-single-file-tool.ps1 -Tool diagram-editor`. Renderer ở [`tools/vendor/`](../../tools/vendor/).
-> `tools/mermaid-diagram-editor.html` chỉ còn chuyển hướng, giữ nguyên `?…#…`. Quyết định: ADR #11.
+> Quyết định: ADR #11.
 > Luật chung mọi tool: `docs/architecture/`, `docs/security/`, `docs/decisions/`.
 
 ## 1. Người dùng & mục đích

@@ -94,5 +94,3 @@ body.recording .statusbar { box-shadow: inset 0 2px 0 #e5534b; }
 .cm-editor .cmp-gutter .cmp-g-del { background: color-mix(in srgb, #e5534b 45%, transparent); }
 .cm-editor .cmp-gutter .cmp-g-add { background: color-mix(in srgb, #2da44e 45%, transparent); }
 .cm-editor .cmp-arrow { cursor: pointer; font-weight: 700; color: var(--ink); }
-  /* Long sample names must not push the toolbar onto a third row (the open list shows them in full). */
-  #demo { max-width:min(20em, 62vw); }

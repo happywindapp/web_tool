@@ -17,4 +17,6 @@ I18n.add({
   "Tên": "Name", "Kiểu": "Type", "Nhóm": "Group", "Giá trị": "Value", "Không có trong từ điển FIX 4.4 / 5.0SP2": "Not in the FIX 4.4 / 5.0SP2 dictionary",
   "Không nạp được từ điển FIX ({file}).": "Could not load the FIX dictionary ({file}).",
   "Đã mở “{name}” trong FIX Parser (tab mới; dữ liệu nằm sau dấu #, không gửi đi đâu).": "Opened “{name}” in FIX Parser (new tab; the data stays after the #, nothing is sent).",
+  "FIX → Chi tiết message": "FIX → Message detail",
+  "Không nạp được Message detail FIX ({file}) — cần file này nằm cạnh one-editor.html.": "Could not load the FIX Message detail ({file}) — this file must sit next to one-editor.html.",
 });

@@ -24,8 +24,8 @@ Xem `docs/tools/<tool>.md` — danh sách ở [`docs/tools/`](../tools/README.md
 - **Dữ liệu mẫu để test nhanh (bắt buộc mọi tool):** người dùng phải thử được tool trong 1 cú bấm, không cần chuẩn bị input.
   1. Toolbar có `<select>` mẫu, option đầu rỗng `Thử mẫu…` (tên mẫu ngắn, mô tả tình huống: "JSON lỗi", "CSV có lỗi"…).
      Chọn xong là **nạp + chạy luôn** rồi trả dropdown về option rỗng. Tool nhiều tab ⇒ mỗi tab 1 dropdown mẫu riêng.
-     **Chỉ hiện khi test local** (file:// / localhost): dropdown + chữ gợi ý nhắc tới nó gắn `class="demo-picker"`; script GoatCounter ở `<head>`
-     thêm `hosted` vào `<html>` khi không local ⇒ rule `.hosted .demo-picker` trong `app-bar-tabs-toolbar-surfaces.css` ẩn trên GitHub Pages.
+     Hiện cả local lẫn GitHub Pages; dropdown gắn `class="demo-picker"` ⇒ rule `select.demo-picker` trong `app-bar-tabs-toolbar-surfaces.css`
+     giới hạn `max-width:9.5em` (select rộng theo option dài nhất — không để đẩy toolbar giãn ngang).
   2. URL `?demo=<key>` nạp mẫu `<key>` rồi chạy ngay (dùng để chia sẻ link thử + test tự động); xoá `demo` khỏi URL sau khi nạp
      để F5 không đè bài đang sửa.
   3. Bộ mẫu phủ được tính năng chính: ≥ 1 mẫu **hợp lệ/điển hình** + ≥ 1 mẫu **có lỗi/ca khó** nếu tool có kiểm tra, tự sửa

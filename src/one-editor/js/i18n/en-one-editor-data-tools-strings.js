@@ -1,4 +1,4 @@
-// English strings for the lazily loaded data tools (tree, JSONPath / XPath panes), keyed by the Vietnamese source text; part of tools/one-editor-data-tools.js.
+// English strings for the lazily loaded data tools (tree, JSONPath / XPath panes), keyed by the Vietnamese source text; part of tools/one-editor-extras.js.
 I18n.add({
   "JSONPath lỗi: {msg}": "JSONPath error: {msg}", "thiếu dấu đóng nháy": "missing closing quote", "thiếu dấu ]": "missing ]", "thiếu dấu )": "missing )", "thiếu giá trị": "missing value",
   "không hiểu “{s}”": "cannot read “{s}”", "biểu thức phải bắt đầu bằng $": "the expression must start with $", "regex chưa đóng": "unclosed regex",

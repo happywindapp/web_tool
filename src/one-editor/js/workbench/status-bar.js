@@ -22,7 +22,7 @@ const StatusBar = (() => {
     set("stIndent", unit === "\t" ? T("Thụt lề: Tab") : T("Thụt lề: {n} dấu cách", { n: unit.length }));
     const nl = CM.lint.diagnosticCount(st);
     set("stLint", nl ? "⚠ " + I18n.num(nl) : "");
-    set("stSrc", TabStrip.ICON[doc.kind] + " " + T(SHORT[doc.kind]) + (doc.kind === "output" && doc.edited ? " ✎" : "") + (doc.stale ? " · " + T("chưa đọc lại") : "") + (Tail.on(Docs.root(doc).id) ? " · 🔁 " + T("theo dõi") : ""));
+    set("stSrc", TabStrip.ICON[doc.kind] + " " + T(SHORT[doc.kind]) + (doc.kind === "output" && doc.edited ? " ✎" : "") + (doc.stale ? " · " + T("chưa đọc lại") : "") + (Docs.root(doc).diskChanged ? " · ⚠ " + T("đổi trên đĩa") : "") + (Tail.on(Docs.root(doc).id) ? " · 🔁 " + T("theo dõi") : ""));
     $("stSrc").title = T(TabStrip.sourceOf(doc));
   }
 

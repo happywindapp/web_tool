@@ -1,10 +1,10 @@
-// Entry of the data tools (phase 8b + the 8a line filter): the tree / query / filter panes live in tools/one-editor-data-tools.js, loaded on first use; the query text of each source tab stays here.
+// Entry of the data tools (phase 8b + the 8a line filter): the tree / query / filter panes live in tools/one-editor-extras.js, loaded on first use; the query text of each source tab stays here.
 const DataOps = (() => {
   const states = new Map();
   let ready = null;
 
   async function load() {
-    ready ??= VendorPaths.load("dataTools").then(() => { PreviewPane.addView("tree", PvTree); PreviewPane.addView("query", PvQuery); PreviewPane.addView("filter", PvFilter); })
+    ready ??= VendorPaths.load("extras").then(() => { PreviewPane.addView("tree", PvTree); PreviewPane.addView("query", PvQuery); PreviewPane.addView("filter", PvFilter); })
       .catch(e => { ready = null; throw new Error(T("Không nạp được công cụ dữ liệu ({file}) — cần file này nằm cạnh one-editor.html.", { file: e.message })); });
     return ready;
   }

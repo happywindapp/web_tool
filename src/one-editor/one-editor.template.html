@@ -58,6 +58,7 @@
   <button id="btnSave" title="Lưu (Ctrl+S): file → ghi đè lên đĩa; ghi chú → đã tự lưu trong trình duyệt">💾 Lưu</button>
   <button id="btnSaveAs" title="Lưu thành file mới (Ctrl+Shift+S); trình duyệt không hỗ trợ thì tải xuống">Lưu thành…</button>
   <button id="btnFind" title="Tìm / thay trong tab đang mở (Ctrl+F) — có tìm / thay trong vùng chọn">🔍 Tìm</button>
+  <button id="btnRefresh" title="Làm mới từ đĩa: đọc lại mọi tab file (kể cả tab chưa đọc lại sau F5) và các folder đang mở trong Explorer">🔄 Làm mới</button>
   <button id="btnFormat" title="Format tab đang mở theo ngôn ngữ — kết quả ra tab liên kết ở view kia (Shift+Alt+F: format tại chỗ)">✨ Format</button>
   <select id="demo" class="demo-picker" title="Nạp dữ liệu mẫu thành tab tạm (không đè bài đang sửa)" data-i18n-skip></select>
   <span class="sep"></span>
@@ -182,7 +183,10 @@
 // @include js/i18n/en-one-editor-data-strings.js
 // @include js/i18n/en-one-editor-log-fix-strings.js
 // @include js/i18n/en-one-editor-editor-extras-strings.js
+// @include js/i18n/en-one-editor-editor-extras-lazy-strings.js
 // @include js/i18n/en-one-editor-power-tools-strings.js
+// @include js/i18n/en-one-editor-disk-sync-strings.js
+// @include js/i18n/en-one-editor-pinned-strings.js
 // @include js/i18n/vi-codemirror-phrases.js
 // @include ../data-workbench/js/core/text-utils.js
 // @include ../data-workbench/js/core/dom-and-storage-helpers.js
@@ -284,6 +288,7 @@
 // @include js/data/rainbow-csv-columns.js
 // @include js/log/log-fix-line-highlight.js
 // @include js/log/fix-tag-hover.js
+// @include js/log/fix-detail-op-entry.js
 // @include js/log/file-tail-monitor.js
 // @include js/editor/editor-extras-lazy-entry.js
 // @include js/extras/power-tools-lazy-entry.js
@@ -300,7 +305,9 @@
 // @include js/workbench/open-file-flow.js
 // @include js/workbench/explorer-tree.js
 // @include js/workbench/explorer-disk-actions.js
+// @include js/workbench/disk-change-sync.js
 // @include js/workbench/recent-files.js
+// @include js/workbench/pinned-items.js
 // @include js/workbench/find-in-files-sources.js
 // @include js/workbench/find-in-files-replace.js
 // @include js/workbench/side-bar-find-in-files-panel.js
@@ -322,6 +329,15 @@
 // @include js/editor/command-list-editor-extras.js
 // @include js/extras/command-list-power-tools.js
 // @include js/core/share-link-and-demo-loader.js
+// @include ../data-workbench/js/core/saved-sessions-local-storage.js
+// @include js/editor/keymap-profiles.js
+// @include js/editor/snippets-completion.js
+// @include js/editor/editor-visual-aids.js
+// @include js/editor/outline-panel.js
+// @include js/workbench/named-sessions.js
+// @include js/core/encrypted-share-codec.js
+// @include js/workbench/locked-notes.js
+// @include js/devtools/local-history-snapshots.js
 // @include js/core/app-boot.js
 </script>
 </body>

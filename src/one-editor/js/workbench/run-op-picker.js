@@ -1,7 +1,7 @@
 // ▶ Run's operation per tab: the one picked by hand for it, else a default fitting its language; a result tab shows the op that made it.
 const RunOp = (() => {
   const picked = new Map();
-  const BY_LANG = { JSON: "json-pretty", JavaScript: "run-code", HTML: "run-code", Log: "filter" };
+  const BY_LANG = { JSON: "json-pretty", JavaScript: "run-code", HTML: "run-code", Log: "filter", FIX: "fix-detail" };
   const keyOf = doc => doc.kind === "output" && doc.link ? doc.link.src : Docs.root(doc).id;
 
   function suggest(doc) {

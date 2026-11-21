@@ -29,10 +29,7 @@ const RecentFiles = (() => {
 
   async function open(item) {
     try {
-      const opts = { mode: "read" };
-      let perm = item.handle.queryPermission ? await item.handle.queryPermission(opts) : "granted";
-      if (perm !== "granted" && item.handle.requestPermission) perm = await item.handle.requestPermission(opts);
-      if (perm !== "granted") { StatusBar.msg(T("Trình duyệt chưa cho đọc lại “{name}”.", { name: item.name }), "warn"); return; }
+      if (!(await LocalFs.readable(item.handle))) { StatusBar.msg(T("Trình duyệt chưa cho đọc lại “{name}”.", { name: item.name }), "warn"); return; }
       await FileOpen.openMany([{ file: await item.handle.getFile(), handle: item.handle }], Views.focused);
     } catch (e) {
       if (e.name === "NotFoundError") { remove(item); StatusBar.msg(T("“{name}” không còn trên đĩa — đã bỏ khỏi danh sách Gần đây.", { name: item.name }), "warn"); }

@@ -64,8 +64,8 @@
   .wb-nav button { padding:6px 14px; border:0; border-radius:6px 6px 0 0; background:transparent; }
   .wb-nav button:hover { background:var(--btn); }
   .wb-nav button.on { background:var(--tb); color:var(--tb-ink); font-weight:600; }
-  /* "Thử mẫu…" is a local testing aid: hidden on the published site, ?demo=<key> still works */
-  .hosted .demo-picker { display:none !important; }
+  /* A select is as wide as its longest option; cap it so long sample names don't widen the toolbar (the open list shows them in full) */
+  select.demo-picker { max-width:9.5em; text-overflow:ellipsis; }
   .toolbar { background:var(--tb); --line:color-mix(in srgb, var(--acc) 40%, var(--panel)); --muted:color-mix(in srgb, var(--ink) 65%, var(--panel)); }
   :root[data-theme="light"] { --bg:#f8fafc; --panel:#fff; --line:#cbd5e1; --ink:#0f172a; --muted:#64748b; --good:#15803d; --bad:#b91c1c; --warn:#b45309; --code:#f8fafc; --btn:#fff; --gut:#f1f5f9; --hover:#f1f5f9;
           --k:#7c3aed; --s:#047857; --n:#b45309; --l:#be185d; --tn:#1d4ed8; --an:#7c3aed; --av:#047857; --c:#94a3b8; --add:#dcfce7; --del:#fee2e2; --add2:#86efac; --del2:#fca5a5; }
@@ -825,7 +825,7 @@ const I18n = (() => {
     apply();
   }
 
-  return { t, num, set, init, add: d => Object.assign(EN, d), onChange: f => listeners.push(f), get lang() { return lang; } };
+  return { t, num, set, init, add: d => Object.assign(EN, d), has: vi => Object.hasOwn(EN, vi), onChange: f => listeners.push(f), get lang() { return lang; } };
 })();
 const T = I18n.t;
 // English UI strings, keyed by the Vietnamese source text.

@@ -1,7 +1,7 @@
-// Phase 8d editor extras live in tools/one-editor-editor-extras.js (loaded after the editor is ready / on first use); Vim and Emmet are vendored bundles loaded when turned on.
+// Phase 8d editor extras are inlined in one-editor.html and run after the editor is ready; Vim and Emmet are vendored bundles loaded when turned on.
 const EditorExtras = (() => {
-  let ready = null, emmetLoading = null;
-  const load = () => ready ??= VendorPaths.load("editorExtras").catch(e => { ready = null; throw new Error(T("Không nạp được phần mở rộng editor ({file}) — cần file này nằm cạnh one-editor.html.", { file: e.message })); });
+  let emmetLoading = null;
+  const load = () => Promise.resolve();
   // Runs fn once the extras are there; a failed load is reported on the status bar.
   const use = fn => load().then(fn).catch(e => StatusBar.msg(e.message, "bad"));
 

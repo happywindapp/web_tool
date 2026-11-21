@@ -4,7 +4,7 @@ const Timeline = (() => {
   const ADMIN = new Set(["0", "1", "2", "4", "5", "A"]), BROADCAST = new Set(["h", "f"]), REJECT = new Set(["3", "j", "9"]);
   const ICON = { error: "✖", warn: "⚠", info: "ℹ", ok: "✔" };
   const COLS = [
-    { id: "n", label: "#" }, { id: "time", label: "Giờ" }, { id: "dir", label: "Gửi → Nhận" }, { id: "type", label: "Loại" },
+    { id: "n", label: "#" }, { id: "time", label: "Giờ gửi" }, { id: "dir", label: "Gửi → Nhận" }, { id: "type", label: "Loại message" },
     { id: "55", label: "Symbol" }, { id: "54", label: "Side" }, { id: "11", label: "ClOrdID" }, { id: "41", label: "OrigClOrdID" },
     { id: "37", label: "OrderID" }, { id: "st", label: "Trạng thái" }, { id: "qty", label: "SL" }, { id: "px", label: "Giá" },
     { id: "58", label: "Text" }, { id: "lv", label: "Kiểm tra" },

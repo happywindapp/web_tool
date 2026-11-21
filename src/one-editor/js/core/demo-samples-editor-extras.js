@@ -28,6 +28,6 @@ Limits are checked before an order is stored.
     "emmet-html": { label: "Emmet + ô màu CSS (Ctrl+E)", payload: () => ({ v: 1, views: [[t("orders.html", HTML)], []] }),
       after: () => { const v = Views.activeView(); v.dispatch({ selection: { anchor: v.state.doc.length - 1 } }); v.focus(); } },
     "outline-md": { label: "Outline + breadcrumbs (Markdown)", payload: () => ({ v: 1, views: [[t("handbook.md", GUIDE)], []] }),
-      after: () => { SideBar.show("outline"); const v = Views.activeView(); v.dispatch({ selection: { anchor: v.state.doc.toString().indexOf("T+2") } }); } },
+      after: () => { SideBar.show("outline"); EditorExtras.use(() => { if (!Aids.settings().crumbs) Aids.toggle("crumbs"); }); const v = Views.activeView(); v.dispatch({ selection: { anchor: v.state.doc.toString().indexOf("T+2") } }); } },
   });
 })();

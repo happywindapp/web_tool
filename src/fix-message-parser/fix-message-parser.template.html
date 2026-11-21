@@ -52,6 +52,8 @@
     <input type="text" id="cols" class="short" data-opt placeholder="6464,448"></label>
   <label class="chk" title="Giao diện sáng / tối">Giao diện
     <select id="theme"><option value="auto">Tự động</option><option value="light">Sáng</option><option value="dark">Tối</option></select></label>
+  <label class="chk c3-opt" title="Xếp 3 panel thành 3 cột cạnh nhau: Dữ liệu FIX · Bảng message · Chi tiết message (màn hình rộng hơn 900px)"><input type="checkbox" id="cols3">▥ 3 cột</label>
+  <label class="chk" title="Cho dòng dài xuống dòng vừa khung: ô Dữ liệu FIX và các ô trong Bảng message"><input type="checkbox" id="wrap">↵ Xuống dòng</label>
   <span class="sep"></span>
   <button id="dictBtn" title="Đặt tên cho tag riêng của công ty, ý nghĩa giá trị, tag nhạy cảm, tag nối lệnh cha–con (CSV, lưu trong trình duyệt)">📖 Từ điển riêng…</button>
   <button id="mask" title="Chọn nhóm dữ liệu cần che (tài khoản, mật khẩu, thành viên, CompID, số hiệu lệnh, Text) — dùng trước khi chia sẻ">🕶 Che dữ liệu…</button>
@@ -120,6 +122,7 @@
 // @include js/parser/fix-wire-codec.js
 // @include js/parser/fix-log-extractor.js
 // @include js/parser/fix-message-validator.js
+// @include js/model/venue-dialect-detection.js
 // @include js/model/order-chain-linker.js
 // @include js/model/fix-timestamp-time-zone-format.js
 // @include js/model/sensitive-data-mask.js

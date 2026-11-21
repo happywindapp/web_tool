@@ -38,6 +38,9 @@ lọc theo cột + khoảng giờ, từ điển riêng (CSV), chuỗi lệnh + c
 | Ngôn ngữ UI | `VI \| EN` (ADR #8). Tên/ý nghĩa tag lấy từ spec (English) — là dữ liệu, không dịch; nội dung mẫu English |
 | Mạng | Không request nào; CSP `default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:` |
 | Phím tắt | `Ctrl+↑/↓` (hoặc `↑/↓` khi focus bảng/chi tiết) chọn message |
+| Đồng bộ 3 panel | Bấm / chạm / di con trỏ (↑↓) trong ô Dữ liệu FIX ⇒ bảng + chi tiết chuyển sang message ở dòng đó; chọn hàng ở bảng (hoặc `Ctrl+↑/↓`) ⇒ ô dữ liệu tô nền message đó, đặt con trỏ + cuộn tới dòng (không focus — carousel điện thoại đứng yên) |
+| ▥ 3 cột | Ô tick trên toolbar: xếp Dữ liệu FIX · Bảng message · Chi tiết thành 3 cột cạnh nhau (thay vì dữ liệu chồng trên bảng); thu gọn ô nhập ⇒ cột dữ liệu co lại; nhớ trong trình duyệt; chỉ áp dụng màn > 900px (hẹp hơn xếp dọc / carousel như cũ) |
+| ↵ Xuống dòng | Ô tick trên toolbar: dòng dài xuống dòng vừa khung ở ô Dữ liệu FIX (lớp tô màu ngắt cùng chỗ với textarea nhờ `scrollbar-gutter:stable`) và các ô Bảng message (bỏ cắt `…`); chọn message vẫn cuộn đúng dòng; **mặc định bật**, bỏ tick thì nhớ trong trình duyệt; mọi kích thước màn |
 
 ## 4. Luật xử lý
 
@@ -65,7 +68,7 @@ lọc theo cột + khoảng giờ, từ điển riêng (CSV), chuỗi lệnh + c
 - Cột **Ý nghĩa** (ưu tiên): mã lỗi Server Sàn (373) → **nghĩa giá trị theo spec Server Sàn** (danh sách `1 = …`, `R: …`, `‘0’ = …` trong ghi chú) kèm `FIX: <enum chuẩn>` mờ
   nếu khác → enum FIX → giờ quy đổi / số có phân cách → nếu không có giá trị để giải thích thì hiện **mô tả ngắn** của tag (in nghiêng: dòng đầu ghi chú spec sàn, hoặc câu đầu mô tả FIX).
 - **Tooltip** (rê chuột vào dòng tag): tên + kiểu + bắt buộc/tuỳ chọn trong message (theo spec Server Sàn nếu có, không thì theo từ điển) · giá trị → nghĩa ·
-  "Mô tả FIX 4.4" (synopsis + nghĩa chuẩn của giá trị) · `Spec <tên sàn> v1.15 — <message>` (ghi chú nguyên văn). Ô "Loại" ở bảng message có tooltip mục đích message;
+  "Mô tả FIX 4.4" (synopsis + nghĩa chuẩn của giá trị) · `Spec <tên sàn> v1.15 — <message>` (ghi chú nguyên văn). Ô "Loại message" ở bảng message có tooltip mục đích message;
   đầu pane chi tiết hiện mục đích message (Server Sàn + FIX).
 - Validator coi giá trị/mã lỗi có trong spec Server Sàn là "đã biết" (không báo info "không có trong từ điển").
 

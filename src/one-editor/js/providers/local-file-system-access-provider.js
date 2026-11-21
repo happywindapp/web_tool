@@ -47,6 +47,14 @@ const LocalFs = (() => {
     throw new Error(T("Trình duyệt không cho ghi vào folder."));
   }
 
+  // A handle kept in IndexedDB loses its permission on reload; asking needs a click.
+  async function readable(h) {
+    const opts = { mode: "read" };
+    let perm = h.queryPermission ? await h.queryPermission(opts) : "granted";
+    if (perm !== "granted" && h.requestPermission) perm = await h.requestPermission(opts);
+    return perm === "granted";
+  }
+
   async function exists(dir, name) {
     for await (const k of dir.keys()) if (k === name) return true;
     return false;
@@ -129,5 +137,5 @@ const LocalFs = (() => {
     catch (e) { if (aborted(e)) return null; throw e; }
   }
 
-  return { pickFiles, pickDirectory, fromHandle, fromEntry, readText, encode, writeHandle, saveAs, create, remove, rename, canPick, canDir, canSave, MAX_ENTRIES };
+  return { pickFiles, pickDirectory, fromHandle, fromEntry, readText, encode, writeHandle, saveAs, readable, create, remove, rename, canPick, canDir, canSave, MAX_ENTRIES };
 })();

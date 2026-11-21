@@ -2,7 +2,7 @@
 const Views = (() => {
   const groups = [...document.querySelectorAll(".group")].map((el, i) => ({ i, el, host: el.querySelector(".host"), tabs: [], active: null, view: null }));
   let focused = 0, layout = "2c", count = 2;
-  const listeners = [], closed = [];
+  const listeners = [], closed = [], cursorFns = [];
   const changed = () => { listeners.forEach(f => f()); StatusBar.refresh(); };
   const userEdit = u => u.transactions.some(tr => tr.annotation(CM.state.Transaction.userEvent) !== undefined);
 
@@ -29,6 +29,7 @@ const Views = (() => {
       Macro.typed(u);
     }
     if (u.docChanged || u.selectionSet || u.transactions.some(t => t.effects.length)) StatusBar.refresh();
+    if (u.selectionSet && !u.docChanged) cursorFns.forEach(f => f(doc, u.state));
   }
 
   function setFocused(i, force) {
@@ -73,7 +74,7 @@ const Views = (() => {
   function open(doc, gi = focused, focus = true) {
     if (!doc || !Docs.get(doc.id)) return;
     const at = where(doc.id);
-    if (at >= 0) gi = at; else { gi = Math.min(gi, count - 1); groups[gi].tabs.push(doc.id); }
+    if (at >= 0) gi = at; else { gi = Math.min(gi, count - 1); groups[gi].tabs.push(doc.id); pinFirst(groups[gi]); }
     activate(gi, doc.id, focus);
   }
 
@@ -109,16 +110,18 @@ const Views = (() => {
     return gi;
   }
 
-  // false when the user keeps an unsaved file open. Closing an original also closes its clones.
+  // false when the user keeps an unsaved file or a pinned tab open. Closing an original also closes its clones.
   function close(id, force = false) {
     const doc = Docs.get(id);
     if (!doc || where(id) < 0) return false;
-    if (!force && doc.kind === "file" && doc.dirty && !confirm(T("“{name}” chưa lưu. Đóng và bỏ thay đổi?", { name: doc.name }))) return false;
+    const unsaved = doc.kind === "file" && doc.dirty;
+    if (!force && unsaved && !confirm(T("“{name}” chưa lưu. Đóng và bỏ thay đổi?", { name: doc.name }))) return false;
+    if (!force && !unsaved && doc.pinned && !confirm(T("Tab “{name}” đang ghim. Vẫn đóng?", { name: doc.name }))) return false;
     if (doc.kind !== "clone") {
       for (const c of Docs.family(doc).slice(1)) { detach(c.id); Docs.remove(c.id); }
       // Notes stay in Docs (reopened by id); texts over 5 MB are not kept for reopening.
       const text = doc.kind === "note" ? "" : Docs.text(doc);
-      if (text.length <= 5e6 && !PreviewPane.isPreview(doc)) closed.push({ id, gi: where(id), kind: doc.kind, name: doc.name, lang: doc.lang, text, handle: doc.handle, stale: doc.stale, eol: doc.eol, bom: doc.bom, dirty: doc.dirty, readOnly: doc.readOnly });
+      if (text.length <= 5e6 && !PreviewPane.isPreview(doc)) closed.push({ id, gi: where(id), kind: doc.kind, name: doc.name, lang: doc.lang, text, handle: doc.handle, stale: doc.stale, eol: doc.eol, bom: doc.bom, dirty: doc.dirty, readOnly: doc.readOnly, disk: doc.disk });
       if (closed.length > 20) closed.shift();
     }
     detach(id);
@@ -134,12 +137,13 @@ const Views = (() => {
     open(Docs.get(s.id) || Docs.create({ ...s, id: undefined, kind }), Math.min(s.gi, count - 1));
   }
 
-  // Pinned tabs stay first and are skipped by "close others / to the right".
+  // Pinned tabs stay first, are skipped by "close others / to the right" and ask before closing alone.
   function togglePin(doc) {
     Docs.update(doc, { pinned: !doc.pinned });
     const g = groups[where(doc.id)];
-    if (g) { g.tabs.sort((a, b) => Docs.get(b).pinned - Docs.get(a).pinned); refresh(g); }
+    if (g) { pinFirst(g); refresh(g); }
   }
+  function pinFirst(g) { g.tabs.sort((a, b) => Docs.get(b).pinned - Docs.get(a).pinned); }
 
   function closeMany(gi, keepId, rightOnly) {
     const tabs = groups[gi].tabs, from = rightOnly ? tabs.indexOf(keepId) + 1 : 0;
@@ -151,6 +155,7 @@ const Views = (() => {
     if (from < 0 || from === to || to < 0 || to >= count || !Docs.get(id)) return;
     detach(id);
     groups[to].tabs.push(id);
+    pinFirst(groups[to]);
     activate(to, id, true);
   }
 
@@ -172,11 +177,11 @@ const Views = (() => {
     else if (doc.state) doc.state = doc.state.update({ effects }).state;
   }
 
-  function replaceText(doc, text) {
+  function replaceText(doc, text, annotations) {
     const g = groups.find(x => x.active === doc.id);
-    if (g) { g.view.dispatch({ changes: { from: 0, to: g.view.state.doc.length, insert: text } }); return; }
+    if (g) { g.view.dispatch({ changes: { from: 0, to: g.view.state.doc.length, insert: text }, annotations }); return; }
     if (doc.state) {
-      const tr = doc.state.update({ changes: { from: 0, to: doc.state.doc.length, insert: text } });
+      const tr = doc.state.update({ changes: { from: 0, to: doc.state.doc.length, insert: text }, annotations });
       doc.state = tr.state;
       CloneSync.forward(doc, tr.changes, false);
     } else doc.text = text;
@@ -201,5 +206,6 @@ const Views = (() => {
     revealLine, applySettings, snapshot, refresh, renderAll: () => groups.forEach(refresh), focus: i => setFocused(Math.min(Math.max(i | 0, 0), count - 1)),
     activeView: (i = focused) => groups[i].view, tabsOf: i => [...groups[i].tabs], groups,
     get focused() { return focused; }, get count() { return count; }, get layout() { return layout; }, onChange: f => listeners.push(f),
+    onCursor: f => cursorFns.push(f),
   };
 })();

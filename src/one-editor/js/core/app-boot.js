@@ -47,7 +47,7 @@ function wireOneEditor() {
   on("opSel", "change", e => RunOp.pick(Views.activeDoc(), e.target.value));
   on("btnSwap", "click", () => Views.swap());
   on("btnExplorer", "click", Actions.toggleExplorer);
-  on("btnShare", "click", ShareLoader.share);
+  on("btnShare", "click", () => ShareLoader.share());
   on("btnClear", "click", Actions.clearData);
   on("chkWrap", "change", e => Actions.setWrap(e.target.checked));
   on("langSel", "change", e => Actions.setLang(e.target.value));
@@ -59,6 +59,7 @@ function wireOneEditor() {
   on("btnZenExit", "click", Actions.toggleZen);
   on("chkMinimap", "change", e => Actions.setMinimap(e.target.checked));
   on("btnFind", "click", () => Commands.run("find"));
+  on("btnRefresh", "click", () => DiskSync.checkAll());
   on("btnFormat", "click", () => Commands.run("formatOut"));
   on("btnCompare", "click", Compare.toggle);
   PreviewPane.init();
@@ -84,6 +85,7 @@ function wireOneEditor() {
   Split.init();
   SideBar.init();
   ExportActions.init();
+  DiskSync.init();
 
   Docs.on((type, doc) => {
     if (type === "edit" || type === "dirty") OutputLink.sourceEdited(doc);
@@ -122,6 +124,7 @@ function wireOneEditor() {
   if (Prefs.get("minimap", false) === true) Actions.setMinimap(true);
   if (Prefs.get("guides", true) !== false) Actions.setGuides(true);
   await RecentFiles.load();
+  await Pinned.init();
   // Extras (breadcrumbs, bracket colours, snippets, key profile, sessions) load after the editor is usable.
   EditorExtras.use(async () => { KeyProfiles.init(); Aids.apply(); await Snippets.load(); await Sessions.init(); });
   StatusBar.storage(NotesDb.ok, NotesDb.error);

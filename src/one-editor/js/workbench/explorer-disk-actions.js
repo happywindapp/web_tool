@@ -1,4 +1,4 @@
-// Explorer actions on disk for handle-based folders (Chrome/Edge): new file / folder, rename, delete — each asks first, then refreshes the parent folder.
+// Explorer actions on disk for handle-based folders (Chrome/Edge): pin, new file / folder, rename, delete — disk changes ask first, then refresh the parent folder.
 const ExplorerDisk = (() => {
   const askName = (msg, value = "") => { const n = ShareState.cleanName(prompt(msg, value) ?? ""); return n && n !== "." && n !== ".." ? n : ""; };
   const reload = dir => { dir.children = null; dir.open = true; Explorer.render(); };
@@ -24,9 +24,11 @@ const ExplorerDisk = (() => {
     const name = askName(T("Tên mới trên đĩa:"), node.name);
     if (!name || name === node.name) return;
     try {
-      const docs = node.dir ? [] : await openDocsOf(node.handle);
+      const docs = node.dir ? [] : await openDocsOf(node.handle), pin = await Pinned.find(node.handle);
       await LocalFs.rename(node, name);
-      docs.forEach(d => Docs.rename(d, name));
+      if (pin) Pinned.renamed(pin, node.handle);
+      // move() renamed node.handle only: the tab's own handle still points at the old name.
+      docs.forEach(d => { d.handle = node.handle; Docs.rename(d, name); DiskSync.mark(d); });
       reload(node.parent);
       StatusBar.msg(T("Đã đổi tên thành “{name}”.", { name }), "good");
     } catch (e) { fail(e); }
@@ -54,10 +56,9 @@ const ExplorerDisk = (() => {
       x.onclick = e => { e.preventDefault(); e.stopPropagation(); fn(); };
       return x;
     };
-    const out = [];
+    const out = [b("📌", T("Ghim / bỏ ghim vào mục Đã ghim"), () => Pinned.toggleHandle(node.handle))];
     if (node.dir) out.push(b("+📄", T("File mới trong folder này"), () => newEntry(node, false)), b("+📁", T("Folder mới trong folder này"), () => newEntry(node, true)));
     if (node.parent) out.push(b("✎", T("Đổi tên trên đĩa"), () => rename(node)), b("🗑", T("Xoá khỏi đĩa"), () => remove(node)));
-    if (!out.length) return [];
     const span = document.createElement("span");
     span.className = "ex-acts";
     span.append(...out);

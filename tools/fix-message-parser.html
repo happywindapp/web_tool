@@ -64,8 +64,8 @@
   .wb-nav button { padding:6px 14px; border:0; border-radius:6px 6px 0 0; background:transparent; }
   .wb-nav button:hover { background:var(--btn); }
   .wb-nav button.on { background:var(--tb); color:var(--tb-ink); font-weight:600; }
-  /* "Thử mẫu…" is a local testing aid: hidden on the published site, ?demo=<key> still works */
-  .hosted .demo-picker { display:none !important; }
+  /* A select is as wide as its longest option; cap it so long sample names don't widen the toolbar (the open list shows them in full) */
+  select.demo-picker { max-width:9.5em; text-overflow:ellipsis; }
   .toolbar { background:var(--tb); --line:color-mix(in srgb, var(--acc) 40%, var(--panel)); --muted:color-mix(in srgb, var(--ink) 65%, var(--panel)); }
   :root[data-theme="light"] { --bg:#f8fafc; --panel:#fff; --line:#cbd5e1; --ink:#0f172a; --muted:#64748b; --good:#15803d; --bad:#b91c1c; --warn:#b45309; --code:#f8fafc; --btn:#fff; --gut:#f1f5f9; --hover:#f1f5f9;
           --k:#7c3aed; --s:#047857; --n:#b45309; --l:#be185d; --tn:#1d4ed8; --an:#7c3aed; --av:#047857; --c:#94a3b8; --add:#dcfce7; --del:#fee2e2; --add2:#86efac; --del2:#fca5a5; }
@@ -82,15 +82,26 @@
   .toolbar { padding:6px 16px; }
   .toolbar .hint { margin-left:auto; font-size:12px; }
   .work { grid-template-columns:minmax(0, 3fr) minmax(320px, 2fr); }
-  .left { display:grid; grid-template-rows:minmax(110px, 30%) minmax(0, 1fr); gap:10px; min-height:0; }
+  .left { display:grid; grid-template-rows:minmax(110px, 1fr) minmax(0, 1fr); gap:10px; min-height:0; }
   .left.collapsed { grid-template-rows:auto minmax(0, 1fr); }
   .left.collapsed .ed { display:none; }
+  /* ▥ 3 cột (wide screens only): the left stack dissolves so input · table · detail sit side by side. */
+  @media (min-width: 901px) {
+    .work.c3 { grid-template-columns:minmax(0, 1fr) minmax(0, 1.3fr) minmax(320px, 1fr); }
+    .work.c3:has(.left.collapsed) { grid-template-columns:auto minmax(0, 1.6fr) minmax(320px, 1fr); }
+    .work.c3 .left { display:contents; }
+  }
+  @media (max-width: 900px) { label.c3-opt { display:none; } }
   .ed { position:relative; min-height:0; overflow:hidden; }
   .ed > .code { position:absolute; inset:0; }
   .ed.hl-on #src { color:transparent; background:transparent; caret-color:var(--ink); }
   .ed:not(.hl-on) pre.hl { display:none; }
   pre.hl { margin:0; pointer-events:none; overflow:hidden; }
+  /* ↵ wrap: textarea and its colour layer must break at the same character, so both reserve the scrollbar gutter. */
+  body.wrap .ed > .code { white-space:pre-wrap; overflow-wrap:anywhere; scrollbar-gutter:stable; }
+  body.wrap table.grid td { white-space:pre-wrap; overflow-wrap:anywhere; vertical-align:top; }
   pre.hl.probe { pointer-events:auto; z-index:2; cursor:help; }
+  pre.hl .hl-sel { background:color-mix(in srgb, var(--acc) 22%, transparent); border-radius:2px; }
   pre.hl .hl-x { color:var(--muted); } pre.hl .hl-d { color:var(--c); } pre.hl .hl-f:hover { background:var(--hover); }
   table.grid th[data-col] { cursor:pointer; } table.grid th[data-col]:hover { color:var(--acc); }
   dialog .row { display:flex; flex-wrap:wrap; gap:6px; align-items:center; }
@@ -279,6 +290,8 @@
     <input type="text" id="cols" class="short" data-opt placeholder="6464,448"></label>
   <label class="chk" title="Giao diện sáng / tối">Giao diện
     <select id="theme"><option value="auto">Tự động</option><option value="light">Sáng</option><option value="dark">Tối</option></select></label>
+  <label class="chk c3-opt" title="Xếp 3 panel thành 3 cột cạnh nhau: Dữ liệu FIX · Bảng message · Chi tiết message (màn hình rộng hơn 900px)"><input type="checkbox" id="cols3">▥ 3 cột</label>
+  <label class="chk" title="Cho dòng dài xuống dòng vừa khung: ô Dữ liệu FIX và các ô trong Bảng message"><input type="checkbox" id="wrap">↵ Xuống dòng</label>
   <span class="sep"></span>
   <button id="dictBtn" title="Đặt tên cho tag riêng của công ty, ý nghĩa giá trị, tag nhạy cảm, tag nối lệnh cha–con (CSV, lưu trong trình duyệt)">📖 Từ điển riêng…</button>
   <button id="mask" title="Chọn nhóm dữ liệu cần che (tài khoản, mật khẩu, thành viên, CompID, số hiệu lệnh, Text) — dùng trước khi chia sẻ">🕶 Che dữ liệu…</button>
@@ -381,7 +394,7 @@ const I18n = (() => {
     apply();
   }
 
-  return { t, num, set, init, add: d => Object.assign(EN, d), onChange: f => listeners.push(f), get lang() { return lang; } };
+  return { t, num, set, init, add: d => Object.assign(EN, d), has: vi => Object.hasOwn(EN, vi), onChange: f => listeners.push(f), get lang() { return lang; } };
 })();
 const T = I18n.t;
 // English UI strings, keyed by the Vietnamese source text.
@@ -392,6 +405,10 @@ I18n.add({
   "Nạp dữ liệu mẫu rồi phân tích ngay": "Load sample data and parse it right away",
   "Thử mẫu…": "Try a sample…",
   "Mở file…": "Open file…",
+  "▥ 3 cột": "▥ 3 columns",
+  "↵ Xuống dòng": "↵ Wrap",
+  "Cho dòng dài xuống dòng vừa khung: ô Dữ liệu FIX và các ô trong Bảng message": "Wrap long lines to fit: the FIX data box and the Message table cells",
+  "Xếp 3 panel thành 3 cột cạnh nhau: Dữ liệu FIX · Bảng message · Chi tiết message (màn hình rộng hơn 900px)": "Lay the 3 panels out as 3 side-by-side columns: FIX data · Message table · Message detail (screens wider than 900px)",
   "Mở file log / message FIX (hoặc kéo-thả file vào trang)": "Open a FIX log / message file (or drag & drop it onto the page)",
   "🔗 Chia sẻ link": "🔗 Share link",
   "Chép link chứa dữ liệu + tuỳ chọn (dữ liệu nằm sau dấu #, không gửi lên máy chủ)": "Copy a link carrying the data + options (the data sits after #, it is never sent to a server)",
@@ -403,7 +420,7 @@ I18n.add({
   "Tự nhận": "Auto-detect",
   "FIX 4.4 chuẩn": "Standard FIX 4.4",
   "Server Sàn (FIX 4.4 + tag riêng)": "Exchange server (FIX 4.4 + custom tags)",
-  "Giờ": "Time",
+  "Giờ": "Time", "Giờ gửi": "Time",
   "Múi giờ hiển thị SendingTime và các tag thời gian (FIX gửi theo UTC)": "Time zone for SendingTime and other time tags (FIX sends UTC)",
   "UTC (chuẩn FIX)": "UTC (FIX standard)",
   "Việt Nam (UTC+7)": "Vietnam (UTC+7)",
@@ -433,7 +450,7 @@ I18n.add({
   "Ẩn header/trailer": "Hide header/trailer",
 
   "Gửi → Nhận": "Sender → Target",
-  "Loại": "Type",
+  "Loại message": "Type",
   "Trạng thái": "Status",
   "SL": "Qty",
   "Giá": "Price",
@@ -5486,6 +5503,14 @@ const FixCheck = (() => {
 
   return { analyse, RANK };
 })();
+// Exchange-server (venue) dialect: spotted by venue-only tags; the venue id is 49 of a venue → firm message, else 56 of a firm → venue message.
+const FixVenue = (() => {
+  const FROM_VENUE = new Set(["8", "9", "h", "f", "j", "AI"]), TO_VENUE = new Set(["D", "F", "G", "s", "t", "u", "S", "Z", "AJ", "R"]);
+  const isVenue = it => /(^|[^\d])(369|4488|6363|6464)=/.test(it.raw);
+  const idOf = msgs => (msgs.find(m => FROM_VENUE.has(m.type) && m.get("49")) || { get: () => "" }).get("49")
+    || (msgs.find(m => TO_VENUE.has(m.type) && m.get("56")) || { get: () => "" }).get("56");
+  return { isVenue, idOf };
+})();
 // Order chains: union-find over shared ID values (ClOrdID/OrigClOrdID/OrderID/CrossID/QuoteID…); session/business Rejects join the message their RefSeqNum(45) points at.
 // Families: a link tag (583 ClOrdLinkID, custom-dictionary "link" tags) in a chain names its parent order → parent chain + child chains, without merging them.
 const FixChain = (() => {
@@ -5978,7 +6003,7 @@ const Timeline = (() => {
   const ADMIN = new Set(["0", "1", "2", "4", "5", "A"]), BROADCAST = new Set(["h", "f"]), REJECT = new Set(["3", "j", "9"]);
   const ICON = { error: "✖", warn: "⚠", info: "ℹ", ok: "✔" };
   const COLS = [
-    { id: "n", label: "#" }, { id: "time", label: "Giờ" }, { id: "dir", label: "Gửi → Nhận" }, { id: "type", label: "Loại" },
+    { id: "n", label: "#" }, { id: "time", label: "Giờ gửi" }, { id: "dir", label: "Gửi → Nhận" }, { id: "type", label: "Loại message" },
     { id: "55", label: "Symbol" }, { id: "54", label: "Side" }, { id: "11", label: "ClOrdID" }, { id: "41", label: "OrigClOrdID" },
     { id: "37", label: "OrderID" }, { id: "st", label: "Trạng thái" }, { id: "qty", label: "SL" }, { id: "px", label: "Giá" },
     { id: "58", label: "Text" }, { id: "lv", label: "Kiểm tra" },
@@ -6205,7 +6230,7 @@ const Detail = (() => {
         `<button data-act="pipe">${esc(T("Chép (|)"))}</button><button data-act="soh">${esc(T("Chép (SOH)"))}</button><button data-act="json">${esc(T("Chép JSON"))}</button>` +
         (resign ? `<button data-act="fix" title="${esc(T("Tính lại BodyLength (9) và CheckSum (10) rồi chép"))}">${esc(T("Chép bản sửa 9/10"))}</button>` : "") +
       `</div>` +
-      `<textarea class="anno" rows="2" placeholder="${esc(T("📝 Ghi chú cho message này — đi kèm link chia sẻ, phân tích đã lưu và file xuất"))}">${esc(ctx.note || "")}</textarea>` +
+      (ctx.anno === false ? "" : `<textarea class="anno" rows="2" placeholder="${esc(T("📝 Ghi chú cho message này — đi kèm link chia sẻ, phân tích đã lưu và file xuất"))}">${esc(ctx.note || "")}</textarea>`) +
       (issues ? `<ul class="issues">${issues}</ul>` : `<div class="good">✔ ${esc(T("Không có lỗi theo từ điển {dict}.", { dict: ctx.dictLabel }))}</div>`) +
       `<div class="hint muted">${esc(T("Rê chuột vào từng dòng để xem giải thích chi tiết (FIX 4.4 + spec {venue}).", { venue: FixKnow.venue() }))}</div>` +
       `<table class="fields"><thead><tr><th>Tag</th><th>${esc(T("Tên"))}</th><th>${esc(T("Giá trị"))}</th><th>${esc(T("Ý nghĩa"))}</th></tr></thead><tbody>${rows(m, ctx)}</tbody></table>` +
@@ -6331,7 +6356,8 @@ const ColView = (() => {
   let filters = [], layout = null, deps = null;
 
   const label = id => { const c = deps.columns().find(x => x.id === id); return c ? (c.extra ? c.label : T(c.label)) : id; };
-  const chips = () => ColFilter.chips($("colChips"), filters, label, k => { filters.splice(k, 1); changed(); });
+  const store = () => deps.store || Store;
+  const chips = () => ColFilter.chips(deps.chipBox || $("colChips"), filters, label, k => { filters.splice(k, 1); changed(); });
   const changed = () => { chips(); deps.onChange(); };
   function add(f) { filters = filters.filter(x => !(x.col === f.col && (x.op === f.op || f.op === "range"))); filters.push(f); changed(); }
 
@@ -6350,7 +6376,7 @@ const ColView = (() => {
       const ids = deps.columns().map(c => c.id).filter(id => id !== from);
       ids.splice(ids.indexOf(th.dataset.col), 0, from);
       layout = ids; from = null;
-      Store.set("layout", layout);
+      store().set("layout", layout);
       deps.onChange();
     });
     table.addEventListener("click", e => {
@@ -6370,10 +6396,10 @@ const ColView = (() => {
     });
   }
 
-  // deps: { columns(), onChange(), select(i), extras() → [{ label, run }] for the right-click menu }
-  function init(d) { deps = d; layout = Store.get("layout", null); chips(); }
+  // deps: { columns(), onChange(), select(i), extras() → [{ label, run }] for the right-click menu, store? / chipBox? (default Store / #colChips) }
+  function init(d) { deps = d; layout = store().get("layout", null); chips(); }
 
-  const resetLayout = () => { layout = null; Store.set("layout", null); deps.onChange(); };
+  const resetLayout = () => { layout = null; store().set("layout", null); deps.onChange(); };
   // Share links / saved analyses carry filters + layout; payload values are untrusted.
   const get = () => ({ filters, layout });
   function set(p = {}) {
@@ -6499,7 +6525,7 @@ const Settings = (() => {
 // Paste box colouring: a <pre> under a transparent-text <textarea> shows tag=value pairs coloured; holding Alt lets the mouse reach the pairs for the tag tooltip.
 const InputView = (() => {
   const LIMIT = 300000;
-  let ta = null, pre = null, box = null;
+  let ta = null, pre = null, box = null, sel = -1;
   const esc = s => Dom.esc(s);
 
   const enabled = () => ta.value.length <= LIMIT;
@@ -6535,7 +6561,25 @@ const InputView = (() => {
       return out + `<span class="hl-x">${esc(line.slice(pos))}</span>`;
     }).join("\n") + "\n";
     sync();
+    mark(sel);
   }
+
+  // Selected message: its pairs get a background; reveal() also moves the caret to its line and scrolls there without focusing (the phone carousel stays put).
+  function mark(i) {
+    sel = i;
+    pre.querySelectorAll(".hl-sel").forEach(e => e.classList.remove("hl-sel"));
+    if (i >= 0) pre.querySelectorAll(`.hl-f[data-m="${i}"]`).forEach(e => e.classList.add("hl-sel"));
+  }
+  function reveal(i, line) {
+    mark(i);
+    const at = ta.value.split("\n", line - 1).reduce((n, l) => n + l.length + 1, 0);
+    ta.setSelectionRange(at, at);
+    // Wrapped lines span several rows: the coloured pair's own position is exact; line × height is the fallback when colouring is off.
+    const hit = pre.querySelector(`.hl-f[data-m="${i}"]`);
+    const y = hit ? hit.offsetTop : (line - 1) * (parseFloat(getComputedStyle(ta).lineHeight) || 19);
+    ta.scrollTop = Math.max(0, y - ta.clientHeight / 3);
+  }
+  const caretLine = () => ta.value.slice(0, ta.selectionStart).split("\n").length;
 
   // resolve(msgIndex, fieldIndex) → tooltip HTML.
   function init(resolve) {
@@ -6549,7 +6593,7 @@ const InputView = (() => {
     TagInfo.bind(pre, el => resolve(+el.dataset.m, +el.dataset.f), "span.hl-f");
   }
 
-  return { init, paint };
+  return { init, paint, mark, reveal, caretLine };
 })();
 // Order chain picker: dropdown tree (parent order → child chains, then standalone chains), current pick as a message set, chip text, share-link form.
 const ChainPick = (() => {
@@ -6619,24 +6663,19 @@ const ChainPick = (() => {
 // Wiring: input → extract → analyse (dialect) → chains → timeline + detail; notes, column filters/layout, saved analyses, dialogs, exports, VI/EN relang.
 const FixApp = (() => {
   const KEEP = ["dialect", "tz", "cols", "hideAdmin", "hideBc", "order", "hideHdr"];
-  // Exchange → firm messages carry the venue in 49; firm → exchange order/quote messages carry it in 56.
-  const FROM_VENUE = new Set(["8", "9", "h", "f", "j", "AI"]), TO_VENUE = new Set(["D", "F", "G", "s", "t", "u", "S", "Z", "AJ", "R"]);
   let saved = null;
   const S = { msgs: [], dict: null, dialect: "fix44", chain: null, vis: [], sel: -1, skipped: 0, us: "", venueId: "" };
 
   const opts = () => Dom.readOpts();
   const cols = () => opts().cols.split(/[\s,;]+/).filter(t => /^\d+$/.test(t)).slice(0, 8);
   const ctx = () => ({ dict: S.dict, tz: opts().tz, cols: cols(), layout: ColView.layout(), inbound: m => !!S.us && m.get("49") !== S.us });
-  const isVenue = it => /(^|[^\d])(369|4488|6363|6464)=/.test(it.raw);
-  const venueIdOf = msgs => (msgs.find(m => FROM_VENUE.has(m.type) && m.get("49")) || { get: () => "" }).get("49")
-    || (msgs.find(m => TO_VENUE.has(m.type) && m.get("56")) || { get: () => "" }).get("56");
   const venueName = () => S.venueId || T("Server Sàn");
   const dictLabel = () => S.dialect === "venue" ? `${venueName()} FIX 4.4` : "FIX 4.4";
 
   // keepChain: only open() keeps the chain / family pick, and only if it still exists after re-parsing.
   function parse(keepChain = false) {
     const text = $("src").value, ex = FixLog.extract(text), want = opts().dialect;
-    S.dialect = want === "auto" ? (ex.items.some(isVenue) ? "venue" : "fix44") : want;
+    S.dialect = want === "auto" ? (ex.items.some(FixVenue.isVenue) ? "venue" : "fix44") : want;
     S.dict = FixDict.get(S.dialect);
     S.msgs = ex.items.map(it => FixCheck.analyse(it, S.dict));
     S.skipped = ex.skipped;
@@ -6644,7 +6683,7 @@ const FixApp = (() => {
     Notes.bind(S.msgs);
     const out = S.msgs.find(m => /\b(OUT|outgoing|sent)\b|->|>>/i.test(m.prefix));
     S.us = (out || S.msgs[0] || { get: () => "" }).get("49");
-    S.venueId = venueIdOf(S.msgs);
+    S.venueId = FixVenue.idOf(S.msgs);
     if (!keepChain) ChainPick.clear();
     ChainPick.bind({ msgs: S.msgs, chain: S.chain, dict: S.dict });
     fillTypes();
@@ -6667,6 +6706,7 @@ const FixApp = (() => {
     S.vis = Timeline.visible(S.msgs, { ...o, only: ChainPick.members() }, ctx());
     if (!S.vis.includes(S.sel)) S.sel = S.vis.length ? S.vis[0] : -1;
     Timeline.render($("grid"), S.msgs, S.vis, S.sel, ctx());
+    InputView.mark(S.sel);
     $("count").textContent = T("{shown}/{total} message", { shown: I18n.num(S.vis.length), total: I18n.num(S.msgs.length) });
     const chip = $("chainChip"), text = ChainPick.chip();
     chip.hidden = !text;
@@ -6688,12 +6728,22 @@ const FixApp = (() => {
       n: I18n.num(S.msgs.length), e: n("error"), w: n("warn"), dict: dictLabel(), auto: opts().dialect === "auto" ? " " + T("(tự nhận)") : "", delims, s: I18n.num(S.skipped) });
   }
 
-  function select(i, scroll) {
+  // fromInput: picked by the caret in the paste box, which then stays where the user put it.
+  function select(i, scroll, fromInput = false) {
     S.sel = i;
     document.querySelectorAll("#grid tr.sel").forEach(r => r.classList.remove("sel"));
     const row = document.querySelector(`#grid tr[data-i="${i}"]`);
     if (row) { row.classList.add("sel"); if (scroll) row.scrollIntoView({ block: "nearest" }); }
+    if (fromInput || !S.msgs[i]) InputView.mark(i); else InputView.reveal(i, S.msgs[i].line);
     showDetail();
+  }
+
+  // Click / tap / arrow keys in the paste box: the message starting at or before the caret line.
+  function fromCaret() {
+    const line = InputView.caretLine();
+    let i = -1;
+    S.msgs.forEach((m, k) => { if (m.line <= line) i = k; });
+    if (i >= 0 && i !== S.sel) select(i, true, true);
   }
 
   const move = d => { const k = S.vis.indexOf(S.sel) + d; if (k >= 0 && k < S.vis.length) select(S.vis[k], true); };
@@ -6728,6 +6778,8 @@ const FixApp = (() => {
 
   function bind() {
     $("src").addEventListener("input", Dom.debounce(() => parse(), 250));
+    $("src").addEventListener("click", fromCaret);
+    $("src").addEventListener("keyup", fromCaret);
     $("dialect").addEventListener("change", () => parse());
     for (const id of ["tz", "type", "hideAdmin", "hideBc", "onlyBad", "onlyNotes", "order", "hideHdr"]) $(id).addEventListener("change", refresh);
     for (const id of ["q", "cols"]) $(id).addEventListener("input", Dom.debounce(refresh, 200));
@@ -6752,6 +6804,9 @@ const FixApp = (() => {
       if ((e.key === "ArrowDown" || e.key === "ArrowUp") && (e.ctrlKey || inGrid)) { e.preventDefault(); move(e.key === "ArrowDown" ? 1 : -1); }
     });
     $("toggleIn").onclick = () => { const c = document.querySelector(".left").classList.toggle("collapsed"); $("toggleIn").textContent = c ? "▾" : "▴"; };
+    const viewPref = (id, el, cls, def = false) => { const f = () => { el.classList.toggle(cls, $(id).checked); Store.set(id, $(id).checked); }; $(id).checked = Store.get(id, def) === true; f(); $(id).onchange = f; };
+    viewPref("cols3", document.querySelector(".work"), "c3");
+    viewPref("wrap", document.body, "wrap", true);
     $("file").onchange = e => { const f = e.target.files[0]; e.target.value = ""; if (f) readFile(f); };
     $("clear").onclick = () => { LinkIO.keep(); saved.forget(); open({ text: "", opts: { q: "" }, chain: null }); };
     $("csv").onclick = () => Dom.download(Timeline.csv(S.msgs, S.vis, ctx()), "fix-messages.csv", "text/csv;charset=utf-8");

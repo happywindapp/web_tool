@@ -7,8 +7,14 @@ const FileOpen = (() => {
     return null;
   }
 
-  // show = false: added to view gi without switching to it (replace in files).
+  // show = false: added to view gi without switching to it (replace in files). The file read is the baseline DiskSync compares with.
   async function open(file, handle, gi, show = true) {
+    const doc = await read(file, handle, gi, show);
+    if (doc && handle && !doc.disk) doc.disk = DiskSync.stamp(file);
+    return doc;
+  }
+
+  async function read(file, handle, gi, show) {
     const dup = handle && await sameOpen(handle);
     if (handle && show) RecentFiles.add(handle);
     if (dup) { if (show) Views.open(dup, Views.where(dup.id) >= 0 ? Views.where(dup.id) : gi); else Views.add(dup, gi); return dup; }
@@ -57,7 +63,7 @@ const FileOpen = (() => {
       if (doc.bigStart != null) { await BigFile.attach(doc, file); return; }
       const r = doc.hex ? { text: await HexDump.ofFile(file), eol: "\n", bom: false, binary: true } : await LocalFs.readText(file, doc.enc && doc.enc !== "utf-8" ? doc.enc : undefined);
       if (!Docs.get(doc.id)) return;
-      Object.assign(doc, { stale: false, text: r.text, state: null, eol: r.eol, eolMixed: r.eolMixed, eolList: r.eolList, bom: r.bom, enc: r.enc, readOnly: r.binary || r.readOnly, detected: LangDetect.detect(doc.name, r.text) });
+      Object.assign(doc, { stale: false, disk: DiskSync.stamp(file), diskChanged: false, text: r.text, state: null, eol: r.eol, eolMixed: r.eolMixed, eolList: r.eolList, bom: r.bom, enc: r.enc, readOnly: r.binary || r.readOnly, detected: LangDetect.detect(doc.name, r.text) });
       const gi = Views.where(doc.id);
       if (gi >= 0 && Views.groups[gi].active === doc.id) Views.activate(gi, doc.id, false);
       Docs.update(doc, {});

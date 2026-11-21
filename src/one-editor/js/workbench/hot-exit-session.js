@@ -13,7 +13,7 @@ const HotExit = (() => {
   const serialize = (d, sealed) => ({
     id: d.id, kind: d.kind, name: d.name, lang: d.lang, text: secret(d) || secret(d.link && Docs.get(d.link.src)) ? "" : d.big ? bigText(d) : handleOnly(d) ? "" : Docs.text(d), stale: d.big ? !!d.handle : handleOnly(d), sealed: sealed || d.sealed || undefined,
     bigStart: d.big && d.handle ? d.big.start : null, handle: d.handle || null, dirty: d.dirty, edited: d.edited,
-    readOnly: d.readOnly, eol: d.eol, eolMixed: d.eolMixed, eolList: d.eolMixed ? (d.state ? MixedEol.codesOf(d.state) : d.eolList) : null, bom: d.bom, enc: d.enc, link: d.link, updated: d.updated, pinned: d.pinned, hex: d.hex,
+    readOnly: d.readOnly, eol: d.eol, eolMixed: d.eolMixed, eolList: d.eolMixed ? (d.state ? MixedEol.codesOf(d.state) : d.eolList) : null, bom: d.bom, enc: d.enc, link: d.link, updated: d.updated, pinned: d.pinned, hex: d.hex, disk: d.disk,
   });
 
   async function flush() {
@@ -46,7 +46,7 @@ const HotExit = (() => {
       if (r.kind === "note" && s && typeof s.salt === "string" && typeof s.iv === "string" && typeof s.ct === "string") Object.assign(d, { sealed: { salt: s.salt, iv: s.iv, ct: s.ct, it: Number.isInteger(s.it) ? s.it : 310000 }, readOnly: true, text: T("🔒 Ghi chú đã khoá — Command Palette → “Ghi chú: mở khoá…” để nhập mật khẩu.") });
     }
     const groups = session && Array.isArray(session.groups) ? session.groups.slice(0, Layouts.MAX) : [];
-    if (session) CmSetup.settings.wrap = session.wrap === true;
+    if (session) CmSetup.settings.wrap = session.wrap !== false;
     Views.setLayout(session && Layouts.get(session.layout) ? session.layout : groups.length > 2 ? Layouts.forCount(groups.length) : "2c");
     groups.forEach((g, gi) => (Array.isArray(g.tabs) ? g.tabs : []).forEach(id => { const d = Docs.get(id); if (d) Views.add(d, gi); }));
     // Tabs missing from the layout (another browser tab wrote it last, or a crash): unsaved work comes back in View 1, the rest is dropped.

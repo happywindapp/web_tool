@@ -1,24 +1,19 @@
 // Wiring: input → extract → analyse (dialect) → chains → timeline + detail; notes, column filters/layout, saved analyses, dialogs, exports, VI/EN relang.
 const FixApp = (() => {
   const KEEP = ["dialect", "tz", "cols", "hideAdmin", "hideBc", "order", "hideHdr"];
-  // Exchange → firm messages carry the venue in 49; firm → exchange order/quote messages carry it in 56.
-  const FROM_VENUE = new Set(["8", "9", "h", "f", "j", "AI"]), TO_VENUE = new Set(["D", "F", "G", "s", "t", "u", "S", "Z", "AJ", "R"]);
   let saved = null;
   const S = { msgs: [], dict: null, dialect: "fix44", chain: null, vis: [], sel: -1, skipped: 0, us: "", venueId: "" };
 
   const opts = () => Dom.readOpts();
   const cols = () => opts().cols.split(/[\s,;]+/).filter(t => /^\d+$/.test(t)).slice(0, 8);
   const ctx = () => ({ dict: S.dict, tz: opts().tz, cols: cols(), layout: ColView.layout(), inbound: m => !!S.us && m.get("49") !== S.us });
-  const isVenue = it => /(^|[^\d])(369|4488|6363|6464)=/.test(it.raw);
-  const venueIdOf = msgs => (msgs.find(m => FROM_VENUE.has(m.type) && m.get("49")) || { get: () => "" }).get("49")
-    || (msgs.find(m => TO_VENUE.has(m.type) && m.get("56")) || { get: () => "" }).get("56");
   const venueName = () => S.venueId || T("Server Sàn");
   const dictLabel = () => S.dialect === "venue" ? `${venueName()} FIX 4.4` : "FIX 4.4";
 
   // keepChain: only open() keeps the chain / family pick, and only if it still exists after re-parsing.
   function parse(keepChain = false) {
     const text = $("src").value, ex = FixLog.extract(text), want = opts().dialect;
-    S.dialect = want === "auto" ? (ex.items.some(isVenue) ? "venue" : "fix44") : want;
+    S.dialect = want === "auto" ? (ex.items.some(FixVenue.isVenue) ? "venue" : "fix44") : want;
     S.dict = FixDict.get(S.dialect);
     S.msgs = ex.items.map(it => FixCheck.analyse(it, S.dict));
     S.skipped = ex.skipped;
@@ -26,7 +21,7 @@ const FixApp = (() => {
     Notes.bind(S.msgs);
     const out = S.msgs.find(m => /\b(OUT|outgoing|sent)\b|->|>>/i.test(m.prefix));
     S.us = (out || S.msgs[0] || { get: () => "" }).get("49");
-    S.venueId = venueIdOf(S.msgs);
+    S.venueId = FixVenue.idOf(S.msgs);
     if (!keepChain) ChainPick.clear();
     ChainPick.bind({ msgs: S.msgs, chain: S.chain, dict: S.dict });
     fillTypes();
@@ -49,6 +44,7 @@ const FixApp = (() => {
     S.vis = Timeline.visible(S.msgs, { ...o, only: ChainPick.members() }, ctx());
     if (!S.vis.includes(S.sel)) S.sel = S.vis.length ? S.vis[0] : -1;
     Timeline.render($("grid"), S.msgs, S.vis, S.sel, ctx());
+    InputView.mark(S.sel);
     $("count").textContent = T("{shown}/{total} message", { shown: I18n.num(S.vis.length), total: I18n.num(S.msgs.length) });
     const chip = $("chainChip"), text = ChainPick.chip();
     chip.hidden = !text;
@@ -70,12 +66,22 @@ const FixApp = (() => {
       n: I18n.num(S.msgs.length), e: n("error"), w: n("warn"), dict: dictLabel(), auto: opts().dialect === "auto" ? " " + T("(tự nhận)") : "", delims, s: I18n.num(S.skipped) });
   }
 
-  function select(i, scroll) {
+  // fromInput: picked by the caret in the paste box, which then stays where the user put it.
+  function select(i, scroll, fromInput = false) {
     S.sel = i;
     document.querySelectorAll("#grid tr.sel").forEach(r => r.classList.remove("sel"));
     const row = document.querySelector(`#grid tr[data-i="${i}"]`);
     if (row) { row.classList.add("sel"); if (scroll) row.scrollIntoView({ block: "nearest" }); }
+    if (fromInput || !S.msgs[i]) InputView.mark(i); else InputView.reveal(i, S.msgs[i].line);
     showDetail();
+  }
+
+  // Click / tap / arrow keys in the paste box: the message starting at or before the caret line.
+  function fromCaret() {
+    const line = InputView.caretLine();
+    let i = -1;
+    S.msgs.forEach((m, k) => { if (m.line <= line) i = k; });
+    if (i >= 0 && i !== S.sel) select(i, true, true);
   }
 
   const move = d => { const k = S.vis.indexOf(S.sel) + d; if (k >= 0 && k < S.vis.length) select(S.vis[k], true); };
@@ -110,6 +116,8 @@ const FixApp = (() => {
 
   function bind() {
     $("src").addEventListener("input", Dom.debounce(() => parse(), 250));
+    $("src").addEventListener("click", fromCaret);
+    $("src").addEventListener("keyup", fromCaret);
     $("dialect").addEventListener("change", () => parse());
     for (const id of ["tz", "type", "hideAdmin", "hideBc", "onlyBad", "onlyNotes", "order", "hideHdr"]) $(id).addEventListener("change", refresh);
     for (const id of ["q", "cols"]) $(id).addEventListener("input", Dom.debounce(refresh, 200));
@@ -134,6 +142,9 @@ const FixApp = (() => {
       if ((e.key === "ArrowDown" || e.key === "ArrowUp") && (e.ctrlKey || inGrid)) { e.preventDefault(); move(e.key === "ArrowDown" ? 1 : -1); }
     });
     $("toggleIn").onclick = () => { const c = document.querySelector(".left").classList.toggle("collapsed"); $("toggleIn").textContent = c ? "▾" : "▴"; };
+    const viewPref = (id, el, cls, def = false) => { const f = () => { el.classList.toggle(cls, $(id).checked); Store.set(id, $(id).checked); }; $(id).checked = Store.get(id, def) === true; f(); $(id).onchange = f; };
+    viewPref("cols3", document.querySelector(".work"), "c3");
+    viewPref("wrap", document.body, "wrap", true);
     $("file").onchange = e => { const f = e.target.files[0]; e.target.value = ""; if (f) readFile(f); };
     $("clear").onclick = () => { LinkIO.keep(); saved.forget(); open({ text: "", opts: { q: "" }, chain: null }); };
     $("csv").onclick = () => Dom.download(Timeline.csv(S.msgs, S.vis, ctx()), "fix-messages.csv", "text/csv;charset=utf-8");

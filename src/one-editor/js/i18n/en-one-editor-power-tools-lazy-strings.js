@@ -1,4 +1,4 @@
-// English strings for the lazily loaded phase 9 power tools; part of tools/one-editor-power-tools.js.
+// English strings for the lazily loaded phase 9 power tools; part of tools/one-editor-extras.js.
 I18n.add({
   // Batch replace
   "Bật / tắt dòng này": "Turn this row on / off", "tìm": "find", "thay bằng": "replace with", "Xoá dòng": "Delete row", "Bộ đã lưu…": "Saved sets…", "Tên bộ thay thế:": "Name of the replace set:",

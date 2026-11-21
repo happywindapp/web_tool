@@ -45,7 +45,7 @@ const Detail = (() => {
         `<button data-act="pipe">${esc(T("Chép (|)"))}</button><button data-act="soh">${esc(T("Chép (SOH)"))}</button><button data-act="json">${esc(T("Chép JSON"))}</button>` +
         (resign ? `<button data-act="fix" title="${esc(T("Tính lại BodyLength (9) và CheckSum (10) rồi chép"))}">${esc(T("Chép bản sửa 9/10"))}</button>` : "") +
       `</div>` +
-      `<textarea class="anno" rows="2" placeholder="${esc(T("📝 Ghi chú cho message này — đi kèm link chia sẻ, phân tích đã lưu và file xuất"))}">${esc(ctx.note || "")}</textarea>` +
+      (ctx.anno === false ? "" : `<textarea class="anno" rows="2" placeholder="${esc(T("📝 Ghi chú cho message này — đi kèm link chia sẻ, phân tích đã lưu và file xuất"))}">${esc(ctx.note || "")}</textarea>`) +
       (issues ? `<ul class="issues">${issues}</ul>` : `<div class="good">✔ ${esc(T("Không có lỗi theo từ điển {dict}.", { dict: ctx.dictLabel }))}</div>`) +
       `<div class="hint muted">${esc(T("Rê chuột vào từng dòng để xem giải thích chi tiết (FIX 4.4 + spec {venue}).", { venue: FixKnow.venue() }))}</div>` +
       `<table class="fields"><thead><tr><th>Tag</th><th>${esc(T("Tên"))}</th><th>${esc(T("Giá trị"))}</th><th>${esc(T("Ý nghĩa"))}</th></tr></thead><tbody>${rows(m, ctx)}</tbody></table>` +

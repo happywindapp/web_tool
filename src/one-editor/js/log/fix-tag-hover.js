@@ -1,7 +1,7 @@
-// FIX tabs: hover a tag=value ⇒ tag name, type, group and the meaning of the value, from the FIX Parser dictionary (tools/one-editor-fix-dictionary.js, loaded on first hover); open the tab in FIX Parser.
+// FIX tabs: hover a tag=value ⇒ tag name, type, group and the meaning of the value, from the FIX Parser dictionary (tools/one-editor-extras.js, loaded on first hover); open the tab in FIX Parser.
 const FixHover = (() => {
   let dict = null, ext = null;
-  const load = () => dict ??= VendorPaths.load("fixDict").then(() => FixDict.get("fix44")).catch(e => { dict = null; throw e; });
+  const load = () => dict ??= VendorPaths.load("extras").then(() => FixDict.get("fix44")).catch(e => { dict = null; throw e; });
 
   // A dictionary + tag + value → { title, rows } (pure once the dictionary is there).
   function describe(d, tag, value) {

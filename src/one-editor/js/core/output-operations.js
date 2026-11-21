@@ -39,6 +39,7 @@ const OutputOps = (() => {
     // pane + text: the translation shows in a pane and also stays as the tab's text (export, copy, share).
     "translate": { label: "Dịch", group: "Dịch", lang: same, live: d => Translate.liveOn(d), pane: true, restore: d => Translate.restored(d), run: (t, c) => Translate.run(t, c) },
     "filter": { label: "Lọc dòng (log)", group: "Log", lang: same, live: true, pane: true, run: async (t, c) => { await DataOps.load(); return LineFilter.run(t, c); } },
+    "fix-detail": { label: "FIX → Chi tiết message", group: "Log", lang: "JSON", live: true, pane: true, run: (t, c) => FixDetailOp.run(t, c) },
     "tree": { label: "Cây JSON / XML", group: "Dữ liệu", lang: "Plain Text", live: true, pane: true, run: (t, c) => DataOps.tree(t, c) },
     "query": { label: "Truy vấn JSONPath / XPath", group: "Dữ liệu", lang: "JSON", live: true, pane: true, run: (t, c) => DataOps.query(t, c) },
     "jwt": { label: "JWT decode (không kiểm chữ ký)", group: "Công cụ dev", lang: "JSON", live: true, pane: true, restore: d => DevReport.restore(d), run: t => DevReport.jwt(t) },

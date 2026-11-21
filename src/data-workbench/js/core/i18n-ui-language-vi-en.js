@@ -51,6 +51,6 @@ const I18n = (() => {
     apply();
   }
 
-  return { t, num, set, init, add: d => Object.assign(EN, d), onChange: f => listeners.push(f), get lang() { return lang; } };
+  return { t, num, set, init, add: d => Object.assign(EN, d), has: vi => Object.hasOwn(EN, vi), onChange: f => listeners.push(f), get lang() { return lang; } };
 })();
 const T = I18n.t;

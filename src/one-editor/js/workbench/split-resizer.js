@@ -93,5 +93,6 @@ const Split = (() => {
   }
   let lastLayout = "";
 
-  return { init, gapAt };
+  const set = r => { apply(r); Prefs.set("split", ratio); };
+  return { init, gapAt, set, ratio: () => ratio };
 })();

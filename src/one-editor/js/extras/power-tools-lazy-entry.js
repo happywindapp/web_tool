@@ -1,8 +1,8 @@
-// Phase 9 tools: tools/one-editor-power-tools.js, loaded on first use; per-source op settings live here (links / demos preset them).
+// Phase 9 tools: tools/one-editor-extras.js, loaded on first use; per-source op settings live here (links / demos preset them).
 const PowerTools = (() => {
   let ready = null;
   const states = new Map();
-  const load = () => ready ??= VendorPaths.load("powerTools").then(() => PowerOps.init())
+  const load = () => ready ??= VendorPaths.load("extras").then(() => PowerOps.init())
     .catch(e => { ready = null; throw new Error(T("Không nạp được bộ công cụ mở rộng ({file}) — cần file này nằm cạnh one-editor.html.", { file: e.message })); });
   const use = fn => load().then(fn).catch(e => StatusBar.msg(e.message, "bad"));
   const op = name => async (t, c) => { await load(); return PowerOps[name](t, c); };

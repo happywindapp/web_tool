@@ -51,7 +51,8 @@ const Actions = (() => {
     const dirtyAfter = () => doc.state !== before;
     try {
       if (!asNew && doc.kind === "file" && doc.handle) {
-        await LocalFs.writeHandle(doc.handle, data);
+        if (!await DiskSync.guard(doc)) return;
+        await DiskSync.write(doc, data);
         Docs.update(doc, { dirty: dirtyAfter() }, "dirty");
         StatusBar.msg(T("✔ Đã lưu “{name}”.", { name: doc.name }), "good");
         EditorExtras.use(() => LocalHistory.snap(doc, true, savedText));
@@ -68,7 +69,7 @@ const Actions = (() => {
       if (!r) return;
       if (r.handle) RecentFiles.add(r.handle);
       // A note stays a note (the file is a copy); other tabs now point at the saved file.
-      if (r.handle && doc.kind !== "note") { Docs.update(doc, { kind: "file", handle: r.handle, dirty: dirtyAfter(), link: null }); if (r.name !== doc.name) Docs.rename(doc, r.name); }
+      if (r.handle && doc.kind !== "note") { Docs.update(doc, { kind: "file", handle: r.handle, dirty: dirtyAfter(), link: null }); if (r.name !== doc.name) Docs.rename(doc, r.name); await DiskSync.mark(doc); }
       StatusBar.msg(r.downloaded ? T("✔ Đã tải xuống “{name}”.", { name: r.name }) : T("✔ Đã lưu “{name}”.", { name: r.name }), "good");
       EditorExtras.use(() => LocalHistory.snap(doc, true, savedText));
     } catch (e) { StatusBar.msg(T("Không lưu được: {msg}", { msg: e.message }), "bad"); }

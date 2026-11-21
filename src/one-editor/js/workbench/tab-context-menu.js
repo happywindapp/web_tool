@@ -1,6 +1,6 @@
 // Right-click / Menu key on a tab (or the empty tab strip = its active tab): the tab commands from the registry — rename, pin, move, clone, close.
 const TabMenu = (() => {
-  const IDS = ["renameTab", "pinTab", "moveTab", "cloneTab", "closeTab", "closeOthers", "closeRight"];
+  const IDS = ["renameTab", "pinTab", "pinItem", "moveTab", "cloneTab", "diskReload", "closeTab", "closeOthers", "closeRight"];
   let menu = null;
 
   const onDown = e => { if (menu && !menu.contains(e.target)) close(); };

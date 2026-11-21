@@ -4,7 +4,6 @@ I18n.add({
   "Emmet: mở rộng viết tắt ở con trỏ (Ctrl+E)": "Emmet: expand the abbreviation at the cursor (Ctrl+E)", "Emmet chỉ chạy trong tab HTML / CSS / JSX.": "Emmet works in HTML / CSS / JSX tabs only.",
   "Emmet: bật (HTML · CSS · JSX — Tab hoặc Ctrl+E để mở rộng viết tắt).": "Emmet: on (HTML · CSS · JSX — Tab or Ctrl+E expands an abbreviation).", "Emmet: tắt.": "Emmet: off.",
   "Không nạp được Emmet ({file}).": "Could not load Emmet ({file}).",
-  "Không nạp được phần mở rộng editor ({file}) — cần file này nằm cạnh one-editor.html.": "Could not load the editor extras ({file}) — this file must sit next to one-editor.html.",
   "Snippet: chèn…": "Snippet: insert…", "Snippet: lưu vùng chọn thành snippet…": "Snippet: save the selection as a snippet…", "Snippet: xoá snippet đã lưu…": "Snippet: delete a saved snippet…",
   "Phiên: lưu các tab + layout với tên…": "Session: save the tabs + layout under a name…", "Phiên: mở phiên đã lưu…": "Session: open a saved session…",
   "Bật / tắt thước cột 80 / 120": "Toggle the 80 / 120 column rulers", "Bật / tắt tô màu cặp ngoặc": "Toggle bracket pair colours",

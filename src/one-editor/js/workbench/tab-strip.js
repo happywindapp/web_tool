@@ -1,4 +1,4 @@
-// Tab strip of one view: click to show, click the active tab's name / double-click / right-click menu to rename in place, × / middle-click / Alt+W to close, drag onto another view to move it (⇥ does the same on touch).
+// Tab strip of one view: click to show, click the active tab's name / double-click / right-click menu to rename in place, 📌 to pin, × / middle-click / Alt+W to close, drag onto another view to move it (⇥ does the same on touch).
 const TabStrip = (() => {
   let editing = null;
   const TAB_TYPE = "application/x-one-editor-tab";
@@ -24,12 +24,16 @@ const TabStrip = (() => {
       tab.setAttribute("aria-selected", doc.id === g.active);
       const name = document.createElement("span");
       name.className = "name";
-      name.textContent = (doc.pinned ? "📌 " : "") + ICON[doc.kind] + " " + doc.name + (doc.kind === "output" && doc.edited ? " ✎" : "");
+      name.textContent = ICON[doc.kind] + " " + doc.name + (doc.kind === "output" && doc.edited ? " ✎" : "") + (Docs.root(doc).diskChanged ? " ⚠" : "");
+      if (Docs.root(doc).diskChanged) tab.title += "\n⚠ " + T("File đã bị sửa bên ngoài — chuột phải → “Đọc lại từ đĩa / so sánh…”");
       const x = document.createElement("button");
       x.className = "x";
       x.textContent = Docs.root(doc).dirty ? "●" : "×";
       x.title = T("Đóng (Alt+W)");
-      tab.append(name, x);
+      const pin = document.createElement("button");
+      Object.assign(pin, { className: "pin", textContent: "📌", title: doc.pinned ? T("Bỏ ghim tab") : T("Ghim tab (Ctrl+K Shift+Enter)") });
+      pin.setAttribute("aria-pressed", doc.pinned);
+      tab.append(name, pin, x);
       return tab;
     }));
     strip.querySelector(".tab.on")?.scrollIntoView({ block: "nearest", inline: "nearest" });
@@ -73,10 +77,11 @@ const TabStrip = (() => {
         const id = idOf(e);
         if (!id) return;
         if (e.target.closest(".x")) Views.close(id);
+        else if (e.target.closest(".pin")) Views.togglePin(Docs.get(id));
         else if (id === g.active && Views.focused === g.i && e.target.closest(".name")) rename(Docs.get(id));
         else Views.activate(g.i, id);
       });
-      strip.addEventListener("dblclick", e => { const d = Docs.get(idOf(e)); if (d) rename(d); });
+      strip.addEventListener("dblclick", e => { const d = !e.target.closest(".pin") && Docs.get(idOf(e)); if (d) rename(d); });
       strip.addEventListener("auxclick", e => { if (e.button === 1 && idOf(e)) { e.preventDefault(); Views.close(idOf(e)); } });
       strip.addEventListener("contextmenu", e => {
         if (e.target.closest(".tab-rename")) return;
@@ -87,7 +92,7 @@ const TabStrip = (() => {
         TabMenu.open(g.i, tab?.dataset.id || g.active, byKey ? r.left : e.clientX, byKey ? r.bottom : e.clientY);
       });
       strip.addEventListener("keydown", e => {
-        const id = idOf(e);
+        const id = !e.target.closest("button") && idOf(e);
         if (!id) return;
         if (e.key === "Enter" || e.key === " ") { e.preventDefault(); Views.activate(g.i, id); }
         else if (e.key === "Delete") Views.close(id);

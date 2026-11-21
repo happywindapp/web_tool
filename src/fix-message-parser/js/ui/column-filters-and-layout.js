@@ -3,7 +3,8 @@ const ColView = (() => {
   let filters = [], layout = null, deps = null;
 
   const label = id => { const c = deps.columns().find(x => x.id === id); return c ? (c.extra ? c.label : T(c.label)) : id; };
-  const chips = () => ColFilter.chips($("colChips"), filters, label, k => { filters.splice(k, 1); changed(); });
+  const store = () => deps.store || Store;
+  const chips = () => ColFilter.chips(deps.chipBox || $("colChips"), filters, label, k => { filters.splice(k, 1); changed(); });
   const changed = () => { chips(); deps.onChange(); };
   function add(f) { filters = filters.filter(x => !(x.col === f.col && (x.op === f.op || f.op === "range"))); filters.push(f); changed(); }
 
@@ -22,7 +23,7 @@ const ColView = (() => {
       const ids = deps.columns().map(c => c.id).filter(id => id !== from);
       ids.splice(ids.indexOf(th.dataset.col), 0, from);
       layout = ids; from = null;
-      Store.set("layout", layout);
+      store().set("layout", layout);
       deps.onChange();
     });
     table.addEventListener("click", e => {
@@ -42,10 +43,10 @@ const ColView = (() => {
     });
   }
 
-  // deps: { columns(), onChange(), select(i), extras() → [{ label, run }] for the right-click menu }
-  function init(d) { deps = d; layout = Store.get("layout", null); chips(); }
+  // deps: { columns(), onChange(), select(i), extras() → [{ label, run }] for the right-click menu, store? / chipBox? (default Store / #colChips) }
+  function init(d) { deps = d; layout = store().get("layout", null); chips(); }
 
-  const resetLayout = () => { layout = null; Store.set("layout", null); deps.onChange(); };
+  const resetLayout = () => { layout = null; store().set("layout", null); deps.onChange(); };
   // Share links / saved analyses carry filters + layout; payload values are untrusted.
   const get = () => ({ filters, layout });
   function set(p = {}) {

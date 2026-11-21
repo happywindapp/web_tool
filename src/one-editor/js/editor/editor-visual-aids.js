@@ -1,6 +1,6 @@
 // Visual aids: column rulers 80 / 120, bracket pair colours (from the syntax tree), colour swatches next to CSS colours, breadcrumbs panel; expand / shrink the selection by syntax.
 const Aids = (() => {
-  const DEF = { rulers: false, brackets: true, swatches: true, crumbs: true }, OPEN = new Set(["(", "[", "{"]), PAIRS = new Set(["(", ")", "[", "]", "{", "}"]);
+  const DEF = { rulers: false, brackets: true, swatches: true, crumbs: false }, OPEN = new Set(["(", "[", "{"]), PAIRS = new Set(["(", ")", "[", "]", "{", "}"]);
   const COLOR = /#(?:[\da-f]{8}|[\da-f]{6}|[\da-f]{3,4})\b|\b(?:rgba?|hsla?)\([^()\n]{3,60}\)/gi, COLOR_LANGS = new Set(["CSS", "SCSS", "LESS", "HTML", "Vue", "SVG", "JSX", "TSX"]);
   const settings = () => ({ ...DEF, ...Prefs.get("aids", {}) });
   const D = () => CM.view.Decoration, docOf = view => { const g = Views.groups.find(x => x.view === view); return g && Docs.get(g.active); };
@@ -19,17 +19,19 @@ const Aids = (() => {
     return b.finish();
   }
 
-  class Swatch extends CM.view.WidgetType {
+  // Built on first use: this module is defined before the CodeMirror core has loaded.
+  let SwatchClass = null;
+  const Swatch = () => SwatchClass ??= class extends CM.view.WidgetType {
     constructor(c) { super(); this.c = c; }
     eq(o) { return o.c === this.c; }
     toDOM() { const s = document.createElement("span"); s.className = "oe-swatch"; s.style.background = this.c; s.title = this.c; return s; }
-  }
+  };
   function swatchMarks(view) {
     const d = docOf(view), b = new CM.state.RangeSetBuilder();
     if (!d || !COLOR_LANGS.has(Docs.effectiveLang(d))) return b.finish();
     for (const { from, to } of view.visibleRanges) {
       const text = view.state.doc.sliceString(from, to);
-      for (const m of text.matchAll(COLOR)) if (CSS.supports("color", m[0])) b.add(from + m.index, from + m.index, D().widget({ widget: new Swatch(m[0]), side: -1 }));
+      for (const m of text.matchAll(COLOR)) if (CSS.supports("color", m[0])) b.add(from + m.index, from + m.index, D().widget({ widget: new (Swatch())(m[0]), side: -1 }));
     }
     return b.finish();
   }

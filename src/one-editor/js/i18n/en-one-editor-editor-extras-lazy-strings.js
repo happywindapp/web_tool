@@ -1,4 +1,4 @@
-// English strings for the lazily loaded editor extras (key profiles, Vim, snippets, sessions, Outline, password dialog, locked notes); part of tools/one-editor-editor-extras.js.
+// English strings for the editor extras (key profiles, Vim, snippets, sessions, Outline, password dialog, locked notes); inlined in one-editor.html.
 I18n.add({
   "Bộ phím: {name} — phím của ứng dụng (Ctrl+P, Ctrl+Shift+P…) giữ nguyên.": "Key profile: {name} — the app's shortcuts (Ctrl+P, Ctrl+Shift+P…) stay the same.",
   "Không nạp được Vim ({file}).": "Could not load Vim ({file}).", "Vim: bật — Esc về Normal, i để gõ, :w lưu.": "Vim: on — Esc for Normal, i to type, :w saves.", "Vim: tắt.": "Vim: off.",
