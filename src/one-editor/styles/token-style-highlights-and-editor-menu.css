@@ -1,0 +1,23 @@
+  /* Notepad++ token styles 1–6 (cyan, orange, yellow, purple, green, pink): translucent so selection and syntax colours stay visible */
+  :root { --npp-s1:rgba(0,190,255,.35); --npp-s2:rgba(255,128,0,.38); --npp-s3:rgba(255,215,0,.55); --npp-s4:rgba(140,60,255,.28); --npp-s5:rgba(0,170,60,.32); --npp-s6:rgba(255,40,140,.3); }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme=light]) { --npp-s1:rgba(0,190,255,.4); --npp-s2:rgba(255,128,0,.45); --npp-s3:rgba(255,215,0,.4); --npp-s4:rgba(170,110,255,.48); --npp-s5:rgba(40,200,90,.4); --npp-s6:rgba(255,80,160,.45); } }
+  :root[data-theme=dark] { --npp-s1:rgba(0,190,255,.4); --npp-s2:rgba(255,128,0,.45); --npp-s3:rgba(255,215,0,.4); --npp-s4:rgba(170,110,255,.48); --npp-s5:rgba(40,200,90,.4); --npp-s6:rgba(255,80,160,.45); }
+  .cm-npp-style { border-radius:2px; }
+  .cm-npp-s1, .npp-sw[data-s="1"] { background:var(--npp-s1); }
+  .cm-npp-s2, .npp-sw[data-s="2"] { background:var(--npp-s2); }
+  .cm-npp-s3, .npp-sw[data-s="3"] { background:var(--npp-s3); }
+  .cm-npp-s4, .npp-sw[data-s="4"] { background:var(--npp-s4); }
+  .cm-npp-s5, .npp-sw[data-s="5"] { background:var(--npp-s5); }
+  .cm-npp-s6, .npp-sw[data-s="6"] { background:var(--npp-s6); }
+  .tab-menu > .menu-sep { width:100%; margin:4px 0; border:0; border-top:1px solid var(--line); }
+  .tab-menu { max-height:calc(100dvh - 8px); overflow-y:auto; }
+  .tab-menu > .menu-head { padding:4px 14px 2px; font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.03em; }
+  .tab-menu > button.chk > span::before { content:"✓"; display:inline-block; width:1.4em; visibility:hidden; }
+  .tab-menu > button.chk[aria-checked="true"] > span::before { visibility:visible; color:var(--acc); }
+  .npp-style-row { display:flex; align-items:center; gap:6px; padding:4px 14px; }
+  .npp-style-row > span { flex:1; min-width:80px; }
+  .npp-sw { width:28px; height:24px; padding:0; border:1px solid var(--line); border-radius:4px; color:var(--ink); font-size:12px; }
+  .npp-sw.all { width:auto; padding:0 8px; }
+  .npp-sw:focus-visible { outline:2px solid var(--acc); outline-offset:1px; }
+  @media (hover:hover) { .npp-sw:hover { border-color:var(--acc); } }
+  @media (pointer:coarse) { .npp-style-row { flex-wrap:wrap; } .npp-style-row > span { flex:1 0 100%; } .npp-sw { width:38px; height:38px; } }

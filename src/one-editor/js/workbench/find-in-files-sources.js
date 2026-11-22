@@ -52,6 +52,8 @@ const FindSources = (() => {
     }
     const root = folder && Explorer.root();
     if (!root) return;
+    // Scanning would download every file of the shared folder.
+    if (root.remote) { failed(st, root.name, T("folder từ link Drive / OneDrive không được quét — mở file thành tab để tìm")); return; }
     let walked = 0;
     for await (const node of walk(root, heavy, st)) {
       if (++walked > FindCore.LIMITS.files) { st.capped = true; return; }

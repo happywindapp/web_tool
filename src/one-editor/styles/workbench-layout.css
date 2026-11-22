@@ -52,14 +52,24 @@
 
   @media (max-height:600px) and (min-width:641px) { .statusbar .tiny { display:none; } }
   @media (min-width:641px) {
-    body.no-explorer #explorerPane, body.zen #explorerPane { display:none; }
-    body.no-explorer #work, body.zen #work { --exw:0px; }
+    body.zen #explorerPane { display:none; }
+    body.zen #work { --exw:0px; }
+    /* Hidden side bar keeps its activity icons as a rail; clicking one opens that panel. */
+    body.no-explorer #explorerPane > .side { display:none; }
+    body.no-explorer .activity button.on { background:transparent; box-shadow:none; }
+  }
+  @media (min-width:901px) {
+    body.no-explorer #work { --exw:42px; }
+    body.no-explorer .activity { flex-direction:column; align-items:center; padding:4px 2px; border-bottom:0; }
+    body.no-explorer .activity button { width:100%; padding:6px 0; border-radius:6px; }
   }
   @media (min-width:641px) and (max-width:900px) {
     #work.pane-scroller { grid-template:none; grid-template-columns:minmax(0, 1fr); grid-template-rows:auto; grid-auto-rows:minmax(280px, 1fr); gap:8px; overflow-y:auto; }
-    body.no-explorer #work.pane-scroller, body.zen #work.pane-scroller { grid-template-rows:none; }
+    body.zen #work.pane-scroller { grid-template-rows:none; }
     #work > * { grid-area:auto; }
-    #explorerPane { max-height:30vh; }
+    /* overflow:hidden makes the pane's min-content 0, so a full #work would squeeze its auto row to the border. */
+    #explorerPane { max-height:30vh; min-height:min(30vh, 220px); }
+    body.no-explorer #explorerPane { min-height:fit-content; }
     #split { display:none; }
   }
   @media (max-width:640px) {
@@ -79,7 +89,11 @@
     #work > * { grid-area:auto; }
     #explorerPane { grid-column:1 / -1; max-height:40dvh; }
     #split { display:none; }
+    body.no-explorer .activity { flex-direction:row; padding:3px 6px; }
+    body.no-explorer .activity button { width:auto; padding:4px 12px; }
   }
+  .toolbar button[aria-pressed="true"] { background:color-mix(in srgb, var(--acc) 22%, var(--panel)); border-color:var(--acc); }
+  .toolbar .icon-btn { min-width:2.2em; padding-inline:6px; font-weight:600; }
 /* Compare 2 views (phase 2a) */
 .cm-editor .cmp-del { background: color-mix(in srgb, #e5534b 13%, transparent); }
 .cm-editor .cmp-add { background: color-mix(in srgb, #2da44e 13%, transparent); }

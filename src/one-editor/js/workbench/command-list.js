@@ -16,6 +16,8 @@ function registerOneEditorCommands() {
   C("newNote", "Ghi chú mới", "Alt+n", () => A.newNote());
   C("openFiles", "Mở file…", "Ctrl+o", A.openFiles);
   C("openFolder", "Mở folder…", null, A.openFolder);
+  C("openCloudFolder", "☁ Mở folder từ link Google Drive / OneDrive…", null, A.openCloudFolder);
+  C("gdriveKey", "Google Drive: đổi / xoá API key…", null, () => { if (CloudDrive.askKey() != null) StatusBar.msg(T("Đã cập nhật API key Google Drive."), "good"); });
   C("save", "Lưu", "Ctrl+s", () => A.save(false), hasDoc);
   C("saveAs", "Lưu thành…", "Ctrl+Shift+s", () => A.save(true), hasDoc);
   C("diskRefresh", "🔄 Làm mới từ đĩa: folder Explorer + các tab file", null, () => DiskSync.checkAll());

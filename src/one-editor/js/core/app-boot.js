@@ -17,6 +17,7 @@ const Toolbar = (() => {
     sel.disabled = !doc;
     if (Views.activeDoc()) $("opSel").value = RunOp.of(Views.activeDoc());
     $("layoutSel").value = Views.layout;
+    ToolbarButtons.sync();
   }
 
   function fill() {
@@ -39,8 +40,6 @@ const Toolbar = (() => {
 function wireOneEditor() {
   const on = (id, ev, fn) => $(id).addEventListener(ev, fn);
   on("btnNew", "click", () => Actions.newNote());
-  on("btnOpen", "click", Actions.openFiles);
-  on("btnFolder", "click", Actions.openFolder);
   on("btnSave", "click", () => Actions.save(false));
   on("btnSaveAs", "click", () => Actions.save(true));
   on("btnRun", "click", Actions.run);
@@ -68,9 +67,13 @@ function wireOneEditor() {
   Compare.init();
   Macro.init();
   CmSetup.settings.hidden = Prefs.get("hidden", false) === true;
+  ToolbarButtons.init();
   CmSetup.settings.numHover = Prefs.get("numhover", true) !== false;
   CmSetup.settings.lint = Prefs.get("lint", true) !== false;
   on("stEol", "click", EncodingActions.pick);
+  on("stKeys", "click", () => QuickPick.open(">" + T("Bộ phím")));
+  on("btnStyle", "click", e => EditorMenu.openFromButton(e.currentTarget));
+  EditorMenu.init();
   on("stLint", "click", () => Commands.run("problems"));
   matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => Views.applySettings());
   registerOneEditorCommands();
@@ -125,6 +128,7 @@ function wireOneEditor() {
   if (Prefs.get("guides", true) !== false) Actions.setGuides(true);
   await RecentFiles.load();
   await Pinned.init();
+  Explorer.restoreCloud();
   // Extras (breadcrumbs, bracket colours, snippets, key profile, sessions) load after the editor is usable.
   EditorExtras.use(async () => { KeyProfiles.init(); Aids.apply(); await Snippets.load(); await Sessions.init(); });
   StatusBar.storage(NotesDb.ok, NotesDb.error);

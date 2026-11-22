@@ -29,6 +29,18 @@ function registerNotepadppCommands(C, hasDoc) {
   for (const [id, text] of TEXT) C("text-" + id, text, null, () => N.text(id), hasDoc);
   for (const alg of ["SHA-1", "SHA-256", "SHA-512"]) C("hash-" + alg, () => T("Hash {alg} của vùng chọn (hoặc cả tab)", { alg }), null, () => N.hash(alg), hasDoc);
 
+  const S = TokenStyles;
+  for (let s = 1; s <= S.N; s++) {
+    const p = () => ({ s, color: S.colorName(s) });
+    C("styleAll" + s, () => T("Tô màu {s} ({color}): mọi chỗ của token", p()), "Ctrl+k " + s, () => S.styleAll(s), hasDoc);
+    C("styleOne" + s, () => T("Tô màu {s} ({color}): chỉ token này", p()), null, () => S.styleOne(s), hasDoc);
+    C("styleClear" + s, () => T("Tô màu: xoá màu {s} ({color})", p()), null, () => S.clearStyle(s), hasDoc);
+  }
+  C("styleClearAll", "Tô màu: xoá mọi màu", "Ctrl+k 0", () => S.clearStyle(0), hasDoc);
+  C("styleNext", "Tô màu: tới chỗ tô kế tiếp", null, () => S.jump(1), hasDoc);
+  C("stylePrev", "Tô màu: tới chỗ tô trước", null, () => S.jump(-1), hasDoc);
+  C("styleCopy", "Tô màu: chép chữ đã tô", null, S.copyStyled, hasDoc);
+
   C("macroRecord", "Macro: bắt đầu / dừng ghi", "Alt+Shift+r", Macro.toggle, hasDoc);
   C("macroPlay", "Macro: phát lại 1 lần", "Alt+Shift+p", () => Macro.play(1), hasDoc);
   C("macroPlayN", "Macro: phát lại N lần…", null, Macro.playN, hasDoc);

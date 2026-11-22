@@ -13,9 +13,21 @@ const src = f => fs.readFileSync(path.join(root, f), "utf8");
 vm.runInContext(["../data-workbench/js/core/text-utils.js", "../data-workbench/js/parsers/format-detect.js", "js/editor/language-detect.js", "js/core/layout-presets.js",
   "js/core/output-operations.js", "js/core/share-link-state.js", "js/core/demo-samples.js", "js/notepadpp/encoding-detect-convert.js", "js/notepadpp/line-and-text-operations.js",
   "js/providers/local-file-system-access-provider.js", "js/notepadpp/large-file-chunk-viewer.js", "js/core/demo-samples-notepadpp.js",
-  "../data-workbench/js/diff/myers-sequence-diff.js", "js/workbench/compare-ignore-line-diff.js",
-].map(src).join("\n;\n") + "\n;Object.assign(globalThis, { Encoding, LineOps, LocalFs, BigFile, DEMOS, ShareState, CompareIgnore });", ctx);
-const { Encoding: E, LineOps: L, LocalFs, BigFile, DEMOS, ShareState, CompareIgnore } = ctx;
+  "../data-workbench/js/diff/myers-sequence-diff.js", "js/workbench/compare-ignore-line-diff.js", "js/notepadpp/token-style-highlights.js",
+].map(src).join("\n;\n") + "\n;Object.assign(globalThis, { Encoding, LineOps, LocalFs, BigFile, DEMOS, ShareState, CompareIgnore, TokenStyles });", ctx);
+const { Encoding: E, LineOps: L, LocalFs, BigFile, DEMOS, ShareState, CompareIgnore, TokenStyles } = ctx;
+
+test("token styles: occurrences are case-sensitive, non-overlapping, whole word only when asked, capped", () => {
+  const occ = (...a) => [...TokenStyles.occurrences(...a)];
+  const log = "ORD-1002 ord-1002 ORD-10021 xORD-1002 ORD-1002";
+  eq(occ(log, "ORD-1002"), [0, 18, 29, 38]);
+  eq(occ(log, "ORD-1002", true), [0, 38]);
+  eq(occ("aaaa", "aa"), [0, 2]);
+  eq(occ("Việt việt Việtnam", "Việt", true), [0]);
+  eq(occ("a_b ab a", "a", true), [7]);
+  eq(occ("x x x x", "x", false, 2), [0, 2]);
+  eq(occ("abc", ""), []);
+});
 const hex = b => Buffer.from(b).toString("hex"), bytes = h => Uint8Array.from(Buffer.from(h, "hex"));
 
 test("encoding: BOM / UTF-8 / 1258 / 1252 detection and byte-exact round trips", () => {
@@ -87,7 +99,7 @@ test("large file chunks end on a line break; demos are valid", async () => {
   assert.equal(a.end, 3 * 1024 * 1024 + 1);
   const b = await BigFile.read(file, a.end);
   assert.ok(b.text.endsWith("\nlast") && b.end === file.size);
-  for (const key of ["sort-dedupe", "column-csv", "macro"]) assert.ok(ShareState.parse(DEMOS[key].payload()).views.flat().length, key);
+  for (const key of ["sort-dedupe", "column-csv", "macro", "token-styles"]) assert.ok(ShareState.parse(DEMOS[key].payload()).views.flat().length, key);
   const d = await LocalFs.readText(DEMOS["windows-1258"].file());
   eq([d.enc, d.eol, d.text.split("\n").length], ["windows-1258", "\r\n", 5]);
   const m = await LocalFs.readText(DEMOS["crlf-mixed"].file());

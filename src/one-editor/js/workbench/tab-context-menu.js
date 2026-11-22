@@ -13,18 +13,19 @@ const TabMenu = (() => {
     removeEventListener("blur", close);
   }
 
-  function item(c) {
+  function entry(label, keys, run) {
     const b = document.createElement("button"), name = document.createElement("span"), key = document.createElement("small");
     b.setAttribute("role", "menuitem");
-    name.textContent = typeof c.label === "function" ? c.label() : T(c.label);
-    key.textContent = Commands.keyLabel(c);
+    name.textContent = label;
+    key.textContent = keys;
     b.append(name, key);
-    b.onclick = () => { close(); Commands.run(c.id); };
+    b.onclick = () => { close(); run(); };
     return b;
   }
+  const item = c => entry(typeof c.label === "function" ? c.label() : T(c.label), Commands.keyLabel(c), () => Commands.run(c.id));
 
   function onKey(e) {
-    const items = [...menu.children], k = items.indexOf(document.activeElement);
+    const items = [...menu.querySelectorAll("button")], k = items.indexOf(document.activeElement);
     if (e.key === "Escape" || e.key === "Tab") { e.preventDefault(); close(); if (Views.activeDoc()) Views.activeView().focus(); }
     else if (e.key === "ArrowDown" || e.key === "ArrowUp") { e.preventDefault(); items[(k + (e.key === "ArrowDown" ? 1 : -1) + items.length) % items.length].focus(); }
   }
@@ -35,11 +36,16 @@ const TabMenu = (() => {
     Views.activate(gi, id, false);
     Views.focus(gi);
     const usable = Commands.all(), cmds = IDS.map(c => usable.find(u => u.id === c)).filter(Boolean);
-    if (!cmds.length) return;
+    if (cmds.length) show(cmds.map(item), x, y);
+  }
+
+  // Shows a menu of nodes (entries, rows, separators) at x, y kept inside the window; the first button gets focus.
+  function show(nodes, x, y) {
+    close();
     menu = document.createElement("div");
     menu.className = "tab-menu";
     menu.setAttribute("role", "menu");
-    menu.append(...cmds.map(item));
+    menu.append(...nodes);
     menu.addEventListener("keydown", onKey);
     document.body.append(menu);
     const r = menu.getBoundingClientRect();
@@ -48,8 +54,8 @@ const TabMenu = (() => {
     document.addEventListener("pointerdown", onDown, true);
     addEventListener("resize", close);
     addEventListener("blur", close);
-    menu.firstChild.focus();
+    menu.querySelector("button").focus();
   }
 
-  return { open, close };
+  return { open, close, show, entry, item };
 })();

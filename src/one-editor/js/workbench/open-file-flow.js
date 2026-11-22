@@ -35,11 +35,13 @@ const FileOpen = (() => {
     return doc;
   }
 
-  // items: [{ file, handle|null }]
+  // items: [{ file, handle|null, remote? }] — remote: a Drive / OneDrive file (one tab per remote file, like a handle).
   async function openMany(items, gi = Views.focused) {
     let n = 0, noted = null;
-    for (const { file, handle } of items) {
-      try { const d = await open(file, handle, gi); if (d) { n++; if (d.encNote) noted = d; } }
+    for (const { file, handle, remote } of items) {
+      const dup = remote?.url && Docs.list().find(d => d.remote?.url === remote.url);
+      if (dup) { Views.open(dup, Views.where(dup.id) >= 0 ? Views.where(dup.id) : gi); n++; continue; }
+      try { const d = await open(file, handle, gi); if (d) { n++; if (remote) Docs.update(d, { remote }); if (d.encNote) noted = d; } }
       catch (e) { StatusBar.msg(T("Không mở được “{name}”: {msg}", { name: file.name, msg: e.message }), "bad"); }
     }
     if (!n) return;

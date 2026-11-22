@@ -48,12 +48,16 @@ test("locked note sealing: text ⇄ { iv, ct } with a PBKDF2 key; another passwo
   await assert.rejects(Crypt.unseal(rec, await Crypt.key("other", salt)), /Sai mật khẩu/);
 });
 
-test("snippets + key profiles: built-in bodies are valid CM templates, profiles bind only Mod keys", () => {
+test("snippets + key profiles: built-in bodies are valid CM templates, profiles bind only Mod / Alt keys", () => {
   for (const s of Snippets.BUILT) {
     assert.ok(s.prefix && s.body && s.langs.length, s.prefix);
     assert.equal((s.body.match(/\$\{/g) || []).length, (s.body.match(/\}/g) || []).length - (s.body.match(/[^$]\{|^\{/g) || []).length, "balanced fields: " + s.prefix);
   }
   assert.ok(Snippets.BUILT.some(s => s.prefix === "log" && s.langs.includes("TypeScript")));
-  for (const [name, list] of Object.entries(KeyProfiles.PROFILES)) for (const [key] of list) assert.match(key, /^Mod-/, name + " " + key);
+  for (const [name, list] of Object.entries(KeyProfiles.PROFILES)) {
+    for (const [key] of list) assert.match(key, /^(Mod|Alt)-/, name + " " + key);
+    assert.equal(new Set(list.map(([key]) => key)).size, list.length, name + " has duplicate keys");
+  }
   eq(Object.keys(KeyProfiles.PROFILES), ["vscode", "sublime", "notepadpp"]);
+  assert.ok(["Mod-d", "Mod-l", "Mod-Shift-l", "Mod-F3", "Alt-0"].every(k => KeyProfiles.PROFILES.notepadpp.some(([key]) => key === k)));
 });

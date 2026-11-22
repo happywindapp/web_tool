@@ -75,7 +75,7 @@ const DiskSync = (() => {
     const out = { reloaded: [], conflict: [], fresh: [], gone: [], big: [], skip: [], perm: [] };
     let treeErr = null;
     try {
-      if (!quiet) for (const d of Docs.list().filter(d => d.kind === "file" && d.handle && d.stale)) { await FileOpen.reload(d); if (d.stale && Docs.get(d.id)) out.perm.push(d); }
+      if (!quiet) for (const d of Docs.list().filter(d => d.kind === "file" && d.handle && d.stale)) { await FileOpen.reload(d, true); if (d.stale && Docs.get(d.id)) out.perm.push(d); }
       for (const d of Docs.list().filter(watched)) { const s = await check(d).catch(() => "skip"); if (out[s]) out[s].push(d); }
       if (tree) await Explorer.refresh().catch(e => { treeErr = e; });
     } finally { busy = false; }

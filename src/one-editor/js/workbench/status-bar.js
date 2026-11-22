@@ -8,6 +8,7 @@ const StatusBar = (() => {
   function draw() {
     raf = 0;
     const doc = Views.activeDoc(), st = doc && Views.activeView().state;
+    set("stKeys", "⌨ " + KeyProfiles.label());
     if (!doc) { ["stPos", "stCount", "stLang", "stEol", "stIndent", "stLint", "stSrc"].forEach(id => set(id, "")); return; }
     const main = st.selection.main, line = st.doc.lineAt(main.head), n = st.selection.ranges.length;
     // Code point under the cursor.

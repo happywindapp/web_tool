@@ -10,7 +10,7 @@ const SideBar = (() => {
   function show(name, focusReplace = false) {
     document.querySelectorAll("[data-side]").forEach(b => b.classList.toggle("on", b.dataset.side === name));
     document.querySelectorAll("[data-side-panel]").forEach(p => { p.hidden = p.dataset.sidePanel !== name; });
-    document.body.classList.remove("no-explorer");
+    if (document.body.classList.contains("no-explorer")) { document.body.classList.remove("no-explorer"); Prefs.set("explorer", true); }
     PhoneLayout.show(0);
     if (name === "outline") EditorExtras.use(() => Outline.show());
     if (name === "search") {

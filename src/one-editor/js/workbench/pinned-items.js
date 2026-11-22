@@ -4,9 +4,11 @@ const Pinned = (() => {
 
   const persist = () => NotesDb.putMeta("pinned", list).catch(e => console.warn("One Editor pinned:", e));
   const changed = () => { persist(); Explorer.render(); };
-  const valid = p => p && (p.kind === "note" ? Docs.get(p.id)?.kind === "note" : (p.kind === "dir" || p.kind === "file") && p.handle && typeof p.name === "string");
+  const valid = p => p && (p.kind === "note" ? Docs.get(p.id)?.kind === "note" : p.kind === "cloud" ? typeof p.link === "string" && typeof p.name === "string"
+    : (p.kind === "dir" || p.kind === "file") && p.handle && typeof p.name === "string");
   const nameOf = p => p.kind === "note" ? Docs.get(p.id)?.name || "" : p.name;
   const hasNote = doc => list.some(p => p.kind === "note" && p.id === doc.id);
+  const hasCloud = link => list.some(p => p.kind === "cloud" && p.link === link);
   const canPin = doc => { const r = Docs.root(doc); return r.kind === "note" || !!r.handle; };
 
   // After the hot-exit restore, so pinned notes can be checked against the restored ones.
@@ -49,6 +51,15 @@ const Pinned = (() => {
     StatusBar.msg(T(on ? "Đã ghim “{name}” — xem ở mục Đã ghim của Explorer." : "Đã bỏ ghim “{name}”.", { name: doc.name }), "good");
   }
 
+  // Folder opened from a Google Drive / OneDrive link: pinned by its link.
+  function toggleCloud(node) {
+    if (!ready || !node.link) return;
+    const on = !hasCloud(node.link);
+    list = on ? [...list, { kind: "cloud", name: node.name, link: node.link }] : list.filter(p => !(p.kind === "cloud" && p.link === node.link));
+    changed();
+    StatusBar.msg(T(on ? "Đã ghim “{name}” — xem ở mục Đã ghim của Explorer." : "Đã bỏ ghim “{name}”.", { name: node.name }), "good");
+  }
+
   // The tab's note, or its file on disk (canPin gates the command).
   function toggleDoc(doc) {
     const r = Docs.root(doc);
@@ -57,6 +68,7 @@ const Pinned = (() => {
 
   async function open(p) {
     if (p.kind === "note") { const d = Docs.get(p.id); if (d) Explorer.openNote(d); return; }
+    if (p.kind === "cloud") { await Actions.openCloudFolder(p.link); return; }
     try {
       if (!(await LocalFs.readable(p.handle))) { StatusBar.msg(T("Trình duyệt chưa cho đọc lại “{name}”.", { name: p.name }), "warn"); return; }
       if (p.kind === "file") { await FileOpen.openMany([{ file: await p.handle.getFile(), handle: p.handle }], Views.focused); return; }
@@ -69,5 +81,5 @@ const Pinned = (() => {
     }
   }
 
-  return { init, items: () => list, nameOf, hasNote, canPin, find, renamed, toggleHandle, toggleNote, toggleDoc, open, remove };
+  return { init, items: () => list, nameOf, hasNote, hasCloud, canPin, find, renamed, toggleHandle, toggleNote, toggleCloud, toggleDoc, open, remove };
 })();

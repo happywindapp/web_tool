@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'unsafe-inline'; img-src data: blob:; font-src data:; frame-src 'self' https://embed.diagrams.net; media-src https://api.dictionaryapi.dev; connect-src https://quan111.goatcounter.com https://api.mymemory.translated.net https://api.dictionaryapi.dev https://api.tatoeba.org https://r.jina.ai">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'unsafe-inline'; img-src data: blob:; font-src data:; frame-src 'self' https://embed.diagrams.net; media-src https://api.dictionaryapi.dev; connect-src https://quan111.goatcounter.com https://api.mymemory.translated.net https://api.dictionaryapi.dev https://api.tatoeba.org https://r.jina.ai https://www.googleapis.com https://api.onedrive.com https://api-badgerp.svc.ms https://my.microsoftpersonalcontent.com https://*.1drv.com">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>One Editor</title>
 <style>
@@ -20,6 +20,7 @@
 /* @include styles/data-tree-query-rainbow.css */
 /* @include styles/log-fix-highlight-filter.css */
 /* @include styles/editor-extras-outline-crumbs.css */
+/* @include styles/token-style-highlights-and-editor-menu.css */
 /* @include ../data-workbench/styles/phone-portrait-layout.css */
 </style>
 <!-- GoatCounter: chỉ gửi path (không query/hash); chạy local đếm thành /local/<tên file> để không lộ thư mục máy -->
@@ -53,11 +54,13 @@
   <select id="opSel" title="Phép ▶ Chạy sẽ chạy — tự chọn theo ngôn ngữ của tab; chọn tay thì tab nhớ phép đó" data-i18n-skip></select>
   <button id="btnExplorer" title="Ẩn / hiện Explorer (Ctrl+B)">☰</button>
   <button id="btnNew" title="Ghi chú mới — tự lưu trong trình duyệt (Alt+N)">+ Ghi chú</button>
-  <button id="btnOpen" title="Mở file trên máy (Ctrl+O) — hoặc kéo-thả vào View 1 / View 2">Mở file…</button>
-  <button id="btnFolder" title="Mở folder vào Explorer (Chrome/Edge: bắt đầu ở folder của file đang mở)">Mở folder…</button>
+  <button id="btnOpen" title="Mở file (Ctrl+O) hoặc folder trên máy — hoặc kéo-thả vào View 1 / View 2" aria-haspopup="menu">📂 Mở ▾</button>
   <button id="btnSave" title="Lưu (Ctrl+S): file → ghi đè lên đĩa; ghi chú → đã tự lưu trong trình duyệt">💾 Lưu</button>
   <button id="btnSaveAs" title="Lưu thành file mới (Ctrl+Shift+S); trình duyệt không hỗ trợ thì tải xuống">Lưu thành…</button>
+  <button id="btnUndo" title="Hoàn tác (Ctrl+Z)">↶ Hoàn tác</button>
+  <button id="btnRedo" title="Làm lại (Ctrl+Y / Ctrl+Shift+Z)">↷ Làm lại</button>
   <button id="btnFind" title="Tìm / thay trong tab đang mở (Ctrl+F) — có tìm / thay trong vùng chọn">🔍 Tìm</button>
+  <button id="btnStyle" title="Tô màu token kiểu Notepad++ — chữ đang chọn hoặc từ dưới con trỏ: tô mọi chỗ / 1 token, xoá màu, tới chỗ tô (chuột phải trong editor cũng có; Ctrl+K 1…6, Ctrl+K 0 xoá hết)">🖍 Tô màu</button>
   <button id="btnRefresh" title="Làm mới từ đĩa: đọc lại mọi tab file (kể cả tab chưa đọc lại sau F5) và các folder đang mở trong Explorer">🔄 Làm mới</button>
   <button id="btnFormat" title="Format tab đang mở theo ngôn ngữ — kết quả ra tab liên kết ở view kia (Shift+Alt+F: format tại chỗ)">✨ Format</button>
   <select id="demo" class="demo-picker" title="Nạp dữ liệu mẫu thành tab tạm (không đè bài đang sửa)" data-i18n-skip></select>
@@ -65,11 +68,16 @@
   <label class="chk" title="Ngôn ngữ của tab đang mở — mặc định tự nhận theo tên file, shebang / modeline rồi nội dung">Ngôn ngữ <select id="langSel" data-i18n-skip></select></label>
   <label class="chk" title="Xuống dòng mềm (Alt+Z)"><input id="chkWrap" type="checkbox"> Xuống dòng</label>
   <label class="chk desktop-only" title="Bản thu nhỏ của file ở mép phải editor — bấm / kéo trên đó để cuộn"><input id="chkMinimap" type="checkbox"> Minimap</label>
+  <button id="btnZoomIn" class="icon-btn" title="Phóng to chữ (Ctrl+=)">A+</button>
+  <button id="btnZoomOut" class="icon-btn" title="Thu nhỏ chữ (Ctrl+-, Ctrl+0 về mặc định)">A−</button>
+  <button id="btnHidden" class="icon-btn" title="Hiện / ẩn mọi ký tự ẩn — dấu cách, Tab, xuống dòng (Show All Characters)" aria-pressed="false">¶</button>
+  <button id="btnEnc" title="Bảng mã của tab — bấm để đọc lại file với bảng mã khác, chuyển sang bảng mã khác hoặc đổi kiểu xuống dòng (như menu Encoding của Notepad++)" aria-haspopup="menu" data-i18n-skip>—</button>
   <span class="sep"></span>
   <button id="btnCompare" title="So sánh tab đang mở của 2 view — Alt+↓ / Alt+↑ nhảy giữa các khối khác (bấm lần nữa để tắt)">≠ So sánh</button>
   <button id="btnSwap" title="Đổi chỗ view đang chọn với view kế tiếp">⇆</button>
   <span class="sep"></span>
   <select id="layoutSel" title="Layout: 1 view · 2 cột · 3 cột · 2 hàng · lưới 2×2 (Alt+Shift+1/2/3/8/5)" data-i18n-skip></select>
+  <button id="btnFnList" title="Function List — hàm / class / tiêu đề của tab ở sidebar, bấm để nhảy tới (bấm lần nữa để ẩn)">ƒ Danh sách hàm</button>
   <button id="btnPalette" title="Command Palette — mọi lệnh và phím tắt (Ctrl+Shift+P; Ctrl+P mở nhanh, Ctrl+R symbol, Ctrl+G dòng)">⌘ Lệnh</button>
 </div>
 <div class="seg pane-switch"><button>Explorer</button><button>View 1</button><button>View 2</button><button hidden>View 3</button><button hidden>View 4</button></div>
@@ -134,6 +142,7 @@
   <button id="stLang" class="link" title="Đổi ngôn ngữ của tab" data-i18n-skip></button>
   <button id="stEol" class="link" title="Bảng mã và kiểu xuống dòng — bấm để mở lại / lưu với bảng mã khác, đổi CRLF / LF / CR" data-i18n-skip></button>
   <span id="stIndent" title="Thụt lề tự dò theo nội dung file — phím Tab chèn đúng kiểu này" data-i18n-skip></span>
+  <button id="stKeys" class="link" title="Bộ phím tắt của editor — bấm để đổi: Notepad++ · VS Code · Sublime Text (Vim bật / tắt trong ⌘ Lệnh)" data-i18n-skip></button>
   <button id="stLint" class="link bad" title="Lỗi / cảnh báo của tab — bấm để mở danh sách (Ctrl+Shift+M), F8 tới lỗi kế" data-i18n-skip></button>
   <span id="stSrc" data-i18n-skip></span>
   <span id="stStore" data-i18n-skip></span>
@@ -186,6 +195,7 @@
 // @include js/i18n/en-one-editor-editor-extras-lazy-strings.js
 // @include js/i18n/en-one-editor-power-tools-strings.js
 // @include js/i18n/en-one-editor-disk-sync-strings.js
+// @include js/i18n/en-one-editor-cloud-folder-strings.js
 // @include js/i18n/en-one-editor-pinned-strings.js
 // @include js/i18n/vi-codemirror-phrases.js
 // @include ../data-workbench/js/core/text-utils.js
@@ -228,6 +238,7 @@
 // @include js/core/demo-samples-power-tools.js
 // @include js/providers/notes-indexeddb-provider.js
 // @include js/providers/local-file-system-access-provider.js
+// @include js/providers/cloud-drive-public-folder-provider.js
 // @include js/editor/bookmarks.js
 // @include js/editor/document-symbols.js
 // @include js/editor/search-in-selection.js
@@ -236,6 +247,7 @@
 // @include js/notepadpp/line-and-text-operations.js
 // @include js/notepadpp/hidden-characters.js
 // @include js/notepadpp/mixed-eol-tracker.js
+// @include js/notepadpp/token-style-highlights.js
 // @include js/editor/codemirror-setup.js
 // @include js/editor/language-loader.js
 // @include js/workbench/document-store.js
@@ -302,6 +314,7 @@
 // @include js/notepadpp/line-text-editor-actions.js
 // @include js/notepadpp/macro-recorder-replay.js
 // @include js/notepadpp/large-file-chunk-viewer.js
+// @include js/notepadpp/editor-context-menu-token-styles.js
 // @include js/workbench/open-file-flow.js
 // @include js/workbench/explorer-tree.js
 // @include js/workbench/explorer-disk-actions.js
@@ -317,6 +330,7 @@
 // @include js/workbench/hot-exit-session.js
 // @include js/workbench/run-op-picker.js
 // @include js/workbench/toolbar-actions.js
+// @include js/workbench/toolbar-notepadpp-buttons-and-menus.js
 // @include js/workbench/split-resizer.js
 // @include js/workbench/command-list.js
 // @include js/workbench/command-list-format-compare.js

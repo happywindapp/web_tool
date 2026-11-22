@@ -33,15 +33,22 @@ const EncodingActions = (() => {
     StatusBar.msg(T("{what} — lưu (Ctrl+S) để ghi ra file.", { what }), "good");
   }
 
-  function saveWith(enc) {
+  // Notepad++ "Convert to": same text, written with enc (+ BOM) by the next save; false when the text does not fit enc.
+  function convert(enc, bom) {
     const doc = active();
-    if (!doc) return;
+    if (!doc) return false;
+    if (doc.readOnly || doc.hex) { StatusBar.msg(T("Tab chỉ đọc — không đổi được."), "warn"); return false; }
     const before = doc.enc;
     doc.enc = enc;
     try { LocalFs.encode(Docs.text(doc), doc); }
-    catch (e) { doc.enc = before; StatusBar.msg(e.message, "bad", e.line ? () => Views.revealLine(doc, e.line) : null); return; }
-    change({ enc, bom: enc.startsWith("utf-16") ? true : doc.bom && enc === "utf-8" }, T("Bảng mã khi lưu: {enc}", { enc: Encoding.label(enc) }));
-    Actions.save(!(doc.kind === "file" && doc.handle));
+    catch (e) { doc.enc = before; StatusBar.msg(e.message, "bad", e.line ? () => Views.revealLine(doc, e.line) : null); return false; }
+    change({ enc, bom }, T("Bảng mã khi lưu: {enc}", { enc: Encoding.label(enc) + (bom ? " BOM" : "") }));
+    return true;
+  }
+
+  function saveWith(enc) {
+    const doc = active();
+    if (doc && convert(enc, enc.startsWith("utf-16") ? true : doc.bom && enc === "utf-8")) Actions.save(!(doc.kind === "file" && doc.handle));
   }
 
   const setEol = eol => change({ eol, eolMixed: false, eolList: null }, T("Xuống dòng: {eol}", { eol: Encoding.EOL_NAME[eol] }));
@@ -50,8 +57,9 @@ const EncodingActions = (() => {
   function toggleHidden() {
     CmSetup.settings.hidden = !CmSetup.settings.hidden;
     Prefs.set("hidden", CmSetup.settings.hidden);
+    $("btnHidden").setAttribute("aria-pressed", CmSetup.settings.hidden);
     Views.applySettings();
   }
 
-  return { announce, reopen, saveWith, setEol, toggleBom, toggleHidden, pick, PICK };
+  return { announce, reopen, convert, saveWith, setEol, toggleBom, toggleHidden, pick, PICK };
 })();

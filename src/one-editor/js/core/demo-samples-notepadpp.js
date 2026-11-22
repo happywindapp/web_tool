@@ -8,6 +8,10 @@
   const SYMBOLS = "GLOBX\nacme\nINITECH\nACME\n\nglobx\nUMBRELLA\nACME\n10 lots\n2 lots\n\nINITECH\n";
   const CSV_COLS = "symbol,side,qty\nACME,BUY,100\nGLOBX,SELL,50\nINITECH,BUY,300\nUMBRELLA,SELL,20\nACME,SELL,75\n";
   const WORDS = "acme corp\nglobex inc\ninitech llc\numbrella group\nhooli\n";
+  const ORDERS_LOG = "2026-11-22 09:15:01.120 INFO  gateway  NEW      ORD-1001 ACME     BUY  100 @ 25.40\n2026-11-22 09:15:01.348 INFO  gateway  NEW      ORD-1002 GLOBX    SELL  50 @ 61.10\n"
+    + "2026-11-22 09:15:02.007 WARN  risk     LIMIT    ORD-1002 GLOBX    exposure 92% of limit\n2026-11-22 09:15:02.215 INFO  gateway  FILLED   ORD-1001 ACME     100 @ 25.40\n"
+    + "2026-11-22 09:15:03.502 ERROR risk     REJECTED ORD-1002 GLOBX    reason=LIMIT_EXCEEDED\n2026-11-22 09:15:04.880 INFO  gateway  NEW      ORD-1003 ACME     SELL  40 @ 25.55\n"
+    + "2026-11-22 09:15:05.116 INFO  gateway  NEW      ORD-10021 INITECH BUY  300 @ 8.02\n2026-11-22 09:15:06.733 ERROR risk     REJECTED ORD-1003 ACME     reason=SHORT_SELL\n";
   const key = (key, code) => ({ k: { key, code, ctrlKey: false, shiftKey: false, altKey: false, metaKey: false } });
 
   Object.assign(DEMOS, {
@@ -15,6 +19,15 @@
     "crlf-mixed": { label: "Xuống dòng hỗn hợp CRLF / LF / CR", file: () => new File([MIXED], "deploy-steps.txt") },
     "sort-dedupe": { label: "Sắp xếp + bỏ trùng dòng", payload: () => ({ v: 1, views: [[t("symbols.txt", SYMBOLS)], []] }), after: () => StatusBar.msg(T("Thử Palette (Ctrl+Shift+P) → “Dòng: sắp xếp…”, “Dòng: bỏ dòng trùng”, “Dòng: bỏ dòng trống”.")) },
     "column-csv": { label: "Chọn cột + chèn số", payload: () => ({ v: 1, views: [[t("orders.csv", CSV_COLS)], []] }), after: () => StatusBar.msg(T("Shift+Alt+kéo chọn cột đầu (hoặc Ctrl+Alt+↓), rồi Palette → “Cột: chèn số tăng dần…”.")) },
+    "token-styles": {
+      label: "Tô màu token kiểu Notepad++",
+      payload: () => ({ v: 1, views: [[t("orders.log", ORDERS_LOG)], []] }),
+      after: () => {
+        const v = Views.activeView();
+        [["ORD-1002", 1], ["REJECTED", 2], ["ACME", 3]].forEach(([text, s]) => TokenStyles.styleAll(s, v, { text, whole: true }));
+        StatusBar.msg(T("Đã tô sẵn ORD-1002 (màu 1 — không tô ORD-10021), REJECTED (2), ACME (3). Bôi đen 1 từ rồi chuột phải → Tô mọi chỗ, hoặc nút 🖍 Tô màu, Ctrl+K 1…6; Ctrl+K 0 xoá hết."));
+      },
+    },
     "macro": {
       label: "Macro: bọc mỗi dòng trong dấu nháy",
       payload: () => ({ v: 1, views: [[t("names.txt", WORDS)], []] }),

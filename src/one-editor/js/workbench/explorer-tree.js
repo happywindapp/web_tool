@@ -30,15 +30,17 @@ const Explorer = (() => {
 
   async function openNode(node) {
     try {
-      const { file, handle } = await node.read();
-      await FileOpen.openMany([{ file, handle }], Views.focused);
+      await FileOpen.openMany([await node.read()], Views.focused);
     } catch (e) { StatusBar.msg(T("Không mở được “{name}”: {msg}", { name: node.name, msg: e.message }), "bad"); }
   }
 
   function treeNode(node, hit) {
     if (!node.dir) return hit(node.name) ? row(fileIcon(node.name) + " " + node.name, node.path, () => openNode(node), ExplorerDisk.buttons(node)) : null;
     const d = el("details", "ex-dir"), kids = el("div", "ex-kids"), sum = el("summary");
-    sum.append(el("span", "ex-dname", "📁 " + node.name), ...ExplorerDisk.buttons(node));
+    const cloudRoot = node.remote && !node.parent && node.link;
+    // preventDefault: a click inside <summary> would also fold the folder.
+    const cloudPin = cloudRoot ? [pinAct(Pinned.hasCloud(node.link), T(PIN_ITEM), e => { e.preventDefault(); e.stopPropagation(); Pinned.toggleCloud(node); })] : [];
+    sum.append(el("span", "ex-dname", (node.remote && !node.parent ? "☁ " : "📁 ") + node.name), ...ExplorerDisk.buttons(node), ...cloudPin);
     sum.title = node.path;
     d.append(sum, kids);
     const fill = () => kids.replaceChildren(...node.children.map(c => treeNode(c, hit)).filter(Boolean));
@@ -69,8 +71,8 @@ const Explorer = (() => {
 
   function pinnedSection(hit) {
     const items = Pinned.items().filter(p => hit(Pinned.nameOf(p)));
-    const icon = p => p.kind === "dir" ? "📁" : p.kind === "note" ? "📝" : fileIcon(p.name);
-    const title = p => T(p.kind === "dir" ? "Mở folder này trong Explorer" : p.kind === "note" ? "Mở ghi chú" : "Mở file");
+    const icon = p => p.kind === "dir" ? "📁" : p.kind === "cloud" ? "☁" : p.kind === "note" ? "📝" : fileIcon(p.name);
+    const title = p => T(p.kind === "dir" || p.kind === "cloud" ? "Mở folder này trong Explorer" : p.kind === "note" ? "Mở ghi chú" : "Mở file");
     return items.length ? section(T("Đã ghim"), items.map(p => row(icon(p) + " " + Pinned.nameOf(p), title(p), () => Pinned.open(p), [btn("ex-act", "✕", T("Bỏ ghim"), () => Pinned.remove(p))]))) : null;
   }
 
@@ -99,15 +101,26 @@ const Explorer = (() => {
     ];
     if (root) {
       const tree = treeNode(root, hit);
-      sections.push(section(T("Folder"), [tree], [...(root.handle ? [refreshBtn()] : []), btn("ex-act", "✕", T("Đóng folder"), () => setRoot(null))]));
+      sections.push(section(T("Folder"), [tree], [...(root.handle || root.remote ? [refreshBtn()] : []), btn("ex-act", "✕", T("Đóng folder"), () => setRoot(null))]));
     } else {
-      sections.push(section(T("Folder"), [el("p", "ex-empty", T("Chưa mở folder. Kéo folder vào đây hoặc bấm:")), btn("ex-open", T("📂 Mở folder…"), T("Mở folder trên máy"), () => Actions.openFolder())]));
+      sections.push(section(T("Folder"), [el("p", "ex-empty", T("Chưa mở folder. Kéo folder vào đây hoặc bấm:")), btn("ex-open", T("📂 Mở folder…"), T("Mở folder trên máy"), () => Actions.openFolder()),
+        btn("ex-open", T("☁ Mở từ link Drive / OneDrive…"), T("Mở folder công khai Google Drive / OneDrive cá nhân (chỉ đọc)"), () => Actions.openCloudFolder())]));
     }
     box.replaceChildren(...sections.filter(Boolean));
   }
 
   const render = () => { if (!raf) raf = requestAnimationFrame(draw); };
-  function setRoot(node) { root = node; if (root) root.open = true; render(); DiskSync.rewatch(); }
+  // A folder from a link is reopened after F5 (a local one needs a new pick).
+  function setRoot(node) { root = node; if (root) root.open = true; Prefs.set("cloudRoot", root?.link || null); render(); DiskSync.rewatch(); }
+
+  async function restoreCloud() {
+    const link = Prefs.get("cloudRoot", null);
+    if (typeof link !== "string" || root) return;
+    try {
+      const node = await CloudDrive.open(link, false);
+      if (node && !root) setRoot(node);
+    } catch (e) { StatusBar.msg(T("Không mở lại được folder từ link: {msg}", { msg: e.message }), "warn"); }
+  }
 
   // Open folders are listed again; known entries keep their node (open state, row buttons), closed folders are read when opened next.
   async function relist(node) {
@@ -119,7 +132,7 @@ const Explorer = (() => {
     }
   }
   async function refresh() {
-    if (!root || !root.handle || !root.children) return;
+    if (!root || !(root.handle || root.remote) || !root.children) return;
     const sig = () => { const out = [], walk = n => { out.push(n.path); (n.children || []).forEach(walk); }; walk(root); return out.join("\n"); };
     const before = sig();
     try { await relist(root); } finally { if (sig() !== before) render(); }
@@ -133,5 +146,5 @@ const Explorer = (() => {
   }
 
   filter.addEventListener("input", render);
-  return { render, setRoot, refresh, loadedFiles, openNode, openNote, root: () => root };
+  return { render, setRoot, restoreCloud, refresh, loadedFiles, openNode, openNote, root: () => root };
 })();

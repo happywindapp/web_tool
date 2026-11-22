@@ -20,6 +20,7 @@
 - [sed-case-conversion-corrupts-vietnamese-utf8.md](sed-case-conversion-corrupts-vietnamese-utf8.md) —
   sed `\L`/`\U` phá chữ có dấu (byte rác `�`); đổi hoa/thường bằng Edit tool hoặc node.
 - [date-input-follows-browser-locale-use-dd-mm-yyyy-text.md](date-input-follows-browser-locale-use-dd-mm-yyyy-text.md) — `<input type=date>` gõ tay theo locale (en-US = mm/dd) ⇒ dùng ô chữ dd/mm/yyyy + 📅 chọn + dòng xem trước.
+- [browser-js-parse-cost-and-syntax-check-cost-measured.md](browser-js-parse-cost-and-syntax-check-cost-measured.md) — số đo parse JS 1–10 MB (~90 ms/MB ở CPU 4×; chi phí chính là tải mạng + RAM) và chi phí kiểm cú pháp theo ngôn ngữ (Lezer có sẵn 0 KB, tree-sitter cpp 4,5 MB).
 - [iframe-srcdoc-inherits-parent-csp-use-separate-sandbox-file.md](iframe-srcdoc-inherits-parent-csp-use-separate-sandbox-file.md) — `srcdoc` kế thừa CSP cha (eval bị chặn) ⇒ engine cần eval chạy trong file HTML riêng + `iframe sandbox="allow-scripts"`; `file://` sandbox không nạp được script local.
 
 - [bilingual-technique-names-in-explanations.md](bilingual-technique-names-in-explanations.md) —
@@ -60,3 +61,4 @@
 - [sandboxed-iframe-same-process-endless-loop-freezes-page.md](sandboxed-iframe-same-process-endless-loop-freezes-page.md) — iframe sandbox (srcdoc, `file://`) chạy cùng process trang chính ⇒ `while(true)` treo cả trang: JS chạy Worker + `terminate()`, HTML cần loop guard chèn vào điều kiện vòng lặp (không thêm xuống dòng).
 - [headless-test-file-system-access-with-opfs-handles.md](headless-test-file-system-access-with-opfs-handles.md) — test file/folder local headless: OPFS handle thay picker, phải serve http (OPFS chặn `file://`), `isolateHistory` cho bước undo riêng.
 - [headless-test-ui-locale-en-and-mobile-viewport-reload.md](headless-test-ui-locale-en-and-mobile-viewport-reload.md) — headless mở UI English ⇒ `I18n.set("vi")` sau boot; đổi `isMobile` giữa chừng làm reload trang ⇒ test mobile ở trang riêng.
+- [css-grid-auto-row-collapses-overflow-hidden-pane.md](css-grid-auto-row-collapses-overflow-hidden-pane.md) — pane `overflow:hidden` trong track grid `auto` bị bóp còn viền khi container hết chỗ (One Editor Explorer 641–900 px) ⇒ thêm `min-height`; test đo chiều cao thật.

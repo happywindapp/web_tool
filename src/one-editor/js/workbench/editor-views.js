@@ -11,6 +11,8 @@ const Views = (() => {
       g.view = new CM.view.EditorView({ parent: g.host, state: CmSetup.makeState("") });
       g.el.addEventListener("focusin", () => setFocused(g.i));
       g.el.addEventListener("pointerdown", () => setFocused(g.i), true);
+      // A click is the user gesture the browser needs to grant read permission again after F5.
+      g.host.addEventListener("pointerdown", () => { const d = Docs.get(g.active); if (d?.stale) FileOpen.reload(d, true); });
     }
     CmSetup.onUpdate = onUpdate;
     setLayout(layout);

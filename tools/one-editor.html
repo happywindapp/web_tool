@@ -3,7 +3,7 @@
 <html lang="vi">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'unsafe-inline'; img-src data: blob:; font-src data:; frame-src 'self' https://embed.diagrams.net; media-src https://api.dictionaryapi.dev; connect-src https://quan111.goatcounter.com https://api.mymemory.translated.net https://api.dictionaryapi.dev https://api.tatoeba.org https://r.jina.ai">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'unsafe-inline'; img-src data: blob:; font-src data:; frame-src 'self' https://embed.diagrams.net; media-src https://api.dictionaryapi.dev; connect-src https://quan111.goatcounter.com https://api.mymemory.translated.net https://api.dictionaryapi.dev https://api.tatoeba.org https://r.jina.ai https://www.googleapis.com https://api.onedrive.com https://api-badgerp.svc.ms https://my.microsoftpersonalcontent.com https://*.1drv.com">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>One Editor</title>
 <style>
@@ -134,14 +134,24 @@
 
   @media (max-height:600px) and (min-width:641px) { .statusbar .tiny { display:none; } }
   @media (min-width:641px) {
-    body.no-explorer #explorerPane, body.zen #explorerPane { display:none; }
-    body.no-explorer #work, body.zen #work { --exw:0px; }
+    body.zen #explorerPane { display:none; }
+    body.zen #work { --exw:0px; }
+    /* Hidden side bar keeps its activity icons as a rail; clicking one opens that panel. */
+    body.no-explorer #explorerPane > .side { display:none; }
+    body.no-explorer .activity button.on { background:transparent; box-shadow:none; }
+  }
+  @media (min-width:901px) {
+    body.no-explorer #work { --exw:42px; }
+    body.no-explorer .activity { flex-direction:column; align-items:center; padding:4px 2px; border-bottom:0; }
+    body.no-explorer .activity button { width:100%; padding:6px 0; border-radius:6px; }
   }
   @media (min-width:641px) and (max-width:900px) {
     #work.pane-scroller { grid-template:none; grid-template-columns:minmax(0, 1fr); grid-template-rows:auto; grid-auto-rows:minmax(280px, 1fr); gap:8px; overflow-y:auto; }
-    body.no-explorer #work.pane-scroller, body.zen #work.pane-scroller { grid-template-rows:none; }
+    body.zen #work.pane-scroller { grid-template-rows:none; }
     #work > * { grid-area:auto; }
-    #explorerPane { max-height:30vh; }
+    /* overflow:hidden makes the pane's min-content 0, so a full #work would squeeze its auto row to the border. */
+    #explorerPane { max-height:30vh; min-height:min(30vh, 220px); }
+    body.no-explorer #explorerPane { min-height:fit-content; }
     #split { display:none; }
   }
   @media (max-width:640px) {
@@ -161,7 +171,11 @@
     #work > * { grid-area:auto; }
     #explorerPane { grid-column:1 / -1; max-height:40dvh; }
     #split { display:none; }
+    body.no-explorer .activity { flex-direction:row; padding:3px 6px; }
+    body.no-explorer .activity button { width:auto; padding:4px 12px; }
   }
+  .toolbar button[aria-pressed="true"] { background:color-mix(in srgb, var(--acc) 22%, var(--panel)); border-color:var(--acc); }
+  .toolbar .icon-btn { min-width:2.2em; padding-inline:6px; font-weight:600; }
 /* Compare 2 views (phase 2a) */
 .cm-editor .cmp-del { background: color-mix(in srgb, #e5534b 13%, transparent); }
 .cm-editor .cmp-add { background: color-mix(in srgb, #2da44e 13%, transparent); }
@@ -448,6 +462,29 @@ body.recording .statusbar { box-shadow: inset 0 2px 0 #e5534b; }
   .pw-dlg .muted { font-size:12px; }
   .pw-acts { display:flex; gap:8px; justify-content:flex-end; }
   @media (max-width:640px) { .ol-item { min-height:38px; padding-top:8px; padding-bottom:8px; font-size:14px; } .oe-crumbs button { min-height:30px; } #pwInput, #pwInput2, #olFilter { font-size:16px; } }
+  /* Notepad++ token styles 1–6 (cyan, orange, yellow, purple, green, pink): translucent so selection and syntax colours stay visible */
+  :root { --npp-s1:rgba(0,190,255,.35); --npp-s2:rgba(255,128,0,.38); --npp-s3:rgba(255,215,0,.55); --npp-s4:rgba(140,60,255,.28); --npp-s5:rgba(0,170,60,.32); --npp-s6:rgba(255,40,140,.3); }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme=light]) { --npp-s1:rgba(0,190,255,.4); --npp-s2:rgba(255,128,0,.45); --npp-s3:rgba(255,215,0,.4); --npp-s4:rgba(170,110,255,.48); --npp-s5:rgba(40,200,90,.4); --npp-s6:rgba(255,80,160,.45); } }
+  :root[data-theme=dark] { --npp-s1:rgba(0,190,255,.4); --npp-s2:rgba(255,128,0,.45); --npp-s3:rgba(255,215,0,.4); --npp-s4:rgba(170,110,255,.48); --npp-s5:rgba(40,200,90,.4); --npp-s6:rgba(255,80,160,.45); }
+  .cm-npp-style { border-radius:2px; }
+  .cm-npp-s1, .npp-sw[data-s="1"] { background:var(--npp-s1); }
+  .cm-npp-s2, .npp-sw[data-s="2"] { background:var(--npp-s2); }
+  .cm-npp-s3, .npp-sw[data-s="3"] { background:var(--npp-s3); }
+  .cm-npp-s4, .npp-sw[data-s="4"] { background:var(--npp-s4); }
+  .cm-npp-s5, .npp-sw[data-s="5"] { background:var(--npp-s5); }
+  .cm-npp-s6, .npp-sw[data-s="6"] { background:var(--npp-s6); }
+  .tab-menu > .menu-sep { width:100%; margin:4px 0; border:0; border-top:1px solid var(--line); }
+  .tab-menu { max-height:calc(100dvh - 8px); overflow-y:auto; }
+  .tab-menu > .menu-head { padding:4px 14px 2px; font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.03em; }
+  .tab-menu > button.chk > span::before { content:"✓"; display:inline-block; width:1.4em; visibility:hidden; }
+  .tab-menu > button.chk[aria-checked="true"] > span::before { visibility:visible; color:var(--acc); }
+  .npp-style-row { display:flex; align-items:center; gap:6px; padding:4px 14px; }
+  .npp-style-row > span { flex:1; min-width:80px; }
+  .npp-sw { width:28px; height:24px; padding:0; border:1px solid var(--line); border-radius:4px; color:var(--ink); font-size:12px; }
+  .npp-sw.all { width:auto; padding:0 8px; }
+  .npp-sw:focus-visible { outline:2px solid var(--acc); outline-offset:1px; }
+  @media (hover:hover) { .npp-sw:hover { border-color:var(--acc); } }
+  @media (pointer:coarse) { .npp-style-row { flex-wrap:wrap; } .npp-style-row > span { flex:1 0 100%; } .npp-sw { width:38px; height:38px; } }
   .pane-switch, .more-toggle { display:none; }
   /* Phone portrait: one pane at a time in a horizontal snap scroller; control rows scroll sideways instead of wrapping and the primary button stays pinned. */
   @media (max-width: 640px) {
@@ -568,11 +605,13 @@ body.recording .statusbar { box-shadow: inset 0 2px 0 #e5534b; }
   <select id="opSel" title="Phép ▶ Chạy sẽ chạy — tự chọn theo ngôn ngữ của tab; chọn tay thì tab nhớ phép đó" data-i18n-skip></select>
   <button id="btnExplorer" title="Ẩn / hiện Explorer (Ctrl+B)">☰</button>
   <button id="btnNew" title="Ghi chú mới — tự lưu trong trình duyệt (Alt+N)">+ Ghi chú</button>
-  <button id="btnOpen" title="Mở file trên máy (Ctrl+O) — hoặc kéo-thả vào View 1 / View 2">Mở file…</button>
-  <button id="btnFolder" title="Mở folder vào Explorer (Chrome/Edge: bắt đầu ở folder của file đang mở)">Mở folder…</button>
+  <button id="btnOpen" title="Mở file (Ctrl+O) hoặc folder trên máy — hoặc kéo-thả vào View 1 / View 2" aria-haspopup="menu">📂 Mở ▾</button>
   <button id="btnSave" title="Lưu (Ctrl+S): file → ghi đè lên đĩa; ghi chú → đã tự lưu trong trình duyệt">💾 Lưu</button>
   <button id="btnSaveAs" title="Lưu thành file mới (Ctrl+Shift+S); trình duyệt không hỗ trợ thì tải xuống">Lưu thành…</button>
+  <button id="btnUndo" title="Hoàn tác (Ctrl+Z)">↶ Hoàn tác</button>
+  <button id="btnRedo" title="Làm lại (Ctrl+Y / Ctrl+Shift+Z)">↷ Làm lại</button>
   <button id="btnFind" title="Tìm / thay trong tab đang mở (Ctrl+F) — có tìm / thay trong vùng chọn">🔍 Tìm</button>
+  <button id="btnStyle" title="Tô màu token kiểu Notepad++ — chữ đang chọn hoặc từ dưới con trỏ: tô mọi chỗ / 1 token, xoá màu, tới chỗ tô (chuột phải trong editor cũng có; Ctrl+K 1…6, Ctrl+K 0 xoá hết)">🖍 Tô màu</button>
   <button id="btnRefresh" title="Làm mới từ đĩa: đọc lại mọi tab file (kể cả tab chưa đọc lại sau F5) và các folder đang mở trong Explorer">🔄 Làm mới</button>
   <button id="btnFormat" title="Format tab đang mở theo ngôn ngữ — kết quả ra tab liên kết ở view kia (Shift+Alt+F: format tại chỗ)">✨ Format</button>
   <select id="demo" class="demo-picker" title="Nạp dữ liệu mẫu thành tab tạm (không đè bài đang sửa)" data-i18n-skip></select>
@@ -580,11 +619,16 @@ body.recording .statusbar { box-shadow: inset 0 2px 0 #e5534b; }
   <label class="chk" title="Ngôn ngữ của tab đang mở — mặc định tự nhận theo tên file, shebang / modeline rồi nội dung">Ngôn ngữ <select id="langSel" data-i18n-skip></select></label>
   <label class="chk" title="Xuống dòng mềm (Alt+Z)"><input id="chkWrap" type="checkbox"> Xuống dòng</label>
   <label class="chk desktop-only" title="Bản thu nhỏ của file ở mép phải editor — bấm / kéo trên đó để cuộn"><input id="chkMinimap" type="checkbox"> Minimap</label>
+  <button id="btnZoomIn" class="icon-btn" title="Phóng to chữ (Ctrl+=)">A+</button>
+  <button id="btnZoomOut" class="icon-btn" title="Thu nhỏ chữ (Ctrl+-, Ctrl+0 về mặc định)">A−</button>
+  <button id="btnHidden" class="icon-btn" title="Hiện / ẩn mọi ký tự ẩn — dấu cách, Tab, xuống dòng (Show All Characters)" aria-pressed="false">¶</button>
+  <button id="btnEnc" title="Bảng mã của tab — bấm để đọc lại file với bảng mã khác, chuyển sang bảng mã khác hoặc đổi kiểu xuống dòng (như menu Encoding của Notepad++)" aria-haspopup="menu" data-i18n-skip>—</button>
   <span class="sep"></span>
   <button id="btnCompare" title="So sánh tab đang mở của 2 view — Alt+↓ / Alt+↑ nhảy giữa các khối khác (bấm lần nữa để tắt)">≠ So sánh</button>
   <button id="btnSwap" title="Đổi chỗ view đang chọn với view kế tiếp">⇆</button>
   <span class="sep"></span>
   <select id="layoutSel" title="Layout: 1 view · 2 cột · 3 cột · 2 hàng · lưới 2×2 (Alt+Shift+1/2/3/8/5)" data-i18n-skip></select>
+  <button id="btnFnList" title="Function List — hàm / class / tiêu đề của tab ở sidebar, bấm để nhảy tới (bấm lần nữa để ẩn)">ƒ Danh sách hàm</button>
   <button id="btnPalette" title="Command Palette — mọi lệnh và phím tắt (Ctrl+Shift+P; Ctrl+P mở nhanh, Ctrl+R symbol, Ctrl+G dòng)">⌘ Lệnh</button>
 </div>
 <div class="seg pane-switch"><button>Explorer</button><button>View 1</button><button>View 2</button><button hidden>View 3</button><button hidden>View 4</button></div>
@@ -649,6 +693,7 @@ body.recording .statusbar { box-shadow: inset 0 2px 0 #e5534b; }
   <button id="stLang" class="link" title="Đổi ngôn ngữ của tab" data-i18n-skip></button>
   <button id="stEol" class="link" title="Bảng mã và kiểu xuống dòng — bấm để mở lại / lưu với bảng mã khác, đổi CRLF / LF / CR" data-i18n-skip></button>
   <span id="stIndent" title="Thụt lề tự dò theo nội dung file — phím Tab chèn đúng kiểu này" data-i18n-skip></span>
+  <button id="stKeys" class="link" title="Bộ phím tắt của editor — bấm để đổi: Notepad++ · VS Code · Sublime Text (Vim bật / tắt trong ⌘ Lệnh)" data-i18n-skip></button>
   <button id="stLint" class="link bad" title="Lỗi / cảnh báo của tab — bấm để mở danh sách (Ctrl+Shift+M), F8 tới lỗi kế" data-i18n-skip></button>
   <span id="stSrc" data-i18n-skip></span>
   <span id="stStore" data-i18n-skip></span>
@@ -1825,11 +1870,18 @@ I18n.add({
   "Lượt truy cập (GoatCounter, cập nhật mỗi ~10 phút)": "Visits (GoatCounter, updates every ~10 minutes)",
   "▶ Chạy": "▶ Run", "+ Ghi chú": "+ Note", "Mở file…": "Open file…", "Mở folder…": "Open folder…", "💾 Lưu": "💾 Save", "Lưu thành…": "Save as…",
   "Ngôn ngữ": "Language", "Xuống dòng": "Wrap",
+  "📂 Mở ▾": "📂 Open ▾", "Mở file (Ctrl+O) hoặc folder trên máy — hoặc kéo-thả vào View 1 / View 2": "Open a file (Ctrl+O) or a folder from this computer — or drop it on View 1 / View 2",
+  "↶ Hoàn tác": "↶ Undo", "↷ Làm lại": "↷ Redo", "Hoàn tác (Ctrl+Z)": "Undo (Ctrl+Z)", "Làm lại (Ctrl+Y / Ctrl+Shift+Z)": "Redo (Ctrl+Y / Ctrl+Shift+Z)",
+  "Phóng to chữ (Ctrl+=)": "Bigger text (Ctrl+=)", "Thu nhỏ chữ (Ctrl+-, Ctrl+0 về mặc định)": "Smaller text (Ctrl+-, Ctrl+0 resets)",
+  "Hiện / ẩn mọi ký tự ẩn — dấu cách, Tab, xuống dòng (Show All Characters)": "Show / hide all characters — spaces, tabs, line endings (Show All Characters)",
+  "Bảng mã của tab — bấm để đọc lại file với bảng mã khác, chuyển sang bảng mã khác hoặc đổi kiểu xuống dòng (như menu Encoding của Notepad++)": "Encoding of the tab — click to reopen the file with another encoding, convert to another encoding or change line endings (like Notepad++'s Encoding menu)",
+  "ƒ Danh sách hàm": "ƒ Function list", "Function List — hàm / class / tiêu đề của tab ở sidebar, bấm để nhảy tới (bấm lần nữa để ẩn)": "Function List — functions / classes / headings of the tab in the side bar, click one to jump there (click again to hide)",
+  "Tab HEX — không có bảng mã.": "HEX tab — no encoding.", "Bảng mã: {enc} · {eol}": "Encoding: {enc} · {eol}", "Đọc lại file với bảng mã": "Reopen the file with",
+  "Chuyển sang (ghi khi lưu)": "Convert to (written on save)", "Chuyển sang {enc}": "Convert to {enc}", "Kiểu xuống dòng (EOL)": "Line endings (EOL)",
+  "Bảng mã khác… (Shift-JIS, GBK, Big5, Windows-125x)": "More encodings… (Shift-JIS, GBK, Big5, Windows-125x)",
   "Chạy phép đã chọn trên tab đang mở — kết quả ra tab liên kết ở view kia (Ctrl+Enter)": "Run the selected operation on the active tab — the result goes to a linked tab in the other view (Ctrl+Enter)",
   "Ẩn / hiện Explorer (Ctrl+B)": "Show / hide Explorer (Ctrl+B)",
   "Ghi chú mới — tự lưu trong trình duyệt (Alt+N)": "New note — saved in this browser as you type (Alt+N)",
-  "Mở file trên máy (Ctrl+O) — hoặc kéo-thả vào View 1 / View 2": "Open a file from this computer (Ctrl+O) — or drop it onto View 1 / View 2",
-  "Mở folder vào Explorer (Chrome/Edge: bắt đầu ở folder của file đang mở)": "Open a folder in Explorer (Chrome/Edge: starts in the active file's folder)",
   "Lưu (Ctrl+S): file → ghi đè lên đĩa; ghi chú → đã tự lưu trong trình duyệt": "Save (Ctrl+S): file → overwrite on disk; note → already saved in the browser",
   "Lưu thành file mới (Ctrl+Shift+S); trình duyệt không hỗ trợ thì tải xuống": "Save to a new file (Ctrl+Shift+S); downloads when the browser cannot write files",
   "Nạp dữ liệu mẫu thành tab tạm (không đè bài đang sửa)": "Load sample data as temporary tabs (your work stays open)",
@@ -2063,6 +2115,26 @@ I18n.add({
   "Tìm trong toàn bộ file (phân biệt hoa / thường):": "Search the whole file (case-sensitive):", "dòng {line} · đoạn {mb} MB: {text}": "line {line} · chunk {mb} MB: {text}",
   "Đang tìm… {p}%": "Searching… {p}%", "Tìm “{q}” trong {name}": "Search “{q}” in {name}", "Tìm thấy {n} dòng{more}.": "Found {n} lines{more}.", "(dừng ở 1000)": "(stopped at 1000)",
   "Tới vị trí (MB, 0–{max}):": "Go to position (MB, 0–{max}):",
+  // Token styles (Notepad++ Style all / Style one token / Clear style) + editor right-click menu + key profile button
+  "xanh ngọc": "cyan", "cam": "orange", "vàng": "yellow", "tím": "purple", "xanh lá": "green", "hồng": "pink",
+  "Tô màu {s} ({color}): mọi chỗ của token": "Style {s} ({color}): all occurrences of token", "Tô màu {s} ({color}): chỉ token này": "Style {s} ({color}): this token only",
+  "Tô màu: xoá màu {s} ({color})": "Style: clear style {s} ({color})", "Tô màu: xoá mọi màu": "Style: clear all styles", "Tô màu: tới chỗ tô kế tiếp": "Style: jump to the next styled text",
+  "Tô màu: tới chỗ tô trước": "Style: jump to the previous styled text", "Tô màu: chép chữ đã tô": "Style: copy styled text",
+  "Bôi đen chữ cần tô (hoặc đặt con trỏ trong 1 từ) rồi chọn màu.": "Select the text to style (or put the cursor in a word), then pick a colour.",
+  "Đã tô {n} chỗ “{tok}” bằng màu {s} ({color}).": "Styled {n} occurrences of “{tok}” with style {s} ({color}).", "(dừng ở {max} chỗ)": "(stopped at {max})",
+  "Đã tô {n} vùng bằng màu {s} ({color}).": "Styled {n} ranges with style {s} ({color}).", "Đã xoá màu {s} ({color}) — {n} chỗ.": "Cleared style {s} ({color}) — {n} ranges.",
+  "Đã xoá mọi màu — {n} chỗ.": "Cleared all styles — {n} ranges.", "Tab này chưa có chữ nào được tô màu.": "Nothing is styled in this tab yet.",
+  "Đã chép {n} đoạn đã tô màu (mỗi đoạn 1 dòng).": "Copied {n} styled pieces (one per line).",
+  "Tô mọi chỗ": "Style all", "Tô 1 token": "Style one token", "Xoá màu": "Clear style", "hết": "all", "Xoá mọi màu đã tô": "Clear all styles",
+  "Tô mọi chỗ của token bằng màu {s} ({color})": "Style all occurrences of the token with style {s} ({color})",
+  "Chỉ tô token đang chọn / dưới con trỏ bằng màu {s} ({color})": "Style only the selected token / the word under the cursor with style {s} ({color})",
+  "Xoá màu {s} ({color}) khỏi cả tab": "Clear style {s} ({color}) from the whole tab", "Tới chỗ tô kế tiếp": "Jump to the next styled text", "Tới chỗ tô trước": "Jump to the previous styled text",
+  "Chép chữ đã tô": "Copy styled text", "Cắt": "Cut", "Chép": "Copy", "Dán": "Paste", "Chọn hết": "Select all", "Trình duyệt không cho đọc clipboard — dùng Ctrl+V.": "The browser does not allow reading the clipboard — use Ctrl+V.",
+  "🖍 Tô màu": "🖍 Style",
+  "Tô màu token kiểu Notepad++ — chữ đang chọn hoặc từ dưới con trỏ: tô mọi chỗ / 1 token, xoá màu, tới chỗ tô (chuột phải trong editor cũng có; Ctrl+K 1…6, Ctrl+K 0 xoá hết)": "Style tokens like Notepad++ — the selected text or the word under the cursor: style all / one token, clear styles, jump to styled text (also in the editor's right-click menu; Ctrl+K 1…6, Ctrl+K 0 clears all)",
+  "Bộ phím": "Key profile", "Bộ phím tắt của editor — bấm để đổi: Notepad++ · VS Code · Sublime Text (Vim bật / tắt trong ⌘ Lệnh)": "Editor key profile — click to change: Notepad++ · VS Code · Sublime Text (Vim on / off in ⌘ Commands)",
+  "Tô màu token kiểu Notepad++": "Notepad++-style token styles",
+  "Đã tô sẵn ORD-1002 (màu 1 — không tô ORD-10021), REJECTED (2), ACME (3). Bôi đen 1 từ rồi chuột phải → Tô mọi chỗ, hoặc nút 🖍 Tô màu, Ctrl+K 1…6; Ctrl+K 0 xoá hết.": "Pre-styled ORD-1002 (style 1 — ORD-10021 is not), REJECTED (2), ACME (3). Select a word, then right-click → Style all, or the 🖍 Style button, Ctrl+K 1…6; Ctrl+K 0 clears all.",
 });
 // English strings for phase 3 (live preview: diagrams, charts), keyed by the Vietnamese source text.
 I18n.add({
@@ -2448,6 +2520,42 @@ I18n.add({
   "{names} cần bạn cho phép đọc lại từ đĩa — bấm vào đây.": "{names} need your permission to be read from disk again — click here.",
   "{names} đổi trên đĩa và lớn hơn 50 MB — mở lại file để xem theo đoạn.": "{names} changed on disk and is over 50 MB — open the file again to view it in chunks.",
   "Không kiểm được {names} (chưa được cấp quyền hoặc lỗi đọc).": "Could not check {names} (no permission or a read error).",
+});
+// English strings for opening public Google Drive / OneDrive folders in the Explorer, keyed by the Vietnamese source text.
+I18n.add({
+  "☁ Mở folder từ link Google Drive / OneDrive…": "☁ Open folder from a Google Drive / OneDrive link…",
+  "Google Drive: đổi / xoá API key…": "Google Drive: change / remove API key…",
+  "Đã cập nhật API key Google Drive.": "Google Drive API key updated.",
+  "☁ Mở từ link Drive / OneDrive…": "☁ Open from Drive / OneDrive link…",
+  "Mở folder công khai Google Drive / OneDrive cá nhân (chỉ đọc)": "Open a public Google Drive / personal OneDrive folder (read-only)",
+  "Dán link folder công khai Google Drive hoặc OneDrive cá nhân:": "Paste the link of a public Google Drive or personal OneDrive folder:",
+  "Đang đọc folder…": "Reading the folder…",
+  "Không mở lại được folder từ link: {msg}": "Could not reopen the folder from its link: {msg}",
+  "Đã mở folder “{name}” từ OneDrive — Ctrl+S lưu thẳng lên OneDrive nếu link cho sửa.": "Opened folder “{name}” from OneDrive — Ctrl+S saves straight back to OneDrive when the link allows editing.",
+  "Đã mở folder “{name}” từ Google Drive (chỉ đọc — Lưu sẽ hỏi chỗ lưu trên máy).": "Opened folder “{name}” from Google Drive (read-only — Save asks where to save on this device).",
+  "Đang lưu lên OneDrive…": "Saving to OneDrive…",
+  "✔ Đã lưu “{name}” lên OneDrive.": "✔ Saved “{name}” to OneDrive.",
+  "Tab này không gắn với file OneDrive.": "This tab is not linked to a OneDrive file.",
+  "“{name}” đã bị sửa trên OneDrive sau khi bạn mở. Ghi đè bằng bản của bạn?": "“{name}” was changed on OneDrive after you opened it. Overwrite it with your version?",
+  "chưa ghi — file trên OneDrive đã đổi; mở lại file từ Explorer để lấy bản mới.": "not written — the file changed on OneDrive; open it again from the Explorer to get the new version.",
+  "link OneDrive chỉ cho xem — dùng Lưu thành (Ctrl+Shift+S) để lưu bản sao trên máy.": "the OneDrive link is view-only — use Save As (Ctrl+Shift+S) to keep a copy on this device.",
+  "File Google Drive chỉ đọc được qua API key (ghi ngược cần đăng nhập Google — chưa hỗ trợ). Lưu bản sao trên máy?": "Google Drive files are read-only through an API key (writing back needs a Google sign-in — not supported yet). Save a copy on this device?",
+  "folder từ link Drive / OneDrive không được quét — mở file thành tab để tìm": "a folder from a Drive / OneDrive link is not scanned — open its files as tabs to search them",
+  "File lớn hơn 50 MB — tải về máy rồi mở.": "The file is larger than 50 MB — download it, then open it.",
+  "Google Drive cần API key (miễn phí, không cần billing): Google Cloud Console → bật “Google Drive API” → Credentials → Create API key (nên giới hạn key cho Drive API + domain của bạn). Key chỉ lưu trong trình duyệt này. Dán key:": "Google Drive needs an API key (free, no billing): Google Cloud Console → enable “Google Drive API” → Credentials → Create API key (restrict it to the Drive API + your domains). The key is stored only in this browser. Paste the key:",
+  "API key Google không hợp lệ — Command Palette → “Google Drive: đổi / xoá API key…”.": "The Google API key is not valid — Command Palette → “Google Drive: change / remove API key…”.",
+  "Không thấy — folder / file chưa chia sẻ “Anyone with the link” hoặc link sai.": "Not found — the folder / file is not shared with “Anyone with the link”, or the link is wrong.",
+  "Google Drive báo lỗi {code}: {msg}": "Google Drive error {code}: {msg}",
+  "Loại file Google này không mở dạng text được.": "This kind of Google file cannot be opened as text.",
+  "Link này là file, không phải folder.": "This link is a file, not a folder.",
+  "Không lấy được quyền đọc OneDrive ẩn danh (HTTP {code}).": "Could not get anonymous OneDrive read access (HTTP {code}).",
+  "OneDrive trả link lạ — dừng đọc.": "OneDrive returned an unexpected link — stopped reading.",
+  "Không đọc được — link OneDrive chưa chia sẻ công khai, đã hết hạn hoặc là OneDrive công ty.": "Could not read it — the OneDrive link is not public, has expired, or is a work OneDrive.",
+  "OneDrive báo lỗi {code}: {msg}": "OneDrive error {code}: {msg}",
+  "OneDrive không cho tải file này.": "OneDrive does not allow downloading this file.",
+  "Không nhận ra link — dán link folder Google Drive (drive.google.com/drive/folders/…) hoặc OneDrive (1drv.ms / onedrive.live.com).": "Link not recognised — paste a Google Drive folder link (drive.google.com/drive/folders/…) or a OneDrive one (1drv.ms / onedrive.live.com).",
+  "OneDrive công ty / SharePoint cần đăng nhập — chưa hỗ trợ.": "Work OneDrive / SharePoint needs a sign-in — not supported yet.",
+  "Đây là địa chỉ trang OneDrive đang xem, không phải link chia sẻ — trong OneDrive chọn folder → Chia sẻ (Share) → Sao chép liên kết (link dạng 1drv.ms/f/…) rồi dán vào.": "This is the address of a OneDrive page you are viewing, not a share link — in OneDrive select the folder → Share → Copy link (a 1drv.ms/f/… link), then paste that.",
 });
 // English strings for pinning: the Explorer "Pinned" section (folders, files, notes) and pinned tabs, keyed by the Vietnamese source text.
 I18n.add({
@@ -4357,6 +4465,10 @@ fmt.Println("orders")
   const SYMBOLS = "GLOBX\nacme\nINITECH\nACME\n\nglobx\nUMBRELLA\nACME\n10 lots\n2 lots\n\nINITECH\n";
   const CSV_COLS = "symbol,side,qty\nACME,BUY,100\nGLOBX,SELL,50\nINITECH,BUY,300\nUMBRELLA,SELL,20\nACME,SELL,75\n";
   const WORDS = "acme corp\nglobex inc\ninitech llc\numbrella group\nhooli\n";
+  const ORDERS_LOG = "2026-11-22 09:15:01.120 INFO  gateway  NEW      ORD-1001 ACME     BUY  100 @ 25.40\n2026-11-22 09:15:01.348 INFO  gateway  NEW      ORD-1002 GLOBX    SELL  50 @ 61.10\n"
+    + "2026-11-22 09:15:02.007 WARN  risk     LIMIT    ORD-1002 GLOBX    exposure 92% of limit\n2026-11-22 09:15:02.215 INFO  gateway  FILLED   ORD-1001 ACME     100 @ 25.40\n"
+    + "2026-11-22 09:15:03.502 ERROR risk     REJECTED ORD-1002 GLOBX    reason=LIMIT_EXCEEDED\n2026-11-22 09:15:04.880 INFO  gateway  NEW      ORD-1003 ACME     SELL  40 @ 25.55\n"
+    + "2026-11-22 09:15:05.116 INFO  gateway  NEW      ORD-10021 INITECH BUY  300 @ 8.02\n2026-11-22 09:15:06.733 ERROR risk     REJECTED ORD-1003 ACME     reason=SHORT_SELL\n";
   const key = (key, code) => ({ k: { key, code, ctrlKey: false, shiftKey: false, altKey: false, metaKey: false } });
 
   Object.assign(DEMOS, {
@@ -4364,6 +4476,15 @@ fmt.Println("orders")
     "crlf-mixed": { label: "Xuống dòng hỗn hợp CRLF / LF / CR", file: () => new File([MIXED], "deploy-steps.txt") },
     "sort-dedupe": { label: "Sắp xếp + bỏ trùng dòng", payload: () => ({ v: 1, views: [[t("symbols.txt", SYMBOLS)], []] }), after: () => StatusBar.msg(T("Thử Palette (Ctrl+Shift+P) → “Dòng: sắp xếp…”, “Dòng: bỏ dòng trùng”, “Dòng: bỏ dòng trống”.")) },
     "column-csv": { label: "Chọn cột + chèn số", payload: () => ({ v: 1, views: [[t("orders.csv", CSV_COLS)], []] }), after: () => StatusBar.msg(T("Shift+Alt+kéo chọn cột đầu (hoặc Ctrl+Alt+↓), rồi Palette → “Cột: chèn số tăng dần…”.")) },
+    "token-styles": {
+      label: "Tô màu token kiểu Notepad++",
+      payload: () => ({ v: 1, views: [[t("orders.log", ORDERS_LOG)], []] }),
+      after: () => {
+        const v = Views.activeView();
+        [["ORD-1002", 1], ["REJECTED", 2], ["ACME", 3]].forEach(([text, s]) => TokenStyles.styleAll(s, v, { text, whole: true }));
+        StatusBar.msg(T("Đã tô sẵn ORD-1002 (màu 1 — không tô ORD-10021), REJECTED (2), ACME (3). Bôi đen 1 từ rồi chuột phải → Tô mọi chỗ, hoặc nút 🖍 Tô màu, Ctrl+K 1…6; Ctrl+K 0 xoá hết."));
+      },
+    },
     "macro": {
       label: "Macro: bọc mỗi dòng trong dấu nháy",
       payload: () => ({ v: 1, views: [[t("names.txt", WORDS)], []] }),
@@ -5075,6 +5196,201 @@ const LocalFs = (() => {
 
   return { pickFiles, pickDirectory, fromHandle, fromEntry, readText, encode, writeHandle, saveAs, readable, create, remove, rename, canPick, canDir, canSave, MAX_ENTRIES };
 })();
+// Public Google Drive / personal OneDrive folders in the Explorer, read-only (ADR #23): Drive API v3 with the user's API key; OneDrive through its anonymous "badger" token.
+const CloudDrive = (() => {
+  const GD = "https://www.googleapis.com/drive/v3/files", OD = "https://api.onedrive.com/v1.0/", MAX_BYTES = 50 * 1024 * 1024, MAX_ENTRIES = 5000;
+  const GFOLDER = "application/vnd.google-apps.folder", OD_APP = "5cbed6ac-a083-4e14-b191-b4ba07653de2";
+  // Google Docs / Sheets have no bytes of their own: opened as exported text.
+  const GEXPORT = { "application/vnd.google-apps.document": ["text/plain", ".txt"], "application/vnd.google-apps.spreadsheet": ["text/csv", ".csv"] };
+  const OPTS = { credentials: "omit" };
+  const err = msg => new Error(msg);
+  const sort = list => list.sort((a, b) => (b.dir - a.dir) || a.name.localeCompare(b.name));
+  const tooBig = size => Number(size) > MAX_BYTES && err(T("File lớn hơn 50 MB — tải về máy rồi mở."));
+  const asFile = async (r, name, mod) => ({ file: new File([await r.blob()], name, { lastModified: Date.parse(mod) || Date.now() }), handle: null });
+  let badger = null;
+  const redeemed = new Set();
+
+  // → { kind: "gdrive", id } | { kind: "onedrive", url } | { kind: "odpage" } | { kind: "business" } | null
+  function parse(link) {
+    let u;
+    try { u = new URL(String(link).trim()); } catch { return null; }
+    if (u.protocol !== "https:") return null;
+    const host = u.hostname.toLowerCase(), qid = u.searchParams.get("id") || "";
+    if (host === "drive.google.com") {
+      const id = (/\/folders\/([\w-]{10,})/.exec(u.pathname) || [])[1] || (/^\/(open|embeddedfolderview|folderview)$/.test(u.pathname) && /^[\w-]{10,}$/.test(qid) ? qid : "");
+      return id ? { kind: "gdrive", id } : null;
+    }
+    // onedrive.live.com without authkey / redeem / resid is the address bar of a page being viewed: it has no share token.
+    if (host === "onedrive.live.com" && !["authkey", "redeem", "resid"].some(k => u.searchParams.has(k))) return { kind: "odpage" };
+    if (host === "1drv.ms" || host === "onedrive.live.com") { u.hash = ""; return { kind: "onedrive", url: u.href }; }
+    return host.endsWith(".sharepoint.com") ? { kind: "business" } : null;
+  }
+
+  // OneDrive share id = "u!" + base64url of the UTF-8 link.
+  function shareId(url) {
+    let s = "";
+    for (const b of new TextEncoder().encode(url)) s += String.fromCharCode(b);
+    return "u!" + btoa(s).replace(/=+$/, "").replace(/\//g, "_").replace(/\+/g, "-");
+  }
+
+  const keyOf = () => String(Prefs.get("gdriveKey", "") || "");
+  // null = cancelled; "" clears the stored key.
+  function askKey() {
+    const k = prompt(T("Google Drive cần API key (miễn phí, không cần billing): Google Cloud Console → bật “Google Drive API” → Credentials → Create API key (nên giới hạn key cho Drive API + domain của bạn). Key chỉ lưu trong trình duyệt này. Dán key:"), keyOf());
+    if (k == null) return null;
+    Prefs.set("gdriveKey", k.trim());
+    return k.trim();
+  }
+
+  function gErr(status, j) {
+    const m = String(j?.error?.message || status).slice(0, 200);
+    if (/API key not valid|API_KEY_INVALID/i.test(m)) return err(T("API key Google không hợp lệ — Command Palette → “Google Drive: đổi / xoá API key…”."));
+    if (status === 404) return err(T("Không thấy — folder / file chưa chia sẻ “Anyone with the link” hoặc link sai."));
+    return err(T("Google Drive báo lỗi {code}: {msg}", { code: status, msg: m }));
+  }
+  async function gFetch(path, params) {
+    const r = await fetch(GD + path + "?" + new URLSearchParams({ ...params, key: keyOf() }), OPTS);
+    if (!r.ok) throw gErr(r.status, await r.json().catch(() => ({})));
+    return r;
+  }
+
+  function gNode(f, parentPath, parent) {
+    const ex = GEXPORT[f.mimeType], name = ex ? f.name + ex[1] : f.name, path = parentPath ? parentPath + "/" + name : name;
+    if (f.mimeType !== GFOLDER) return { name, path, dir: false, remote: "gdrive", parent, read: () => gRead(f, name, ex) };
+    const node = { name, path, dir: true, children: null, remote: "gdrive", parent, list: async () => {
+      const out = [];
+      let pageToken = "";
+      do {
+        const p = { q: "'" + f.id + "' in parents and trashed = false", fields: "nextPageToken,files(id,name,mimeType,size,modifiedTime)", pageSize: "1000", supportsAllDrives: "true", includeItemsFromAllDrives: "true" };
+        const j = await (await gFetch("", pageToken ? { ...p, pageToken } : p)).json();
+        (j.files || []).forEach(c => out.push(gNode(c, path, node)));
+        pageToken = j.nextPageToken || "";
+      } while (pageToken && out.length < MAX_ENTRIES);
+      return sort(out.slice(0, MAX_ENTRIES));
+    } };
+    return node;
+  }
+
+  async function gRead(f, name, ex) {
+    const big = tooBig(f.size);
+    if (big) throw big;
+    if (!ex && f.mimeType.startsWith("application/vnd.google-apps.")) throw err(T("Loại file Google này không mở dạng text được."));
+    return { remote: { kind: "gdrive" }, ...await asFile(await gFetch("/" + f.id + (ex ? "/export" : ""), ex ? { mimeType: ex[0] } : { alt: "media", supportsAllDrives: "true" }), name, f.modifiedTime) };
+  }
+
+  async function gRoot(id, ask) {
+    if (!keyOf() && !(ask && askKey())) return null;
+    const f = await (await gFetch("/" + id, { fields: "id,name,mimeType", supportsAllDrives: "true" })).json();
+    if (f.mimeType !== GFOLDER) throw err(T("Link này là file, không phải folder."));
+    return gNode(f, "", null);
+  }
+
+  async function odToken() {
+    if (badger) return badger;
+    const r = await fetch("https://api-badgerp.svc.ms/v1.0/token", { ...OPTS, method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ appId: OD_APP }) });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok || !j.token) throw err(T("Không lấy được quyền đọc OneDrive ẩn danh (HTTP {code}).", { code: r.status }));
+    redeemed.clear();
+    return badger = j.token;
+  }
+  // The token only ever goes to api.onedrive.com (nextLink comes from the response). A new token reaches items only after it has opened the share link (sid) once.
+  async function odFetch(url, sid, init = {}, retry = true) {
+    if (!url.startsWith(OD)) throw err(T("OneDrive trả link lạ — dừng đọc."));
+    const headers = { Authorization: "Badger " + await odToken(), Prefer: "autoredeem" }, viaShare = url.startsWith(OD + "shares/");
+    if (sid && !viaShare && !redeemed.has(sid) && (await fetch(OD + "shares/" + sid + "/driveItem?$select=id", { ...OPTS, headers })).ok) redeemed.add(sid);
+    const r = await fetch(url, { ...OPTS, ...init, headers: { ...init.headers, ...headers } });
+    if (r.status === 401 && retry) { badger = null; return odFetch(url, sid, init, false); }
+    if (r.ok && sid && viaShare) redeemed.add(sid);
+    return r;
+  }
+  async function odJson(url, sid) {
+    const r = await odFetch(url, sid), j = await r.json().catch(() => ({}));
+    if (r.ok) return j;
+    if ([400, 403, 404].includes(r.status) || j?.error?.code === "generalException") throw err(T("Không đọc được — link OneDrive chưa chia sẻ công khai, đã hết hạn hoặc là OneDrive công ty."));
+    throw err(T("OneDrive báo lỗi {code}: {msg}", { code: r.status, msg: String(j?.error?.message || r.statusText).slice(0, 200) }));
+  }
+  // Personal item ids are "<driveId>!<n>": the fallback when a shared drive root has no parentReference.
+  const odItem = it => OD + "drives/" + encodeURIComponent(it.parentReference?.driveId || String(it.id).split("!")[0]) + "/items/" + encodeURIComponent(it.id);
+
+  async function odChildren(j, path, node, sid) {
+    const out = [];
+    for (;;) {
+      (j.value || j.children || []).forEach(c => out.push(odNode(c, path, node, sid)));
+      const next = j["@odata.nextLink"] || j["children@odata.nextLink"];
+      if (!next || out.length >= MAX_ENTRIES) break;
+      j = await odJson(next, sid);
+    }
+    return sort(out.slice(0, MAX_ENTRIES));
+  }
+
+  function odNode(it, parentPath, parent, sid, first = null) {
+    const path = parentPath ? parentPath + "/" + it.name : it.name;
+    if (!it.folder) return { name: it.name, path, dir: false, remote: "onedrive", parent, read: () => odRead(it, sid) };
+    const node = { name: it.name, path, dir: true, children: null, remote: "onedrive", parent, list: async () => {
+      // The root comes with its children ($expand) once; refreshes list it like any folder.
+      const j = first || await odJson(odItem(it) + "/children?$top=1000", sid);
+      first = null;
+      return odChildren(j, path, node, sid);
+    } };
+    return node;
+  }
+
+  // downloadUrl from the listing expires after a while ⇒ on failure ask for a fresh one once. `remote` is where Save writes back (eTag = the version read).
+  async function odRead(it, sid) {
+    const big = tooBig(it.size);
+    if (big) throw big;
+    let url = it["@content.downloadUrl"], r = url ? await fetch(url, OPTS).catch(() => null) : null, eTag = it.eTag;
+    if (!r || !r.ok) {
+      const fresh = await odJson(odItem(it), sid);
+      url = fresh["@content.downloadUrl"];
+      eTag = fresh.eTag;
+      if (!url) throw err(T("OneDrive không cho tải file này."));
+      r = await fetch(url, OPTS);
+      if (!r.ok) throw err(T("OneDrive báo lỗi {code}: {msg}", { code: r.status, msg: r.statusText }));
+    }
+    return { ...await asFile(r, it.name, it.lastModifiedDateTime), remote: { kind: "onedrive", url: odItem(it), sid, eTag } };
+  }
+
+  async function odRoot(url) {
+    const sid = shareId(url), j = await odJson(OD + "shares/" + sid + "/driveItem?$expand=children", sid);
+    if (!j.folder) throw err(T("Link này là file, không phải folder."));
+    return odNode(j, "", null, sid, j);
+  }
+
+  // OneDrive tab → its file (If-Match: the version read, so an edit made elsewhere is not overwritten silently) → the new remote.
+  async function save(doc, data) {
+    const rm = doc.remote, put = eTag => odFetch(rm.url + "/content", rm.sid, { method: "PUT", body: data, headers: { "Content-Type": "application/octet-stream", ...(eTag ? { "If-Match": eTag } : {}) } });
+    if (rm?.kind !== "onedrive" || typeof rm.url !== "string" || !rm.url.startsWith(OD + "drives/")) throw err(T("Tab này không gắn với file OneDrive."));
+    let r = await put(rm.eTag);
+    if (r.status === 412) {
+      if (!confirm(T("“{name}” đã bị sửa trên OneDrive sau khi bạn mở. Ghi đè bằng bản của bạn?", { name: doc.name }))) throw err(T("chưa ghi — file trên OneDrive đã đổi; mở lại file từ Explorer để lấy bản mới."));
+      r = await put(null);
+    }
+    const j = await r.json().catch(() => ({}));
+    if (r.status === 403) throw err(T("link OneDrive chỉ cho xem — dùng Lưu thành (Ctrl+Shift+S) để lưu bản sao trên máy."));
+    if (!r.ok) throw err(T("OneDrive báo lỗi {code}: {msg}", { code: r.status, msg: String(j?.error?.message || r.statusText).slice(0, 200) }));
+    return { ...rm, eTag: j.eTag || null };
+  }
+
+  // → root node with its first listing (null = cancelled / no key and ask = false), shaped like LocalFs nodes plus `remote` + `link`.
+  async function open(link, ask = true) {
+    const node = await rootOf(String(link).trim(), ask);
+    if (!node) return null;
+    node.link = String(link).trim();
+    node.children = await node.list();
+    return node;
+  }
+
+  async function rootOf(link, ask) {
+    const p = parse(link);
+    if (!p) throw err(T("Không nhận ra link — dán link folder Google Drive (drive.google.com/drive/folders/…) hoặc OneDrive (1drv.ms / onedrive.live.com)."));
+    if (p.kind === "business") throw err(T("OneDrive công ty / SharePoint cần đăng nhập — chưa hỗ trợ."));
+    if (p.kind === "odpage") throw err(T("Đây là địa chỉ trang OneDrive đang xem, không phải link chia sẻ — trong OneDrive chọn folder → Chia sẻ (Share) → Sao chép liên kết (link dạng 1drv.ms/f/…) rồi dán vào."));
+    return p.kind === "gdrive" ? gRoot(p.id, ask) : odRoot(p.url);
+  }
+
+  return { parse, shareId, open, askKey, save };
+})();
 // Notepad++ bookmarks: Ctrl+F2 toggles the current line, F2 / Shift+F2 jump to the next / previous one (wrapping); kept per tab in a StateField that follows edits.
 const Bookmarks = (() => {
   let field = null, toggle = null, clearAll = null, mark = null;
@@ -5551,6 +5867,130 @@ const MixedEol = (() => {
 
   return { init, effect, codesOf, textOf, optsOf, get field() { return field; } };
 })();
+// Notepad++ token styles: 6 colours over every occurrence (Style all) or just the token (Style one), clear, jump, copy; marks follow edits and live in the tab's editor state (not saved).
+const TokenStyles = (() => {
+  const N = 6, MAX = 50000, COLORS = ["xanh ngọc", "cam", "vàng", "tím", "xanh lá", "hồng"];
+  let field = null, ext = null, add = null, clear = null, marks = null;
+  const isWord = c => /[\p{L}\p{N}_]/u.test(c || "");
+
+  // Start offsets of non-overlapping `token` matches (case-sensitive); whole = no letter / digit / _ right before or after (pure).
+  function occurrences(text, token, whole = false, max = MAX) {
+    const out = [];
+    if (!token) return out;
+    for (let i = text.indexOf(token); i >= 0 && out.length < max;) {
+      const ok = !whole || (!isWord(text[i - 1]) && !isWord(text[i + token.length]));
+      if (ok) out.push(i);
+      i = text.indexOf(token, i + (ok ? token.length : 1));
+    }
+    return out;
+  }
+
+  // Built on first use: CodeMirror is only loaded at boot. Prec.low makes a mark the outer span (lower precedence wraps), so syntax / log colours inside do not split it.
+  function extension() {
+    if (ext) return ext;
+    const { StateField, StateEffect } = CM.state, { Decoration, EditorView } = CM.view;
+    add = StateEffect.define({ map: (v, m) => ({ style: v.style, ranges: v.ranges.map(([a, b]) => [m.mapPos(a), m.mapPos(b)]) }) });
+    clear = StateEffect.define();
+    marks = Array.from({ length: N }, (_, i) => Decoration.mark({ class: "cm-npp-style cm-npp-s" + (i + 1), style: i + 1 }));
+    field = StateField.define({
+      create: () => Decoration.none,
+      update(set, tr) {
+        set = set.map(tr.changes);
+        for (const e of tr.effects) {
+          if (e.is(clear)) set = e.value ? set.update({ filter: (f, t, d) => d.spec.style !== e.value }) : Decoration.none;
+          else if (e.is(add)) {
+            // Styling a range again replaces its colour instead of stacking a second mark.
+            const ranges = e.value.ranges.filter(([a, b]) => b > a), keys = new Set(ranges.map(([a, b]) => a + ":" + b));
+            set = set.update({ filter: (f, t) => !keys.has(f + ":" + t), add: ranges.map(([a, b]) => marks[e.value.style - 1].range(a, b)), sort: true });
+          }
+        }
+        return set;
+      },
+      provide: f => EditorView.decorations.from(f),
+    });
+    return ext = CM.state.Prec.low(field);
+  }
+
+  const colorName = s => T(COLORS[s - 1]);
+  const activeView = () => (Views.activeDoc() && Views.activeView()) || (StatusBar.msg(T("Chưa có tab nào đang mở."), "warn"), null);
+  // Selected text (exact match) or the word under the cursor (whole word); null when neither.
+  function tokenOf(st) {
+    const r = st.selection.main;
+    if (!r.empty) return { text: st.sliceDoc(r.from, r.to), whole: false, from: r.from };
+    const w = st.wordAt(r.head);
+    return w ? { text: st.sliceDoc(w.from, w.to), whole: true, from: w.from } : null;
+  }
+  const noToken = () => StatusBar.msg(T("Bôi đen chữ cần tô (hoặc đặt con trỏ trong 1 từ) rồi chọn màu."), "warn");
+  const short = s => s.length > 40 ? s.slice(0, 40) + "…" : s;
+
+  // tok: { text, whole } to style a given string (demos); default = the token at the cursor.
+  function styleAll(s, v = activeView(), tok = v && tokenOf(v.state)) {
+    if (!v) return;
+    if (!tok || !tok.text) { noToken(); return; }
+    const at = occurrences(v.state.doc.toString(), tok.text, tok.whole);
+    v.dispatch({ effects: add.of({ style: s, ranges: at.map(i => [i, i + tok.text.length]) }) });
+    StatusBar.msg(T("Đã tô {n} chỗ “{tok}” bằng màu {s} ({color}).", { n: I18n.num(at.length), tok: short(tok.text), s, color: colorName(s) }) + (at.length >= MAX ? " " + T("(dừng ở {max} chỗ)", { max: I18n.num(MAX) }) : ""), at.length ? "good" : "warn");
+  }
+
+  // Every non-empty selection range (multi-cursor too), or the word under the cursor.
+  function styleOne(s) {
+    const v = activeView();
+    if (!v) return;
+    const st = v.state, picked = st.selection.ranges.filter(r => !r.empty).map(r => [r.from, r.to]);
+    const w = picked.length ? null : st.wordAt(st.selection.main.head), ranges = picked.length ? picked : w ? [[w.from, w.to]] : [];
+    if (!ranges.length) { noToken(); return; }
+    v.dispatch({ effects: add.of({ style: s, ranges }) });
+    StatusBar.msg(T("Đã tô {n} vùng bằng màu {s} ({color}).", { n: ranges.length, s, color: colorName(s) }), "good");
+  }
+
+  // [from, to, style] of every mark in document order.
+  function ranges(st, s = 0) {
+    const out = [], set = field && st.field(field, false);
+    if (set) set.between(0, st.doc.length, (f, t, d) => { if (t > f && (!s || d.spec.style === s)) out.push([f, t, d.spec.style]); });
+    return out;
+  }
+
+  // s = 0 clears every colour.
+  function clearStyle(s) {
+    const v = activeView();
+    if (!v) return;
+    const n = ranges(v.state, s).length;
+    v.dispatch({ effects: clear.of(s) });
+    StatusBar.msg(s ? T("Đã xoá màu {s} ({color}) — {n} chỗ.", { s, color: colorName(s), n: I18n.num(n) }) : T("Đã xoá mọi màu — {n} chỗ.", { n: I18n.num(n) }), "good");
+  }
+
+  // Next / previous styled range after / before the selection, wrapping around.
+  function jump(dir) {
+    const v = activeView();
+    if (!v) return;
+    const rs = ranges(v.state), r = v.state.selection.main;
+    if (!rs.length) { StatusBar.msg(T("Tab này chưa có chữ nào được tô màu."), "warn"); return; }
+    const to = dir > 0 ? rs.find(([f]) => f > r.from) ?? rs[0] : [...rs].reverse().find(([f]) => f < r.from) ?? rs[rs.length - 1];
+    v.dispatch({ selection: { anchor: to[0], head: to[1] }, effects: CM.view.EditorView.scrollIntoView(to[0], { y: "center" }) });
+    v.focus();
+  }
+
+  function copyStyled() {
+    const v = activeView();
+    if (!v) return;
+    const rs = ranges(v.state);
+    if (!rs.length) { StatusBar.msg(T("Tab này chưa có chữ nào được tô màu."), "warn"); return; }
+    Dom.copy(rs.map(([f, t]) => v.state.sliceDoc(f, t)).join("\n"));
+    StatusBar.msg(T("Đã chép {n} đoạn đã tô màu (mỗi đoạn 1 dòng).", { n: I18n.num(rs.length) }), "good");
+  }
+
+  // Notepad++ Ctrl+F3 / Ctrl+Shift+F3: select the next / previous occurrence of the token, wrapping around.
+  function findNext(v, dir) {
+    const st = v.state, tok = tokenOf(st);
+    if (!tok || !tok.text) return false;
+    const at = occurrences(st.doc.toString(), tok.text, tok.whole);
+    const i = dir > 0 ? at.find(p => p > tok.from) ?? at[0] : [...at].reverse().find(p => p < tok.from) ?? at[at.length - 1];
+    if (i !== undefined) v.dispatch({ selection: { anchor: i, head: i + tok.text.length }, scrollIntoView: true, userEvent: "select.search" });
+    return true;
+  }
+
+  return { N, extension, occurrences, ranges, colorName, styleAll, styleOne, clearStyle, jump, copyStyled, findNext };
+})();
 // CodeMirror 6 editor config shared by every tab: compartments for language / wrap / theme / UI phrases / read-only so settings change without losing undo history.
 const CmSetup = (() => {
   let C = null, themes = null, onUpdate = null, minimap = null, guides = null;
@@ -5624,7 +6064,7 @@ const CmSetup = (() => {
       V.EditorView.clickAddsSelectionRange.of(e => e.altKey || e.ctrlKey || e.metaKey), L.indentUnit.of(indent || "  "),
       V.highlightActiveLine(), F.highlightSelectionMatches(), F.search({ top: true }),
       V.keymap.of([...A.closeBracketsKeymap, ...K.defaultKeymap, ...F.searchKeymap, ...K.historyKeymap, ...L.foldKeymap, ...A.completionKeymap, K.indentWithTab]),
-      Bookmarks.extension(), RainbowCsv.extension(), LogFixMarks.extension(), FixHover.extension(), CompareDeco.field, MixedEol.field, comp.compare.of([]), comp.lang.of([]), comp.ro.of(readOnly ? [S.EditorState.readOnly.of(true)] : []),
+      Bookmarks.extension(), TokenStyles.extension(), RainbowCsv.extension(), LogFixMarks.extension(), FixHover.extension(), CompareDeco.field, MixedEol.field, comp.compare.of([]), comp.lang.of([]), comp.ro.of(readOnly ? [S.EditorState.readOnly.of(true)] : []),
       ...[comp.wrap, comp.theme, comp.phrases, comp.minimap, comp.guides, comp.hidden, comp.numHover, comp.lint].map(c => c.of([])),
       V.EditorView.updateListener.of(u => { if (onUpdate) onUpdate(u); SearchInSelection.decorate(u.view); if (u.docChanged && u.transactions.some(tr => tr.isUserEvent("input.paste"))) PowerTools.pasted(u); }),
     ];
@@ -5690,6 +6130,8 @@ const Docs = (() => {
       enc: [...Encoding.WRITABLE, ...Encoding.READ_ONLY].includes(init.enc) ? init.enc : "utf-8", link: init.link && typeof init.link.src === "string" ? { src: init.link.src, op: init.link.op, ...(init.link.opts && typeof init.link.opts === "object" ? { opts: init.link.opts } : {}) } : null,
       updated: +init.updated || Date.now(), pending: init.pending ?? true, scrollTop: 0, langApplied: null, pinned: !!init.pinned, hex: !!init.hex,
       cloneOf: init.kind === "clone" ? init.cloneOf : null,
+      // File opened from a Drive / OneDrive link: where Save writes back (CloudDrive.save).
+      remote: init.remote && typeof init.remote.kind === "string" ? { ...init.remote } : null,
       detected: LangDetect.detect(init.name, text),
     };
     all.set(doc.id, doc);
@@ -5781,6 +6223,7 @@ const StatusBar = (() => {
   function draw() {
     raf = 0;
     const doc = Views.activeDoc(), st = doc && Views.activeView().state;
+    set("stKeys", "⌨ " + KeyProfiles.label());
     if (!doc) { ["stPos", "stCount", "stLang", "stEol", "stIndent", "stLint", "stSrc"].forEach(id => set(id, "")); return; }
     const main = st.selection.main, line = st.doc.lineAt(main.head), n = st.selection.ranges.length;
     // Code point under the cursor.
@@ -5946,18 +6389,19 @@ const TabMenu = (() => {
     removeEventListener("blur", close);
   }
 
-  function item(c) {
+  function entry(label, keys, run) {
     const b = document.createElement("button"), name = document.createElement("span"), key = document.createElement("small");
     b.setAttribute("role", "menuitem");
-    name.textContent = typeof c.label === "function" ? c.label() : T(c.label);
-    key.textContent = Commands.keyLabel(c);
+    name.textContent = label;
+    key.textContent = keys;
     b.append(name, key);
-    b.onclick = () => { close(); Commands.run(c.id); };
+    b.onclick = () => { close(); run(); };
     return b;
   }
+  const item = c => entry(typeof c.label === "function" ? c.label() : T(c.label), Commands.keyLabel(c), () => Commands.run(c.id));
 
   function onKey(e) {
-    const items = [...menu.children], k = items.indexOf(document.activeElement);
+    const items = [...menu.querySelectorAll("button")], k = items.indexOf(document.activeElement);
     if (e.key === "Escape" || e.key === "Tab") { e.preventDefault(); close(); if (Views.activeDoc()) Views.activeView().focus(); }
     else if (e.key === "ArrowDown" || e.key === "ArrowUp") { e.preventDefault(); items[(k + (e.key === "ArrowDown" ? 1 : -1) + items.length) % items.length].focus(); }
   }
@@ -5968,11 +6412,16 @@ const TabMenu = (() => {
     Views.activate(gi, id, false);
     Views.focus(gi);
     const usable = Commands.all(), cmds = IDS.map(c => usable.find(u => u.id === c)).filter(Boolean);
-    if (!cmds.length) return;
+    if (cmds.length) show(cmds.map(item), x, y);
+  }
+
+  // Shows a menu of nodes (entries, rows, separators) at x, y kept inside the window; the first button gets focus.
+  function show(nodes, x, y) {
+    close();
     menu = document.createElement("div");
     menu.className = "tab-menu";
     menu.setAttribute("role", "menu");
-    menu.append(...cmds.map(item));
+    menu.append(...nodes);
     menu.addEventListener("keydown", onKey);
     document.body.append(menu);
     const r = menu.getBoundingClientRect();
@@ -5981,10 +6430,10 @@ const TabMenu = (() => {
     document.addEventListener("pointerdown", onDown, true);
     addEventListener("resize", close);
     addEventListener("blur", close);
-    menu.firstChild.focus();
+    menu.querySelector("button").focus();
   }
 
-  return { open, close };
+  return { open, close, show, entry, item };
 })();
 // Up to 4 views (layout 1 / 2 columns / 3 columns / 2 rows / 2×2): one EditorView each showing its active tab; every tab keeps its own EditorState so undo, cursor and folds survive switching and moving.
 const Views = (() => {
@@ -5999,6 +6448,8 @@ const Views = (() => {
       g.view = new CM.view.EditorView({ parent: g.host, state: CmSetup.makeState("") });
       g.el.addEventListener("focusin", () => setFocused(g.i));
       g.el.addEventListener("pointerdown", () => setFocused(g.i), true);
+      // A click is the user gesture the browser needs to grant read permission again after F5.
+      g.host.addEventListener("pointerdown", () => { const d = Docs.get(g.active); if (d?.stale) FileOpen.reload(d, true); });
     }
     CmSetup.onUpdate = onUpdate;
     setLayout(layout);
@@ -9631,15 +10082,22 @@ const EncodingActions = (() => {
     StatusBar.msg(T("{what} — lưu (Ctrl+S) để ghi ra file.", { what }), "good");
   }
 
-  function saveWith(enc) {
+  // Notepad++ "Convert to": same text, written with enc (+ BOM) by the next save; false when the text does not fit enc.
+  function convert(enc, bom) {
     const doc = active();
-    if (!doc) return;
+    if (!doc) return false;
+    if (doc.readOnly || doc.hex) { StatusBar.msg(T("Tab chỉ đọc — không đổi được."), "warn"); return false; }
     const before = doc.enc;
     doc.enc = enc;
     try { LocalFs.encode(Docs.text(doc), doc); }
-    catch (e) { doc.enc = before; StatusBar.msg(e.message, "bad", e.line ? () => Views.revealLine(doc, e.line) : null); return; }
-    change({ enc, bom: enc.startsWith("utf-16") ? true : doc.bom && enc === "utf-8" }, T("Bảng mã khi lưu: {enc}", { enc: Encoding.label(enc) }));
-    Actions.save(!(doc.kind === "file" && doc.handle));
+    catch (e) { doc.enc = before; StatusBar.msg(e.message, "bad", e.line ? () => Views.revealLine(doc, e.line) : null); return false; }
+    change({ enc, bom }, T("Bảng mã khi lưu: {enc}", { enc: Encoding.label(enc) + (bom ? " BOM" : "") }));
+    return true;
+  }
+
+  function saveWith(enc) {
+    const doc = active();
+    if (doc && convert(enc, enc.startsWith("utf-16") ? true : doc.bom && enc === "utf-8")) Actions.save(!(doc.kind === "file" && doc.handle));
   }
 
   const setEol = eol => change({ eol, eolMixed: false, eolList: null }, T("Xuống dòng: {eol}", { eol: Encoding.EOL_NAME[eol] }));
@@ -9648,10 +10106,11 @@ const EncodingActions = (() => {
   function toggleHidden() {
     CmSetup.settings.hidden = !CmSetup.settings.hidden;
     Prefs.set("hidden", CmSetup.settings.hidden);
+    $("btnHidden").setAttribute("aria-pressed", CmSetup.settings.hidden);
     Views.applySettings();
   }
 
-  return { announce, reopen, saveWith, setEol, toggleBom, toggleHidden, pick, PICK };
+  return { announce, reopen, convert, saveWith, setEol, toggleBom, toggleHidden, pick, PICK };
 })();
 // Editor side of LineOps: line operations on the lines touched by the selection (whole tab when nothing is selected), transforms on each selection, hash, column numbers.
 const NppActions = (() => {
@@ -9912,6 +10371,91 @@ const BigFile = (() => {
 
   return { open, attach, move, search, goTo, read };
 })();
+// Notepad++-style editor right-click menu (cut / copy / paste / select all + token styles) and the toolbar 🖍 menu (styles only); touch long-press and Shift+right-click keep the browser menu.
+const EditorMenu = (() => {
+  let touch = false;
+  const S = TokenStyles, el = (tag, cls, text) => Object.assign(document.createElement(tag), { className: cls, textContent: text || "" });
+  const sep = () => el("hr", "menu-sep");
+
+  // One row: label + a swatch per colour (+ "all" for clear).
+  function swatchRow(label, title, run, all) {
+    const row = el("div", "npp-style-row");
+    row.setAttribute("role", "group");
+    row.append(el("span", "", T(label)));
+    for (let s = 1; s <= S.N; s++) {
+      const b = el("button", "npp-sw", String(s));
+      Object.assign(b, { type: "button", title: T(title, { s, color: S.colorName(s) }) });
+      b.dataset.s = s;
+      b.setAttribute("role", "menuitem");
+      b.onclick = () => { TabMenu.close(); run(s); };
+      row.append(b);
+    }
+    if (all) {
+      const b = el("button", "npp-sw all", T("hết"));
+      Object.assign(b, { type: "button", title: T("Xoá mọi màu đã tô") });
+      b.setAttribute("role", "menuitem");
+      b.onclick = () => { TabMenu.close(); all(); };
+      row.append(b);
+    }
+    return row;
+  }
+
+  const key = id => { const c = Commands.all().find(x => x.id === id); return c ? Commands.keyLabel(c) : ""; };
+  const styleNodes = () => [
+    swatchRow("Tô mọi chỗ", "Tô mọi chỗ của token bằng màu {s} ({color})", S.styleAll),
+    swatchRow("Tô 1 token", "Chỉ tô token đang chọn / dưới con trỏ bằng màu {s} ({color})", S.styleOne),
+    swatchRow("Xoá màu", "Xoá màu {s} ({color}) khỏi cả tab", S.clearStyle, () => S.clearStyle(0)),
+    sep(),
+    TabMenu.entry(T("Tới chỗ tô kế tiếp"), key("styleNext"), () => S.jump(1)),
+    TabMenu.entry(T("Tới chỗ tô trước"), key("stylePrev"), () => S.jump(-1)),
+    TabMenu.entry(T("Chép chữ đã tô"), key("styleCopy"), S.copyStyled),
+  ];
+
+  // Cut / copy go through the browser so CodeMirror's own handlers run (empty selection = the whole line).
+  function clip(v, what) {
+    v.focus();
+    if (what !== "paste") { document.execCommand(what); return; }
+    if (!navigator.clipboard || !navigator.clipboard.readText) { StatusBar.msg(T("Trình duyệt không cho đọc clipboard — dùng Ctrl+V."), "warn"); return; }
+    navigator.clipboard.readText().then(t => v.dispatch(v.state.replaceSelection(t), { userEvent: "input.paste", scrollIntoView: true }), () => StatusBar.msg(T("Trình duyệt không cho đọc clipboard — dùng Ctrl+V."), "warn"));
+  }
+
+  function editNodes(v) {
+    const ro = v.state.readOnly, nodes = [];
+    if (!ro) nodes.push(TabMenu.entry(T("Cắt"), "Ctrl+X", () => clip(v, "cut")));
+    nodes.push(TabMenu.entry(T("Chép"), "Ctrl+C", () => clip(v, "copy")));
+    if (!ro) nodes.push(TabMenu.entry(T("Dán"), "Ctrl+V", () => clip(v, "paste")));
+    nodes.push(TabMenu.entry(T("Chọn hết"), "Ctrl+A", () => { v.focus(); CM.commands.selectAll(v); }), sep());
+    return nodes;
+  }
+
+  function onContextMenu(e) {
+    if (touch || e.shiftKey) return;
+    const g = Views.groups.find(x => x.view && x.view.scrollDOM.contains(e.target));
+    if (!g || !Docs.get(g.active)) return;
+    e.preventDefault();
+    Views.focus(g.i);
+    const v = g.view, st = v.state;
+    let x = e.clientX, y = e.clientY;
+    // Right-click outside the selection moves the cursor there, so the token is the word clicked.
+    const pos = x || y ? v.posAtCoords({ x, y }) : null;
+    if (pos !== null && !st.selection.ranges.some(r => pos >= r.from && pos <= r.to)) v.dispatch({ selection: { anchor: pos } });
+    if (!x && !y) { const c = v.coordsAtPos(st.selection.main.head); if (c) { x = c.left; y = c.bottom; } }
+    TabMenu.show([...editNodes(v), ...styleNodes()], x, y);
+  }
+
+  function openFromButton(btn) {
+    if (!Views.activeDoc()) { StatusBar.msg(T("Chưa có tab nào đang mở."), "warn"); return; }
+    const r = btn.getBoundingClientRect();
+    TabMenu.show(styleNodes(), r.left, r.bottom + 2);
+  }
+
+  function init() {
+    document.addEventListener("pointerdown", e => { touch = e.pointerType === "touch"; }, true);
+    document.addEventListener("contextmenu", onContextMenu);
+  }
+
+  return { init, openFromButton };
+})();
 // Opening local files as tabs: reuse a tab already showing the same handle, > 50 MB → chunked read-only viewer, ask before showing a binary file (read-only).
 const FileOpen = (() => {
   const MAX_BYTES = 50 * 1024 * 1024;
@@ -9949,11 +10493,13 @@ const FileOpen = (() => {
     return doc;
   }
 
-  // items: [{ file, handle|null }]
+  // items: [{ file, handle|null, remote? }] — remote: a Drive / OneDrive file (one tab per remote file, like a handle).
   async function openMany(items, gi = Views.focused) {
     let n = 0, noted = null;
-    for (const { file, handle } of items) {
-      try { const d = await open(file, handle, gi); if (d) { n++; if (d.encNote) noted = d; } }
+    for (const { file, handle, remote } of items) {
+      const dup = remote?.url && Docs.list().find(d => d.remote?.url === remote.url);
+      if (dup) { Views.open(dup, Views.where(dup.id) >= 0 ? Views.where(dup.id) : gi); n++; continue; }
+      try { const d = await open(file, handle, gi); if (d) { n++; if (remote) Docs.update(d, { remote }); if (d.encNote) noted = d; } }
       catch (e) { StatusBar.msg(T("Không mở được “{name}”: {msg}", { name: file.name, msg: e.message }), "bad"); }
     }
     if (!n) return;
@@ -10021,15 +10567,17 @@ const Explorer = (() => {
 
   async function openNode(node) {
     try {
-      const { file, handle } = await node.read();
-      await FileOpen.openMany([{ file, handle }], Views.focused);
+      await FileOpen.openMany([await node.read()], Views.focused);
     } catch (e) { StatusBar.msg(T("Không mở được “{name}”: {msg}", { name: node.name, msg: e.message }), "bad"); }
   }
 
   function treeNode(node, hit) {
     if (!node.dir) return hit(node.name) ? row(fileIcon(node.name) + " " + node.name, node.path, () => openNode(node), ExplorerDisk.buttons(node)) : null;
     const d = el("details", "ex-dir"), kids = el("div", "ex-kids"), sum = el("summary");
-    sum.append(el("span", "ex-dname", "📁 " + node.name), ...ExplorerDisk.buttons(node));
+    const cloudRoot = node.remote && !node.parent && node.link;
+    // preventDefault: a click inside <summary> would also fold the folder.
+    const cloudPin = cloudRoot ? [pinAct(Pinned.hasCloud(node.link), T(PIN_ITEM), e => { e.preventDefault(); e.stopPropagation(); Pinned.toggleCloud(node); })] : [];
+    sum.append(el("span", "ex-dname", (node.remote && !node.parent ? "☁ " : "📁 ") + node.name), ...ExplorerDisk.buttons(node), ...cloudPin);
     sum.title = node.path;
     d.append(sum, kids);
     const fill = () => kids.replaceChildren(...node.children.map(c => treeNode(c, hit)).filter(Boolean));
@@ -10060,8 +10608,8 @@ const Explorer = (() => {
 
   function pinnedSection(hit) {
     const items = Pinned.items().filter(p => hit(Pinned.nameOf(p)));
-    const icon = p => p.kind === "dir" ? "📁" : p.kind === "note" ? "📝" : fileIcon(p.name);
-    const title = p => T(p.kind === "dir" ? "Mở folder này trong Explorer" : p.kind === "note" ? "Mở ghi chú" : "Mở file");
+    const icon = p => p.kind === "dir" ? "📁" : p.kind === "cloud" ? "☁" : p.kind === "note" ? "📝" : fileIcon(p.name);
+    const title = p => T(p.kind === "dir" || p.kind === "cloud" ? "Mở folder này trong Explorer" : p.kind === "note" ? "Mở ghi chú" : "Mở file");
     return items.length ? section(T("Đã ghim"), items.map(p => row(icon(p) + " " + Pinned.nameOf(p), title(p), () => Pinned.open(p), [btn("ex-act", "✕", T("Bỏ ghim"), () => Pinned.remove(p))]))) : null;
   }
 
@@ -10090,15 +10638,26 @@ const Explorer = (() => {
     ];
     if (root) {
       const tree = treeNode(root, hit);
-      sections.push(section(T("Folder"), [tree], [...(root.handle ? [refreshBtn()] : []), btn("ex-act", "✕", T("Đóng folder"), () => setRoot(null))]));
+      sections.push(section(T("Folder"), [tree], [...(root.handle || root.remote ? [refreshBtn()] : []), btn("ex-act", "✕", T("Đóng folder"), () => setRoot(null))]));
     } else {
-      sections.push(section(T("Folder"), [el("p", "ex-empty", T("Chưa mở folder. Kéo folder vào đây hoặc bấm:")), btn("ex-open", T("📂 Mở folder…"), T("Mở folder trên máy"), () => Actions.openFolder())]));
+      sections.push(section(T("Folder"), [el("p", "ex-empty", T("Chưa mở folder. Kéo folder vào đây hoặc bấm:")), btn("ex-open", T("📂 Mở folder…"), T("Mở folder trên máy"), () => Actions.openFolder()),
+        btn("ex-open", T("☁ Mở từ link Drive / OneDrive…"), T("Mở folder công khai Google Drive / OneDrive cá nhân (chỉ đọc)"), () => Actions.openCloudFolder())]));
     }
     box.replaceChildren(...sections.filter(Boolean));
   }
 
   const render = () => { if (!raf) raf = requestAnimationFrame(draw); };
-  function setRoot(node) { root = node; if (root) root.open = true; render(); DiskSync.rewatch(); }
+  // A folder from a link is reopened after F5 (a local one needs a new pick).
+  function setRoot(node) { root = node; if (root) root.open = true; Prefs.set("cloudRoot", root?.link || null); render(); DiskSync.rewatch(); }
+
+  async function restoreCloud() {
+    const link = Prefs.get("cloudRoot", null);
+    if (typeof link !== "string" || root) return;
+    try {
+      const node = await CloudDrive.open(link, false);
+      if (node && !root) setRoot(node);
+    } catch (e) { StatusBar.msg(T("Không mở lại được folder từ link: {msg}", { msg: e.message }), "warn"); }
+  }
 
   // Open folders are listed again; known entries keep their node (open state, row buttons), closed folders are read when opened next.
   async function relist(node) {
@@ -10110,7 +10669,7 @@ const Explorer = (() => {
     }
   }
   async function refresh() {
-    if (!root || !root.handle || !root.children) return;
+    if (!root || !(root.handle || root.remote) || !root.children) return;
     const sig = () => { const out = [], walk = n => { out.push(n.path); (n.children || []).forEach(walk); }; walk(root); return out.join("\n"); };
     const before = sig();
     try { await relist(root); } finally { if (sig() !== before) render(); }
@@ -10124,7 +10683,7 @@ const Explorer = (() => {
   }
 
   filter.addEventListener("input", render);
-  return { render, setRoot, refresh, loadedFiles, openNode, openNote, root: () => root };
+  return { render, setRoot, restoreCloud, refresh, loadedFiles, openNode, openNote, root: () => root };
 })();
 // Explorer actions on disk for handle-based folders (Chrome/Edge): pin, new file / folder, rename, delete — disk changes ask first, then refresh the parent folder.
 const ExplorerDisk = (() => {
@@ -10272,7 +10831,7 @@ const DiskSync = (() => {
     const out = { reloaded: [], conflict: [], fresh: [], gone: [], big: [], skip: [], perm: [] };
     let treeErr = null;
     try {
-      if (!quiet) for (const d of Docs.list().filter(d => d.kind === "file" && d.handle && d.stale)) { await FileOpen.reload(d); if (d.stale && Docs.get(d.id)) out.perm.push(d); }
+      if (!quiet) for (const d of Docs.list().filter(d => d.kind === "file" && d.handle && d.stale)) { await FileOpen.reload(d, true); if (d.stale && Docs.get(d.id)) out.perm.push(d); }
       for (const d of Docs.list().filter(watched)) { const s = await check(d).catch(() => "skip"); if (out[s]) out[s].push(d); }
       if (tree) await Explorer.refresh().catch(e => { treeErr = e; });
     } finally { busy = false; }
@@ -10411,9 +10970,11 @@ const Pinned = (() => {
 
   const persist = () => NotesDb.putMeta("pinned", list).catch(e => console.warn("One Editor pinned:", e));
   const changed = () => { persist(); Explorer.render(); };
-  const valid = p => p && (p.kind === "note" ? Docs.get(p.id)?.kind === "note" : (p.kind === "dir" || p.kind === "file") && p.handle && typeof p.name === "string");
+  const valid = p => p && (p.kind === "note" ? Docs.get(p.id)?.kind === "note" : p.kind === "cloud" ? typeof p.link === "string" && typeof p.name === "string"
+    : (p.kind === "dir" || p.kind === "file") && p.handle && typeof p.name === "string");
   const nameOf = p => p.kind === "note" ? Docs.get(p.id)?.name || "" : p.name;
   const hasNote = doc => list.some(p => p.kind === "note" && p.id === doc.id);
+  const hasCloud = link => list.some(p => p.kind === "cloud" && p.link === link);
   const canPin = doc => { const r = Docs.root(doc); return r.kind === "note" || !!r.handle; };
 
   // After the hot-exit restore, so pinned notes can be checked against the restored ones.
@@ -10456,6 +11017,15 @@ const Pinned = (() => {
     StatusBar.msg(T(on ? "Đã ghim “{name}” — xem ở mục Đã ghim của Explorer." : "Đã bỏ ghim “{name}”.", { name: doc.name }), "good");
   }
 
+  // Folder opened from a Google Drive / OneDrive link: pinned by its link.
+  function toggleCloud(node) {
+    if (!ready || !node.link) return;
+    const on = !hasCloud(node.link);
+    list = on ? [...list, { kind: "cloud", name: node.name, link: node.link }] : list.filter(p => !(p.kind === "cloud" && p.link === node.link));
+    changed();
+    StatusBar.msg(T(on ? "Đã ghim “{name}” — xem ở mục Đã ghim của Explorer." : "Đã bỏ ghim “{name}”.", { name: node.name }), "good");
+  }
+
   // The tab's note, or its file on disk (canPin gates the command).
   function toggleDoc(doc) {
     const r = Docs.root(doc);
@@ -10464,6 +11034,7 @@ const Pinned = (() => {
 
   async function open(p) {
     if (p.kind === "note") { const d = Docs.get(p.id); if (d) Explorer.openNote(d); return; }
+    if (p.kind === "cloud") { await Actions.openCloudFolder(p.link); return; }
     try {
       if (!(await LocalFs.readable(p.handle))) { StatusBar.msg(T("Trình duyệt chưa cho đọc lại “{name}”.", { name: p.name }), "warn"); return; }
       if (p.kind === "file") { await FileOpen.openMany([{ file: await p.handle.getFile(), handle: p.handle }], Views.focused); return; }
@@ -10476,7 +11047,7 @@ const Pinned = (() => {
     }
   }
 
-  return { init, items: () => list, nameOf, hasNote, canPin, find, renamed, toggleHandle, toggleNote, toggleDoc, open, remove };
+  return { init, items: () => list, nameOf, hasNote, hasCloud, canPin, find, renamed, toggleHandle, toggleNote, toggleCloud, toggleDoc, open, remove };
 })();
 // What Find in files searches: open tabs + notes (live text), then the Explorer folder read from disk; binaries, files over the limit and .git / node_modules (unless asked) are skipped and counted.
 const FindSources = (() => {
@@ -10532,6 +11103,8 @@ const FindSources = (() => {
     }
     const root = folder && Explorer.root();
     if (!root) return;
+    // Scanning would download every file of the shared folder.
+    if (root.remote) { failed(st, root.name, T("folder từ link Drive / OneDrive không được quét — mở file thành tab để tìm")); return; }
     let walked = 0;
     for await (const node of walk(root, heavy, st)) {
       if (++walked > FindCore.LIMITS.files) { st.capped = true; return; }
@@ -10609,7 +11182,7 @@ const SideBar = (() => {
   function show(name, focusReplace = false) {
     document.querySelectorAll("[data-side]").forEach(b => b.classList.toggle("on", b.dataset.side === name));
     document.querySelectorAll("[data-side-panel]").forEach(p => { p.hidden = p.dataset.sidePanel !== name; });
-    document.body.classList.remove("no-explorer");
+    if (document.body.classList.contains("no-explorer")) { document.body.classList.remove("no-explorer"); Prefs.set("explorer", true); }
     PhoneLayout.show(0);
     if (name === "outline") EditorExtras.use(() => Outline.show());
     if (name === "search") {
@@ -11022,7 +11595,7 @@ const HotExit = (() => {
   const serialize = (d, sealed) => ({
     id: d.id, kind: d.kind, name: d.name, lang: d.lang, text: secret(d) || secret(d.link && Docs.get(d.link.src)) ? "" : d.big ? bigText(d) : handleOnly(d) ? "" : Docs.text(d), stale: d.big ? !!d.handle : handleOnly(d), sealed: sealed || d.sealed || undefined,
     bigStart: d.big && d.handle ? d.big.start : null, handle: d.handle || null, dirty: d.dirty, edited: d.edited,
-    readOnly: d.readOnly, eol: d.eol, eolMixed: d.eolMixed, eolList: d.eolMixed ? (d.state ? MixedEol.codesOf(d.state) : d.eolList) : null, bom: d.bom, enc: d.enc, link: d.link, updated: d.updated, pinned: d.pinned, hex: d.hex, disk: d.disk,
+    readOnly: d.readOnly, eol: d.eol, eolMixed: d.eolMixed, eolList: d.eolMixed ? (d.state ? MixedEol.codesOf(d.state) : d.eolList) : null, bom: d.bom, enc: d.enc, link: d.link, updated: d.updated, pinned: d.pinned, hex: d.hex, disk: d.disk, remote: d.remote,
   });
 
   async function flush() {
@@ -11130,11 +11703,27 @@ const Actions = (() => {
     const doc = Views.activeDoc(), startIn = doc && doc.kind === "file" && doc.handle ? doc.handle : undefined;
     try {
       const node = await LocalFs.pickDirectory(startIn);
-      if (!node) return;
-      Explorer.setRoot(node);
-      document.body.classList.remove("no-explorer");
-      PhoneLayout.show(0);
-      StatusBar.msg(T("Đã mở folder “{name}”.", { name: node.name }), "good");
+      if (node) showFolder(node, T("Đã mở folder “{name}”.", { name: node.name }));
+    } catch (e) { StatusBar.msg(T("Không mở được folder: {msg}", { msg: e.message }), "bad"); }
+  }
+
+  function showFolder(node, msg) {
+    Explorer.setRoot(node);
+    document.body.classList.remove("no-explorer");
+    PhoneLayout.show(0);
+    StatusBar.msg(msg, "good");
+  }
+
+  // Public Google Drive / OneDrive link → read-only folder; the first listing runs before the tree changes, so a bad link fails early.
+  // saved: a pinned link (a string — handlers pass an event here otherwise).
+  async function openCloudFolder(saved) {
+    const link = typeof saved === "string" ? saved : prompt(T("Dán link folder công khai Google Drive hoặc OneDrive cá nhân:"));
+    if (!link || !link.trim()) return;
+    StatusBar.msg(T("Đang đọc folder…"));
+    try {
+      const node = await CloudDrive.open(link);
+      if (!node) { StatusBar.msg(""); return; }
+      showFolder(node, T(node.remote === "onedrive" ? "Đã mở folder “{name}” từ OneDrive — Ctrl+S lưu thẳng lên OneDrive nếu link cho sửa." : "Đã mở folder “{name}” từ Google Drive (chỉ đọc — Lưu sẽ hỏi chỗ lưu trên máy).", { name: node.name }));
     } catch (e) { StatusBar.msg(T("Không mở được folder: {msg}", { msg: e.message }), "bad"); }
   }
 
@@ -11167,6 +11756,15 @@ const Actions = (() => {
         Tail.sync(doc);
         return;
       }
+      if (!asNew && doc.remote?.kind === "onedrive") {
+        StatusBar.msg(T("Đang lưu lên OneDrive…"));
+        const remote = await CloudDrive.save(doc, data);
+        Docs.update(doc, { remote, dirty: dirtyAfter() }, "dirty");
+        StatusBar.msg(T("✔ Đã lưu “{name}” lên OneDrive.", { name: doc.name }), "good");
+        EditorExtras.use(() => LocalHistory.snap(doc, true, savedText));
+        return;
+      }
+      if (!asNew && doc.remote?.kind === "gdrive" && !confirm(T("File Google Drive chỉ đọc được qua API key (ghi ngược cần đăng nhập Google — chưa hỗ trợ). Lưu bản sao trên máy?"))) return;
       if (!asNew && doc.kind === "note") {
         await HotExit.flush();
         StatusBar.msg(NotesDb.ok ? T("✔ Ghi chú tự lưu trong trình duyệt. Muốn ra file thì dùng “Lưu thành…”.") : T("⚠ Trình duyệt chặn IndexedDB — dùng “Lưu thành…” để giữ nội dung."), NotesDb.ok ? "good" : "warn");
@@ -11177,7 +11775,7 @@ const Actions = (() => {
       if (!r) return;
       if (r.handle) RecentFiles.add(r.handle);
       // A note stays a note (the file is a copy); other tabs now point at the saved file.
-      if (r.handle && doc.kind !== "note") { Docs.update(doc, { kind: "file", handle: r.handle, dirty: dirtyAfter(), link: null }); if (r.name !== doc.name) Docs.rename(doc, r.name); await DiskSync.mark(doc); }
+      if (r.handle && doc.kind !== "note") { Docs.update(doc, { kind: "file", handle: r.handle, dirty: dirtyAfter(), link: null, remote: null }); if (r.name !== doc.name) Docs.rename(doc, r.name); await DiskSync.mark(doc); }
       StatusBar.msg(r.downloaded ? T("✔ Đã tải xuống “{name}”.", { name: r.name }) : T("✔ Đã lưu “{name}”.", { name: r.name }), "good");
       EditorExtras.use(() => LocalHistory.snap(doc, true, savedText));
     } catch (e) { StatusBar.msg(T("Không lưu được: {msg}", { msg: e.message }), "bad"); }
@@ -11284,7 +11882,74 @@ const Actions = (() => {
     location.replace(location.pathname);
   }
 
-  return { newNote, openFiles, openFolder, save, suggestName, run, closeTab, setWrap, setLang, moveTab, cloneTab, setLayout, zoom, setMinimap, setGuides, toggleZen, toggleExplorer, clearData };
+  return { newNote, openFiles, openFolder, openCloudFolder, save, suggestName, run, closeTab, setWrap, setLang, moveTab, cloneTab, setLayout, zoom, setMinimap, setGuides, toggleZen, toggleExplorer, clearData };
+})();
+// Notepad++-style toolbar buttons: undo / redo, zoom, show all characters, Encoding menu (reopen with / convert to / EOL), one Open menu (file / folder), Function List toggle.
+const ToolbarButtons = (() => {
+  const el = (tag, cls, text) => Object.assign(document.createElement(tag), { className: cls, textContent: text || "" });
+  const below = (btn, nodes) => { const r = btn.getBoundingClientRect(); TabMenu.show(nodes, r.left, r.bottom + 2); };
+  const check = (b, on) => { b.classList.add("chk"); b.setAttribute("role", "menuitemradio"); b.setAttribute("aria-checked", on); return b; };
+  const encName = (enc, bom) => Encoding.label(enc) + (bom ? " BOM" : "");
+  const activeRoot = () => { const d = Views.activeDoc(); return d ? Docs.root(d) : (StatusBar.msg(T("Chưa có tab nào đang mở."), "warn"), null); };
+
+  const REOPEN = ["utf-8", "utf-16le", "utf-16be", "windows-1252", "windows-1258"];
+  const CONVERT = [["utf-8", false], ["utf-8", true], ["utf-16le", true], ["utf-16be", true], ["windows-1252", false], ["windows-1258", false]];
+
+  function encodingMenu(btn) {
+    const doc = activeRoot();
+    if (!doc) return;
+    if (doc.hex) { StatusBar.msg(T("Tab HEX — không có bảng mã."), "warn"); return; }
+    const E = EncodingActions, enc = doc.enc || "utf-8", bom = !!doc.bom, eol = doc.eol || "\n";
+    const nodes = [el("div", "menu-head", T("Bảng mã: {enc} · {eol}", { enc: encName(enc, bom), eol: Encoding.EOL_NAME[eol] }))];
+    // Reinterpreting needs the original bytes, so only tabs read from disk get it.
+    if (doc.kind === "file" && (doc.file || doc.handle)) {
+      nodes.push(el("hr", "menu-sep"), el("div", "menu-head", T("Đọc lại file với bảng mã")));
+      for (const e of REOPEN) nodes.push(check(TabMenu.entry(Encoding.label(e), "", () => E.reopen(e)), e === enc));
+    }
+    nodes.push(el("hr", "menu-sep"), el("div", "menu-head", T("Chuyển sang (ghi khi lưu)")));
+    for (const [e, b] of CONVERT) nodes.push(check(TabMenu.entry(T("Chuyển sang {enc}", { enc: encName(e, b) }), "", () => E.convert(e, b)), e === enc && b === bom));
+    nodes.push(el("hr", "menu-sep"), el("div", "menu-head", T("Kiểu xuống dòng (EOL)")));
+    for (const e of ["\r\n", "\n", "\r"]) nodes.push(check(TabMenu.entry(Encoding.EOL_NAME[e], "", () => E.setEol(e)), !doc.eolMixed && e === eol));
+    nodes.push(el("hr", "menu-sep"), TabMenu.entry(T("Bảng mã khác… (Shift-JIS, GBK, Big5, Windows-125x)"), "", E.pick));
+    below(btn, nodes);
+  }
+
+  function openMenu(btn) {
+    const all = Commands.all();
+    below(btn, ["openFiles", "openFolder", "openCloudFolder"].map(id => TabMenu.item(all.find(c => c.id === id))));
+  }
+
+  // Toggles like Notepad++: a second press hides the side bar when Function List is already showing.
+  function functionList() {
+    const shown = !document.body.classList.contains("no-explorer") && !document.querySelector('[data-side-panel="outline"]').hidden;
+    if (shown && !matchMedia("(max-width: 640px)").matches) Actions.toggleExplorer();
+    else SideBar.show("outline");
+  }
+
+  const edit = id => () => { if (activeRoot()) CM.commands[id](Views.activeView()); };
+
+  function sync() {
+    const d = Views.activeDoc(), doc = d && Docs.root(d), b = $("btnEnc");
+    b.textContent = !doc ? "—" : doc.hex ? "HEX" : encName(doc.enc || "utf-8", doc.bom);
+    b.disabled = !doc;
+  }
+
+  function init() {
+    const on = (id, fn) => $(id).addEventListener("click", fn);
+    on("btnUndo", edit("undo"));
+    on("btnRedo", edit("redo"));
+    on("btnZoomIn", () => Actions.zoom(1));
+    on("btnZoomOut", () => Actions.zoom(-1));
+    on("btnHidden", EncodingActions.toggleHidden);
+    on("btnEnc", e => encodingMenu(e.currentTarget));
+    on("btnOpen", e => openMenu(e.currentTarget));
+    on("btnFnList", functionList);
+    // Act on the editor without taking focus, so the caret and selection stay put.
+    for (const id of ["btnUndo", "btnRedo", "btnZoomIn", "btnZoomOut", "btnHidden"]) $(id).addEventListener("mousedown", e => e.preventDefault());
+    $("btnHidden").setAttribute("aria-pressed", CmSetup.settings.hidden);
+  }
+
+  return { init, sync };
 })();
 // Resizing views (desktop > 900px): the #split bar in 2 columns (drag, ←/→, double-click = 50/50); in 3 columns / 2 rows / 2×2 the gap between two views is the handle. Ratios are remembered per layout.
 const Split = (() => {
@@ -11402,6 +12067,8 @@ function registerOneEditorCommands() {
   C("newNote", "Ghi chú mới", "Alt+n", () => A.newNote());
   C("openFiles", "Mở file…", "Ctrl+o", A.openFiles);
   C("openFolder", "Mở folder…", null, A.openFolder);
+  C("openCloudFolder", "☁ Mở folder từ link Google Drive / OneDrive…", null, A.openCloudFolder);
+  C("gdriveKey", "Google Drive: đổi / xoá API key…", null, () => { if (CloudDrive.askKey() != null) StatusBar.msg(T("Đã cập nhật API key Google Drive."), "good"); });
   C("save", "Lưu", "Ctrl+s", () => A.save(false), hasDoc);
   C("saveAs", "Lưu thành…", "Ctrl+Shift+s", () => A.save(true), hasDoc);
   C("diskRefresh", "🔄 Làm mới từ đĩa: folder Explorer + các tab file", null, () => DiskSync.checkAll());
@@ -11508,6 +12175,18 @@ function registerNotepadppCommands(C, hasDoc) {
     ["urlDec", "MIME: URL decode"], ["htmlEnc", "MIME: mã hoá HTML entity"], ["htmlDec", "MIME: giải mã HTML entity"]];
   for (const [id, text] of TEXT) C("text-" + id, text, null, () => N.text(id), hasDoc);
   for (const alg of ["SHA-1", "SHA-256", "SHA-512"]) C("hash-" + alg, () => T("Hash {alg} của vùng chọn (hoặc cả tab)", { alg }), null, () => N.hash(alg), hasDoc);
+
+  const S = TokenStyles;
+  for (let s = 1; s <= S.N; s++) {
+    const p = () => ({ s, color: S.colorName(s) });
+    C("styleAll" + s, () => T("Tô màu {s} ({color}): mọi chỗ của token", p()), "Ctrl+k " + s, () => S.styleAll(s), hasDoc);
+    C("styleOne" + s, () => T("Tô màu {s} ({color}): chỉ token này", p()), null, () => S.styleOne(s), hasDoc);
+    C("styleClear" + s, () => T("Tô màu: xoá màu {s} ({color})", p()), null, () => S.clearStyle(s), hasDoc);
+  }
+  C("styleClearAll", "Tô màu: xoá mọi màu", "Ctrl+k 0", () => S.clearStyle(0), hasDoc);
+  C("styleNext", "Tô màu: tới chỗ tô kế tiếp", null, () => S.jump(1), hasDoc);
+  C("stylePrev", "Tô màu: tới chỗ tô trước", null, () => S.jump(-1), hasDoc);
+  C("styleCopy", "Tô màu: chép chữ đã tô", null, S.copyStyled, hasDoc);
 
   C("macroRecord", "Macro: bắt đầu / dừng ghi", "Alt+Shift+r", Macro.toggle, hasDoc);
   C("macroPlay", "Macro: phát lại 1 lần", "Alt+Shift+p", () => Macro.play(1), hasDoc);
@@ -11822,22 +12501,40 @@ const SavedSessions = ({ select, saveBtn, delBtn, store, key = "saved", snapshot
   fill();
   return { fill, forget: () => { current = null; fill(); } };
 };
-// Key profiles: VS Code (default — CodeMirror's own keys already match it), Sublime Text, Notepad++ (editor keys only, the app's shortcuts stay); Vim (vendored, loaded when on) above any profile.
+// Key profiles: Notepad++ (default), VS Code (CodeMirror's own keys already match it), Sublime Text — editor keys only, the app's shortcuts stay; Vim (vendored, loaded when on) above any profile.
 const KeyProfiles = (() => {
-  const NAMES = { vscode: "VS Code", sublime: "Sublime Text", notepadpp: "Notepad++" };
-  const cmd = name => v => CM.commands[name](v);
+  const NAMES = { vscode: "VS Code", sublime: "Sublime Text", notepadpp: "Notepad++" }, DEFAULT = "notepadpp";
+  const cmd = name => v => CM.commands[name](v), fold = name => v => CM.language[name](v);
   const text = id => () => { NppActions.text(id); return true; }, lines = id => () => { NppActions.lines(id); return true; };
+  // Notepad++ Ctrl+L: the lines touched by each selection go to the clipboard (with their line end), then are deleted.
+  function cutLines(v) {
+    const st = v.state, seen = new Set(), parts = [];
+    for (const r of st.selection.ranges) {
+      // A selection ending at a line start does not take that line (same rule as deleteLine).
+      const last = st.doc.lineAt(r.to > r.from && st.doc.lineAt(r.to).from === r.to ? r.to - 1 : r.to).number;
+      for (let n = st.doc.lineAt(r.from).number; n <= last; n++) if (!seen.has(n)) { seen.add(n); parts.push(st.doc.line(n).text); }
+    }
+    Dom.copy(parts.join("\n") + "\n");
+    return st.readOnly || CM.commands.deleteLine(v);
+  }
+  // Ctrl+T / Ctrl+Shift+T (browser tabs), Ctrl+B (Explorer), Ctrl+K (chords), Ctrl+Alt+Enter, Alt+1…4 (views) stay with the browser / app.
   const PROFILES = {
     vscode: [],
     sublime: [["Mod-Shift-d", cmd("copyLineDown")], ["Mod-Shift-ArrowUp", cmd("moveLineUp")], ["Mod-Shift-ArrowDown", cmd("moveLineDown")], ["Mod-m", cmd("cursorMatchingBracket")], ["Mod-j", lines("join")], ["Mod-Shift-u", text("upper")], ["Mod-u", text("lower")]],
-    notepadpp: [["Mod-d", cmd("copyLineDown")], ["Mod-Shift-l", cmd("deleteLine")], ["Mod-Shift-ArrowUp", cmd("moveLineUp")], ["Mod-Shift-ArrowDown", cmd("moveLineDown")], ["Mod-u", text("lower")], ["Mod-Shift-u", text("upper")], ["Mod-j", lines("join")], ["Mod-q", cmd("toggleComment")]],
+    notepadpp: [["Mod-d", cmd("copyLineDown")], ["Mod-Shift-l", cmd("deleteLine")], ["Mod-l", cutLines], ["Mod-Shift-ArrowUp", cmd("moveLineUp")], ["Mod-Shift-ArrowDown", cmd("moveLineDown")],
+      ["Mod-u", text("lower")], ["Mod-Shift-u", text("upper")], ["Mod-j", lines("join")], ["Mod-q", cmd("toggleComment")], ["Mod-Shift-q", cmd("toggleBlockComment")],
+      ["Mod-h", v => CM.search.openSearchPanel(v)], ["Mod-F3", v => TokenStyles.findNext(v, 1)], ["Mod-Shift-F3", v => TokenStyles.findNext(v, -1)],
+      ["Mod-Shift-Backspace", cmd("deleteToLineStart")], ["Mod-Shift-Delete", cmd("deleteToLineEnd")],
+      ["Alt-0", fold("foldAll")], ["Alt-Shift-0", fold("unfoldAll")], ["Mod-Alt-f", fold("foldCode")], ["Mod-Alt-Shift-f", fold("unfoldCode")]],
   };
-  const current = () => Object.hasOwn(PROFILES, Prefs.get("keys", "vscode")) ? Prefs.get("keys", "vscode") : "vscode";
+  const current = () => Object.hasOwn(PROFILES, Prefs.get("keys", DEFAULT)) ? Prefs.get("keys", DEFAULT) : DEFAULT;
   const ext = id => PROFILES[id].length ? CM.state.Prec.high(CM.view.keymap.of(PROFILES[id].map(([key, run]) => ({ key, run, preventDefault: true })))) : [];
+  const label = () => NAMES[current()] + (Prefs.get("vim", false) === true ? " + Vim" : "");
 
   function set(id, quiet = false) {
     Prefs.set("keys", id);
     CmSetup.setExtra("keys", ext(id));
+    StatusBar.refresh();
     if (!quiet) StatusBar.msg(T("Bộ phím: {name} — phím của ứng dụng (Ctrl+P, Ctrl+Shift+P…) giữ nguyên.", { name: NAMES[id] }), "good");
   }
 
@@ -11850,6 +12547,7 @@ const KeyProfiles = (() => {
     if (on && !CM.vim.wired) { CM.vim.wired = true; CM.vim.Vim.defineEx("write", "w", () => Actions.save(false)); }
     Prefs.set("vim", !!on);
     CmSetup.setExtra("vim", on ? CM.state.Prec.highest(CM.vim.vim({ status: true })) : []);
+    StatusBar.refresh();
     if (!quiet) StatusBar.msg(on ? T("Vim: bật — Esc về Normal, i để gõ, :w lưu.") : T("Vim: tắt."), "good");
   }
 
@@ -11859,7 +12557,7 @@ const KeyProfiles = (() => {
     if (Prefs.get("vim", false) === true) setVim(true, true);
   }
 
-  return { set, setVim, init, PROFILES, current };
+  return { set, setVim, init, PROFILES, current, label };
 })();
 // Snippets: a built-in set per language + the user's own (IndexedDB meta "snippets"), offered in autocomplete by prefix and from the Palette; ${1:field} placeholders, Tab moves on.
 const Snippets = (() => {
@@ -12389,6 +13087,7 @@ const Toolbar = (() => {
     sel.disabled = !doc;
     if (Views.activeDoc()) $("opSel").value = RunOp.of(Views.activeDoc());
     $("layoutSel").value = Views.layout;
+    ToolbarButtons.sync();
   }
 
   function fill() {
@@ -12411,8 +13110,6 @@ const Toolbar = (() => {
 function wireOneEditor() {
   const on = (id, ev, fn) => $(id).addEventListener(ev, fn);
   on("btnNew", "click", () => Actions.newNote());
-  on("btnOpen", "click", Actions.openFiles);
-  on("btnFolder", "click", Actions.openFolder);
   on("btnSave", "click", () => Actions.save(false));
   on("btnSaveAs", "click", () => Actions.save(true));
   on("btnRun", "click", Actions.run);
@@ -12440,9 +13137,13 @@ function wireOneEditor() {
   Compare.init();
   Macro.init();
   CmSetup.settings.hidden = Prefs.get("hidden", false) === true;
+  ToolbarButtons.init();
   CmSetup.settings.numHover = Prefs.get("numhover", true) !== false;
   CmSetup.settings.lint = Prefs.get("lint", true) !== false;
   on("stEol", "click", EncodingActions.pick);
+  on("stKeys", "click", () => QuickPick.open(">" + T("Bộ phím")));
+  on("btnStyle", "click", e => EditorMenu.openFromButton(e.currentTarget));
+  EditorMenu.init();
   on("stLint", "click", () => Commands.run("problems"));
   matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => Views.applySettings());
   registerOneEditorCommands();
@@ -12497,6 +13198,7 @@ function wireOneEditor() {
   if (Prefs.get("guides", true) !== false) Actions.setGuides(true);
   await RecentFiles.load();
   await Pinned.init();
+  Explorer.restoreCloud();
   // Extras (breadcrumbs, bracket colours, snippets, key profile, sessions) load after the editor is usable.
   EditorExtras.use(async () => { KeyProfiles.init(); Aids.apply(); await Snippets.load(); await Sessions.init(); });
   StatusBar.storage(NotesDb.ok, NotesDb.error);

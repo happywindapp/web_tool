@@ -22,11 +22,27 @@ const Actions = (() => {
     const doc = Views.activeDoc(), startIn = doc && doc.kind === "file" && doc.handle ? doc.handle : undefined;
     try {
       const node = await LocalFs.pickDirectory(startIn);
-      if (!node) return;
-      Explorer.setRoot(node);
-      document.body.classList.remove("no-explorer");
-      PhoneLayout.show(0);
-      StatusBar.msg(T("Đã mở folder “{name}”.", { name: node.name }), "good");
+      if (node) showFolder(node, T("Đã mở folder “{name}”.", { name: node.name }));
+    } catch (e) { StatusBar.msg(T("Không mở được folder: {msg}", { msg: e.message }), "bad"); }
+  }
+
+  function showFolder(node, msg) {
+    Explorer.setRoot(node);
+    document.body.classList.remove("no-explorer");
+    PhoneLayout.show(0);
+    StatusBar.msg(msg, "good");
+  }
+
+  // Public Google Drive / OneDrive link → read-only folder; the first listing runs before the tree changes, so a bad link fails early.
+  // saved: a pinned link (a string — handlers pass an event here otherwise).
+  async function openCloudFolder(saved) {
+    const link = typeof saved === "string" ? saved : prompt(T("Dán link folder công khai Google Drive hoặc OneDrive cá nhân:"));
+    if (!link || !link.trim()) return;
+    StatusBar.msg(T("Đang đọc folder…"));
+    try {
+      const node = await CloudDrive.open(link);
+      if (!node) { StatusBar.msg(""); return; }
+      showFolder(node, T(node.remote === "onedrive" ? "Đã mở folder “{name}” từ OneDrive — Ctrl+S lưu thẳng lên OneDrive nếu link cho sửa." : "Đã mở folder “{name}” từ Google Drive (chỉ đọc — Lưu sẽ hỏi chỗ lưu trên máy).", { name: node.name }));
     } catch (e) { StatusBar.msg(T("Không mở được folder: {msg}", { msg: e.message }), "bad"); }
   }
 
@@ -59,6 +75,15 @@ const Actions = (() => {
         Tail.sync(doc);
         return;
       }
+      if (!asNew && doc.remote?.kind === "onedrive") {
+        StatusBar.msg(T("Đang lưu lên OneDrive…"));
+        const remote = await CloudDrive.save(doc, data);
+        Docs.update(doc, { remote, dirty: dirtyAfter() }, "dirty");
+        StatusBar.msg(T("✔ Đã lưu “{name}” lên OneDrive.", { name: doc.name }), "good");
+        EditorExtras.use(() => LocalHistory.snap(doc, true, savedText));
+        return;
+      }
+      if (!asNew && doc.remote?.kind === "gdrive" && !confirm(T("File Google Drive chỉ đọc được qua API key (ghi ngược cần đăng nhập Google — chưa hỗ trợ). Lưu bản sao trên máy?"))) return;
       if (!asNew && doc.kind === "note") {
         await HotExit.flush();
         StatusBar.msg(NotesDb.ok ? T("✔ Ghi chú tự lưu trong trình duyệt. Muốn ra file thì dùng “Lưu thành…”.") : T("⚠ Trình duyệt chặn IndexedDB — dùng “Lưu thành…” để giữ nội dung."), NotesDb.ok ? "good" : "warn");
@@ -69,7 +94,7 @@ const Actions = (() => {
       if (!r) return;
       if (r.handle) RecentFiles.add(r.handle);
       // A note stays a note (the file is a copy); other tabs now point at the saved file.
-      if (r.handle && doc.kind !== "note") { Docs.update(doc, { kind: "file", handle: r.handle, dirty: dirtyAfter(), link: null }); if (r.name !== doc.name) Docs.rename(doc, r.name); await DiskSync.mark(doc); }
+      if (r.handle && doc.kind !== "note") { Docs.update(doc, { kind: "file", handle: r.handle, dirty: dirtyAfter(), link: null, remote: null }); if (r.name !== doc.name) Docs.rename(doc, r.name); await DiskSync.mark(doc); }
       StatusBar.msg(r.downloaded ? T("✔ Đã tải xuống “{name}”.", { name: r.name }) : T("✔ Đã lưu “{name}”.", { name: r.name }), "good");
       EditorExtras.use(() => LocalHistory.snap(doc, true, savedText));
     } catch (e) { StatusBar.msg(T("Không lưu được: {msg}", { msg: e.message }), "bad"); }
@@ -176,5 +201,5 @@ const Actions = (() => {
     location.replace(location.pathname);
   }
 
-  return { newNote, openFiles, openFolder, save, suggestName, run, closeTab, setWrap, setLang, moveTab, cloneTab, setLayout, zoom, setMinimap, setGuides, toggleZen, toggleExplorer, clearData };
+  return { newNote, openFiles, openFolder, openCloudFolder, save, suggestName, run, closeTab, setWrap, setLang, moveTab, cloneTab, setLayout, zoom, setMinimap, setGuides, toggleZen, toggleExplorer, clearData };
 })();
