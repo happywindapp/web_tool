@@ -7,6 +7,8 @@ const RunOp = (() => {
   function suggest(doc) {
     const lang = Docs.effectiveLang(doc);
     if (Object.hasOwn(BY_LANG, lang)) return BY_LANG[lang];
+    // No real formatter (format only re-indents): ▶ checks the syntax instead.
+    if (CodeLint.LANGS.has(lang) && Formatter.tier(lang) === 3) return "syntax-check";
     return PreviewPane.kindOf(Docs.root(doc)) ? "preview" : "format";
   }
 

@@ -51,6 +51,7 @@ const OutputOps = (() => {
     "sql-insert": { label: "CSV / JSON → SQL INSERT", group: "Chuyển đổi", lang: "SQL", live: true, run: power("sqlInsert") },
     "sql-update": { label: "CSV / JSON → SQL UPDATE … WHERE khoá", group: "Chuyển đổi", lang: "SQL", live: true, run: power("sqlUpdate") },
     "json-schema": { label: "JSON → JSON Schema (2020-12)", group: "Sinh kiểu từ JSON", lang: "JSON", live: true, run: power("schema") },
+    "syntax-check": { label: "Kiểm cú pháp (không chạy code)", group: "Chạy code", lang: "Plain Text", live: d => { const s = Docs.get(d.link.src) || d; return (s.state ? s.state.doc.length : s.text.length) <= CodeLint.LIVE_MAX; }, pane: true, run: power("syntaxCheck") },
     "run-code": { label: "Chạy HTML / JS (sandbox)", group: "Chạy code", lang: "Plain Text", live: d => PowerTools.state(d.link.src, "run-code").live === true, pane: true, run: power("run") },
     "code-image": { label: "Code → ảnh (PNG / SVG)", group: "Xuất", lang: "SVG", live: true, pane: true, run: power("codeImage") },
   };

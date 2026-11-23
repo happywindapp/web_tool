@@ -2,13 +2,17 @@
 const TabStrip = (() => {
   let editing = null;
   const TAB_TYPE = "application/x-one-editor-tab";
-  const ICON = { note: "📝", file: "📄", temp: "✳", output: "⇢", clone: "⧉" };
+  const ICON = { note: "📝", file: "📄", temp: "✳", output: "⇢", clone: "⧉", folder: "📁", trash: "🗑", results: "🔎", settings: "⚙" };
   const SOURCE = {
     note: "Ghi chú — tự lưu trong trình duyệt",
     file: "File trên máy",
     temp: "Tab tạm (mẫu / link) — sửa thì được giữ lại thành ghi chú",
     output: "Kết quả liên kết — chạy lại sẽ cập nhật tab này",
     clone: "Bản hiển thị thứ hai của một tab — sửa ở đây là sửa tab gốc",
+    folder: "Tab folder — danh sách file như Windows Explorer, đường dẫn ở thanh địa chỉ",
+    trash: "Thùng rác — file đã xoá trong Explorer, khôi phục được",
+    results: "Kết quả tìm / so sánh file — ↻ để chạy lại",
+    settings: "Cài đặt One Editor — đổi là áp dụng ngay",
   };
   const HAND_EDITED = "Kết quả đã sửa tay — không tự cập nhật nữa; đóng tab thì được giữ thành ghi chú";
   const sourceOf = doc => doc.kind === "output" && doc.edited ? HAND_EDITED : SOURCE[doc.kind];

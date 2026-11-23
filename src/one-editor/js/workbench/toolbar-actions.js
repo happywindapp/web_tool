@@ -116,6 +116,14 @@ const Actions = (() => {
     $("chkWrap").checked = !!on;
     Views.applySettings();
     HotExit.schedule();
+    Settings.changed();
+  }
+
+  function setWords(on) {
+    CmSetup.settings.words = !!on;
+    Prefs.set("words", !!on);
+    Views.applySettings();
+    StatusBar.msg(on ? T("Gợi ý từ trong file khi gõ: bật.") : T("Gợi ý từ trong file khi gõ: tắt."));
   }
 
   function setLang(value) {
@@ -147,6 +155,12 @@ const Actions = (() => {
     Views.setLayout(id);
     $("layoutSel").value = Views.layout;
     HotExit.schedule();
+  }
+
+  function setSplit(pair) {
+    if (Views.count < 2) setLayout("2c");
+    Split.preset(pair);
+    StatusBar.msg(T("Tỷ lệ view: {r}", { r: pair }));
   }
 
   // Editor font size (also what Ctrl+= / Ctrl+- / Ctrl+0 change instead of the browser zoom).
@@ -198,8 +212,9 @@ const Actions = (() => {
     if (!confirm(T("Xoá mọi ghi chú, tab đã lưu và lịch sử cục bộ trong trình duyệt này? Không khôi phục được."))) return;
     HotExit.stop();
     try { await NotesDb.clear(); } catch (e) { StatusBar.msg(T("Không xoá được: {msg}", { msg: e.message }), "bad"); return; }
+    Prefs.set("fiRecentDirs", []);
     location.replace(location.pathname);
   }
 
-  return { newNote, openFiles, openFolder, openCloudFolder, save, suggestName, run, closeTab, setWrap, setLang, moveTab, cloneTab, setLayout, zoom, setMinimap, setGuides, toggleZen, toggleExplorer, clearData };
+  return { newNote, openFiles, openFolder, openCloudFolder, save, suggestName, run, closeTab, setWrap, setWords, setLang, moveTab, cloneTab, setLayout, setSplit, zoom, setMinimap, setGuides, toggleZen, toggleExplorer, clearData };
 })();

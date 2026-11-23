@@ -1,7 +1,7 @@
-// Documents behind the tabs. kind: note (kept in IndexedDB until deleted) | file (local disk) | temp (demo / shared link, kept while open) | output (OutputLink result) | clone (second view of another tab, never stored).
+// Documents behind the tabs. kind: note (kept in IndexedDB until deleted) | file (local disk) | temp (demo / shared link, kept while open) | output (OutputLink result) | clone (second view of another tab, never stored) | folder (FolderItems list, no text, never stored) | trash (TrashTab recycle bin, no text) | results (ResultsTab file list, no text) | settings (SettingsTab, no text).
 const Docs = (() => {
   const all = new Map(), listeners = [];
-  const KINDS = ["note", "file", "temp", "output", "clone"];
+  const KINDS = ["note", "file", "temp", "output", "clone", "folder", "trash", "results", "settings"];
   const newId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
   const emit = (type, doc) => listeners.forEach(f => f(type, doc));
 
@@ -98,5 +98,8 @@ const Docs = (() => {
     emit("remove", doc);
   }
 
-  return { create, get, list, notes, text, root, family, effectiveLang, ensureState, release, edited, recheck, rename, update, closed, remove, on: f => listeners.push(f) };
+  // Folder / recycle bin tabs: an item list, no text.
+  // Tabs without text, drawn by their own module (lists and the settings page).
+  const isList = d => ["folder", "trash", "results", "settings"].includes(d?.kind);
+  return { create, get, list, notes, text, root, family, effectiveLang, ensureState, release, edited, recheck, rename, update, closed, remove, isList, on: f => listeners.push(f) };
 })();

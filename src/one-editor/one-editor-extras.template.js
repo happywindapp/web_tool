@@ -69,5 +69,16 @@
 // @include js/extras/run-code-pane-view.js
 // @include js/extras/code-snippet-to-image.js
 // @include js/extras/code-image-op-and-pane.js
+// @include js/extras/syntax-check-op-and-pane.js
 // @include js/extras/power-tools-demos.js
 // @include js/extras/power-tools-ops.js
+// Explorer tar / gzip (phase 11d): Tar for ExplorerArchive.
+// @include js/core/tar-gzip-archive-pure.js
+// Explorer find & compare (phase 11e): advanced file search, duplicate files, folder compare + one-way sync for FileTools / the 🔎 tab.
+// @include js/core/explorer-folder-compare-pure.js
+// @include js/core/explorer-search-duplicates-pure.js
+// @include js/extras/explorer-scan-walk.js
+// @include js/extras/explorer-advanced-file-search.js
+// @include js/extras/explorer-duplicate-file-finder.js
+// @include js/extras/explorer-folder-compare.js
+// @include js/extras/explorer-folder-sync-apply.js

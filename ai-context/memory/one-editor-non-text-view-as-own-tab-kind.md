@@ -1,0 +1,16 @@
+# One Editor: nội dung không phải text ⇒ loại tab riêng, không phủ lên tab file
+
+**Triệu chứng:** làm danh sách folder (kiểu Windows Explorer) thành lớp phủ (overlay) che editor View 1 ⇒ user không chịu: chiếm chỗ tab đang chứa file, không thấy đang ở đường dẫn nào, đóng/mở lẫn lộn với tab.
+
+**Nguyên nhân:** mọi thứ trong 1 view của One Editor là tab; overlay nằm ngoài mô hình tab nên không có tên, icon, không chuyển / đóng / kéo sang view khác được như tab.
+
+**Cách xử lý đúng (2026-11-23, `FolderItems` — `src/one-editor/js/workbench/explorer-folder-items-view.js`):**
+- Thêm `kind` mới vào `Docs` (`KINDS`), icon ở `TabStrip.ICON` + mô tả ở `TabStrip.SOURCE` + `StatusBar.SHORT`.
+- Vẽ bằng `mount(g)` gọi từ `Views.refresh` (như `PreviewPane.mount`), class trên `.group` ẩn `.host`.
+- `PreviewPane.isPane` trả true cho kind đó ⇒ lint / outline / goto / phiên có tên / lịch sử tự bỏ qua; nhưng `PreviewPane.mount` phải loại nó ra.
+- F5: hot exit lưu trạng thái riêng của tab (`serialize` thêm field, `restore` gọi `adopt` trước khi `Views.activate`); tab khôi phục ở trạng thái "chờ" tới khi nguồn dữ liệu sẵn sàng (folder gốc cần 1 cú bấm cấp lại quyền đọc — handle lưu IndexedDB `meta.explorerRoot`). Loại khỏi `Views.close` (reopen), phiên có tên, link chia sẻ; `OutputLink.run` báo không chạy; `CloneSync.cloneTo` mở thêm tab cùng loại.
+- Trạng thái theo đường dẫn (path), không giữ node: `ExplorerDisk.reload` thay node con ⇒ tab tìm lại theo path.
+- **Bổ sung 2026-11-23 (phase 10):** đã có 2 loại tab danh sách (`folder`, `trash` — `TrashTab`). Mọi chỗ kiểm dùng `Docs.isList(d)` thay vì so `kind === "folder"`; thêm loại thứ 3 ⇒ sửa `Docs.isList` + các bảng ở trên (thiếu `StatusBar.SHORT` ⇒ status bar hiện "undefined"). `X.mount(g)` phải gọi **sau** `FolderItems.mount(g)` trong `Views.refresh`, vì `FolderItems.mount` gỡ class `is-folder` khi tab đang chọn không phải tab folder của nó.
+- **Bổ sung 2026-11-23 (phase 11a):** thêm `results` (`ResultsTab`, 🔎) và `settings` (`SettingsTab`, ⚙) ⇒ `Docs.isList` = mọi tab không có text (folder · trash · results · settings). Module mount sau `FolderItems.mount` phải tự `g.el.classList.add("is-folder")` khi tab của nó đang chọn. Hàng của tab danh sách dựng qua `FolderRows.row` + `FolderRows.own(list, picked)` thì phím Explorer (Delete, Ctrl+X/C, Alt+Enter) tự áp cho nhóm đang chọn.
+- **Bổ sung 2026-11-23 (phase 11b):** module giữ danh sách tab để vẽ lại (vd `FolderFilter`, `FolderPreview`) **không** được coi `!t.ui.root.isConnected` là tab đã đóng — tab khôi phục sau F5 mà chưa từng active thì root chưa nằm trong DOM. Đánh dấu `t.closed = true` trong handler `Docs.on("remove")` của tab rồi dọn theo cờ đó.
+- **Bổ sung 2026-11-23 (phase 11e):** `ExplorerDisk.reload(dir)` thay **cả cây con** bằng node mới ⇒ node của folder con cũ bị tách khỏi cây (children cũ / null mãi). Tab danh sách giữ node (tab 🔎) phải tìm lại theo đường dẫn khi folder **tổ tiên** được đọc lại: `FolderPaths.relink(nodes)` (gọi trong `ResultsTab.sync`); xoá nhiều mục ở nhiều folder ⇒ chỉ reload các folder cha không nằm trong folder cha khác. Provider của tab 🔎 đăng ký ở file chính (stub nạp bundle), không trong bundle nạp lười — nếu không, tab khôi phục sau F5 không có ↻.

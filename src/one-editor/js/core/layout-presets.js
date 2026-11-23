@@ -2,10 +2,12 @@
 const Layouts = (() => {
   const LIST = [
     { id: "1", n: 1, label: "1 view", key: "Alt+Shift+1" },
-    { id: "2c", n: 2, label: "2 cột", key: "Alt+Shift+2" },
+    { id: "2c", n: 2, label: "2 cột", key: "Alt+Shift+2", bar: true },
     { id: "3c", n: 3, label: "3 cột", key: "Alt+Shift+3" },
     { id: "2r", n: 2, label: "2 hàng", key: "Alt+Shift+8" },
     { id: "4g", n: 4, label: "Lưới 2×2", key: "Alt+Shift+5" },
+    { id: "12", n: 3, label: "1x2", bar: true },
+    { id: "21", n: 3, label: "2x1", bar: true },
   ];
   const get = id => LIST.find(l => l.id === id) || null;
   // Smallest layout holding n views (shared links / demos with more views than the current layout).

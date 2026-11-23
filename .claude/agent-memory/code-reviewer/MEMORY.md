@@ -1,4 +1,9 @@
 - [Node probe harness: TZ + i18n scan](node-probe-harness-tz-and-i18n-check.md) — vm-load pure modules, process.env.TZ for DST, scan VI strings missing EN
 - [Vendor path blocked by scout hook](vendor-path-blocked-by-scout-hook.md) — printf trick for tools/vendor; headless Chrome + local /leak server to test network leaks and SvgSanitizer bypasses
 - [SVG builder: control chars + dup ids](inline-svg-builder-xml-control-chars-and-dup-ids.md) — \x1b/\f break DOMParser SVG; inline gradient ids clash with hidden panes
+- [web-tree-sitter: init hang + root ERROR](web-tree-sitter-init-hang-and-root-error-node.md) — init never rejects on WASM fail; walk misses root ERROR; printf trick now denied, use Grep -o windows
+- [isomorphic-git statusMatrix facts](isomorphic-git-statusmatrix-readonly-facts.md) — refresh:false = no index write; gitlink ⇒ null row; cache keeps packs
 - [file:// iframe shares IndexedDB](file-url-iframe-shares-indexeddb-with-main-page.md) — unsandboxed file:// frame/worker reads main page IDB despite origin "null"
+- [Unmounted list tab root is detached](one-editor-unmounted-tab-root-is-disconnected.md) — isConnected ≠ closed for One Editor folder tabs; prune on Docs remove
+- [Explorer listing silent 5000 cap](explorer-folder-listing-silent-5000-cap.md) — loadKids truncates at MAX_ENTRIES unflagged; undo put may evict own trash backup
+- [Keyboard contextmenu has coords](chrome-keyboard-contextmenu-event-has-coords.md) — Chrome Menu key ⇒ clientX/Y = element center, shiftKey false; raw CDP probe via node WebSocket

@@ -4,6 +4,7 @@
   .iv-kind { display:flex; flex-wrap:wrap; gap:6px; align-items:center; }
   .iv-kind b { font-weight:600; margin-right:4px; }
   .iv-list { padding:4px 0 24px; font:13px/1.5 Consolas, "Cascadia Mono", monospace; }
+  .pv-invisible > .rp-none { padding:8px 12px; }
   .iv-row { display:flex; gap:10px; padding:0 12px; cursor:pointer; white-space:pre; }
   .iv-row:hover { background:var(--hover); }
   .iv-row code { flex:none; color:var(--acc); }

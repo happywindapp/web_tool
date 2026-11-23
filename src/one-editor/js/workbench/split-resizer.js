@@ -1,4 +1,4 @@
-// Resizing views (desktop > 900px): the #split bar in 2 columns (drag, ←/→, double-click = 50/50); in 3 columns / 2 rows / 2×2 the gap between two views is the handle. Ratios are remembered per layout.
+// Resizing views (desktop > 900px): the #split bar in 2 columns / 1x2 / 2x1 (drag, ←/→, double-click = 50/50); elsewhere the gap between two views is the handle. Ratios are remembered per layout.
 const Split = (() => {
   const clamp = r => Math.min(0.85, Math.max(0.15, r));
   let ratio = 0.5;
@@ -27,15 +27,15 @@ const Split = (() => {
 
   // Column / row index of view gi in the current layout (2 columns uses #split instead).
   const col = gi => Views.layout === "3c" ? gi : Views.layout === "4g" ? gi % 2 : -1;
-  const row = gi => Views.layout === "2r" ? gi : Views.layout === "4g" ? gi >> 1 : -1;
+  const row = gi => ({ "2r": gi, "4g": gi >> 1, "12": gi - 1, "21": gi < 2 ? gi : -1 })[Views.layout] ?? -1;
 
   // The two views on each side of the point when it lies in a gap between them.
   function gapAt(x, y) {
-    if (!["3c", "2r", "4g"].includes(Views.layout) || !matchMedia("(min-width: 901px)").matches) return null;
+    if (!["3c", "2r", "4g", "12", "21"].includes(Views.layout) || !matchMedia("(min-width: 901px)").matches) return null;
     const vis = Views.groups.slice(0, Views.count).map(g => ({ gi: g.i, r: g.el.getBoundingClientRect() }));
     for (const a of vis) for (const b of vis) {
-      if (a.r.right <= x && b.r.left >= x && b.r.left - a.r.right < 16 && y > Math.max(a.r.top, b.r.top) && y < Math.min(a.r.bottom, b.r.bottom)) return { axis: "x", a, b };
-      if (a.r.bottom <= y && b.r.top >= y && b.r.top - a.r.bottom < 16 && x > Math.max(a.r.left, b.r.left) && x < Math.min(a.r.right, b.r.right)) return { axis: "y", a, b };
+      if (col(a.gi) >= 0 && col(b.gi) >= 0 && a.r.right <= x && b.r.left >= x && b.r.left - a.r.right < 16 && y > Math.max(a.r.top, b.r.top) && y < Math.min(a.r.bottom, b.r.bottom)) return { axis: "x", a, b };
+      if (row(a.gi) >= 0 && row(b.gi) >= 0 && a.r.bottom <= y && b.r.top >= y && b.r.top - a.r.bottom < 16 && x > Math.max(a.r.left, b.r.left) && x < Math.min(a.r.right, b.r.right)) return { axis: "y", a, b };
     }
     return null;
   }
@@ -57,8 +57,9 @@ const Split = (() => {
     bar.addEventListener("pointerdown", e => {
       e.preventDefault();
       bar.setPointerCapture(e.pointerId);
-      const a = Views.groups[0].el.getBoundingClientRect(), b = Views.groups[1].el.getBoundingClientRect();
-      const move = ev => apply((ev.clientX - a.left) / (b.right - a.left));
+      const left = Views.groups[0].el.getBoundingClientRect().left;
+      const right = Math.max(...Views.groups.slice(0, Views.count).map(g => g.el.getBoundingClientRect().right));
+      const move = ev => apply((ev.clientX - left) / (right - left));
       const up = () => { bar.removeEventListener("pointermove", move); Prefs.set("split", ratio); };
       bar.addEventListener("pointermove", move);
       bar.addEventListener("pointerup", up, { once: true });
@@ -94,5 +95,17 @@ const Split = (() => {
   let lastLayout = "";
 
   const set = r => { apply(r); Prefs.set("split", ratio); };
-  return { init, gapAt, set, ratio: () => ratio };
+
+  // Toolbar "25:75": split-bar layouts → column widths; 3 columns → 25:25:50 / 50:25:25; 2 rows → row heights; 2×2 → column widths.
+  function preset(pair) {
+    const a = parseInt(pair, 10) / 100, b = 1 - a, L = Views.layout;
+    if (Layouts.get(L)?.bar) return set(a);
+    if (L === "3c") fr.c = a === b ? [1, 1, 1] : a < b ? [1, 1, 2] : [2, 1, 1];
+    else if (L === "2r") fr.r = [a, b];
+    else if (L === "4g") fr.c = [a, b, 1];
+    else return;
+    applyTracks();
+    Prefs.set("tracks-" + L, fr);
+  }
+  return { init, gapAt, set, preset, ratio: () => ratio };
 })();

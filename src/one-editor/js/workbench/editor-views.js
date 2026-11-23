@@ -43,7 +43,7 @@ const Views = (() => {
 
   const where = id => groups.findIndex(g => g.tabs.includes(id));
   const activeDoc = (i = focused) => Docs.get(groups[i].active);
-  const refresh = g => { g.el.classList.toggle("is-empty", !g.active); PreviewPane.mount(g); TabStrip.render(g); };
+  const refresh = g => { g.el.classList.toggle("is-empty", !g.active); PreviewPane.mount(g); FolderItems.mount(g); TrashTab.mount(g); ResultsTab.mount(g); SettingsTab.mount(g); TabStrip.render(g); };
   const keepScroll = g => { const d = Docs.get(g.active); if (d) d.scrollTop = g.view.scrollDOM.scrollTop; };
   const other = (gi = focused) => Layouts.other(gi, count);
   const blank = g => { g.active = null; g.view.setState(CmSetup.makeState("")); refresh(g); };
@@ -66,7 +66,7 @@ const Views = (() => {
     groups.forEach(g => { g.el.hidden = g.i >= count; refresh(g); });
     document.querySelectorAll(".pane-switch button").forEach((b, k) => { b.hidden = k > count; });
     $("work").className = "pane-scroller lay-" + id;
-    $("split").hidden = id !== "2c";
+    $("split").hidden = !l.bar;
     setFocused(Math.min(focused, count - 1), true);
   }
 
@@ -123,7 +123,7 @@ const Views = (() => {
       for (const c of Docs.family(doc).slice(1)) { detach(c.id); Docs.remove(c.id); }
       // Notes stay in Docs (reopened by id); texts over 5 MB are not kept for reopening.
       const text = doc.kind === "note" ? "" : Docs.text(doc);
-      if (text.length <= 5e6 && !PreviewPane.isPreview(doc)) closed.push({ id, gi: where(id), kind: doc.kind, name: doc.name, lang: doc.lang, text, handle: doc.handle, stale: doc.stale, eol: doc.eol, bom: doc.bom, dirty: doc.dirty, readOnly: doc.readOnly, disk: doc.disk });
+      if (text.length <= 5e6 && !PreviewPane.isPreview(doc) && !Docs.isList(doc)) closed.push({ id, gi: where(id), kind: doc.kind, name: doc.name, lang: doc.lang, text, handle: doc.handle, stale: doc.stale, eol: doc.eol, bom: doc.bom, dirty: doc.dirty, readOnly: doc.readOnly, disk: doc.disk });
       if (closed.length > 20) closed.shift();
     }
     detach(id);

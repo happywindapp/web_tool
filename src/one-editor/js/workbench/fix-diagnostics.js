@@ -5,7 +5,8 @@ const FixMarks = (() => {
     const st = doc && doc.state;
     if (!st || !CM.lint) return;
     // The live linter owns this language (it also reports errors and auto-fix hints): ask it to re-check instead of overwriting its marks.
-    if (CmSetup.settings.lint && DataLint.LANGS.has(Docs.effectiveLang(doc))) { const g = Views.groups.find(x => x.active === doc.id); if (g) CM.lint.forceLinting(g.view); return; }
+    const lang = Docs.effectiveLang(doc);
+    if (CmSetup.settings.lint && (DataLint.LANGS.has(lang) || CodeLint.lives(lang, st.doc.length))) { const g = Views.groups.find(x => x.active === doc.id); if (g) CM.lint.forceLinting(g.view); return; }
     const at =(line, col) => {
       const l = st.doc.line(Math.min(Math.max(line || 1, 1), st.doc.lines));
       return Math.min(l.from + Math.max((col || 1) - 1, 0), l.to);

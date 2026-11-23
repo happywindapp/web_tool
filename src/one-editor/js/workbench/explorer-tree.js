@@ -1,7 +1,8 @@
 // Explorer: pinned items, open tabs, notes (IndexedDB) and a local folder tree loaded lazily; every row is a button so touch and keyboard work like the mouse.
 const Explorer = (() => {
   const box = $("explorer"), filter = $("exFilter");
-  let root = null, raf = 0;
+  let root = null, raf = 0, dirsOnly = false, saved = null;
+  const nodes = new WeakMap(), loading = new WeakMap();
   const DATA = new Set(["JSON", "YAML", "XML", "CSV", "TSV", "TOML", "Properties files"]);
 
   const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
@@ -28,27 +29,59 @@ const Explorer = (() => {
     return !id ? "📄" : DATA.has(id) ? "🧾" : id === "Markdown" ? "📘" : id === LangDetect.PLAIN || id === "Log" ? "📄" : "📜";
   }
 
-  async function openNode(node) {
+  async function openNode(node, gi = Views.focused) {
     try {
-      await FileOpen.openMany([await node.read()], Views.focused);
+      await FileOpen.openMany([await node.read()], gi);
     } catch (e) { StatusBar.msg(T("Không mở được “{name}”: {msg}", { name: node.name, msg: e.message }), "bad"); }
   }
 
+  // One read per folder at a time, shared by the tree and the item pane of View 1.
+  function loadKids(node) {
+    if (node.children) return Promise.resolve(node.children);
+    if (!loading.has(node)) loading.set(node, node.list().then(k => { node.children = k; GitStatus.found(node); return k; }).finally(() => loading.delete(node)));
+    return loading.get(node);
+  }
+
+  // Hidden files (".x") and extensions follow the View menu of the folder tab; the colour tag dot goes after the name.
+  const tagged = (el, node) => { const d = Tags.dot(node); if (d) el.append(d); };
   function treeNode(node, hit) {
-    if (!node.dir) return hit(node.name) ? row(fileIcon(node.name) + " " + node.name, node.path, () => openNode(node), ExplorerDisk.buttons(node)) : null;
+    if (node !== root && !FolderView.shows(node.name)) return null;
+    if (!node.dir) {
+      if (dirsOnly || !hit(node.name)) return null;
+      const label = FolderView.label(node), r = row(fileIcon(node.name) + " " + label, node.path, () => openNode(node), ExplorerDisk.buttons(node));
+      const git = GitStatus.paint(r.firstChild, fileIcon(node.name), node, label);
+      if (git) r.firstChild.title += " · " + git;
+      tagged(r.firstChild, node);
+      nodes.set(r, node);
+      return r;
+    }
     const d = el("details", "ex-dir"), kids = el("div", "ex-kids"), sum = el("summary");
+    nodes.set(sum, node);
     const cloudRoot = node.remote && !node.parent && node.link;
     // preventDefault: a click inside <summary> would also fold the folder.
     const cloudPin = cloudRoot ? [pinAct(Pinned.hasCloud(node.link), T(PIN_ITEM), e => { e.preventDefault(); e.stopPropagation(); Pinned.toggleCloud(node); })] : [];
-    sum.append(el("span", "ex-dname", (node.remote && !node.parent ? "☁ " : "📁 ") + node.name), ...ExplorerDisk.buttons(node), ...cloudPin);
-    sum.title = node.path;
+    const icon = node.remote && !node.parent ? "☁" : "📁", dname = el("span", "ex-dname", icon + " " + node.name), git = GitStatus.paint(dname, icon, node);
+    // Row buttons sit at the right edge like on file rows (a flex <summary> would lose its ▶ marker).
+    const acts = el("span", "ex-sacts");
+    acts.append(...ExplorerDisk.buttons(node), ...cloudPin);
+    tagged(dname, node);
+    sum.append(dname, acts);
+    sum.title = node.path + (git ? " · " + git : "");
+    if (FolderItems.isShown(node)) sum.classList.add("fi-cur");
+    // Like the Windows navigation pane: a click shows the folder in View 1's folder tab; a second click on the shown folder folds it.
+    // node.open is set here: show() redraws the tree before the async "toggle" event would record it.
+    sum.addEventListener("click", e => {
+      if (FolderItems.current() === node) return;
+      if (d.open) e.preventDefault(); else node.open = true;
+      FolderItems.show(node);
+    });
     d.append(sum, kids);
     const fill = () => kids.replaceChildren(...node.children.map(c => treeNode(c, hit)).filter(Boolean));
     d.addEventListener("toggle", async () => {
       node.open = d.open;
       if (!d.open || node.children) return;
       kids.replaceChildren(el("p", "ex-empty", T("Đang đọc…")));
-      try { node.children = await node.list(); fill(); }
+      try { await loadKids(node); fill(); }
       catch (e) { kids.replaceChildren(el("p", "ex-empty bad", T("Không đọc được folder: {msg}", { msg: e.message }))); }
     });
     if (node.children) fill();
@@ -65,8 +98,9 @@ const Explorer = (() => {
       Views.close(d.id, true);
       Docs.remove(d.id);
     };
-    return row("📝 " + d.name, T("Mở ghi chú"), () => openNote(d),
-      [pinAct(Pinned.hasNote(d), T(PIN_ITEM), () => Pinned.toggleNote(d)), btn("ex-act", "✎", T("Đổi tên"), () => TabStrip.rename(d)), btn("ex-act", "🗑", T("Xoá ghi chú"), del)]);
+    const r = row("📝 " + d.name, T("Mở ghi chú"), () => openNote(d), [pinAct(Pinned.hasNote(d), T(PIN_ITEM), () => Pinned.toggleNote(d))]);
+    r.menuExtra = [[T("Đổi tên…"), () => TabStrip.rename(d)], [T("Xoá"), del]];
+    return r;
   }
 
   function pinnedSection(hit) {
@@ -84,6 +118,12 @@ const Explorer = (() => {
     return section(T("Gần đây"), rows.length ? rows : [el("p", "ex-empty", empty)], items.length ? [btn("ex-act", "🗑", T("Xoá danh sách Gần đây"), () => RecentFiles.clear())] : []);
   }
 
+  // Shown only while the recycle bin holds something.
+  function trashSection() {
+    const s = TrashStore.summary();
+    return s?.n ? section(T("Thùng rác"), [row("🗑 " + T("{n} mục · {size}", { n: s.n, size: FolderFmt.size(s.size) }), T("Mở thùng rác — khôi phục file đã xoá"), () => TrashTab.open())]) : null;
+  }
+
   function draw() {
     raf = 0;
     const q = filter.value.trim().toLowerCase(), hit = s => !q || s.toLowerCase().includes(q);
@@ -98,20 +138,63 @@ const Explorer = (() => {
       section(T("Ghi chú"), notes.length ? notes.map(noteRow) : [el("p", "ex-empty", NotesDb.ok ? T("Chưa có ghi chú — bấm + để tạo.") : T("Trình duyệt chặn IndexedDB — ghi chú không được lưu."))],
         [btn("ex-act", "+", T("Ghi chú mới (Alt+N)"), () => Actions.newNote(Views.focused))]),
       recentSection(hit),
+      trashSection(),
     ];
     if (root) {
+      dirsOnly = Prefs.get("exShowFiles", true) === false;
+      const showFiles = el("label", "ex-chk"), cb = el("input");
+      Object.assign(cb, { type: "checkbox", checked: !dirsOnly, onchange: () => { Prefs.set("exShowFiles", cb.checked); render(); } });
+      showFiles.title = T("Hiện file trong cây folder (bỏ chọn ⇒ chỉ hiện folder) — tab folder vẫn liệt kê đủ file");
+      showFiles.append(cb, T("Hiện file"));
       const tree = treeNode(root, hit);
-      sections.push(section(T("Folder"), [tree], [...(root.handle || root.remote ? [refreshBtn()] : []), btn("ex-act", "✕", T("Đóng folder"), () => setRoot(null))]));
+      sections.push(section(T("Folder"), [tree], [showFiles, ...(root.handle || root.remote ? [refreshBtn()] : []), btn("ex-act", "✕", T("Đóng folder"), () => setRoot(null))]));
     } else {
-      sections.push(section(T("Folder"), [el("p", "ex-empty", T("Chưa mở folder. Kéo folder vào đây hoặc bấm:")), btn("ex-open", T("📂 Mở folder…"), T("Mở folder trên máy"), () => Actions.openFolder()),
-        btn("ex-open", T("☁ Mở từ link Drive / OneDrive…"), T("Mở folder công khai Google Drive / OneDrive cá nhân (chỉ đọc)"), () => Actions.openCloudFolder())]));
+      const again = saved ? [btn("ex-open", T("📂 Mở lại “{name}”", { name: saved.name }), T("Sau khi tải lại trang, trình duyệt cần bạn bấm để cho đọc lại folder này"), () => reopenSaved())] : [];
+      sections.push(section(T("Folder"), [...again, el("p", "ex-empty", T("Chưa mở folder. Kéo folder vào đây hoặc bấm:")), btn("ex-open", T("📂 Mở folder…"), T("Mở folder trên máy"), () => Actions.openFolder()),
+        btn("ex-open", T("☁ Mở từ link Drive / OneDrive…"), T("Mở folder công khai Google Drive / OneDrive cá nhân"), () => Actions.openCloudFolder())]));
     }
+    // The redraw replaces every row: keyboard focus returns to the row of the same node.
+    const was = box.contains(document.activeElement) ? nodes.get(document.activeElement.closest(".ex-row, summary")) : null;
     box.replaceChildren(...sections.filter(Boolean));
+    if (was) { const h = [...box.querySelectorAll(".ex-row, summary")].find(x => nodes.get(x) === was); (h?.matches("summary") ? h : h?.firstChild)?.focus({ preventScroll: true }); }
+    FolderItems.sync();
+    ResultsTab.sync();
   }
 
   const render = () => { if (!raf) raf = requestAnimationFrame(draw); };
-  // A folder from a link is reopened after F5 (a local one needs a new pick).
-  function setRoot(node) { root = node; if (root) root.open = true; Prefs.set("cloudRoot", root?.link || null); render(); DiskSync.rewatch(); }
+  // F5 reopens the folder: a link from localStorage, a local folder from its handle in IndexedDB (dropped folders have none).
+  // transient (demo folder): F5 still reopens the folder saved before.
+  function setRoot(node, transient = false) {
+    GitStatus.reset(); root = node; saved = null; if (root) root.open = true;
+    if (!NewWindow.active && !transient) {
+      Prefs.set("cloudRoot", root?.link || null);
+      NotesDb.putMeta("explorerRoot", root?.handle && !root.parent ? root.handle : null).catch(() => {});
+    }
+    render(); DiskSync.rewatch();
+  }
+
+  // Read access still granted ⇒ open at once; otherwise the browser needs a click (reopenSaved) to ask again.
+  async function restoreLocal() {
+    let h = null;
+    try { h = await NotesDb.getMeta("explorerRoot"); } catch { return; }
+    if (!h || root || typeof h.queryPermission !== "function") return;
+    if (await h.queryPermission({ mode: "read" }).catch(() => "denied") === "granted") { setRoot(LocalFs.fromHandle(h)); return; }
+    saved = h;
+    render();
+  }
+  async function reopenSaved() {
+    const h = saved;
+    if (!h) { Actions.openFolder(); return; }
+    try {
+      if (!(await LocalFs.readable(h))) { StatusBar.msg(T("Trình duyệt chưa cho đọc lại “{name}”.", { name: h.name }), "warn"); return; }
+      await h.keys().next();
+      setRoot(LocalFs.fromHandle(h));
+    } catch (e) {
+      setRoot(null);
+      StatusBar.msg(T("Không mở được “{name}”: {msg}", { name: h.name, msg: e.message }), "bad");
+    }
+  }
+  const restore = async () => { await restoreLocal(); await restoreCloud(); };
 
   async function restoreCloud() {
     const link = Prefs.get("cloudRoot", null);
@@ -126,6 +209,7 @@ const Explorer = (() => {
   async function relist(node) {
     const key = c => c.name + (c.dir ? "/" : ""), old = new Map((node.children || []).map(c => [key(c), c]));
     node.children = (await node.list()).map(c => old.get(key(c)) || c);
+    GitStatus.found(node);
     for (const c of node.children) {
       if (c.dir && c.open && c.children) await relist(c).catch(() => { c.children = null; });
       else if (c.dir) c.children = null;
@@ -135,7 +219,8 @@ const Explorer = (() => {
     if (!root || !(root.handle || root.remote) || !root.children) return;
     const sig = () => { const out = [], walk = n => { out.push(n.path); (n.children || []).forEach(walk); }; walk(root); return out.join("\n"); };
     const before = sig();
-    try { await relist(root); } finally { if (sig() !== before) render(); }
+    DirSize.clear();
+    try { await relist(root); } finally { if (sig() !== before) render(); GitStatus.rescan(); }
   }
 
   // Files of the folders already read (Quick Open does not walk the disk).
@@ -146,5 +231,6 @@ const Explorer = (() => {
   }
 
   filter.addEventListener("input", render);
-  return { render, setRoot, restoreCloud, refresh, loadedFiles, openNode, openNote, root: () => root };
+  TrashStore.onChange(render);
+  return { render, setRoot, restore, reopenSaved, savedName: () => saved?.name || null, refresh, loadedFiles, openNode, openNote, loadKids, fileIcon, root: () => root, nodeOf: el => nodes.get(el) || null };
 })();

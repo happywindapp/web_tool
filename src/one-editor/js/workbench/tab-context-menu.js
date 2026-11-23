@@ -1,7 +1,9 @@
 // Right-click / Menu key on a tab (or the empty tab strip = its active tab): the tab commands from the registry — rename, pin, move, clone, close.
 const TabMenu = (() => {
   const IDS = ["renameTab", "pinTab", "pinItem", "moveTab", "cloneTab", "diskReload", "closeTab", "closeOthers", "closeRight"];
-  let menu = null;
+  let menu = null, back = null;
+  // Focus goes back to where the menu was opened from (a folder tab row has no editor to fall back to).
+  const restore = () => { const ok = back?.isConnected && back !== document.body && back.checkVisibility(); if (ok) back.focus({ preventScroll: true }); return ok; };
 
   const onDown = e => { if (menu && !menu.contains(e.target)) close(); };
   function close() {
@@ -19,14 +21,14 @@ const TabMenu = (() => {
     name.textContent = label;
     key.textContent = keys;
     b.append(name, key);
-    b.onclick = () => { close(); run(); };
+    b.onclick = () => { close(); restore(); run(); };
     return b;
   }
   const item = c => entry(typeof c.label === "function" ? c.label() : T(c.label), Commands.keyLabel(c), () => Commands.run(c.id));
 
   function onKey(e) {
     const items = [...menu.querySelectorAll("button")], k = items.indexOf(document.activeElement);
-    if (e.key === "Escape" || e.key === "Tab") { e.preventDefault(); close(); if (Views.activeDoc()) Views.activeView().focus(); }
+    if (e.key === "Escape" || e.key === "Tab") { e.preventDefault(); close(); if (!restore() && Views.activeDoc()) Views.activeView().focus(); }
     else if (e.key === "ArrowDown" || e.key === "ArrowUp") { e.preventDefault(); items[(k + (e.key === "ArrowDown" ? 1 : -1) + items.length) % items.length].focus(); }
   }
 
@@ -42,6 +44,7 @@ const TabMenu = (() => {
   // Shows a menu of nodes (entries, rows, separators) at x, y kept inside the window; the first button gets focus.
   function show(nodes, x, y) {
     close();
+    back = document.activeElement;
     menu = document.createElement("div");
     menu.className = "tab-menu";
     menu.setAttribute("role", "menu");

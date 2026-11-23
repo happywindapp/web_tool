@@ -1,0 +1,5 @@
+# Sophos Intercept X kill trình duyệt khi nó sinh PowerShell
+
+- **Triệu chứng:** One Editor → Explorer → Mở bằng ứng dụng… → Explorer / Terminal / Git Bash / PowerShell (qua `oneeditor-open:`) ⇒ không mở gì, trình duyệt tự đóng, không có crash dump. Chạy tay `open-with.ps1` (kể cả không `-DryRun`) vẫn OK.
+- **Nguyên nhân:** handler của protocol là `powershell.exe -WindowStyle Hidden -ExecutionPolicy Bypass`. Sophos Intercept X (HitmanPro.Alert) Lockdown `BrowserAncestorPowershell` / `LolBin` chặn trình duyệt sinh PowerShell và đóng luôn trình duyệt. Bằng chứng: Application log, provider `HitmanPro.Alert`, event 911 (`Application msedge.exe … Filename powershell.exe`); Windows PowerShell log không có event 400 của launcher.
+- **Cách xử lý đúng:** không lách EDR. Menu có dòng cảnh báo; người dùng dùng Sao chép đường dẫn (đã ra full path khi đặt đường dẫn gốc) hoặc chép lệnh rồi dán Win+R — tiến trình cha là `explorer.exe`, không bị Lockdown. Muốn dùng trình mở trên máy công ty ⇒ xin IT exclusion.

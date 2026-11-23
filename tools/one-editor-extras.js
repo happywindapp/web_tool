@@ -6456,7 +6456,7 @@ I18n.add({
   "Code → ảnh · {n} dòng · {w}×{h}": "Code → image · {n} lines · {w}×{h}", "Theo editor": "Like the editor", "Khung": "Frame",
   "Không dựng được ảnh SVG.": "Could not build the SVG image.",
 });
-document.head.append(Object.assign(document.createElement("style"), { textContent: "  /* Phase 9: invisible-char pane, batch replace + SQL dialogs, recipe / regex / run / code-image panes. */\n  .pv-invisible, .pv-recipe, .pv-regex, .pv-run, .pv-codeimg { overflow:auto; background:var(--bg); color:var(--ink); }\n  .iv-sum { display:flex; flex-direction:column; gap:4px; padding:8px 12px; border-bottom:1px solid var(--line); }\n  .iv-kind { display:flex; flex-wrap:wrap; gap:6px; align-items:center; }\n  .iv-kind b { font-weight:600; margin-right:4px; }\n  .iv-list { padding:4px 0 24px; font:13px/1.5 Consolas, \"Cascadia Mono\", monospace; }\n  .iv-row { display:flex; gap:10px; padding:0 12px; cursor:pointer; white-space:pre; }\n  .iv-row:hover { background:var(--hover); }\n  .iv-row code { flex:none; color:var(--acc); }\n  .iv-name { flex:none; min-width:12em; color:var(--muted); }\n  .iv-ctx { min-width:0; overflow:hidden; text-overflow:ellipsis; }\n  .iv-ctx mark, .rx-src mark { background:color-mix(in srgb, var(--warn) 30%, transparent); color:inherit; border-radius:2px; }\n\n  dialog.br-dlg { width:min(900px, calc(100vw - 16px)); max-height:86dvh; }\n  .br-head, .br-foot { display:flex; flex-wrap:wrap; gap:6px; align-items:center; padding:10px 12px; }\n  .br-head select { min-width:0; max-width:240px; }\n  .br-foot .muted { flex:1; font-size:12px; color:var(--muted); }\n  .br-rows { overflow:auto; padding:0 12px; display:flex; flex-direction:column; gap:6px; }\n  .br-row { display:grid; grid-template-columns:auto minmax(0, 1fr) auto minmax(0, 1fr) auto auto auto 4.5em auto; gap:6px; align-items:center; }\n  .br-row.off .br-in { opacity:.5; }\n  .br-in { min-width:0; font-family:Consolas, \"Cascadia Mono\", monospace; }\n  .br-n { font-size:12px; color:var(--acc); text-align:right; }\n  .br-result { margin:4px 12px 0; min-height:1.4em; font-size:13px; }\n  .br-dlg label.chk, .sql-dlg label.chk { display:inline-flex; align-items:center; gap:3px; font-size:12px; }\n  .sql-f { display:flex; flex-direction:column; gap:2px; font-size:13px; }\n  .sql-f span { color:var(--muted); font-size:12px; }\n\n  .rc-steps { display:flex; flex-direction:column; gap:6px; padding:8px 12px; }\n  .rc-step { border:1px solid var(--line); border-left:4px solid var(--good); border-radius:6px; background:var(--panel); padding:6px 8px; }\n  .rc-step.off { opacity:.55; border-left-color:var(--muted); }\n  .rc-step.bad { border-left-color:var(--bad); }\n  .rc-top { display:flex; flex-wrap:wrap; gap:6px; align-items:center; }\n  .rc-top b { font-weight:600; }\n  .rc-grip { cursor:grab; color:var(--muted); user-select:none; }\n  .rc-state { flex:1; min-width:8em; font-size:12px; color:var(--muted); overflow-wrap:anywhere; }\n  .rc-step.bad .rc-state { color:var(--bad); }\n  .rc-args { display:flex; flex-wrap:wrap; gap:6px; margin-top:6px; }\n  .rc-arg { flex:1; min-width:8em; font-family:Consolas, \"Cascadia Mono\", monospace; }\n  .rc-out-head { padding:6px 12px; border-top:1px solid var(--line); font-size:12px; color:var(--muted); }\n  .rc-out-head.bad { color:var(--bad); }\n  .rc-out { margin:0; padding:4px 12px 24px; white-space:pre-wrap; overflow-wrap:anywhere; font:13px/1.5 Consolas, \"Cascadia Mono\", monospace; }\n  .rc-add, .rc-saved { max-width:12em; }\n\n  .cm-rx-a { background:color-mix(in srgb, #f59e0b 30%, transparent); border-radius:2px; }\n  .cm-rx-b { background:color-mix(in srgb, #0ea5e9 30%, transparent); border-radius:2px; }\n  .pv-bar .rx-pat { flex:2; min-width:8em; font-family:Consolas, \"Cascadia Mono\", monospace; }\n  .pv-bar .rx-flags { width:4.5em; font-family:Consolas, \"Cascadia Mono\", monospace; }\n  .pv-bar .rx-repl { flex:1; min-width:7em; font-family:Consolas, \"Cascadia Mono\", monospace; }\n  .pv-regex .rp-warn { margin:8px 12px; }\n  .rx-sec { padding:4px 12px 8px; }\n  .rx-sec h4 { margin:6px 0; font-size:13px; }\n  .rx-src { margin:0; padding:6px 8px; border:1px solid var(--line); border-radius:6px; background:var(--code); white-space:pre-wrap; overflow-wrap:anywhere; font:13px/1.5 Consolas, \"Cascadia Mono\", monospace; max-height:40vh; overflow:auto; }\n  .rx-src mark.rx-a { background:color-mix(in srgb, #f59e0b 35%, transparent); color:inherit; }\n  .rx-src mark.rx-b { background:color-mix(in srgb, #0ea5e9 35%, transparent); color:inherit; }\n  .rx-tab { border-collapse:collapse; font:12px/1.4 Consolas, \"Cascadia Mono\", monospace; display:block; overflow-x:auto; }\n  .rx-tab th, .rx-tab td { border:1px solid var(--line); padding:2px 6px; text-align:left; white-space:pre; }\n  .rx-tab tr:hover td { background:var(--hover); cursor:pointer; }\n  .rx-none { color:var(--muted); }\n  .rx-bad { margin:8px 12px; color:var(--bad); white-space:pre-wrap; }\n  .rx-exp { margin:0; padding-left:18px; font-size:13px; }\n  .rx-exp code { color:var(--acc); }\n  .pv-run { display:flex; flex-direction:column; overflow:hidden; }\n  .run-host { flex:1 1 50%; min-height:120px; border-bottom:1px solid var(--line); background:#fff; }\n  .run-host.js { flex:0 0 0; min-height:0; border:0; overflow:hidden; }\n  .run-frame { width:100%; height:100%; border:0; display:block; }\n  .run-con { flex:1 1 50%; overflow:auto; padding:4px 0 16px; font:12px/1.5 Consolas, \"Cascadia Mono\", monospace; }\n  .run-row { display:flex; gap:8px; padding:1px 12px; border-bottom:1px solid color-mix(in srgb, var(--line) 50%, transparent); white-space:pre-wrap; overflow-wrap:anywhere; }\n  .run-ic { flex:none; width:1em; color:var(--muted); }\n  .run-warn { color:var(--warn); background:color-mix(in srgb, var(--warn) 8%, transparent); }\n  .run-error { color:var(--bad); background:color-mix(in srgb, var(--bad) 8%, transparent); }\n  .run-info .run-ic { color:var(--acc); }\n  .run-line { flex:none; padding:0 4px; font-size:11px; }\n  .run-tx { min-width:0; }\n  .run-old { margin:8px 12px; white-space:pre-wrap; color:var(--muted); }\n\n  .pv-codeimg { display:flex; }\n  .ci-box { margin:auto; padding:16px; max-width:100%; }\n  .ci-box svg { display:block; max-width:100%; height:auto; }\n\n  @media (max-width: 640px) {\n    .pv-bar .rx-pat, .pv-bar .rx-flags, .pv-bar .rx-repl { font-size:16px; }\n    .rc-arg, .rc-add, .rc-saved, .rc-args select { font-size:16px; }\n    .br-row { grid-template-columns:auto minmax(0, 1fr) auto auto; padding:6px 0; border-bottom:1px solid var(--line); }\n    .br-row .br-in { grid-column:2 / 4; }\n    .br-row .br-arrow { display:none; }\n    .br-row > button { grid-row:1; grid-column:4; }\n    .br-in, .br-head select, .sql-f input, .sql-f select { font-size:16px; }\n    .iv-name { min-width:0; }\n  }" }));
+document.head.append(Object.assign(document.createElement("style"), { textContent: "  /* Phase 9: invisible-char pane, batch replace + SQL dialogs, recipe / regex / run / code-image panes. */\n  .pv-invisible, .pv-recipe, .pv-regex, .pv-run, .pv-codeimg { overflow:auto; background:var(--bg); color:var(--ink); }\n  .iv-sum { display:flex; flex-direction:column; gap:4px; padding:8px 12px; border-bottom:1px solid var(--line); }\n  .iv-kind { display:flex; flex-wrap:wrap; gap:6px; align-items:center; }\n  .iv-kind b { font-weight:600; margin-right:4px; }\n  .iv-list { padding:4px 0 24px; font:13px/1.5 Consolas, \"Cascadia Mono\", monospace; }\n  .pv-invisible > .rp-none { padding:8px 12px; }\n  .iv-row { display:flex; gap:10px; padding:0 12px; cursor:pointer; white-space:pre; }\n  .iv-row:hover { background:var(--hover); }\n  .iv-row code { flex:none; color:var(--acc); }\n  .iv-name { flex:none; min-width:12em; color:var(--muted); }\n  .iv-ctx { min-width:0; overflow:hidden; text-overflow:ellipsis; }\n  .iv-ctx mark, .rx-src mark { background:color-mix(in srgb, var(--warn) 30%, transparent); color:inherit; border-radius:2px; }\n\n  dialog.br-dlg { width:min(900px, calc(100vw - 16px)); max-height:86dvh; }\n  .br-head, .br-foot { display:flex; flex-wrap:wrap; gap:6px; align-items:center; padding:10px 12px; }\n  .br-head select { min-width:0; max-width:240px; }\n  .br-foot .muted { flex:1; font-size:12px; color:var(--muted); }\n  .br-rows { overflow:auto; padding:0 12px; display:flex; flex-direction:column; gap:6px; }\n  .br-row { display:grid; grid-template-columns:auto minmax(0, 1fr) auto minmax(0, 1fr) auto auto auto 4.5em auto; gap:6px; align-items:center; }\n  .br-row.off .br-in { opacity:.5; }\n  .br-in { min-width:0; font-family:Consolas, \"Cascadia Mono\", monospace; }\n  .br-n { font-size:12px; color:var(--acc); text-align:right; }\n  .br-result { margin:4px 12px 0; min-height:1.4em; font-size:13px; }\n  .br-dlg label.chk, .sql-dlg label.chk { display:inline-flex; align-items:center; gap:3px; font-size:12px; }\n  .sql-f { display:flex; flex-direction:column; gap:2px; font-size:13px; }\n  .sql-f span { color:var(--muted); font-size:12px; }\n\n  .rc-steps { display:flex; flex-direction:column; gap:6px; padding:8px 12px; }\n  .rc-step { border:1px solid var(--line); border-left:4px solid var(--good); border-radius:6px; background:var(--panel); padding:6px 8px; }\n  .rc-step.off { opacity:.55; border-left-color:var(--muted); }\n  .rc-step.bad { border-left-color:var(--bad); }\n  .rc-top { display:flex; flex-wrap:wrap; gap:6px; align-items:center; }\n  .rc-top b { font-weight:600; }\n  .rc-grip { cursor:grab; color:var(--muted); user-select:none; }\n  .rc-state { flex:1; min-width:8em; font-size:12px; color:var(--muted); overflow-wrap:anywhere; }\n  .rc-step.bad .rc-state { color:var(--bad); }\n  .rc-args { display:flex; flex-wrap:wrap; gap:6px; margin-top:6px; }\n  .rc-arg { flex:1; min-width:8em; font-family:Consolas, \"Cascadia Mono\", monospace; }\n  .rc-out-head { padding:6px 12px; border-top:1px solid var(--line); font-size:12px; color:var(--muted); }\n  .rc-out-head.bad { color:var(--bad); }\n  .rc-out { margin:0; padding:4px 12px 24px; white-space:pre-wrap; overflow-wrap:anywhere; font:13px/1.5 Consolas, \"Cascadia Mono\", monospace; }\n  .rc-add, .rc-saved { max-width:12em; }\n\n  .cm-rx-a { background:color-mix(in srgb, #f59e0b 30%, transparent); border-radius:2px; }\n  .cm-rx-b { background:color-mix(in srgb, #0ea5e9 30%, transparent); border-radius:2px; }\n  .pv-bar .rx-pat { flex:2; min-width:8em; font-family:Consolas, \"Cascadia Mono\", monospace; }\n  .pv-bar .rx-flags { width:4.5em; font-family:Consolas, \"Cascadia Mono\", monospace; }\n  .pv-bar .rx-repl { flex:1; min-width:7em; font-family:Consolas, \"Cascadia Mono\", monospace; }\n  .pv-regex .rp-warn { margin:8px 12px; }\n  .rx-sec { padding:4px 12px 8px; }\n  .rx-sec h4 { margin:6px 0; font-size:13px; }\n  .rx-src { margin:0; padding:6px 8px; border:1px solid var(--line); border-radius:6px; background:var(--code); white-space:pre-wrap; overflow-wrap:anywhere; font:13px/1.5 Consolas, \"Cascadia Mono\", monospace; max-height:40vh; overflow:auto; }\n  .rx-src mark.rx-a { background:color-mix(in srgb, #f59e0b 35%, transparent); color:inherit; }\n  .rx-src mark.rx-b { background:color-mix(in srgb, #0ea5e9 35%, transparent); color:inherit; }\n  .rx-tab { border-collapse:collapse; font:12px/1.4 Consolas, \"Cascadia Mono\", monospace; display:block; overflow-x:auto; }\n  .rx-tab th, .rx-tab td { border:1px solid var(--line); padding:2px 6px; text-align:left; white-space:pre; }\n  .rx-tab tr:hover td { background:var(--hover); cursor:pointer; }\n  .rx-none { color:var(--muted); }\n  .rx-bad { margin:8px 12px; color:var(--bad); white-space:pre-wrap; }\n  .rx-exp { margin:0; padding-left:18px; font-size:13px; }\n  .rx-exp code { color:var(--acc); }\n  .pv-run { display:flex; flex-direction:column; overflow:hidden; }\n  .run-host { flex:1 1 50%; min-height:120px; border-bottom:1px solid var(--line); background:#fff; }\n  .run-host.js { flex:0 0 0; min-height:0; border:0; overflow:hidden; }\n  .run-frame { width:100%; height:100%; border:0; display:block; }\n  .run-con { flex:1 1 50%; overflow:auto; padding:4px 0 16px; font:12px/1.5 Consolas, \"Cascadia Mono\", monospace; }\n  .run-row { display:flex; gap:8px; padding:1px 12px; border-bottom:1px solid color-mix(in srgb, var(--line) 50%, transparent); white-space:pre-wrap; overflow-wrap:anywhere; }\n  .run-ic { flex:none; width:1em; color:var(--muted); }\n  .run-warn { color:var(--warn); background:color-mix(in srgb, var(--warn) 8%, transparent); }\n  .run-error { color:var(--bad); background:color-mix(in srgb, var(--bad) 8%, transparent); }\n  .run-info .run-ic { color:var(--acc); }\n  .run-line { flex:none; padding:0 4px; font-size:11px; }\n  .run-tx { min-width:0; }\n  .run-old { margin:8px 12px; white-space:pre-wrap; color:var(--muted); }\n\n  .pv-codeimg { display:flex; }\n  .ci-box { margin:auto; padding:16px; max-width:100%; }\n  .ci-box svg { display:block; max-width:100%; height:auto; }\n\n  @media (max-width: 640px) {\n    .pv-bar .rx-pat, .pv-bar .rx-flags, .pv-bar .rx-repl { font-size:16px; }\n    .rc-arg, .rc-add, .rc-saved, .rc-args select { font-size:16px; }\n    .br-row { grid-template-columns:auto minmax(0, 1fr) auto auto; padding:6px 0; border-bottom:1px solid var(--line); }\n    .br-row .br-in { grid-column:2 / 4; }\n    .br-row .br-arrow { display:none; }\n    .br-row > button { grid-row:1; grid-column:4; }\n    .br-in, .br-head select, .sql-f input, .sql-f select { font-size:16px; }\n    .iv-name { min-width:0; }\n  }" }));
 // Small DOM + editor helpers shared by the phase 9 panes and dialogs: element builder, jump / select in the source tab, edit the source in one undo step.
 const PowerUi = (() => {
   function mk(tag, cls, text, attrs) {
@@ -8165,6 +8165,44 @@ const PvCodeImage = {
     return v;
   },
 };
+// "syntax-check" op + pane: one row per syntax error (line:col, message, the source line) from CodeLint — click selects it in the source tab.
+const SyntaxCheckOp = {
+  async run(t, c) {
+    const r = await CodeLint.check(t, c.lang);
+    const lines = r.items.map(x => x.line + ":" + x.col + "\t" + (x.sev === "error" ? T("lỗi") : T("cảnh báo")) + "\t" + x.msg);
+    const head = r.items.length ? T("{n} lỗi cú pháp · {lang} · {engine}", { n: I18n.num(r.items.length), lang: c.lang, engine: r.engine }) : T("✔ Không thấy lỗi cú pháp · {lang} · {engine}", { lang: c.lang, engine: r.engine });
+    return { text: [head, ...lines].join("\n") + "\n", view: { kind: "syntax", srcId: c.id, lang: c.lang, ...r }, notes: [head + ".", T("Chỉ kiểm cú pháp, không chạy code: không bắt lỗi kiểu dữ liệu hay biến chưa khai báo.")] };
+  },
+};
+
+const PvSyntax = {
+  create(p) {
+    const SHOW = 1000, { mk } = PowerUi;
+    const v = { el: mk("div", "pv-invisible"), tools: [], last: null };
+
+    function render() {
+      const d = v.last, src = Docs.get(d.srcId), text = src ? Docs.text(src) : "";
+      p.type.textContent = T("Kiểm cú pháp · {lang} · {engine} · {n}", { lang: d.lang, engine: d.engine, n: I18n.num(d.items.length) });
+      const note = mk("div", "rp-none", T("Chỉ kiểm cú pháp, không chạy code: không bắt lỗi kiểu dữ liệu hay biến chưa khai báo."));
+      if (!d.items.length) { v.el.replaceChildren(mk("div", "rp-none", T("✔ Không thấy lỗi cú pháp.")), note); return; }
+      const list = mk("div", "iv-list");
+      for (const x of d.items.slice(0, SHOW)) {
+        const row = mk("div", "iv-row"), end = text.indexOf("\n", x.from - x.col + 1);
+        const line = text.slice(x.from - x.col + 1, end < 0 ? text.length : end).trim();
+        row.append(mk("span", "lf-n", x.line + ":" + x.col), mk("code", "", x.sev === "error" ? "✖" : "⚠"), mk("span", "iv-name", x.msg), mk("span", "iv-ctx", line.length > 80 ? line.slice(0, 80) + "…" : line));
+        row.title = T("Bấm để chọn chỗ lỗi ở tab nguồn");
+        row.onclick = () => PowerUi.select(src, x.from, x.to);
+        list.append(row);
+      }
+      if (d.items.length > SHOW) list.append(mk("div", "rp-none", T("Chỉ hiện {n} lỗi đầu.", { n: I18n.num(SHOW) })));
+      v.el.replaceChildren(list, note);
+    }
+
+    v.labels = () => { if (v.last) render(); };
+    v.show = d => { v.last = d; render(); return true; };
+    return v;
+  },
+};
 // Phase 9 demo content (labels in demo-samples-power-tools.js): fake data in English; after() runs the follow-up step (dialog, conversion, run).
 const PowerDemos = (() => {
   const t = (n, text) => ({ n, l: "", t: text });
@@ -8287,7 +8325,40 @@ setTimeout(() => console.info("timer fired"), 100);
 setTimeout(() => { while (true) {} }, 300);
 `;
 
+  const GO = `package main
+
+import "fmt"
+
+type Order struct {
+	ID    int
+	Qty   int
+	Price float64
+}
+
+// A missing ")" and a missing "}" (the second one also trips "func main").
+func total(orders []Order) float64 {
+	sum := 0.0
+	for _, o := range orders {
+		sum += float64(o.Qty * o.Price
+	}
+	return sum
+
+func main() {
+	fmt.Println(total([]Order{{1, 100, 25.4}}))
+}
+`;
+  const TSQL = `-- T-SQL (SQL Server): valid; run the command "Format SQL as MySQL" (or PostgreSQL) to see that dialect reject it.
+SELECT TOP 20 [o].[OrderId], o.Symbol, SUM(o.Qty * o.Price) AS Turnover
+FROM dbo.[Orders] o WITH (NOLOCK)
+JOIN dbo.Accounts a ON a.AccountId = o.AccountId
+WHERE o.TradeDate >= '2026-01-01' AND a.Status = N'A'
+GROUP BY o.OrderId, o.Symbol
+ORDER BY Turnover DESC
+`;
+
   return {
+    "syntax-go": { payload: one("orders.go", GO, "syntax-check") },
+    "syntax-tsql": { payload: one("turnover.sql", TSQL, "syntax-check") },
     "regex": { payload: one("orders.log", REGEX, "regex"), after: () => OutputLink.run(Views.activeDoc(), "regex") },
     "code-image": { payload: one("fees.ts", CODE, "code-image") },
     "run-html": { payload: one("ticket.html", HTML), after: () => OutputLink.run(Views.activeDoc(), "run-code") },
@@ -8313,7 +8384,7 @@ const PowerOps = (() => {
   function init() {
     if (inited) return;
     inited = true;
-    const V = { invisible: PvInvisible, recipe: PvRecipe, regex: PvRegex, run: PvRun, "code-image": PvCodeImage };
+    const V = { invisible: PvInvisible, recipe: PvRecipe, regex: PvRegex, run: PvRun, "code-image": PvCodeImage, syntax: PvSyntax };
     for (const [k, v] of Object.entries(V)) PreviewPane.addView(k, v);
     RegexMarks.init();
   }
@@ -8349,5 +8420,686 @@ const PowerOps = (() => {
   }
 
   return { init, cron, sqlInsert: sql("insert"), sqlUpdate: sql("update"), sqlOpts, schema, invisible,
-    recipe: (t, c) => RecipeOp.run(t, c), regex: (t, c) => RegexOp.run(t, c), run: (t, c) => RunCode.run(t, c), codeImage: (t, c) => CodeImageOp.run(t, c) };
+    recipe: (t, c) => RecipeOp.run(t, c), regex: (t, c) => RegexOp.run(t, c), run: (t, c) => RunCode.run(t, c), codeImage: (t, c) => CodeImageOp.run(t, c), syntaxCheck: (t, c) => SyntaxCheckOp.run(t, c) };
+})();
+// Explorer tar / gzip (phase 11d): Tar for ExplorerArchive.
+// tar (ustar + PAX for long / non-ASCII names) write / read and gzip through the browser's own streams (no library); links and special entries are listed as skip.
+const Tar = (() => {
+  const enc = new TextEncoder(), dec = new TextDecoder(), BLOCK = 512, RECORD = 10240, MAX = 8 ** 11 - 1;
+  const pipe = async (bytes, stream) => new Uint8Array(await new Response(new Blob([bytes]).stream().pipeThrough(stream)).arrayBuffer());
+  const gzip = bytes => pipe(bytes, new CompressionStream("gzip"));
+  const gunzip = bytes => pipe(bytes, new DecompressionStream("gzip")).catch(() => { throw new Error(T("File gzip bị hỏng.")); });
+  const isGzip = b => b[0] === 0x1f && b[1] === 0x8b;
+  const octal = (n, width) => n.toString(8).padStart(width - 1, "0") + "\0";
+  const field = (b, at, len) => { const s = b.subarray(at, at + len), z = s.indexOf(0); return dec.decode(z < 0 ? s : s.subarray(0, z)); };
+
+  // Sum of the header with the checksum field as spaces (some old writers summed signed bytes).
+  function sums(h) {
+    let u = 0, s = 0;
+    for (let i = 0; i < BLOCK; i++) { const c = i >= 148 && i < 156 ? 32 : h[i]; u += c; s += c > 127 ? c - 256 : c; }
+    return [u, s];
+  }
+  function header(name, size, mtime, type, mode) {
+    const h = new Uint8Array(BLOCK), put = (s, at) => h.set(enc.encode(s), at);
+    put(name, 0); put(octal(mode, 8), 100); put(octal(0, 8), 108); put(octal(0, 8), 116);
+    put(octal(size, 12), 124); put(octal(Math.max(0, Math.floor(mtime / 1000)), 12), 136); put(type, 156); put("ustar\x0000", 257);
+    put(octal(sums(h)[0], 7) + " ", 148);
+    return h;
+  }
+  // "len key=value\n", len counting the whole record in UTF-8 bytes.
+  function paxRecord(key, value) {
+    const body = " " + key + "=" + value + "\n", n = enc.encode(body).length;
+    let len = n + String(n).length;
+    if (String(len).length !== String(n).length) len = n + String(len).length;
+    return enc.encode(len + body);
+  }
+  const ascii100 = s => (/^[\x20-\x7e]*$/.test(s) && s.length <= 100 ? s : null);
+  const pad = n => (BLOCK - (n % BLOCK)) % BLOCK;
+
+  // entries: [{ name ("a/b.txt", folders end with "/"), data?: Uint8Array, date?: Date }] → tar bytes.
+  function create(entries) {
+    const parts = [];
+    let total = 0;
+    const push = b => { parts.push(b); total += b.length; };
+    for (const e of entries) {
+      const dir = e.name.endsWith("/"), data = dir ? new Uint8Array(0) : e.data || new Uint8Array(0), mtime = (e.date || new Date()).getTime();
+      if (data.length > MAX) throw new Error(T("“{name}” lớn hơn 8 GB — tar này chưa hỗ trợ.", { name: e.name }));
+      let name = ascii100(e.name);
+      if (name === null) {
+        const pax = paxRecord("path", e.name), safe = e.name.replace(/[^\x20-\x7e]/g, "_").slice(-90);
+        push(header("PaxHeader/" + safe.slice(-90), pax.length, mtime, "x", 0o644)); push(pax); push(new Uint8Array(pad(pax.length)));
+        name = safe.slice(-100);
+      }
+      push(header(name, data.length, mtime, dir ? "5" : "0", dir ? 0o755 : 0o644));
+      if (data.length) { push(data); push(new Uint8Array(pad(data.length))); }
+    }
+    push(new Uint8Array(BLOCK * 2));
+    push(new Uint8Array((RECORD - (total % RECORD)) % RECORD));
+    const out = new Uint8Array(total);
+    let at = 0;
+    for (const p of parts) { out.set(p, at); at += p.length; }
+    return out;
+  }
+
+  function size(h) {
+    if (h[124] & 0x80) { let n = 0; for (let i = 125; i < 136; i++) n = n * 256 + h[i]; return n; }
+    return parseInt(field(h, 124, 12).trim() || "0", 8);
+  }
+  const valid = h => { const want = parseInt(field(h, 148, 8).trim(), 8); return Number.isFinite(want) && sums(h).includes(want); };
+  const isTar = b => b.length >= BLOCK && valid(b.subarray(0, BLOCK));
+  function pax(data) {
+    const out = {}, text = dec.decode(data);
+    for (const m of text.matchAll(/(\d+) ([^=\n]+)=([^\n]*)\n/g)) out[m[2]] = m[3];
+    return out;
+  }
+
+  // tar bytes → [{ name, dir, date, size, skip (link / device), bytes: () => Promise<Uint8Array> }].
+  function read(b) {
+    const out = [], bad = () => new Error(T("Không phải file tar hợp lệ."));
+    let p = 0, next = {};
+    while (p + BLOCK <= b.length) {
+      const h = b.subarray(p, p + BLOCK);
+      if (h.every(x => x === 0)) break;
+      if (!valid(h)) throw bad();
+      const type = String.fromCharCode(h[156] || 48), len = next.size ?? size(h), start = p + BLOCK;
+      // A negative / NaN size would stall or rewind the walk.
+      if (!Number.isSafeInteger(len) || len < 0) throw bad();
+      if (start + len > b.length) throw new Error(T("File tar bị hỏng (thiếu dữ liệu)."));
+      const data = b.subarray(start, start + len);
+      p = start + len + pad(len);
+      if (type === "x") { next = { ...next, ...pax(data) }; if (next.size != null) next.size = +next.size; continue; }
+      if (type === "L") { next.path = field(data, 0, data.length); continue; }
+      if (type === "g" || type === "K") continue;
+      const prefix = field(h, 257, 6) === "ustar" ? field(h, 345, 155) : "";
+      const name = next.path ?? (prefix ? prefix + "/" : "") + field(h, 0, 100), mtime = next.mtime != null ? +next.mtime : parseInt(field(h, 136, 12).trim() || "0", 8);
+      next = {};
+      const dir = type === "5" || (type === "0" && name.endsWith("/") && !len);
+      out.push({ name, dir, date: new Date(mtime * 1000), size: len, skip: !dir && !/^[07]$/.test(type), bytes: async () => data.slice() });
+    }
+    return out;
+  }
+
+  // Bytes of a .tar / .tar.gz / .tgz / .gz → { kind: "tar" | "gz", items }; a plain .gz is one file named without ".gz".
+  async function open(bytes, name) {
+    if (isGzip(bytes)) {
+      const raw = await gunzip(bytes);
+      if (isTar(raw)) return { kind: "tar", items: read(raw) };
+      const file = name.replace(/\.gz$/i, "") || "file";
+      return { kind: "gz", items: [{ name: file === name ? name + ".out" : file, dir: false, date: new Date(), size: raw.length, skip: false, bytes: async () => raw }] };
+    }
+    if (isTar(bytes)) return { kind: "tar", items: read(bytes) };
+    throw new Error(T("Không phải file tar / gzip hợp lệ."));
+  }
+
+  return { create, read, open, gzip, gunzip, isTar, isGzip };
+})();
+// Explorer find & compare (phase 11e): advanced file search, duplicate files, folder compare + one-way sync for FileTools / the 🔎 tab.
+// Folder compare, pure: pair two folders' children by name (any case), status by size then bytes (4 MB blocks), the one-way sync plan.
+const DirDiff = (() => {
+  const CHUNK = 4 * 1024 * 1024;
+  const SYM = { left: "⬅", right: "➡", diff: "≠", same: "=" };
+  const low = s => s.toLowerCase();
+
+  // Children of one folder on each side → { rows: [{ name, a, b, st: left | right | diff (file vs folder) | check (two files) }], both: folder pairs to walk }.
+  function match(a = [], b = []) {
+    const byName = new Map(b.map(y => [low(y.name), y])), seen = new Set(), rows = [], both = [];
+    for (const x of a) {
+      const k = low(x.name), y = byName.get(k);
+      seen.add(k);
+      if (!y) rows.push({ name: x.name, a: x, b: null, st: "left" });
+      else if (x.dir && y.dir) both.push([x, y]);
+      else rows.push({ name: x.name, a: x, b: y, st: x.dir !== y.dir ? "diff" : "check" });
+    }
+    for (const y of b) if (!seen.has(low(y.name))) rows.push({ name: y.name, a: null, b: y, st: "right" });
+    return { rows, both };
+  }
+
+  // Sizes known and different ⇒ diff without reading; otherwise the bytes decide.
+  const bySize = (sa, sb) => (sa != null && sb != null && sa !== sb ? "diff" : "check");
+
+  function sameBytes(x, y) {
+    if (x.length !== y.length) return false;
+    for (let i = 0; i < x.length; i++) if (x[i] !== y[i]) return false;
+    return true;
+  }
+  // Two Blobs, block by block, stopping at the first block that differs; stop() → true gives up (null).
+  async function equalBlobs(fa, fb, stop = () => false, chunk = CHUNK) {
+    if (fa.size !== fb.size) return false;
+    for (let o = 0; o < fa.size; o += chunk) {
+      if (stop()) return null;
+      const [x, y] = await Promise.all([fa.slice(o, o + chunk).arrayBuffer(), fb.slice(o, o + chunk).arrayBuffer()]);
+      if (!sameBytes(new Uint8Array(x), new Uint8Array(y))) return false;
+    }
+    return true;
+  }
+
+  // dir "ab" (left → right) or "ba"; rows [{ st, a, b }] → { copy, over, del } of { row, src, dst } (dst null for a copy); "same" rows stay.
+  function plan(rows, dir, removeExtra = false) {
+    const ab = dir === "ab", out = { copy: [], over: [], del: [] };
+    for (const row of rows) {
+      const src = ab ? row.a : row.b, dst = ab ? row.b : row.a;
+      if (row.st === "diff" && src && dst) out.over.push({ row, src, dst });
+      else if (src && !dst && row.st === (ab ? "left" : "right")) out.copy.push({ row, src, dst: null });
+      else if (!src && dst && removeExtra && row.st === (ab ? "right" : "left")) out.del.push({ row, src: null, dst });
+    }
+    return out;
+  }
+
+  return { SYM, match, bySize, sameBytes, equalBlobs, plan };
+})();
+// File search + duplicate finder, pure: size / date criteria ("1.5 MB", "23/11/2026", today / 7 / 30 days), the size / date / kind test, size groups, a fast FNV-1a key and which copies to pick.
+const FileFind = (() => {
+  const UNIT = { b: 1, kb: 1024, mb: 1024 ** 2, gb: 1024 ** 3 };
+  const DAY = 864e5;
+
+  // "" → null; "500", "2 KB", "1,5mb" → bytes; anything else → NaN.
+  function parseSize(s) {
+    const t = String(s ?? "").trim().toLowerCase().replace(",", ".");
+    if (!t) return null;
+    const m = t.match(/^(\d+(?:\.\d+)?)\s*(b|kb|mb|gb)?$/);
+    return m ? Math.round(+m[1] * UNIT[m[2] || "b"]) : NaN;
+  }
+
+  // "dd/mm/yyyy" (also d-m-yyyy, yyyy-mm-dd) → local midnight ms; "" → null; bad → NaN.
+  function parseDay(s) {
+    const t = String(s ?? "").trim();
+    if (!t) return null;
+    let m = t.match(/^(\d{1,2})[/.-](\d{1,2})[/.-](\d{4})$/), y, mo, d;
+    if (m) [d, mo, y] = [+m[1], +m[2], +m[3]];
+    else if ((m = t.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/))) [y, mo, d] = [+m[1], +m[2], +m[3]];
+    else return NaN;
+    const at = new Date(y, mo - 1, d);
+    return at.getFullYear() === y && at.getMonth() === mo - 1 && at.getDate() === d ? at.getTime() : NaN;
+  }
+
+  // date: "" any · "today" · "7" · "30" · "range" (from / to as typed) → [min, max) in ms, null = open end.
+  function dateRange(c, now = Date.now()) {
+    if (c.date === "today") { const d = new Date(now); return [new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime(), null]; }
+    if (c.date === "7" || c.date === "30") return [now - +c.date * DAY, null];
+    if (c.date !== "range") return [null, null];
+    const a = parseDay(c.from), b = parseDay(c.to);
+    return [a, b == null || Number.isNaN(b) ? b : b + DAY];
+  }
+
+  // → error text keys of the criteria, [] when usable.
+  function problems(c) {
+    const out = [], [a, b] = [parseSize(c.min), parseSize(c.max)];
+    if (Number.isNaN(a) || Number.isNaN(b)) out.push("size");
+    else if (a != null && b != null && a > b) out.push("sizeOrder");
+    if (c.date === "range") { const [x, y] = dateRange(c); if (Number.isNaN(x) || Number.isNaN(y)) out.push("date"); else if (x != null && y != null && x >= y) out.push("dateOrder"); }
+    return out;
+  }
+
+  // Criteria → { stat: needs size / date, test({ dir, size, mod }) }. Folders have no size / date ⇒ they fail any size / date bound.
+  function meta(c, now = Date.now()) {
+    const min = parseSize(c.min), max = parseSize(c.max), [from, to] = dateRange(c, now);
+    const stat = min != null || max != null || from != null || to != null;
+    function test(e) {
+      if ((c.kind === "file" && e.dir) || (c.kind === "dir" && !e.dir)) return false;
+      if (!stat) return true;
+      if (e.dir) return false;
+      if ((min != null && !(e.size >= min)) || (max != null && !(e.size <= max))) return false;
+      return !((from != null && !(e.mod >= from)) || (to != null && !(e.mod < to)));
+    }
+    return { stat, test };
+  }
+
+  // files [{ size }] → groups of ≥ 2 with the same size, biggest size first; empty files left out when skipEmpty.
+  function sizeGroups(files, skipEmpty = true) {
+    const by = new Map();
+    for (const f of files) {
+      if (f.size == null || (skipEmpty && f.size === 0)) continue;
+      if (!by.has(f.size)) by.set(f.size, []);
+      by.get(f.size).push(f);
+    }
+    return [...by.values()].filter(g => g.length > 1).sort((x, y) => y[0].size - x[0].size);
+  }
+
+  // 32-bit FNV-1a over bytes, chained through h.
+  function fnv1a(bytes, h = 0x811c9dc5) {
+    for (let i = 0; i < bytes.length; i++) { h ^= bytes[i]; h = Math.imul(h, 0x01000193) >>> 0; }
+    return h >>> 0;
+  }
+
+  // group [{ path, mod }] + rule newest | oldest | shortest → the copies to select (all but the one kept).
+  function pick(group, rule) {
+    const score = f => rule === "shortest" ? [f.path.length, f.path] : rule === "oldest" ? [f.mod ?? Infinity, f.path] : [-(f.mod ?? -Infinity), f.path];
+    const cmp = (x, y) => { const [a, b] = [score(x), score(y)]; return a[0] - b[0] || (a[1] < b[1] ? -1 : a[1] > b[1] ? 1 : 0); };
+    const keep = [...group].sort(cmp)[0];
+    return group.filter(f => f !== keep);
+  }
+
+  return { parseSize, parseDay, dateRange, problems, meta, sizeGroups, fnv1a, pick };
+})();
+// Folder scans of the 🔎 tab (file search, duplicates): tree nodes read folder by folder (Explorer.loadKids, breadth first), .git / node_modules skipped on request, ≤ 20,000 items visited, a yield to the page every ~12 ms, stop().
+const ScanWalk = (() => {
+  const MAX = 20000;
+  let last = 0;
+  const breathe = async () => { if (Date.now() - last > 12) { await new Promise(r => setTimeout(r, 0)); last = Date.now(); } };
+  const stats = () => ({ seen: 0, capped: false, cut: 0, failed: [] });
+  const heavy = (name, skip) => skip && FindCore.skipDir(name, false);
+
+  // root → async iterable of child nodes below it (folders too); a folder that cannot be read is counted in st.failed.
+  async function* walk(root, { sub = true, skip = true, stop = () => false, st }) {
+    const queue = [root];
+    for (let i = 0; i < queue.length; i++) {
+      let kids;
+      try { kids = await Explorer.loadKids(queue[i]); } catch (e) { st.failed.push(queue[i].path + ": " + e.message); continue; }
+      // A listing stops at LocalFs.MAX_ENTRIES: the result is partial.
+      if (kids.length >= LocalFs.MAX_ENTRIES) st.cut++;
+      for (const k of kids) {
+        if (stop()) return;
+        if (k.dir && heavy(k.name, skip)) continue;
+        if (++st.seen > MAX) { st.capped = true; return; }
+        yield k;
+        if (k.dir && sub) queue.push(k);
+        await breathe();
+      }
+    }
+  }
+
+  async function each(items, n, fn) {
+    let batch = [];
+    for await (const x of items) {
+      batch.push(fn(x));
+      if (batch.length >= n) { await Promise.all(batch); batch = []; }
+    }
+    await Promise.all(batch);
+  }
+
+  const stat = n => FolderFmt.stat(n).catch(() => ({ size: null, mod: null }));
+  function ticker(fn) {
+    let at = 0;
+    return (force = false) => { if (force || Date.now() - at > 300) { at = Date.now(); fn(); } };
+  }
+  // Path of the 🔎 criteria → the folder node, exactly (never a parent standing in for a missing folder).
+  async function folder(path) {
+    const n = await FolderPaths.resolve(path);
+    if (!n || n.path !== path) throw new Error(T("Không thấy folder “{path}” trong Explorer — mở lại folder rồi bấm ↻.", { path }));
+    return n;
+  }
+  const num = n => n.toLocaleString(I18n.lang);
+  function tail(st) {
+    return [st.capped ? T("Dừng ở {max} mục.", { max: num(MAX) }) : "", st.cut ? T("{n} folder có hơn {max} mục — chỉ xét {max} mục đầu.", { n: st.cut, max: num(LocalFs.MAX_ENTRIES) }) : "",
+      st.failed.length ? T("{n} mục không đọc được.", { n: st.failed.length }) : ""].filter(Boolean).join(" ");
+  }
+
+  return { MAX, walk, each, stat, stats, ticker, folder, num, tail, heavy };
+})();
+// Advanced file search (Tìm file…, Alt+F7): name (quick filter syntax), file / folder, size from–to, modified (today / 7 / 30 days / range), containing text (plain or regex, text files ≤ 5 MB), subfolders, .git / node_modules — rows stream into the 🔎 tab.
+const FileSearch = (() => {
+  const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+  let last = { name: "", kind: "", min: "", max: "", date: "", from: "", to: "", text: "", regex: false, matchCase: false, sub: true, skip: true };
+
+  function field(label, input) { const l = el("label", "fs-field"); l.append(el("span", "", label), input); return l; }
+  function input(name, value, hint) { const i = el("input"); Object.assign(i, { name, value, placeholder: hint, type: "text", spellcheck: false, autocomplete: "off" }); return i; }
+  function select(name, value, opts) { const s = el("select"); s.name = name; s.append(...opts.map(([v, text]) => Object.assign(el("option", "", text), { value: v }))); s.value = value; return s; }
+  function check(name, on, label) { const l = el("label", "fs-check"), i = el("input"); Object.assign(i, { type: "checkbox", name, checked: on }); l.append(i, el("span", "", label)); return l; }
+
+  // The dialog is built per use (current UI language, last criteria); → criteria or null.
+  function dialog(node) {
+    const dlg = el("dialog", "name-ask fs-ask"), form = el("form"), err = el("p", "fs-err"), c = last;
+    dlg.dataset.i18nSkip = "";
+    form.method = "dialog";
+    const range = el("div", "fs-pair");
+    range.append(field(T("Từ ngày"), input("from", c.from, "dd/mm/yyyy")), field(T("Đến ngày"), input("to", c.to, "dd/mm/yyyy")));
+    const size = el("div", "fs-pair");
+    size.append(field(T("Cỡ từ"), input("min", c.min, T("vd 1 KB"))), field(T("Đến"), input("max", c.max, T("vd 5 MB"))));
+    const date = select("date", c.date, [["", T("Bất kỳ")], ["today", T("Hôm nay")], ["7", T("7 ngày qua")], ["30", T("30 ngày qua")], ["range", T("Khoảng ngày…")]]);
+    const checks = el("div", "fs-checks"), btns = el("div", "name-ask-btns"), cancel = el("button", "", T("Huỷ")), ok = el("button", "main", T("Tìm"));
+    checks.append(check("regex", c.regex, T("Regex")), check("matchCase", c.matchCase, T("Phân biệt hoa / thường")), check("sub", c.sub, T("Gồm folder con")), check("skip", c.skip, T("Bỏ .git / node_modules")));
+    Object.assign(cancel, { type: "button", onclick: () => dlg.close("") });
+    Object.assign(ok, { type: "submit", value: "ok" });
+    btns.append(cancel, ok);
+    form.append(el("h3", "fs-title", T("Tìm file trong “{dir}”", { dir: node.name })),
+      field(T("Tên"), input("name", c.name, T("*.log;*.txt — trống = mọi tên"))),
+      field(T("Kiểu"), select("kind", c.kind, [["", T("File và folder")], ["file", T("Chỉ file")], ["dir", T("Chỉ folder")]])),
+      size, field(T("Ngày sửa"), date), range, field(T("Có chứa chữ"), input("text", c.text, T("trống = không xét nội dung"))), checks, err, btns);
+    const sync = () => { range.hidden = date.value !== "range"; };
+    date.onchange = sync;
+    sync();
+    dlg.append(form);
+    document.body.append(dlg);
+    const read = () => {
+      const f = Object.fromEntries(["name", "kind", "min", "max", "date", "from", "to", "text"].map(k => [k, form.elements[k].value.trim()]));
+      for (const k of ["regex", "matchCase", "sub", "skip"]) f[k] = form.elements[k].checked;
+      return f;
+    };
+    // Bad sizes / dates / regex keep the dialog open with the reason.
+    form.addEventListener("submit", e => {
+      const f = read(), bad = FileFind.problems(f);
+      let msg = bad.includes("size") ? T("Cỡ không hợp lệ — vd 500, 2 KB, 1.5 MB.") : bad.includes("sizeOrder") ? T("“Cỡ từ” lớn hơn “Đến”.")
+        : bad.includes("date") ? T("Ngày không hợp lệ — gõ dd/mm/yyyy.") : bad.includes("dateOrder") ? T("“Từ ngày” sau “Đến ngày”.") : "";
+      if (!msg && f.text && f.regex) try { FindCore.compile(f.text, { regex: true }); } catch (x) { msg = T("Regex lỗi: {msg}", { msg: x.message }); }
+      if (msg) { e.preventDefault(); err.textContent = msg; }
+    });
+    dlg.showModal();
+    form.elements.name.focus();
+    form.elements.name.select();
+    return new Promise(done => dlg.addEventListener("close", () => { const f = dlg.returnValue === "ok" ? read() : null; dlg.remove(); done(f); }, { once: true }));
+  }
+
+  async function ask(node) {
+    const f = await dialog(node);
+    if (!f) return;
+    last = f;
+    ResultsTab.open("find", { path: node.path, ...f });
+  }
+
+  // Text files ≤ 5 MB only (the Find in files limits); binaries by name or NUL bytes are skipped and counted.
+  async function contains(node, re, skipped) {
+    if (FindCore.binaryName(node.name)) { skipped.bin++; return false; }
+    const { file } = await node.read();
+    if (file.size > FindCore.LIMITS.fileBytes) { skipped.big++; return false; }
+    const r = await LocalFs.readText(file);
+    if (r.binary) { skipped.bin++; return false; }
+    re.lastIndex = 0;
+    return re.test(r.text);
+  }
+
+  async function run(c, sink) {
+    const root = await ScanWalk.folder(c.path), name = NameMatch.filter(c.name || ""), m = FileFind.meta(c), st = ScanWalk.stats(), skipped = { big: 0, bin: 0 };
+    const re = c.text ? FindCore.compile(c.text, { regex: c.regex, matchCase: c.matchCase }) : null, out = [];
+    let found = 0;
+    const tick = ScanWalk.ticker(() => { if (out.length) sink.add(out.splice(0)); sink.progress(T("Đã duyệt {n} mục · {k} kết quả — Esc để dừng", { n: ScanWalk.num(st.seen), k: ScanWalk.num(found) })); });
+    const test = async node => {
+      tick();
+      if ((name && !name(node.name)) || (re && node.dir)) return;
+      try {
+        const stat = !node.dir && (m.stat || re) ? await ScanWalk.stat(node) : null;
+        if (!m.test({ dir: node.dir, ...stat }) || (re && !await contains(node, re, skipped))) return;
+        found++;
+        out.push(stat?.size != null ? { node, stat } : { node });
+      } catch (e) { st.failed.push(node.path + ": " + e.message); }
+    };
+    await ScanWalk.each(ScanWalk.walk(root, { sub: c.sub !== false, skip: c.skip !== false, stop: sink.stopped, st }), 16, test);
+    if (out.length) sink.add(out.splice(0));
+    if (st.capped || st.cut) sink.incomplete();
+    const skip = re && skipped.big + skipped.bin ? T("Bỏ qua {big} file > 5 MB và {bin} file nhị phân khi tìm chữ.", { big: skipped.big, bin: skipped.bin }) : "";
+    sink.done([T("Tìm xong: {k} kết quả trong {n} mục đã duyệt.", { k: ScanWalk.num(found), n: ScanWalk.num(st.seen) }), ScanWalk.tail(st), skip].filter(Boolean).join(" "));
+  }
+
+  return { ask, run };
+})();
+// Duplicate files below a folder: same size ⇒ same quick key (size + first / last 64 KB, FNV-1a) ⇒ same bytes (4 MB blocks); each group in the 🔎 tab as "n file × size · wasted X", then "keep the newest / oldest / shortest path" selects the other copies for Delete (recycle bin, Ctrl+Z).
+const DupFinder = (() => {
+  const EDGE = 64 * 1024;
+  const fileOf = async f => (f.file ??= (await f.node.read()).file);
+
+  async function quickKey(f) {
+    const file = await fileOf(f), head = new Uint8Array(await file.slice(0, EDGE).arrayBuffer());
+    const tail = file.size > EDGE ? new Uint8Array(await file.slice(Math.max(EDGE, file.size - EDGE)).arrayBuffer()) : new Uint8Array(0);
+    return FileFind.fnv1a(tail, FileFind.fnv1a(head));
+  }
+
+  // Same quick key ⇒ clusters of byte-identical files (null when stopped).
+  async function clusters(list, stop) {
+    const out = [];
+    for (const f of list) {
+      let home = null;
+      for (const c of out) {
+        // A file changed / locked since its quick key is just not a duplicate.
+        const eq = await DirDiff.equalBlobs(await fileOf(c[0]), await fileOf(f), stop).catch(() => false);
+        if (eq === null) return null;
+        if (eq) { home = c; break; }
+      }
+      if (home) home.push(f); else out.push([f]);
+    }
+    return out.filter(c => c.length > 1);
+  }
+
+  async function run(c, sink) {
+    const root = await ScanWalk.folder(c.path), st = ScanWalk.stats(), files = [];
+    let groups = 0, dupFiles = 0, wasted = 0, checked = 0;
+    const tick = ScanWalk.ticker(() => sink.progress(T("Đã duyệt {n} mục · {k} file — Esc để dừng", { n: ScanWalk.num(st.seen), k: ScanWalk.num(files.length) })));
+    await ScanWalk.each(ScanWalk.walk(root, { skip: c.skip !== false, stop: sink.stopped, st }), 16, async node => {
+      tick();
+      if (!node.dir) { const s = await ScanWalk.stat(node); files.push({ node, path: node.path, size: s.size, mod: s.mod }); }
+    });
+    if (sink.stopped()) return;
+    const bySize = FileFind.sizeGroups(files, c.skipEmpty !== false), todo = bySize.reduce((n, g) => n + g.length, 0);
+    const step = ScanWalk.ticker(() => sink.progress(T("So nội dung {k} / {n} file cùng cỡ — Esc để dừng", { k: ScanWalk.num(checked), n: ScanWalk.num(todo) })));
+    for (const g of bySize) {
+      const byKey = new Map();
+      for (const f of g) {
+        if (sink.stopped()) return;
+        try { const k = await quickKey(f); if (!byKey.has(k)) byKey.set(k, []); byKey.get(k).push(f); }
+        catch (e) { st.failed.push(f.path + ": " + e.message); }
+        checked++;
+        step();
+      }
+      for (const same of byKey.values()) {
+        if (same.length < 2) continue;
+        const found = await clusters(same, sink.stopped);
+        if (!found) return;
+        for (const cl of found) {
+          groups++;
+          dupFiles += cl.length;
+          wasted += cl[0].size * (cl.length - 1);
+          const label = T("#{k} · {n} file × {size} · lãng phí {waste}", { k: groups, n: cl.length, size: FolderFmt.size(cl[0].size), waste: FolderFmt.size(cl[0].size * (cl.length - 1)) });
+          sink.add(cl.sort((a, b) => (a.path < b.path ? -1 : 1)).map(f => ({ node: f.node, group: label, stat: { size: f.size, mod: f.mod } })));
+        }
+      }
+    }
+    if (st.capped || st.cut) sink.incomplete();
+    sink.done([groups ? T("Tìm xong: {g} nhóm trùng · {f} file · lãng phí {w}.", { g: groups, f: dupFiles, w: FolderFmt.size(wasted) }) : T("Không có file trùng trong {n} file.", { n: ScanWalk.num(files.length) }), ScanWalk.tail(st)].filter(Boolean).join(" "));
+  }
+
+  // "Keep one per group": every other copy becomes selected; the 🗑 / Delete key does the rest.
+  function keep(ctl, rule) {
+    const groups = new Map();
+    for (const it of ctl.items) { if (!groups.has(it.group)) groups.set(it.group, []); groups.get(it.group).push({ path: it.node.path, mod: it.stat?.mod, it }); }
+    const picked = [...groups.values()].flatMap(g => FileFind.pick(g, rule)).map(f => f.it);
+    ctl.select(picked.map(it => it.key ?? it.node.path));
+    const size = picked.reduce((s, it) => s + (it.stat?.size || 0), 0);
+    StatusBar.msg(T("Đã chọn {n} bản trùng ({size}) — bấm Delete (🗑) để chuyển vào thùng rác, Ctrl+Z hoàn tác.", { n: picked.length, size: FolderFmt.size(size) }), "good");
+  }
+
+  function menu(ctl) {
+    const E = TabMenu.entry, c = ctl.criteria || {}, head = Object.assign(document.createElement("div"), { className: "menu-head", textContent: T("Chọn bản trùng") });
+    const sep = () => Object.assign(document.createElement("hr"), { className: "menu-sep" });
+    const keeps = ctl.items.length ? [E(T("Giữ bản mới nhất mỗi nhóm"), "", () => keep(ctl, "newest")), E(T("Giữ bản cũ nhất mỗi nhóm"), "", () => keep(ctl, "oldest")),
+      E(T("Giữ bản có đường dẫn ngắn nhất"), "", () => keep(ctl, "shortest")), sep()] : [];
+    return [head, ...keeps, FolderView.check(c.skipEmpty !== false, T("Bỏ file 0 byte"), "", () => ctl.rerun({ ...c, skipEmpty: c.skipEmpty === false })),
+      FolderView.check(c.skip !== false, T("Bỏ .git / node_modules"), "", () => ctl.rerun({ ...c, skip: c.skip === false }))];
+  }
+
+  return { run, menu };
+})();
+// Folder compare (So sánh với panel kia / So sánh với “A” / 2 folders selected): both trees walked pair by pair, names matched in any case — ⬅ left only · ➡ right only · ≠ different (size, else bytes in 4 MB blocks; dates are not trusted) · = same; a folder on one side is one row.
+const DirCompare = (() => {
+  const LABEL = { left: "Chỉ có ở trái", right: "Chỉ có ở phải", diff: "Khác nhau", same: "Giống nhau" };
+
+  // Two files → "same" / "diff" plus their stats; null when stopped.
+  async function judge(a, b, stop) {
+    const [fa, fb] = (await Promise.all([a.read(), b.read()])).map(r => r.file), sa = { size: fa.size, mod: fa.lastModified }, sb = { size: fb.size, mod: fb.lastModified };
+    if (DirDiff.bySize(fa.size, fb.size) === "diff") return { st: "diff", sa, sb };
+    const eq = await DirDiff.equalBlobs(fa, fb, stop);
+    return eq === null ? null : { st: eq ? "same" : "diff", sa, sb };
+  }
+
+  // A row for the 🔎 tab: node = the left entry when there is one; pa / pb = the folders the row lives in on each side (sync target).
+  function item(r, rel, pa, pb, sa = null, sb = null) {
+    const node = r.a || r.b, stat = r.a ? sa : sb, side = (s, n) => (n.dir ? T("folder") : s?.size != null ? FolderFmt.size(s.size) : "");
+    const title = [T(LABEL[r.st]), r.a ? T("trái: {v}", { v: side(sa, r.a) }) : "", r.b ? T("phải: {v}", { v: side(sb, r.b) }) : ""].filter(Boolean).join(" · ");
+    return { node, key: (rel ? rel + "/" : "") + node.name, dir: rel, st: r.st, status: DirDiff.SYM[r.st], statusTitle: title, a: r.a, b: r.b, pa, pb, ...(stat ? { stat } : {}) };
+  }
+
+  async function run(c, sink) {
+    const [A, B] = [await ScanWalk.folder(c.a), await ScanWalk.folder(c.b)], skip = c.skip !== false, n = { left: 0, right: 0, diff: 0, same: 0 };
+    const queue = [[A, B, ""]], light = kids => kids.filter(k => !(k.dir && ScanWalk.heavy(k.name, skip)));
+    let seen = 0, capped = false, cut = 0;
+    const tick = ScanWalk.ticker(() => sink.progress(T("Đã so {n} mục: ⬅ {l} · ➡ {r} · ≠ {d} · = {s} — Esc để dừng", { n: ScanWalk.num(seen), l: n.left, r: n.right, d: n.diff, s: n.same })));
+    for (let i = 0; i < queue.length; i++) {
+      if (sink.stopped()) return;
+      const [a, b, rel] = queue[i];
+      const [ka, kb] = await Promise.all([Explorer.loadKids(a), Explorer.loadKids(b)]);
+      const [la, lb] = [light(ka), light(kb)], m = DirDiff.match(la, lb), out = [];
+      seen += la.length + lb.length;
+      if (ka.length >= LocalFs.MAX_ENTRIES || kb.length >= LocalFs.MAX_ENTRIES) { cut++; sink.incomplete(); }
+      if (seen > ScanWalk.MAX) { capped = true; break; }
+      for (const [x, y] of m.both) queue.push([x, y, rel ? rel + "/" + x.name : x.name]);
+      await ScanWalk.each(m.rows, 4, async r => {
+        let sa = null, sb = null;
+        if (r.st === "check") {
+          // Unreadable ⇒ shown as ≠ and the result is partial (no sync on it).
+          const j = await judge(r.a, r.b, sink.stopped).catch(() => { sink.incomplete(); return { st: "diff" }; });
+          if (!j) return;
+          ({ st: r.st, sa = null, sb = null } = j);
+        } else if (!(r.a || r.b).dir) [sa, sb] = await Promise.all([r.a && !r.a.dir ? ScanWalk.stat(r.a) : null, r.b && !r.b.dir ? ScanWalk.stat(r.b) : null]);
+        n[r.st]++;
+        out.push(item(r, rel, a, b, sa, sb));
+        tick();
+      });
+      if (sink.stopped()) return;
+      sink.add(out);
+    }
+    if (capped) sink.incomplete();
+    sink.done([T("So sánh xong: ⬅ {l} chỉ trái · ➡ {r} chỉ phải · ≠ {d} khác · = {s} giống.", { l: n.left, r: n.right, d: n.diff, s: n.same }), capped ? T("Dừng ở {max} mục — đồng bộ cần so sánh đủ.", { max: ScanWalk.num(ScanWalk.MAX) }) : "",
+      cut ? T("{n} folder có hơn {max} mục — chỉ xét {max} mục đầu.", { n: cut, max: ScanWalk.num(LocalFs.MAX_ENTRIES) }) : ""].filter(Boolean).join(" "));
+  }
+
+  return { run };
+})();
+// One-way folder sync from a finished compare (⇄ Đồng bộ ▾): preview (new copies · overwrites · ☐ delete what only the target has), every overwritten / deleted item copied into the recycle bin first, one undo step (new items ⇒ bin, overwritten / deleted ⇒ restored).
+const DirSync = (() => {
+  const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+  const nameOf = p => String(p || "").split("/").pop();
+  const relOf = s => { const it = s.row; return (it.dir ? it.dir + "/" : "") + (s.src || s.dst).name + ((s.src || s.dst).dir ? "/" : ""); };
+  let busy = false;
+
+  function section(title, steps, box) {
+    const d = el("details", "sync-sec"), list = el("ul");
+    d.open = steps.length <= 12;
+    d.append(el("summary", "", title));
+    list.append(...steps.slice(0, 200).map(s => el("li", "", relOf(s))));
+    if (steps.length > 200) list.append(el("li", "sync-more", T("… và {n} mục nữa", { n: steps.length - 200 })));
+    d.append(list);
+    box.append(d);
+    return d;
+  }
+
+  // → { del } or null when cancelled.
+  function preview(ctl, dir, from, to) {
+    const all = DirDiff.plan(ctl.items, dir, true), dlg = el("dialog", "name-ask sync-ask"), form = el("form"), lists = el("div", "sync-lists"), btns = el("div", "name-ask-btns");
+    dlg.dataset.i18nSkip = "";
+    form.method = "dialog";
+    form.append(el("h3", "fs-title", T("Đồng bộ “{a}” → “{b}”", { a: nameOf(from), b: nameOf(to) })), el("p", "sync-path", from + " → " + to), lists);
+    if (all.copy.length) section(T("Chép mới ({n})", { n: all.copy.length }), all.copy, lists);
+    if (all.over.length) section(T("Ghi đè ({n})", { n: all.over.length }), all.over, lists);
+    const del = el("input"), ok = el("button", "main", T("Đồng bộ")), cancel = el("button", "", T("Huỷ"));
+    Object.assign(del, { type: "checkbox", name: "del" });
+    if (all.del.length) {
+      const l = el("label", "fs-check");
+      l.append(del, el("span", "", T("Xoá {n} mục chỉ có ở “{b}” (vào thùng rác)", { n: all.del.length, b: nameOf(to) })));
+      lists.append(l);
+      section(T("Sẽ xoá nếu bật ô trên"), all.del, lists).open = false;
+    }
+    if (!all.copy.length && !all.over.length && !all.del.length) lists.append(el("p", "", T("Không có gì để đồng bộ — 2 folder đã giống nhau theo chiều này.")));
+    form.append(el("p", "sync-note", T("File bị ghi đè / xoá được chép vào thùng rác trước. Ctrl+Z (ở Explorer / tab folder) hoàn tác cả lần đồng bộ.")), btns);
+    const empty = () => !all.copy.length && !all.over.length && !(del.checked && all.del.length);
+    ok.disabled = empty();
+    del.onchange = () => { ok.disabled = empty(); };
+    Object.assign(cancel, { type: "button", onclick: () => dlg.close("") });
+    Object.assign(ok, { type: "submit", value: "ok" });
+    btns.append(cancel, ok);
+    dlg.append(form);
+    document.body.append(dlg);
+    dlg.showModal();
+    (ok.disabled ? cancel : ok).focus();
+    return new Promise(done => dlg.addEventListener("close", () => { const r = dlg.returnValue === "ok" ? { del: del.checked } : null; dlg.remove(); done(r); }, { once: true }));
+  }
+
+  async function write(src, h) {
+    const w = await h.createWritable();
+    await (await src.read()).file.stream().pipeTo(w);
+  }
+
+  // → { made: entries the undo sends to the bin, ids: bin records it restores, tags, bad, parents }.
+  async function apply(p, onStep) {
+    const parents = new Map(), made = [], ids = [], bad = [], gone = [], docs = [];
+    const parent = dir => { if (!parents.has(dir.handle)) parents.set(dir.handle, { handle: dir.handle, path: dir.path }); return parents.get(dir.handle); };
+    const out = [...p.over.map(s => s.dst), ...p.del.map(s => s.dst)];
+    let kept = null, k = 0;
+    if (out.length) {
+      StatusBar.msg(T("Đang chép {n} mục sẽ bị ghi đè / xoá vào thùng rác…", { n: out.length }));
+      try { kept = await TrashStore.put(out); }
+      catch (e) { if (!confirm(T("Không giữ được các mục bị ghi đè / xoá trong thùng rác ({why}). Vẫn đồng bộ? Chúng sẽ không khôi phục được.", { why: e.message }))) return null; }
+    }
+    const binId = i => kept?.ids[i];
+    const settle = async (i, ok) => { if (ok && binId(i)) ids.push(binId(i)); else if (!ok && binId(i)) await TrashStore.purge([binId(i)]).catch(() => {}); };
+    const leave = async n => { if (!n.dir) docs.push(...await ExplorerDisk.openDocsOf(n.handle)); await LocalFs.remove(n); gone.push(n); parent(n.parent); };
+    for (const [i, s] of p.over.entries()) {
+      let left = false;
+      try {
+        // Without a bin copy the undo could not bring the old file back: it leaves the new one alone too.
+        if (!s.src.dir && !s.dst.dir) { await write(s.src, s.dst.handle); if (binId(i)) made.push({ handle: s.dst.handle, parent: parent(s.dst.parent) }); }
+        else { await leave(s.dst); left = true; made.push({ handle: await ExplorerOps.copyHandle(s.src.handle, s.dst.parent.handle, s.src.name), parent: parent(s.dst.parent) }); }
+        await settle(i, true);
+      } catch (e) { bad.push(relOf(s) + ": " + e.message); await settle(i, left); }
+      onStep(++k);
+    }
+    for (const s of p.copy) {
+      const dir = s.row.a === s.src ? s.row.pb : s.row.pa;
+      try {
+        if (await LocalFs.exists(dir.handle, s.src.name)) throw new Error(T("đã có ở đích"));
+        made.push({ handle: await ExplorerOps.copyHandle(s.src.handle, dir.handle, s.src.name), parent: parent(dir) });
+      } catch (e) { bad.push(relOf(s) + ": " + e.message); }
+      onStep(++k);
+    }
+    for (const [j, s] of p.del.entries()) {
+      const i = p.over.length + j;
+      try { await leave(s.dst); await settle(i, true); } catch (e) { bad.push(relOf(s) + ": " + e.message); await settle(i, false); }
+      onStep(++k);
+    }
+    // An open tab of a removed file keeps its text and becomes unsaved, as with Delete.
+    docs.forEach(d => Docs.update(d, { handle: null, dirty: true, stale: false }, "dirty"));
+    return { made, ids, bad, tags: Tags.removed(gone), parents: [...parents.values()] };
+  }
+
+  // Folders written to are read again before the compare runs again (a cached listing would show the old state).
+  const reread = r => Promise.all(r.parents.map(x => ExplorerDisk.reloadHandle(x.handle)));
+
+  async function run(ctl, dir) {
+    const c = ctl.criteria, from = dir === "ab" ? c.a : c.b, to = dir === "ab" ? c.b : c.a;
+    if (busy) { StatusBar.msg(T("Đang đồng bộ — chờ lần trước xong."), "warn"); return; }
+    if (!ctl.complete) { StatusBar.msg(T("So sánh chưa xong (đã dừng, lỗi hoặc quá nhiều mục) — bấm ↻ chạy lại trước khi đồng bộ."), "warn"); return; }
+    const [A, B] = await Promise.all([FolderPaths.resolve(c.a), FolderPaths.resolve(c.b)]);
+    if (!ExplorerOps.writableNode(A) || !ExplorerOps.writableNode(B) || A.path !== c.a || B.path !== c.b) { StatusBar.msg(T("Đồng bộ chỉ làm được giữa 2 folder mở có quyền ghi (Chrome / Edge)."), "warn"); return; }
+    const choice = await preview(ctl, dir, from, to);
+    if (!choice) return;
+    const p = DirDiff.plan(ctl.items, dir, choice.del), total = p.copy.length + p.over.length + p.del.length;
+    busy = true;
+    try {
+      await LocalFs.writable((dir === "ab" ? B : A).handle);
+      let done = 0;
+      const tick = ScanWalk.ticker(() => StatusBar.msg(T("Đang đồng bộ {k} / {n}…", { k: done, n: total })));
+      const r = await apply(p, k => { done = k; tick(); });
+      if (!r) { StatusBar.msg(T("Chưa đồng bộ gì."), "warn"); return; }
+      const label = T("Đồng bộ “{a}” → “{b}”", { a: nameOf(from), b: nameOf(to) });
+      const step = r.made.length || r.ids.length ? ExplorerUndo.push(label, async () => {
+        // Every step is tried (a new file already gone must not keep the old ones in the bin); the bin keeps this sync's copies while it fills.
+        const back = r.made.map(m => ({ name: m.handle.name, dir: m.handle.kind === "directory", handle: m.handle, parent: m.parent }));
+        const removed = !back.length || await ExplorerDisk.remove(back, { undoable: false, keep: r.ids });
+        if (r.ids.length) await TrashStore.restoreIds(r.ids);
+        Tags.restore(r.tags);
+        await reread(r);
+        ctl.rerun();
+        if (!removed) throw ExplorerUndo.shown();
+      }) : null;
+      await reread(r);
+      const msg = T("Đã đồng bộ “{a}” → “{b}”: chép mới {c} · ghi đè {o} · xoá {d}.", { a: nameOf(from), b: nameOf(to), c: p.copy.length, o: p.over.length, d: p.del.length });
+      StatusBar.msg(msg + (r.bad.length ? " " + T("Lỗi: {list}", { list: r.bad.join(" · ") }) : "") + (step ? " " + T("Hoàn tác (Ctrl+Z)") : ""), r.bad.length ? "bad" : "good", step ? () => ExplorerUndo.undo(step) : null, step ? T("Bấm để hoàn tác") : "");
+      ctl.rerun();
+    } catch (e) { StatusBar.msg(T("Thao tác trên đĩa lỗi: {msg}", { msg: e.message }), "bad"); }
+    finally { busy = false; }
+  }
+
+  function menu(ctl) {
+    const c = ctl.criteria || {}, E = TabMenu.entry, head = el("div", "menu-head", T("Đồng bộ 1 chiều"));
+    return [head, E(T("Trái → phải: “{a}” → “{b}”…", { a: nameOf(c.a), b: nameOf(c.b) }), "", () => run(ctl, "ab")), E(T("Phải → trái: “{b}” → “{a}”…", { a: nameOf(c.a), b: nameOf(c.b) }), "", () => run(ctl, "ba")),
+      el("hr", "menu-sep"), FolderView.check(c.skip !== false, T("Bỏ .git / node_modules"), "", () => ctl.rerun({ ...c, skip: c.skip === false }))];
+  }
+
+  return { menu };
 })();

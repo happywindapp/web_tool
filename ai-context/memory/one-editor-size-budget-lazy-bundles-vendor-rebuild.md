@@ -1,8 +1,8 @@
-# One Editor: ngân sách file chính (≤ 1 MB từ 2026-11-20, trước là 700 KB) → bundle nạp lười; script vendor build lại core
+# One Editor: ngân sách file chính (≤ 9,9 MB từ 2026-11-22; trước 1 MB, 700 KB) → bundle nạp lười; script vendor build lại core
 
 **Triệu chứng.** Thêm tính năng vào One Editor làm `tools/one-editor.html` vượt 700 KB (ngân sách phase 6). Chạy `scripts/vendor-one-editor-libraries.ps1` để thêm 1 gói (Vim / Emmet) làm `tools/vendor/codemirror-6.43.15/codemirror-core.min.js` + `codemirror-languages.min.js` đổi hash dù không đổi phiên bản.
 
-**Ngân sách hiện hành (user chốt 2026-11-21, mọi tool / project).** File chính ≤ 1 MB raw · tải lần đầu (file chính + script nạp ngay) ≤ 1,5 MB raw / ~450 KB gzip · sẵn sàng khi giả lập CPU chậm 4× ≤ ~2 s · mỗi bundle nạp lười ≤ 1 MB raw. Vượt mục nào ⇒ hỏi user, không tự nâng trần (2–5 MB ⇒ parse JS làm mobile mở 3–7 s).
+**Ngân sách hiện hành (user chốt 2026-11-22, mọi tool / project; thay mức 1 MB của 2026-11-21).** File chính ≤ 9,9 MB raw · mỗi file phụ nạp lười (bundle code của mình) ≤ 9,9 MB raw, **tối đa 3 file phụ / tool** (thư viện `tools/vendor/…` và trang sandbox CSP riêng không tính) · sẵn sàng khi giả lập CPU chậm 4× ~2 s chỉ là mức cảnh báo. Vượt trần ⇒ hỏi user, không tự nâng. Số đo nền: `browser-js-parse-cost-and-syntax-check-cost-measured.md`.
 
 **Nguyên nhân.** File chính đã ~700 KB sau phase 8. Script vendor cài lại mọi gói, phụ thuộc bắc cầu (`@lezer/*`, `style-mod`…) được resolve bản mới hơn.
 

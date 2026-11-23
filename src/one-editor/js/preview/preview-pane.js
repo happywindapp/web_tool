@@ -3,7 +3,8 @@ const PreviewPane = (() => {
   const panes = new Map(), extra = {};
   const VIEWS = () => ({ diagram: PvDiagram, markdown: PvMarkdown, html: PvHtml, table: PvTable, drawio: PvDrawio, translate: PvTranslate, report: PvReport, ...extra });
   const isPreview = doc => !!doc && doc.kind === "output" && doc.link?.op === "preview";
-  const isPane = doc => !!doc && doc.kind === "output" && !!OutputOps.get(doc.link?.op)?.pane;
+  // A folder / recycle bin / results / settings tab counts as a pane (no text) but is drawn by its own module.
+  const isPane = doc => !!doc && (Docs.isList(doc) || doc.kind === "output" && !!OutputOps.get(doc.link?.op)?.pane);
   const el = (tag, cls) => Object.assign(document.createElement(tag), { className: cls });
 
   function create(doc) {
@@ -68,7 +69,7 @@ const PreviewPane = (() => {
 
   // Called on every view refresh: shows the active preview tab in place of the editor.
   function mount(g) {
-    const doc = Docs.get(g.active), on = isPane(doc);
+    const doc = Docs.get(g.active), on = isPane(doc) && !Docs.isList(doc);
     syncButton(g);
     g.el.classList.toggle("is-preview", on);
     if (!on) return;

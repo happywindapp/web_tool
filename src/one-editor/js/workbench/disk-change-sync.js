@@ -140,7 +140,7 @@ const DiskSync = (() => {
   // saving: the focus check that a permission prompt or confirm() triggers skips the tab mid-write.
   async function write(doc, data) {
     doc.saving = true;
-    try { await LocalFs.writeHandle(doc.handle, data); await mark(doc); }
+    try { await LocalFs.writeHandle(doc.handle, data); await mark(doc); GitStatus.soon(); }
     finally { doc.saving = false; }
   }
 

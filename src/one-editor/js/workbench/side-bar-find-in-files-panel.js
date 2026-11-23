@@ -23,6 +23,14 @@ const SideBar = (() => {
     }
   }
 
+  // Clicking the open panel's icon hides the side bar (VS Code); phones keep the pane carousel, where hiding does nothing.
+  function click(name) {
+    const open = !document.body.classList.contains("no-explorer") && document.querySelector(`[data-side="${name}"]`).classList.contains("on");
+    if (!open || matchMedia("(max-width: 640px)").matches) { show(name); return; }
+    document.body.classList.add("no-explorer");
+    Prefs.set("explorer", false);
+  }
+
   const opts = () => ({ matchCase: $("sxCase").checked, word: $("sxWord").checked, regex: $("sxRegex").checked });
 
   // An open tab jumps at once; a folder file opens as a tab first. Lines may have moved since the scan, so positions are clamped.
@@ -143,7 +151,7 @@ const SideBar = (() => {
   }
 
   function init() {
-    document.querySelectorAll("[data-side]").forEach(b => { b.onclick = () => show(b.dataset.side); });
+    document.querySelectorAll("[data-side]").forEach(b => { b.onclick = () => click(b.dataset.side); });
     // The shared I18n translates title / placeholder only, not aria-label.
     const nav = document.querySelector(".activity"), navLabel = () => nav.setAttribute("aria-label", T("Thanh hoạt động"));
     navLabel();

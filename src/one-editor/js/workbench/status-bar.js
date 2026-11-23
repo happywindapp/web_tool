@@ -1,7 +1,7 @@
 // Status bar: cursor, selections, counts, language, EOL/encoding, tab source, storage state; msg() shows the last action and can jump to a line when clicked.
 const StatusBar = (() => {
   let raf = 0, storageNote = "";
-  const SHORT = { note: "Ghi chú", file: "File", temp: "Tab tạm", output: "Kết quả liên kết" };
+  const SHORT = { note: "Ghi chú", file: "File", temp: "Tab tạm", output: "Kết quả liên kết", folder: "Folder", trash: "Thùng rác", results: "Kết quả", settings: "Cài đặt" };
   const set = (id, text) => { $(id).textContent = text; };
   const words = s => (s.match(/[\p{L}\p{N}_]+/gu) || []).length;
 

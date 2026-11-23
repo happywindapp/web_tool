@@ -13,6 +13,7 @@ const OutputLink = (() => {
   async function run(src, opId, quiet = false) {
     const op = OutputOps.get(opId);
     if (!src || !op) return false;
+    if (Docs.isList(src)) { StatusBar.msg(T("Tab folder không có nội dung để chạy — mở 1 file trước."), "warn"); return false; }
     src = Docs.root(src);
     if (src.kind === "output" && src.link) {
       const origin = Docs.get(src.link.src);

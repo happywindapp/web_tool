@@ -1,6 +1,6 @@
-// IndexedDB (ADR #20): "docs" holds notes + every open tab (hot exit), "meta" holds the layout, "history" + "historyText" the local history. Blocked or failing storage ⇒ ok=false and the tool runs without saving.
+// IndexedDB (ADR #20): "docs" holds notes + every open tab (hot exit), "meta" holds the layout, "history" + "historyText" the local history, "trash" + "trashData" the Explorer recycle bin (v3, ADR #27). Blocked or failing storage ⇒ ok=false and the tool runs without saving.
 const NotesDb = (() => {
-  const NAME = "web_tool.one-editor", VERSION = 2, STORES = ["docs", "meta", "history", "historyText"];
+  const NAME = "web_tool.one-editor", VERSION = 3, STORES = ["docs", "meta", "history", "historyText", "trash", "trashData"];
   let db = null, ok = false, error = "";
 
   const req = r => new Promise((res, rej) => { r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); });
@@ -16,6 +16,8 @@ const NotesDb = (() => {
         if (!has("meta")) d.createObjectStore("meta");
         if (!has("history")) d.createObjectStore("history", { keyPath: "id" });
         if (!has("historyText")) d.createObjectStore("historyText");
+        if (!has("trash")) d.createObjectStore("trash", { keyPath: "id" });
+        if (!has("trashData")) d.createObjectStore("trashData");
       };
       db = await req(r);
       db.onversionchange = () => { db.close(); fail(new Error(T("Một tab mới hơn của One Editor đã nâng cấp dữ liệu — tải lại trang này (F5) để lưu tiếp."))); StatusBar.msg(error, "warn"); };
@@ -76,5 +78,17 @@ const NotesDb = (() => {
     return true;
   }
 
-  return { open, loadAll, save, getMeta, putMeta, clear, histList, histText, histWrite, get ok() { return ok; }, get error() { return error; } };
+  // Recycle bin: "trash" keeps { id, name, dir, from, parent, at, size, files } (cheap to list), "trashData" the entries [{ rel, dir, blob, mod }] under the same id.
+  const trashList = async () => ok ? req(db.transaction("trash", "readonly").objectStore("trash").getAll()) : [];
+  const trashData = async id => ok ? req(db.transaction("trashData", "readonly").objectStore("trashData").get(id)) : undefined;
+  // Resolves only once the transaction is complete (the files are stored) — callers delete from disk after that.
+  async function trashWrite(adds, dropIds) {
+    if (!ok) throw new Error(error || T("Trình duyệt chặn IndexedDB."));
+    const t = db.transaction(["trash", "trashData"], "readwrite"), m = t.objectStore("trash"), x = t.objectStore("trashData");
+    for (const id of dropIds) { m.delete(id); x.delete(id); }
+    for (const [rec, entries] of adds) { m.put(rec); x.put(entries, rec.id); }
+    await done(t);
+  }
+
+  return { open, loadAll, save, getMeta, putMeta, clear, histList, histText, histWrite, trashList, trashData, trashWrite, get ok() { return ok; }, get error() { return error; } };
 })();

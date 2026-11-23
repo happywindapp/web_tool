@@ -4,7 +4,7 @@ const PowerOps = (() => {
   function init() {
     if (inited) return;
     inited = true;
-    const V = { invisible: PvInvisible, recipe: PvRecipe, regex: PvRegex, run: PvRun, "code-image": PvCodeImage };
+    const V = { invisible: PvInvisible, recipe: PvRecipe, regex: PvRegex, run: PvRun, "code-image": PvCodeImage, syntax: PvSyntax };
     for (const [k, v] of Object.entries(V)) PreviewPane.addView(k, v);
     RegexMarks.init();
   }
@@ -40,5 +40,5 @@ const PowerOps = (() => {
   }
 
   return { init, cron, sqlInsert: sql("insert"), sqlUpdate: sql("update"), sqlOpts, schema, invisible,
-    recipe: (t, c) => RecipeOp.run(t, c), regex: (t, c) => RegexOp.run(t, c), run: (t, c) => RunCode.run(t, c), codeImage: (t, c) => CodeImageOp.run(t, c) };
+    recipe: (t, c) => RecipeOp.run(t, c), regex: (t, c) => RegexOp.run(t, c), run: (t, c) => RunCode.run(t, c), codeImage: (t, c) => CodeImageOp.run(t, c), syntaxCheck: (t, c) => SyntaxCheckOp.run(t, c) };
 })();

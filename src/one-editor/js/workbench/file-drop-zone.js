@@ -1,4 +1,4 @@
-// Drag & drop: files dropped on View 1 / View 2 open there (elsewhere: the focused view), a folder becomes the Explorer tree, a dragged tab moves to the view it is dropped on.
+// Drag & drop: files dropped on View 1 / View 2 open there (elsewhere: the focused view), a folder becomes the Explorer tree, a dragged tab moves to the view it is dropped on; on a writable folder tab ExplorerDnd copies them in instead.
 const FileDrop = (() => {
   const types = e => [...(e.dataTransfer?.types || [])];
   const isTab = e => types(e).includes(TabStrip.TAB_TYPE);
@@ -33,7 +33,7 @@ const FileDrop = (() => {
       if (!isFiles(e) && !isTab(e)) return;
       e.preventDefault();
       e.dataTransfer.dropEffect = isTab(e) ? "move" : "copy";
-      mark(e.target.closest?.(".group, #explorerPane") || null);
+      mark(isFiles(e) && ExplorerDnd.takesFiles(e.target) ? null : e.target.closest?.(".group, #explorerPane") || null);
     }, true);
     document.addEventListener("dragleave", e => { if (!e.relatedTarget) mark(null); }, true);
     document.addEventListener("dragend", () => mark(null), true);
@@ -45,7 +45,9 @@ const FileDrop = (() => {
       mark(null);
       const g = e.target.closest?.(".group"), gi = g ? +g.dataset.group : -1;
       if (isTab(e)) { if (gi >= 0) Views.move(e.dataTransfer.getData(TabStrip.TAB_TYPE), gi); return; }
-      openDropped(takeItems(e.dataTransfer), gi >= 0 ? gi : Views.focused)
+      const items = takeItems(e.dataTransfer);
+      if (ExplorerDnd.dropFiles(e.target, items)) return;
+      openDropped(items, gi >= 0 ? gi : Views.focused)
         .catch(err => StatusBar.msg(T("Kéo-thả lỗi: {msg}", { msg: err.message }), "bad"));
     }, true);
   }

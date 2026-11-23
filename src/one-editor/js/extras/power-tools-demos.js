@@ -120,7 +120,40 @@ setTimeout(() => console.info("timer fired"), 100);
 setTimeout(() => { while (true) {} }, 300);
 `;
 
+  const GO = `package main
+
+import "fmt"
+
+type Order struct {
+	ID    int
+	Qty   int
+	Price float64
+}
+
+// A missing ")" and a missing "}" (the second one also trips "func main").
+func total(orders []Order) float64 {
+	sum := 0.0
+	for _, o := range orders {
+		sum += float64(o.Qty * o.Price
+	}
+	return sum
+
+func main() {
+	fmt.Println(total([]Order{{1, 100, 25.4}}))
+}
+`;
+  const TSQL = `-- T-SQL (SQL Server): valid; run the command "Format SQL as MySQL" (or PostgreSQL) to see that dialect reject it.
+SELECT TOP 20 [o].[OrderId], o.Symbol, SUM(o.Qty * o.Price) AS Turnover
+FROM dbo.[Orders] o WITH (NOLOCK)
+JOIN dbo.Accounts a ON a.AccountId = o.AccountId
+WHERE o.TradeDate >= '2026-01-01' AND a.Status = N'A'
+GROUP BY o.OrderId, o.Symbol
+ORDER BY Turnover DESC
+`;
+
   return {
+    "syntax-go": { payload: one("orders.go", GO, "syntax-check") },
+    "syntax-tsql": { payload: one("turnover.sql", TSQL, "syntax-check") },
     "regex": { payload: one("orders.log", REGEX, "regex"), after: () => OutputLink.run(Views.activeDoc(), "regex") },
     "code-image": { payload: one("fees.ts", CODE, "code-image") },
     "run-html": { payload: one("ticket.html", HTML), after: () => OutputLink.run(Views.activeDoc(), "run-code") },

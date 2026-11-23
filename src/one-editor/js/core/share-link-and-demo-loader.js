@@ -67,6 +67,7 @@ const ShareLoader = (() => {
   function loadDemo(key) {
     if (!Object.hasOwn(DEMOS, key)) return;
     if (DEMOS[key].file) { FileOpen.openMany([{ file: DEMOS[key].file(), handle: null }]); return; }
+    if (DEMOS[key].open) { DEMOS[key].open(); return; }
     // Phase 9 demos live in the lazily loaded bundle.
     if (DEMOS[key].lazy) { PowerTools.use(() => { const d = PowerDemos[key]; load(d.payload(), () => T("Đã nạp mẫu “{name}”.", { name: T(DEMOS[key].label) })); d.after?.(); }); return; }
     load(DEMOS[key].payload(), () => T("Đã nạp mẫu “{name}”.", { name: T(DEMOS[key].label) }));
@@ -76,7 +77,7 @@ const ShareLoader = (() => {
   // pw: encrypt the payload into a "#enc:" link (Crypt, extras bundle).
   async function share(pw = "") {
     // A preview tab has no text: its source tab is marked and the link runs "preview" on it again.
-    const docs = Views.groups.slice(0, Views.count).map(g => g.tabs.map(Docs.get).filter(d => d && d.kind !== "clone"));
+    const docs = Views.groups.slice(0, Views.count).map(g => g.tabs.map(Docs.get).filter(d => d && d.kind !== "clone" && !Docs.isList(d)));
     const shown = new Set(docs.flat().filter(PreviewPane.isPreview).map(d => d.link.src));
     const views = docs.map(list => list.filter(d => !PreviewPane.isPreview(d)).map(d => ({ name: d.name, lang: d.lang, text: Docs.text(d), preview: shown.has(d.id) })));
     if (!views.some(v => v.length)) { StatusBar.msg(T("Chưa có tab nào để chia sẻ."), "warn"); return; }

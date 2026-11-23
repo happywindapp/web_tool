@@ -153,7 +153,8 @@ test("share payload: round trip, untrusted fields dropped", () => {
 });
 
 test("layouts: view counts and 'the other view'", () => {
-  eq(Layouts.LIST.map(l => l.n), [1, 2, 3, 2, 4]);
+  eq(Layouts.LIST.map(l => l.n), [1, 2, 3, 2, 4, 3, 3]);
+  eq(Layouts.LIST.filter(l => l.bar).map(l => l.id), ["2c", "12", "21"]);
   eq([1, 2, 3, 4, 9].map(Layouts.forCount), ["1", "2c", "3c", "4g", "4g"]);
   eq([Layouts.other(0, 1), Layouts.other(0, 2), Layouts.other(1, 2), Layouts.other(2, 3), Layouts.other(3, 4)], [-1, 1, 0, 0, 0]);
 });

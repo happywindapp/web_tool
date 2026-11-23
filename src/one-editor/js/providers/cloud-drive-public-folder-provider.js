@@ -1,4 +1,4 @@
-// Public Google Drive / personal OneDrive folders in the Explorer, read-only (ADR #23): Drive API v3 with the user's API key; OneDrive through its anonymous "badger" token.
+// Public Google Drive / personal OneDrive folders in the Explorer (ADR #23): Drive API v3 with the user's API key (read-only); OneDrive through its anonymous "badger" token (read, save, create).
 const CloudDrive = (() => {
   const GD = "https://www.googleapis.com/drive/v3/files", OD = "https://api.onedrive.com/v1.0/", MAX_BYTES = 50 * 1024 * 1024, MAX_ENTRIES = 5000;
   const GFOLDER = "application/vnd.google-apps.folder", OD_APP = "5cbed6ac-a083-4e14-b191-b4ba07653de2";
@@ -58,7 +58,7 @@ const CloudDrive = (() => {
 
   function gNode(f, parentPath, parent) {
     const ex = GEXPORT[f.mimeType], name = ex ? f.name + ex[1] : f.name, path = parentPath ? parentPath + "/" + name : name;
-    if (f.mimeType !== GFOLDER) return { name, path, dir: false, remote: "gdrive", parent, read: () => gRead(f, name, ex) };
+    if (f.mimeType !== GFOLDER) return { name, path, dir: false, remote: "gdrive", parent, size: f.size == null ? null : Number(f.size), modified: f.modifiedTime || null, read: () => gRead(f, name, ex) };
     const node = { name, path, dir: true, children: null, remote: "gdrive", parent, list: async () => {
       const out = [];
       let pageToken = "";
@@ -125,10 +125,11 @@ const CloudDrive = (() => {
     return sort(out.slice(0, MAX_ENTRIES));
   }
 
+  // od: the item's API address (create in it); webUrl: where rename / delete happen, since the anonymous token gets 403 on PATCH / DELETE.
   function odNode(it, parentPath, parent, sid, first = null) {
-    const path = parentPath ? parentPath + "/" + it.name : it.name;
-    if (!it.folder) return { name: it.name, path, dir: false, remote: "onedrive", parent, read: () => odRead(it, sid) };
-    const node = { name: it.name, path, dir: true, children: null, remote: "onedrive", parent, list: async () => {
+    const path = parentPath ? parentPath + "/" + it.name : it.name, od = { url: odItem(it), sid }, webUrl = /^https:\/\/onedrive\.live\.com[/?]/.test(it.webUrl || "") ? it.webUrl : null;
+    if (!it.folder) return { name: it.name, path, dir: false, remote: "onedrive", od, webUrl, parent, size: it.size ?? null, modified: it.lastModifiedDateTime || null, read: () => odRead(it, sid) };
+    const node = { name: it.name, path, dir: true, children: null, remote: "onedrive", od, webUrl, parent, list: async () => {
       // The root comes with its children ($expand) once; refreshes list it like any folder.
       const j = first || await odJson(odItem(it) + "/children?$top=1000", sid);
       first = null;
@@ -174,6 +175,20 @@ const CloudDrive = (() => {
     return { ...rm, eTag: j.eTag || null };
   }
 
+  // New empty file / folder in a OneDrive folder node → its node; an existing name fails instead of being replaced.
+  async function create(dir, name, folder) {
+    if (dir?.remote !== "onedrive" || !dir.od) throw err(T("Chỉ tạo được trong folder OneDrive."));
+    const { url, sid } = dir.od, J = { "Content-Type": "application/json" };
+    const r = folder
+      ? await odFetch(url + "/children", sid, { method: "POST", headers: J, body: JSON.stringify({ name, folder: {}, "@microsoft.graph.conflictBehavior": "fail" }) })
+      : await odFetch(url + ":/" + encodeURIComponent(name) + ":/content?@microsoft.graph.conflictBehavior=fail", sid, { method: "PUT", headers: { "Content-Type": "application/octet-stream" }, body: "" });
+    const j = await r.json().catch(() => ({}));
+    if (r.status === 409) throw err(T("Đã có “{name}” trong folder này.", { name }));
+    if (r.status === 403) throw err(T("link OneDrive chỉ cho xem — không tạo được."));
+    if (!r.ok) throw err(T("OneDrive báo lỗi {code}: {msg}", { code: r.status, msg: String(j?.error?.message || r.statusText).slice(0, 200) }));
+    return odNode(j, dir.path, dir, sid);
+  }
+
   // → root node with its first listing (null = cancelled / no key and ask = false), shaped like LocalFs nodes plus `remote` + `link`.
   async function open(link, ask = true) {
     const node = await rootOf(String(link).trim(), ask);
@@ -191,5 +206,5 @@ const CloudDrive = (() => {
     return p.kind === "gdrive" ? gRoot(p.id, ask) : odRoot(p.url);
   }
 
-  return { parse, shareId, open, askKey, save };
+  return { parse, shareId, open, askKey, save, create };
 })();

@@ -12,7 +12,7 @@ function registerDataCommands(C, doc, hasDoc) {
     CmSetup.settings.lint = !!on;
     Prefs.set("lint", !!on);
     Views.applySettings();
-    StatusBar.msg(on ? T("Kiểm lỗi khi gõ (JSON · YAML · XML · HTML · CSS): bật.") : T("Kiểm lỗi khi gõ: tắt."));
+    StatusBar.msg(on ? T("Kiểm lỗi khi gõ (dữ liệu + cú pháp code): bật.") : T("Kiểm lỗi khi gõ: tắt."));
   }
 
   C("dataTree", "Dữ liệu: cây JSON / XML ở view kia (bấm nút tới dòng, chép đường dẫn)", null, () => OutputLink.run(doc(), "tree"), hasDoc);
@@ -20,7 +20,7 @@ function registerDataCommands(C, doc, hasDoc) {
   C("problems", "Lỗi: mở danh sách lỗi của tab (Problems)", "Ctrl+Shift+m", () => CM.lint.openLintPanel(view()), hasDoc);
   C("problemNext", "Lỗi: tới lỗi kế tiếp", "F8", () => CM.lint.nextDiagnostic(view()), hasDoc);
   C("problemPrev", "Lỗi: về lỗi trước", "Shift+F8", () => CM.lint.previousDiagnostic(view()), hasDoc);
-  C("lint", "Bật / tắt kiểm lỗi khi gõ (JSON · YAML · XML · HTML · CSS)", null, () => setLint(!CmSetup.settings.lint));
+  C("lint", "Bật / tắt kiểm lỗi khi gõ (dữ liệu + cú pháp code)", null, () => setLint(!CmSetup.settings.lint));
   C("csvAlign", "CSV: căn thẳng cột (thêm dấu cách)", null, () => csvEdit(RainbowCsv.align), csv);
   C("csvShrink", "CSV: bỏ căn cột (xoá dấu cách quanh ô)", null, () => csvEdit(RainbowCsv.shrink), csv);
   C("csvGrid", "CSV: mở trong bảng của Data Workbench (tab mới)", null, () => RainbowCsv.openInWorkbench(Docs.root(doc())), csv);

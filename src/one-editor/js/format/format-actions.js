@@ -72,6 +72,11 @@ const FormatActions = (() => {
     keep();
     const label = key === "sql" ? Formatter.SQL_DIALECTS[value] : key === "width" ? String(value) : value === "tab" ? "Tab" : value === "auto" ? T("tự dò theo file") : T("{n} dấu cách", { n: value });
     StatusBar.msg(T("Format: {what} = {value}", { what: T(key === "sql" ? "SQL dialect" : key === "width" ? "độ rộng dòng" : "thụt lề"), value: label }), "good");
+    // The SQL syntax check follows the dialect: a reconfigure re-lints the views (forceLinting only hurries a pending lint), then the syntax-check results re-run.
+    if (key === "sql") {
+      Views.applySettings();
+      Docs.list().filter(d => d.kind === "output" && d.link?.op === "syntax-check" && Docs.get(d.link.src)).forEach(d => OutputLink.run(Docs.get(d.link.src), "syntax-check", true));
+    }
   }
 
   function askWidth() {

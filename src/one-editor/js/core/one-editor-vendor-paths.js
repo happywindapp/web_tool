@@ -9,7 +9,9 @@ const VendorPaths = (() => {
     cmVim: CM_DIR + "codemirror-vim.min.js",
     cmEmmet: CM_DIR + "codemirror-emmet.min.js",
     sqlFormatter: "vendor/sql-formatter-15.9.0.min.js",
+    syntaxCheck: "vendor/syntax-check-parsers-1/syntax-check-parsers.min.js",
     prettier: P_DIR + "standalone.js",
+    isoGit: "vendor/isomorphic-git-1.44.11/isomorphic-git-with-buffer.min.js",
     extras: "one-editor-extras.js",
   };
   for (const p of ["babel", "estree", "typescript", "postcss", "html", "markdown", "yaml", "graphql"]) PATHS["prettier-" + p] = P_DIR + "plugins/" + p + ".js";

@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'unsafe-inline'; img-src data: blob:; font-src data:; frame-src 'self' https://embed.diagrams.net; media-src https://api.dictionaryapi.dev; connect-src https://quan111.goatcounter.com https://api.mymemory.translated.net https://api.dictionaryapi.dev https://api.tatoeba.org https://r.jina.ai https://www.googleapis.com https://api.onedrive.com https://api-badgerp.svc.ms https://my.microsoftpersonalcontent.com https://*.1drv.com">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'unsafe-inline'; img-src data: blob:; font-src data:; frame-src 'self' https://embed.diagrams.net; media-src https://api.dictionaryapi.dev; connect-src https://quan111.goatcounter.com https://api.mymemory.translated.net https://api.dictionaryapi.dev https://api.tatoeba.org https://r.jina.ai https://www.googleapis.com https://api.onedrive.com https://api-badgerp.svc.ms https://my.microsoftpersonalcontent.com https://*.1drv.com">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>One Editor</title>
 <style>
@@ -14,6 +14,10 @@
 /* @include styles/workbench-layout.css */
 /* @include styles/tabs-and-explorer-tree.css */
 /* @include styles/preview-pane.css */
+/* @include styles/explorer-folder-items-view.css */
+/* @include styles/explorer-folder-items-selection-preview.css */
+/* @include styles/explorer-commander-views.css */
+/* @include styles/settings-tab.css */
 /* @include styles/find-in-files-and-print.css */
 /* @include styles/translate-pane.css */
 /* @include styles/devtools-report-and-hover.css */
@@ -45,7 +49,9 @@
   <h1>One Editor</h1>
   <button class="more-toggle" title="Thêm thao tác" aria-expanded="false">⋯</button>
   <button id="btnShare" title="Chép link chứa các tab đang mở (dữ liệu nằm sau dấu #, không gửi lên máy chủ)">🔗 Chia sẻ link</button>
+  <button id="btnOpenIn" title="Mở nội dung tab đang mở bằng tool khác (Data Workbench, FIX Parser, Diagram Editor, One Editor) ở tab trình duyệt mới — dữ liệu nằm sau dấu #, không gửi lên máy chủ" aria-haspopup="menu">↗ Mở bằng tool ▾</button>
   <label class="chk" title="Giao diện sáng / tối">Giao diện <select id="uiTheme"><option value="auto">Tự động</option><option value="light">Sáng</option><option value="dark">Tối</option></select></label>
+  <button id="btnSettings" title="Cài đặt — mọi cài đặt của One Editor (Ctrl+,)">⚙ Cài đặt</button>
   <button id="btnClear" title="Xoá mọi ghi chú và tab đã lưu trong IndexedDB của trình duyệt này">🗑 Xoá dữ liệu đã lưu</button>
   <span class="seg lang-switch" title="Ngôn ngữ"><span class="gc-views" title="Lượt truy cập (GoatCounter, cập nhật mỗi ~10 phút)" hidden></span><button data-lang="vi">VI</button><button data-lang="en">EN</button></span>
 </header>
@@ -76,7 +82,8 @@
   <button id="btnCompare" title="So sánh tab đang mở của 2 view — Alt+↓ / Alt+↑ nhảy giữa các khối khác (bấm lần nữa để tắt)">≠ So sánh</button>
   <button id="btnSwap" title="Đổi chỗ view đang chọn với view kế tiếp">⇆</button>
   <span class="sep"></span>
-  <select id="layoutSel" title="Layout: 1 view · 2 cột · 3 cột · 2 hàng · lưới 2×2 (Alt+Shift+1/2/3/8/5)" data-i18n-skip></select>
+  <select id="layoutSel" title="Layout: 1 view · 2 cột · 3 cột · 2 hàng · lưới 2×2 (Alt+Shift+1/2/3/8/5) · 1x2 (1 view | 2 view trên dưới) · 2x1 (2 view trên dưới | 1 view)" data-i18n-skip></select>
+  <select id="splitSel" class="desktop-only" title="Tỷ lệ view 50:50 · 25:75 · 75:25 — 2 cột, 1x2, 2x1, 2×2: độ rộng cột · 3 cột: 25:25:50 / 50:25:25 · 2 hàng: chiều cao (1 view ⇒ chuyển sang 2 cột)" data-i18n-skip></select>
   <button id="btnFnList" title="Function List — hàm / class / tiêu đề của tab ở sidebar, bấm để nhảy tới (bấm lần nữa để ẩn)">ƒ Danh sách hàm</button>
   <button id="btnPalette" title="Command Palette — mọi lệnh và phím tắt (Ctrl+Shift+P; Ctrl+P mở nhanh, Ctrl+R symbol, Ctrl+G dòng)">⌘ Lệnh</button>
 </div>
@@ -179,6 +186,7 @@
 </script>
 <script>
 // @include ../data-workbench/js/core/i18n-ui-language-vi-en.js
+// @include js/i18n/english-text-lookup-any-ui-language.js
 // @include ../data-workbench/js/i18n/en-shared-theme-sessions-filters.js
 // @include ../data-workbench/js/i18n/en-parser-converter-messages.js
 // @include js/i18n/en-one-editor-strings.js
@@ -197,6 +205,16 @@
 // @include js/i18n/en-one-editor-disk-sync-strings.js
 // @include js/i18n/en-one-editor-cloud-folder-strings.js
 // @include js/i18n/en-one-editor-pinned-strings.js
+// @include js/i18n/en-one-editor-syntax-check-strings.js
+// @include js/i18n/en-one-editor-git-strings.js
+// @include js/i18n/en-one-editor-open-with-strings.js
+// @include js/i18n/en-one-editor-selection-actions-strings.js
+// @include js/i18n/en-one-editor-folder-items-strings.js
+// @include js/i18n/en-one-editor-file-manager-strings.js
+// @include js/i18n/en-one-editor-commander-strings.js
+// @include js/i18n/en-one-editor-commander-navigation-strings.js
+// @include js/i18n/en-one-editor-commander-file-ops-strings.js
+// @include js/i18n/en-one-editor-commander-search-compare-strings.js
 // @include js/i18n/vi-codemirror-phrases.js
 // @include ../data-workbench/js/core/text-utils.js
 // @include ../data-workbench/js/core/dom-and-storage-helpers.js
@@ -219,6 +237,13 @@
 // @include js/core/layout-presets.js
 // @include js/core/fuzzy-match.js
 // @include js/core/hex-dump.js
+// @include js/core/explorer-name-match-pure.js
+// @include js/core/explorer-trash-quota-pure.js
+// @include js/core/explorer-group-and-column-filter-pure.js
+// @include js/core/explorer-history-hotlist-pure.js
+// @include js/core/explorer-color-tags-pure.js
+// @include js/core/new-file-templates-data.js
+// @include js/core/settings-registry.js
 // @include js/core/command-registry.js
 // @include js/editor/language-detect.js
 // @include js/core/output-operations.js
@@ -236,7 +261,9 @@
 // @include js/core/demo-samples-log-fix.js
 // @include js/core/demo-samples-editor-extras.js
 // @include js/core/demo-samples-power-tools.js
+// @include js/core/demo-samples-explorer-folder.js
 // @include js/providers/notes-indexeddb-provider.js
+// @include js/providers/explorer-trash-indexeddb-store.js
 // @include js/providers/local-file-system-access-provider.js
 // @include js/providers/cloud-drive-public-folder-provider.js
 // @include js/editor/bookmarks.js
@@ -297,6 +324,8 @@
 // @include js/devtools/number-timestamp-hover.js
 // @include js/data/data-tools-lazy-entry.js
 // @include js/data/tolerant-lint-sources.js
+// @include js/editor/code-syntax-check-engines.js
+// @include js/editor/code-syntax-lint.js
 // @include js/data/rainbow-csv-columns.js
 // @include js/log/log-fix-line-highlight.js
 // @include js/log/fix-tag-hover.js
@@ -316,8 +345,47 @@
 // @include js/notepadpp/large-file-chunk-viewer.js
 // @include js/notepadpp/editor-context-menu-token-styles.js
 // @include js/workbench/open-file-flow.js
+// @include js/core/git-handle-fs-adapter.js
+// @include js/core/git-status-matrix-model.js
+// @include js/workbench/explorer-git-status-overlay.js
+// @include js/workbench/explorer-local-root-path.js
+// @include js/workbench/explorer-tortoisegit-copy-commands.js
+// @include js/workbench/explorer-open-in-browser-tab.js
+// @include js/workbench/open-with-windows-protocol-setup.js
+// @include js/workbench/explorer-open-with-apps-menu.js
+// @include js/workbench/explorer-open-in-new-one-editor-window.js
 // @include js/workbench/explorer-tree.js
+// @include js/workbench/explorer-folder-items-format-sort.js
+// @include js/workbench/explorer-color-tags.js
+// @include js/workbench/explorer-folder-size.js
+// @include js/workbench/explorer-thumbnails.js
+// @include js/workbench/explorer-folder-items-view-modes.js
+// @include js/workbench/explorer-folder-items-selection.js
+// @include js/workbench/explorer-folder-items-quick-filter.js
+// @include js/workbench/explorer-folder-items-breadcrumb.js
+// @include js/workbench/explorer-folder-items-preview-pane.js
+// @include js/workbench/explorer-folder-path-resolve.js
+// @include js/workbench/explorer-folder-items-rows.js
+// @include js/workbench/explorer-folder-items-details-pane.js
+// @include js/workbench/explorer-folder-items-flat-view.js
+// @include js/workbench/explorer-folder-items-grouping.js
+// @include js/workbench/explorer-folder-items-miller-columns.js
+// @include js/workbench/explorer-history-hotlist.js
+// @include js/workbench/explorer-dual-panel-commander.js
+// @include js/workbench/explorer-folder-items-keys.js
+// @include js/workbench/explorer-folder-items-view.js
+// @include js/workbench/explorer-file-operation-undo.js
 // @include js/workbench/explorer-disk-actions.js
+// @include js/core/zip-archive-deflate-raw.js
+// @include js/workbench/explorer-cut-copy-paste-zip.js
+// @include js/workbench/explorer-archive-compress-extract.js
+// @include js/workbench/explorer-new-file-from-template.js
+// @include js/workbench/explorer-drag-drop-move-copy.js
+// @include js/workbench/explorer-context-menu.js
+// @include js/workbench/explorer-trash-tab-view.js
+// @include js/workbench/explorer-results-tab-view.js
+// @include js/workbench/explorer-search-compare-entry.js
+// @include js/workbench/settings-tab-view.js
 // @include js/workbench/disk-change-sync.js
 // @include js/workbench/recent-files.js
 // @include js/workbench/pinned-items.js
@@ -343,6 +411,8 @@
 // @include js/editor/command-list-editor-extras.js
 // @include js/extras/command-list-power-tools.js
 // @include js/core/share-link-and-demo-loader.js
+// @include js/workbench/open-tab-in-other-tool.js
+// @include js/workbench/editor-selection-actions.js
 // @include ../data-workbench/js/core/saved-sessions-local-storage.js
 // @include js/editor/keymap-profiles.js
 // @include js/editor/snippets-completion.js
@@ -352,6 +422,7 @@
 // @include js/core/encrypted-share-codec.js
 // @include js/workbench/locked-notes.js
 // @include js/devtools/local-history-snapshots.js
+// @include js/workbench/settings-entries-built-in.js
 // @include js/core/app-boot.js
 </script>
 </body>

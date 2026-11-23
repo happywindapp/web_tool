@@ -14,6 +14,9 @@ const HotExit = (() => {
     id: d.id, kind: d.kind, name: d.name, lang: d.lang, text: secret(d) || secret(d.link && Docs.get(d.link.src)) ? "" : d.big ? bigText(d) : handleOnly(d) ? "" : Docs.text(d), stale: d.big ? !!d.handle : handleOnly(d), sealed: sealed || d.sealed || undefined,
     bigStart: d.big && d.handle ? d.big.start : null, handle: d.handle || null, dirty: d.dirty, edited: d.edited,
     readOnly: d.readOnly, eol: d.eol, eolMixed: d.eolMixed, eolList: d.eolMixed ? (d.state ? MixedEol.codesOf(d.state) : d.eolList) : null, bom: d.bom, enc: d.enc, link: d.link, updated: d.updated, pinned: d.pinned, hex: d.hex, disk: d.disk, remote: d.remote,
+    folder: d.kind === "folder" ? FolderItems.saved(d) : undefined,
+    results: d.kind === "results" ? ResultsTab.saved(d) : undefined,
+    settings: d.kind === "settings" ? SettingsTab.saved(d) : undefined,
   });
 
   async function flush() {
@@ -26,7 +29,8 @@ const HotExit = (() => {
     try {
       const sealed = new Map();
       for (const d of docs) if (d.crypt) sealed.set(d, await Locks.sealDoc(d));
-      await NotesDb.save(docs.map(d => serialize(d, sealed.get(d))), gone, { v: 1, ...Views.snapshot(), wrap: CmSetup.settings.wrap });
+      // A window opened by "Open in a new window" keeps its tabs but leaves the main window's layout alone.
+      await NotesDb.save(docs.map(d => serialize(d, sealed.get(d))), gone, NewWindow.active ? null : { v: 1, ...Views.snapshot(), wrap: CmSetup.settings.wrap });
       failed = false;
       StatusBar.storage(true);
     } catch (e) {
@@ -42,6 +46,10 @@ const HotExit = (() => {
     const { docs, session } = await NotesDb.loadAll();
     for (const r of docs) if (r && typeof r.id === "string" && typeof r.text === "string" && r.kind !== "clone") {
       const d = Docs.create({ ...r, pending: false });
+      if (r.kind === "folder") FolderItems.adopt(d, r.folder);
+      if (r.kind === "trash") TrashTab.adopt(d);
+      if (r.kind === "results") ResultsTab.adopt(d, r.results);
+      if (r.kind === "settings") SettingsTab.adopt(d, r.settings);
       const s = r.sealed;
       if (r.kind === "note" && s && typeof s.salt === "string" && typeof s.iv === "string" && typeof s.ct === "string") Object.assign(d, { sealed: { salt: s.salt, iv: s.iv, ct: s.ct, it: Number.isInteger(s.it) ? s.it : 310000 }, readOnly: true, text: T("🔒 Ghi chú đã khoá — Command Palette → “Ghi chú: mở khoá…” để nhập mật khẩu.") });
     }

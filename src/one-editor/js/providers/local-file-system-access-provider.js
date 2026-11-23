@@ -55,9 +55,11 @@ const LocalFs = (() => {
     return perm === "granted";
   }
 
+  // → the name already there ("" if none), ignoring case: Windows folders treat "README.md" and "readme.md" as one file.
   async function exists(dir, name) {
-    for await (const k of dir.keys()) if (k === name) return true;
-    return false;
+    const want = name.toLowerCase();
+    for await (const k of dir.keys()) if (k.toLowerCase() === want) return k;
+    return "";
   }
 
   // dir node + name → new file (empty) or folder; refuses to overwrite.
@@ -76,7 +78,8 @@ const LocalFs = (() => {
   async function rename(node, name) {
     if (typeof node.handle.move !== "function") throw new Error(T("Trình duyệt này chưa hỗ trợ đổi tên trên đĩa."));
     await writable(node.parent.handle);
-    if (await exists(node.parent.handle, name)) throw new Error(T("“{name}” đã có trong folder.", { name }));
+    const there = await exists(node.parent.handle, name);
+    if (there && there !== node.name) throw new Error(T("“{name}” đã có trong folder.", { name }));
     await node.handle.move(name);
   }
 
@@ -137,5 +140,5 @@ const LocalFs = (() => {
     catch (e) { if (aborted(e)) return null; throw e; }
   }
 
-  return { pickFiles, pickDirectory, fromHandle, fromEntry, readText, encode, writeHandle, saveAs, readable, create, remove, rename, canPick, canDir, canSave, MAX_ENTRIES };
+  return { pickFiles, pickDirectory, fromHandle, fromEntry, fromFileList, readText, encode, writeHandle, saveAs, readable, writable, exists, create, remove, rename, canPick, canDir, canSave, MAX_ENTRIES };
 })();

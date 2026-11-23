@@ -1,0 +1,40 @@
+  /* ⚙ Settings tab (.fi.st): groups on the left, entries on the right; a group strip on top when the tab is narrow */
+  .fi.st .fi-bar > .st-q { flex:0 1 24em; }
+  .st-body { flex:1 1 0; min-height:0; display:grid; grid-template-columns:minmax(9em, 14em) minmax(0, 1fr); }
+  .st-nav { display:flex; flex-direction:column; gap:2px; padding:10px 6px; overflow:auto; border-right:1px solid var(--line); background:var(--panel); }
+  .st-tab { padding:6px 10px; border:0; border-radius:4px; background:transparent; color:var(--ink); font:inherit; text-align:left; cursor:pointer; }
+  .st-tab[aria-current] { background:color-mix(in srgb, var(--acc) 18%, transparent); font-weight:600; }
+  .st-main { min-height:0; overflow:auto; padding:4px 18px 24px; }
+  .st-head { display:flex; align-items:center; gap:10px; margin:14px 0 4px; }
+  .st-head > h3 { flex:1 1 auto; margin:0; font-size:15px; }
+  .st-item { display:flex; align-items:center; gap:14px; padding:9px 0; border-bottom:1px solid var(--line); }
+  .st-text { flex:1 1 auto; min-width:0; }
+  .st-name { display:flex; align-items:center; gap:6px; }
+  .st-dot { color:var(--acc); font-size:10px; }
+  .st-item:not(.mod) .st-dot, .st-item:not(.mod) .st-reset { visibility:hidden; }
+  .st-hint { margin-top:2px; color:var(--muted); font-size:12px; }
+  .st-ctl { flex:none; display:flex; align-items:center; gap:6px; }
+  .st-ctl select { max-width:15em; }
+  .st-num { width:5em; }
+  .st-reset { padding:2px 8px; }
+  .st-info { display:flex; flex-wrap:wrap; align-items:center; justify-content:flex-end; gap:6px; max-width:24em; }
+  .st-val { color:var(--muted); font-size:12px; }
+  .st-act { white-space:nowrap; }
+  .st-switch { position:relative; display:inline-block; flex:none; width:38px; height:22px; }
+  .st-switch > input { position:absolute; inset:0; z-index:1; width:100%; height:100%; margin:0; opacity:0; cursor:pointer; }
+  .st-switch > span { position:absolute; inset:0; border-radius:11px; background:var(--line); transition:background .15s; }
+  .st-switch > span::after { content:""; position:absolute; left:3px; top:3px; width:16px; height:16px; border-radius:50%; background:#fff; box-shadow:0 1px 2px rgb(0 0 0 / .3); transition:transform .15s; }
+  .st-switch > input:checked + span { background:var(--acc); }
+  .st-switch > input:checked + span::after { transform:translateX(16px); }
+  .st-switch > input:focus-visible + span { outline:2px solid var(--acc); outline-offset:2px; }
+  @container (max-width:640px) {
+    .st-body { grid-template-columns:minmax(0, 1fr); grid-template-rows:auto minmax(0, 1fr); }
+    .st-nav { flex-direction:row; padding:6px; overflow-x:auto; border-right:0; border-bottom:1px solid var(--line); }
+    .st-tab { flex:none; white-space:nowrap; }
+    .st-main { padding:2px 12px 20px; }
+    .st-item { gap:10px; }
+    .st-info { max-width:55%; }
+  }
+  @container (max-width:520px) { .st-item { flex-wrap:wrap; } .st-ctl { margin-left:auto; } }
+  @media (pointer:coarse) { .st-tab { min-height:36px; } .st-ctl > button, .st-act { min-height:34px; } }
+  @media (hover:hover) { .st-tab:not([aria-current]):hover { background:var(--hover); } }

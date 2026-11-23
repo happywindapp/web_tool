@@ -1,8 +1,8 @@
 // CodeMirror 6 editor config shared by every tab: compartments for language / wrap / theme / UI phrases / read-only so settings change without losing undo history.
 const CmSetup = (() => {
-  let C = null, themes = null, onUpdate = null, minimap = null, guides = null;
+  let C = null, themes = null, onUpdate = null, minimap = null, guides = null, words = null;
   const comp = {}, extra = { vim: [], keys: [], aids: [] };
-  const settings = { wrap: true, minimap: false, guides: false, hidden: false, numHover: true, lint: true };
+  const settings = { wrap: true, minimap: false, guides: false, hidden: false, numHover: true, lint: true, words: true };
 
   const isDark = () => {
     const t = document.documentElement.dataset.theme;
@@ -30,13 +30,16 @@ const CmSetup = (() => {
 
   function init() {
     C = globalThis.CM;
-    for (const k of ["lang", "wrap", "theme", "phrases", "ro", "minimap", "guides", "compare", "hidden", "numHover", "lint", "vim", "keys", "aids"]) comp[k] = new C.state.Compartment();
+    for (const k of ["lang", "wrap", "theme", "phrases", "ro", "minimap", "guides", "compare", "hidden", "numHover", "lint", "words", "vim", "keys", "aids"]) comp[k] = new C.state.Compartment();
     themes = { light: makeTheme(false), dark: makeTheme(true) };
     CompareDeco.init();
     MixedEol.init();
   }
 
   const phrases = () => I18n.lang === "vi" ? C.state.EditorState.phrases.of(CM_PHRASES_VI) : [];
+  // Notepad++ word completion (words already in the file); no type, so a language's own entry with the same label wins the dedupe.
+  const wordSource = ctx => { const r = C.autocomplete.completeAnyWord(ctx); return r && { ...r, options: r.options.map(o => ({ label: o.label })) }; };
+  const wordCompletion = () => words ??= C.state.EditorState.languageData.of(() => [{ autocomplete: wordSource }]);
   const settingsEffects = () => [
     comp.wrap.reconfigure(settings.wrap ? C.view.EditorView.lineWrapping : []),
     comp.theme.reconfigure(isDark() ? themes.dark : themes.light),
@@ -46,6 +49,7 @@ const CmSetup = (() => {
     comp.hidden.reconfigure(settings.hidden ? HiddenChars.extension() : []),
     comp.numHover.reconfigure(settings.numHover ? NumHover.extension() : []),
     comp.lint.reconfigure(settings.lint ? DataLint.extension() : []),
+    comp.words.reconfigure(settings.words ? wordCompletion() : []),
     ...["vim", "keys", "aids"].map(k => comp[k].reconfigure(extra[k])),
   ];
 
@@ -72,7 +76,7 @@ const CmSetup = (() => {
       V.highlightActiveLine(), F.highlightSelectionMatches(), F.search({ top: true }),
       V.keymap.of([...A.closeBracketsKeymap, ...K.defaultKeymap, ...F.searchKeymap, ...K.historyKeymap, ...L.foldKeymap, ...A.completionKeymap, K.indentWithTab]),
       Bookmarks.extension(), TokenStyles.extension(), RainbowCsv.extension(), LogFixMarks.extension(), FixHover.extension(), CompareDeco.field, MixedEol.field, comp.compare.of([]), comp.lang.of([]), comp.ro.of(readOnly ? [S.EditorState.readOnly.of(true)] : []),
-      ...[comp.wrap, comp.theme, comp.phrases, comp.minimap, comp.guides, comp.hidden, comp.numHover, comp.lint].map(c => c.of([])),
+      ...[comp.wrap, comp.theme, comp.phrases, comp.minimap, comp.guides, comp.hidden, comp.numHover, comp.lint, comp.words].map(c => c.of([])),
       V.EditorView.updateListener.of(u => { if (onUpdate) onUpdate(u); SearchInSelection.decorate(u.view); if (u.docChanged && u.transactions.some(tr => tr.isUserEvent("input.paste"))) PowerTools.pasted(u); }),
     ];
   }
@@ -86,7 +90,7 @@ const CmSetup = (() => {
   const setExtra = (k, ext) => { extra[k] = ext; Views.applySettings(); };
 
   return {
-    init, makeState, setExtra, settingsEffects, langEffect, compareEffect, enableMinimap, enableGuides, isDark, settings,
+    init, makeState, setExtra, settingsEffects, langEffect, compareEffect, enableMinimap, enableGuides, isDark, settings, theme: () => (isDark() ? themes.dark : themes.light),
     set onUpdate(fn) { onUpdate = fn; },
   };
 })();

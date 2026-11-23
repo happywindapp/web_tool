@@ -33,6 +33,14 @@
   .ex-acts { display:inline-flex; visibility:hidden; }
   .ex-row:hover .ex-acts, .ex-row:focus-within .ex-acts, summary:hover .ex-acts, summary:focus-within .ex-acts { visibility:visible; }
   @media (hover:none) { .ex-acts { visibility:visible; } }
+  .git-ico { position:relative; display:inline-block; }
+  .git-mark { position:absolute; left:-5px; bottom:-3px; min-width:11px; height:11px; padding:0 1px; border-radius:6px; font:700 9px/11px system-ui, sans-serif;
+              font-style:normal; text-align:center; color:#fff; box-shadow:0 0 0 1px var(--bg, #fff); pointer-events:none; }
+  .git-c { background:#15803d; } .git-m, .git-d { background:#dc2626; } .git-a { background:#2563eb; } .git-u { background:#64748b; }
+  .git-ignored { opacity:.55; }
+  .ex-prop { display:flex; gap:12px; max-width:min(420px, calc(100vw - 16px)); padding:3px 14px; font-size:12px; }
+  .ex-prop > span { flex:none; width:7.5em; color:var(--muted); }
+  .ex-prop > b { min-width:0; font-weight:500; overflow-wrap:anywhere; }
 
   dialog.qp { width:min(640px, calc(100vw - 16px)); max-height:70dvh; margin:10dvh auto auto; padding:0; border:1px solid var(--line); border-radius:10px;
               background:var(--panel); color:var(--ink); box-shadow:0 16px 48px rgb(0 0 0 / .3); }

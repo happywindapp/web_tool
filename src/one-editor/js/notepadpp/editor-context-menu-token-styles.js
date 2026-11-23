@@ -67,7 +67,7 @@ const EditorMenu = (() => {
     const pos = x || y ? v.posAtCoords({ x, y }) : null;
     if (pos !== null && !st.selection.ranges.some(r => pos >= r.from && pos <= r.to)) v.dispatch({ selection: { anchor: pos } });
     if (!x && !y) { const c = v.coordsAtPos(st.selection.main.head); if (c) { x = c.left; y = c.bottom; } }
-    TabMenu.show([...editNodes(v), ...styleNodes()], x, y);
+    TabMenu.show([...editNodes(v), ...SelectionActions.nodes(v, x, y), ...styleNodes()], x, y);
   }
 
   function openFromButton(btn) {

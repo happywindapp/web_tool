@@ -5,6 +5,7 @@ function registerOneEditorCommands() {
   const withDoc = fn => () => { const d = doc(); if (d) fn(d); };
 
   C("palette", "Command Palette — mọi lệnh", ["Ctrl+Shift+p", "F1"], () => QuickPick.open(">"));
+  C("settings", "Cài đặt — mọi cài đặt của One Editor (tab ⚙)", "Ctrl+,", () => SettingsTab.open());
   C("quickOpen", "Mở nhanh tab / ghi chú / file", "Ctrl+p", () => QuickPick.open(""));
   C("gotoLine", "Tới dòng…", "Ctrl+g", () => QuickPick.open(":"), hasDoc);
   C("gotoSymbol", "Tới symbol (hàm, class, tiêu đề)…", ["Ctrl+r", "Ctrl+Shift+o"], () => QuickPick.open("@"), hasDoc);
@@ -12,6 +13,7 @@ function registerOneEditorCommands() {
   C("findInSelSelect", "Tìm trong vùng chọn: chọn hết kết quả", "Alt+Shift+Enter", () => SearchInSelection.selectAll(view()), hasDoc);
   C("findInSelReplace", "Tìm trong vùng chọn: thay hết", "Ctrl+Alt+Enter", () => SearchInSelection.replaceAll(view()), hasDoc);
   C("guides", "Bật / tắt đường thụt lề (indent guide)", null, () => A.setGuides(!CmSetup.settings.guides));
+  C("words", "Bật / tắt gợi ý từ có sẵn trong file khi gõ", null, () => A.setWords(!CmSetup.settings.words));
 
   C("newNote", "Ghi chú mới", "Alt+n", () => A.newNote());
   C("openFiles", "Mở file…", "Ctrl+o", A.openFiles);
@@ -21,6 +23,7 @@ function registerOneEditorCommands() {
   C("save", "Lưu", "Ctrl+s", () => A.save(false), hasDoc);
   C("saveAs", "Lưu thành…", "Ctrl+Shift+s", () => A.save(true), hasDoc);
   C("diskRefresh", "🔄 Làm mới từ đĩa: folder Explorer + các tab file", null, () => DiskSync.checkAll());
+  C("gitIcons", "Explorer: bật / tắt biểu tượng trạng thái Git (kiểu TortoiseGit)", null, () => GitStatus.toggle());
   C("diskReload", "Đọc lại từ đĩa / so sánh với bản trên đĩa…", null, withDoc(d => DiskSync.one(d)), () => hasDoc() && !!Docs.root(doc()).handle);
   C("closeTab", "Đóng tab", "Alt+w", A.closeTab, hasDoc);
   C("closeOthers", "Đóng các tab khác trong view (trừ tab ghim)", null, withDoc(d => V.closeMany(V.focused, d.id, false)), hasDoc);
@@ -44,6 +47,15 @@ function registerOneEditorCommands() {
   C("sideExplorer", "Hiện Explorer", "Ctrl+Shift+e", () => SideBar.show("explorer"));
   C("sideSearch", "Tìm trong các file: tab đang mở, ghi chú, folder Explorer", "Ctrl+Shift+f", () => SideBar.show("search"));
   C("sideReplace", "Thay trong các file: tab đang mở, ghi chú, folder Explorer", "Ctrl+Shift+h", () => SideBar.show("search", true));
+  C("trashOpen", "Explorer: mở Thùng rác (file đã xoá, khôi phục được)", null, () => TrashTab.open());
+  C("explorerUndo", "Explorer: hoàn tác thao tác file (Ctrl+Z khi đang ở Explorer / tab folder)", null, () => ExplorerUndo.undo());
+  C("folderPreview", "Tab folder: bật / tắt khung xem trước (Alt+P trong tab folder)", null, () => FolderView.togglePreview());
+  C("folderChecks", "Tab folder: bật / tắt ô chọn mục", null, () => FolderView.toggleChecks());
+  C("dualPanel", "Explorer: 2 panel kiểu Commander (F5 chép · F6 chuyển sang panel kia)", null, () => DualPanel.toggle());
+  C("folderFlat", "Tab folder: xem phẳng — mọi file trong folder con (Ctrl+Alt+B trong tab folder)", null, () => FolderFlat.toggleShown());
+  C("fileSearch", "Explorer: tìm file nâng cao — tên, cỡ, ngày sửa, có chứa chữ (Alt+F7 trong tab folder)", null, () => FileTools.search());
+  C("fileDups", "Explorer: tìm file trùng trong folder đang xem", null, () => FileTools.dups());
+  C("folderCompare", "Explorer: so sánh 2 panel (folder View 1 ⇄ View 2) + đồng bộ 1 chiều", null, () => FileTools.panels());
   C("exportFile", "Xuất: tải xuống (giữ đuôi gốc)", null, () => ExportActions.download(false), hasDoc);
   C("exportTxt", "Xuất: tải xuống dạng .txt", null, () => ExportActions.download(true), hasDoc);
   C("exportPrint", "Xuất: in (chỉ nội dung tab, preview Markdown in phần đã vẽ)", null, ExportActions.print, hasDoc);
@@ -67,4 +79,6 @@ function registerOneEditorCommands() {
   registerPowerToolCommands(C, doc, hasDoc);
   C("language", "Đổi ngôn ngữ của tab", null, () => $("langSel").focus(), hasDoc);
   C("share", "Chia sẻ link các tab đang mở", null, () => ShareLoader.share());
+  SelectionActions.register(C);
+  for (const t of OpenInTool.TOOLS) C("openIn-" + t.id, () => T("Mở tab đang mở bằng {tool}", { tool: t.name }), null, () => OpenInTool.open(t.id), hasDoc);
 }

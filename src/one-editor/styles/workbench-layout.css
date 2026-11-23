@@ -10,6 +10,8 @@
   #work.lay-3c { grid-template:"ex g0 g1 g2" minmax(0, 1fr) / var(--exw) minmax(0, var(--c1, 1fr)) minmax(0, var(--c2, 1fr)) minmax(0, var(--c3, 1fr)); }
   #work.lay-2r { grid-template:"ex g0" minmax(0, var(--r1, 1fr)) "ex g1" minmax(0, var(--r2, 1fr)) / var(--exw) minmax(0, 1fr); }
   #work.lay-4g { grid-template:"ex g0 g1" minmax(0, var(--r1, 1fr)) "ex g2 g3" minmax(0, var(--r2, 1fr)) / var(--exw) minmax(0, var(--c1, 1fr)) minmax(0, var(--c2, 1fr)); }
+  #work.lay-12 { grid-template:"ex g0 sp g1" minmax(0, var(--r1, 1fr)) "ex g0 sp g2" minmax(0, var(--r2, 1fr)) / var(--exw) minmax(0, var(--v1, 1fr)) 4px minmax(0, var(--v2, 1fr)); }
+  #work.lay-21 { grid-template:"ex g0 sp g2" minmax(0, var(--r1, 1fr)) "ex g1 sp g2" minmax(0, var(--r2, 1fr)) / var(--exw) minmax(0, var(--v1, 1fr)) 4px minmax(0, var(--v2, 1fr)); }
   #work.gap-x { cursor:col-resize; } #work.gap-y { cursor:row-resize; }
   .host .cm-editor .cm-bookmark { background:color-mix(in srgb, var(--warn) 14%, transparent); box-shadow:inset 3px 0 0 var(--warn); }
   body.zen { grid-template-rows:minmax(0, 1fr); }
@@ -94,6 +96,7 @@
   }
   .toolbar button[aria-pressed="true"] { background:color-mix(in srgb, var(--acc) 22%, var(--panel)); border-color:var(--acc); }
   .toolbar .icon-btn { min-width:2.2em; padding-inline:6px; font-weight:600; }
+  #opSel { max-width:10em; text-overflow:ellipsis; }
 /* Compare 2 views (phase 2a) */
 .cm-editor .cmp-del { background: color-mix(in srgb, #e5534b 13%, transparent); }
 .cm-editor .cmp-add { background: color-mix(in srgb, #2da44e 13%, transparent); }

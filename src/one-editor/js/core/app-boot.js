@@ -2,7 +2,8 @@
 const Prefs = (() => {
   const P = "web_tool.one-editor.";
   const get = (k, d) => { try { const v = localStorage.getItem(P + k); return v == null ? d : JSON.parse(v); } catch { return d; } };
-  const set = (k, v) => { try { localStorage.setItem(P + k, JSON.stringify(v)); } catch { /* storage blocked → not remembered */ } };
+  // Every write tells the ⚙ Settings tab, so a switch flipped elsewhere shows there at once.
+  const set = (k, v) => { try { localStorage.setItem(P + k, JSON.stringify(v)); } catch { /* storage blocked → not remembered */ } Settings.changed(); };
   return { get, set };
 })();
 
@@ -23,6 +24,7 @@ const Toolbar = (() => {
   function fill() {
     $("demo").replaceChildren(opt("", T("Thử mẫu…")), ...Object.entries(DEMOS).map(([k, d]) => opt(k, T(d.label))));
     $("layoutSel").replaceChildren(...Layouts.LIST.map(l => opt(l.id, T(l.label))));
+    $("splitSel").replaceChildren(opt("", T("◫ Tỷ lệ…")), ...["50:50", "25:75", "75:25"].map(r => opt(r, r)));
     const op = $("opSel").value;
     const groups = {};
     for (const id of OutputOps.ids) {
@@ -47,7 +49,9 @@ function wireOneEditor() {
   on("btnSwap", "click", () => Views.swap());
   on("btnExplorer", "click", Actions.toggleExplorer);
   on("btnShare", "click", () => ShareLoader.share());
+  on("btnOpenIn", "click", e => OpenInTool.menu(e.currentTarget));
   on("btnClear", "click", Actions.clearData);
+  on("btnSettings", "click", () => SettingsTab.open());
   on("chkWrap", "change", e => Actions.setWrap(e.target.checked));
   on("langSel", "change", e => Actions.setLang(e.target.value));
   on("demo", "change", e => { const k = e.target.value; e.target.value = ""; ShareLoader.loadDemo(k); });
@@ -55,6 +59,7 @@ function wireOneEditor() {
   on("stLang", "click", () => $("langSel").focus());
   on("btnPalette", "click", () => QuickPick.open(">"));
   on("layoutSel", "change", e => Actions.setLayout(e.target.value));
+  on("splitSel", "change", e => { const v = e.target.value; e.target.value = ""; if (v) Actions.setSplit(v); });
   on("btnZenExit", "click", Actions.toggleZen);
   on("chkMinimap", "change", e => Actions.setMinimap(e.target.checked));
   on("btnFind", "click", () => Commands.run("find"));
@@ -70,6 +75,7 @@ function wireOneEditor() {
   ToolbarButtons.init();
   CmSetup.settings.numHover = Prefs.get("numhover", true) !== false;
   CmSetup.settings.lint = Prefs.get("lint", true) !== false;
+  CmSetup.settings.words = Prefs.get("words", true) !== false;
   on("stEol", "click", EncodingActions.pick);
   on("stKeys", "click", () => QuickPick.open(">" + T("Bộ phím")));
   on("btnStyle", "click", e => EditorMenu.openFromButton(e.currentTarget));
@@ -121,18 +127,20 @@ function wireOneEditor() {
   wireOneEditor();
   await NotesDb.open();
   HotExit.init();
-  await HotExit.restore();
+  if (!NewWindow.active) await HotExit.restore();
   $("chkWrap").checked = CmSetup.settings.wrap;
   Views.applySettings();
   if (Prefs.get("minimap", false) === true) Actions.setMinimap(true);
   if (Prefs.get("guides", true) !== false) Actions.setGuides(true);
   await RecentFiles.load();
   await Pinned.init();
-  Explorer.restoreCloud();
+  Tags.load();
+  if (!NewWindow.active) Explorer.restore();
   // Extras (breadcrumbs, bracket colours, snippets, key profile, sessions) load after the editor is usable.
   EditorExtras.use(async () => { KeyProfiles.init(); Aids.apply(); await Snippets.load(); await Sessions.init(); });
   StatusBar.storage(NotesDb.ok, NotesDb.error);
   StatusBar.msg(T("Sẵn sàng. Kéo-thả file / folder vào View 1 hoặc View 2, hoặc bấm + để tạo ghi chú."));
+  if (NewWindow.active) await NewWindow.take();
   await ShareLoader.fromUrl();
   addEventListener("hashchange", () => ShareLoader.fromUrl());
   Explorer.render();

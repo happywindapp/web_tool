@@ -24,6 +24,8 @@ const CloneSync = (() => {
   function cloneTo(doc, gi) {
     const r = Docs.root(doc);
     if (r.stale) { StatusBar.msg(T("Đọc lại file từ đĩa trước khi mở thêm ở view khác."), "warn"); return; }
+    if (r.kind === "folder") { FolderItems.duplicate(r, gi); return; }
+    if (["trash", "results", "settings"].includes(r.kind)) return;
     if (PreviewPane.isPreview(r)) { StatusBar.msg(T("Tab preview không mở thêm ở view khác được — mở preview từ tab nguồn."), "warn"); return; }
     const there = Views.tabsOf(gi).map(Docs.get).find(d => d && Docs.root(d) === r);
     if (there) { Views.activate(gi, there.id); return; }

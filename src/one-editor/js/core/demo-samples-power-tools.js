@@ -5,6 +5,7 @@
     "batch-replace": "Thay hàng loạt (regex / chuỗi)", "unicode-invisible": "Ký tự vô hình (zero-width, NBSP, SOH…)", "markdown-table": "Bảng Markdown: TSV → bảng, căn cột, mục lục",
     "recipe-base64-gzip-json": "Recipe: Base64 → gunzip → JSON", "regex": "Regex tester: nhóm bắt, thay thế", "run-html": "Chạy HTML / JS + console",
     "run-js": "Chạy JS (dừng vòng lặp vô hạn)", "code-image": "Code → ảnh (PNG / SVG)",
+    "syntax-go": "Kiểm cú pháp Go (thiếu dấu ngoặc)", "syntax-tsql": "Kiểm cú pháp T-SQL (TOP, [tên], NOLOCK)",
   };
   for (const [k, label] of Object.entries(LIST)) DEMOS[k] = { label, lazy: true };
 })();
