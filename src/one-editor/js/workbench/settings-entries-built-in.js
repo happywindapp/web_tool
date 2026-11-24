@@ -39,6 +39,10 @@
   S({ id: "minimap", group: "editor", label: "Minimap", hint: "Bản thu nhỏ của file ở mép phải editor", get: () => cm.minimap, set: v => Actions.setMinimap(v), def: false });
   S({ id: "guides", group: "editor", label: "Đường thụt lề (indent guide)", get: () => cm.guides, set: v => Actions.setGuides(v), def: true });
   S({ id: "hidden", group: "editor", label: "Hiện ký tự ẩn", hint: "Dấu cách, Tab, xuống dòng (nút ¶)", get: () => cm.hidden, set: flip(() => cm.hidden, EncodingActions.toggleHidden), def: false });
+  S({ id: "clipKeep", group: "data", label: "Nhớ lịch sử clipboard qua F5", hint: "Lưu trong IndexedDB của trình duyệt này — có thể chứa mật khẩu / token bạn đã chép; tắt là xoá ngay bản đã lưu (mục 📌 luôn được giữ)",
+    get: () => ClipHistory.keep(), set: v => ClipHistory.setKeep(v), def: false });
+  S({ id: "todoTags", group: "editor", type: "text", label: "Từ khoá TODO", hint: "Panel ☑ TODO: các tag cách nhau dấu phẩy (in hoa khi so)", get: () => TodoScan.tags(Prefs.get("todoTags", "")).join(", "),
+    set: v => { Prefs.set("todoTags", TodoScan.tags(v).join(", ")); TodoPanel.rescan(); }, def: TodoScan.DEFAULT.join(", ") });
   S({ id: "lint", group: "editor", label: "Kiểm lỗi khi gõ", hint: "Dữ liệu (JSON, XML, YAML…) và cú pháp code", get: () => cm.lint, set: v => { cm.lint = v; Prefs.set("lint", v); Views.applySettings(); }, def: true });
   S({ id: "numHover", group: "editor", label: "Tooltip quy đổi số / timestamp", hint: "Rê chuột lên số: hex, nhị phân, ngày giờ", get: () => cm.numHover, set: v => DevActions.setHover(v), def: true });
   S({ id: "words", group: "editor", label: "Gợi ý từ có sẵn trong file khi gõ", get: () => cm.words, set: v => Actions.setWords(v), def: true });

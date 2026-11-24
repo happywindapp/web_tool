@@ -1,6 +1,6 @@
 // Right-click / Menu key on a tab (or the empty tab strip = its active tab): the tab commands from the registry — rename, pin, move, clone, close.
 const TabMenu = (() => {
-  const IDS = ["renameTab", "pinTab", "pinItem", "moveTab", "cloneTab", "diskReload", "closeTab", "closeOthers", "closeRight"];
+  const IDS = ["renameTab", "pinTab", "pinItem", "addToGroup", "moveTab", "cloneTab", "diskReload", "closeTab", "closeOthers", "closeRight"];
   let menu = null, back = null;
   // Focus goes back to where the menu was opened from (a folder tab row has no editor to fall back to).
   const restore = () => { const ok = back?.isConnected && back !== document.body && back.checkVisibility(); if (ok) back.focus({ preventScroll: true }); return ok; };

@@ -21,7 +21,14 @@
   .tab-menu > button:focus-visible { outline:none; background:color-mix(in srgb, var(--acc) 16%, transparent); }
 
   .ex-sec h3 { display:flex; align-items:center; gap:2px; margin:8px 6px 2px 10px; font-size:11px; letter-spacing:.04em; text-transform:uppercase; color:var(--muted); }
-  .ex-sec h3 > span { flex:1 1 auto; }
+  .ex-fold { flex:1 1 auto; min-width:0; padding:2px 0; border:0; border-radius:0; background:transparent; color:inherit; font:inherit; letter-spacing:inherit;
+             text-transform:inherit; text-align:left; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .ex-fold::before { content:"▾"; display:inline-block; width:1.1em; transition:transform .12s; }
+  .ex-sec.folded .ex-fold::before { transform:rotate(-90deg); }
+  .ex-sec.folded > :not(h3) { display:none; }
+  .ex-fold:focus-visible { outline:2px solid var(--acc); outline-offset:-2px; }
+  .ex-bar-btn { flex:none; padding:2px 7px; }
+  #explorerPane .bar #exFilter { flex-basis:5em; }
   .ex-row { display:flex; align-items:center; min-width:0; }
   .ex-item { flex:1 1 auto; min-width:0; padding:3px 8px 3px 14px; border:0; border-radius:0; background:transparent; text-align:left;
              white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
@@ -57,6 +64,7 @@
 
   @media (hover:hover) {
     .tab:hover, .ex-item:hover, details.ex-dir > summary:hover { background:var(--hover); color:var(--ink); }
+    .ex-fold:hover { color:var(--ink); }
     .tab .x:hover, .tab .pin:hover, .ex-act:hover, .gbar > button:hover { background:var(--line); color:var(--ink); }
     .tab-menu > button:hover { background:var(--hover); }
   }
@@ -67,4 +75,6 @@
     .gbar > button { min-height:38px; padding:2px 12px; }
     .ex-item, details.ex-dir > summary { padding-top:7px; padding-bottom:7px; }
     .ex-act { min-width:38px; min-height:36px; }
+    .ex-fold, .ex-bar-btn { min-height:36px; }
+    .ex-bar-btn { min-width:38px; }
   }

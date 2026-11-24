@@ -13,7 +13,7 @@ const Toolbar = (() => {
   function sync() {
     const doc = Views.activeDoc() && Docs.root(Views.activeDoc()), sel = $("langSel");
     if (sel.options.length !== LangDetect.ids.length + 1) sel.replaceChildren(opt("", ""), ...LangDetect.ids.map(id => opt(id, id)));
-    sel.options[0].textContent = T("Tự nhận ({lang})", { lang: doc ? doc.detected.id : "—" });
+    sel.options[0].textContent = T("Auto ({lang})",{ lang: doc ? doc.detected.id : "—" });
     sel.value = doc ? doc.lang : "";
     sel.disabled = !doc;
     if (Views.activeDoc()) $("opSel").value = RunOp.of(Views.activeDoc());
@@ -22,7 +22,7 @@ const Toolbar = (() => {
   }
 
   function fill() {
-    $("demo").replaceChildren(opt("", T("Thử mẫu…")), ...Object.entries(DEMOS).map(([k, d]) => opt(k, T(d.label))));
+    $("demo").replaceChildren(opt("", "Samples"), ...Object.entries(DEMOS).map(([k, d]) => opt(k, T(d.label))));
     $("layoutSel").replaceChildren(...Layouts.LIST.map(l => opt(l.id, T(l.label))));
     $("splitSel").replaceChildren(opt("", T("◫ Tỷ lệ…")), ...["50:50", "25:75", "75:25"].map(r => opt(r, r)));
     const op = $("opSel").value;
@@ -45,18 +45,18 @@ function wireOneEditor() {
   on("btnSave", "click", () => Actions.save(false));
   on("btnSaveAs", "click", () => Actions.save(true));
   on("btnRun", "click", Actions.run);
+  on("btnRunTop", "click", Actions.run);
   on("opSel", "change", e => RunOp.pick(Views.activeDoc(), e.target.value));
   on("btnSwap", "click", () => Views.swap());
-  on("btnExplorer", "click", Actions.toggleExplorer);
   on("btnShare", "click", () => ShareLoader.share());
   on("btnOpenIn", "click", e => OpenInTool.menu(e.currentTarget));
   on("btnClear", "click", Actions.clearData);
   on("btnSettings", "click", () => SettingsTab.open());
+  on("btnToolbar", "click", Actions.toggleToolbar);
   on("chkWrap", "change", e => Actions.setWrap(e.target.checked));
   on("langSel", "change", e => Actions.setLang(e.target.value));
   on("demo", "change", e => { const k = e.target.value; e.target.value = ""; ShareLoader.loadDemo(k); });
   on("uiTheme", "change", () => Views.applySettings());
-  on("stLang", "click", () => $("langSel").focus());
   on("btnPalette", "click", () => QuickPick.open(">"));
   on("layoutSel", "change", e => Actions.setLayout(e.target.value));
   on("splitSel", "change", e => { const v = e.target.value; e.target.value = ""; if (v) Actions.setSplit(v); });
@@ -76,8 +76,7 @@ function wireOneEditor() {
   CmSetup.settings.numHover = Prefs.get("numhover", true) !== false;
   CmSetup.settings.lint = Prefs.get("lint", true) !== false;
   CmSetup.settings.words = Prefs.get("words", true) !== false;
-  on("stEol", "click", EncodingActions.pick);
-  on("stKeys", "click", () => QuickPick.open(">" + T("Bộ phím")));
+  on("btnKeys", "click", () => QuickPick.open(">" + T("Bộ phím")));
   on("btnStyle", "click", e => EditorMenu.openFromButton(e.currentTarget));
   EditorMenu.init();
   on("stLint", "click", () => Commands.run("problems"));
@@ -93,6 +92,14 @@ function wireOneEditor() {
   }, 150), { passive: true });
   Split.init();
   SideBar.init();
+  BookmarkList.init();
+  ProblemsPanel.init();
+  GitPanel.init();
+  TodoPanel.init();
+  TimelinePanel.init();
+  ClipHistory.init();
+  LibraryPanel.init();
+  SidePanels.init();
   ExportActions.init();
   DiskSync.init();
 
@@ -116,6 +123,7 @@ function wireOneEditor() {
   I18n.init();
   ThemePicker.bind($("uiTheme"), Prefs);
   if (Prefs.get("explorer", true) === false) document.body.classList.add("no-explorer");
+  if (Prefs.get("toolbar", true) === false) Actions.toggleToolbar();
   Toolbar.fill();
   StatusBar.msg(T("Đang nạp trình soạn thảo…"));
   try { await VendorPaths.load("cmCore"); }
@@ -127,6 +135,10 @@ function wireOneEditor() {
   wireOneEditor();
   await NotesDb.open();
   HotExit.init();
+  await ClipHistory.load();
+  await Macro.load();
+  // Before restore: tabs it drops keep their bookmarks.
+  await BookmarkFiles.init();
   if (!NewWindow.active) await HotExit.restore();
   $("chkWrap").checked = CmSetup.settings.wrap;
   Views.applySettings();
@@ -134,6 +146,7 @@ function wireOneEditor() {
   if (Prefs.get("guides", true) !== false) Actions.setGuides(true);
   await RecentFiles.load();
   await Pinned.init();
+  await Groups.init();
   Tags.load();
   if (!NewWindow.active) Explorer.restore();
   // Extras (breadcrumbs, bracket colours, snippets, key profile, sessions) load after the editor is usable.

@@ -43,7 +43,7 @@ const ExplorerMenu = (() => {
   const newEntries = node => ExplorerNew.entries(node);
   const viewEntries = node => Array.from({ length: Layouts.MAX }, (_, i) => E(T("Mở ở View {n}", { n: i + 1 }), "", () => openIn(node, i + 1)));
   const folderTabEntry = node => E(T("Mở trong tab folder mới"), "", () => FolderItems.openNew(node));
-  const tail = (node, head) => [...OpenWith.entries(node, head), ...TortoiseCmd.entries(node, head), E(T("Sao chép đường dẫn"), "", () => copyPath(node)),
+  const tail = (node, head) => [...Groups.entries([Groups.ofNode(node)], head), ...OpenWith.entries(node, head), ...TortoiseCmd.entries(node, head), E(T("Sao chép đường dẫn"), "", () => copyPath(node)),
     E(T("Thuộc tính"), "Alt+Enter", () => properties(node, head)), sep(), nativeEntry()];
 
   function treeTop(node, head) {
@@ -88,7 +88,7 @@ const ExplorerMenu = (() => {
       E(T("Xoá"), "Delete", () => ExplorerDisk.remove(nodes)), E(T("Xoá vĩnh viễn…"), "Shift+Delete", () => ExplorerDisk.remove(nodes, { permanent: true })));
     out.push(sep(), E(T("Tải xuống (ZIP)"), "", () => ExplorerArchive.download(nodes)));
     if (disk) out.push(...ExplorerArchive.menu(nodes, head));
-    out.push(sep(), Tags.entry(nodes, head), E(T("Sao chép đường dẫn"), "", () => copyPath(nodes)), E(T("Thuộc tính"), "Alt+Enter", () => properties(nodes, head)), sep(), nativeEntry());
+    out.push(sep(), Tags.entry(nodes, head), ...Groups.entries(nodes.map(Groups.ofNode), head), E(T("Sao chép đường dẫn"), "", () => copyPath(nodes)), E(T("Thuộc tính"), "Alt+Enter", () => properties(nodes, head)), sep(), nativeEntry());
     return tidy(out);
   }
 
@@ -96,7 +96,7 @@ const ExplorerMenu = (() => {
   function rowItems(head) {
     const label = b => (b.textContent + " " + b.title.split(/ — | \(/)[0]).trim();
     return [E(T("Mở"), "Enter", () => head.querySelector(".ex-item").click()), ...[...head.querySelectorAll(".ex-act")].map(b => E(label(b), "", () => b.click())),
-      ...(head.menuExtra || []).map(([text, run]) => E(text, "", run)), sep(), nativeEntry()];
+      ...(head.menuExtra || []).map(([text, run]) => E(text, "", run)), ...Groups.entries([head.groupItem || null], head), sep(), nativeEntry()];
   }
 
   function fmtSize(n) {

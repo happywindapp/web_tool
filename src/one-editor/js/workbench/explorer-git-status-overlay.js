@@ -1,9 +1,13 @@
 // Explorer git status icons like TortoiseGit overlays: a listed folder holding .git is scanned read-only (isomorphic-git, lazy vendor); rescans on 🔄 / disk change, focus and save.
 const GitStatus = (() => {
-  const repos = new Map(), subs = new Set();
+  const repos = new Map(), subs = new Set(), listeners = [];
+  let watching = false;
   const LABEL = { c: "không đổi", m: "đã sửa", a: "đã thêm (add), chưa commit", d: "đã gỡ khỏi Git (git rm --cached), chưa commit", u: "chưa theo dõi (untracked)", i: "bị bỏ qua (.gitignore) hoặc folder rỗng" };
   const MARK = { c: "✓", m: "!", a: "+", d: "✕", u: "?" };
   const on = () => Prefs.get("gitIcons", true) !== false;
+  // The Git panel scans while it shows even with the Explorer icons off.
+  const scanning = () => on() || watching;
+  const notify = () => listeners.forEach(f => f());
   const sigOf = result => result ? [...result.files].join("|") : "";
 
   // A node still in the Explorer tree (renamed / deleted folders drop out when their parent is listed again).
@@ -22,6 +26,7 @@ const GitStatus = (() => {
       r.result = await GitStatusModel.scan(git, r.node.handle, {});
       r.warned = false;
     } catch (e) { r.result = null; err = e; }
+    r.error = err;
     if (err && !await r.node.handle.getDirectoryHandle(".git").catch(() => null)) repos.delete(r.node.path);
     else if (err && !r.warned) {
       r.warned = true;
@@ -29,7 +34,8 @@ const GitStatus = (() => {
     }
     r.busy = false;
     const sig = sigOf(r.result);
-    if (sig !== r.sig || repos.get(r.node.path) !== r) { r.sig = sig; Explorer.render(); }
+    if (sig !== r.sig || repos.get(r.node.path) !== r) { r.sig = sig; if (on()) Explorer.render(); }
+    notify();
     if (r.again && repos.get(r.node.path) === r) { r.again = false; scan(r); }
   }
 
@@ -41,17 +47,20 @@ const GitStatus = (() => {
     if (sub !== subs.has(node.path)) { if (sub) subs.add(node.path); else subs.delete(node.path); Explorer.render(); }
     if (!dotgit?.dir) { if (repos.delete(node.path)) Explorer.render(); return; }
     if (repos.has(node.path)) return;
-    const r = { node, result: null, sig: "", busy: false, again: false, warned: false };
+    const r = { node, result: null, sig: "", busy: false, again: false, warned: false, error: null };
     repos.set(node.path, r);
-    if (on()) scan(r);
+    if (scanning()) scan(r);
+    notify();
   }
 
   function rescan() {
-    if (!on()) return;
+    if (!scanning()) return;
     for (const [path, r] of repos) if (attached(r.node)) scan(r); else repos.delete(path);
   }
   const soon = Dom.debounce(rescan, 800);
-  const reset = () => { repos.clear(); subs.clear(); };
+  const reset = () => { repos.clear(); subs.clear(); notify(); };
+  const list = () => [...repos.values()].filter(r => attached(r.node));
+  function watch(v) { watching = v; if (v) rescan(); }
 
   function repoOf(node) {
     for (let n = node; n; n = n.parent) { const r = repos.get(n.path); if (r) return r; }
@@ -96,5 +105,5 @@ const GitStatus = (() => {
   }
 
   addEventListener("focus", soon);
-  return { found, rescan, soon, reset, repoOf, label, paint, toggle };
+  return { found, rescan, soon, reset, repoOf, label, paint, toggle, list, watch, onChange: f => listeners.push(f) };
 })();

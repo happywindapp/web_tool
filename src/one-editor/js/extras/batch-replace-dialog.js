@@ -96,5 +96,8 @@ const BatchUi = (() => {
 
   // Labels are built in the UI language: rebuilt (and reopened) when it changes.
   I18n.onChange(() => { if (!dlg) return; const was = dlg.open; dlg.remove(); dlg = null; if (was) open(); });
-  return { open, run };
+  // My library: the saved sets, replaced whole (import / delete).
+  const listSets = () => loadSets().then(() => sets);
+  async function putSets(list) { await loadSets(); const was = sets; sets = list.map(s => ({ name: String(s.name).slice(0, 80), rules: BatchRules.clean(s.rules) })).slice(0, MAX_SETS); try { await storeSets(); } catch (e) { sets = was; throw e; } if (dlg) drawSets(); }
+  return { open, run, listSets, putSets };
 })();

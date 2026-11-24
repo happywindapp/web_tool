@@ -1,0 +1,22 @@
+// English strings for the Bookmarks side panel (activity bar 🔖, commands, closed-file bookmarks, demo), keyed by the Vietnamese source text.
+I18n.add({
+  "Bookmark — mọi dòng đã đánh dấu trong tab, ghi chú và file (Ctrl+F2 đặt / bỏ, F2 / Shift+F2 tới cái kế / trước)": "Bookmarks — every marked line in tabs, notes and files (Ctrl+F2 toggles, F2 / Shift+F2 next / previous)",
+  "Lọc theo tên file / nội dung dòng…": "Filter by file name / line text…",
+  "Đặt / bỏ bookmark ở dòng con trỏ của tab đang chọn (Ctrl+F2)": "Toggle a bookmark on the cursor line of the active tab (Ctrl+F2)",
+  "Xoá mọi bookmark": "Remove all bookmarks",
+  "Bookmark: danh sách mọi bookmark (thanh bên 🔖)": "Bookmarks: list of all bookmarks (🔖 side bar)",
+  "Bookmark: xoá mọi bookmark ở mọi tab, ghi chú và file": "Bookmarks: remove every bookmark in all tabs, notes and files",
+  "Tab này không đặt bookmark được.": "This tab cannot hold bookmarks.",
+  "🔖 Đã đánh dấu dòng {n} — xem mọi bookmark ở 🔖 thanh bên.": "🔖 Line {n} bookmarked — see all bookmarks in the 🔖 side bar.",
+  "Đã bỏ bookmark dòng {n}.": "Bookmark removed from line {n}.",
+  "Bỏ bookmark này": "Remove this bookmark",
+  "Xoá mọi bookmark của mục này": "Remove every bookmark of this item",
+  "đã đóng — bấm để mở lại": "closed — click to reopen",
+  "Không có bookmark khớp.": "No matching bookmarks.",
+  "Chưa có bookmark. Đặt con trỏ ở dòng cần nhớ rồi bấm ＋, Ctrl+F2 hoặc chuột phải → Bookmark.": "No bookmarks yet. Put the cursor on a line to remember, then press ＋, Ctrl+F2 or right-click → Bookmark.",
+  "Chưa có bookmark nào.": "There are no bookmarks.",
+  "Xoá mọi bookmark ({n}) ở mọi tab, ghi chú và file đã đóng?": "Remove all bookmarks ({n}) in every tab, note and closed file?",
+  "Đã xoá mọi bookmark.": "All bookmarks removed.",
+  "“{name}” không còn trên đĩa — đã xoá bookmark của file này.": "“{name}” is no longer on disk — its bookmarks were removed.",
+  "Bookmark nhiều tab (🔖 thanh bên)": "Bookmarks across tabs (🔖 side bar)",
+});

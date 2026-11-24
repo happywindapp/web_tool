@@ -63,9 +63,11 @@ const ExplorerDnd = (() => {
   document.addEventListener("dragover", e => {
     const types = [...(e.dataTransfer?.types || [])];
     if (drag && types.includes(TYPE)) {
-      const tg = target(e.target), eff = effect(tg, drag.nodes, e.ctrlKey || e.metaKey);
       // Immediate: FileDrop listens on document too, and a dragged picture can also carry "Files".
       e.stopImmediatePropagation();
+      const grp = Groups.dropSec(e.target);
+      if (grp) { mark(grp); e.preventDefault(); e.dataTransfer.dropEffect = "copy"; return; }
+      const tg = target(e.target), eff = effect(tg, drag.nodes, e.ctrlKey || e.metaKey);
       mark(eff && tg.open == null ? tg.el : null);
       if (!eff) { e.dataTransfer.dropEffect = "none"; return; }
       e.preventDefault();
@@ -78,8 +80,9 @@ const ExplorerDnd = (() => {
     if (!drag || ![...(e.dataTransfer?.types || [])].includes(TYPE)) return;
     e.preventDefault();
     e.stopImmediatePropagation();
-    const nodes = drag.nodes, tg = target(e.target), eff = effect(tg, nodes, e.ctrlKey || e.metaKey);
+    const nodes = drag.nodes, grp = Groups.dropSec(e.target), tg = grp ? null : target(e.target), eff = tg && effect(tg, nodes, e.ctrlKey || e.metaKey);
     end();
+    if (grp) { Groups.dropNodes(grp, nodes); return; }
     if (!eff) return;
     if (tg.open != null) { run(openFiles(nodes, tg.open)); return; }
     run((async () => { const dest = tg.node || await FolderPaths.resolve(tg.path); if (dest) await ExplorerOps.copyTo(nodes, dest, { cut: eff === "move" }); })());

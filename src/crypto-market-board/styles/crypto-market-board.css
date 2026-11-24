@@ -4,7 +4,7 @@
   :root[data-theme="dark"] { --up:#22c55e; --down:#f87171; --ref:#facc15; --ceil:#e879f9; --floor:#38bdf8; }
   .up { color:var(--up); } .down { color:var(--down); } .ref { color:var(--ref); }
 
-  body { grid-template-rows:auto auto auto 1fr auto auto; }
+  body { grid-template-rows:auto auto auto 1fr auto; }
   .work { grid-template-columns:minmax(0, 1fr) clamp(380px, 34vw, 580px); }
   .board-pane, .detail-pane { grid-template-rows:auto minmax(0, 1fr); }
   .scroll { overflow:auto; min-height:0; }

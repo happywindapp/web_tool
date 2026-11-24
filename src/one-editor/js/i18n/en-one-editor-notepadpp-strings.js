@@ -16,8 +16,7 @@ I18n.add({
   "Chỉ mở lại được tab file đọc từ đĩa.": "Only a file tab read from disk can be reopened.", "“{name}” chưa lưu. Mở lại sẽ bỏ thay đổi — tiếp tục?": "“{name}” is not saved. Reopening drops the changes — continue?",
   "Đã mở lại “{name}” với {enc}.": "Reopened “{name}” with {enc}.", "(chỉ đọc)": "(read-only)", "Không mở lại được: {msg}": "Could not reopen: {msg}",
   "Tab chỉ đọc — không đổi được.": "Read-only tab — cannot change it.", "{what} — lưu (Ctrl+S) để ghi ra file.": "{what} — save (Ctrl+S) to write the file.",
-  "Bảng mã khi lưu: {enc}": "Save encoding: {enc}", "Xuống dòng: {eol}": "Line endings: {eol}", "Bỏ BOM": "BOM removed", "Thêm BOM": "BOM added", "(hỗn hợp)": "(mixed)",
-  "Bảng mã và kiểu xuống dòng — bấm để mở lại / lưu với bảng mã khác, đổi CRLF / LF / CR": "Encoding and line endings — click to reopen / save with another encoding, change CRLF / LF / CR",
+  "Bảng mã khi lưu: {enc}": "Save encoding: {enc}", "Xuống dòng: {eol}": "Line endings: {eol}", "Bỏ BOM": "BOM removed", "Thêm BOM": "BOM added",
   // Lines, text, column, hash
   "Dòng: sắp xếp A → Z": "Lines: sort A → Z", "Dòng: sắp xếp Z → A": "Lines: sort Z → A", "Dòng: sắp xếp bỏ qua hoa / thường": "Lines: sort ignoring case",
   "Dòng: sắp xếp theo số": "Lines: sort numerically", "Dòng: sắp xếp theo độ dài": "Lines: sort by length", "Dòng: bỏ dòng trùng": "Lines: remove duplicates",

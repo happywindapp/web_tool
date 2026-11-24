@@ -206,6 +206,13 @@ const Actions = (() => {
   function toggleExplorer() {
     if (matchMedia("(max-width: 640px)").matches) { PhoneLayout.show(0); return; }
     Prefs.set("explorer", !document.body.classList.toggle("no-explorer"));
+    SidePanels.collapsed();
+  }
+
+  function toggleToolbar() {
+    const hidden = document.body.classList.toggle("no-toolbar");
+    $("btnToolbar").setAttribute("aria-pressed", String(!hidden));
+    Prefs.set("toolbar", !hidden);
   }
 
   async function clearData() {
@@ -216,5 +223,5 @@ const Actions = (() => {
     location.replace(location.pathname);
   }
 
-  return { newNote, openFiles, openFolder, openCloudFolder, save, suggestName, run, closeTab, setWrap, setWords, setLang, moveTab, cloneTab, setLayout, setSplit, zoom, setMinimap, setGuides, toggleZen, toggleExplorer, clearData };
+  return { newNote, openFiles, openFolder, openCloudFolder, save, suggestName, run, closeTab, setWrap, setWords, setLang, moveTab, cloneTab, setLayout, setSplit, zoom, setMinimap, setGuides, toggleZen, toggleExplorer, toggleToolbar, clearData };
 })();

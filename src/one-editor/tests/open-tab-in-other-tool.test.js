@@ -39,7 +39,9 @@ test("every listed tool has a target page", () => {
 test("Ask AI URL: ?q= carries the encoded text, too long or no ?q= ⇒ bare site (clipboard)", () => {
   const ai = n => SelectionActions.AI.find(a => a.name === n);
   assert.equal(SelectionActions.aiUrl(ai("ChatGPT"), "a&b c"), "https://chatgpt.com/?q=a%26b%20c");
-  assert.equal(SelectionActions.aiUrl(ai("Gemini"), "x"), "https://gemini.google.com/app");
+  assert.equal(SelectionActions.aiUrl(ai("Gemini"), "x"), "https://gemini.google.com");
+  assert.equal(SelectionActions.aiUrl(ai("Copilot M365"), "x"), "https://copilot.cloud.microsoft");
+  assert.equal(SelectionActions.aiUrl(ai("Google"), "NATS"), "https://www.google.com/search?q=NATS");
   assert.equal(SelectionActions.aiUrl(ai("Perplexity"), "x".repeat(7000)), "https://www.perplexity.ai/search");
 });
 

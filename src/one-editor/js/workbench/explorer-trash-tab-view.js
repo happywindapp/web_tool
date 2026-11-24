@@ -32,7 +32,7 @@ const TrashTab = (() => {
     ui.title.textContent = "🗑 " + T("Thùng rác");
     [T("Khôi phục mục đã chọn về chỗ cũ (Enter)"), T("Tải xuống mục đã chọn (nhiều mục ⇒ ZIP)"), T("Xoá vĩnh viễn mục đã chọn (Delete)"), T("Dọn sạch thùng rác")].forEach((s, k) => { ui.acts[k].title = s; });
     ui.head.replaceChildren(...[["name", "Tên"], ["mod", "Ngày xoá"], ["type", "Vị trí gốc"], ["size", "Kích thước"]].map(([k, label]) => el("span", "fi-" + k, T(label))));
-    ui.note.textContent = T("Giữ tối đa {days} ngày, tổng {mb} MB — đầy thì mục cũ nhất tự bỏ. File khôi phục mang ngày sửa mới. Nút 🗑 Xoá dữ liệu đã lưu cũng xoá thùng rác.", { days: TrashQuota.DAYS, mb: TrashQuota.TOTAL / TrashQuota.MB });
+    ui.note.textContent = T("Giữ tối đa {days} ngày, tổng {mb} MB — đầy thì mục cũ nhất tự bỏ. File khôi phục mang ngày sửa mới. Nút 🗑 Xoá dữ liệu cũng xoá thùng rác.", { days: TrashQuota.DAYS, mb: TrashQuota.TOTAL / TrashQuota.MB });
   }
 
   async function paint() {

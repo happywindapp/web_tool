@@ -32,11 +32,15 @@ function registerOneEditorCommands() {
   C("renameTab", "Đổi tên tab", null, withDoc(d => TabStrip.rename(d)), hasDoc);
   C("pinTab", "Ghim / bỏ ghim tab", "Ctrl+k Shift+Enter", withDoc(d => V.togglePin(d)), hasDoc);
   C("pinItem", "Ghim / bỏ ghim vào mục Đã ghim (Explorer)", null, withDoc(d => Pinned.toggleDoc(d)), () => hasDoc() && Pinned.canPin(doc()));
+  C("addToGroup", "Thêm tab vào group (Explorer)…", null, withDoc(d => Groups.addDoc(d)), () => hasDoc() && !!Groups.ofDoc(doc()));
+  C("newGroup", "Explorer: group mới…", null, () => Groups.create());
 
-  C("bookmark", "Bookmark: bật / tắt ở dòng này", "Ctrl+F2", () => Bookmarks.toggleLine(view()), hasDoc);
+  C("bookmark", "Bookmark: bật / tắt ở dòng này", "Ctrl+F2", withDoc(d => BookmarkList.toggle(d)), hasDoc);
   C("bookmarkNext", "Bookmark: tới cái kế tiếp", "F2", () => Bookmarks.jump(view(), 1), hasDoc);
   C("bookmarkPrev", "Bookmark: về cái trước", "Shift+F2", () => Bookmarks.jump(view(), -1), hasDoc);
-  C("bookmarkClear", "Bookmark: xoá hết trong tab", null, () => Bookmarks.clear(view()), hasDoc);
+  C("bookmarkClear", "Bookmark: xoá hết trong tab", null, withDoc(d => BookmarkList.set(d, [])), hasDoc);
+  C("bookmarkList", "Bookmark: danh sách mọi bookmark (thanh bên 🔖)", null, () => SidePanels.show("bookmarks"));
+  C("bookmarkClearAll", "Bookmark: xoá mọi bookmark ở mọi tab, ghi chú và file", null, () => BookmarkList.clearAll());
 
   for (const l of Layouts.LIST) C("layout-" + l.id, () => T("Layout: {name}", { name: T(l.label) }), l.key, () => A.setLayout(l.id));
   for (let i = 0; i < Layouts.MAX; i++) C("focus" + (i + 1), () => T("Tới View {n}", { n: i + 1 }), "Alt+" + (i + 1), () => { V.focus(i); if (V.activeDoc()) view().focus(); PhoneLayout.show(V.focused + 1); }, () => i < V.count);
@@ -44,9 +48,13 @@ function registerOneEditorCommands() {
   C("cloneTab", "Mở tab này thêm ở view kế tiếp (2 view cùng sửa 1 tab)", "Ctrl+\\", A.cloneTab, hasDoc);
   C("swap", "Đổi chỗ view này với view kế tiếp", null, () => V.swap(), many);
   C("explorer", "Ẩn / hiện Explorer", "Ctrl+b", A.toggleExplorer);
-  C("sideExplorer", "Hiện Explorer", "Ctrl+Shift+e", () => SideBar.show("explorer"));
-  C("sideSearch", "Tìm trong các file: tab đang mở, ghi chú, folder Explorer", "Ctrl+Shift+f", () => SideBar.show("search"));
-  C("sideReplace", "Thay trong các file: tab đang mở, ghi chú, folder Explorer", "Ctrl+Shift+h", () => SideBar.show("search", true));
+  C("toolbar", "Ẩn / hiện thanh công cụ", null, A.toggleToolbar);
+  C("sideExplorer", "Hiện Explorer", "Ctrl+Shift+e", () => SidePanels.show("explorer"));
+  C("sideSearch", "Tìm trong các file: tab đang mở, ghi chú, folder Explorer", "Ctrl+Shift+f", () => SidePanels.show("search"));
+  C("sideReplace", "Thay trong các file: tab đang mở, ghi chú, folder Explorer", "Ctrl+Shift+h", () => SidePanels.show("search", true));
+  document.querySelectorAll(".activity [data-side]").forEach(b => C("panel-" + b.dataset.side, () => T("Hiện panel: {name}", { name: b.title.split(" — ")[0] }), null, () => SidePanels.show(b.dataset.side)));
+  C("sideGit", "Git: file đã đổi so với HEAD (panel ⎇, chỉ đọc)", "Ctrl+Shift+g", () => SidePanels.show("git"));
+  C("clipPaste", "Dán từ lịch sử clipboard…", null, () => ClipHistory.pick(), hasDoc);
   C("trashOpen", "Explorer: mở Thùng rác (file đã xoá, khôi phục được)", null, () => TrashTab.open());
   C("explorerUndo", "Explorer: hoàn tác thao tác file (Ctrl+Z khi đang ở Explorer / tab folder)", null, () => ExplorerUndo.undo());
   C("folderPreview", "Tab folder: bật / tắt khung xem trước (Alt+P trong tab folder)", null, () => FolderView.togglePreview());

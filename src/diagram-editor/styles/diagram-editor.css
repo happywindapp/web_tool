@@ -1,4 +1,4 @@
-  body { grid-template-rows:auto auto minmax(0, 1fr) auto auto; }
+  body { grid-template-rows:auto auto minmax(0, 1fr) auto; }
   :root[data-theme="dark"] { color-scheme:dark; }
   @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { color-scheme:dark; } }
   .toolbar .opts { display:inline-flex; flex-wrap:wrap; gap:8px; align-items:center; }
@@ -55,7 +55,6 @@
   .statusbar { background:var(--panel); border-top:1px solid var(--line); padding:6px 16px; max-height:30vh; overflow:auto; }
   .status-row { display:flex; flex-wrap:wrap; gap:4px 14px; align-items:baseline; min-height:20px; }
   #status { font-weight:600; }
-  .tiny { font-size:12px; }
   #err { margin:4px 0; padding:6px 8px; background:color-mix(in srgb, var(--bad) 10%, var(--panel)); border-radius:6px; color:var(--bad); font:12px/1.4 Consolas, monospace; white-space:pre-wrap; cursor:pointer; }
 
   dialog { width:min(720px, 92vw); max-height:80vh; padding:0; border:1px solid var(--line); border-radius:8px; background:var(--panel); color:var(--ink); }

@@ -15,7 +15,7 @@
   .st-hint { margin-top:2px; color:var(--muted); font-size:12px; }
   .st-ctl { flex:none; display:flex; align-items:center; gap:6px; }
   .st-ctl select { max-width:15em; }
-  .st-num { width:5em; }
+  .st-num { width:5em; } .st-txt { width:min(16em, 100%); }
   .st-reset { padding:2px 8px; }
   .st-info { display:flex; flex-wrap:wrap; align-items:center; justify-content:flex-end; gap:6px; max-width:24em; }
   .st-val { color:var(--muted); font-size:12px; }

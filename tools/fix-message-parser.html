@@ -53,6 +53,11 @@
   .t{color:var(--muted)} .tn{color:var(--tn);font-weight:600} .an{color:var(--an)} .av{color:var(--av)} .c{color:var(--c);font-style:italic} .d,.cd{color:var(--l)}
   .good{color:var(--good)} .bad{color:var(--bad)} .warn{color:var(--warn)} .muted{color:var(--muted)}
   .author { display:flex; flex-wrap:wrap; gap:2px 6px; padding:4px 16px 6px; background:var(--panel); font-size:12px; color:var(--muted); } .author a { color:var(--acc); } .author span:not(:first-child) { margin-left:10px; }
+  .author { --author-ink:#0e7490; } .author a { color:var(--author-ink); } .author > span { color:color-mix(in srgb, var(--author-ink) 70%, var(--ink)); font-weight:600; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .author { --author-ink:#67e8f9; } }
+  :root[data-theme="dark"] .author { --author-ink:#67e8f9; }
+  .foot-row { display:flex; flex-wrap:wrap; align-items:baseline; gap:2px 14px; } .foot-row > :first-child { flex:1 1 320px; min-width:0; }
+  footer .author { margin-left:auto; padding:0; background:none; }
   @media (max-width: 900px) { .work { grid-template-columns:minmax(0, 1fr); grid-template-rows:repeat(2, minmax(280px, 1fr)); overflow-y:auto; } }
   /* Scoped tokens so every control in a band restyles itself; --tb-ink keeps the page ink for the active tab inside the dark header */
   :root { --tb:color-mix(in srgb, var(--acc) 10%, var(--panel)); --tb-ink:var(--ink); }
@@ -78,7 +83,7 @@
          border:1px solid var(--line); border-radius:8px; box-shadow:0 6px 24px rgba(0,0,0,.18); }
   .pop .row { display:flex; flex-wrap:wrap; gap:6px; align-items:center; }
   .pop input[type=text] { flex:1; min-width:120px; }
-  body { grid-template-rows:auto auto 1fr auto auto; }
+  body { grid-template-rows:auto auto 1fr auto; }
   .toolbar { padding:6px 16px; }
   .toolbar .hint { margin-left:auto; font-size:12px; }
   .work { grid-template-columns:minmax(0, 3fr) minmax(320px, 2fr); }
@@ -223,7 +228,7 @@
     .paste { grid-template-rows:16dvh auto; }
     .studio-full { margin:0; border:0; border-radius:0; }
     footer.report, .statusbar { max-height:20dvh; padding:4px 12px; }
-    footer.report .hint, .statusbar .tiny, .toolbar .hint, #detail .hint { display:none; }
+    footer.report .hint, .toolbar .hint, #detail .hint { display:none; }
     .msgs li[data-line] { padding:4px 0; }
     table.grid button.mini { min-height:0; padding:4px 6px; }
     .chip button { min-height:0; }
@@ -296,7 +301,7 @@
   <button id="dictBtn" title="Đặt tên cho tag riêng của công ty, ý nghĩa giá trị, tag nhạy cảm, tag nối lệnh cha–con (CSV, lưu trong trình duyệt)">📖 Từ điển riêng…</button>
   <button id="mask" title="Chọn nhóm dữ liệu cần che (tài khoản, mật khẩu, thành viên, CompID, số hiệu lệnh, Text) — dùng trước khi chia sẻ">🕶 Che dữ liệu…</button>
   <button id="clear" data-pane-go="0">Xoá</button>
-  <span class="muted hint">Ctrl+↑/↓ chọn message · giữ Alt + rê chuột trên ô nhập để tra tag · dữ liệu không rời khỏi máy</span>
+  <span class="muted hint">Ctrl+↑/↓ chọn message · giữ Alt + rê chuột trên ô nhập để tra tag</span>
 </div>
 <div class="seg pane-switch"><button>Dữ liệu FIX</button><button>Bảng message</button><button>Chi tiết message</button></div>
 <main class="work pane-scroller">
@@ -333,12 +338,13 @@
     <div class="scroll" id="detail" data-i18n-skip></div>
   </section>
 </main>
-<footer class="status" id="status"></footer>
-<dialog id="dlg"></dialog>
+<footer class="status foot-row"><span id="status"></span>
 <div class="author">
   <span>Tác giả:</span><b><a href="https://happywindapp.github.io/CV/cv_quan_phan.html">Phan Ngọc Minh Quân</a></b>
-  <span>GitHub Source:</span><a href="https://github.com/happywindapp/web_tool/">github.com/happywindapp/web_tool</a>
+  <span>GitHub:</span><a href="https://github.com/happywindapp/web_tool/">happywindapp</a>
 </div>
+</footer>
+<dialog id="dlg"></dialog>
 <script>
 "use strict";
 // UI language VI/EN: saved choice (shared by every tool) → browser language; English dictionary is keyed by the Vietnamese text.
@@ -562,7 +568,7 @@ I18n.add({
   "Lưu dữ liệu + bộ lọc + ghi chú + chuỗi lệnh + bố cục cột vào trình duyệt này": "Save data + filters + annotations + order chain + column layout in this browser",
   "Mở lại một phân tích đã lưu trong trình duyệt này": "Reopen an analysis saved in this browser",
   "Xoá phân tích đang mở khỏi trình duyệt": "Delete the open analysis from the browser",
-  "Ctrl+↑/↓ chọn message · giữ Alt + rê chuột trên ô nhập để tra tag · dữ liệu không rời khỏi máy": "Ctrl+↑/↓ select message · hold Alt and hover the paste box to look up a tag · data never leaves your machine",
+  "Ctrl+↑/↓ chọn message · giữ Alt + rê chuột trên ô nhập để tra tag": "Ctrl+↑/↓ select message · hold Alt and hover the paste box to look up a tag",
   "Có ghi chú": "Annotated",
   "📝 Ghi chú cho message này — đi kèm link chia sẻ, phân tích đã lưu và file xuất": "📝 Annotation for this message — travels with share links, saved analyses and exports",
   "Ghi chú": "Annotation",

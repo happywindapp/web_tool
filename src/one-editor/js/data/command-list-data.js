@@ -17,7 +17,8 @@ function registerDataCommands(C, doc, hasDoc) {
 
   C("dataTree", "Dữ liệu: cây JSON / XML ở view kia (bấm nút tới dòng, chép đường dẫn)", null, () => OutputLink.run(doc(), "tree"), hasDoc);
   C("dataQuery", "Dữ liệu: truy vấn JSONPath / XPath ở view kia", null, () => OutputLink.run(doc(), "query"), hasDoc);
-  C("problems", "Lỗi: mở danh sách lỗi của tab (Problems)", "Ctrl+Shift+m", () => CM.lint.openLintPanel(view()), hasDoc);
+  C("problems", "Lỗi: panel Problems — lỗi / cảnh báo của mọi tab đang mở", "Ctrl+Shift+m", () => SidePanels.show("problems"));
+  C("problemsBottom", "Lỗi: danh sách lỗi ở đáy editor", null, () => CM.lint.openLintPanel(view()), hasDoc);
   C("problemNext", "Lỗi: tới lỗi kế tiếp", "F8", () => CM.lint.nextDiagnostic(view()), hasDoc);
   C("problemPrev", "Lỗi: về lỗi trước", "Shift+F8", () => CM.lint.previousDiagnostic(view()), hasDoc);
   C("lint", "Bật / tắt kiểm lỗi khi gõ (dữ liệu + cú pháp code)", null, () => setLint(!CmSetup.settings.lint));

@@ -1,4 +1,4 @@
-// Activity bar (Explorer · Search) and the Find in files panel: open tabs, notes and the Explorer folder, scanned in time slices with progress and Stop; results grouped per file.
+// Explorer · Outline · Search panels of the activity bar and the Find in files panel: open tabs, notes and the Explorer folder, scanned in time slices with progress and Stop; results grouped per file.
 const SideBar = (() => {
   const box = $("sxResults"), input = $("sxQuery"), repl = $("sxReplace"), status = $("sxStatus");
   const LIMIT = FindCore.LIMITS.shownHits;
@@ -7,28 +7,14 @@ const SideBar = (() => {
   let gen = 0, cur = null, busy = false;
   const folded = new Set();
 
-  function show(name, focusReplace = false) {
-    document.querySelectorAll("[data-side]").forEach(b => b.classList.toggle("on", b.dataset.side === name));
-    document.querySelectorAll("[data-side-panel]").forEach(p => { p.hidden = p.dataset.sidePanel !== name; });
-    if (document.body.classList.contains("no-explorer")) { document.body.classList.remove("no-explorer"); Prefs.set("explorer", true); }
-    PhoneLayout.show(0);
-    if (name === "outline") EditorExtras.use(() => Outline.show());
-    if (name === "search") {
-      const v = Views.activeDoc() && Views.activeView(), sel = v ? v.state.sliceDoc(v.state.selection.main.from, v.state.selection.main.to) : "";
-      if (sel && !sel.includes("\n")) input.value = sel;
-      const f = focusReplace && input.value ? repl : input;
-      f.focus();
-      f.select();
-      run();
-    }
-  }
-
-  // Clicking the open panel's icon hides the side bar (VS Code); phones keep the pane carousel, where hiding does nothing.
-  function click(name) {
-    const open = !document.body.classList.contains("no-explorer") && document.querySelector(`[data-side="${name}"]`).classList.contains("on");
-    if (!open || matchMedia("(max-width: 640px)").matches) { show(name); return; }
-    document.body.classList.add("no-explorer");
-    Prefs.set("explorer", false);
+  function showSearch(focusReplace = false, quiet = false) {
+    if (quiet) { run(); return; }
+    const v = Views.activeDoc() && Views.activeView(), sel = v ? v.state.sliceDoc(v.state.selection.main.from, v.state.selection.main.to) : "";
+    if (sel && !sel.includes("\n")) input.value = sel;
+    const f = focusReplace && input.value ? repl : input;
+    f.focus();
+    f.select();
+    run();
   }
 
   const opts = () => ({ matchCase: $("sxCase").checked, word: $("sxWord").checked, regex: $("sxRegex").checked });
@@ -151,11 +137,10 @@ const SideBar = (() => {
   }
 
   function init() {
-    document.querySelectorAll("[data-side]").forEach(b => { b.onclick = () => click(b.dataset.side); });
-    // The shared I18n translates title / placeholder only, not aria-label.
-    const nav = document.querySelector(".activity"), navLabel = () => nav.setAttribute("aria-label", T("Thanh hoạt động"));
-    navLabel();
-    I18n.onChange(() => { navLabel(); if (cur) render(cur); else run(); });
+    SidePanels.register("explorer", {});
+    SidePanels.register("outline", { show: (a, quiet) => EditorExtras.use(() => Outline.show(quiet)) });
+    SidePanels.register("search", { show: showSearch });
+    I18n.onChange(() => { if (cur) render(cur); else run(); });
     const later = Dom.debounce(run, 300);
     input.addEventListener("input", later);
     ["sxCase", "sxWord", "sxRegex", "sxFolder", "sxHeavy"].forEach(id => $(id).addEventListener("change", run));
@@ -165,5 +150,5 @@ const SideBar = (() => {
     $("sxReplaceAll").onclick = () => { if (cur) replace(cur.groups); };
   }
 
-  return { init, show, run };
+  return { init, run, jump };
 })();

@@ -1,6 +1,7 @@
 // Local history: a snapshot of the tab on every successful Ctrl+S (or on demand) in IndexedDB — ≤ 50 per file, ≤ 100 MB in all, oldest first out; compare with any snapshot, restore it (Ctrl+Z works).
 const LocalHistory = (() => {
-  const PER_KEY = 50, TOTAL = 100 * 1024 * 1024, MAX_TEXT = 5 * 1024 * 1024;
+  const PER_KEY = 50, TOTAL = 100 * 1024 * 1024, MAX_TEXT = 5 * 1024 * 1024, listeners = [];
+  const changed = () => listeners.forEach(f => f());
 
   // FNV-1a: same sum + size as the newest snapshot of the file ⇒ unchanged, no new snapshot.
   function sum(text) {
@@ -54,6 +55,7 @@ const LocalHistory = (() => {
       const p = plan(records, rec);
       if (p.skip) { if (!quiet) StatusBar.msg(T("Không đổi so với bản lịch sử gần nhất — không chụp thêm."), "warn"); return false; }
       await NotesDb.histWrite(rec, text, p.drop);
+      changed();
       if (!quiet) StatusBar.msg(T("✔ Đã chụp bản lịch sử của “{name}”.", { name: doc.name }), "good");
       return true;
     } catch (e) {
@@ -67,11 +69,17 @@ const LocalHistory = (() => {
   const kb = n => I18n.num(Math.max(1, Math.round(n / 1024))) + " KB";
   const sourceOf = doc => doc && doc.hist ? Docs.get(doc.hist.src) : doc && Docs.root(doc);
 
+  // Snapshots of one tab, newest first.
+  async function list(src) {
+    const records = await NotesDb.histList(), key = await keyOf(src, records);
+    return records.filter(r => r.key === key).sort((a, b) => b.t - a.t);
+  }
+
   async function pick() {
     const src = sourceOf(Views.activeDoc());
     if (!usable(src)) { StatusBar.msg(T("Tab này không có lịch sử cục bộ."), "warn"); return; }
     let mine;
-    try { const records = await NotesDb.histList(), key = await keyOf(src, records); mine = records.filter(r => r.key === key).sort((a, b) => b.t - a.t); }
+    try { mine = await list(src); }
     catch (e) { StatusBar.msg(T("Không đọc được lịch sử cục bộ: {msg}", { msg: e.message }), "bad"); return; }
     if (!mine.length) { StatusBar.msg(T("“{name}” chưa có bản lịch sử — bản được chụp mỗi lần Ctrl+S, hoặc dùng lệnh “Lịch sử cục bộ: chụp bản ngay”.", { name: src.name }), "warn"); return; }
     QuickPick.pick(mine.map((r, i) => ({ label: "🕘 " + when(r.t) + " · " + kb(r.size), detail: DevNum.ago(r.t) + (i ? "" : " · " + T("mới nhất")), run: () => open(src, r) })),
@@ -83,39 +91,44 @@ const LocalHistory = (() => {
     let text;
     try { text = await NotesDb.histText(r.id); } catch (e) { text = null; console.warn("One Editor local history:", e); }
     if (typeof text !== "string" || !Docs.get(src.id)) { StatusBar.msg(T("Không đọc được bản lịch sử này."), "bad"); return; }
-    Docs.list().filter(d => d.hist && d.hist.src === src.id).forEach(d => Views.close(d.id, true));
-    if (Views.where(src.id) < 0) Views.open(src, Views.focused, false);
-    if (Views.count < 2) Views.setLayout("2c");
-    const at = Views.where(src.id), snapDoc = Docs.create({ kind: "temp", name: src.name + " @ " + when(r.t), lang: Docs.effectiveLang(src), text, readOnly: true });
-    snapDoc.hist = { src: src.id, t: r.t };
-    Views.activate(at, src.id, false);
-    Views.open(snapDoc, Views.other(at), false);
-    Compare.start(at);
+    ReadOnlyCompare.open(src, src.name + " @ " + when(r.t), text, { hist: { src: src.id, t: r.t } });
     StatusBar.msg(T("So sánh “{name}” với bản lúc {time} — lệnh “Lịch sử cục bộ: khôi phục…” để ghi bản đó vào tab gốc (Ctrl+Z được).", { name: src.name, time: when(r.t) }), "good");
   }
 
   const viewing = () => { const d = Views.activeDoc(); return d && d.hist ? d : d && Docs.list().find(x => x.hist && x.hist.src === Docs.root(d).id) || null; };
 
+  function apply(src, t, text) {
+    if (src.readOnly || src.stale) { StatusBar.msg(T("Tab gốc đang chỉ đọc — đọc lại file (Ctrl+S) rồi khôi phục."), "warn"); return; }
+    if (!confirm(T("Thay toàn bộ nội dung “{name}” bằng bản lúc {time}? Ctrl+Z để hoàn tác.", { name: src.name, time: when(t) }))) return;
+    Views.replaceText(src, text);
+    StatusBar.msg(T("✔ Đã khôi phục bản lúc {time} vào “{name}” — chưa ghi đĩa, Ctrl+S để lưu.", { name: src.name, time: when(t) }), "good");
+  }
+
   function restore() {
     const snapDoc = viewing(), src = snapDoc && Docs.get(snapDoc.hist.src);
     if (!src) { StatusBar.msg(T("Tab gốc của bản lịch sử này đã đóng."), "warn"); return; }
-    if (src.readOnly || src.stale) { StatusBar.msg(T("Tab gốc đang chỉ đọc — đọc lại file (Ctrl+S) rồi khôi phục."), "warn"); return; }
-    if (!confirm(T("Thay toàn bộ nội dung “{name}” bằng bản lúc {time}? Ctrl+Z để hoàn tác.", { name: src.name, time: when(snapDoc.hist.t) }))) return;
-    Views.replaceText(src, Docs.text(snapDoc));
-    StatusBar.msg(T("✔ Đã khôi phục bản lúc {time} vào “{name}” — chưa ghi đĩa, Ctrl+S để lưu.", { name: src.name, time: when(snapDoc.hist.t) }), "good");
+    apply(src, snapDoc.hist.t, Docs.text(snapDoc));
   }
 
-  async function clear() {
-    const src = sourceOf(Views.activeDoc());
+  // Timeline ↺: a stored snapshot straight into its tab.
+  async function restoreFrom(src, r) {
+    let text;
+    try { text = await NotesDb.histText(r.id); } catch (e) { text = null; console.warn("One Editor local history:", e); }
+    if (typeof text !== "string" || !Docs.get(src.id)) { StatusBar.msg(T("Không đọc được bản lịch sử này."), "bad"); return; }
+    apply(src, r.t, text);
+  }
+
+  async function clear(src = sourceOf(Views.activeDoc())) {
     if (!usable(src)) { StatusBar.msg(T("Tab này không có lịch sử cục bộ."), "warn"); return; }
     try {
-      const records = await NotesDb.histList(), key = await keyOf(src, records), ids = records.filter(r => r.key === key).map(r => r.id);
+      const ids = (await list(src)).map(r => r.id);
       if (!ids.length) { StatusBar.msg(T("“{name}” chưa có bản lịch sử.", { name: src.name }), "warn"); return; }
       if (!confirm(T("Xoá {n} bản lịch sử của “{name}”?", { n: ids.length, name: src.name }))) return;
       await NotesDb.histWrite(null, "", ids);
+      changed();
       StatusBar.msg(T("✔ Đã xoá {n} bản lịch sử.", { n: ids.length }), "good");
     } catch (e) { StatusBar.msg(T("Không xoá được lịch sử cục bộ: {msg}", { msg: e.message }), "bad"); }
   }
 
-  return { plan, sum, snap, snapNow: () => snap(Views.activeDoc(), false), pick, restore, clear, viewing };
+  return { plan, sum, snap, snapNow: () => snap(Views.activeDoc(), false), pick, restore, restoreFrom, clear, viewing, list, open, usable, sourceOf, when, kb, onChange: f => listeners.push(f) };
 })();

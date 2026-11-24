@@ -27,7 +27,7 @@ const Outline = (() => {
   }
   const later = () => { clearTimeout(timer); timer = setTimeout(render, 300); };
 
-  function show() {
+  function show(quiet) {
     if (!wired) {
       wired = true;
       filter.addEventListener("input", later);
@@ -35,7 +35,7 @@ const Outline = (() => {
       Docs.on(type => { if (type === "edit" || type === "lang") later(); });
     }
     render();
-    filter.focus();
+    if (!quiet && !matchMedia("(pointer: coarse)").matches) filter.focus();
   }
 
   return { show, render };

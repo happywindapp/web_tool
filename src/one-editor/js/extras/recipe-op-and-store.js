@@ -51,5 +51,7 @@ const RecipeOp = (() => {
     StatusBar.msg(T("🔗 Đã chép link recipe ({n} ký tự) — mở link là chạy lại đúng các bước.", { n: I18n.num(url.length) }) + (url.length > 60000 ? " " + T("Link dài — vài ứng dụng chat có thể cắt mất.") : ""), ok ? "good" : "warn");
   }
 
-  return { run, set, steps, load, save, drop, share };
+  // My library: replaced whole (import / delete), untrusted steps cleaned.
+  async function putAll(list) { const next = list.map(r => ({ name: String(r.name).slice(0, 80), steps: RecipeRun.clean(r.steps) })).slice(0, MAX_SAVED); await store(next); saved = next; }
+  return { run, set, steps, load, save, drop, share, putAll };
 })();

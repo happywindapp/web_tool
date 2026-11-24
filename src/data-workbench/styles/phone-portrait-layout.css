@@ -60,7 +60,7 @@
     .paste { grid-template-rows:16dvh auto; }
     .studio-full { margin:0; border:0; border-radius:0; }
     footer.report, .statusbar { max-height:20dvh; padding:4px 12px; }
-    footer.report .hint, .statusbar .tiny, .toolbar .hint, #detail .hint { display:none; }
+    footer.report .hint, .toolbar .hint, #detail .hint { display:none; }
     .msgs li[data-line] { padding:4px 0; }
     table.grid button.mini { min-height:0; padding:4px 6px; }
     .chip button { min-height:0; }

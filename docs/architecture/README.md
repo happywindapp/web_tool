@@ -81,18 +81,7 @@ Xem `docs/tools/<tool>.md` — danh sách ở [`docs/tools/`](../tools/README.md
   - **Không viết lại màu từng nút:** đổi biến CSS ngay tại header/toolbar, control bên trong tự ăn theo. Popover/dialog gắn vào `body`, không đặt trong 2 vùng này, để giữ màu trang.
   - **Kiểm:** theme sáng + tối (đổi bằng dropdown Giao diện, không dùng cờ `--force-dark-mode` vì Chrome tự đảo màu); chữ đạt 4.5:1 trên nền tint — `.muted` có sẵn chỉ đạt 4.14:1 nên toolbar phải giữ override `--muted` nếu có chữ phụ.
   - **Ngoại lệ còn lại:** FIX Parser mới áp màu, chưa chia lại control (mẫu + mở file ở header, giao diện ở toolbar).
-- **Khối tác giả (bắt buộc mọi tool):** đặt ngay sau `</footer>` trạng thái, chép nguyên văn markup + CSS dưới đây:
-
-  ```html
-  <div class="author">
-    <span>Tác giả:</span><b><a href="https://happywindapp.github.io/CV/cv_quan_phan.html">Phan Ngọc Minh Quân</a></b>
-    <span>GitHub Source:</span><a href="https://github.com/happywindapp/web_tool/">github.com/happywindapp/web_tool</a>
-  </div>
-  ```
-
-  ```css
-  .author { display:flex; flex-wrap:wrap; gap:2px 6px; padding:4px 16px 6px; background:var(--panel); font-size:12px; color:var(--muted); } .author a { color:var(--acc); } .author span:not(:first-child) { margin-left:10px; }
-  ```
+- **Khối tác giả (bắt buộc mọi tool):** gộp vào hàng trạng thái của footer để tiết kiệm 1 hàng — `<!-- @include ../data-workbench/partials/author-credit-in-footer.html -->` trong 1 hàng flex (`.foot-row` của `base.css`, con đầu là ô trạng thái), `footer .author` tự dạt phải. Footer cuộn được thì đặt ở hàng đầu (Data Workbench), không ở hàng cuối. Ô trạng thái mà JS ghi `textContent`/`innerHTML` phải là phần tử con riêng (`<footer class="status foot-row"><span id="status"></span>…`), không phải chính footer, kẻo xoá mất khối tác giả. Mọi tool hiện có đã áp; tool 1 file không build thì chép nội dung partial + 3 rule CSS `.author`/`.foot-row`/`footer .author` từ `base.css`.
 
 - **Đếm lượt xem GoatCounter (bắt buộc mọi tool + trang mới, ADR #17):** chép nguyên đoạn `<!-- GoatCounter … --><script>…sendBeacon…</script>` từ `index.html` vào ngay trước `</head>` (tool build từ `src/` thì sửa template); có CSP thì thêm `https://quan111.goatcounter.com` vào `connect-src`; đặt badge `<span class="gc-views" title="Lượt truy cập (GoatCounter, cập nhật mỗi ~10 phút)" hidden></span>` làm con đầu của `.lang-switch` (CSS chung ở `app-bar-tabs-toolbar-surfaces.css`) + thêm khoá đó vào từ điển EN. Không dùng `count.js` (gửi cả query).
 

@@ -2,7 +2,7 @@
 const Views = (() => {
   const groups = [...document.querySelectorAll(".group")].map((el, i) => ({ i, el, host: el.querySelector(".host"), tabs: [], active: null, view: null }));
   let focused = 0, layout = "2c", count = 2;
-  const listeners = [], closed = [], cursorFns = [];
+  const listeners = [], closed = [], cursorFns = [], lintFns = [];
   const changed = () => { listeners.forEach(f => f()); StatusBar.refresh(); };
   const userEdit = u => u.transactions.some(tr => tr.annotation(CM.state.Transaction.userEvent) !== undefined);
 
@@ -32,6 +32,7 @@ const Views = (() => {
     }
     if (u.docChanged || u.selectionSet || u.transactions.some(t => t.effects.length)) StatusBar.refresh();
     if (u.selectionSet && !u.docChanged) cursorFns.forEach(f => f(doc, u.state));
+    if (lintFns.length && u.transactions.some(t => t.effects.some(e => e.is(CM.lint.setDiagnosticsEffect)))) lintFns.forEach(f => f(doc));
   }
 
   function setFocused(i, force) {
@@ -207,7 +208,7 @@ const Views = (() => {
     init, setLayout, add, open, activate, close, reopen, togglePin, closeMany, move, swap, where, other, activeDoc, applyEffect, replaceText,
     revealLine, applySettings, snapshot, refresh, renderAll: () => groups.forEach(refresh), focus: i => setFocused(Math.min(Math.max(i | 0, 0), count - 1)),
     activeView: (i = focused) => groups[i].view, tabsOf: i => [...groups[i].tabs], groups,
-    get focused() { return focused; }, get count() { return count; }, get layout() { return layout; }, onChange: f => listeners.push(f),
+    get focused() { return focused; }, get count() { return count; }, get layout() { return layout; }, onChange: f => listeners.push(f), onLint: f => lintFns.push(f),
     onCursor: f => cursorFns.push(f),
   };
 })();

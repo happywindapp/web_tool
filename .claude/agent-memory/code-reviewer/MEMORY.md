@@ -6,4 +6,5 @@
 - [file:// iframe shares IndexedDB](file-url-iframe-shares-indexeddb-with-main-page.md) — unsandboxed file:// frame/worker reads main page IDB despite origin "null"
 - [Unmounted list tab root is detached](one-editor-unmounted-tab-root-is-disconnected.md) — isConnected ≠ closed for One Editor folder tabs; prune on Docs remove
 - [Explorer listing silent 5000 cap](explorer-folder-listing-silent-5000-cap.md) — loadKids truncates at MAX_ENTRIES unflagged; undo put may evict own trash backup
+- [Boot order + stale tab reveal](one-editor-boot-order-and-stale-tab-reveal.md) — Docs.on after HotExit.restore misses restored tabs; revealLine on stale F5 tab ⇒ line 1
 - [Keyboard contextmenu has coords](chrome-keyboard-contextmenu-event-has-coords.md) — Chrome Menu key ⇒ clientX/Y = element center, shiftKey false; raw CDP probe via node WebSocket

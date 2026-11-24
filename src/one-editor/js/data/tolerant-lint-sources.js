@@ -41,13 +41,13 @@ const DataLint = (() => {
     return [];
   }
 
-  function source(view) {
-    const g = Views.groups.find(x => x.view === view), doc = g && Docs.get(g.active);
-    const lang = doc && Docs.effectiveLang(doc), st = view.state;
-    if (!doc || !owns(lang) || doc.hex || doc.big || PreviewPane.isPane(doc)) return [];
+  // Diagnostics of any tab's state (Problems checks tabs not on screen); code languages return a Promise.
+  function diagnosticsOf(doc, st, warn = false) {
+    const lang = Docs.effectiveLang(doc);
+    if (!owns(lang) || doc.hex || doc.big || PreviewPane.isPane(doc)) return [];
     if (CodeLint.LANGS.has(lang)) return CodeLint.diagnostics(st, doc, lang);
     if (st.doc.length > MAX) {
-      if (!big.has(doc.id)) { big.add(doc.id); StatusBar.msg(T("“{name}” lớn hơn 5 MB — tắt kiểm lỗi khi gõ cho tab này.", { name: doc.name }), "warn"); }
+      if (warn && !big.has(doc.id)) { big.add(doc.id); StatusBar.msg(T("“{name}” lớn hơn 5 MB — tắt kiểm lỗi khi gõ cho tab này.", { name: doc.name }), "warn"); }
       return [];
     }
     const pos = x => {
@@ -58,7 +58,12 @@ const DataLint = (() => {
     return issues(st.doc.toString(), lang, doc.name).slice(0, 200).map(x => { const from = pos(x); return { from, to: Math.min(from + 1, st.doc.lineAt(from).to), severity: x.sev, message: x.msg, source: lang }; });
   }
 
+  function source(view) {
+    const g = Views.groups.find(x => x.view === view), doc = g && Docs.get(g.active);
+    return doc ? diagnosticsOf(doc, view.state, true) : [];
+  }
+
   const owns = lang => LANGS.has(lang) || CodeLint.LANGS.has(lang);
   const extension = () => ext ??= CM.lint.linter(source, { delay: 600, needsRefresh: u => u.transactions.some(t => t.reconfigured) });
-  return { issues, extension, owns, LANGS };
+  return { issues, extension, owns, diagnosticsOf, LANGS, MAX };
 })();

@@ -52,7 +52,7 @@ const ExplorerOps = (() => {
   async function move(node, dest, taken = null) {
     if (taken ? taken.has(node.name.toLowerCase()) : await LocalFs.exists(dest.handle, node.name)) throw new Error(T("“{name}” đã có trong folder đích.", { name: node.name }));
     await LocalFs.writable(node.parent.handle);
-    const tabs = await tabsUnder(node), pin = await Pinned.find(node.handle);
+    const tabs = await tabsUnder(node), pin = await Pinned.find(node.handle), grouped = await Groups.find(node.handle);
     let moved = node.handle;
     try {
       if (typeof node.handle.move !== "function") throw new Error("no move");
@@ -63,6 +63,7 @@ const ExplorerOps = (() => {
     }
     for (const { d, rel } of tabs) { d.handle = await walkTo(moved, rel); DiskSync.mark(d); }
     if (pin) Pinned.renamed(pin, moved);
+    Groups.renamed(grouped, moved);
     Tags.moved(Tags.pathOf(node), dest.path + "/" + node.name);
     return moved;
   }

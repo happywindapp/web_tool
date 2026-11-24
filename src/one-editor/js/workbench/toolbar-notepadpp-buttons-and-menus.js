@@ -37,7 +37,7 @@ const ToolbarButtons = (() => {
   function functionList() {
     const shown = !document.body.classList.contains("no-explorer") && !document.querySelector('[data-side-panel="outline"]').hidden;
     if (shown && !matchMedia("(max-width: 640px)").matches) Actions.toggleExplorer();
-    else SideBar.show("outline");
+    else SidePanels.show("outline");
   }
 
   const edit = id => () => { if (activeRoot()) CM.commands[id](Views.activeView()); };

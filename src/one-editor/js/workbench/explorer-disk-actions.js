@@ -46,10 +46,11 @@ const ExplorerDisk = (() => {
   // → true when renamed; open tabs and pins follow the file.
   async function renameTo(node, name) {
     try {
-      const docs = node.dir ? [] : await openDocsOf(node.handle), pin = await Pinned.find(node.handle), from = Tags.pathOf(node);
+      const docs = node.dir ? [] : await openDocsOf(node.handle), pin = await Pinned.find(node.handle), grouped = await Groups.find(node.handle), from = Tags.pathOf(node);
       await LocalFs.rename(node, name);
       Tags.moved(from, node.parent.path + "/" + name);
       if (pin) Pinned.renamed(pin, node.handle);
+      Groups.renamed(grouped, node.handle);
       // move() renamed node.handle only: the tab's own handle still points at the old name.
       docs.forEach(d => { d.handle = node.handle; Docs.rename(d, name); DiskSync.mark(d); });
       refreshParent(node.parent);

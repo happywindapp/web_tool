@@ -73,7 +73,7 @@ I18n.add({
   "Dọn sạch thùng rác": "Empty the recycle bin",
   "Ngày xoá": "Date deleted",
   "Vị trí gốc": "Original location",
-  "Giữ tối đa {days} ngày, tổng {mb} MB — đầy thì mục cũ nhất tự bỏ. File khôi phục mang ngày sửa mới. Nút 🗑 Xoá dữ liệu đã lưu cũng xoá thùng rác.": "Kept up to {days} days, {mb} MB in total — when full the oldest items go first. Restored files get a new modified date. 🗑 Clear saved data also empties the recycle bin.",
+  "Giữ tối đa {days} ngày, tổng {mb} MB — đầy thì mục cũ nhất tự bỏ. File khôi phục mang ngày sửa mới. Nút 🗑 Xoá dữ liệu cũng xoá thùng rác.": "Kept up to {days} days, {mb} MB in total — when full the oldest items go first. Restored files get a new modified date. 🗑 Clear data also empties the recycle bin.",
   "Thùng rác trống.": "The recycle bin is empty.",
   "Không khôi phục được “{name}”: {msg}": "Could not restore “{name}”: {msg}",
   "Đã khôi phục {n} mục.": "Restored {n} items.",

@@ -32,7 +32,7 @@ const Snippets = (() => {
     await load();
     const v = Views.activeView(), list = forLang(langOf(v));
     if (!list.length) { StatusBar.msg(T("Chưa có snippet cho ngôn ngữ này — bôi đen đoạn code rồi “Snippet: lưu vùng chọn…”."), "warn"); return; }
-    QuickPick.pick(list.map(s => ({ label: s.prefix + (s.own ? " ★" : ""), detail: s.desc || s.body.split("\n")[0].slice(0, 60), run: () => { const r = v.state.selection.main; CM.autocomplete.snippet(s.body)(v, null, r.from, r.to); v.focus(); } })), T("Chọn snippet để chèn"));
+    QuickPick.pick(list.map(s => ({ label: s.prefix + (s.own ? " ★" : ""), detail: s.desc || s.body.split("\n")[0].slice(0, 60), run: () => insert(v, s.body) })), T("Chọn snippet để chèn"));
   }
 
   async function saveSelection() {
@@ -52,5 +52,10 @@ const Snippets = (() => {
     QuickPick.pick(mine.map(s => ({ label: "🗑 " + s.prefix, detail: s.lang || "*", run: async () => { mine = mine.filter(x => x !== s); if (await store()) StatusBar.msg(T("Đã xoá snippet “{prefix}”.", { prefix: s.prefix }), "good"); } })), T("Chọn snippet của bạn để xoá"));
   }
 
-  return { load, extension, source, pick, saveSelection, pickDelete, BUILT };
+  // My library: the user's list, replaced whole (import / delete); false when storage failed.
+  const own = async () => { await load(); return mine; };
+  async function putAll(list) { await load(); const was = mine; mine = list.slice(0, 500); if (await store()) return true; mine = was; return false; }
+  const insert = (v, body) => { const r = v.state.selection.main; CM.autocomplete.snippet(body)(v, null, r.from, r.to); v.focus(); };
+
+  return { load, extension, source, pick, saveSelection, pickDelete, BUILT, own, putAll, insert, forLang };
 })();

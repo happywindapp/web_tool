@@ -55,7 +55,6 @@ I18n.add({
   "Lần kết nối trước không thành công. Sơ đồ vẫn còn nguyên trong trình duyệt.": "The last connection failed. Your diagram is still safe in this browser.",
   "🌐 Kết nối draw.io": "🌐 Connect draw.io",
   "Đừng dùng tab này cho sơ đồ chứa thông tin nội bộ. Năm tab còn lại chạy hoàn toàn trên máy bạn.": "Do not use this tab for diagrams with internal information. The other five tabs run entirely on your machine.",
-  "Kéo để di chuyển, lăn chuột để phóng to/thu nhỏ. Mermaid, PlantUML, DBML, D2, Structurizr chạy hoàn toàn trên máy bạn, không gửi dữ liệu đi đâu; riêng draw.io cần kết nối embed.diagrams.net sau khi bạn đồng ý. Nháp và lịch sử chỉ lưu trong trình duyệt này.": "Drag to pan, scroll to zoom. Mermaid, PlantUML, DBML, D2 and Structurizr run entirely on your machine and send no data anywhere; only draw.io connects to embed.diagrams.net, after you agree. Drafts and history are stored only in this browser.",
   "Tác giả:": "Author:",
   "Lịch sử phiên bản (lưu trên trình duyệt này)": "Version history (stored in this browser)",
   "Lưu bản hiện tại": "Save current version",

@@ -58,7 +58,7 @@
   <button id="dictBtn" title="Đặt tên cho tag riêng của công ty, ý nghĩa giá trị, tag nhạy cảm, tag nối lệnh cha–con (CSV, lưu trong trình duyệt)">📖 Từ điển riêng…</button>
   <button id="mask" title="Chọn nhóm dữ liệu cần che (tài khoản, mật khẩu, thành viên, CompID, số hiệu lệnh, Text) — dùng trước khi chia sẻ">🕶 Che dữ liệu…</button>
   <button id="clear" data-pane-go="0">Xoá</button>
-  <span class="muted hint">Ctrl+↑/↓ chọn message · giữ Alt + rê chuột trên ô nhập để tra tag · dữ liệu không rời khỏi máy</span>
+  <span class="muted hint">Ctrl+↑/↓ chọn message · giữ Alt + rê chuột trên ô nhập để tra tag</span>
 </div>
 <div class="seg pane-switch"><button>Dữ liệu FIX</button><button>Bảng message</button><button>Chi tiết message</button></div>
 <main class="work pane-scroller">
@@ -95,12 +95,10 @@
     <div class="scroll" id="detail" data-i18n-skip></div>
   </section>
 </main>
-<footer class="status" id="status"></footer>
+<footer class="status foot-row"><span id="status"></span>
+  <!-- @include ../data-workbench/partials/author-credit-in-footer.html -->
+</footer>
 <dialog id="dlg"></dialog>
-<div class="author">
-  <span>Tác giả:</span><b><a href="https://happywindapp.github.io/CV/cv_quan_phan.html">Phan Ngọc Minh Quân</a></b>
-  <span>GitHub Source:</span><a href="https://github.com/happywindapp/web_tool/">github.com/happywindapp/web_tool</a>
-</div>
 <script>
 "use strict";
 // @include ../data-workbench/js/core/i18n-ui-language-vi-en.js

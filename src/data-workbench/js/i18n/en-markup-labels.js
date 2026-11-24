@@ -43,7 +43,7 @@ I18n.add({
   "Tải về": "Download",
   "Đưa kết quả sang ô bên trái để sửa tiếp": "Move the result to the left pane to keep editing",
   "← Dùng kết quả": "← Use result",
-  "Bấm vào một dòng lỗi để nhảy tới vị trí đó. Tự sửa lỗi là “đoán” ý định ban đầu, nên luôn đọc lại danh sách thay đổi. Nháp được lưu trong trình duyệt của máy này.": "Click an error line to jump to it. Auto-fixing “guesses” the original intent, so always review the list of changes. Drafts are saved in this browser on this machine.",
+  "Bấm vào một dòng lỗi để nhảy tới vị trí đó. Tự sửa lỗi là “đoán” ý định ban đầu, nên luôn đọc lại danh sách thay đổi.": "Click an error line to jump to it. Auto-fixing “guesses” the original intent, so always review the list of changes.",
   "Từ": "From",
   "Sang": "To",
   "Đưa kết quả về ô nguồn và đảo chiều chuyển đổi": "Move the result back to the source and reverse the conversion",

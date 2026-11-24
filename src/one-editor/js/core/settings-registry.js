@@ -1,9 +1,9 @@
 // Settings registry (pure, node test): each entry borrows get / set from the module that holds the value, so the ⚙ Settings tab and the old switches are one value; groups, search (Vietnamese + English, accents ignored), defaults, change listeners.
 const Settings = (() => {
   const GROUPS = [["explorer", "Explorer & tab folder"], ["editor", "Editor"], ["keys", "Phím tắt"], ["preview", "Preview & dịch"], ["data", "Dữ liệu đã lưu"]];
-  const TYPES = new Set(["bool", "choice", "number", "info"]), list = [], listeners = [];
+  const TYPES = new Set(["bool", "choice", "number", "text", "info"]), list = [], listeners = [];
 
-  // e: { id, group, label, hint, type: "bool" | "choice" | "number" | "info", get(), set(v), def, choices() → [[value, label]], min, max, actions() → [[label, run]] }.
+  // e: { id, group, label, hint, type: "bool" | "choice" | "number" | "text" | "info", get(), set(v), def, choices() → [[value, label]], min, max, actions() → [[label, run]] }.
   function add(e) {
     if (!e?.id || list.some(x => x.id === e.id)) throw new Error("Settings: bad or duplicate id " + e?.id);
     if (!GROUPS.some(g => g[0] === e.group) || !TYPES.has(e.type || "bool")) throw new Error("Settings: bad group / type for " + e.id);

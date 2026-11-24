@@ -52,8 +52,10 @@ const GitStatusModel = (() => {
     if (await packBytes(fs) > MAX_PACK_BYTES) throw Object.assign(new Error("pack > " + MAX_PACK_BYTES), { code: "EBIGPACK" });
     fs.setIndex(await indexStats(git, fs, cache));
     const rows = await git.statusMatrix({ fs, dir: "/", cache, refresh: false });
-    return { ...build(rows), ms: Date.now() - t0 };
+    const branch = await git.currentBranch({ fs, dir: "/", fullname: false }).catch(() => null);
+    const oid = branch ? "" : await git.resolveRef({ fs, dir: "/", ref: "HEAD" }).catch(() => "");
+    return { ...build(rows), branch, oid, ms: Date.now() - t0 };
   }
 
-  return { code, build, lookup, scan, MAX_PACK_BYTES };
+  return { code, build, lookup, scan, packBytes, MAX_PACK_BYTES };
 })();

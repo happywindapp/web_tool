@@ -92,5 +92,8 @@ const Macro = (() => {
     if (name && saved[name]) { last = saved[name]; play(1); }
   }
 
-  return { init, typed, toggle, play, playN, save, runSaved, set: steps => { last = steps; }, get recording() { return !!rec; } };
+  const list = () => saved;
+  async function putAll(map) { if (!(await NotesDb.putMeta("macros", map))) throw new Error(T("trình duyệt chặn IndexedDB")); saved = map; }
+
+  return { init, typed, toggle, play, playN, save, runSaved, list, putAll, load, set: steps => { last = steps; }, get recording() { return !!rec; } };
 })();

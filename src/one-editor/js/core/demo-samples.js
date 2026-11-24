@@ -1,4 +1,4 @@
-// Demo payloads (same shape as a share link) for the "Thử mẫu…" dropdown and ?demo=<key>; content is fake and in English.
+// Demo payloads (same shape as a share link) for the "Samples" dropdown and ?demo=<key>; content is fake and in English.
 const DEMOS = (() => {
   const ORDERS_JS = `// Order book helpers (sample)
 const FEE_RATE = 0.0015;

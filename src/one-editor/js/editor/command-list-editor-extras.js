@@ -15,7 +15,7 @@ function registerEditorExtraCommands(C, doc, hasDoc) {
     C("aid-" + id, label, null, X(() => Aids.toggle(id)));
   C("expandSel", "Mở rộng vùng chọn theo cú pháp", "Alt+Shift+ArrowRight", X(() => Aids.expand(Views.activeView())), hasDoc);
   C("shrinkSel", "Thu hẹp vùng chọn (ngược lại lần mở rộng)", "Alt+Shift+ArrowLeft", X(() => Aids.shrink(Views.activeView())), hasDoc);
-  C("outline", "Outline: danh sách hàm / class / tiêu đề của tab (sidebar)", null, () => SideBar.show("outline"));
+  C("outline", "Outline: danh sách hàm / class / tiêu đề của tab (sidebar)", null, () => SidePanels.show("outline"));
   C("noteLock", "Ghi chú: đặt mật khẩu (lưu mã hoá AES-GCM)…", null, X(() => Locks.lock(Docs.root(doc()))), note);
   C("noteRelock", "Ghi chú: khoá lại ngay (ẩn nội dung)", null, X(() => Locks.relock(Docs.root(doc()))), note);
   C("noteUnlock", "Ghi chú: mở khoá…", null, X(() => Locks.unlock(Docs.root(doc()))), note);

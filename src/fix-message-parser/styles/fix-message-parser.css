@@ -1,4 +1,4 @@
-  body { grid-template-rows:auto auto 1fr auto auto; }
+  body { grid-template-rows:auto auto 1fr auto; }
   .toolbar { padding:6px 16px; }
   .toolbar .hint { margin-left:auto; font-size:12px; }
   .work { grid-template-columns:minmax(0, 3fr) minmax(320px, 2fr); }

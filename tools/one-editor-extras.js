@@ -2662,7 +2662,7 @@ I18n.add({
   "Lưu dữ liệu + bộ lọc + ghi chú + chuỗi lệnh + bố cục cột vào trình duyệt này": "Save data + filters + annotations + order chain + column layout in this browser",
   "Mở lại một phân tích đã lưu trong trình duyệt này": "Reopen an analysis saved in this browser",
   "Xoá phân tích đang mở khỏi trình duyệt": "Delete the open analysis from the browser",
-  "Ctrl+↑/↓ chọn message · giữ Alt + rê chuột trên ô nhập để tra tag · dữ liệu không rời khỏi máy": "Ctrl+↑/↓ select message · hold Alt and hover the paste box to look up a tag · data never leaves your machine",
+  "Ctrl+↑/↓ chọn message · giữ Alt + rê chuột trên ô nhập để tra tag": "Ctrl+↑/↓ select message · hold Alt and hover the paste box to look up a tag",
   "Có ghi chú": "Annotated",
   "📝 Ghi chú cho message này — đi kèm link chia sẻ, phân tích đã lưu và file xuất": "📝 Annotation for this message — travels with share links, saved analyses and exports",
   "Ghi chú": "Annotation",
@@ -7069,7 +7069,10 @@ const BatchUi = (() => {
 
   // Labels are built in the UI language: rebuilt (and reopened) when it changes.
   I18n.onChange(() => { if (!dlg) return; const was = dlg.open; dlg.remove(); dlg = null; if (was) open(); });
-  return { open, run };
+  // My library: the saved sets, replaced whole (import / delete).
+  const listSets = () => loadSets().then(() => sets);
+  async function putSets(list) { await loadSets(); const was = sets; sets = list.map(s => ({ name: String(s.name).slice(0, 80), rules: BatchRules.clean(s.rules) })).slice(0, MAX_SETS); try { await storeSets(); } catch (e) { sets = was; throw e; } if (dlg) drawSets(); }
+  return { open, run, listSets, putSets };
 })();
 // Invisible / look-alike characters, pure: zero-width + BOM + bidi (Cf), odd spaces (Zs ≠ space), control chars (Cc ≠ tab / LF / CR), line separators, Cyrillic / Greek letters inside Latin words.
 const Invisible = (() => {
@@ -7561,7 +7564,9 @@ const RecipeOp = (() => {
     StatusBar.msg(T("🔗 Đã chép link recipe ({n} ký tự) — mở link là chạy lại đúng các bước.", { n: I18n.num(url.length) }) + (url.length > 60000 ? " " + T("Link dài — vài ứng dụng chat có thể cắt mất.") : ""), ok ? "good" : "warn");
   }
 
-  return { run, set, steps, load, save, drop, share };
+  // My library: replaced whole (import / delete), untrusted steps cleaned.
+  async function putAll(list) { const next = list.map(r => ({ name: String(r.name).slice(0, 80), steps: RecipeRun.clean(r.steps) })).slice(0, MAX_SAVED); await store(next); saved = next; }
+  return { run, set, steps, load, save, drop, share, putAll };
 })();
 // Recipe pane: steps (drag ⠿ or ↑ ↓ to reorder, on / off, args, ✔ / ✖ per step), "+ add step", saved recipes, 🔗 link, then the output. Text nodes only.
 const PvRecipe = {

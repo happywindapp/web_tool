@@ -19,7 +19,7 @@ const Locks = (() => {
 
   // Shows new text in the tab (read-only while locked), like a file re-read from disk.
   function show(doc, text, readOnly) {
-    Object.assign(doc, { text, state: null, readOnly, langApplied: null });
+    Object.assign(doc, { text, state: null, marks: Bookmarks.linesOf(doc), readOnly, langApplied: null });
     const gi = Views.where(doc.id);
     if (gi >= 0 && Views.groups[gi].active === doc.id) Views.activate(gi, doc.id, false);
     Docs.update(doc, {});

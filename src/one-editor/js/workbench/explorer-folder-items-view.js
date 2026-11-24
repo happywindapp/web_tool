@@ -243,5 +243,5 @@ const FolderItems = (() => {
   const tabIn = gi => (gi >= 0 && gi < Views.count ? tabs.get(Views.groups[gi].active) || null : null);
   const api = { find: root => [...tabs.values()].find(x => x.ui.root === root), selected, back, goUp, open, navigate, openAll, paint, goPath, tabIn, show, reload: t => { t.failed = null; ExplorerDisk.reload(t.node); } };
   [FolderKeys, FolderMiller, FolderHotlist, FolderFlat, DualPanel].forEach(m => m.init(api));
-  return { show, mount, sync, duplicate, saved, adopt, isShown, current: shownFolder, openNew, reveal, tabIn };
+  return { show, mount, sync, duplicate, saved, adopt, isShown, current: shownFolder, openNew, reveal, tabIn, nodeOf: docId => tabs.get(docId)?.node || null };
 })();

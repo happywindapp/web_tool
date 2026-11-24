@@ -75,7 +75,7 @@ const CmSetup = (() => {
       V.EditorView.clickAddsSelectionRange.of(e => e.altKey || e.ctrlKey || e.metaKey), L.indentUnit.of(indent || "  "),
       V.highlightActiveLine(), F.highlightSelectionMatches(), F.search({ top: true }),
       V.keymap.of([...A.closeBracketsKeymap, ...K.defaultKeymap, ...F.searchKeymap, ...K.historyKeymap, ...L.foldKeymap, ...A.completionKeymap, K.indentWithTab]),
-      Bookmarks.extension(), TokenStyles.extension(), RainbowCsv.extension(), LogFixMarks.extension(), FixHover.extension(), CompareDeco.field, MixedEol.field, comp.compare.of([]), comp.lang.of([]), comp.ro.of(readOnly ? [S.EditorState.readOnly.of(true)] : []),
+      Bookmarks.extension(), ClipHistory.extension(), TokenStyles.extension(), RainbowCsv.extension(), LogFixMarks.extension(), FixHover.extension(), CompareDeco.field, MixedEol.field, comp.compare.of([]), comp.lang.of([]), comp.ro.of(readOnly ? [S.EditorState.readOnly.of(true)] : []),
       ...[comp.wrap, comp.theme, comp.phrases, comp.minimap, comp.guides, comp.hidden, comp.numHover, comp.lint, comp.words].map(c => c.of([])),
       V.EditorView.updateListener.of(u => { if (onUpdate) onUpdate(u); SearchInSelection.decorate(u.view); if (u.docChanged && u.transactions.some(tr => tr.isUserEvent("input.paste"))) PowerTools.pasted(u); }),
     ];

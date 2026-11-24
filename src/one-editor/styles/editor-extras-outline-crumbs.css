@@ -6,7 +6,7 @@
   @media (prefers-color-scheme: dark) { :root:not([data-theme=light]) .brk0 { color:#fbbf24; } :root:not([data-theme=light]) .brk1 { color:#e879f9; } :root:not([data-theme=light]) .brk2 { color:#60a5fa; } }
   :root[data-theme=dark] .brk0 { color:#fbbf24; } :root[data-theme=dark] .brk1 { color:#e879f9; } :root[data-theme=dark] .brk2 { color:#60a5fa; }
   .oe-swatch { display:inline-block; width:0.8em; height:0.8em; margin:0 3px 0 1px; vertical-align:-0.05em; border:1px solid var(--muted); border-radius:2px; }
-  #outline { flex:1; overflow:auto; min-height:0; padding:4px 0; }
+  #outline, #bmList, .side-list { flex:1; overflow:auto; min-height:0; padding:4px 0; }
   .ol-item { display:block; width:100%; text-align:left; border:0; border-radius:0; background:transparent; padding:3px 8px; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font:12.5px Consolas, "Cascadia Mono", monospace; }
   .ol-item:hover { background:var(--hover); }
   .ol-item.on { background:color-mix(in srgb, var(--acc) 18%, transparent); font-weight:600; }

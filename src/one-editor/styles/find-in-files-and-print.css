@@ -26,3 +26,22 @@
     #printOut .pv-table th { position:static; }
     #printOut .pv-table td, #printOut .pv-table th { white-space:pre-wrap; max-width:none; }
   }
+  /* Side panels: nested groups (Git repo → status), severity and Git status colours. */
+  .sx-file .sx-file > summary { padding-left:16px; }
+  .sx-file .sx-file .sx-hit { padding-left:34px; }
+  .pb-sev.error, .gt-d > summary .sx-doc { color:var(--bad); } .pb-sev.warning, .gt-m > summary .sx-doc { color:var(--warn); }
+  .gt-a > summary .sx-doc { color:var(--good); } .gt-u > summary .sx-doc { color:var(--muted); }
+  .pb-src, .gt-dir { color:var(--muted); }
+  #pbStatus { flex:1 1 100%; font-size:12px; }
+  .todo-tag { padding:0 4px; border-radius:4px; font-size:11px; font-weight:600; }
+  .todo-bad.todo-tag, .todo-bad > summary .sx-doc { color:var(--bad); } .todo-warn.todo-tag, .todo-warn > summary .sx-doc { color:var(--warn); } .todo-acc.todo-tag, .todo-acc > summary .sx-doc { color:var(--acc); }
+  .todo-tag.todo-bad { background:color-mix(in srgb, var(--bad) 12%, transparent); } .todo-tag.todo-warn { background:color-mix(in srgb, var(--warn) 12%, transparent); } .todo-tag.todo-acc { background:color-mix(in srgb, var(--acc) 12%, transparent); }
+  .tl-name { flex:1 1 auto; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--muted); font-size:12px; }
+  #tdStatus { flex:1 1 auto; min-width:0; }
+  .ex-bar-btn[aria-pressed="true"] { background:color-mix(in srgb, var(--acc) 20%, var(--btn)); border-color:var(--acc); }
+  .cb-item { display:flex; flex-direction:column; align-items:flex-start; gap:1px; }
+  .cb-text { display:block; max-width:100%; overflow:hidden; white-space:pre; text-overflow:ellipsis; }
+  .cb-meta { font-family:system-ui, sans-serif; }
+  .cb-pin { box-shadow:inset 2px 0 0 var(--warn); }
+  .ex-act[aria-pressed="true"] { color:var(--warn); }
+  #gtFilter, #pbFilter, #tdFilter, #cbFilter, #lbFilter { flex:1 1 4em; }

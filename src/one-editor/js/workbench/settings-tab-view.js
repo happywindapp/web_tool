@@ -45,9 +45,10 @@ const SettingsTab = (() => {
       sel.onchange = () => apply(e, sel, sel.value);
       return sel;
     }
-    if (e.type === "number") {
-      const box = el("input", "st-num");
-      Object.assign(box, { type: "number", min: e.min ?? "", max: e.max ?? "", step: 1, onchange: () => apply(e, box, box.value) });
+    if (e.type === "number" || e.type === "text") {
+      const box = el("input", "st-" + (e.type === "text" ? "txt" : "num"));
+      Object.assign(box, e.type === "text" ? { type: "text", spellcheck: false } : { type: "number", min: e.min ?? "", max: e.max ?? "", step: 1 });
+      box.onchange = () => apply(e, box, box.value);
       box.setAttribute("aria-label", label);
       return box;
     }

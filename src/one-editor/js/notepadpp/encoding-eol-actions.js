@@ -16,7 +16,7 @@ const EncodingActions = (() => {
     if (doc.dirty && !confirm(T("“{name}” chưa lưu. Mở lại sẽ bỏ thay đổi — tiếp tục?", { name: doc.name }))) return;
     try {
       const file = doc.file || await doc.handle.getFile(), r = await LocalFs.readText(file, enc);
-      Object.assign(doc, { text: r.text, state: null, eol: r.eol, eolMixed: r.eolMixed, eolList: r.eolList, bom: r.bom, enc: r.enc, readOnly: r.readOnly, dirty: false, langApplied: null });
+      Object.assign(doc, { text: r.text, state: null, marks: Bookmarks.linesOf(doc), eol: r.eol, eolMixed: r.eolMixed, eolList: r.eolList, bom: r.bom, enc: r.enc, readOnly: r.readOnly, dirty: false, langApplied: null });
       const gi = Views.where(doc.id);
       if (gi >= 0) { Views.groups[gi].active = null; Views.activate(gi, doc.id, false); }
       Docs.update(doc, {}, "dirty");

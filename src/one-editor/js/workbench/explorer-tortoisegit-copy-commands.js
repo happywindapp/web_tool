@@ -28,5 +28,5 @@ const TortoiseCmd = (() => {
     return [TabMenu.entry(T("Sao chép lệnh TortoiseGit…"), "", () => { const r = head.getBoundingClientRect(); show(node, r.left + 16, r.bottom); })];
   }
 
-  return { entries, command };
+  return { entries, command, show };
 })();

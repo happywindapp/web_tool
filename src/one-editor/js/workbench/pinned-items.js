@@ -66,7 +66,18 @@ const Pinned = (() => {
     if (r.kind === "note") toggleNote(r); else toggleHandle(r.handle);
   }
 
-  async function open(p) {
+  // The header "+": pins the active tab's note / file / folder (never unpins, unlike toggleDoc).
+  async function addActive() {
+    const d = Views.activeDoc(), it = d && Groups.ofDoc(d);
+    if (!d) { StatusBar.msg(T("Chưa có tab nào đang chọn."), "warn"); return; }
+    if (!ready || !it) { StatusBar.msg(T("Tab này không ghim được: chỉ ghi chú, file / folder trên máy (Chrome / Edge) và folder mở từ link."), "warn"); return; }
+    const has = it.kind === "note" ? list.some(p => p.kind === "note" && p.id === it.id) : it.kind === "cloud" ? hasCloud(it.link) : !!(await find(it.handle));
+    if (has) { StatusBar.msg(T("“{name}” đã có trong mục Đã ghim.", { name: nameOf(it) }), "warn"); return; }
+    if (it.kind === "note") toggleNote(Docs.get(it.id)); else if (it.kind === "cloud") toggleCloud(it); else toggleHandle(it.handle);
+  }
+
+  // gone: what to do when the entry left the disk (a group removes it from itself).
+  async function open(p, gone = () => { remove(p); StatusBar.msg(T("“{name}” không còn trên đĩa — đã bỏ ghim.", { name: p.name }), "warn"); }) {
     if (p.kind === "note") { const d = Docs.get(p.id); if (d) Explorer.openNote(d); return; }
     if (p.kind === "cloud") { await Actions.openCloudFolder(p.link); return; }
     try {
@@ -76,10 +87,10 @@ const Pinned = (() => {
       Explorer.setRoot(LocalFs.fromHandle(p.handle));
       StatusBar.msg(T("Đã mở folder “{name}”.", { name: p.name }), "good");
     } catch (e) {
-      if (e.name === "NotFoundError") { remove(p); StatusBar.msg(T("“{name}” không còn trên đĩa — đã bỏ ghim.", { name: p.name }), "warn"); }
+      if (e.name === "NotFoundError") gone();
       else StatusBar.msg(T("Không mở được “{name}”: {msg}", { name: p.name, msg: e.message }), "bad");
     }
   }
 
-  return { init, items: () => list, nameOf, hasNote, hasCloud, canPin, find, renamed, toggleHandle, toggleNote, toggleCloud, toggleDoc, open, remove };
+  return { init, items: () => list, valid, addActive, nameOf, hasNote, hasCloud, canPin, find, renamed, toggleHandle, toggleNote, toggleCloud, toggleDoc, open, remove };
 })();

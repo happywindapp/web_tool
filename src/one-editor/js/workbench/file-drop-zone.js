@@ -32,8 +32,9 @@ const FileDrop = (() => {
     document.addEventListener("dragover", e => {
       if (!isFiles(e) && !isTab(e)) return;
       e.preventDefault();
-      e.dataTransfer.dropEffect = isTab(e) ? "move" : "copy";
-      mark(isFiles(e) && ExplorerDnd.takesFiles(e.target) ? null : e.target.closest?.(".group, #explorerPane") || null);
+      const grp = isTab(e) && Groups.dropSec(e.target);
+      e.dataTransfer.dropEffect = isTab(e) && !grp ? "move" : "copy";
+      mark(grp || (isFiles(e) && ExplorerDnd.takesFiles(e.target) ? null : e.target.closest?.(".group, #explorerPane") || null));
     }, true);
     document.addEventListener("dragleave", e => { if (!e.relatedTarget) mark(null); }, true);
     document.addEventListener("dragend", () => mark(null), true);
@@ -44,6 +45,8 @@ const FileDrop = (() => {
       e.stopPropagation();
       mark(null);
       const g = e.target.closest?.(".group"), gi = g ? +g.dataset.group : -1;
+      const grp = Groups.dropSec(e.target);
+      if (isTab(e) && grp) { Groups.dropDoc(grp, e.dataTransfer.getData(TabStrip.TAB_TYPE)); return; }
       if (isTab(e)) { if (gi >= 0) Views.move(e.dataTransfer.getData(TabStrip.TAB_TYPE), gi); return; }
       const items = takeItems(e.dataTransfer);
       if (ExplorerDnd.dropFiles(e.target, items)) return;

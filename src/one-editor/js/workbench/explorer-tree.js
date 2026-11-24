@@ -17,12 +17,9 @@ const Explorer = (() => {
     s.append(b);
     return s;
   }
-  function section(title, rows, tools = []) {
-    const s = el("section", "ex-sec"), h = el("h3");
-    h.append(el("span", "", title), ...tools);
-    s.append(h, ...rows);
-    return s;
-  }
+  const section = (...a) => ExplorerSections.section(...a);
+  // groupItem: what "Thêm vào group ▸" of the row menu adds.
+  const tagRow = (r, item) => { r.groupItem = item; return r; };
   function fileIcon(name) {
     const id = LangDetect.byName(name);
     if (/\.(png|jpe?g|gif|webp|bmp|ico)$/i.test(name)) return "🖼";
@@ -100,42 +97,65 @@ const Explorer = (() => {
     };
     const r = row("📝 " + d.name, T("Mở ghi chú"), () => openNote(d), [pinAct(Pinned.hasNote(d), T(PIN_ITEM), () => Pinned.toggleNote(d))]);
     r.menuExtra = [[T("Đổi tên…"), () => TabStrip.rename(d)], [T("Xoá"), del]];
-    return r;
+    return tagRow(r, { kind: "note", id: d.id });
   }
 
-  function pinnedSection(hit) {
+  // A pinned or grouped item (folder / file / note / cloud link) with its ✕ button.
+  function itemRow(p, open, unTitle, un) {
+    const icon = p.kind === "dir" ? "📁" : p.kind === "cloud" ? "☁" : p.kind === "note" ? "📝" : fileIcon(p.name);
+    const title = T(p.kind === "dir" || p.kind === "cloud" ? "Mở folder này trong Explorer" : p.kind === "note" ? "Mở ghi chú" : "Mở file");
+    return tagRow(row(icon + " " + Pinned.nameOf(p), title, open, [btn("ex-act", "✕", unTitle, un)]), p);
+  }
+
+  const addTabBtn = run => btn("ex-act", "+", T("Thêm tab đang chọn vào đây"), run);
+  // Always shown (its "+" pins the active tab); hidden only while a filter matches nothing in it.
+  function pinnedSection(hit, q) {
     const items = Pinned.items().filter(p => hit(Pinned.nameOf(p)));
-    const icon = p => p.kind === "dir" ? "📁" : p.kind === "cloud" ? "☁" : p.kind === "note" ? "📝" : fileIcon(p.name);
-    const title = p => T(p.kind === "dir" || p.kind === "cloud" ? "Mở folder này trong Explorer" : p.kind === "note" ? "Mở ghi chú" : "Mở file");
-    return items.length ? section(T("Đã ghim"), items.map(p => row(icon(p) + " " + Pinned.nameOf(p), title(p), () => Pinned.open(p), [btn("ex-act", "✕", T("Bỏ ghim"), () => Pinned.remove(p))]))) : null;
+    if (q && !items.length) return null;
+    const rows = items.length ? items.map(p => itemRow(p, () => Pinned.open(p), T("Bỏ ghim"), () => Pinned.remove(p)))
+      : [el("p", "ex-empty", T("Chưa ghim mục nào — bấm + để ghim tab đang chọn, hoặc 📌 trên file / folder / ghi chú."))];
+    return section("pinned", T("Đã ghim"), rows, [addTabBtn(() => Pinned.addActive())]);
+  }
+
+  // Groups without a filter match hide while filtering, like Pinned.
+  function groupSection(g, hit, q) {
+    const items = g.items.filter(p => hit(Pinned.nameOf(p)));
+    if (q && !items.length) return null;
+    const rows = items.length ? items.map(p => itemRow(p, () => Groups.open(g, p), T("Bỏ khỏi group"), () => Groups.removeItem(g, p)))
+      : [el("p", "ex-empty", T("Group trống — kéo file / folder / tab vào đây, hoặc chuột phải ▸ Thêm vào group."))];
+    const s = section("g:" + g.id, "🗂 " + g.name, rows, [addTabBtn(() => Groups.addActive(g)), btn("ex-act", "⋯", T("Thao tác group: thêm tab, chuyển lên / xuống, đổi tên, xoá"), e => Groups.groupMenu(g, e.currentTarget))]);
+    if (s) s.dataset.group = g.id;
+    return s;
   }
 
   function recentSection(hit) {
     const items = RecentFiles.list().filter(r => hit(r.name));
-    const rows = items.map(r => row(fileIcon(r.name) + " " + r.name, T("Mở lại — lần mở trước: {at}", { at: new Date(r.at).toLocaleString(I18n.lang) }), () => RecentFiles.open(r),
-      [pinAct(false, T(PIN_ITEM), () => Pinned.toggleHandle(r.handle)), btn("ex-act", "✕", T("Bỏ khỏi danh sách"), () => RecentFiles.remove(r))]));
+    const rows = items.map(r => tagRow(row(fileIcon(r.name) + " " + r.name, T("Mở lại — lần mở trước: {at}", { at: new Date(r.at).toLocaleString(I18n.lang) }), () => RecentFiles.open(r),
+      [pinAct(false, T(PIN_ITEM), () => Pinned.toggleHandle(r.handle)), btn("ex-act", "✕", T("Bỏ khỏi danh sách"), () => RecentFiles.remove(r))]), Groups.ofHandle(r.handle)));
     const empty = LocalFs.canPick ? T("Chưa có file nào mở gần đây.") : T("Trình duyệt này không giữ được file để mở lại (cần Chrome / Edge).");
-    return section(T("Gần đây"), rows.length ? rows : [el("p", "ex-empty", empty)], items.length ? [btn("ex-act", "🗑", T("Xoá danh sách Gần đây"), () => RecentFiles.clear())] : []);
+    return section("recent", T("Gần đây"), rows.length ? rows : [el("p", "ex-empty", empty)], items.length ? [btn("ex-act", "🗑", T("Xoá danh sách Gần đây"), () => RecentFiles.clear())] : []);
   }
 
   // Shown only while the recycle bin holds something.
   function trashSection() {
     const s = TrashStore.summary();
-    return s?.n ? section(T("Thùng rác"), [row("🗑 " + T("{n} mục · {size}", { n: s.n, size: FolderFmt.size(s.size) }), T("Mở thùng rác — khôi phục file đã xoá"), () => TrashTab.open())]) : null;
+    return s?.n ? section("trash", T("Thùng rác"), [row("🗑 " + T("{n} mục · {size}", { n: s.n, size: FolderFmt.size(s.size) }), T("Mở thùng rác — khôi phục file đã xoá"), () => TrashTab.open())]) : null;
   }
 
   function draw() {
     raf = 0;
     const q = filter.value.trim().toLowerCase(), hit = s => !q || s.toLowerCase().includes(q);
+    ExplorerSections.setFiltering(!!q);
     const open = Views.groups.flatMap(g => g.tabs.map(id => [g.i, Docs.get(id)])).filter(([, d]) => d && hit(d.name));
     const notes = Docs.notes().filter(d => hit(d.name)).sort((a, b) => Pinned.hasNote(b) - Pinned.hasNote(a) || b.updated - a.updated);
     const refreshBtn = () => btn("ex-act", "🔄", T("Làm mới từ đĩa: đọc lại folder và các file bị sửa bên ngoài"), () => DiskSync.checkAll());
     const tabPin = d => pinAct(d.pinned, T(d.pinned ? "Bỏ ghim tab" : "Ghim tab (luôn ở đầu view, hỏi lại trước khi đóng)"), () => Views.togglePin(d));
     const sections = [
-      pinnedSection(hit),
-      section(T("Đang mở"), open.length ? open.map(([gi, d]) => row(TabStrip.ICON[d.kind] + " " + d.name + (d.dirty ? " ●" : "") + (d.diskChanged ? " ⚠" : ""), T("View {n}", { n: gi + 1 }), () => { Views.activate(gi, d.id); PhoneLayout.show(gi + 1); }, [tabPin(d)]))
+      pinnedSection(hit, q),
+      ...Groups.list().map(g => groupSection(g, hit, q)),
+      section("open", T("Đang mở"), open.length ? open.map(([gi, d]) => tagRow(row(TabStrip.ICON[d.kind] + " " + d.name + (d.dirty ? " ●" : "") + (d.diskChanged ? " ⚠" : ""), T("View {n}", { n: gi + 1 }), () => { Views.activate(gi, d.id); PhoneLayout.show(gi + 1); }, [tabPin(d)]), Groups.ofDoc(d)))
         : [el("p", "ex-empty", T("Chưa mở tab nào."))], Docs.list().some(d => d.kind === "file" && d.handle) ? [refreshBtn()] : []),
-      section(T("Ghi chú"), notes.length ? notes.map(noteRow) : [el("p", "ex-empty", NotesDb.ok ? T("Chưa có ghi chú — bấm + để tạo.") : T("Trình duyệt chặn IndexedDB — ghi chú không được lưu."))],
+      section("notes", T("Ghi chú"), notes.length ? notes.map(noteRow) : [el("p", "ex-empty", NotesDb.ok ? T("Chưa có ghi chú — bấm + để tạo.") : T("Trình duyệt chặn IndexedDB — ghi chú không được lưu."))],
         [btn("ex-act", "+", T("Ghi chú mới (Alt+N)"), () => Actions.newNote(Views.focused))]),
       recentSection(hit),
       trashSection(),
@@ -147,16 +167,17 @@ const Explorer = (() => {
       showFiles.title = T("Hiện file trong cây folder (bỏ chọn ⇒ chỉ hiện folder) — tab folder vẫn liệt kê đủ file");
       showFiles.append(cb, T("Hiện file"));
       const tree = treeNode(root, hit);
-      sections.push(section(T("Folder"), [tree], [showFiles, ...(root.handle || root.remote ? [refreshBtn()] : []), btn("ex-act", "✕", T("Đóng folder"), () => setRoot(null))]));
+      sections.push(section("folder", T("Folder"), [tree], [showFiles, ...(root.handle || root.remote ? [refreshBtn()] : []), btn("ex-act", "✕", T("Đóng folder"), () => setRoot(null))]));
     } else {
       const again = saved ? [btn("ex-open", T("📂 Mở lại “{name}”", { name: saved.name }), T("Sau khi tải lại trang, trình duyệt cần bạn bấm để cho đọc lại folder này"), () => reopenSaved())] : [];
-      sections.push(section(T("Folder"), [...again, el("p", "ex-empty", T("Chưa mở folder. Kéo folder vào đây hoặc bấm:")), btn("ex-open", T("📂 Mở folder…"), T("Mở folder trên máy"), () => Actions.openFolder()),
+      sections.push(section("folder", T("Folder"), [...again, el("p", "ex-empty", T("Chưa mở folder. Kéo folder vào đây hoặc bấm:")), btn("ex-open", T("📂 Mở folder…"), T("Mở folder trên máy"), () => Actions.openFolder()),
         btn("ex-open", T("☁ Mở từ link Drive / OneDrive…"), T("Mở folder công khai Google Drive / OneDrive cá nhân"), () => Actions.openCloudFolder())]));
     }
     // The redraw replaces every row: keyboard focus returns to the row of the same node.
     const was = box.contains(document.activeElement) ? nodes.get(document.activeElement.closest(".ex-row, summary")) : null;
     box.replaceChildren(...sections.filter(Boolean));
     if (was) { const h = [...box.querySelectorAll(".ex-row, summary")].find(x => nodes.get(x) === was); (h?.matches("summary") ? h : h?.firstChild)?.focus({ preventScroll: true }); }
+    ExplorerSections.after();
     FolderItems.sync();
     ResultsTab.sync();
   }

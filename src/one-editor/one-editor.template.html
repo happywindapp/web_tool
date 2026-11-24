@@ -45,20 +45,21 @@
 </head>
 <body>
 <header class="top">
-  <a class="btn" href="../index.html">← Trang chủ</a>
-  <h1>One Editor</h1>
+  <a class="btn" href="../index.html">← Home</a>
+  <button id="btnRunTop" class="main" title="Chạy phép đã chọn trên tab đang mở — kết quả ra tab liên kết ở view kia (Ctrl+Enter)">▶ Chạy</button>
+  <h1><a class="app-title" href="one-editor.html" target="_blank" rel="noopener" title="Mở One Editor ở tab trình duyệt mới">One Editor</a></h1>
   <button class="more-toggle" title="Thêm thao tác" aria-expanded="false">⋯</button>
   <button id="btnShare" title="Chép link chứa các tab đang mở (dữ liệu nằm sau dấu #, không gửi lên máy chủ)">🔗 Chia sẻ link</button>
   <button id="btnOpenIn" title="Mở nội dung tab đang mở bằng tool khác (Data Workbench, FIX Parser, Diagram Editor, One Editor) ở tab trình duyệt mới — dữ liệu nằm sau dấu #, không gửi lên máy chủ" aria-haspopup="menu">↗ Mở bằng tool ▾</button>
   <label class="chk" title="Giao diện sáng / tối">Giao diện <select id="uiTheme"><option value="auto">Tự động</option><option value="light">Sáng</option><option value="dark">Tối</option></select></label>
+  <button id="btnToolbar" title="Ẩn / hiện thanh công cụ" aria-pressed="true">🧰 Công cụ</button>
   <button id="btnSettings" title="Cài đặt — mọi cài đặt của One Editor (Ctrl+,)">⚙ Cài đặt</button>
-  <button id="btnClear" title="Xoá mọi ghi chú và tab đã lưu trong IndexedDB của trình duyệt này">🗑 Xoá dữ liệu đã lưu</button>
+  <button id="btnClear" title="Xoá mọi ghi chú và tab đã lưu trong IndexedDB của trình duyệt này">🗑 Xoá dữ liệu</button>
   <span class="seg lang-switch" title="Ngôn ngữ"><span class="gc-views" title="Lượt truy cập (GoatCounter, cập nhật mỗi ~10 phút)" hidden></span><button data-lang="vi">VI</button><button data-lang="en">EN</button></span>
 </header>
 <div class="toolbar">
   <button id="btnRun" class="main" title="Chạy phép đã chọn trên tab đang mở — kết quả ra tab liên kết ở view kia (Ctrl+Enter)">▶ Chạy</button>
   <select id="opSel" title="Phép ▶ Chạy sẽ chạy — tự chọn theo ngôn ngữ của tab; chọn tay thì tab nhớ phép đó" data-i18n-skip></select>
-  <button id="btnExplorer" title="Ẩn / hiện Explorer (Ctrl+B)">☰</button>
   <button id="btnNew" title="Ghi chú mới — tự lưu trong trình duyệt (Alt+N)">+ Ghi chú</button>
   <button id="btnOpen" title="Mở file (Ctrl+O) hoặc folder trên máy — hoặc kéo-thả vào View 1 / View 2" aria-haspopup="menu">📂 Mở ▾</button>
   <button id="btnSave" title="Lưu (Ctrl+S): file → ghi đè lên đĩa; ghi chú → đã tự lưu trong trình duyệt">💾 Lưu</button>
@@ -78,31 +79,75 @@
   <button id="btnZoomOut" class="icon-btn" title="Thu nhỏ chữ (Ctrl+-, Ctrl+0 về mặc định)">A−</button>
   <button id="btnHidden" class="icon-btn" title="Hiện / ẩn mọi ký tự ẩn — dấu cách, Tab, xuống dòng (Show All Characters)" aria-pressed="false">¶</button>
   <button id="btnEnc" title="Bảng mã của tab — bấm để đọc lại file với bảng mã khác, chuyển sang bảng mã khác hoặc đổi kiểu xuống dòng (như menu Encoding của Notepad++)" aria-haspopup="menu" data-i18n-skip>—</button>
+  <button id="btnKeys" title="Bộ phím tắt của editor — bấm để đổi: Notepad++ · VS Code · Sublime Text (Vim bật / tắt trong ⌘ Lệnh)" data-i18n-skip></button>
   <span class="sep"></span>
   <button id="btnCompare" title="So sánh tab đang mở của 2 view — Alt+↓ / Alt+↑ nhảy giữa các khối khác (bấm lần nữa để tắt)">≠ So sánh</button>
   <button id="btnSwap" title="Đổi chỗ view đang chọn với view kế tiếp">⇆</button>
   <span class="sep"></span>
   <select id="layoutSel" title="Layout: 1 view · 2 cột · 3 cột · 2 hàng · lưới 2×2 (Alt+Shift+1/2/3/8/5) · 1x2 (1 view | 2 view trên dưới) · 2x1 (2 view trên dưới | 1 view)" data-i18n-skip></select>
   <select id="splitSel" class="desktop-only" title="Tỷ lệ view 50:50 · 25:75 · 75:25 — 2 cột, 1x2, 2x1, 2×2: độ rộng cột · 3 cột: 25:25:50 / 50:25:25 · 2 hàng: chiều cao (1 view ⇒ chuyển sang 2 cột)" data-i18n-skip></select>
-  <button id="btnFnList" title="Function List — hàm / class / tiêu đề của tab ở sidebar, bấm để nhảy tới (bấm lần nữa để ẩn)">ƒ Danh sách hàm</button>
+  <button id="btnFnList" title="Function List — hàm / class / tiêu đề của tab ở sidebar, bấm để nhảy tới (bấm lần nữa để ẩn)">ƒ Function</button>
   <button id="btnPalette" title="Command Palette — mọi lệnh và phím tắt (Ctrl+Shift+P; Ctrl+P mở nhanh, Ctrl+R symbol, Ctrl+G dòng)">⌘ Lệnh</button>
 </div>
 <div class="seg pane-switch"><button>Explorer</button><button>View 1</button><button>View 2</button><button hidden>View 3</button><button hidden>View 4</button></div>
 <main id="work" class="pane-scroller">
   <aside class="pane" id="explorerPane">
-    <nav class="activity" aria-label="Thanh hoạt động">
+    <nav class="activity" role="toolbar" aria-label="Thanh hoạt động">
+      <div class="act-top">
       <button data-side="explorer" class="on" title="Explorer — tab đang mở, ghi chú, gần đây, folder (Ctrl+Shift+E)">📁</button>
       <button data-side="search" title="Tìm / thay trong mọi tab, ghi chú và folder đang mở (Ctrl+Shift+F / Ctrl+Shift+H)">🔍</button>
       <button data-side="outline" title="Outline — hàm, class, tiêu đề của tab đang mở">☰</button>
+      <button data-side="bookmarks" title="Bookmark — mọi dòng đã đánh dấu trong tab, ghi chú và file (Ctrl+F2 đặt / bỏ, F2 / Shift+F2 tới cái kế / trước)">🔖</button>
+      <button data-side="git" title="Git — file đã đổi so với HEAD của repo trong folder Explorer, chỉ đọc (Ctrl+Shift+G)">⎇</button>
+      <button data-side="problems" title="Problems — lỗi / cảnh báo của mọi tab đang mở (Ctrl+Shift+M)">⚠</button>
+      <button data-side="timeline" title="Timeline — lịch sử cục bộ của tab đang chọn: so sánh, khôi phục">🕘</button>
+      <button data-side="todo" title="TODO / FIXME — các tag trong tab, ghi chú và folder đang mở">☑</button>
+      <button data-side="clipboard" title="Lịch sử clipboard — các đoạn đã chép / cắt, bấm để chèn vào con trỏ">📋</button>
+      <button data-side="library" title="Thư viện của tôi — snippet, macro, bộ thay hàng loạt, recipe; xuất / nhập file">🧩</button>
+      </div>
+      <div class="act-bottom">
+      <button data-act="trash" title="Thùng rác — file đã xoá trong Explorer, khôi phục được" hidden>🗑</button>
+      <button data-act="settings" title="Cài đặt — mọi cài đặt của One Editor (Ctrl+,)">⚙</button>
+      </div>
     </nav>
     <div class="side" data-side-panel="explorer">
-      <div class="bar"><b>Explorer</b><input id="exFilter" type="text" placeholder="Lọc theo tên…" spellcheck="false"></div>
+      <div class="bar"><b>Explorer</b><input id="exFilter" type="text" placeholder="Lọc theo tên…" spellcheck="false"><button id="exFoldAll" class="ex-bar-btn" title="Thu gọn tất cả mục">⊟</button><button id="exNewGroup" class="ex-bar-btn" title="Group mới (kiểu OneCommander): gom file / folder / tab hay dùng">🗂</button><button id="exViews" class="ex-bar-btn" title="Hiện / ẩn mục">⋯</button></div>
       <div class="ss-row" title="Phiên có tên: lưu / mở bộ tab + layout (lưu trong trình duyệt này)"><select id="ssSel" data-i18n-skip></select><button id="ssSave" title="Lưu các tab + layout thành phiên có tên">💾</button><button id="ssDel" title="Xoá phiên đang mở khỏi trình duyệt" hidden>🗑</button></div>
       <div id="explorer" data-i18n-skip></div>
     </div>
     <div class="side" data-side-panel="outline" hidden>
       <div class="bar"><b>Outline</b><input id="olFilter" type="text" placeholder="Lọc symbol…" spellcheck="false"></div>
       <div id="outline" data-i18n-skip></div>
+    </div>
+    <div class="side" data-side-panel="bookmarks" hidden>
+      <div class="bar"><b>Bookmark</b><input id="bmFilter" type="text" placeholder="Lọc theo tên file / nội dung dòng…" spellcheck="false"><button id="bmAdd" class="ex-bar-btn" title="Đặt / bỏ bookmark ở dòng con trỏ của tab đang chọn (Ctrl+F2)">＋</button><button id="bmClear" class="ex-bar-btn" title="Xoá mọi bookmark">🗑</button></div>
+      <div id="bmList" data-i18n-skip></div>
+    </div>
+    <div class="side" data-side-panel="git" hidden>
+      <div class="bar"><b>Git</b><input id="gtFilter" type="text" placeholder="Lọc theo đường dẫn file…" spellcheck="false"><button id="gtRefresh" class="ex-bar-btn" title="Quét lại trạng thái Git">↻</button></div>
+      <div id="gtList" class="side-list" data-i18n-skip></div>
+    </div>
+    <div class="side" data-side-panel="problems" hidden>
+      <div class="bar"><b>Problems</b><input id="pbFilter" type="text" placeholder="Lọc theo tên tab / nội dung lỗi…" spellcheck="false"><button id="pbRefresh" class="ex-bar-btn" title="Kiểm lại mọi tab đang mở">↻</button></div>
+      <div class="sx-form"><label class="chk" title="Hiện lỗi"><input id="pbErr" type="checkbox" checked> ✖ Lỗi</label><label class="chk" title="Hiện cảnh báo"><input id="pbWarn" type="checkbox" checked> ⚠ Cảnh báo</label><span id="pbStatus" class="muted" data-i18n-skip></span></div>
+      <div id="pbList" class="side-list" data-i18n-skip></div>
+    </div>
+    <div class="side" data-side-panel="timeline" hidden>
+      <div class="bar"><b>Timeline</b><span id="tlName" class="tl-name" data-i18n-skip></span><button id="tlSnap" class="ex-bar-btn" title="Chụp bản lịch sử ngay">📸</button><button id="tlClear" class="ex-bar-btn" title="Xoá lịch sử cục bộ của tab này">🧹</button></div>
+      <div id="tlList" class="side-list" data-i18n-skip></div>
+    </div>
+    <div class="side" data-side-panel="todo" hidden>
+      <div class="bar"><b>TODO</b><input id="tdFilter" type="text" placeholder="Lọc theo tên file / nội dung…" spellcheck="false"><button id="tdMode" class="ex-bar-btn" title="Xem theo file ⇄ theo tag" aria-pressed="false">🏷</button><button id="tdRefresh" class="ex-bar-btn" title="Quét lại tab, ghi chú và folder">↻</button></div>
+      <div class="sx-status"><span id="tdStatus" data-i18n-skip></span><label class="chk" title="Quét cả folder đang mở trong Explorer (bỏ qua file nhị phân và file lớn hơn 5 MB)"><input id="tdFolder" type="checkbox" checked> Folder</label><button id="tdStop" class="ex-act" title="Dừng quét — giữ các kết quả đã tìm được" hidden>■ Dừng</button></div>
+      <div id="tdList" class="side-list" data-i18n-skip></div>
+    </div>
+    <div class="side" data-side-panel="clipboard" hidden>
+      <div class="bar"><b>Clipboard</b><input id="cbFilter" type="text" placeholder="Lọc nội dung / tên tab…" spellcheck="false"><button id="cbClear" class="ex-bar-btn" title="Xoá các mục chưa ghim">🧹</button></div>
+      <div id="cbList" class="side-list" data-i18n-skip></div>
+    </div>
+    <div class="side" data-side-panel="library" hidden>
+      <div class="bar"><b>Thư viện</b><input id="lbFilter" type="text" placeholder="Lọc theo tên…" spellcheck="false"><button id="lbExport" class="ex-bar-btn" title="Xuất thư viện ra 1 file JSON">⬇</button><button id="lbImport" class="ex-bar-btn" title="Nhập thư viện từ file JSON (gộp, trùng tên thì hỏi)">⬆</button><input id="lbFile" type="file" accept=".json,application/json" hidden></div>
+      <div id="lbList" class="side-list" data-i18n-skip></div>
     </div>
     <div class="side" data-side-panel="search" hidden>
       <div class="bar"><b>Tìm / thay trong các file</b></div>
@@ -123,7 +168,7 @@
   <section class="pane group" data-group="0" aria-label="View 1">
     <div class="gbar"><div class="tabs" role="tablist" data-i18n-skip></div><button class="gpreview" title="Preview tab này ở view kia — sơ đồ, chart, Markdown, HTML, SVG, bảng CSV/JSON, draw.io — tự cập nhật khi gõ (Ctrl+K V)" hidden>👁</button><button class="gtranslate" title="Dịch tab này ở view kia — đọc to, từ điển tiếng Anh; tab chỉ có 1 link ⇒ dịch cả trang web; dùng bộ dịch trên máy, không có thì hỏi trước khi gửi MyMemory (Ctrl+K T)" hidden>🌐</button><button class="grun" title="Chạy HTML / JS trong sandbox ở view kia (Ctrl+K R)" hidden>▶</button><button class="gnew" title="Ghi chú mới ở view này (Alt+N)">+</button><button class="gmove" title="Chuyển tab đang mở sang view kế tiếp">⇥</button></div>
     <div class="host" data-i18n-skip></div>
-    <div class="empty"><p><b>View 1</b></p><p>Kéo-thả file hoặc folder vào đây, hoặc bấm + để tạo ghi chú.</p><p class="demo-picker">Hoặc chọn một mẫu ở “Thử mẫu…”.</p></div>
+    <div class="empty"><p><b>View 1</b></p><p>Kéo-thả file hoặc folder vào đây, hoặc bấm + để tạo ghi chú.</p><p class="demo-picker">Hoặc chọn một mẫu ở “Samples”.</p></div>
   </section>
   <div id="split" tabindex="0" role="separator" aria-orientation="vertical" title="Kéo để đổi độ rộng 2 view (← → khi đang chọn, nhấp đúp về 50/50)"></div>
   <section class="pane group" data-group="1" aria-label="View 2">
@@ -146,19 +191,11 @@
   <span id="status" data-i18n-skip></span>
   <span id="stPos" data-i18n-skip></span>
   <span id="stCount" data-i18n-skip></span>
-  <button id="stLang" class="link" title="Đổi ngôn ngữ của tab" data-i18n-skip></button>
-  <button id="stEol" class="link" title="Bảng mã và kiểu xuống dòng — bấm để mở lại / lưu với bảng mã khác, đổi CRLF / LF / CR" data-i18n-skip></button>
-  <span id="stIndent" title="Thụt lề tự dò theo nội dung file — phím Tab chèn đúng kiểu này" data-i18n-skip></span>
-  <button id="stKeys" class="link" title="Bộ phím tắt của editor — bấm để đổi: Notepad++ · VS Code · Sublime Text (Vim bật / tắt trong ⌘ Lệnh)" data-i18n-skip></button>
   <button id="stLint" class="link bad" title="Lỗi / cảnh báo của tab — bấm để mở danh sách (Ctrl+Shift+M), F8 tới lỗi kế" data-i18n-skip></button>
   <span id="stSrc" data-i18n-skip></span>
-  <span id="stStore" data-i18n-skip></span>
-  <span class="tiny">Chạy hoàn toàn trên máy bạn: ghi chú và tab đang mở chỉ lưu trong IndexedDB của trình duyệt này, file chỉ đọc/ghi khi bạn chọn — không gửi dữ liệu đi đâu (trừ khi bạn đồng ý dịch qua MyMemory / dịch trang web qua Jina Reader / tra từ điển).</span>
+  <span id="stStore" data-i18n-skip hidden></span>
+  <!-- @include ../data-workbench/partials/author-credit-in-footer.html -->
 </footer>
-<div class="author">
-  <span>Tác giả:</span><b><a href="https://happywindapp.github.io/CV/cv_quan_phan.html">Phan Ngọc Minh Quân</a></b>
-  <span>GitHub Source:</span><a href="https://github.com/happywindapp/web_tool/">github.com/happywindapp/web_tool</a>
-</div>
 <dialog id="pwDlg" class="qp pw-dlg" aria-label="Mật khẩu">
   <form method="dialog">
     <p id="pwTitle" data-i18n-skip></p>
@@ -215,6 +252,8 @@
 // @include js/i18n/en-one-editor-commander-navigation-strings.js
 // @include js/i18n/en-one-editor-commander-file-ops-strings.js
 // @include js/i18n/en-one-editor-commander-search-compare-strings.js
+// @include js/i18n/en-one-editor-bookmarks-strings.js
+// @include js/i18n/en-one-editor-side-panels-strings.js
 // @include js/i18n/vi-codemirror-phrases.js
 // @include ../data-workbench/js/core/text-utils.js
 // @include ../data-workbench/js/core/dom-and-storage-helpers.js
@@ -262,6 +301,8 @@
 // @include js/core/demo-samples-editor-extras.js
 // @include js/core/demo-samples-power-tools.js
 // @include js/core/demo-samples-explorer-folder.js
+// @include js/core/demo-samples-side-panels.js
+// @include js/core/bookmark-lines-pure.js
 // @include js/providers/notes-indexeddb-provider.js
 // @include js/providers/explorer-trash-indexeddb-store.js
 // @include js/providers/local-file-system-access-provider.js
@@ -347,6 +388,11 @@
 // @include js/workbench/open-file-flow.js
 // @include js/core/git-handle-fs-adapter.js
 // @include js/core/git-status-matrix-model.js
+// @include js/core/git-changes-group-pure.js
+// @include js/core/git-head-blob-reader.js
+// @include js/core/todo-tag-scan-pure.js
+// @include js/core/clipboard-history-list-pure.js
+// @include js/core/my-library-import-export-pure.js
 // @include js/workbench/explorer-git-status-overlay.js
 // @include js/workbench/explorer-local-root-path.js
 // @include js/workbench/explorer-tortoisegit-copy-commands.js
@@ -355,6 +401,7 @@
 // @include js/workbench/explorer-open-with-apps-menu.js
 // @include js/workbench/explorer-open-in-new-one-editor-window.js
 // @include js/workbench/explorer-tree.js
+// @include js/workbench/explorer-sections-fold-and-visibility.js
 // @include js/workbench/explorer-folder-items-format-sort.js
 // @include js/workbench/explorer-color-tags.js
 // @include js/workbench/explorer-folder-size.js
@@ -389,9 +436,19 @@
 // @include js/workbench/disk-change-sync.js
 // @include js/workbench/recent-files.js
 // @include js/workbench/pinned-items.js
+// @include js/workbench/explorer-groups.js
 // @include js/workbench/find-in-files-sources.js
 // @include js/workbench/find-in-files-replace.js
+// @include js/workbench/side-panels-registry-and-badges.js
+// @include js/workbench/side-panel-list-helpers.js
 // @include js/workbench/side-bar-find-in-files-panel.js
+// @include js/workbench/bookmarks-closed-files-store.js
+// @include js/workbench/bookmarks-side-panel.js
+// @include js/workbench/read-only-compare-tab.js
+// @include js/workbench/problems-side-panel.js
+// @include js/workbench/git-changes-side-panel.js
+// @include js/workbench/todo-side-panel.js
+// @include js/workbench/clipboard-history-side-panel.js
 // @include js/workbench/export-download-print-copy-html.js
 // @include js/workbench/quick-pick-dialog.js
 // @include js/workbench/file-drop-zone.js
@@ -422,6 +479,8 @@
 // @include js/core/encrypted-share-codec.js
 // @include js/workbench/locked-notes.js
 // @include js/devtools/local-history-snapshots.js
+// @include js/workbench/timeline-side-panel.js
+// @include js/workbench/my-library-side-panel.js
 // @include js/workbench/settings-entries-built-in.js
 // @include js/core/app-boot.js
 </script>

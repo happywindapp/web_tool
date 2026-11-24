@@ -1,7 +1,7 @@
   /* Explorer + 1–4 views by layout (#work.lay-*); ≤ 900px stacks, ≤ 640px becomes the carousel of phone-portrait-layout.css */
   /* .pane-switch is display:none above 640px, so it takes no row here (phones switch body to flex). */
-  body { grid-template-rows:auto auto minmax(0, 1fr) auto auto; }
-  #work { --exw:270px; display:grid; gap:6px; padding:8px 12px; min-height:0; }
+  body { grid-template-rows:auto auto minmax(0, 1fr) auto; }
+  #work { --exw:312px; display:grid; gap:6px; padding:8px 12px; min-height:0; }
   #explorerPane { grid-area:ex; } #split { grid-area:sp; }
   .group[data-group="0"] { grid-area:g0; } .group[data-group="1"] { grid-area:g1; } .group[data-group="2"] { grid-area:g2; } .group[data-group="3"] { grid-area:g3; }
   #work.lay-1 { grid-template:"ex g0" minmax(0, 1fr) / var(--exw) minmax(0, 1fr); }
@@ -14,8 +14,14 @@
   #work.lay-21 { grid-template:"ex g0 sp g2" minmax(0, var(--r1, 1fr)) "ex g1 sp g2" minmax(0, var(--r2, 1fr)) / var(--exw) minmax(0, var(--v1, 1fr)) 4px minmax(0, var(--v2, 1fr)); }
   #work.gap-x { cursor:col-resize; } #work.gap-y { cursor:row-resize; }
   .host .cm-editor .cm-bookmark { background:color-mix(in srgb, var(--warn) 14%, transparent); box-shadow:inset 3px 0 0 var(--warn); }
+  body.no-toolbar { grid-template-rows:auto minmax(0, 1fr) auto; }
+  body.no-toolbar > .toolbar { display:none; }
+  body:not(.no-toolbar) #btnRunTop { display:none; }
+  /* Beats the phone rule that folds header buttons behind ⋯ — Run stays next to ← Home. */
+  @media (max-width:640px) { body.no-toolbar header.top > #btnRunTop { display:block; order:0; flex:none; } }
+  header.top button[aria-pressed="true"] { box-shadow:inset 0 -2px 0 var(--ink); }
   body.zen { grid-template-rows:minmax(0, 1fr); }
-  body.zen > header.top, body.zen > .toolbar, body.zen > .statusbar, body.zen > .author { display:none; }
+  body.zen > header.top, body.zen > .toolbar, body.zen > .statusbar { display:none; }
   .zen-exit { position:fixed; top:6px; right:12px; z-index:40; opacity:.8; }
   .group { position:relative; grid-template-rows:auto minmax(0, 1fr); }
   .group.focused { border-color:var(--acc); }
@@ -32,8 +38,15 @@
   #split:hover, #split:focus-visible { background:var(--line); outline:0; }
 
   #explorerPane { grid-template-columns:minmax(0, 1fr); grid-template-rows:auto minmax(0, 1fr); }
-  .activity { display:flex; gap:2px; padding:3px 6px; background:var(--gut); border-bottom:1px solid var(--line); }
-  .activity button { padding:4px 12px; border:0; border-radius:6px 6px 0 0; background:transparent; font-size:16px; }
+  /* Strip: scrolls sideways; the local / scroll background pair shades whichever edge still hides icons. */
+  .activity { display:flex; gap:2px; padding:3px 6px; border-bottom:1px solid var(--line); overflow:auto hidden; scrollbar-width:thin;
+    background:linear-gradient(to right, var(--gut) 40%, transparent) left / 20px 100% no-repeat local, linear-gradient(to left, var(--gut) 40%, transparent) right / 20px 100% no-repeat local,
+      radial-gradient(farthest-side at 0 50%, rgb(0 0 0 / .2), transparent) left / 8px 100% no-repeat scroll, radial-gradient(farthest-side at 100% 50%, rgb(0 0 0 / .2), transparent) right / 8px 100% no-repeat scroll, var(--gut); }
+  .act-top, .act-bottom { display:flex; flex:none; gap:2px; }
+  .act-bottom { margin-left:auto; }
+  .activity button { position:relative; flex:none; padding:4px 12px; border:0; border-radius:6px 6px 0 0; background:transparent; font-size:16px; }
+  .act-badge { position:absolute; top:0; right:1px; min-width:15px; height:15px; padding:0 3px; border-radius:8px; background:var(--acc); color:#fff; box-shadow:0 0 0 1.5px var(--gut);
+    font:600 9.5px/15px system-ui, sans-serif; text-align:center; pointer-events:none; }
   .activity button.on { background:color-mix(in srgb, var(--acc) 20%, transparent); box-shadow:inset 0 -2px 0 var(--acc); }
   .side { display:flex; flex-direction:column; min-width:0; min-height:0; }
   #explorerPane .bar input { flex:1 1 auto; min-width:0; padding:3px 8px; }
@@ -46,13 +59,11 @@
   .sx-hit small { color:var(--muted); }
 
   .statusbar { display:flex; flex-wrap:wrap; gap:2px 14px; align-items:center; padding:4px 16px; background:var(--panel); border-top:1px solid var(--line); font-size:12px; color:var(--muted); }
-  .statusbar #status { flex:1 1 320px; min-width:0; color:var(--ink); }
+  .statusbar #status { flex:1 1 200px; min-width:0; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .statusbar #status.good { color:var(--good); } .statusbar #status.bad { color:var(--bad); } .statusbar #status.warn { color:var(--warn); }
   .statusbar #status.jump { cursor:pointer; text-decoration:underline dotted; }
   .statusbar button.link { padding:0 4px; border:0; background:transparent; color:inherit; font:inherit; }
-  .statusbar .tiny { flex:0 0 100%; font-size:11px; }
 
-  @media (max-height:600px) and (min-width:641px) { .statusbar .tiny { display:none; } }
   @media (min-width:641px) {
     body.zen #explorerPane { display:none; }
     body.zen #work { --exw:0px; }
@@ -60,10 +71,16 @@
     body.no-explorer #explorerPane > .side { display:none; }
     body.no-explorer .activity button.on { background:transparent; box-shadow:none; }
   }
+  /* Rail like VS Code: icons in their own 42 px column, ⚙ 🗑 pinned to the bottom; hiding the side bar leaves the rail. */
   @media (min-width:901px) {
     body.no-explorer #work { --exw:42px; }
-    body.no-explorer .activity { flex-direction:column; align-items:center; padding:4px 2px; border-bottom:0; }
-    body.no-explorer .activity button { width:100%; padding:6px 0; border-radius:6px; }
+    #explorerPane { grid-template-columns:41px minmax(0, 1fr); grid-template-rows:minmax(0, 1fr); }
+    #explorerPane > .side { grid-row:1; grid-column:2; }
+    .activity { grid-row:1; grid-column:1; flex-direction:column; padding:4px 2px; border-bottom:0; border-right:1px solid var(--line); overflow:hidden auto; scrollbar-width:none; background:var(--gut); }
+    .act-top, .act-bottom { flex-direction:column; }
+    .act-bottom { margin:auto 0 0; padding-top:8px; }
+    .activity button { width:100%; padding:6px 0; border-radius:6px; }
+    .activity button.on { box-shadow:inset 2px 0 0 var(--acc); }
   }
   @media (min-width:641px) and (max-width:900px) {
     #work.pane-scroller { grid-template:none; grid-template-columns:minmax(0, 1fr); grid-template-rows:auto; grid-auto-rows:minmax(280px, 1fr); gap:8px; overflow-y:auto; }
@@ -83,7 +100,7 @@
     #explorer { font-size:15px; }
     #explorerPane .bar input, .sx-form input[type=text] { font-size:16px; }
     .activity button { min-height:40px; }
-    #stCount, #stEol, #stIndent, #stSrc, #stStore:not(.bad) { display:none; }
+    #stCount, #stSrc, #stStore:not(.bad) { display:none; }
   }
   /* Phone / tablet landscape: the page scrolls, Explorer spans the top, views two per row. */
   @media (max-height:500px) and (min-width:641px) and (pointer:coarse) {
@@ -91,12 +108,19 @@
     #work > * { grid-area:auto; }
     #explorerPane { grid-column:1 / -1; max-height:40dvh; }
     #split { display:none; }
-    body.no-explorer .activity { flex-direction:row; padding:3px 6px; }
-    body.no-explorer .activity button { width:auto; padding:4px 12px; }
+    #explorerPane { grid-template-columns:minmax(0, 1fr); grid-template-rows:auto minmax(0, 1fr); }
+    #explorerPane > .side { grid-row:auto; grid-column:auto; }
+    .activity { grid-row:auto; grid-column:auto; flex-direction:row; padding:3px 6px; border-right:0; border-bottom:1px solid var(--line); overflow:auto hidden; }
+    .act-top, .act-bottom { flex-direction:row; }
+    .act-bottom { margin:0 0 0 auto; padding-top:0; }
+    .activity button { width:auto; padding:4px 12px; border-radius:6px 6px 0 0; }
+    .activity button.on { box-shadow:inset 0 -2px 0 var(--acc); }
   }
   .toolbar button[aria-pressed="true"] { background:color-mix(in srgb, var(--acc) 22%, var(--panel)); border-color:var(--acc); }
   .toolbar .icon-btn { min-width:2.2em; padding-inline:6px; font-weight:600; }
-  #opSel { max-width:10em; text-overflow:ellipsis; }
+  #opSel { max-width:7em; text-overflow:ellipsis; }
+  header.top h1 .app-title { color:inherit; text-decoration:none; }
+  header.top h1 .app-title:hover { text-decoration:underline; }
 /* Compare 2 views (phase 2a) */
 .cm-editor .cmp-del { background: color-mix(in srgb, #e5534b 13%, transparent); }
 .cm-editor .cmp-add { background: color-mix(in srgb, #2da44e 13%, transparent); }

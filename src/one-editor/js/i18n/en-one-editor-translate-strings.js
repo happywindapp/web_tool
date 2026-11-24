@@ -1,8 +1,6 @@
 // English strings for phase 7 (translate, read aloud, English dictionary), keyed by the Vietnamese source text.
 I18n.add({
   // Markup, demos, op, commands
-  "Chạy hoàn toàn trên máy bạn: ghi chú và tab đang mở chỉ lưu trong IndexedDB của trình duyệt này, file chỉ đọc/ghi khi bạn chọn — không gửi dữ liệu đi đâu (trừ khi bạn đồng ý dịch qua MyMemory / dịch trang web qua Jina Reader / tra từ điển).":
-    "Runs entirely on your device: notes and open tabs are stored only in this browser's IndexedDB, files are read/written only when you choose — nothing is sent anywhere (unless you agree to translate via MyMemory / translate a web page via Jina Reader / look up the dictionary).",
   "Dịch tab này ở view kia — đọc to, từ điển tiếng Anh; tab chỉ có 1 link ⇒ dịch cả trang web; dùng bộ dịch trên máy, không có thì hỏi trước khi gửi MyMemory (Ctrl+K T)":
     "Translate this tab in the other view — read aloud, English dictionary; a tab holding just one link ⇒ translates the whole web page; uses the on-device translator, otherwise asks before sending to MyMemory (Ctrl+K T)",
   "Dịch: Anh → Việt (Markdown, giữ code)": "Translate: English → Vietnamese (Markdown, code kept)", "Dịch: Việt → Anh": "Translate: Vietnamese → English",

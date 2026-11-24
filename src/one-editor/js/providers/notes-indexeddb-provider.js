@@ -59,6 +59,14 @@ const NotesDb = (() => {
     return true;
   }
 
+  async function delMeta(key) {
+    if (!ok) return false;
+    const t = db.transaction("meta", "readwrite");
+    t.objectStore("meta").delete(key);
+    await done(t);
+    return true;
+  }
+
   async function clear() {
     if (!ok) return;
     const t = db.transaction(STORES, "readwrite");
@@ -90,5 +98,5 @@ const NotesDb = (() => {
     await done(t);
   }
 
-  return { open, loadAll, save, getMeta, putMeta, clear, histList, histText, histWrite, trashList, trashData, trashWrite, get ok() { return ok; }, get error() { return error; } };
+  return { open, loadAll, save, getMeta, putMeta, delMeta, clear, histList, histText, histWrite, trashList, trashData, trashWrite, get ok() { return ok; }, get error() { return error; } };
 })();

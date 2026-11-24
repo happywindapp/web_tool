@@ -16,7 +16,7 @@ const Docs = (() => {
       disk: init.disk && Number.isFinite(init.disk.size) && Number.isFinite(init.disk.mod) ? { size: init.disk.size, mod: init.disk.mod } : null,
       enc: [...Encoding.WRITABLE, ...Encoding.READ_ONLY].includes(init.enc) ? init.enc : "utf-8", link: init.link && typeof init.link.src === "string" ? { src: init.link.src, op: init.link.op, ...(init.link.opts && typeof init.link.opts === "object" ? { opts: init.link.opts } : {}) } : null,
       updated: +init.updated || Date.now(), pending: init.pending ?? true, scrollTop: 0, langApplied: null, pinned: !!init.pinned, hex: !!init.hex,
-      cloneOf: init.kind === "clone" ? init.cloneOf : null,
+      cloneOf: init.kind === "clone" ? init.cloneOf : null, marks: BookmarkLines.clean(init.marks), marksLive: false,
       // File opened from a Drive / OneDrive link: where Save writes back (CloudDrive.save).
       remote: init.remote && typeof init.remote.kind === "string" ? { ...init.remote } : null,
       detected: LangDetect.detect(init.name, text),
@@ -40,12 +40,16 @@ const Docs = (() => {
     if (doc.state) return doc.state;
     doc.state = CmSetup.makeState(doc.text, doc.readOnly || doc.stale, LangDetect.indentOf(doc.text));
     if (doc.eolMixed && doc.eolList) doc.state = doc.state.update({ effects: MixedEol.effect(doc.state.doc, doc.eolList) }).state;
+    const marks = doc.kind === "clone" ? Bookmarks.linesOf(root(doc)) : doc.marks;
+    doc.marksLive = !doc.stale && !doc.sealed;
+    if (doc.marksLive && marks.length) doc.state = Bookmarks.withLines(doc.state, marks);
     doc.text = "";
     doc.langApplied = null;
     return doc.state;
   }
   function release(doc) {
     if (!doc.state) return;
+    doc.marks = Bookmarks.linesOf(doc);
     doc.text = doc.state.doc.toString();
     doc.state = null;
   }

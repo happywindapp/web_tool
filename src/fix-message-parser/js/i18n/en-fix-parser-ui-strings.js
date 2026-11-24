@@ -163,7 +163,7 @@ I18n.add({
   "Lưu dữ liệu + bộ lọc + ghi chú + chuỗi lệnh + bố cục cột vào trình duyệt này": "Save data + filters + annotations + order chain + column layout in this browser",
   "Mở lại một phân tích đã lưu trong trình duyệt này": "Reopen an analysis saved in this browser",
   "Xoá phân tích đang mở khỏi trình duyệt": "Delete the open analysis from the browser",
-  "Ctrl+↑/↓ chọn message · giữ Alt + rê chuột trên ô nhập để tra tag · dữ liệu không rời khỏi máy": "Ctrl+↑/↓ select message · hold Alt and hover the paste box to look up a tag · data never leaves your machine",
+  "Ctrl+↑/↓ chọn message · giữ Alt + rê chuột trên ô nhập để tra tag": "Ctrl+↑/↓ select message · hold Alt and hover the paste box to look up a tag",
   "Có ghi chú": "Annotated",
   "📝 Ghi chú cho message này — đi kèm link chia sẻ, phân tích đã lưu và file xuất": "📝 Annotation for this message — travels with share links, saved analyses and exports",
   "Ghi chú": "Annotation",

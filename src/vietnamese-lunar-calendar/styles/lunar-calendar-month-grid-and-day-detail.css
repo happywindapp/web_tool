@@ -1,7 +1,7 @@
   :root { --hd:#dc2626; --sunday:#dc2626; --first:#b45309; --hol:#be123c; --acc-ink:#0e7490; --offbg:color-mix(in srgb, #dc2626 9%, var(--panel)); --hdrow:color-mix(in srgb, #f59e0b 12%, var(--panel)); }
   @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --hd:#f87171; --sunday:#f87171; --first:#fbbf24; --hol:#fb7185; --acc-ink:#67e8f9; } }
   :root[data-theme="dark"] { --hd:#f87171; --sunday:#f87171; --first:#fbbf24; --hol:#fb7185; --acc-ink:#67e8f9; }
-  body { grid-template-rows:auto auto 1fr auto auto; }
+  body { grid-template-rows:auto auto 1fr auto; }
   .bar.monthnav { gap:4px; } .bar.monthnav #lunarRange { margin-left:6px; }
   .cal-opts { display:contents; }
   .nb-ticker { flex:1 1 12em; min-width:0; max-width:28em; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; text-align:left;
@@ -189,7 +189,7 @@
   .birth-grid span.empty { color:var(--muted); background:var(--gut); }
   .arrows { margin:6px 0; padding-left:18px; } .arrows li { margin:4px 0; }
   footer.status { padding:4px 16px; border-top:1px solid var(--line); background:var(--panel); font-size:13px; min-height:26px; }
-  footer.status.bad { color:var(--bad); }
+  #status.bad { color:var(--bad); }
   @media (max-width: 640px) {
     .scroll { padding:8px; }
     .month { gap:2px; }

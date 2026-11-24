@@ -1,13 +1,15 @@
 // Selected-text actions (editor right-click menu + Command Palette): translate / ▶ run just the selection, open it in another tool, ask an AI chat site (ADR #26).
 const SelectionActions = (() => {
-  // ?q= prefills the prompt box where the site supports it; Gemini has no such parameter, so it gets the clipboard only.
+  // ?q= prefills the prompt box where the site supports it; Gemini and Copilot M365 drop it (tested), so they get the clipboard only.
   const AI = [
     { name: "ChatGPT", url: "https://chatgpt.com/?q=" },
-    { name: "Gemini", url: "https://gemini.google.com/app" },
+    { name: "Gemini", url: "https://gemini.google.com" },
     { name: "Copilot", url: "https://copilot.microsoft.com/?q=" },
+    { name: "Copilot M365", url: "https://copilot.cloud.microsoft" },
     { name: "Perplexity", url: "https://www.perplexity.ai/search?q=" },
     { name: "Grok", url: "https://grok.com/?q=" },
     { name: "Claude", url: "https://claude.ai/new?q=" },
+    { name: "Google", url: "https://www.google.com/search?q=" },
   ];
   // Longer query strings get HTTP 414 on some sites, so the text then goes by clipboard only.
   const Q_MAX = 6000;
