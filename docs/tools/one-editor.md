@@ -48,6 +48,8 @@ preview sơ đồ / chart / Markdown / HTML cạnh code, tìm / thay trong nhi�
 | Xuất (Command Palette) | Tải xuống giữ đuôi / `.txt` (bảng mã + EOL của tab) · In (chỉ nội dung tab; tab preview Markdown / bảng in phần đã vẽ, sơ đồ in SVG) · Copy as HTML giữ màu highlight |
 | Công cụ tham khảo (phase 9) | ▶ **Cron** → giải thích VI/EN + 10 lần chạy kế (Unix 5 trường / Quartz 6–7) · ▶ **CSV / JSON → SQL** INSERT (lô) / UPDATE … WHERE khoá (T-SQL / PostgreSQL, "SQL từ dữ liệu: tuỳ chọn…") · ▶ **JSON → JSON Schema** 2020-12 · **Thay hàng loạt** (nhiều cặp regex / chuỗi, bật / tắt, lưu bộ) · **Unicode**: `U+XXXX` dưới con trỏ + ▶ tìm ký tự vô hình / chữ giống Latin (sửa theo loại, `SOH → |`) · **Bảng Markdown** (dán TSV từ Excel ⇒ bảng, căn bảng, mục lục) · ▶ **Recipe** kiểu CyberChef (Base64 / Hex / URL / gzip / JSON / JWT / hash / regex…, lưu + 🔗 link) · ▶ **Regex tester** (tô match trong nguồn, nhóm số + tên, xem trước thay thế, giải thích; cú pháp JS) · ▶ **Chạy HTML / JS** (nút ▶ trên thanh tab, `Ctrl+K R`, sandbox, console + số dòng, dừng sau 5 s) · ▶ **Code → ảnh** (PNG / SVG / chép PNG, theme, khung, số dòng) |
 
+Trong **Cài đặt → Thanh công cụ**, bạn có thể ẩn hoặc hiện từng mục trên toolbar, gồm cả ô chọn phép chạy, dữ liệu mẫu, ngôn ngữ, bố cục, tỷ lệ view và các ô Xuống dòng, Minimap. **Hiện tất cả** mở toolbar và hiện mọi mục. **Ẩn tất cả** ẩn mọi mục, thu gọn toolbar và chuyển **▶ Chạy** lên header cạnh **← Home**. Hai lựa chọn phản ánh cả trạng thái của thanh và các mục bên trong. Thay đổi áp dụng ngay và được lưu trong trình duyệt.
+
 ## 3. Contract (đổi là breaking)
 
 - **`?demo=<key>`** (cũng là dropdown `Samples`; mở thành tab tạm, không đè bài đang sửa; nội dung giả, tiếng Anh):

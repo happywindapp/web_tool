@@ -118,6 +118,11 @@
   /* Beats the phone rule that folds header buttons behind ⋯ — Run stays next to ← Home. */
   @media (max-width:640px) { body.no-toolbar header.top > #btnRunTop { display:block; order:0; flex:none; } }
   header.top button[aria-pressed="true"] { box-shadow:inset 0 -2px 0 var(--ink); }
+  header.top .more-toggle[aria-expanded="true"] { background:var(--line); }
+  body > :is(header.top, .toolbar) :is(button:enabled, a.btn):active { filter:brightness(.78); }
+  @media (prefers-reduced-motion: no-preference) {
+    body > :is(header.top, .toolbar) :is(button:enabled, a.btn):active { translate:0 1px; }
+  }
   body.zen { grid-template-rows:minmax(0, 1fr); }
   body.zen > header.top, body.zen > .toolbar, body.zen > .statusbar { display:none; }
   .zen-exit { position:fixed; top:6px; right:12px; z-index:40; opacity:.8; }
@@ -257,6 +262,7 @@ body.recording .statusbar { box-shadow: inset 0 2px 0 #e5534b; }
   .tab-menu > button { display:flex; justify-content:space-between; gap:16px; padding:6px 14px; border:0; border-radius:0; background:transparent; color:inherit; text-align:left; }
   .tab-menu > button small { color:var(--muted); }
   .tab-menu > button:focus-visible { outline:none; background:color-mix(in srgb, var(--acc) 16%, transparent); }
+  .tab-menu > button:enabled:active { background:color-mix(in srgb, var(--acc) 34%, var(--panel)); }
 
   .ex-sec h3 { display:flex; align-items:center; gap:2px; margin:8px 6px 2px 10px; font-size:calc(11px * var(--ui-k, 1)); letter-spacing:.04em; text-transform:uppercase; color:var(--muted); }
   .ex-fold { flex:1 1 auto; min-width:0; padding:2px 0; border:0; border-radius:0; background:transparent; color:inherit; font:inherit; letter-spacing:inherit;
@@ -619,6 +625,10 @@ body.recording .statusbar { box-shadow: inset 0 2px 0 #e5534b; }
   .st-main { min-height:0; overflow:auto; padding:4px 18px 24px; }
   .st-head { display:flex; align-items:center; gap:10px; margin:14px 0 4px; }
   .st-head > h3 { flex:1 1 auto; margin:0; font-size:calc(15px * var(--ui-k, 1)); }
+  .st-head:has(> .st-toolbar-visibility) { flex-wrap:wrap; }
+  .st-toolbar-visibility { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:4px 16px; margin-inline-start:auto; }
+  .st-toolbar-visibility label { display:inline-flex; align-items:center; gap:6px; min-height:36px; cursor:pointer; }
+  .st-toolbar-visibility input { margin:0; accent-color:var(--acc); }
   .st-item { display:flex; align-items:center; gap:14px; padding:9px 0; border-bottom:1px solid var(--line); }
   .st-text { flex:1 1 auto; min-width:0; }
   .st-name { display:flex; align-items:center; gap:6px; }
@@ -2333,6 +2343,9 @@ I18n.add({
   "Bảng mã khác… (Shift-JIS, GBK, Big5, Windows-125x)": "More encodings… (Shift-JIS, GBK, Big5, Windows-125x)",
   "Chạy phép đã chọn trên tab đang mở — kết quả ra tab liên kết ở view kia (Ctrl+Enter)": "Run the selected operation on the active tab — the result goes to a linked tab in the other view (Ctrl+Enter)",
   "🧰 Công cụ": "🧰 Toolbar", "Ẩn / hiện thanh công cụ": "Show / hide the toolbar",
+  "Thanh công cụ": "Toolbar", "Ký tự ẩn": "Invisible characters",
+  "Hiện tất cả": "Show all", "Ẩn tất cả": "Hide all",
+  "Phép chạy": "Operation", "Dữ liệu mẫu": "Samples", "Bố cục view": "View layout", "Tỷ lệ view": "View ratio",
   "Ghi chú mới — tự lưu trong trình duyệt (Alt+N)": "New note — saved in this browser as you type (Alt+N)",
   "Lưu (Ctrl+S): file → ghi đè lên đĩa; ghi chú → đã tự lưu trong trình duyệt": "Save (Ctrl+S): file → overwrite on disk; note → already saved in the browser",
   "Lưu thành file mới (Ctrl+Shift+S); trình duyệt không hỗ trợ thì tải xuống": "Save to a new file (Ctrl+Shift+S); downloads when the browser cannot write files",
@@ -5405,7 +5418,7 @@ const FileTemplates = (() => {
 })();
 // Settings registry (pure, node test): each entry borrows get / set from the module that holds the value, so the ⚙ Settings tab and the old switches are one value; groups, search (Vietnamese + English, accents ignored), defaults, change listeners.
 const Settings = (() => {
-  const GROUPS = [["explorer", "Explorer & tab folder"], ["editor", "Editor"], ["keys", "Phím tắt"], ["preview", "Preview & dịch"], ["data", "Dữ liệu đã lưu"]];
+  const GROUPS = [["explorer", "Explorer & tab folder"], ["editor", "Editor"], ["toolbar", "Thanh công cụ"], ["keys", "Phím tắt"], ["preview", "Preview & dịch"], ["data", "Dữ liệu đã lưu"]];
   const TYPES = new Set(["bool", "choice", "number", "text", "info"]), list = [], listeners = [];
 
   // e: { id, group, label, hint, type: "bool" | "choice" | "number" | "text" | "info", get(), set(v), def, choices() → [[value, label]], min, max, actions() → [[label, run]] }.
@@ -17305,10 +17318,28 @@ const SettingsTab = (() => {
     return row;
   }
 
+  function toolbarVisibility(list) {
+    const group = el("div", "st-toolbar-visibility");
+    group.setAttribute("role", "radiogroup");
+    group.setAttribute("aria-label", groupName("toolbar"));
+    for (const [value, text] of [["show", "Hiện tất cả"], ["hide", "Ẩn tất cả"]]) {
+      const label = el("label"), radio = el("input"), show = value === "show";
+      Object.assign(radio, { type: "radio", name: "toolbar-visibility", value });
+      radio.onchange = async () => {
+        for (const e of list) if (e.get() !== show) await Settings.set(e, show);
+        Actions.setToolbarVisible(show);
+      };
+      label.append(radio, el("span", "", T(text)));
+      group.append(label);
+    }
+    return group;
+  }
+
   function section(g, list, whole) {
     const head = el("div", "st-head");
     head.append(el("h3", "", groupName(g)));
-    if (whole && list.some(Settings.hasDefault)) head.append(btn("st-act", "↺ " + T("Mặc định cả nhóm"), () => Settings.resetGroup(g)));
+    if (whole && g === "toolbar") head.append(toolbarVisibility(list));
+    else if (whole && list.some(Settings.hasDefault)) head.append(btn("st-act", "↺ " + T("Mặc định cả nhóm"), () => Settings.resetGroup(g)));
     return [head, ...list.map(item)];
   }
 
@@ -17333,6 +17364,10 @@ const SettingsTab = (() => {
   function values() {
     raf = 0;
     if (!visible()) return;
+    for (const radio of t.ui.main.querySelectorAll(".st-toolbar-visibility input")) {
+      const show = radio.value === "show";
+      radio.checked = Actions.toolbarVisible() === show && Settings.inGroup("toolbar").every(e => e.get() === show);
+    }
     for (const row of t.ui.main.querySelectorAll(".st-item")) {
       const e = Settings.entry(row.dataset.id), c = row.querySelector(".st-val, input, select");
       row.classList.toggle("mod", !Settings.isDefault(e));
@@ -19386,11 +19421,15 @@ const Actions = (() => {
     SidePanels.collapsed();
   }
 
-  function toggleToolbar() {
-    const hidden = document.body.classList.toggle("no-toolbar");
-    $("btnToolbar").setAttribute("aria-pressed", String(!hidden));
-    Prefs.set("toolbar", !hidden);
+  const toolbarVisible = () => !document.body.classList.contains("no-toolbar");
+
+  function setToolbarVisible(visible) {
+    document.body.classList.toggle("no-toolbar", !visible);
+    $("btnToolbar").setAttribute("aria-pressed", String(visible));
+    Prefs.set("toolbar", visible);
   }
+
+  const toggleToolbar = () => setToolbarVisible(!toolbarVisible());
 
   async function clearData() {
     if (!confirm(T("Xoá mọi ghi chú, tab đã lưu và lịch sử cục bộ trong trình duyệt này? Không khôi phục được."))) return;
@@ -19400,7 +19439,7 @@ const Actions = (() => {
     location.replace(location.pathname);
   }
 
-  return { newNote, openFiles, openFolder, openCloudFolder, save, suggestName, run, closeTab, setWrap, setWords, setLang, moveTab, cloneTab, setLayout, setSplit, zoom, setMinimap, setGuides, toggleZen, toggleExplorer, toggleToolbar, clearData };
+  return { newNote, openFiles, openFolder, openCloudFolder, save, suggestName, run, closeTab, setWrap, setWords, setLang, moveTab, cloneTab, setLayout, setSplit, zoom, setMinimap, setGuides, toggleZen, toggleExplorer, toolbarVisible, setToolbarVisible, toggleToolbar, clearData };
 })();
 // Notepad++-style toolbar buttons: undo / redo, zoom, show all characters, Encoding menu (reopen with / convert to / EOL), one Open menu (file / folder), Function List toggle.
 const ToolbarButtons = (() => {
@@ -19452,6 +19491,39 @@ const ToolbarButtons = (() => {
     b.disabled = !doc;
   }
 
+  function initVisibility() {
+    const toolbar = $("btnRun").parentElement;
+    function syncSeparators() {
+      let separator = null;
+      for (const item of toolbar.children) {
+        if (item.classList.contains("sep")) {
+          item.hidden = true;
+          separator = item;
+        } else if (!item.hidden && separator) {
+          separator.hidden = false;
+          separator = null;
+        }
+      }
+    }
+
+    for (const [id, label] of [
+      ["opSel", "Phép chạy"],
+      ["btnNew", "+ Ghi chú"], ["btnOpen", "📂 Mở ▾"], ["btnSave", "💾 Lưu"], ["btnSaveAs", "Lưu thành…"],
+      ["btnUndo", "↶ Hoàn tác"], ["btnRedo", "↷ Làm lại"], ["btnFind", "🔍 Tìm"], ["btnStyle", "🖍 Tô màu"],
+      ["btnRefresh", "🔄 Làm mới"], ["btnFormat", "✨ Format"], ["demo", "Dữ liệu mẫu"], ["langSel", "Ngôn ngữ"],
+      ["chkWrap", "Xuống dòng"], ["chkMinimap", "Minimap"], ["btnZoomIn", "Phóng to chữ"], ["btnZoomOut", "Thu nhỏ chữ"],
+      ["btnHidden", "Ký tự ẩn"], ["btnEnc", "Bảng mã & EOL"], ["btnKeys", "Bộ phím"], ["btnCompare", "≠ So sánh"],
+      ["btnSwap", "Đổi chỗ view đang chọn với view kế tiếp"], ["layoutSel", "Bố cục view"], ["splitSel", "Tỷ lệ view"],
+      ["btnFnList", "Function List"], ["btnPalette", "⌘ Lệnh"],
+    ]) {
+      const item = $(id).closest(".toolbar > *"), key = "toolbar." + id;
+      item.hidden = Prefs.get(key, true) === false;
+      Settings.add({ id: key, group: "toolbar", label, def: true, get: () => !item.hidden,
+        set: visible => { item.hidden = !visible; syncSeparators(); Prefs.set(key, visible); } });
+    }
+    syncSeparators();
+  }
+
   function init() {
     const on = (id, fn) => $(id).addEventListener("click", fn);
     on("btnUndo", edit("undo"));
@@ -19467,7 +19539,7 @@ const ToolbarButtons = (() => {
     $("btnHidden").setAttribute("aria-pressed", CmSetup.settings.hidden);
   }
 
-  return { init, sync };
+  return { init, initVisibility, sync };
 })();
 // Resizing views (desktop > 900px): the #split bar in 2 columns / 1x2 / 2x1 (drag, ←/→, double-click = 50/50); elsewhere the gap between two views is the handle. Ratios are remembered per layout.
 const Split = (() => {
@@ -21418,6 +21490,10 @@ const Toolbar = (() => {
 
 function wireOneEditor() {
   const on = (id, ev, fn) => $(id).addEventListener(ev, fn);
+  document.addEventListener("click", e => {
+    const button = e.target.closest("body > :is(header.top, .toolbar) button:enabled");
+    button?.animate([{ filter: "brightness(.78)" }, { filter: "none" }], { duration: 180, easing: "ease-out" });
+  }, true);
   on("btnNew", "click", () => Actions.newNote());
   on("btnSave", "click", () => Actions.save(false));
   on("btnSaveAs", "click", () => Actions.save(true));
@@ -21503,6 +21579,7 @@ function wireOneEditor() {
   ThemePicker.bind($("uiTheme"), Prefs);
   if (Prefs.get("explorer", true) === false) document.body.classList.add("no-explorer");
   if (Prefs.get("toolbar", true) === false) Actions.toggleToolbar();
+  ToolbarButtons.initVisibility();
   Toolbar.fill();
   StatusBar.msg(T("Đang nạp trình soạn thảo…"));
   try { await VendorPaths.load("cmCore"); }

@@ -48,6 +48,39 @@ const ToolbarButtons = (() => {
     b.disabled = !doc;
   }
 
+  function initVisibility() {
+    const toolbar = $("btnRun").parentElement;
+    function syncSeparators() {
+      let separator = null;
+      for (const item of toolbar.children) {
+        if (item.classList.contains("sep")) {
+          item.hidden = true;
+          separator = item;
+        } else if (!item.hidden && separator) {
+          separator.hidden = false;
+          separator = null;
+        }
+      }
+    }
+
+    for (const [id, label] of [
+      ["opSel", "Phép chạy"],
+      ["btnNew", "+ Ghi chú"], ["btnOpen", "📂 Mở ▾"], ["btnSave", "💾 Lưu"], ["btnSaveAs", "Lưu thành…"],
+      ["btnUndo", "↶ Hoàn tác"], ["btnRedo", "↷ Làm lại"], ["btnFind", "🔍 Tìm"], ["btnStyle", "🖍 Tô màu"],
+      ["btnRefresh", "🔄 Làm mới"], ["btnFormat", "✨ Format"], ["demo", "Dữ liệu mẫu"], ["langSel", "Ngôn ngữ"],
+      ["chkWrap", "Xuống dòng"], ["chkMinimap", "Minimap"], ["btnZoomIn", "Phóng to chữ"], ["btnZoomOut", "Thu nhỏ chữ"],
+      ["btnHidden", "Ký tự ẩn"], ["btnEnc", "Bảng mã & EOL"], ["btnKeys", "Bộ phím"], ["btnCompare", "≠ So sánh"],
+      ["btnSwap", "Đổi chỗ view đang chọn với view kế tiếp"], ["layoutSel", "Bố cục view"], ["splitSel", "Tỷ lệ view"],
+      ["btnFnList", "Function List"], ["btnPalette", "⌘ Lệnh"],
+    ]) {
+      const item = $(id).closest(".toolbar > *"), key = "toolbar." + id;
+      item.hidden = Prefs.get(key, true) === false;
+      Settings.add({ id: key, group: "toolbar", label, def: true, get: () => !item.hidden,
+        set: visible => { item.hidden = !visible; syncSeparators(); Prefs.set(key, visible); } });
+    }
+    syncSeparators();
+  }
+
   function init() {
     const on = (id, fn) => $(id).addEventListener("click", fn);
     on("btnUndo", edit("undo"));
@@ -63,5 +96,5 @@ const ToolbarButtons = (() => {
     $("btnHidden").setAttribute("aria-pressed", CmSetup.settings.hidden);
   }
 
-  return { init, sync };
+  return { init, initVisibility, sync };
 })();

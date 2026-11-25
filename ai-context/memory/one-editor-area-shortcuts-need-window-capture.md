@@ -7,3 +7,5 @@
 **Cách xử lý đúng:** gắn `addEventListener("keydown", onKey, true)` ở `window`, kiểm `box.contains(e.target)`, và chỉ chặn phím khi thực sự xử lý. Mẫu: `src/one-editor/js/workbench/explorer-context-menu.js`.
 
 **Kiểm ZIP tự viết trên Windows:** dùng PowerShell `Expand-Archive` / `Compress-Archive`. `tar.exe` (bsdtar) đổi tên UTF-8 sang code page ANSI nên báo lỗi với chữ "ệ". Trong Git Bash, `tar` lại là GNU tar, không đọc được ZIP.
+
+Nếu chạy test ZIP từ `pwsh` và Windows PowerShell báo lỗi overload `ExtractToDirectory`, chạy Node với `$env:PSModulePath = "$env:SystemRoot\System32\WindowsPowerShell\v1.0\Modules"` trong shell test để tiến trình `powershell` chọn module Archive tương thích.

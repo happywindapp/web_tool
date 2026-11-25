@@ -41,6 +41,10 @@ const Toolbar = (() => {
 
 function wireOneEditor() {
   const on = (id, ev, fn) => $(id).addEventListener(ev, fn);
+  document.addEventListener("click", e => {
+    const button = e.target.closest("body > :is(header.top, .toolbar) button:enabled");
+    button?.animate([{ filter: "brightness(.78)" }, { filter: "none" }], { duration: 180, easing: "ease-out" });
+  }, true);
   on("btnNew", "click", () => Actions.newNote());
   on("btnSave", "click", () => Actions.save(false));
   on("btnSaveAs", "click", () => Actions.save(true));
@@ -126,6 +130,7 @@ function wireOneEditor() {
   ThemePicker.bind($("uiTheme"), Prefs);
   if (Prefs.get("explorer", true) === false) document.body.classList.add("no-explorer");
   if (Prefs.get("toolbar", true) === false) Actions.toggleToolbar();
+  ToolbarButtons.initVisibility();
   Toolbar.fill();
   StatusBar.msg(T("Đang nạp trình soạn thảo…"));
   try { await VendorPaths.load("cmCore"); }

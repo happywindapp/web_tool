@@ -19,6 +19,7 @@
   .tab-menu > button { display:flex; justify-content:space-between; gap:16px; padding:6px 14px; border:0; border-radius:0; background:transparent; color:inherit; text-align:left; }
   .tab-menu > button small { color:var(--muted); }
   .tab-menu > button:focus-visible { outline:none; background:color-mix(in srgb, var(--acc) 16%, transparent); }
+  .tab-menu > button:enabled:active { background:color-mix(in srgb, var(--acc) 34%, var(--panel)); }
 
   .ex-sec h3 { display:flex; align-items:center; gap:2px; margin:8px 6px 2px 10px; font-size:calc(11px * var(--ui-k, 1)); letter-spacing:.04em; text-transform:uppercase; color:var(--muted); }
   .ex-fold { flex:1 1 auto; min-width:0; padding:2px 0; border:0; border-radius:0; background:transparent; color:inherit; font:inherit; letter-spacing:inherit;

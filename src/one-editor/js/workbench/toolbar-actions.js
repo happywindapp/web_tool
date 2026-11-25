@@ -209,11 +209,15 @@ const Actions = (() => {
     SidePanels.collapsed();
   }
 
-  function toggleToolbar() {
-    const hidden = document.body.classList.toggle("no-toolbar");
-    $("btnToolbar").setAttribute("aria-pressed", String(!hidden));
-    Prefs.set("toolbar", !hidden);
+  const toolbarVisible = () => !document.body.classList.contains("no-toolbar");
+
+  function setToolbarVisible(visible) {
+    document.body.classList.toggle("no-toolbar", !visible);
+    $("btnToolbar").setAttribute("aria-pressed", String(visible));
+    Prefs.set("toolbar", visible);
   }
+
+  const toggleToolbar = () => setToolbarVisible(!toolbarVisible());
 
   async function clearData() {
     if (!confirm(T("Xoá mọi ghi chú, tab đã lưu và lịch sử cục bộ trong trình duyệt này? Không khôi phục được."))) return;
@@ -223,5 +227,5 @@ const Actions = (() => {
     location.replace(location.pathname);
   }
 
-  return { newNote, openFiles, openFolder, openCloudFolder, save, suggestName, run, closeTab, setWrap, setWords, setLang, moveTab, cloneTab, setLayout, setSplit, zoom, setMinimap, setGuides, toggleZen, toggleExplorer, toggleToolbar, clearData };
+  return { newNote, openFiles, openFolder, openCloudFolder, save, suggestName, run, closeTab, setWrap, setWords, setLang, moveTab, cloneTab, setLayout, setSplit, zoom, setMinimap, setGuides, toggleZen, toggleExplorer, toolbarVisible, setToolbarVisible, toggleToolbar, clearData };
 })();

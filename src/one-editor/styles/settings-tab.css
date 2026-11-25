@@ -7,6 +7,10 @@
   .st-main { min-height:0; overflow:auto; padding:4px 18px 24px; }
   .st-head { display:flex; align-items:center; gap:10px; margin:14px 0 4px; }
   .st-head > h3 { flex:1 1 auto; margin:0; font-size:calc(15px * var(--ui-k, 1)); }
+  .st-head:has(> .st-toolbar-visibility) { flex-wrap:wrap; }
+  .st-toolbar-visibility { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:4px 16px; margin-inline-start:auto; }
+  .st-toolbar-visibility label { display:inline-flex; align-items:center; gap:6px; min-height:36px; cursor:pointer; }
+  .st-toolbar-visibility input { margin:0; accent-color:var(--acc); }
   .st-item { display:flex; align-items:center; gap:14px; padding:9px 0; border-bottom:1px solid var(--line); }
   .st-text { flex:1 1 auto; min-width:0; }
   .st-name { display:flex; align-items:center; gap:6px; }

@@ -69,10 +69,28 @@ const SettingsTab = (() => {
     return row;
   }
 
+  function toolbarVisibility(list) {
+    const group = el("div", "st-toolbar-visibility");
+    group.setAttribute("role", "radiogroup");
+    group.setAttribute("aria-label", groupName("toolbar"));
+    for (const [value, text] of [["show", "Hiện tất cả"], ["hide", "Ẩn tất cả"]]) {
+      const label = el("label"), radio = el("input"), show = value === "show";
+      Object.assign(radio, { type: "radio", name: "toolbar-visibility", value });
+      radio.onchange = async () => {
+        for (const e of list) if (e.get() !== show) await Settings.set(e, show);
+        Actions.setToolbarVisible(show);
+      };
+      label.append(radio, el("span", "", T(text)));
+      group.append(label);
+    }
+    return group;
+  }
+
   function section(g, list, whole) {
     const head = el("div", "st-head");
     head.append(el("h3", "", groupName(g)));
-    if (whole && list.some(Settings.hasDefault)) head.append(btn("st-act", "↺ " + T("Mặc định cả nhóm"), () => Settings.resetGroup(g)));
+    if (whole && g === "toolbar") head.append(toolbarVisibility(list));
+    else if (whole && list.some(Settings.hasDefault)) head.append(btn("st-act", "↺ " + T("Mặc định cả nhóm"), () => Settings.resetGroup(g)));
     return [head, ...list.map(item)];
   }
 
@@ -97,6 +115,10 @@ const SettingsTab = (() => {
   function values() {
     raf = 0;
     if (!visible()) return;
+    for (const radio of t.ui.main.querySelectorAll(".st-toolbar-visibility input")) {
+      const show = radio.value === "show";
+      radio.checked = Actions.toolbarVisible() === show && Settings.inGroup("toolbar").every(e => e.get() === show);
+    }
     for (const row of t.ui.main.querySelectorAll(".st-item")) {
       const e = Settings.entry(row.dataset.id), c = row.querySelector(".st-val, input, select");
       row.classList.toggle("mod", !Settings.isDefault(e));
