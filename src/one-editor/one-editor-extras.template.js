@@ -70,8 +70,50 @@
 // @include js/extras/code-snippet-to-image.js
 // @include js/extras/code-image-op-and-pane.js
 // @include js/extras/syntax-check-op-and-pane.js
+// Data (phase 14b): Blob Worker host · SQL on tabs + SQLite file (sql.js) · fake data · xlsx / docx viewer (SheetJS mini, mammoth); the libraries load into the worker on first use.
+// @include js/i18n/en-one-editor-data-sql-office-strings.js
+// @include styles/data-sql-fake-office-panes.css
+// @include js/core/blob-worker-host.js
+// @include js/extras/sql-on-tabs-pure.js
+// @include js/extras/sql-on-tabs-op-and-worker.js
+// @include js/extras/sql-on-tabs-pane-view.js
+// @include js/extras/fake-data-from-json-schema-pure.js
+// @include js/extras/fake-data-op-and-pane.js
+// @include js/extras/office-xlsx-docx-viewer.js
+// @include js/extras/data-files-demos.js
 // @include js/extras/power-tools-demos.js
 // @include js/extras/power-tools-ops.js
+// Log + domain (phase 14c): log merge in a Blob Worker + histogram, FIX order lifecycle + sequence diagram, SWIFT MT dictionary + detail.
+// @include js/i18n/en-one-editor-log-domain-strings.js
+// @include styles/log-domain-panes.css
+// @include js/log/log-merge-timeline-pure.js
+// @include js/log/log-merge-op-and-worker.js
+// @include js/log/log-merge-pane-view.js
+// @include js/log/fix-order-lifecycle-pure.js
+// @include js/log/fix-order-lifecycle-op-and-pane.js
+// @include js/log/swift-mt-tag-dictionary-data.js
+// @include js/log/swift-mt-parse-pure.js
+// @include js/log/swift-mt-detail-op-and-pane.js
+// @include js/log/log-domain-demos.js
+// Dev tools (phase 14d): cURL ⇄ code, X.509 + protobuf decode, OpenAPI docs — pure models + ops / panes.
+// @include js/i18n/en-one-editor-devtools-14d-strings.js
+// @include styles/curl-x509-openapi-panes.css
+// @include js/devtools/curl-parse-and-codegen-pure.js
+// @include js/devtools/curl-request-codegen-pure.js
+// @include js/devtools/curl-convert-op-and-pane.js
+// @include js/devtools/x509-der-decode-pure.js
+// @include js/devtools/protobuf-wire-decode-pure.js
+// @include js/devtools/x509-protobuf-op-and-pane.js
+// @include js/extras/openapi-doc-model-pure.js
+// @include js/extras/openapi-doc-op-and-pane.js
+// @include js/devtools/curl-x509-protobuf-openapi-demos.js
+// Compare / Git (phase 14e): conflict block widget (markers scanned on the main page), unified patch view + apply + export.
+// @include js/i18n/en-one-editor-git-14e-strings.js
+// @include styles/git-conflict-patch-panes.css
+// @include js/editor/git-conflict-resolver.js
+// @include js/extras/unified-patch-pure.js
+// @include js/extras/unified-patch-op-and-pane.js
+// @include js/editor/git-conflict-patch-demos.js
 // Explorer tar / gzip (phase 11d): Tar for ExplorerArchive.
 // @include js/core/tar-gzip-archive-pure.js
 // Explorer find & compare (phase 11e): advanced file search, duplicate files, folder compare + one-way sync for FileTools / the 🔎 tab.
@@ -82,3 +124,6 @@
 // @include js/extras/explorer-duplicate-file-finder.js
 // @include js/extras/explorer-folder-compare.js
 // @include js/extras/explorer-folder-sync-apply.js
+// Profile backup (phase 14a): export / import settings, library, notes as one .json.gz.
+// @include js/core/profile-backup-pure.js
+// @include js/workbench/profile-backup-actions.js

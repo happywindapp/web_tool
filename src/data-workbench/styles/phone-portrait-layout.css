@@ -10,15 +10,15 @@
 
     button, select, input[type=text], label.btn, a.btn { min-height:38px; }
     /* iOS zooms the page when a focused field is under 16px. */
-    select, input[type=text], textarea, textarea.anno { font-size:16px; }
+    select, input[type=text], textarea, textarea.anno { font-size:calc(16px * var(--ui-k, 1)); }
     select, input[type=text] { max-width:62vw; }
     input[type=checkbox] { width:20px; height:20px; }
 
     header.top { gap:6px; padding:6px 12px 8px; }
     header.top > * { order:3; }
     header.top > a.btn { order:0; flex:none; display:grid; place-items:center; font-size:0; }
-    header.top > a.btn::before { content:"←"; font-size:18px; line-height:1; }
-    header.top > h1 { order:0; flex:1 1 0; min-width:0; margin:0; font-size:15px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    header.top > a.btn::before { content:"←"; font-size:calc(18px * var(--ui-k, 1)); line-height:1; }
+    header.top > h1 { order:0; flex:1 1 0; min-width:0; margin:0; font-size:calc(15px * var(--ui-k, 1)); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
     header.top > .more-toggle { order:1; flex:none; display:block; padding:5px 12px; font-weight:700; }
     header.top > .lang-switch { order:2; flex:none; position:static; flex-wrap:nowrap; }
     .lang-switch button { padding:5px 9px; }
@@ -53,8 +53,8 @@
     .pane-scroller .left, .pane-scroller .diff-inputs { display:contents; }
     #split { display:none; }
     .code { overscroll-behavior-x:contain; }
-    .code, .gut, #gut, #hl, #src, #cfg { font-size:16px; }
-    pre.code:not(.hl) { font-size:13px; }
+    .code, .gut, #gut, #hl, #src, #cfg { font-size:calc(16px * var(--ui-k, 1)); }
+    pre.code:not(.hl) { font-size:calc(13px * var(--ui-k, 1)); }
 
     .grid-area { padding:8px 12px; }
     .paste { grid-template-rows:16dvh auto; }
@@ -66,7 +66,7 @@
     .chip button { min-height:0; }
     .tip, .pop { max-width:calc(100vw - 16px); }
     .tip { max-height:80dvh; overflow:hidden; }
-    .author { flex-wrap:nowrap; justify-content:space-between; gap:8px; padding:2px 12px 4px; font-size:11px; white-space:nowrap; overflow:hidden; }
+    .author { flex-wrap:nowrap; justify-content:space-between; gap:8px; padding:2px 12px 4px; font-size:calc(11px * var(--ui-k, 1)); white-space:nowrap; overflow:hidden; }
     .author span { display:none; }
   }
   @media (max-width: 640px) and (prefers-reduced-motion: no-preference) { .pane-scroller { scroll-behavior:smooth; } }

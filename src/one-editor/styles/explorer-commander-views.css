@@ -7,7 +7,7 @@
   .fi-row > .fi-st, .fi-head > .fi-st { text-align:center; }
   .fi.rs .fi-list { scroll-padding-top:2.4em; }
   .rs-grp { position:sticky; top:0; z-index:1; display:block; width:100%; padding:5px 12px; border:0; border-bottom:1px solid var(--line); border-radius:0;
-    background:var(--gut); color:var(--ink); font:inherit; font-size:12px; font-weight:600; text-align:left; cursor:pointer; }
+    background:var(--gut); color:var(--ink); font:inherit; font-size:calc(12px * var(--ui-k, 1)); font-weight:600; text-align:left; cursor:pointer; }
   .rs-grp:focus-visible { outline:1px dotted var(--acc); outline-offset:-2px; }
   @media (pointer:coarse) { .rs-grp { padding-top:10px; padding-bottom:10px; } }
   @media (hover:hover) { .rs-grp:hover { background:var(--hover); } }
@@ -46,7 +46,7 @@
     .fi.flat .fi-row > .fi-dir, .fi.flat .fi-head > .fi-dir { display:none; }
   }
   .fi-head > .fi-hcell { display:flex; align-items:center; min-width:0; }
-  .fi-hcell > button { padding:4px 0; border:0; background:transparent; color:var(--muted); font:inherit; font-size:12px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .fi-hcell > button { padding:4px 0; border:0; background:transparent; color:var(--muted); font:inherit; font-size:calc(12px * var(--ui-k, 1)); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .fi-hcell > .fi-hsort { flex:1 1 auto; min-width:0; text-align:left; }
   .fi-head > .fi-size.fi-hcell > .fi-hsort { text-align:right; }
   .fi-hcell > .fi-hflt { flex:none; padding:4px 4px; opacity:.6; }
@@ -73,11 +73,11 @@
   /* Phase 11d: drag & drop targets, "n items" drag picture, the name box of New ▸ templates */
   .fi-list > .fi-row.dnd-over, .fi-mcol > .fi-row.dnd-over, #explorer .dnd-over, .fi-crumb.dnd-over { outline:2px solid var(--acc); outline-offset:-2px; background:color-mix(in srgb, var(--acc) 18%, transparent); }
   .fi-list.dnd-over { outline:2px dashed var(--acc); outline-offset:-3px; }
-  .dnd-ghost { position:fixed; top:-100px; left:0; padding:4px 10px; border-radius:6px; background:var(--acc); color:#fff; font-size:12px; font-weight:600; pointer-events:none; }
+  .dnd-ghost { position:fixed; top:-100px; left:0; padding:4px 10px; border-radius:6px; background:var(--acc); color:#fff; font-size:calc(12px * var(--ui-k, 1)); font-weight:600; pointer-events:none; }
   dialog.name-ask { width:min(420px, calc(100vw - 32px)); padding:14px 16px; border:1px solid var(--line); border-radius:10px; background:var(--panel); color:var(--ink); box-shadow:0 16px 48px rgb(0 0 0 / .3); }
   dialog.name-ask::backdrop { background:rgb(0 0 0 / .25); }
-  .name-ask label { display:flex; flex-direction:column; gap:8px; font-size:13px; }
-  .name-ask input { padding:6px 8px; border:1px solid var(--line); border-radius:6px; background:var(--bg); color:var(--ink); font:inherit; font-size:14px; }
+  .name-ask label { display:flex; flex-direction:column; gap:8px; font-size:calc(13px * var(--ui-k, 1)); }
+  .name-ask input { padding:6px 8px; border:1px solid var(--line); border-radius:6px; background:var(--bg); color:var(--ink); font:inherit; font-size:calc(14px * var(--ui-k, 1)); }
   .name-ask-btns { display:flex; justify-content:flex-end; gap:8px; margin-top:12px; }
   .name-ask-btns > button { min-width:5.5em; padding:5px 12px; }
   @media (pointer:coarse) { .name-ask input, .name-ask-btns > button { min-height:40px; } }
@@ -92,19 +92,19 @@
   .fi-bar > .rs-act { flex:none; white-space:nowrap; }
   .fi-row > .fi-st { font-weight:600; }
   dialog.fs-ask, dialog.sync-ask { width:min(460px, calc(100vw - 32px)); max-height:calc(100dvh - 32px); overflow:auto; }
-  .fs-title { margin:0 0 10px; font-size:15px; }
-  .fs-ask .fs-field { display:flex; flex-direction:column; gap:4px; margin-bottom:8px; font-size:13px; }
-  .fs-ask select { padding:6px 8px; border:1px solid var(--line); border-radius:6px; background:var(--bg); color:var(--ink); font:inherit; font-size:14px; }
+  .fs-title { margin:0 0 10px; font-size:calc(15px * var(--ui-k, 1)); }
+  .fs-ask .fs-field { display:flex; flex-direction:column; gap:4px; margin-bottom:8px; font-size:calc(13px * var(--ui-k, 1)); }
+  .fs-ask select { padding:6px 8px; border:1px solid var(--line); border-radius:6px; background:var(--bg); color:var(--ink); font:inherit; font-size:calc(14px * var(--ui-k, 1)); }
   .fs-pair { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
   .fs-pair[hidden] { display:none; }
   .fs-checks { display:grid; grid-template-columns:repeat(auto-fill, minmax(12em, 1fr)); gap:4px 12px; margin:4px 0 6px; }
-  .name-ask .fs-check { display:flex; flex-direction:row; align-items:center; gap:6px; font-size:13px; }
+  .name-ask .fs-check { display:flex; flex-direction:row; align-items:center; gap:6px; font-size:calc(13px * var(--ui-k, 1)); }
   .name-ask .fs-check > input { width:16px; height:16px; margin:0; padding:0; }
-  .fs-err { min-height:1.2em; margin:4px 0 0; color:var(--bad); font-size:12px; }
-  .sync-path { margin:0 0 8px; color:var(--muted); font-size:12px; overflow-wrap:anywhere; }
+  .fs-err { min-height:1.2em; margin:4px 0 0; color:var(--bad); font-size:calc(12px * var(--ui-k, 1)); }
+  .sync-path { margin:0 0 8px; color:var(--muted); font-size:calc(12px * var(--ui-k, 1)); overflow-wrap:anywhere; }
   .sync-lists { display:flex; flex-direction:column; gap:6px; }
-  .sync-sec > summary { cursor:pointer; font-size:13px; font-weight:600; }
-  .sync-sec > ul { max-height:10em; overflow:auto; margin:4px 0 0; padding-left:1.4em; font:12px/1.5 var(--mono, monospace); overflow-wrap:anywhere; }
+  .sync-sec > summary { cursor:pointer; font-size:calc(13px * var(--ui-k, 1)); font-weight:600; }
+  .sync-sec > ul { max-height:10em; overflow:auto; margin:4px 0 0; padding-left:1.4em; font:calc(12px * var(--ui-k, 1))/1.5 var(--mono, monospace); overflow-wrap:anywhere; }
   .sync-more { color:var(--muted); list-style:none; }
-  .sync-note { margin:10px 0 0; color:var(--muted); font-size:12px; }
+  .sync-note { margin:10px 0 0; color:var(--muted); font-size:calc(12px * var(--ui-k, 1)); }
   @media (pointer:coarse) { .fs-ask input:not([type=checkbox]), .fs-ask select { min-height:40px; } .name-ask-btns > button { min-height:40px; } .name-ask .fs-check > input { width:20px; height:20px; min-height:0; } }

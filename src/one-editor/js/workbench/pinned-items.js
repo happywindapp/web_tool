@@ -29,10 +29,12 @@ const Pinned = (() => {
   // A disk rename moves only that handle object: the pinned copy follows it.
   function renamed(item, handle) { Object.assign(item, { handle, name: handle.name }); changed(); }
 
+  const loading = () => { if (!ready) StatusBar.msg(T("Đang nạp mục Đã ghim — thử lại sau giây lát."), "warn"); return !ready; };
+
   // find() is async: a quick double click would otherwise pin the same entry twice.
   let busy = false;
   async function toggleHandle(handle) {
-    if (!ready || busy || !handle || typeof handle.isSameEntry !== "function") return;
+    if (loading() || busy || !handle || typeof handle.isSameEntry !== "function") return;
     busy = true;
     try {
       const hit = await find(handle);
@@ -44,7 +46,7 @@ const Pinned = (() => {
   }
 
   function toggleNote(doc) {
-    if (!ready) return;
+    if (loading()) return;
     const on = !hasNote(doc);
     list = on ? [...list, { kind: "note", id: doc.id }] : list.filter(p => p.id !== doc.id);
     changed();
@@ -53,7 +55,7 @@ const Pinned = (() => {
 
   // Folder opened from a Google Drive / OneDrive link: pinned by its link.
   function toggleCloud(node) {
-    if (!ready || !node.link) return;
+    if (!node.link || loading()) return;
     const on = !hasCloud(node.link);
     list = on ? [...list, { kind: "cloud", name: node.name, link: node.link }] : list.filter(p => !(p.kind === "cloud" && p.link === node.link));
     changed();
@@ -70,7 +72,8 @@ const Pinned = (() => {
   async function addActive() {
     const d = Views.activeDoc(), it = d && Groups.ofDoc(d);
     if (!d) { StatusBar.msg(T("Chưa có tab nào đang chọn."), "warn"); return; }
-    if (!ready || !it) { StatusBar.msg(T("Tab này không ghim được: chỉ ghi chú, file / folder trên máy (Chrome / Edge) và folder mở từ link."), "warn"); return; }
+    if (loading()) return;
+    if (!it) { StatusBar.msg(T("Tab này không ghim được: chỉ ghi chú, file / folder trên máy (Chrome / Edge) và folder mở từ link."), "warn"); return; }
     const has = it.kind === "note" ? list.some(p => p.kind === "note" && p.id === it.id) : it.kind === "cloud" ? hasCloud(it.link) : !!(await find(it.handle));
     if (has) { StatusBar.msg(T("“{name}” đã có trong mục Đã ghim.", { name: nameOf(it) }), "warn"); return; }
     if (it.kind === "note") toggleNote(Docs.get(it.id)); else if (it.kind === "cloud") toggleCloud(it); else toggleHandle(it.handle);

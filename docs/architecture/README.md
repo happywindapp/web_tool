@@ -78,6 +78,10 @@ Xem `docs/tools/<tool>.md` — danh sách ở [`docs/tools/`](../tools/README.md
     .toolbar { display:flex; flex-wrap:wrap; gap:8px; align-items:center; padding:8px 16px; background:color-mix(in srgb, var(--acc) 10%, var(--panel)); --line:color-mix(in srgb, var(--acc) 40%, var(--panel)); border-bottom:1px solid var(--line); }
     ```
 
+- **Cỡ giao diện Nhỏ / Vừa / Lớn (mọi tool build từ `src/`):** select `Cỡ` (`label.ui-size-label` + `select.ui-size-pick`) ngay sau select `Giao diện`, `@include ../data-workbench/js/core/ui-size-picker-small-medium-large.js` sau `theme-picker-auto-light-dark.js`. Module `UiSize` lưu 1 khoá localStorage chung `web-tool.ui-size` (đổi ở 1 tool ⇒ mọi tool theo) và đặt `html[data-ui-size]`.
+  - `base.css` (chỉ ≥ 641px) định nghĩa `--ui-k` (hệ số chữ: .888 / .988 / 1.088 ⇒ chữ gốc ~12.4 / 13.8 / 15.2px), `--bar-py`, `--bar-gap`, `--btn-pad` cho header + toolbar. Điện thoại giữ `--ui-k` = 1 và ẩn select (ô nhập 16px chống iOS zoom).
+  - CSS mới: viết cỡ chữ / icon dạng `calc(Npx * var(--ui-k, 1))`, không viết px trần. Ngoại lệ: vùng soạn code + gutter (phải khớp dòng) và editor CodeMirror (`--ed-font`).
+
   - **Không viết lại màu từng nút:** đổi biến CSS ngay tại header/toolbar, control bên trong tự ăn theo. Popover/dialog gắn vào `body`, không đặt trong 2 vùng này, để giữ màu trang.
   - **Kiểm:** theme sáng + tối (đổi bằng dropdown Giao diện, không dùng cờ `--force-dark-mode` vì Chrome tự đảo màu); chữ đạt 4.5:1 trên nền tint — `.muted` có sẵn chỉ đạt 4.14:1 nên toolbar phải giữ override `--muted` nếu có chữ phụ.
   - **Ngoại lệ còn lại:** FIX Parser mới áp màu, chưa chia lại control (mẫu + mở file ở header, giao diện ở toolbar).

@@ -1,29 +1,29 @@
   /* Detail pane tabs: overview, chart, trades, news, financials, events, profile, analyst calls. */
   .dtabs { position:sticky; top:0; z-index:5; display:flex; gap:2px; padding:4px 8px 0; overflow-x:auto; scrollbar-width:none; background:var(--panel); border-bottom:1px solid var(--line); }
-  .dtabs button { flex:none; min-height:0; padding:5px 9px; border:0; border-bottom:2px solid transparent; border-radius:0; background:none; color:var(--muted); font-size:12.5px; white-space:nowrap; }
+  .dtabs button { flex:none; min-height:0; padding:5px 9px; border:0; border-bottom:2px solid transparent; border-radius:0; background:none; color:var(--muted); font-size:calc(12.5px * var(--ui-k, 1)); white-space:nowrap; }
   .dtabs button.on { color:var(--ink); border-bottom-color:var(--acc); font-weight:600; }
   @media (hover:hover) { .dtabs button:hover { color:var(--ink); } }
   .dpanel { padding-bottom:8px; }
   .dpanel .cbar { padding-top:8px; }
   .dpanel .seg button.on { background:var(--acc); color:#fff; border-color:var(--acc); }
 
-  .nitem { padding:8px 12px; border-bottom:1px solid var(--gut); font-size:13px; }
+  .nitem { padding:8px 12px; border-bottom:1px solid var(--gut); font-size:calc(13px * var(--ui-k, 1)); }
   .nitem b { font-weight:600; line-height:1.35; } .nitem a { color:var(--ink); text-decoration:none; }
   @media (hover:hover) { .nitem a:hover { color:var(--acc); text-decoration:underline; } }
-  .nitem .muted { font-size:11.5px; margin-top:2px; }
-  .nitem p { margin:4px 0 0; color:var(--muted); font-size:12.5px; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
+  .nitem .muted { font-size:calc(11.5px * var(--ui-k, 1)); margin-top:2px; }
+  .nitem p { margin:4px 0 0; color:var(--muted); font-size:calc(12.5px * var(--ui-k, 1)); display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
   button.more { display:block; margin:8px auto; }
-  .summary { font-size:12.5px; line-height:1.5; white-space:pre-line; }
+  .summary { font-size:calc(12.5px * var(--ui-k, 1)); line-height:1.5; white-space:pre-line; }
 
-  table.dtable { width:calc(100% - 24px); margin:6px 12px; border-collapse:collapse; font-size:12.5px; font-variant-numeric:tabular-nums; }
-  .dtable th { padding:3px 6px; color:var(--muted); font-size:11.5px; font-weight:600; text-align:left; border-bottom:1px solid var(--line); }
+  table.dtable { width:calc(100% - 24px); margin:6px 12px; border-collapse:collapse; font-size:calc(12.5px * var(--ui-k, 1)); font-variant-numeric:tabular-nums; }
+  .dtable th { padding:3px 6px; color:var(--muted); font-size:calc(11.5px * var(--ui-k, 1)); font-weight:600; text-align:left; border-bottom:1px solid var(--line); }
   .dtable td { padding:4px 6px; vertical-align:top; border-bottom:1px solid var(--gut); }
-  .dtable .muted { font-size:11.5px; }
+  .dtable .muted { font-size:calc(11.5px * var(--ui-k, 1)); }
   .dtable.kv th { width:36%; border-bottom:1px solid var(--gut); font-weight:400; vertical-align:top; }
   .dtable a { color:var(--acc); word-break:break-all; }
 
   .fscroll { overflow-x:auto; margin:4px 0 0; }
-  table.ftable { border-collapse:separate; border-spacing:0; min-width:100%; font-size:12px; font-variant-numeric:tabular-nums; white-space:nowrap; }
+  table.ftable { border-collapse:separate; border-spacing:0; min-width:100%; font-size:calc(12px * var(--ui-k, 1)); font-variant-numeric:tabular-nums; white-space:nowrap; }
   .ftable th, .ftable td { padding:3px 8px; border-bottom:1px solid var(--gut); text-align:right; }
   .ftable thead th { position:sticky; top:0; background:var(--gut); color:var(--muted); font-weight:600; }
   .ftable tbody th, .ftable thead th:first-child { position:sticky; left:0; z-index:1; max-width:190px; overflow:hidden; text-overflow:ellipsis; text-align:left; font-weight:400; background:var(--panel); }

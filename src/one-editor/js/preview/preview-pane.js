@@ -26,9 +26,9 @@ const PreviewPane = (() => {
     p.err.hidden = !v.error;
     if (v.error) {
       p.hadError = true;
-      const d = v.error.detail;
-      p.err.classList.toggle("warn", !!v.error.warn);
-      p.err.textContent = (v.error.warn ? "⚠ " : "✖ ") + v.error.message + (d && !v.error.message.includes(d) ? "\n\n" + d : "") + (p.has ? "\n\n" + (p.kind === "translate" ? T("Đang hiện bản dịch gần nhất (mờ).") : T("Đang hiện bản vẽ hợp lệ gần nhất (mờ).")) : "");
+      const d = v.error.detail, warn = !!(v.error.warn || v.error.stopped);
+      p.err.classList.toggle("warn", warn);
+      p.err.textContent = (warn ? "⚠ " : "✖ ") + v.error.message + (d && !v.error.message.includes(d) ? "\n\n" + d : "") + (p.has ? "\n\n" + (p.kind === "translate" ? T("Đang hiện bản dịch gần nhất (mờ).") : T("Đang hiện bản vẽ hợp lệ gần nhất (mờ).")) : "");
       p.body.classList.toggle("stale", p.has);
       return;
     }

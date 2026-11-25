@@ -20,10 +20,10 @@
   * { box-sizing:border-box; }
   [hidden] { display:none !important; }
   body { margin:0; height:100vh; height:100dvh; display:grid; grid-template-rows:auto 1fr auto; background:var(--bg); color:var(--ink);
-         font:14px/1.45 "Segoe UI", Arial, sans-serif; }
+         font:calc(14px * var(--ui-k, 1))/1.45 "Segoe UI", Arial, sans-serif; }
   body.drop { outline:3px dashed var(--acc); outline-offset:-6px; }
   header.top { position:relative; display:flex; flex-wrap:wrap; gap:8px; align-items:center; padding:8px 112px 8px 16px; background:var(--panel); border-bottom:1px solid var(--line); }
-  header.top h1 { font-size:16px; margin:0 8px 0 0; }
+  header.top h1 { font-size:calc(16px * var(--ui-k, 1)); margin:0 8px 0 0; }
   .seg { display:inline-flex; flex-wrap:wrap; gap:4px; }
   .seg button.on { background:var(--ink); color:var(--bg); border-color:var(--ink); }
   .lang-switch { position:absolute; top:8px; right:16px; }
@@ -43,6 +43,16 @@
   .panel { display:grid; grid-template-rows:auto 1fr auto; min-height:0; }
   .toolbar { display:flex; flex-wrap:wrap; gap:8px; align-items:center; padding:8px 16px; background:var(--panel); border-bottom:1px solid var(--line); }
   .toolbar .sep { width:1px; align-self:stretch; background:var(--line); }
+  /* UI size (UiSize module, html[data-ui-size]): desktop only — phone keeps its touch targets and 16px inputs. */
+  @media (min-width:641px) {
+    :root { --ui-k:.988; --bar-py:6px; --bar-gap:7px; --btn-pad:4px 9px; }
+    :root[data-ui-size="small"] { --ui-k:.888; --bar-py:3px; --bar-gap:5px; --btn-pad:2px 7px; }
+    :root[data-ui-size="large"] { --ui-k:1.088; --bar-py:9px; --bar-gap:9px; --btn-pad:6px 12px; }
+    header.top, .toolbar { gap:var(--bar-gap); padding-block:var(--bar-py); }
+    header.top .lang-switch { top:var(--bar-py); }
+    :is(header.top, .toolbar) :is(button, select, a.btn, label.btn, input:not([type=checkbox], [type=radio])) { padding:var(--btn-pad); }
+  }
+  @media (max-width:640px) { label.ui-size-label { display:none; } }
   .work { display:grid; grid-template-columns:1fr 1fr; gap:10px; padding:10px 16px; min-height:0; }
   .pane { display:grid; grid-template-rows:auto 1fr; min-height:0; background:var(--panel); border:1px solid var(--line); border-radius:8px; overflow:hidden; }
   .bar { display:flex; gap:6px; align-items:center; padding:6px 10px; border-bottom:1px solid var(--line); flex-wrap:wrap; }
@@ -52,7 +62,7 @@
   .k{color:var(--k)} .s{color:var(--s)} .n{color:var(--n)} .l{color:var(--l)} .p{color:var(--muted)}
   .t{color:var(--muted)} .tn{color:var(--tn);font-weight:600} .an{color:var(--an)} .av{color:var(--av)} .c{color:var(--c);font-style:italic} .d,.cd{color:var(--l)}
   .good{color:var(--good)} .bad{color:var(--bad)} .warn{color:var(--warn)} .muted{color:var(--muted)}
-  .author { display:flex; flex-wrap:wrap; gap:2px 6px; padding:4px 16px 6px; background:var(--panel); font-size:12px; color:var(--muted); } .author a { color:var(--acc); } .author span:not(:first-child) { margin-left:10px; }
+  .author { display:flex; flex-wrap:wrap; gap:2px 6px; padding:4px 16px 6px; background:var(--panel); font-size:calc(12px * var(--ui-k, 1)); color:var(--muted); } .author a { color:var(--acc); } .author span:not(:first-child) { margin-left:10px; }
   .author { --author-ink:#0e7490; } .author a { color:var(--author-ink); } .author > span { color:color-mix(in srgb, var(--author-ink) 70%, var(--ink)); font-weight:600; }
   @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .author { --author-ink:#67e8f9; } }
   :root[data-theme="dark"] .author { --author-ink:#67e8f9; }
@@ -63,12 +73,13 @@
   :root { --tb:color-mix(in srgb, var(--acc) 10%, var(--panel)); --tb-ink:var(--ink); }
   header.top { background:#164e63; border-bottom:0; color:var(--ink); color-scheme:dark;
                --ink:#ecfeff; --muted:#a5d8e6; --btn:#1f6b85; --line:#4b93aa; --good:#86efac; --bad:#fecaca; --warn:#fde68a; }
-  .lang-switch .gc-views { align-self:center; margin-right:4px; font-size:12px; font-weight:600; color:var(--ink); opacity:.85; white-space:nowrap; }
+  .lang-switch .gc-views { align-self:center; margin-right:4px; font-size:calc(12px * var(--ui-k, 1)); font-weight:600; color:var(--ink); opacity:.85; white-space:nowrap; }
   @media (min-width:641px) { header.top:has(.gc-views:not([hidden])) { padding-right:200px; } }
   .wb-nav { flex:0 0 100%; gap:2px; margin-bottom:-8px; }
   .wb-nav button { padding:6px 14px; border:0; border-radius:6px 6px 0 0; background:transparent; }
   .wb-nav button:hover { background:var(--btn); }
   .wb-nav button.on { background:var(--tb); color:var(--tb-ink); font-weight:600; }
+  @media (min-width:641px) { .wb-nav { margin-bottom:calc(-1 * var(--bar-py)); } header.top .wb-nav button { padding:calc(var(--bar-py) - 1px) 12px; } }
   /* A select is as wide as its longest option; cap it so long sample names don't widen the toolbar (the open list shows them in full) */
   select.demo-picker { max-width:9.5em; text-overflow:ellipsis; }
   .toolbar { background:var(--tb); --line:color-mix(in srgb, var(--acc) 40%, var(--panel)); --muted:color-mix(in srgb, var(--ink) 65%, var(--panel)); }
@@ -76,7 +87,7 @@
           --k:#7c3aed; --s:#047857; --n:#b45309; --l:#be185d; --tn:#1d4ed8; --an:#7c3aed; --av:#047857; --c:#94a3b8; --add:#dcfce7; --del:#fee2e2; --add2:#86efac; --del2:#fca5a5; }
   :root[data-theme="dark"] { --bg:#0b1220; --panel:#111827; --line:#334155; --ink:#e2e8f0; --muted:#94a3b8; --good:#4ade80; --bad:#f87171; --warn:#fbbf24; --code:#0f172a; --btn:#1e293b; --gut:#0b1220; --hover:#1e293b;
           --k:#c4b5fd; --s:#6ee7b7; --n:#fcd34d; --l:#f9a8d4; --tn:#93c5fd; --an:#c4b5fd; --av:#6ee7b7; --c:#64748b; --add:#14361f; --del:#3f1717; --add2:#166534; --del2:#991b1b; }
-  .chip { display:inline-flex; gap:6px; align-items:center; padding:2px 8px; border-radius:12px; background:var(--acc); color:#fff; font-size:12px; }
+  .chip { display:inline-flex; gap:6px; align-items:center; padding:2px 8px; border-radius:12px; background:var(--acc); color:#fff; font-size:calc(12px * var(--ui-k, 1)); }
   .chip button { padding:0 6px; border:0; background:transparent; color:#fff; font-weight:700; }
   .chips { display:inline-flex; flex-wrap:wrap; gap:4px; }
   .pop { position:fixed; z-index:60; display:flex; flex-direction:column; gap:6px; padding:8px; min-width:220px; background:var(--panel); color:var(--ink);
@@ -133,19 +144,19 @@
   #dioFrame { min-height:0; }
   #dioFrame iframe { display:block; width:100%; height:100%; border:0; background:#fff; }
   .gate { align-self:center; justify-self:center; max-width:560px; padding:24px; text-align:center; }
-  .gate h2 { margin:0 0 8px; font-size:18px; }
+  .gate h2 { margin:0 0 8px; font-size:calc(18px * var(--ui-k, 1)); }
   .gate p { margin:0 0 12px; }
   .gate button { padding:8px 18px; margin-bottom:12px; }
 
   .statusbar { background:var(--panel); border-top:1px solid var(--line); padding:6px 16px; max-height:30vh; overflow:auto; }
   .status-row { display:flex; flex-wrap:wrap; gap:4px 14px; align-items:baseline; min-height:20px; }
   #status { font-weight:600; }
-  #err { margin:4px 0; padding:6px 8px; background:color-mix(in srgb, var(--bad) 10%, var(--panel)); border-radius:6px; color:var(--bad); font:12px/1.4 Consolas, monospace; white-space:pre-wrap; cursor:pointer; }
+  #err { margin:4px 0; padding:6px 8px; background:color-mix(in srgb, var(--bad) 10%, var(--panel)); border-radius:6px; color:var(--bad); font:calc(12px * var(--ui-k, 1))/1.4 Consolas, monospace; white-space:pre-wrap; cursor:pointer; }
 
   dialog { width:min(720px, 92vw); max-height:80vh; padding:0; border:1px solid var(--line); border-radius:8px; background:var(--panel); color:var(--ink); }
   #hList { margin:0; padding:8px 16px 12px 36px; overflow:auto; max-height:60vh; }
   #hList li { padding:4px 0; border-bottom:1px solid var(--gut); }
-  #hList code { display:block; color:var(--muted); font-size:12px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  #hList code { display:block; color:var(--muted); font-size:calc(12px * var(--ui-k, 1)); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   @media (max-width: 900px) { .studio { grid-template-columns:minmax(0, 1fr); grid-template-rows:repeat(2, minmax(280px, 1fr)); gap:10px; overflow-y:auto; } #split { display:none; } }
   .pane-switch, .more-toggle { display:none; }
   /* Phone portrait: one pane at a time in a horizontal snap scroller; control rows scroll sideways instead of wrapping and the primary button stays pinned. */
@@ -159,15 +170,15 @@
 
     button, select, input[type=text], label.btn, a.btn { min-height:38px; }
     /* iOS zooms the page when a focused field is under 16px. */
-    select, input[type=text], textarea, textarea.anno { font-size:16px; }
+    select, input[type=text], textarea, textarea.anno { font-size:calc(16px * var(--ui-k, 1)); }
     select, input[type=text] { max-width:62vw; }
     input[type=checkbox] { width:20px; height:20px; }
 
     header.top { gap:6px; padding:6px 12px 8px; }
     header.top > * { order:3; }
     header.top > a.btn { order:0; flex:none; display:grid; place-items:center; font-size:0; }
-    header.top > a.btn::before { content:"←"; font-size:18px; line-height:1; }
-    header.top > h1 { order:0; flex:1 1 0; min-width:0; margin:0; font-size:15px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    header.top > a.btn::before { content:"←"; font-size:calc(18px * var(--ui-k, 1)); line-height:1; }
+    header.top > h1 { order:0; flex:1 1 0; min-width:0; margin:0; font-size:calc(15px * var(--ui-k, 1)); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
     header.top > .more-toggle { order:1; flex:none; display:block; padding:5px 12px; font-weight:700; }
     header.top > .lang-switch { order:2; flex:none; position:static; flex-wrap:nowrap; }
     .lang-switch button { padding:5px 9px; }
@@ -202,8 +213,8 @@
     .pane-scroller .left, .pane-scroller .diff-inputs { display:contents; }
     #split { display:none; }
     .code { overscroll-behavior-x:contain; }
-    .code, .gut, #gut, #hl, #src, #cfg { font-size:16px; }
-    pre.code:not(.hl) { font-size:13px; }
+    .code, .gut, #gut, #hl, #src, #cfg { font-size:calc(16px * var(--ui-k, 1)); }
+    pre.code:not(.hl) { font-size:calc(13px * var(--ui-k, 1)); }
 
     .grid-area { padding:8px 12px; }
     .paste { grid-template-rows:16dvh auto; }
@@ -215,7 +226,7 @@
     .chip button { min-height:0; }
     .tip, .pop { max-width:calc(100vw - 16px); }
     .tip { max-height:80dvh; overflow:hidden; }
-    .author { flex-wrap:nowrap; justify-content:space-between; gap:8px; padding:2px 12px 4px; font-size:11px; white-space:nowrap; overflow:hidden; }
+    .author { flex-wrap:nowrap; justify-content:space-between; gap:8px; padding:2px 12px 4px; font-size:calc(11px * var(--ui-k, 1)); white-space:nowrap; overflow:hidden; }
     .author span { display:none; }
   }
   @media (max-width: 640px) and (prefers-reduced-motion: no-preference) { .pane-scroller { scroll-behavior:smooth; } }
@@ -264,6 +275,7 @@
   <select id="savedSel" title="Mở lại một sơ đồ đã lưu trong trình duyệt này"></select>
   <button id="btnDelSaved" title="Xoá sơ đồ đang mở khỏi danh sách đã lưu" hidden>🗑</button>
   <label class="chk" title="Giao diện sáng / tối">Giao diện <select id="uiTheme"><option value="auto">Tự động</option><option value="light">Sáng</option><option value="dark">Tối</option></select></label>
+  <label class="chk ui-size-label" title="Cỡ chữ và icon của giao diện — dùng chung mọi tool">Cỡ <select class="ui-size-pick"><option value="small">Nhỏ</option><option value="medium">Vừa</option><option value="large">Lớn</option></select></label>
   <span class="seg lang-switch" title="Ngôn ngữ"><span class="gc-views" title="Lượt truy cập (GoatCounter, cập nhật mỗi ~10 phút)" hidden></span><button data-lang="vi">VI</button><button data-lang="en">EN</button></span>
   <nav class="seg wb-nav" aria-label="Loại sơ đồ">
     <button data-engine="mermaid" title="Flowchart, sequence, ER, Gantt… — chạy offline">Mermaid</button>
@@ -333,7 +345,7 @@ const I18n = (() => {
   const KEY = "web_tool.lang", EN = {}, listeners = [];
   const SKIP = "script,style,textarea,pre,code,svg,table,[contenteditable],[data-i18n-skip]";
   const origText = new WeakMap(), origAttr = new WeakMap();
-  let origTitle = null;
+  let origTitle = null, applied = false;
   let lang = (() => {
     try { const v = localStorage.getItem(KEY); if (v === "vi" || v === "en") return v; } catch { /* storage blocked */ }
     const nav = globalThis.navigator;
@@ -342,7 +354,8 @@ const I18n = (() => {
 
   const word = s => lang === "en" && Object.hasOwn(EN, s) ? EN[s] : s;
   const t = (vi, params) => params ? word(vi).replace(/\{(\w+)\}/g, (m, k) => Object.hasOwn(params, k) ? String(params[k]) : m) : word(vi);
-  const num = n => n.toLocaleString(lang);
+  let numFmt = new Intl.NumberFormat(lang);
+  const num = n => numFmt.format(n);
   const swap = src => { const m = /^(\s*)([\s\S]*?)(\s*)$/.exec(src); return m[1] + word(m[2]) + m[3]; };
 
   // Static markup keeps its Vietnamese source; the original of each text node / attribute is remembered so switching back is exact.
@@ -350,19 +363,22 @@ const I18n = (() => {
     document.documentElement.lang = lang;
     if (origTitle === null) origTitle = document.title;
     document.title = word(origTitle);
-    for (const el of [root, ...root.querySelectorAll("*")]) {
-      if (el.parentElement && el.parentElement.closest(SKIP)) continue;
-      if (!el.matches(SKIP)) for (const n of el.childNodes) {
-        if (n.nodeType !== 3 || !n.data.trim()) continue;
-        if (!origText.has(n)) origText.set(n, n.data);
-        n.data = swap(origText.get(n));
-      }
-      for (const a of ["title", "placeholder"]) {
-        if (!el.hasAttribute(a)) continue;
-        if (!origAttr.has(el)) origAttr.set(el, {});
-        const o = origAttr.get(el);
-        o[a] ??= el.getAttribute(a);
-        el.setAttribute(a, swap(o[a]));
+    if (lang !== "vi" || applied) {
+      applied = true;
+      for (const el of [root, ...root.querySelectorAll("*")]) {
+        if (el.parentElement && el.parentElement.closest(SKIP)) continue;
+        if (!el.matches(SKIP)) for (const n of el.childNodes) {
+          if (n.nodeType !== 3 || !n.data.trim()) continue;
+          if (!origText.has(n)) origText.set(n, n.data);
+          n.data = swap(origText.get(n));
+        }
+        for (const a of ["title", "placeholder"]) {
+          if (!el.hasAttribute(a)) continue;
+          if (!origAttr.has(el)) origAttr.set(el, {});
+          const o = origAttr.get(el);
+          o[a] ??= el.getAttribute(a);
+          el.setAttribute(a, swap(o[a]));
+        }
       }
     }
     document.querySelectorAll("[data-lang]").forEach(b => { b.classList.toggle("on", b.dataset.lang === lang); b.setAttribute("aria-pressed", b.dataset.lang === lang); });
@@ -371,6 +387,7 @@ const I18n = (() => {
   function set(l) {
     if (l === lang) return;
     lang = l;
+    numFmt = new Intl.NumberFormat(l);
     try { localStorage.setItem(KEY, l); } catch { /* storage blocked → choice lasts until reload */ }
     apply();
     listeners.forEach(f => f(l));
@@ -393,6 +410,11 @@ I18n.add({
   "Tự động": "Auto",
   "Sáng": "Light",
   "Tối": "Dark",
+  "Cỡ": "Size",
+  "Cỡ chữ và icon của giao diện — dùng chung mọi tool": "Text and icon size of the interface — shared by every tool",
+  "Nhỏ": "Small",
+  "Vừa": "Medium",
+  "Lớn": "Large",
   "📂 Đã lưu ({n})": "📂 Saved ({n})",
   "Chưa có dữ liệu để lưu.": "Nothing to save yet.",
   "Tên bản lưu (lưu trong trình duyệt này):": "Name for this save (stored in this browser):",
@@ -659,6 +681,27 @@ const ThemePicker = (() => {
     select.addEventListener("change", () => { apply(select.value); store.set("theme", select.value); });
   }
   return { bind, apply };
+})();
+// UI size small / medium / large: one localStorage key shared by every tool; sets html[data-ui-size] and binds every select.ui-size-pick.
+const UiSize = (() => {
+  const KEY = "web-tool.ui-size", SIZES = ["small", "medium", "large"], listeners = [];
+  const get = () => { try { const v = localStorage.getItem(KEY); return SIZES.includes(v) ? v : "medium"; } catch { return "medium"; } };
+  const picks = () => document.querySelectorAll("select.ui-size-pick");
+  function apply(v) {
+    document.documentElement.dataset.uiSize = v;
+    picks().forEach(s => { s.value = v; });
+    listeners.forEach(fn => fn(v));
+  }
+  function set(v) {
+    if (!SIZES.includes(v)) return;
+    try { localStorage.setItem(KEY, v); } catch { /* private mode: size lasts this page only */ }
+    apply(v);
+  }
+  const onChange = fn => listeners.push(fn);
+  apply(get());
+  picks().forEach(s => s.addEventListener("change", () => set(s.value)));
+  addEventListener("storage", e => { if (e.key === KEY) apply(get()); });
+  return { SIZES, get, set, onChange };
 })();
 // Named saves in localStorage (newest first, ≤ 30): 💾 asks a name and saves snapshot() · pick one in the <select> to reopen · 🗑 deletes the open one.
 const SavedSessions = ({ select, saveBtn, delBtn, store, key = "saved", snapshot, open, suggestName = () => "", isEmpty = p => !String(p.text || "").trim(), note, keep = () => {} }) => {

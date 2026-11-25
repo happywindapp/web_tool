@@ -6,7 +6,7 @@ const OutputLink = (() => {
 
   function fail(src, e) {
     const line = e.line || 0;
-    StatusBar.msg(e.message + (line ? " — " + T("bấm để tới dòng {n}", { n: line }) : ""), e.warn ? "warn" : "bad", line ? () => Views.revealLine(src, line) : null);
+    StatusBar.msg(e.message + (line ? " — " + T("bấm để tới dòng {n}", { n: line }) : ""), e.warn || e.stopped ? "warn" : "bad", line ? () => Views.revealLine(src, line) : null);
   }
 
   // quiet: live re-run (no focus change, no success message). Async ops (Prettier, sql-formatter) drop a result overtaken by a newer run.

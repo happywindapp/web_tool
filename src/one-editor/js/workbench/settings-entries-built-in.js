@@ -32,6 +32,8 @@
   const cm = CmSetup.settings, aid = id => () => !!Aids.settings()[id];
   S({ id: "theme", group: "editor", type: "choice", label: "Giao diện", hint: "Sáng / tối, hoặc theo hệ điều hành", choices: choose([["auto", "Tự động"], ["light", "Sáng"], ["dark", "Tối"]]),
     get: () => $("uiTheme").value, set: v => { $("uiTheme").value = v; $("uiTheme").dispatchEvent(new Event("change")); }, def: "auto" });
+  S({ id: "uiSize", group: "editor", type: "choice", label: "Cỡ giao diện", hint: "Cỡ chữ và icon của menu, thanh công cụ, Explorer, panel (không đổi chữ editor) — dùng chung mọi tool, chỉ áp trên màn rộng", choices: choose([["small", "Nhỏ"], ["medium", "Vừa"], ["large", "Lớn"]]),
+    get: UiSize.get, set: UiSize.set, def: "medium" });
   const font = () => (Prefs.get("font", 13) | 0) || 13;
   S({ id: "font", group: "editor", type: "number", label: "Cỡ chữ editor (px)", hint: "9–28 — Ctrl+= / Ctrl+- / Ctrl+0 cũng đổi", min: 9, max: 28,
     get: font, set: v => { if (v !== font()) Actions.zoom(v === 13 ? 0 : v - font()); }, def: 13 });

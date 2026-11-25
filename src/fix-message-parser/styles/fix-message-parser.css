@@ -1,6 +1,5 @@
   body { grid-template-rows:auto auto 1fr auto; }
-  .toolbar { padding:6px 16px; }
-  .toolbar .hint { margin-left:auto; font-size:12px; }
+  #dialect { max-width:10em; text-overflow:ellipsis; }
   .work { grid-template-columns:minmax(0, 3fr) minmax(320px, 2fr); }
   .left { display:grid; grid-template-rows:minmax(110px, 1fr) minmax(0, 1fr); gap:10px; min-height:0; }
   .left.collapsed { grid-template-rows:auto minmax(0, 1fr); }
@@ -29,12 +28,12 @@
   dialog::backdrop { background:rgba(15,23,42,.45); }
   dialog h3 { margin:0 0 6px; } dialog label { display:flex; gap:6px; align-items:center; margin:4px 0; } dialog textarea { width:100%; height:200px; }
   dialog .grow { flex:1; }
-  textarea.anno { width:100%; min-height:44px; margin:2px 0 6px; padding:5px 8px; border:1px dashed var(--line); border-radius:6px; background:var(--code); color:var(--ink); font:12.5px "Segoe UI", Arial, sans-serif; resize:vertical; }
-  .bar .muted { font-size:12px; }
+  textarea.anno { width:100%; min-height:44px; margin:2px 0 6px; padding:5px 8px; border:1px dashed var(--line); border-radius:6px; background:var(--code); color:var(--ink); font:calc(12.5px * var(--ui-k, 1)) "Segoe UI", Arial, sans-serif; resize:vertical; }
+  .bar .muted { font-size:calc(12px * var(--ui-k, 1)); }
   .filters { gap:6px 8px; }
   .filters #q { flex:1 1 220px; min-width:160px; }
   .scroll { overflow:auto; min-height:0; }
-  table.grid, table.fields { border-collapse:collapse; width:100%; font:12px/1.35 Consolas, "Cascadia Mono", monospace; }
+  table.grid, table.fields { border-collapse:collapse; width:100%; font:calc(12px * var(--ui-k, 1))/1.35 Consolas, "Cascadia Mono", monospace; }
   table.grid th, table.fields th { position:sticky; top:0; z-index:1; background:var(--gut); text-align:left; font-weight:600; padding:4px 6px; border-bottom:1px solid var(--line); white-space:nowrap; }
   table.grid td { padding:3px 6px; border-bottom:1px solid var(--line); white-space:nowrap; max-width:260px; overflow:hidden; text-overflow:ellipsis; }
   table.grid tbody tr { cursor:pointer; }
@@ -44,15 +43,15 @@
   table.grid tr.in td.dir { color:var(--tn); }
   td.lv-error, li.error { color:var(--bad); } td.lv-warn, li.warn { color:var(--warn); } td.lv-info, li.info { color:var(--muted); } td.lv-ok { color:var(--good); }
   td.t-rej { color:var(--bad); font-weight:600; } td.t-er { color:var(--good); font-weight:600; } td.t-app { color:var(--k); font-weight:600; }
-  .more { padding:8px; text-align:center; color:var(--muted); font-size:12px; }
+  .more { padding:8px; text-align:center; color:var(--muted); font-size:calc(12px * var(--ui-k, 1)); }
   #detail { padding:8px 10px; }
   #detail table.fields th { top:-8px; }
   .dhead { display:flex; flex-wrap:wrap; gap:4px 10px; align-items:baseline; margin-bottom:6px; }
-  .dhead b { font-size:15px; }
+  .dhead b { font-size:calc(15px * var(--ui-k, 1)); }
   .dacts { display:flex; flex-wrap:wrap; gap:6px; margin:6px 0; }
-  .dacts button { font-size:12px; padding:3px 8px; }
-  .prefix { font:12px Consolas, monospace; color:var(--muted); margin-bottom:4px; word-break:break-all; }
-  ul.issues { margin:4px 0 8px; padding-left:18px; font-size:12.5px; }
+  .dacts button { font-size:calc(12px * var(--ui-k, 1)); padding:3px 8px; }
+  .prefix { font:calc(12px * var(--ui-k, 1)) Consolas, monospace; color:var(--muted); margin-bottom:4px; word-break:break-all; }
+  ul.issues { margin:4px 0 8px; padding-left:18px; font-size:calc(12.5px * var(--ui-k, 1)); }
   ul.issues li { cursor:pointer; }
   table.fields td { padding:3px 6px; border-bottom:1px solid var(--line); vertical-align:top; }
   table.fields td.tg { color:var(--tn); font-weight:600; text-align:right; white-space:nowrap; }
@@ -66,18 +65,18 @@
   table.fields td.mn .hv { color:var(--muted); }
   table.fields td.mn .desc { color:var(--muted); font-style:italic; font-family:"Segoe UI", Arial, sans-serif; }
   table.fields tbody tr[data-tag]:hover td { background:var(--hover); }
-  .purpose { font-size:12.5px; margin:-2px 0 6px; } .purpose div + div { margin-top:2px; }
-  #detail .hint { font-size:12px; margin:2px 0 4px; }
+  .purpose { font-size:calc(12.5px * var(--ui-k, 1)); margin:-2px 0 6px; } .purpose div + div { margin-top:2px; }
+  #detail .hint { font-size:calc(12px * var(--ui-k, 1)); margin:2px 0 4px; }
   .tip { position:fixed; z-index:50; max-width:480px; padding:8px 10px; background:var(--panel); color:var(--ink); border:1px solid var(--line); border-radius:8px;
-         box-shadow:0 6px 24px rgba(0,0,0,.18); font:12.5px/1.45 "Segoe UI", Arial, sans-serif; pointer-events:none; }
+         box-shadow:0 6px 24px rgba(0,0,0,.18); font:calc(12.5px * var(--ui-k, 1))/1.45 "Segoe UI", Arial, sans-serif; pointer-events:none; }
   .tip .tt-h { margin-bottom:4px; } .tip .tt-h .tn { font-family:Consolas, monospace; }
-  .tip .tt-req { margin-left:6px; padding:0 6px; border-radius:8px; background:var(--gut); color:var(--muted); font-size:11.5px; }
+  .tip .tt-req { margin-left:6px; padding:0 6px; border-radius:8px; background:var(--gut); color:var(--muted); font-size:calc(11.5px * var(--ui-k, 1)); }
   .tip .tt-v code { font-family:Consolas, monospace; color:var(--av); }
   .tip .tt-c { color:var(--muted); margin-top:2px; }
   .tip .tt-sec { margin-top:6px; padding-top:6px; border-top:1px solid var(--line); }
   .tip .tt-k { font-weight:600; color:var(--acc); margin-bottom:2px; }
-  pre.raw { margin:10px 0 0; padding:8px; background:var(--code); border:1px solid var(--line); border-radius:6px; white-space:pre-wrap; word-break:break-all; font:12px/1.5 Consolas, monospace; }
+  pre.raw { margin:10px 0 0; padding:8px; background:var(--code); border:1px solid var(--line); border-radius:6px; white-space:pre-wrap; word-break:break-all; font:calc(12px * var(--ui-k, 1))/1.5 Consolas, monospace; }
   pre.raw .d { color:var(--muted); }
   .empty { padding:24px 12px; color:var(--muted); text-align:center; }
-  footer.status { padding:4px 16px; background:var(--panel); border-top:1px solid var(--line); font-size:12.5px; }
-  @media (max-width: 900px) { .work { grid-template-columns:minmax(0, 1fr); grid-template-rows:minmax(480px, 3fr) minmax(300px, 2fr); overflow-y:auto; } .toolbar .hint { display:none; } }
+  footer.status { padding:4px 16px; background:var(--panel); border-top:1px solid var(--line); font-size:calc(12.5px * var(--ui-k, 1)); }
+  @media (max-width: 900px) { .work { grid-template-columns:minmax(0, 1fr); grid-template-rows:minmax(480px, 3fr) minmax(300px, 2fr); overflow-y:auto; } }

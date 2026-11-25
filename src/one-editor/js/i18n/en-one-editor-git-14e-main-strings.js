@@ -1,0 +1,20 @@
+// English strings for phase 14e (main page): Git conflict scan / commands / status bar, patch op label and demos — keyed by the Vietnamese source.
+I18n.add({
+  "Conflict Git: 2 khối (1 kiểu diff3) + Markdown có “=======” không phải conflict": "Git conflict: 2 blocks (1 diff3) + Markdown whose “=======” is not a conflict",
+  "Patch 2 file → áp vào tab (1 hunk lệch 3 dòng)": "2-file patch → apply to tabs (1 hunk off by 3 lines)",
+  "Xem patch (unified / git diff) + áp vào tab": "View patch (unified / git diff) + apply to a tab",
+  "Tab này không có conflict Git.": "This tab has no Git conflict.",
+  "Conflict {k}/{n} — dòng {l}.": "Conflict {k}/{n} — line {l}.",
+  "Đặt con trỏ trong một khối conflict trước.": "Put the cursor inside a conflict block first.",
+  "✔ {what}: {n} conflict — còn {left} · Ctrl+Z để hoàn tác.": "✔ {what}: {n} conflict — {left} left · Ctrl+Z to undo.",
+  "Conflict Git: {a} ⇄ {b}": "Git conflict: {a} ⇄ {b}",
+  "So sánh: xuất .patch (View 1 cũ → View 2 mới, unified)": "Compare: export .patch (View 1 old → View 2 new, unified)",
+  "Conflict Git: tới conflict kế": "Git conflict: next conflict",
+  "Conflict Git: về conflict trước": "Git conflict: previous conflict",
+  "Conflict Git: Accept Current (khối ở con trỏ)": "Git conflict: Accept Current (block at the cursor)",
+  "Conflict Git: Accept Incoming (khối ở con trỏ)": "Git conflict: Accept Incoming (block at the cursor)",
+  "Conflict Git: Accept Both (khối ở con trỏ)": "Git conflict: Accept Both (block at the cursor)",
+  "Conflict Git: Accept all current": "Git conflict: Accept all current",
+  "Conflict Git: Accept all incoming": "Git conflict: Accept all incoming",
+  "Conflict Git trong tab — bấm để tới conflict kế (Palette: Accept all current / incoming)": "Git conflicts in this tab — click for the next one (Palette: Accept all current / incoming)",
+});

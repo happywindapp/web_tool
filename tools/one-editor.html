@@ -3,7 +3,7 @@
 <html lang="vi">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'unsafe-inline'; img-src data: blob:; font-src data:; frame-src 'self' https://embed.diagrams.net; media-src https://api.dictionaryapi.dev; connect-src https://quan111.goatcounter.com https://api.mymemory.translated.net https://api.dictionaryapi.dev https://api.tatoeba.org https://r.jina.ai https://www.googleapis.com https://api.onedrive.com https://api-badgerp.svc.ms https://my.microsoftpersonalcontent.com https://*.1drv.com">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; worker-src blob:; style-src 'unsafe-inline'; img-src data: blob:; font-src data:; frame-src 'self' https://embed.diagrams.net; media-src https://api.dictionaryapi.dev; connect-src https://quan111.goatcounter.com https://api.mymemory.translated.net https://api.dictionaryapi.dev https://api.tatoeba.org https://r.jina.ai https://www.googleapis.com https://api.onedrive.com https://api-badgerp.svc.ms https://my.microsoftpersonalcontent.com https://*.1drv.com">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>One Editor</title>
 <style>
@@ -20,10 +20,10 @@
   * { box-sizing:border-box; }
   [hidden] { display:none !important; }
   body { margin:0; height:100vh; height:100dvh; display:grid; grid-template-rows:auto 1fr auto; background:var(--bg); color:var(--ink);
-         font:14px/1.45 "Segoe UI", Arial, sans-serif; }
+         font:calc(14px * var(--ui-k, 1))/1.45 "Segoe UI", Arial, sans-serif; }
   body.drop { outline:3px dashed var(--acc); outline-offset:-6px; }
   header.top { position:relative; display:flex; flex-wrap:wrap; gap:8px; align-items:center; padding:8px 112px 8px 16px; background:var(--panel); border-bottom:1px solid var(--line); }
-  header.top h1 { font-size:16px; margin:0 8px 0 0; }
+  header.top h1 { font-size:calc(16px * var(--ui-k, 1)); margin:0 8px 0 0; }
   .seg { display:inline-flex; flex-wrap:wrap; gap:4px; }
   .seg button.on { background:var(--ink); color:var(--bg); border-color:var(--ink); }
   .lang-switch { position:absolute; top:8px; right:16px; }
@@ -43,6 +43,16 @@
   .panel { display:grid; grid-template-rows:auto 1fr auto; min-height:0; }
   .toolbar { display:flex; flex-wrap:wrap; gap:8px; align-items:center; padding:8px 16px; background:var(--panel); border-bottom:1px solid var(--line); }
   .toolbar .sep { width:1px; align-self:stretch; background:var(--line); }
+  /* UI size (UiSize module, html[data-ui-size]): desktop only — phone keeps its touch targets and 16px inputs. */
+  @media (min-width:641px) {
+    :root { --ui-k:.988; --bar-py:6px; --bar-gap:7px; --btn-pad:4px 9px; }
+    :root[data-ui-size="small"] { --ui-k:.888; --bar-py:3px; --bar-gap:5px; --btn-pad:2px 7px; }
+    :root[data-ui-size="large"] { --ui-k:1.088; --bar-py:9px; --bar-gap:9px; --btn-pad:6px 12px; }
+    header.top, .toolbar { gap:var(--bar-gap); padding-block:var(--bar-py); }
+    header.top .lang-switch { top:var(--bar-py); }
+    :is(header.top, .toolbar) :is(button, select, a.btn, label.btn, input:not([type=checkbox], [type=radio])) { padding:var(--btn-pad); }
+  }
+  @media (max-width:640px) { label.ui-size-label { display:none; } }
   .work { display:grid; grid-template-columns:1fr 1fr; gap:10px; padding:10px 16px; min-height:0; }
   .pane { display:grid; grid-template-rows:auto 1fr; min-height:0; background:var(--panel); border:1px solid var(--line); border-radius:8px; overflow:hidden; }
   .bar { display:flex; gap:6px; align-items:center; padding:6px 10px; border-bottom:1px solid var(--line); flex-wrap:wrap; }
@@ -52,7 +62,7 @@
   .k{color:var(--k)} .s{color:var(--s)} .n{color:var(--n)} .l{color:var(--l)} .p{color:var(--muted)}
   .t{color:var(--muted)} .tn{color:var(--tn);font-weight:600} .an{color:var(--an)} .av{color:var(--av)} .c{color:var(--c);font-style:italic} .d,.cd{color:var(--l)}
   .good{color:var(--good)} .bad{color:var(--bad)} .warn{color:var(--warn)} .muted{color:var(--muted)}
-  .author { display:flex; flex-wrap:wrap; gap:2px 6px; padding:4px 16px 6px; background:var(--panel); font-size:12px; color:var(--muted); } .author a { color:var(--acc); } .author span:not(:first-child) { margin-left:10px; }
+  .author { display:flex; flex-wrap:wrap; gap:2px 6px; padding:4px 16px 6px; background:var(--panel); font-size:calc(12px * var(--ui-k, 1)); color:var(--muted); } .author a { color:var(--acc); } .author span:not(:first-child) { margin-left:10px; }
   .author { --author-ink:#0e7490; } .author a { color:var(--author-ink); } .author > span { color:color-mix(in srgb, var(--author-ink) 70%, var(--ink)); font-weight:600; }
   @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .author { --author-ink:#67e8f9; } }
   :root[data-theme="dark"] .author { --author-ink:#67e8f9; }
@@ -63,12 +73,13 @@
   :root { --tb:color-mix(in srgb, var(--acc) 10%, var(--panel)); --tb-ink:var(--ink); }
   header.top { background:#164e63; border-bottom:0; color:var(--ink); color-scheme:dark;
                --ink:#ecfeff; --muted:#a5d8e6; --btn:#1f6b85; --line:#4b93aa; --good:#86efac; --bad:#fecaca; --warn:#fde68a; }
-  .lang-switch .gc-views { align-self:center; margin-right:4px; font-size:12px; font-weight:600; color:var(--ink); opacity:.85; white-space:nowrap; }
+  .lang-switch .gc-views { align-self:center; margin-right:4px; font-size:calc(12px * var(--ui-k, 1)); font-weight:600; color:var(--ink); opacity:.85; white-space:nowrap; }
   @media (min-width:641px) { header.top:has(.gc-views:not([hidden])) { padding-right:200px; } }
   .wb-nav { flex:0 0 100%; gap:2px; margin-bottom:-8px; }
   .wb-nav button { padding:6px 14px; border:0; border-radius:6px 6px 0 0; background:transparent; }
   .wb-nav button:hover { background:var(--btn); }
   .wb-nav button.on { background:var(--tb); color:var(--tb-ink); font-weight:600; }
+  @media (min-width:641px) { .wb-nav { margin-bottom:calc(-1 * var(--bar-py)); } header.top .wb-nav button { padding:calc(var(--bar-py) - 1px) 12px; } }
   /* A select is as wide as its longest option; cap it so long sample names don't widen the toolbar (the open list shows them in full) */
   select.demo-picker { max-width:9.5em; text-overflow:ellipsis; }
   .toolbar { background:var(--tb); --line:color-mix(in srgb, var(--acc) 40%, var(--panel)); --muted:color-mix(in srgb, var(--ink) 65%, var(--panel)); }
@@ -76,7 +87,7 @@
           --k:#7c3aed; --s:#047857; --n:#b45309; --l:#be185d; --tn:#1d4ed8; --an:#7c3aed; --av:#047857; --c:#94a3b8; --add:#dcfce7; --del:#fee2e2; --add2:#86efac; --del2:#fca5a5; }
   :root[data-theme="dark"] { --bg:#0b1220; --panel:#111827; --line:#334155; --ink:#e2e8f0; --muted:#94a3b8; --good:#4ade80; --bad:#f87171; --warn:#fbbf24; --code:#0f172a; --btn:#1e293b; --gut:#0b1220; --hover:#1e293b;
           --k:#c4b5fd; --s:#6ee7b7; --n:#fcd34d; --l:#f9a8d4; --tn:#93c5fd; --an:#c4b5fd; --av:#6ee7b7; --c:#64748b; --add:#14361f; --del:#3f1717; --add2:#166534; --del2:#991b1b; }
-  .chip { display:inline-flex; gap:6px; align-items:center; padding:2px 8px; border-radius:12px; background:var(--acc); color:#fff; font-size:12px; }
+  .chip { display:inline-flex; gap:6px; align-items:center; padding:2px 8px; border-radius:12px; background:var(--acc); color:#fff; font-size:calc(12px * var(--ui-k, 1)); }
   .chip button { padding:0 6px; border:0; background:transparent; color:#fff; font-weight:700; }
   .chips { display:inline-flex; flex-wrap:wrap; gap:4px; }
   .pop { position:fixed; z-index:60; display:flex; flex-direction:column; gap:6px; padding:8px; min-width:220px; background:var(--panel); color:var(--ink);
@@ -131,22 +142,25 @@
       radial-gradient(farthest-side at 0 50%, rgb(0 0 0 / .2), transparent) left / 8px 100% no-repeat scroll, radial-gradient(farthest-side at 100% 50%, rgb(0 0 0 / .2), transparent) right / 8px 100% no-repeat scroll, var(--gut); }
   .act-top, .act-bottom { display:flex; flex:none; gap:2px; }
   .act-bottom { margin-left:auto; }
-  .activity button { position:relative; flex:none; padding:4px 12px; border:0; border-radius:6px 6px 0 0; background:transparent; font-size:16px; }
+  .activity button { position:relative; flex:none; padding:5px 11px; border:0; border-radius:6px 6px 0 0; background:transparent; color:inherit; }
+  .ic { width:calc(15px * var(--ui-k, 1)); height:calc(15px * var(--ui-k, 1)); vertical-align:-2.5px; flex:none; pointer-events:none; }
+  .ic-sm { width:calc(13px * var(--ui-k, 1)); height:calc(13px * var(--ui-k, 1)); vertical-align:-2px; }
+  .activity button .ic { display:block; margin:0 auto; width:calc(18px * var(--ui-k, 1)); height:calc(18px * var(--ui-k, 1)); }
   .act-badge { position:absolute; top:0; right:1px; min-width:15px; height:15px; padding:0 3px; border-radius:8px; background:var(--acc); color:#fff; box-shadow:0 0 0 1.5px var(--gut);
     font:600 9.5px/15px system-ui, sans-serif; text-align:center; pointer-events:none; }
   .activity button.on { background:color-mix(in srgb, var(--acc) 20%, transparent); box-shadow:inset 0 -2px 0 var(--acc); }
   .side { display:flex; flex-direction:column; min-width:0; min-height:0; }
   #explorerPane .bar input { flex:1 1 auto; min-width:0; padding:3px 8px; }
-  #explorer, #sxResults { flex:1 1 0; min-height:0; overflow:auto; padding:2px 0 12px; font-size:13px; }
+  #explorer, #sxResults { flex:1 1 0; min-height:0; overflow:auto; padding:2px 0 12px; font-size:calc(13px * var(--ui-k, 1)); }
   .sx-form { display:flex; flex-wrap:wrap; gap:4px 8px; align-items:center; padding:6px 8px; border-bottom:1px solid var(--line); }
   .sx-form input[type=text] { flex:1 1 100%; min-width:0; padding:3px 8px; }
-  .sx-doc { margin:8px 8px 2px 10px; font-size:12px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-  .sx-hit { font-family:Consolas, "Cascadia Mono", monospace; font-size:12px; }
+  .sx-doc { margin:8px 8px 2px 10px; font-size:calc(12px * var(--ui-k, 1)); color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .sx-hit { font-family:Consolas, "Cascadia Mono", monospace; font-size:calc(12px * var(--ui-k, 1)); }
   .sx-hit b { color:var(--acc); background:color-mix(in srgb, var(--acc) 15%, transparent); }
   .sx-hit small { color:var(--muted); }
 
-  .statusbar { display:flex; flex-wrap:wrap; gap:2px 14px; align-items:center; padding:4px 16px; background:var(--panel); border-top:1px solid var(--line); font-size:12px; color:var(--muted); }
-  .statusbar #status { flex:1 1 200px; min-width:0; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .statusbar { display:flex; flex-wrap:wrap; gap:2px 14px; align-items:center; padding:4px 16px; background:var(--panel); border-top:1px solid var(--line); font-size:calc(12px * var(--ui-k, 1)); color:var(--muted); }
+  .statusbar #status { flex:1 1 200px; min-width:0; contain:inline-size; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .statusbar #status.good { color:var(--good); } .statusbar #status.bad { color:var(--bad); } .statusbar #status.warn { color:var(--warn); }
   .statusbar #status.jump { cursor:pointer; text-decoration:underline dotted; }
   .statusbar button.link { padding:0 4px; border:0; background:transparent; color:inherit; font:inherit; }
@@ -182,10 +196,10 @@
     #work.pane-scroller { grid-template:none; grid-auto-flow:column; grid-auto-columns:100%; grid-template-rows:minmax(0, 1fr); gap:0; padding:0; }
     #work > * { grid-area:auto; }
     .host .cm-editor { font-size:max(16px, var(--ed-font, 13px)); }
-    #qpInput { font-size:16px; }
+    #qpInput { font-size:calc(16px * var(--ui-k, 1)); }
     .toolbar .desktop-only, #work .cm-minimap-gutter { display:none; }
-    #explorer { font-size:15px; }
-    #explorerPane .bar input, .sx-form input[type=text] { font-size:16px; }
+    #explorer { font-size:calc(15px * var(--ui-k, 1)); }
+    #explorerPane .bar input, .sx-form input[type=text] { font-size:calc(16px * var(--ui-k, 1)); }
     .activity button { min-height:40px; }
     #stCount, #stSrc, #stStore:not(.bad) { display:none; }
   }
@@ -244,7 +258,7 @@ body.recording .statusbar { box-shadow: inset 0 2px 0 #e5534b; }
   .tab-menu > button small { color:var(--muted); }
   .tab-menu > button:focus-visible { outline:none; background:color-mix(in srgb, var(--acc) 16%, transparent); }
 
-  .ex-sec h3 { display:flex; align-items:center; gap:2px; margin:8px 6px 2px 10px; font-size:11px; letter-spacing:.04em; text-transform:uppercase; color:var(--muted); }
+  .ex-sec h3 { display:flex; align-items:center; gap:2px; margin:8px 6px 2px 10px; font-size:calc(11px * var(--ui-k, 1)); letter-spacing:.04em; text-transform:uppercase; color:var(--muted); }
   .ex-fold { flex:1 1 auto; min-width:0; padding:2px 0; border:0; border-radius:0; background:transparent; color:inherit; font:inherit; letter-spacing:inherit;
              text-transform:inherit; text-align:left; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .ex-fold::before { content:"▾"; display:inline-block; width:1.1em; transition:transform .12s; }
@@ -257,7 +271,7 @@ body.recording .statusbar { box-shadow: inset 0 2px 0 #e5534b; }
   .ex-item { flex:1 1 auto; min-width:0; padding:3px 8px 3px 14px; border:0; border-radius:0; background:transparent; text-align:left;
              white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .ex-act { flex:none; padding:1px 7px; border:0; background:transparent; color:var(--muted); }
-  .ex-empty { margin:2px 14px 4px; font-size:12px; color:var(--muted); }
+  .ex-empty { margin:2px 14px 4px; font-size:calc(12px * var(--ui-k, 1)); color:var(--muted); }
   .ex-open { margin:2px 14px 6px; }
   details.ex-dir > summary { padding:3px 8px 3px 14px; cursor:pointer; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .ex-kids { padding-left:12px; }
@@ -269,7 +283,7 @@ body.recording .statusbar { box-shadow: inset 0 2px 0 #e5534b; }
               font-style:normal; text-align:center; color:#fff; box-shadow:0 0 0 1px var(--bg, #fff); pointer-events:none; }
   .git-c { background:#15803d; } .git-m, .git-d { background:#dc2626; } .git-a { background:#2563eb; } .git-u { background:#64748b; }
   .git-ignored { opacity:.55; }
-  .ex-prop { display:flex; gap:12px; max-width:min(420px, calc(100vw - 16px)); padding:3px 14px; font-size:12px; }
+  .ex-prop { display:flex; gap:12px; max-width:min(420px, calc(100vw - 16px)); padding:3px 14px; font-size:calc(12px * var(--ui-k, 1)); }
   .ex-prop > span { flex:none; width:7.5em; color:var(--muted); }
   .ex-prop > b { min-width:0; font-weight:500; overflow-wrap:anywhere; }
 
@@ -313,20 +327,20 @@ body.recording .statusbar { box-shadow: inset 0 2px 0 #e5534b; }
   .pv-body { display:grid; min-height:0; min-width:0; }
   .pv-body > * { min-height:0; min-width:0; }
   .pv-body.stale > * { opacity:.35; }
-  .pv-type { margin-right:auto; color:var(--muted); font-size:12px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; min-width:0; }
+  .pv-type { margin-right:auto; color:var(--muted); font-size:calc(12px * var(--ui-k, 1)); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; min-width:0; }
   .pv-pct { min-width:58px; }
   .pv-view { position:relative; overflow:hidden; contain:strict; cursor:grab; user-select:none; touch-action:none; background-color:#fff;
              background-image:radial-gradient(rgba(100, 116, 139, .22) 1px, transparent 1px); background-size:18px 18px; }
   .pv-view.grab { cursor:grabbing; }
   .pv-stage { position:absolute; left:0; top:0; transform-origin:0 0; transform:translate(0, 0); }
   .pv-stage svg { display:block; }
-  .pv-note { padding:6px 10px; color:var(--muted); font-size:12px; white-space:pre-wrap; border-top:1px solid var(--line); }
-  .pv-err { margin:0; max-height:40%; overflow:auto; padding:8px 10px; font-size:12px; white-space:pre-wrap; color:var(--bad); border-top:2px solid var(--bad);
+  .pv-note { padding:6px 10px; color:var(--muted); font-size:calc(12px * var(--ui-k, 1)); white-space:pre-wrap; border-top:1px solid var(--line); }
+  .pv-err { margin:0; max-height:40%; overflow:auto; padding:8px 10px; font-size:calc(12px * var(--ui-k, 1)); white-space:pre-wrap; color:var(--bad); border-top:2px solid var(--bad);
             background:color-mix(in srgb, var(--bad) 8%, var(--panel)); }
   /* Renders off-screen-but-visible so the browser does not throttle it; never clickable or focusable. */
   .pv-sandbox { position:fixed; left:0; top:0; width:100vw; height:100vh; border:0; opacity:0; pointer-events:none; z-index:-1; }
   /* Markdown: page-like reading surface in the app theme. */
-  .pv-md { overflow:auto; padding:16px 24px 40vh; line-height:1.6; color:var(--ink); background:var(--bg); font-size:14px; overflow-wrap:anywhere; }
+  .pv-md { overflow:auto; padding:16px 24px 40vh; line-height:1.6; color:var(--ink); background:var(--bg); font-size:calc(14px * var(--ui-k, 1)); overflow-wrap:anywhere; }
   .pv-md > :first-child { margin-top:0; }
   .pv-md h1, .pv-md h2 { border-bottom:1px solid var(--line); padding-bottom:.25em; }
   .pv-md a { color:var(--acc); }
@@ -350,7 +364,7 @@ body.recording .statusbar { box-shadow: inset 0 2px 0 #e5534b; }
   .pv-frame { width:100%; height:100%; border:0; background:#fff; }
   /* CSV / JSON table */
   .pv-table { overflow:auto; background:var(--bg); }
-  .pv-table table { border-collapse:collapse; font-size:12px; font-family:ui-monospace, Consolas, monospace; }
+  .pv-table table { border-collapse:collapse; font-size:calc(12px * var(--ui-k, 1)); font-family:ui-monospace, Consolas, monospace; }
   .pv-table th, .pv-table td { border:1px solid var(--line); padding:3px 8px; text-align:left; white-space:pre; max-width:40ch; overflow:hidden; text-overflow:ellipsis; }
   .pv-table th { position:sticky; top:0; background:var(--panel); z-index:1; }
   .pv-table td:first-child, .pv-table th:first-child { color:var(--muted); text-align:right; }
@@ -362,14 +376,14 @@ body.recording .statusbar { box-shadow: inset 0 2px 0 #e5534b; }
   .pv-dio-frame { display:grid; min-height:0; }
   .pv-dio-frame iframe { width:100%; height:100%; border:0; }
   /* Folder tab (FolderItems): Windows Explorer–like item view in place of the editor (data-view = FolderView mode); narrow details keep name + size */
-  .group > .fi { grid-row:2; grid-column:1; display:none; flex-direction:column; min-height:0; min-width:0; background:var(--code); font-size:13px; container-type:inline-size; }
+  .group > .fi { grid-row:2; grid-column:1; display:none; flex-direction:column; min-height:0; min-width:0; background:var(--code); font-size:calc(13px * var(--ui-k, 1)); container-type:inline-size; }
   .group.is-folder > .fi:not([hidden]) { display:flex; }
   .group.is-folder > .host { visibility:hidden; }
   .group.is-folder > .pvhost, .group.is-folder > .empty, .group.is-folder > .fx-list { display:none; }
   .fi-bar { display:flex; align-items:center; gap:4px; padding:4px 6px; background:var(--gut); border-bottom:1px solid var(--line); }
   .fi-bar > .fi-nav { flex:none; padding:2px 8px; }
-  .fi-addr { flex:1 1 auto; min-width:0; padding:3px 8px; font-family:Consolas, "Cascadia Mono", monospace; font-size:12px; }
-  .fi-count { flex:none; color:var(--muted); font-size:12px; }
+  .fi-addr { flex:1 1 auto; min-width:0; padding:3px 8px; font-family:Consolas, "Cascadia Mono", monospace; font-size:calc(12px * var(--ui-k, 1)); }
+  .fi-count { flex:none; color:var(--muted); font-size:calc(12px * var(--ui-k, 1)); }
   .fi-row { display:grid; grid-template-columns:1.2em minmax(0, 1fr) 10.5em 8em 6.5em; gap:10px; align-items:center; width:100%; padding:3px 12px; border:0; border-radius:0;
     background:transparent; color:var(--ink); font:inherit; text-align:left; }
   .fi-row > span { overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
@@ -398,7 +412,7 @@ body.recording .statusbar { box-shadow: inset 0 2px 0 #e5534b; }
   .fi[data-view="tiles"] .fi-row { grid-template-columns:44px minmax(0, 1fr); grid-template-areas:"ico name" "ico type" "ico size"; gap:0 8px; padding:6px 8px; }
   .fi[data-view="content"] .fi-row { grid-template-columns:36px minmax(0, 1fr) auto; grid-template-areas:"ico name mod" "ico type size"; gap:0 14px; padding:6px 12px;
     border-bottom:1px solid var(--line); }
-  .fi:is([data-view="tiles"], [data-view="content"]) .fi-row > .fi-ico { grid-area:ico; font-size:30px; }
+  .fi:is([data-view="tiles"], [data-view="content"]) .fi-row > .fi-ico { grid-area:ico; font-size:calc(30px * var(--ui-k, 1)); }
   .fi:is([data-view="tiles"], [data-view="content"]) .fi-row > .fi-name { grid-area:name; }
   .fi:is([data-view="tiles"], [data-view="content"]) .fi-row > .fi-type { grid-area:type; }
   .fi:is([data-view="tiles"], [data-view="content"]) .fi-row > .fi-size { grid-area:size; }
@@ -408,7 +422,7 @@ body.recording .statusbar { box-shadow: inset 0 2px 0 #e5534b; }
   .fi-row > .fi-mod, .fi-row > .fi-type, .fi-row > .fi-size { color:var(--muted); }
   .fi-row > .fi-size, .fi-head > .fi-size { text-align:right; }
   .fi-head { padding-top:0; padding-bottom:0; border-bottom:1px solid var(--line); }
-  .fi-head > button { padding:4px 0; border:0; background:transparent; color:var(--muted); font:inherit; font-size:12px; text-align:left; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .fi-head > button { padding:4px 0; border:0; background:transparent; color:var(--muted); font:inherit; font-size:calc(12px * var(--ui-k, 1)); text-align:left; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .fi-list { flex:1 1 0; min-height:0; overflow:auto; padding-bottom:12px; }
   .fi-row.on { background:color-mix(in srgb, var(--acc) 18%, transparent); }
   .fi-row:focus-visible { outline:1px dotted var(--acc); outline-offset:-2px; }
@@ -428,7 +442,7 @@ body.recording .statusbar { box-shadow: inset 0 2px 0 #e5534b; }
   .ex-sacts { position:absolute; top:0; right:0; bottom:0; display:flex; align-items:center; }
   .ex-sacts > .ex-acts, .ex-sacts > .ex-act { height:100%; align-items:center; background:var(--panel); }
   @media (hover:hover) { details.ex-dir > summary:hover > .ex-sacts > * { background:var(--hover); } }
-  .ex-chk { display:inline-flex; align-items:center; gap:3px; margin-right:4px; text-transform:none; letter-spacing:0; font-size:11px; cursor:pointer; }
+  .ex-chk { display:inline-flex; align-items:center; gap:3px; margin-right:4px; text-transform:none; letter-spacing:0; font-size:calc(11px * var(--ui-k, 1)); cursor:pointer; }
   .ex-chk > input { margin:0; }
   /* Folder tab, phase 10: breadcrumbs, quick filter, multi-selection (check boxes, touch bar), preview pane (Alt+P); recycle bin tab (.fi.tr) */
   .fi-body { flex:1 1 0; min-height:0; display:grid; grid-template-columns:minmax(0, 1fr); }
@@ -437,12 +451,12 @@ body.recording .statusbar { box-shadow: inset 0 2px 0 #e5534b; }
   .fi-path > .fi-addr { flex:1 1 auto; }
   .fi-path:not(.edit) > .fi-addr, .fi-path.edit > .fi-crumbs { display:none; }
   .fi-crumbs { flex:1 1 auto; min-width:0; display:flex; align-items:center; overflow:hidden; padding:1px 3px; border:1px solid var(--line); border-radius:4px; background:var(--code); cursor:text; }
-  .fi-crumbs > button { flex:none; max-width:16em; padding:2px 5px; border:0; border-radius:3px; background:transparent; color:var(--ink); font:inherit; font-size:12px;
+  .fi-crumbs > button { flex:none; max-width:16em; padding:2px 5px; border:0; border-radius:3px; background:transparent; color:var(--ink); font:inherit; font-size:calc(12px * var(--ui-k, 1));
     white-space:nowrap; overflow:hidden; text-overflow:ellipsis; cursor:pointer; }
   .fi-crumbs > .fi-sep { padding:2px 3px; color:var(--muted); }
   .fi-crumbs > .fi-crumb.cur { font-weight:600; }
   .fi-crumbs > [hidden] { display:none; }
-  .fi-find { flex:0 1 13em; min-width:6em; padding:3px 8px; font-size:12px; }
+  .fi-find { flex:0 1 13em; min-width:6em; padding:3px 8px; font-size:calc(12px * var(--ui-k, 1)); }
   .fi-bar > .fi-nav.on { background:color-mix(in srgb, var(--acc) 22%, transparent); }
   /* Check boxes: Xem ▸ Ô chọn mục, always on touch screens */
   .fi-row { position:relative; }
@@ -452,17 +466,17 @@ body.recording .statusbar { box-shadow: inset 0 2px 0 #e5534b; }
   .fi.checks:is([data-view="xl"], [data-view="lg"], [data-view="md"]) .fi-list > .fi-row { padding-left:4px; }
   .fi.checks:is([data-view="xl"], [data-view="lg"], [data-view="md"]) .fi-chk { top:6px; margin-top:0; }
   .fi-row.on > .fi-chk { background:var(--acc); border-color:var(--acc); }
-  .fi-row.on > .fi-chk::after { content:"✓"; display:block; color:#fff; font-size:11px; font-style:normal; line-height:11px; text-align:center; }
+  .fi-row.on > .fi-chk::after { content:"✓"; display:block; color:#fff; font-size:calc(11px * var(--ui-k, 1)); font-style:normal; line-height:11px; text-align:center; }
   .fi-selbar { display:flex; align-items:center; gap:6px; padding:4px 8px; overflow-x:auto; border-bottom:1px solid var(--line); background:color-mix(in srgb, var(--acc) 14%, var(--panel)); }
   .fi-selbar[hidden] { display:none; }
-  .fi-selcount { flex:1 1 auto; font-size:13px; font-weight:600; white-space:nowrap; }
+  .fi-selcount { flex:1 1 auto; font-size:calc(13px * var(--ui-k, 1)); font-weight:600; white-space:nowrap; }
   .fi-selbar > button { flex:none; min-width:38px; min-height:34px; }
   /* Preview pane: right of the list, below it when the tab is narrow */
   .fi.pv-on .fi-body { grid-template-columns:minmax(0, 1fr) 6px var(--fi-pvw, 40%); }
   .fi:not(.pv-on) :is(.fi-pv, .fi-pvsplit) { display:none; }
   .fi-pvsplit { cursor:col-resize; background:var(--line); touch-action:none; }
   .fi-pv { display:flex; flex-direction:column; min-width:0; min-height:0; background:var(--bg); }
-  .fi-pvhead { display:flex; align-items:center; gap:6px; padding:4px 8px; border-bottom:1px solid var(--line); background:var(--gut); font-size:12px; }
+  .fi-pvhead { display:flex; align-items:center; gap:6px; padding:4px 8px; border-bottom:1px solid var(--line); background:var(--gut); font-size:calc(12px * var(--ui-k, 1)); }
   .fi-pvhead > b { flex:1 1 auto; min-width:0; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
   .fi-pvbtn { flex:none; padding:1px 8px; }
   .fi-pvbody { flex:1 1 0; min-height:0; display:flex; flex-direction:column; overflow:auto; }
@@ -470,9 +484,9 @@ body.recording .statusbar { box-shadow: inset 0 2px 0 #e5534b; }
   .fi-pvcode > .cm-editor { height:100%; }
   .fi-pvbody > .pv-md { flex:1 1 auto; padding:12px 16px; }
   .fi-pvimg { display:block; max-width:100%; max-height:100%; margin:auto; }
-  .fi-pvhex { margin:0; padding:8px 10px; font:12px/1.5 Consolas, "Cascadia Mono", monospace; white-space:pre; }
-  .fi-pvcut { margin:6px 10px; color:var(--muted); font-size:12px; }
-  .fi-pvfacts { display:grid; grid-template-columns:auto 1fr; gap:4px 12px; margin:12px 14px; font-size:13px; }
+  .fi-pvhex { margin:0; padding:8px 10px; font:calc(12px * var(--ui-k, 1))/1.5 Consolas, "Cascadia Mono", monospace; white-space:pre; }
+  .fi-pvcut { margin:6px 10px; color:var(--muted); font-size:calc(12px * var(--ui-k, 1)); }
+  .fi-pvfacts { display:grid; grid-template-columns:auto 1fr; gap:4px 12px; margin:12px 14px; font-size:calc(13px * var(--ui-k, 1)); }
   .fi-pvfacts > dt { color:var(--muted); }
   .fi-pvfacts > dd { margin:0; overflow-wrap:anywhere; }
   .fi-pvbody > .ex-open { align-self:flex-start; margin:0 14px; }
@@ -481,9 +495,9 @@ body.recording .statusbar { box-shadow: inset 0 2px 0 #e5534b; }
     .fi-pvsplit { cursor:default; }
   }
   /* Recycle bin tab */
-  .tr-title { flex:1 1 auto; padding:0 6px; font-size:13px; }
-  .tr-note { margin:6px 14px 10px; color:var(--muted); font-size:12px; }
-  .fi.tr .fi-head > span { padding:4px 0; color:var(--muted); font-size:12px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .tr-title { flex:1 1 auto; padding:0 6px; font-size:calc(13px * var(--ui-k, 1)); }
+  .tr-note { margin:6px 14px 10px; color:var(--muted); font-size:calc(12px * var(--ui-k, 1)); }
+  .fi.tr .fi-head > span { padding:4px 0; color:var(--muted); font-size:calc(12px * var(--ui-k, 1)); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   @container (min-width:521px) { .fi.tr .fi-row { grid-template-columns:1.2em minmax(0, 1fr) 10.5em minmax(6em, 16em) 6.5em; } }
   @media (hover:hover) { .fi-crumbs > button:hover { background:var(--hover); } }
   /* Phase 11 list tabs — results tab (.fi.rs): folder column, status column when a provider sets one, fold-able group headers */
@@ -495,7 +509,7 @@ body.recording .statusbar { box-shadow: inset 0 2px 0 #e5534b; }
   .fi-row > .fi-st, .fi-head > .fi-st { text-align:center; }
   .fi.rs .fi-list { scroll-padding-top:2.4em; }
   .rs-grp { position:sticky; top:0; z-index:1; display:block; width:100%; padding:5px 12px; border:0; border-bottom:1px solid var(--line); border-radius:0;
-    background:var(--gut); color:var(--ink); font:inherit; font-size:12px; font-weight:600; text-align:left; cursor:pointer; }
+    background:var(--gut); color:var(--ink); font:inherit; font-size:calc(12px * var(--ui-k, 1)); font-weight:600; text-align:left; cursor:pointer; }
   .rs-grp:focus-visible { outline:1px dotted var(--acc); outline-offset:-2px; }
   @media (pointer:coarse) { .rs-grp { padding-top:10px; padding-bottom:10px; } }
   @media (hover:hover) { .rs-grp:hover { background:var(--hover); } }
@@ -534,7 +548,7 @@ body.recording .statusbar { box-shadow: inset 0 2px 0 #e5534b; }
     .fi.flat .fi-row > .fi-dir, .fi.flat .fi-head > .fi-dir { display:none; }
   }
   .fi-head > .fi-hcell { display:flex; align-items:center; min-width:0; }
-  .fi-hcell > button { padding:4px 0; border:0; background:transparent; color:var(--muted); font:inherit; font-size:12px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .fi-hcell > button { padding:4px 0; border:0; background:transparent; color:var(--muted); font:inherit; font-size:calc(12px * var(--ui-k, 1)); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .fi-hcell > .fi-hsort { flex:1 1 auto; min-width:0; text-align:left; }
   .fi-head > .fi-size.fi-hcell > .fi-hsort { text-align:right; }
   .fi-hcell > .fi-hflt { flex:none; padding:4px 4px; opacity:.6; }
@@ -561,11 +575,11 @@ body.recording .statusbar { box-shadow: inset 0 2px 0 #e5534b; }
   /* Phase 11d: drag & drop targets, "n items" drag picture, the name box of New ▸ templates */
   .fi-list > .fi-row.dnd-over, .fi-mcol > .fi-row.dnd-over, #explorer .dnd-over, .fi-crumb.dnd-over { outline:2px solid var(--acc); outline-offset:-2px; background:color-mix(in srgb, var(--acc) 18%, transparent); }
   .fi-list.dnd-over { outline:2px dashed var(--acc); outline-offset:-3px; }
-  .dnd-ghost { position:fixed; top:-100px; left:0; padding:4px 10px; border-radius:6px; background:var(--acc); color:#fff; font-size:12px; font-weight:600; pointer-events:none; }
+  .dnd-ghost { position:fixed; top:-100px; left:0; padding:4px 10px; border-radius:6px; background:var(--acc); color:#fff; font-size:calc(12px * var(--ui-k, 1)); font-weight:600; pointer-events:none; }
   dialog.name-ask { width:min(420px, calc(100vw - 32px)); padding:14px 16px; border:1px solid var(--line); border-radius:10px; background:var(--panel); color:var(--ink); box-shadow:0 16px 48px rgb(0 0 0 / .3); }
   dialog.name-ask::backdrop { background:rgb(0 0 0 / .25); }
-  .name-ask label { display:flex; flex-direction:column; gap:8px; font-size:13px; }
-  .name-ask input { padding:6px 8px; border:1px solid var(--line); border-radius:6px; background:var(--bg); color:var(--ink); font:inherit; font-size:14px; }
+  .name-ask label { display:flex; flex-direction:column; gap:8px; font-size:calc(13px * var(--ui-k, 1)); }
+  .name-ask input { padding:6px 8px; border:1px solid var(--line); border-radius:6px; background:var(--bg); color:var(--ink); font:inherit; font-size:calc(14px * var(--ui-k, 1)); }
   .name-ask-btns { display:flex; justify-content:flex-end; gap:8px; margin-top:12px; }
   .name-ask-btns > button { min-width:5.5em; padding:5px 12px; }
   @media (pointer:coarse) { .name-ask input, .name-ask-btns > button { min-height:40px; } }
@@ -580,21 +594,21 @@ body.recording .statusbar { box-shadow: inset 0 2px 0 #e5534b; }
   .fi-bar > .rs-act { flex:none; white-space:nowrap; }
   .fi-row > .fi-st { font-weight:600; }
   dialog.fs-ask, dialog.sync-ask { width:min(460px, calc(100vw - 32px)); max-height:calc(100dvh - 32px); overflow:auto; }
-  .fs-title { margin:0 0 10px; font-size:15px; }
-  .fs-ask .fs-field { display:flex; flex-direction:column; gap:4px; margin-bottom:8px; font-size:13px; }
-  .fs-ask select { padding:6px 8px; border:1px solid var(--line); border-radius:6px; background:var(--bg); color:var(--ink); font:inherit; font-size:14px; }
+  .fs-title { margin:0 0 10px; font-size:calc(15px * var(--ui-k, 1)); }
+  .fs-ask .fs-field { display:flex; flex-direction:column; gap:4px; margin-bottom:8px; font-size:calc(13px * var(--ui-k, 1)); }
+  .fs-ask select { padding:6px 8px; border:1px solid var(--line); border-radius:6px; background:var(--bg); color:var(--ink); font:inherit; font-size:calc(14px * var(--ui-k, 1)); }
   .fs-pair { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
   .fs-pair[hidden] { display:none; }
   .fs-checks { display:grid; grid-template-columns:repeat(auto-fill, minmax(12em, 1fr)); gap:4px 12px; margin:4px 0 6px; }
-  .name-ask .fs-check { display:flex; flex-direction:row; align-items:center; gap:6px; font-size:13px; }
+  .name-ask .fs-check { display:flex; flex-direction:row; align-items:center; gap:6px; font-size:calc(13px * var(--ui-k, 1)); }
   .name-ask .fs-check > input { width:16px; height:16px; margin:0; padding:0; }
-  .fs-err { min-height:1.2em; margin:4px 0 0; color:var(--bad); font-size:12px; }
-  .sync-path { margin:0 0 8px; color:var(--muted); font-size:12px; overflow-wrap:anywhere; }
+  .fs-err { min-height:1.2em; margin:4px 0 0; color:var(--bad); font-size:calc(12px * var(--ui-k, 1)); }
+  .sync-path { margin:0 0 8px; color:var(--muted); font-size:calc(12px * var(--ui-k, 1)); overflow-wrap:anywhere; }
   .sync-lists { display:flex; flex-direction:column; gap:6px; }
-  .sync-sec > summary { cursor:pointer; font-size:13px; font-weight:600; }
-  .sync-sec > ul { max-height:10em; overflow:auto; margin:4px 0 0; padding-left:1.4em; font:12px/1.5 var(--mono, monospace); overflow-wrap:anywhere; }
+  .sync-sec > summary { cursor:pointer; font-size:calc(13px * var(--ui-k, 1)); font-weight:600; }
+  .sync-sec > ul { max-height:10em; overflow:auto; margin:4px 0 0; padding-left:1.4em; font:calc(12px * var(--ui-k, 1))/1.5 var(--mono, monospace); overflow-wrap:anywhere; }
   .sync-more { color:var(--muted); list-style:none; }
-  .sync-note { margin:10px 0 0; color:var(--muted); font-size:12px; }
+  .sync-note { margin:10px 0 0; color:var(--muted); font-size:calc(12px * var(--ui-k, 1)); }
   @media (pointer:coarse) { .fs-ask input:not([type=checkbox]), .fs-ask select { min-height:40px; } .name-ask-btns > button { min-height:40px; } .name-ask .fs-check > input { width:20px; height:20px; min-height:0; } }
   /* ⚙ Settings tab (.fi.st): groups on the left, entries on the right; a group strip on top when the tab is narrow */
   .fi.st .fi-bar > .st-q { flex:0 1 24em; }
@@ -604,19 +618,19 @@ body.recording .statusbar { box-shadow: inset 0 2px 0 #e5534b; }
   .st-tab[aria-current] { background:color-mix(in srgb, var(--acc) 18%, transparent); font-weight:600; }
   .st-main { min-height:0; overflow:auto; padding:4px 18px 24px; }
   .st-head { display:flex; align-items:center; gap:10px; margin:14px 0 4px; }
-  .st-head > h3 { flex:1 1 auto; margin:0; font-size:15px; }
+  .st-head > h3 { flex:1 1 auto; margin:0; font-size:calc(15px * var(--ui-k, 1)); }
   .st-item { display:flex; align-items:center; gap:14px; padding:9px 0; border-bottom:1px solid var(--line); }
   .st-text { flex:1 1 auto; min-width:0; }
   .st-name { display:flex; align-items:center; gap:6px; }
-  .st-dot { color:var(--acc); font-size:10px; }
+  .st-dot { color:var(--acc); font-size:calc(10px * var(--ui-k, 1)); }
   .st-item:not(.mod) .st-dot, .st-item:not(.mod) .st-reset { visibility:hidden; }
-  .st-hint { margin-top:2px; color:var(--muted); font-size:12px; }
+  .st-hint { margin-top:2px; color:var(--muted); font-size:calc(12px * var(--ui-k, 1)); }
   .st-ctl { flex:none; display:flex; align-items:center; gap:6px; }
   .st-ctl select { max-width:15em; }
   .st-num { width:5em; } .st-txt { width:min(16em, 100%); }
   .st-reset { padding:2px 8px; }
   .st-info { display:flex; flex-wrap:wrap; align-items:center; justify-content:flex-end; gap:6px; max-width:24em; }
-  .st-val { color:var(--muted); font-size:12px; }
+  .st-val { color:var(--muted); font-size:calc(12px * var(--ui-k, 1)); }
   .st-act { white-space:nowrap; }
   .st-switch { position:relative; display:inline-block; flex:none; width:38px; height:22px; }
   .st-switch > input { position:absolute; inset:0; z-index:1; width:100%; height:100%; margin:0; opacity:0; cursor:pointer; }
@@ -638,17 +652,17 @@ body.recording .statusbar { box-shadow: inset 0 2px 0 #e5534b; }
   @media (hover:hover) { .st-tab:not([aria-current]):hover { background:var(--hover); } }
   /* Find in files (phase 6): replace row, scope options, status + Stop, results grouped per file */
   .sx-form input#sxReplace { flex:1 1 100%; min-width:0; padding:3px 8px; }
-  .sx-form #sxReplaceAll { padding:2px 8px; font-size:12px; }
-  .sx-status { display:flex; gap:6px; align-items:flex-start; padding:4px 8px; font-size:12px; color:var(--muted); border-bottom:1px solid var(--line); }
+  .sx-form #sxReplaceAll { padding:2px 8px; font-size:calc(12px * var(--ui-k, 1)); }
+  .sx-status { display:flex; gap:6px; align-items:flex-start; padding:4px 8px; font-size:calc(12px * var(--ui-k, 1)); color:var(--muted); border-bottom:1px solid var(--line); }
   .sx-status:has(#sxStatus:empty) { display:none; }
   .sx-status #sxStatus { flex:1 1 auto; min-width:0; }
   .sx-status #sxStatus.bad { color:var(--bad); } .sx-status #sxStatus.warn { color:var(--warn); }
   .sx-file > summary { display:flex; gap:6px; align-items:center; padding:2px 6px 2px 4px; cursor:pointer; }
-  .sx-file > summary .sx-doc { margin:0; flex:0 1 auto; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:12px; color:var(--ink); }
+  .sx-file > summary .sx-doc { margin:0; flex:0 1 auto; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:calc(12px * var(--ui-k, 1)); color:var(--ink); }
   .sx-file > summary .sx-path { flex:1 1 0; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--muted); direction:rtl; text-align:left; }
-  .sx-file > summary .sx-n { padding:0 6px; border-radius:9px; background:var(--hover); font-size:11px; }
+  .sx-file > summary .sx-n { padding:0 6px; border-radius:9px; background:var(--hover); font-size:calc(11px * var(--ui-k, 1)); }
   .sx-file .sx-hit { padding-left:22px; }
-  @media (max-width:640px) { .sx-form input[type=text] { max-width:none; } .sx-form input#sxReplace { font-size:16px; } .sx-file > summary { min-height:36px; } }
+  @media (max-width:640px) { .sx-form input[type=text] { max-width:none; } .sx-form input#sxReplace { font-size:calc(16px * var(--ui-k, 1)); } .sx-file > summary { min-height:36px; } }
 
   /* Print: only #printOut (filled by ExportActions before printing), always dark text on white */
   #printOut { display:none; }
@@ -670,11 +684,11 @@ body.recording .statusbar { box-shadow: inset 0 2px 0 #e5534b; }
   .pb-sev.error, .gt-d > summary .sx-doc { color:var(--bad); } .pb-sev.warning, .gt-m > summary .sx-doc { color:var(--warn); }
   .gt-a > summary .sx-doc { color:var(--good); } .gt-u > summary .sx-doc { color:var(--muted); }
   .pb-src, .gt-dir { color:var(--muted); }
-  #pbStatus { flex:1 1 100%; font-size:12px; }
-  .todo-tag { padding:0 4px; border-radius:4px; font-size:11px; font-weight:600; }
+  #pbStatus { flex:1 1 100%; font-size:calc(12px * var(--ui-k, 1)); }
+  .todo-tag { padding:0 4px; border-radius:4px; font-size:calc(11px * var(--ui-k, 1)); font-weight:600; }
   .todo-bad.todo-tag, .todo-bad > summary .sx-doc { color:var(--bad); } .todo-warn.todo-tag, .todo-warn > summary .sx-doc { color:var(--warn); } .todo-acc.todo-tag, .todo-acc > summary .sx-doc { color:var(--acc); }
   .todo-tag.todo-bad { background:color-mix(in srgb, var(--bad) 12%, transparent); } .todo-tag.todo-warn { background:color-mix(in srgb, var(--warn) 12%, transparent); } .todo-tag.todo-acc { background:color-mix(in srgb, var(--acc) 12%, transparent); }
-  .tl-name { flex:1 1 auto; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--muted); font-size:12px; }
+  .tl-name { flex:1 1 auto; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--muted); font-size:calc(12px * var(--ui-k, 1)); }
   #tdStatus { flex:1 1 auto; min-width:0; }
   .ex-bar-btn[aria-pressed="true"] { background:color-mix(in srgb, var(--acc) 20%, var(--btn)); border-color:var(--acc); }
   .cb-item { display:flex; flex-direction:column; align-items:flex-start; gap:1px; }
@@ -689,10 +703,10 @@ body.recording .statusbar { box-shadow: inset 0 2px 0 #e5534b; }
   .pv-err.warn { color:var(--warn); border-top-color:var(--warn); background:color-mix(in srgb, var(--warn) 8%, var(--panel)); }
   .tr-acts { display:flex; flex-wrap:wrap; align-items:center; gap:6px; }
   .tr-acts button { padding:2px 8px; }
-  .tr-muted { color:var(--muted); font-size:12px; }
-  .tr-out { flex-shrink:0; white-space:pre-wrap; overflow-wrap:anywhere; min-height:4em; padding:10px 12px; font-size:15px; line-height:1.6; user-select:text;
+  .tr-muted { color:var(--muted); font-size:calc(12px * var(--ui-k, 1)); }
+  .tr-out { flex-shrink:0; white-space:pre-wrap; overflow-wrap:anywhere; min-height:4em; padding:10px 12px; font-size:calc(15px * var(--ui-k, 1)); line-height:1.6; user-select:text;
             background:var(--panel); border:1px solid var(--line); border-radius:6px; }
-  .tr-out.pv-md { white-space:normal; overflow:visible; padding:10px 16px; background:var(--panel); font-size:15px; }
+  .tr-out.pv-md { white-space:normal; overflow:visible; padding:10px 16px; background:var(--panel); font-size:calc(15px * var(--ui-k, 1)); }
   .tr-bi { display:flex; gap:6px; margin:2px 0 12px; padding-left:8px; border-left:3px solid color-mix(in srgb, var(--acc) 45%, transparent); color:var(--acc); }
   .tr-bi-ic { flex-shrink:0; font-size:.85em; line-height:1.9; }
   .tr-bi-body { min-width:0; flex:1; }
@@ -704,49 +718,49 @@ body.recording .statusbar { box-shadow: inset 0 2px 0 #e5534b; }
   .tr-dict { padding-top:8px; border-top:1px solid var(--line); }
   .tr-dict[hidden] { display:none; }
   .tr-dict > button { padding:2px 10px; }
-  .tr-dict-note { margin-left:8px; color:var(--muted); font-size:12px; }
+  .tr-dict-note { margin-left:8px; color:var(--muted); font-size:calc(12px * var(--ui-k, 1)); }
   .tr-dict-err { margin-top:8px; color:var(--bad); }
-  .tr-word { display:flex; flex-wrap:wrap; align-items:center; gap:4px 16px; margin:10px 0 6px; font-size:16px; }
+  .tr-word { display:flex; flex-wrap:wrap; align-items:center; gap:4px 16px; margin:10px 0 6px; font-size:calc(16px * var(--ui-k, 1)); }
   .tr-ph { display:inline-flex; align-items:center; gap:4px; }
-  .tr-ph small { color:var(--muted); font-weight:600; font-size:11px; }
+  .tr-ph small { color:var(--muted); font-weight:600; font-size:calc(11px * var(--ui-k, 1)); }
   .tr-ph button { padding:0 6px; }
   .tr-pos { margin-top:6px; }
   .tr-pos > i { color:var(--acc); font-weight:600; }
   .tr-pos ol { margin:4px 0 6px; padding-left:22px; }
   .tr-pos li { margin:2px 0; }
   .tr-ex { color:var(--muted); font-style:italic; }
-  .tr-syn { color:var(--muted); font-size:12px; }
+  .tr-syn { color:var(--muted); font-size:calc(12px * var(--ui-k, 1)); }
   .tr-cards { display:flex; flex-direction:column; gap:8px; margin-top:8px; }
   .tr-card { padding:4px 12px 8px; background:var(--panel); border:1px solid var(--line); border-radius:6px; }
   .tr-card .tr-word { margin:6px 0 4px; }
-  .tr-card-go { margin-left:auto; padding:1px 8px; font-size:12px; }
+  .tr-card-go { margin-left:auto; padding:1px 8px; font-size:calc(12px * var(--ui-k, 1)); }
   .tr-tr, .tr-tr.tr-ex { color:var(--acc); }
-  .tr-word .tr-tr { font-size:15px; }
+  .tr-word .tr-tr { font-size:calc(15px * var(--ui-k, 1)); }
   .tr-src mark { background:color-mix(in srgb, var(--acc) 22%, transparent); color:inherit; border-radius:2px; }
   .tr-exs { margin-top:6px; padding-top:6px; border-top:1px dashed var(--line); }
-  .tr-exs-h { font-weight:600; font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:.04em; }
+  .tr-exs-h { font-weight:600; font-size:calc(12px * var(--ui-k, 1)); color:var(--muted); text-transform:uppercase; letter-spacing:.04em; }
   .tr-exi { margin:4px 0; }
-  .tr-tag { display:inline-block; margin-bottom:2px; padding:0 6px; border-radius:8px; font-size:11px; color:var(--muted); border:1px solid var(--line); }
+  .tr-tag { display:inline-block; margin-bottom:2px; padding:0 6px; border-radius:8px; font-size:calc(11px * var(--ui-k, 1)); color:var(--muted); border:1px solid var(--line); }
   @media (max-width:640px) { .pv-tr { padding:8px 10px 24px; } .tr-lang { max-width:11em; } }
   /* Dev tool report pane (JWT, URL) + number / timestamp hover tooltip. */
   .pv-report { overflow:auto; display:flex; flex-direction:column; gap:12px; padding:10px 14px 24px; background:var(--bg); color:var(--ink); }
-  .pv-report h4 { margin:0 0 4px; font-size:13px; color:var(--acc); }
-  .pv-report table { border-collapse:collapse; font-size:13px; max-width:100%; }
+  .pv-report h4 { margin:0 0 4px; font-size:calc(13px * var(--ui-k, 1)); color:var(--acc); }
+  .pv-report table { border-collapse:collapse; font-size:calc(13px * var(--ui-k, 1)); max-width:100%; }
   .pv-report th, .pv-report td { padding:3px 10px 3px 0; text-align:left; vertical-align:top; border-bottom:1px solid var(--line); white-space:pre-line; overflow-wrap:break-word; }
   .pv-report th { color:var(--muted); font-weight:600; white-space:nowrap; }
   .pv-report td { font-family:Consolas, "Cascadia Mono", monospace; }
   .pv-report tr.bad td:last-child { color:var(--bad); font-weight:600; }
   .pv-report tr.good td:last-child { color:var(--good); font-weight:600; }
   .rp-warn { padding:6px 10px; border:1px solid var(--warn); border-radius:6px; color:var(--warn); background:color-mix(in srgb, var(--warn) 8%, var(--panel)); }
-  .rp-code { margin:0; padding:8px 10px; overflow:auto; font-size:12.5px; background:var(--panel); border:1px solid var(--line); border-radius:6px; white-space:pre-wrap; overflow-wrap:anywhere; }
-  .rp-none { color:var(--muted); font-size:12px; }
-  .oe-numhover { padding:4px 8px; font-size:12px; }
+  .rp-code { margin:0; padding:8px 10px; overflow:auto; font-size:calc(12.5px * var(--ui-k, 1)); background:var(--panel); border:1px solid var(--line); border-radius:6px; white-space:pre-wrap; overflow-wrap:anywhere; }
+  .rp-none { color:var(--muted); font-size:calc(12px * var(--ui-k, 1)); }
+  .oe-numhover { padding:4px 8px; font-size:calc(12px * var(--ui-k, 1)); }
   .oe-numhover b { display:block; margin-bottom:2px; color:var(--acc); }
   .oe-numhover th { padding-right:10px; color:var(--muted); font-weight:600; text-align:left; }
   .oe-numhover td { font-family:Consolas, "Cascadia Mono", monospace; user-select:text; }
-  @media (max-width:640px) { .pv-report { padding:8px 10px 24px; } .pv-report table { font-size:12px; } .pv-report td { overflow-wrap:anywhere; } .pv-report th { white-space:normal; } }
+  @media (max-width:640px) { .pv-report { padding:8px 10px 24px; } .pv-report table { font-size:calc(12px * var(--ui-k, 1)); } .pv-report td { overflow-wrap:anywhere; } .pv-report th { white-space:normal; } }
   /* Data tools: tree pane, JSONPath / XPath query pane, Rainbow CSV column colours, Problems count. */
-  .pv-tree, .pv-query { overflow:auto; padding:8px 12px 24px; background:var(--bg); color:var(--ink); font:13px/1.55 Consolas, "Cascadia Mono", monospace; }
+  .pv-tree, .pv-query { overflow:auto; padding:8px 12px 24px; background:var(--bg); color:var(--ink); font:calc(13px * var(--ui-k, 1))/1.55 Consolas, "Cascadia Mono", monospace; }
   .pv-tree details { padding-left:16px; }
   .pv-tree > details, .pv-tree > .tleaf { padding-left:0; }
   .pv-tree .tleaf { padding-left:30px; }
@@ -773,21 +787,22 @@ body.recording .statusbar { box-shadow: inset 0 2px 0 #e5534b; }
   .rb4 { color:var(--l); } .rb5 { color:var(--acc); } .rb6 { color:var(--bad); } .rb7 { color:var(--muted); }
   #stLint { font-weight:600; }
   #stLint:empty { display:none; }
-  @media (max-width:640px) { .dq-input { width:100%; } .pv-query td { font-size:12px; } }
+  @media (max-width:640px) { .dq-input { width:100%; } .pv-query td { font-size:calc(12px * var(--ui-k, 1)); } }
   /* Log / FIX line colours (no CM grammar) + the line filter pane. */
   .lg-err { color:var(--bad); font-weight:700; } .lg-warn { color:var(--warn); font-weight:700; } .lg-info { color:var(--acc); font-weight:600; } .lg-dbg { color:var(--muted); }
   .lg-time { color:var(--k); } .lg-id { color:var(--l); } .lg-ip { color:var(--tn); } .lg-str { color:var(--s); } .lg-num { color:var(--n); }
   .fx-h { color:var(--k); font-weight:600; } .fx-b { color:var(--tn); font-weight:600; } .fx-t { color:var(--muted); font-weight:600; }
   .fx-v { color:var(--s); } .fx-mt { color:var(--bad); font-weight:700; }
-  .pv-filter { overflow:auto; padding:6px 0 24px; background:var(--bg); color:var(--ink); font:13px/1.5 Consolas, "Cascadia Mono", monospace; }
+  .sw-blk { color:var(--acc); font-weight:700; } .sw-tag { color:var(--tn); font-weight:600; } .sw-q { color:var(--k); } .sw-seq { color:var(--l); font-weight:600; }
+  .pv-filter { overflow:auto; padding:6px 0 24px; background:var(--bg); color:var(--ink); font:calc(13px * var(--ui-k, 1))/1.5 Consolas, "Cascadia Mono", monospace; }
   .lf-row { display:flex; gap:10px; padding:0 12px; cursor:pointer; white-space:pre-wrap; overflow-wrap:anywhere; }
   .lf-row:hover { background:var(--hover); }
   .lf-ctx { color:var(--muted); }
   .lf-n { flex:none; min-width:4em; text-align:right; color:var(--muted); user-select:none; }
   .lf-gap { padding:0 12px; color:var(--muted); }
-  .pv-bar label.chk { display:inline-flex; align-items:center; gap:3px; font-size:12px; }
+  .pv-bar label.chk { display:inline-flex; align-items:center; gap:3px; font-size:calc(12px * var(--ui-k, 1)); }
   /* Editor extras: breadcrumbs panel, bracket pair colours, colour swatches, Outline list, sessions row, password dialog. */
-  .oe-crumbs { display:flex; flex-wrap:nowrap; align-items:center; gap:2px; overflow:hidden; padding:1px 8px; font-size:12px; color:var(--muted); background:var(--panel); border-bottom:1px solid var(--line); white-space:nowrap; }
+  .oe-crumbs { display:flex; flex-wrap:nowrap; align-items:center; gap:2px; overflow:hidden; padding:1px 8px; font-size:calc(12px * var(--ui-k, 1)); color:var(--muted); background:var(--panel); border-bottom:1px solid var(--line); white-space:nowrap; }
   .oe-crumbs button { min-height:24px; border:0; background:transparent; padding:0 3px; color:inherit; font:inherit; cursor:pointer; overflow:hidden; text-overflow:ellipsis; max-width:24em; }
   .oe-crumbs button:hover { color:var(--ink); background:var(--hover); }
   .brk0 { color:#d97706; } .brk1 { color:#c026d3; } .brk2 { color:#2563eb; }
@@ -795,7 +810,7 @@ body.recording .statusbar { box-shadow: inset 0 2px 0 #e5534b; }
   :root[data-theme=dark] .brk0 { color:#fbbf24; } :root[data-theme=dark] .brk1 { color:#e879f9; } :root[data-theme=dark] .brk2 { color:#60a5fa; }
   .oe-swatch { display:inline-block; width:0.8em; height:0.8em; margin:0 3px 0 1px; vertical-align:-0.05em; border:1px solid var(--muted); border-radius:2px; }
   #outline, #bmList, .side-list { flex:1; overflow:auto; min-height:0; padding:4px 0; }
-  .ol-item { display:block; width:100%; text-align:left; border:0; border-radius:0; background:transparent; padding:3px 8px; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font:12.5px Consolas, "Cascadia Mono", monospace; }
+  .ol-item { display:block; width:100%; text-align:left; border:0; border-radius:0; background:transparent; padding:3px 8px; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font:calc(12.5px * var(--ui-k, 1)) Consolas, "Cascadia Mono", monospace; }
   .ol-item:hover { background:var(--hover); }
   .ol-item.on { background:color-mix(in srgb, var(--acc) 18%, transparent); font-weight:600; }
   .ss-row { display:flex; gap:4px; padding:4px 8px; border-bottom:1px solid var(--line); }
@@ -803,9 +818,22 @@ body.recording .statusbar { box-shadow: inset 0 2px 0 #e5534b; }
   .ss-row button { padding:2px 8px; }
   .pw-dlg form { display:flex; flex-direction:column; gap:8px; padding:14px; min-width:min(360px, 86vw); }
   .pw-dlg p { margin:0; }
-  .pw-dlg .muted { font-size:12px; }
+  .pw-dlg .muted { font-size:calc(12px * var(--ui-k, 1)); }
   .pw-acts { display:flex; gap:8px; justify-content:flex-end; }
-  @media (max-width:640px) { .ol-item { min-height:38px; padding-top:8px; padding-bottom:8px; font-size:14px; } .oe-crumbs button { min-height:30px; } #pwInput, #pwInput2, #olFilter { font-size:16px; } }
+  @media (max-width:640px) { .ol-item { min-height:38px; padding-top:8px; padding-bottom:8px; font-size:calc(14px * var(--ui-k, 1)); } .oe-crumbs button { min-height:30px; } #pwInput, #pwInput2, #olFilter { font-size:calc(16px * var(--ui-k, 1)); } }
+  .oe-sticky { position:absolute; left:0; right:12px; z-index:4; background:var(--code); border-bottom:1px solid var(--line); box-shadow:0 2px 4px color-mix(in srgb, var(--ink) 12%, transparent); font-family:Consolas, "Cascadia Mono", monospace; line-height:1.5; }
+  .oe-sticky-row { display:flex; align-items:center; overflow:hidden; white-space:pre; tab-size:4; cursor:pointer; color:var(--ink); }
+  .oe-sticky-row:hover { background:var(--hover); }
+  .oe-sticky-num { flex:0 0 var(--sticky-gut, 0); box-sizing:border-box; padding-right:12px; text-align:right; color:var(--muted); background:var(--gut); }
+  .oe-sticky-txt { padding-left:6px; overflow:hidden; text-overflow:ellipsis; }
+  .oe-paste-bar { display:flex; align-items:center; gap:8px; flex-wrap:wrap; padding:3px 8px; font-size:calc(12.5px * var(--ui-k, 1)); background:color-mix(in srgb, var(--acc) 10%, var(--panel)); border-bottom:1px solid var(--line); }
+  .oe-paste-bar > span { flex:1 1 auto; min-width:0; overflow-wrap:anywhere; }
+  .oe-paste-bar button { min-height:26px; padding:0 8px; }
+  .profile-dlg .profile-title { font-weight:600; }
+  .profile-dlg label { display:flex; align-items:center; gap:6px; }
+  @media (max-width:640px) { .oe-paste-bar button { min-height:36px; } .profile-dlg label { min-height:36px; } }
+  /* Phase 14e: Git conflict count in the status bar (the block widget styles load with the extras bundle). */
+  .statusbar #stConflict { color:var(--warn); font-weight:600; }
   /* Notepad++ token styles 1–6 (cyan, orange, yellow, purple, green, pink): translucent so selection and syntax colours stay visible */
   :root { --npp-s1:rgba(0,190,255,.35); --npp-s2:rgba(255,128,0,.38); --npp-s3:rgba(255,215,0,.55); --npp-s4:rgba(140,60,255,.28); --npp-s5:rgba(0,170,60,.32); --npp-s6:rgba(255,40,140,.3); }
   @media (prefers-color-scheme: dark) { :root:not([data-theme=light]) { --npp-s1:rgba(0,190,255,.4); --npp-s2:rgba(255,128,0,.45); --npp-s3:rgba(255,215,0,.4); --npp-s4:rgba(170,110,255,.48); --npp-s5:rgba(40,200,90,.4); --npp-s6:rgba(255,80,160,.45); } }
@@ -819,13 +847,13 @@ body.recording .statusbar { box-shadow: inset 0 2px 0 #e5534b; }
   .cm-npp-s6, .npp-sw[data-s="6"] { background:var(--npp-s6); }
   .tab-menu > .menu-sep { width:100%; margin:4px 0; border:0; border-top:1px solid var(--line); }
   .tab-menu { max-height:calc(100dvh - 8px); overflow-y:auto; }
-  .tab-menu > .menu-head { padding:4px 14px 2px; font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.03em; }
-  .tab-menu > .menu-note { max-width:280px; padding:0 14px 4px; font-size:11px; color:var(--muted); }
+  .tab-menu > .menu-head { padding:4px 14px 2px; font-size:calc(11px * var(--ui-k, 1)); font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.03em; }
+  .tab-menu > .menu-note { max-width:280px; padding:0 14px 4px; font-size:calc(11px * var(--ui-k, 1)); color:var(--muted); }
   .tab-menu > button.chk > span::before { content:"✓"; display:inline-block; width:1.4em; visibility:hidden; }
   .tab-menu > button.chk[aria-checked="true"] > span::before { visibility:visible; color:var(--acc); }
   .npp-style-row { display:flex; align-items:center; gap:6px; padding:4px 14px; }
   .npp-style-row > span { flex:1; min-width:80px; }
-  .npp-sw { width:28px; height:24px; padding:0; border:1px solid var(--line); border-radius:4px; color:var(--ink); font-size:12px; }
+  .npp-sw { width:28px; height:24px; padding:0; border:1px solid var(--line); border-radius:4px; color:var(--ink); font-size:calc(12px * var(--ui-k, 1)); }
   .npp-sw.all { width:auto; padding:0 8px; }
   .npp-sw:focus-visible { outline:2px solid var(--acc); outline-offset:1px; }
   @media (hover:hover) { .npp-sw:hover { border-color:var(--acc); } }
@@ -842,15 +870,15 @@ body.recording .statusbar { box-shadow: inset 0 2px 0 #e5534b; }
 
     button, select, input[type=text], label.btn, a.btn { min-height:38px; }
     /* iOS zooms the page when a focused field is under 16px. */
-    select, input[type=text], textarea, textarea.anno { font-size:16px; }
+    select, input[type=text], textarea, textarea.anno { font-size:calc(16px * var(--ui-k, 1)); }
     select, input[type=text] { max-width:62vw; }
     input[type=checkbox] { width:20px; height:20px; }
 
     header.top { gap:6px; padding:6px 12px 8px; }
     header.top > * { order:3; }
     header.top > a.btn { order:0; flex:none; display:grid; place-items:center; font-size:0; }
-    header.top > a.btn::before { content:"←"; font-size:18px; line-height:1; }
-    header.top > h1 { order:0; flex:1 1 0; min-width:0; margin:0; font-size:15px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    header.top > a.btn::before { content:"←"; font-size:calc(18px * var(--ui-k, 1)); line-height:1; }
+    header.top > h1 { order:0; flex:1 1 0; min-width:0; margin:0; font-size:calc(15px * var(--ui-k, 1)); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
     header.top > .more-toggle { order:1; flex:none; display:block; padding:5px 12px; font-weight:700; }
     header.top > .lang-switch { order:2; flex:none; position:static; flex-wrap:nowrap; }
     .lang-switch button { padding:5px 9px; }
@@ -885,8 +913,8 @@ body.recording .statusbar { box-shadow: inset 0 2px 0 #e5534b; }
     .pane-scroller .left, .pane-scroller .diff-inputs { display:contents; }
     #split { display:none; }
     .code { overscroll-behavior-x:contain; }
-    .code, .gut, #gut, #hl, #src, #cfg { font-size:16px; }
-    pre.code:not(.hl) { font-size:13px; }
+    .code, .gut, #gut, #hl, #src, #cfg { font-size:calc(16px * var(--ui-k, 1)); }
+    pre.code:not(.hl) { font-size:calc(13px * var(--ui-k, 1)); }
 
     .grid-area { padding:8px 12px; }
     .paste { grid-template-rows:16dvh auto; }
@@ -898,7 +926,7 @@ body.recording .statusbar { box-shadow: inset 0 2px 0 #e5534b; }
     .chip button { min-height:0; }
     .tip, .pop { max-width:calc(100vw - 16px); }
     .tip { max-height:80dvh; overflow:hidden; }
-    .author { flex-wrap:nowrap; justify-content:space-between; gap:8px; padding:2px 12px 4px; font-size:11px; white-space:nowrap; overflow:hidden; }
+    .author { flex-wrap:nowrap; justify-content:space-between; gap:8px; padding:2px 12px 4px; font-size:calc(11px * var(--ui-k, 1)); white-space:nowrap; overflow:hidden; }
     .author span { display:none; }
   }
   @media (max-width: 640px) and (prefers-reduced-motion: no-preference) { .pane-scroller { scroll-behavior:smooth; } }
@@ -936,17 +964,36 @@ body.recording .statusbar { box-shadow: inset 0 2px 0 #e5534b; }
 </script>
 </head>
 <body>
+<!-- Icons: Lucide (ISC License, https://lucide.dev) -->
+<svg hidden aria-hidden="true"><defs>
+  <symbol id="ic-folder" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></symbol>
+  <symbol id="ic-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></symbol>
+  <symbol id="ic-list" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h.01M3 18h.01M3 6h.01M8 12h13M8 18h13M8 6h13"/></symbol>
+  <symbol id="ic-bookmark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></symbol>
+  <symbol id="ic-git" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><line x1="6" x2="6" y1="3" y2="15"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M18 9a9 9 0 0 1-9 9"/></symbol>
+  <symbol id="ic-alert" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></symbol>
+  <symbol id="ic-history" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></symbol>
+  <symbol id="ic-check-sq" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="m9 12 2 2 4-4"/></symbol>
+  <symbol id="ic-clipboard" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></symbol>
+  <symbol id="ic-puzzle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M19.439 7.85c-.049.322.059.648.289.878l1.568 1.568c.47.47.706 1.087.706 1.704s-.235 1.233-.706 1.704l-1.611 1.611a.98.98 0 0 1-.837.276c-.47-.07-.802-.48-.968-.925a2.501 2.501 0 1 0-3.214 3.214c.446.166.855.497.925.968a.979.979 0 0 1-.276.837l-1.61 1.61a2.404 2.404 0 0 1-1.705.707 2.402 2.402 0 0 1-1.704-.706l-1.568-1.568a1.026 1.026 0 0 0-.877-.29c-.493.074-.84.504-1.02.968a2.5 2.5 0 1 1-3.237-3.237c.464-.18.894-.527.967-1.02a1.026 1.026 0 0 0-.289-.877l-1.568-1.568A2.402 2.402 0 0 1 1.998 12c0-.617.236-1.234.706-1.704L4.23 8.77c.24-.24.581-.353.917-.303.515.077.877.528 1.073 1.01a2.5 2.5 0 1 0 3.259-3.259c-.482-.196-.933-.558-1.01-1.073-.05-.336.062-.676.303-.917l1.525-1.525A2.402 2.402 0 0 1 12 1.998c.617 0 1.234.236 1.704.706l1.568 1.568c.23.23.556.338.877.29.493-.074.84-.504 1.02-.968a2.5 2.5 0 1 1 3.237 3.237c-.464.18-.894.527-.967 1.02Z"/></symbol>
+  <symbol id="ic-trash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></symbol>
+  <symbol id="ic-settings" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></symbol>
+  <symbol id="ic-link" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></symbol>
+  <symbol id="ic-wrench" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></symbol>
+  <symbol id="ic-keyboard" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="M6 8h.001M10 8h.001M14 8h.001M18 8h.001M8 12h.001M12 12h.001M16 12h.001M7 16h10"/></symbol>
+</defs></svg>
 <header class="top">
   <a class="btn" href="../index.html">← Home</a>
   <button id="btnRunTop" class="main" title="Chạy phép đã chọn trên tab đang mở — kết quả ra tab liên kết ở view kia (Ctrl+Enter)">▶ Chạy</button>
   <h1><a class="app-title" href="one-editor.html" target="_blank" rel="noopener" title="Mở One Editor ở tab trình duyệt mới">One Editor</a></h1>
   <button class="more-toggle" title="Thêm thao tác" aria-expanded="false">⋯</button>
-  <button id="btnShare" title="Chép link chứa các tab đang mở (dữ liệu nằm sau dấu #, không gửi lên máy chủ)">🔗 Chia sẻ link</button>
+  <button id="btnShare" title="Chép link chứa các tab đang mở (dữ liệu nằm sau dấu #, không gửi lên máy chủ)"><svg class="ic" aria-hidden="true"><use href="#ic-link"/></svg> Chia sẻ link</button>
   <button id="btnOpenIn" title="Mở nội dung tab đang mở bằng tool khác (Data Workbench, FIX Parser, Diagram Editor, One Editor) ở tab trình duyệt mới — dữ liệu nằm sau dấu #, không gửi lên máy chủ" aria-haspopup="menu">↗ Mở bằng tool ▾</button>
   <label class="chk" title="Giao diện sáng / tối">Giao diện <select id="uiTheme"><option value="auto">Tự động</option><option value="light">Sáng</option><option value="dark">Tối</option></select></label>
-  <button id="btnToolbar" title="Ẩn / hiện thanh công cụ" aria-pressed="true">🧰 Công cụ</button>
-  <button id="btnSettings" title="Cài đặt — mọi cài đặt của One Editor (Ctrl+,)">⚙ Cài đặt</button>
-  <button id="btnClear" title="Xoá mọi ghi chú và tab đã lưu trong IndexedDB của trình duyệt này">🗑 Xoá dữ liệu</button>
+  <label class="chk ui-size-label" title="Cỡ chữ và icon của giao diện — dùng chung mọi tool">Cỡ <select class="ui-size-pick"><option value="small">Nhỏ</option><option value="medium">Vừa</option><option value="large">Lớn</option></select></label>
+  <button id="btnToolbar" title="Ẩn / hiện thanh công cụ" aria-pressed="true"><svg class="ic" aria-hidden="true"><use href="#ic-wrench"/></svg> Công cụ</button>
+  <button id="btnSettings" title="Cài đặt — mọi cài đặt của One Editor (Ctrl+,)"><svg class="ic" aria-hidden="true"><use href="#ic-settings"/></svg> Cài đặt</button>
+  <button id="btnClear" title="Xoá mọi ghi chú và tab đã lưu trong IndexedDB của trình duyệt này"><svg class="ic" aria-hidden="true"><use href="#ic-trash"/></svg> Xoá dữ liệu</button>
   <span class="seg lang-switch" title="Ngôn ngữ"><span class="gc-views" title="Lượt truy cập (GoatCounter, cập nhật mỗi ~10 phút)" hidden></span><button data-lang="vi">VI</button><button data-lang="en">EN</button></span>
 </header>
 <div class="toolbar">
@@ -964,7 +1011,7 @@ body.recording .statusbar { box-shadow: inset 0 2px 0 #e5534b; }
   <button id="btnFormat" title="Format tab đang mở theo ngôn ngữ — kết quả ra tab liên kết ở view kia (Shift+Alt+F: format tại chỗ)">✨ Format</button>
   <select id="demo" class="demo-picker" title="Nạp dữ liệu mẫu thành tab tạm (không đè bài đang sửa)" data-i18n-skip></select>
   <span class="sep"></span>
-  <label class="chk" title="Ngôn ngữ của tab đang mở — mặc định tự nhận theo tên file, shebang / modeline rồi nội dung">Ngôn ngữ <select id="langSel" data-i18n-skip></select></label>
+  <select id="langSel" title="Ngôn ngữ của tab đang mở — mặc định tự nhận theo tên file, shebang / modeline rồi nội dung" data-i18n-skip></select>
   <label class="chk" title="Xuống dòng mềm (Alt+Z)"><input id="chkWrap" type="checkbox"> Xuống dòng</label>
   <label class="chk desktop-only" title="Bản thu nhỏ của file ở mép phải editor — bấm / kéo trên đó để cuộn"><input id="chkMinimap" type="checkbox"> Minimap</label>
   <button id="btnZoomIn" class="icon-btn" title="Phóng to chữ (Ctrl+=)">A+</button>
@@ -986,20 +1033,20 @@ body.recording .statusbar { box-shadow: inset 0 2px 0 #e5534b; }
   <aside class="pane" id="explorerPane">
     <nav class="activity" role="toolbar" aria-label="Thanh hoạt động">
       <div class="act-top">
-      <button data-side="explorer" class="on" title="Explorer — tab đang mở, ghi chú, gần đây, folder (Ctrl+Shift+E)">📁</button>
-      <button data-side="search" title="Tìm / thay trong mọi tab, ghi chú và folder đang mở (Ctrl+Shift+F / Ctrl+Shift+H)">🔍</button>
-      <button data-side="outline" title="Outline — hàm, class, tiêu đề của tab đang mở">☰</button>
-      <button data-side="bookmarks" title="Bookmark — mọi dòng đã đánh dấu trong tab, ghi chú và file (Ctrl+F2 đặt / bỏ, F2 / Shift+F2 tới cái kế / trước)">🔖</button>
-      <button data-side="git" title="Git — file đã đổi so với HEAD của repo trong folder Explorer, chỉ đọc (Ctrl+Shift+G)">⎇</button>
-      <button data-side="problems" title="Problems — lỗi / cảnh báo của mọi tab đang mở (Ctrl+Shift+M)">⚠</button>
-      <button data-side="timeline" title="Timeline — lịch sử cục bộ của tab đang chọn: so sánh, khôi phục">🕘</button>
-      <button data-side="todo" title="TODO / FIXME — các tag trong tab, ghi chú và folder đang mở">☑</button>
-      <button data-side="clipboard" title="Lịch sử clipboard — các đoạn đã chép / cắt, bấm để chèn vào con trỏ">📋</button>
-      <button data-side="library" title="Thư viện của tôi — snippet, macro, bộ thay hàng loạt, recipe; xuất / nhập file">🧩</button>
+      <button data-side="explorer" class="on" title="Explorer — tab đang mở, ghi chú, gần đây, folder (Ctrl+Shift+E)"><svg class="ic" aria-hidden="true"><use href="#ic-folder"/></svg></button>
+      <button data-side="search" title="Tìm / thay trong mọi tab, ghi chú và folder đang mở (Ctrl+Shift+F / Ctrl+Shift+H)"><svg class="ic" aria-hidden="true"><use href="#ic-search"/></svg></button>
+      <button data-side="outline" title="Outline — hàm, class, tiêu đề của tab đang mở"><svg class="ic" aria-hidden="true"><use href="#ic-list"/></svg></button>
+      <button data-side="bookmarks" title="Bookmark — mọi dòng đã đánh dấu trong tab, ghi chú và file (Ctrl+F2 đặt / bỏ, F2 / Shift+F2 tới cái kế / trước)"><svg class="ic" aria-hidden="true"><use href="#ic-bookmark"/></svg></button>
+      <button data-side="git" title="Git — file đã đổi so với HEAD của repo trong folder Explorer, chỉ đọc (Ctrl+Shift+G)"><svg class="ic" aria-hidden="true"><use href="#ic-git"/></svg></button>
+      <button data-side="problems" title="Problems — lỗi / cảnh báo của mọi tab đang mở (Ctrl+Shift+M)"><svg class="ic" aria-hidden="true"><use href="#ic-alert"/></svg></button>
+      <button data-side="timeline" title="Timeline — lịch sử cục bộ của tab đang chọn: so sánh, khôi phục"><svg class="ic" aria-hidden="true"><use href="#ic-history"/></svg></button>
+      <button data-side="todo" title="TODO / FIXME — các tag trong tab, ghi chú và folder đang mở"><svg class="ic" aria-hidden="true"><use href="#ic-check-sq"/></svg></button>
+      <button data-side="clipboard" title="Lịch sử clipboard — các đoạn đã chép / cắt, bấm để chèn vào con trỏ"><svg class="ic" aria-hidden="true"><use href="#ic-clipboard"/></svg></button>
+      <button data-side="library" title="Thư viện của tôi — snippet, macro, bộ thay hàng loạt, recipe; xuất / nhập file"><svg class="ic" aria-hidden="true"><use href="#ic-puzzle"/></svg></button>
       </div>
       <div class="act-bottom">
-      <button data-act="trash" title="Thùng rác — file đã xoá trong Explorer, khôi phục được" hidden>🗑</button>
-      <button data-act="settings" title="Cài đặt — mọi cài đặt của One Editor (Ctrl+,)">⚙</button>
+      <button data-act="trash" title="Thùng rác — file đã xoá trong Explorer, khôi phục được" hidden><svg class="ic" aria-hidden="true"><use href="#ic-trash"/></svg></button>
+      <button data-act="settings" title="Cài đặt — mọi cài đặt của One Editor (Ctrl+,)"><svg class="ic" aria-hidden="true"><use href="#ic-settings"/></svg></button>
       </div>
     </nav>
     <div class="side" data-side-panel="explorer">
@@ -1084,6 +1131,7 @@ body.recording .statusbar { box-shadow: inset 0 2px 0 #e5534b; }
   <span id="stPos" data-i18n-skip></span>
   <span id="stCount" data-i18n-skip></span>
   <button id="stLint" class="link bad" title="Lỗi / cảnh báo của tab — bấm để mở danh sách (Ctrl+Shift+M), F8 tới lỗi kế" data-i18n-skip></button>
+  <button id="stConflict" class="link warn" title="Conflict Git trong tab — bấm để tới conflict kế (Palette: Accept all current / incoming)" data-i18n-skip hidden></button>
   <span id="stSrc" data-i18n-skip></span>
   <span id="stStore" data-i18n-skip hidden></span>
 <div class="author">
@@ -2089,7 +2137,7 @@ const I18n = (() => {
   const KEY = "web_tool.lang", EN = {}, listeners = [];
   const SKIP = "script,style,textarea,pre,code,svg,table,[contenteditable],[data-i18n-skip]";
   const origText = new WeakMap(), origAttr = new WeakMap();
-  let origTitle = null;
+  let origTitle = null, applied = false;
   let lang = (() => {
     try { const v = localStorage.getItem(KEY); if (v === "vi" || v === "en") return v; } catch { /* storage blocked */ }
     const nav = globalThis.navigator;
@@ -2098,7 +2146,8 @@ const I18n = (() => {
 
   const word = s => lang === "en" && Object.hasOwn(EN, s) ? EN[s] : s;
   const t = (vi, params) => params ? word(vi).replace(/\{(\w+)\}/g, (m, k) => Object.hasOwn(params, k) ? String(params[k]) : m) : word(vi);
-  const num = n => n.toLocaleString(lang);
+  let numFmt = new Intl.NumberFormat(lang);
+  const num = n => numFmt.format(n);
   const swap = src => { const m = /^(\s*)([\s\S]*?)(\s*)$/.exec(src); return m[1] + word(m[2]) + m[3]; };
 
   // Static markup keeps its Vietnamese source; the original of each text node / attribute is remembered so switching back is exact.
@@ -2106,19 +2155,22 @@ const I18n = (() => {
     document.documentElement.lang = lang;
     if (origTitle === null) origTitle = document.title;
     document.title = word(origTitle);
-    for (const el of [root, ...root.querySelectorAll("*")]) {
-      if (el.parentElement && el.parentElement.closest(SKIP)) continue;
-      if (!el.matches(SKIP)) for (const n of el.childNodes) {
-        if (n.nodeType !== 3 || !n.data.trim()) continue;
-        if (!origText.has(n)) origText.set(n, n.data);
-        n.data = swap(origText.get(n));
-      }
-      for (const a of ["title", "placeholder"]) {
-        if (!el.hasAttribute(a)) continue;
-        if (!origAttr.has(el)) origAttr.set(el, {});
-        const o = origAttr.get(el);
-        o[a] ??= el.getAttribute(a);
-        el.setAttribute(a, swap(o[a]));
+    if (lang !== "vi" || applied) {
+      applied = true;
+      for (const el of [root, ...root.querySelectorAll("*")]) {
+        if (el.parentElement && el.parentElement.closest(SKIP)) continue;
+        if (!el.matches(SKIP)) for (const n of el.childNodes) {
+          if (n.nodeType !== 3 || !n.data.trim()) continue;
+          if (!origText.has(n)) origText.set(n, n.data);
+          n.data = swap(origText.get(n));
+        }
+        for (const a of ["title", "placeholder"]) {
+          if (!el.hasAttribute(a)) continue;
+          if (!origAttr.has(el)) origAttr.set(el, {});
+          const o = origAttr.get(el);
+          o[a] ??= el.getAttribute(a);
+          el.setAttribute(a, swap(o[a]));
+        }
       }
     }
     document.querySelectorAll("[data-lang]").forEach(b => { b.classList.toggle("on", b.dataset.lang === lang); b.setAttribute("aria-pressed", b.dataset.lang === lang); });
@@ -2127,6 +2179,7 @@ const I18n = (() => {
   function set(l) {
     if (l === lang) return;
     lang = l;
+    numFmt = new Intl.NumberFormat(l);
     try { localStorage.setItem(KEY, l); } catch { /* storage blocked → choice lasts until reload */ }
     apply();
     listeners.forEach(f => f(l));
@@ -2154,6 +2207,11 @@ I18n.add({
   "Tự động": "Auto",
   "Sáng": "Light",
   "Tối": "Dark",
+  "Cỡ": "Size",
+  "Cỡ chữ và icon của giao diện — dùng chung mọi tool": "Text and icon size of the interface — shared by every tool",
+  "Nhỏ": "Small",
+  "Vừa": "Medium",
+  "Lớn": "Large",
   "📂 Đã lưu ({n})": "📂 Saved ({n})",
   "Chưa có dữ liệu để lưu.": "Nothing to save yet.",
   "Tên bản lưu (lưu trong trình duyệt này):": "Name for this save (stored in this browser):",
@@ -2258,7 +2316,7 @@ I18n.add({
 // English UI strings, keyed by the Vietnamese source text.
 I18n.add({
   // Header, toolbar, markup
-"🔗 Chia sẻ link": "🔗 Share link", "🗑 Xoá dữ liệu": "🗑 Clear data", "Tác giả:": "Author:",
+"🔗 Chia sẻ link": "🔗 Share link", "Chia sẻ link": "Share link", "🗑 Xoá dữ liệu": "🗑 Clear data", "Xoá dữ liệu": "Clear data", "Công cụ": "Toolbar", "Cài đặt": "Settings", "Tác giả:": "Author:",
   "Chép link chứa các tab đang mở (dữ liệu nằm sau dấu #, không gửi lên máy chủ)": "Copy a link holding the open tabs (data sits after the #, never sent to a server)",
   "Xoá mọi ghi chú và tab đã lưu trong IndexedDB của trình duyệt này": "Delete every note and saved tab from this browser's IndexedDB",
   "Lượt truy cập (GoatCounter, cập nhật mỗi ~10 phút)": "Visits (GoatCounter, updates every ~10 minutes)",
@@ -3265,6 +3323,8 @@ I18n.add({
   "Checkbox ở mỗi dòng tab folder (luôn có trên màn hình cảm ứng)": "A check box on each folder tab row (always on touch screens)",
   "File đang chọn hiện cạnh danh sách (Alt+P)": "The selected file shows beside the list (Alt+P)",
   "Sáng / tối, hoặc theo hệ điều hành": "Light / dark, or follow the operating system",
+  "Cỡ giao diện": "Interface size",
+  "Cỡ chữ và icon của menu, thanh công cụ, Explorer, panel (không đổi chữ editor) — dùng chung mọi tool, chỉ áp trên màn rộng": "Text and icon size of menus, toolbar, Explorer and panels (editor text unchanged) — shared by every tool, wide screens only",
   "Cỡ chữ editor (px)": "Editor font size (px)",
   "9–28 — Ctrl+= / Ctrl+- / Ctrl+0 cũng đổi": "9–28 — Ctrl+= / Ctrl+- / Ctrl+0 change it too",
   "Xuống dòng mềm": "Word wrap",
@@ -3528,6 +3588,7 @@ I18n.add({
 I18n.add({
   "{n} mục trong thùng rác": "{n} items in the recycle bin",
   "Hiện panel: {name}": "Show panel: {name}",
+  "Đang nạp mục Đã ghim — thử lại sau giây lát.": "Loading the Pinned list — try again in a moment.",
   // Problems
   "Problems: lỗi của mọi tab đang mở (⚠ thanh bên)": "Problems: errors of every open tab (⚠ side bar)",
   "Problems — lỗi / cảnh báo của mọi tab đang mở (Ctrl+Shift+M)": "Problems — errors / warnings of every open tab (Ctrl+Shift+M)",
@@ -3620,6 +3681,139 @@ I18n.add({
   "Folder đang mở không có repo Git (.git) — hoặc là folder Drive / OneDrive / kéo-thả không có quyền đọc .git.": "The open folder has no Git repo (.git) — or it is a Drive / OneDrive / dropped folder that cannot read .git.",
   "Chưa mở folder. Mở folder có .git bằng 📂 Mở ▾ → Mở folder (Chrome / Edge).": "No folder open. Open a folder holding .git with 📂 Open ▾ → Open folder (Chrome / Edge).",
   "Panel chỉ đọc: không stage / commit; dùng ⋯ để chép lệnh TortoiseGit.": "Read-only panel: no stage / commit; use ⋯ to copy a TortoiseGit command.",
+});
+// English strings for phase 14a: profile backup, sticky scroll, spellcheck, typewriter, writing stats, smart paste — keyed by the Vietnamese source.
+I18n.add({
+  // Demos
+  "Sao lưu profile: file mẫu + ⚙ Dữ liệu đã lưu": "Profile backup: sample file + ⚙ Saved data",
+  "Mẫu: file profile ở View 1 (JSON, không nén). ⚙ Dữ liệu đã lưu ▸ ⬇ Xuất profile / ⬆ Nhập profile — nhập sẽ tải lại trang.": "Sample: a profile file in View 1 (JSON, not compressed). ⚙ Saved data ▸ ⬇ Export profile / ⬆ Import profile — importing reloads the page.",
+  "Sticky scroll: class / method / heading dính đầu màn hình": "Sticky scroll: class / method / heading pinned at the top",
+  "Dán thông minh: JWT + Base64 ⇒ gợi ý phép ▶": "Smart paste: JWT + Base64 ⇒ suggested ▶ operation",
+  // Smart paste
+  "khoá riêng PEM": "PEM private key",
+  "PEM (chứng chỉ / khoá)": "PEM (certificate / key)",
+  "lệnh cURL": "cURL command",
+  "URL có query": "URL with a query",
+  "biểu thức cron": "cron expression",
+  "JSON 1 dòng": "one-line JSON",
+  "HTML 1 dòng": "one-line HTML",
+  "XML 1 dòng": "one-line XML",
+  "Phát hiện {what}": "Detected {what}",
+  "Ẩn gợi ý cho tab này": "Hide the suggestion for this tab",
+  "Dán thông minh": "Smart paste",
+  "Dán JWT, cURL, cron, URL dài, Base64, PEM, FIX, epoch, JSON / XML 1 dòng vào tab trống ⇒ gợi ý phép ▶ phù hợp (không tự chạy)": "Pasting a JWT, cURL, cron, long URL, Base64, PEM, FIX, epoch or one-line JSON / XML into an empty tab ⇒ suggests the matching ▶ operation (never runs by itself)",
+  // Spellcheck
+  "Kiểm chính tả English: bật cho “{name}” — từ sai được gạch đỏ; Shift+chuột phải lên từ để xem gợi ý.": "English spellcheck: on for “{name}” — misspelled words are underlined; Shift+right-click a word for suggestions.",
+  "Kiểm chính tả English: tắt cho “{name}”.": "English spellcheck: off for “{name}”.",
+  "Kiểm chính tả English (tab này)": "English spellcheck (this tab)",
+  "Gợi ý chính tả (menu trình duyệt)": "Spelling suggestions (browser menu)",
+  "Kiểm chính tả English: Markdown / Text": "English spellcheck: Markdown / Text",
+  "Mặc định cho tab Markdown và văn bản thường — bộ kiểm của trình duyệt": "Default for Markdown and plain text tabs — the browser's own checker",
+  "Kiểm chính tả English: ghi chú": "English spellcheck: notes",
+  "Ghi chú thường viết tiếng Việt nên mặc định tắt": "Notes are often in Vietnamese, so off by default",
+  "Kiểm chính tả English: code": "English spellcheck: code",
+  "Mỗi tab vẫn bật / tắt riêng được (chuột phải hoặc Palette)": "Each tab can still be switched on its own (right-click or Palette)",
+  "Kiểm chính tả English: bật / tắt cho tab này": "English spellcheck: on / off for this tab",
+  // Sticky scroll / typewriter / writing stats
+  "Dòng mở hàm / class / tiêu đề đang bao màn hình dính ở đầu editor (≤ 5 dòng, bấm để tới) — tắt khi màn hình ≤ 640 px hoặc file > 1 MB": "The opening lines of the function / class / heading around the screen stay at the top of the editor (≤ 5 lines, click to go there) — off on screens ≤ 640 px or files > 1 MB",
+  "Dòng đang gõ luôn ở giữa màn hình": "The line being typed stays in the middle of the screen",
+  "Sticky scroll: bật / tắt": "Sticky scroll: on / off",
+  "Typewriter scrolling: bật / tắt (dòng đang gõ ở giữa)": "Typewriter scrolling: on / off (typing line in the middle)",
+  "{w} từ · ~{m} phút đọc": "{w} words · ~{m} min read",
+  "chọn {w} từ": "{w} words selected",
+  // Profile backup
+  "Sao lưu / khôi phục profile": "Back up / restore profile",
+  "Cài đặt, phím tắt, group, ghim, nhãn màu, snippet / macro / bộ thay / recipe, ghi chú — 1 file .json.gz, có thể đặt mật khẩu": "Settings, shortcuts, groups, pins, colour tags, snippets / macros / replace sets / recipes, notes — one .json.gz file, optionally password-protected",
+  "Lần xuất gần nhất: {date}": "Last export: {date}",
+  "Chưa xuất lần nào": "Never exported",
+  "⬇ Xuất profile…": "⬇ Export profile…",
+  "⬆ Nhập profile…": "⬆ Import profile…",
+  "Xuất profile…": "Export profile…",
+  "Nhắc sao lưu mỗi 14 ngày": "Remind me to back up every 14 days",
+  "Lời nhắc ở thanh trạng thái khi mở One Editor": "A reminder in the status bar when One Editor opens",
+  "Sao lưu: xuất profile (cài đặt, thư viện, ghi chú…)…": "Backup: export profile (settings, library, notes…)…",
+  "Sao lưu: nhập profile…": "Backup: import profile…",
+  "Đã {d} ngày chưa sao lưu profile One Editor — bấm để xuất.": "No One Editor profile backup for {d} days — click to export.",
+  "Chưa sao lưu profile One Editor lần nào — bấm để xuất.": "The One Editor profile has never been backed up — click to export.",
+  "⬆ Đã nhập profile: {n} ghi chú, {s} cài đặt.": "⬆ Profile imported: {n} notes, {s} settings.",
+  "Trình duyệt chặn IndexedDB — không có gì để sao lưu.": "The browser blocks IndexedDB — nothing to back up.",
+  "Profile có mật khẩu — nhập mật khẩu để mở": "This profile has a password — type it to open",
+  "Xuất profile One Editor": "Export One Editor profile",
+  "Gồm cài đặt, phím tắt, group, ghim, nhãn màu, snippet / macro / bộ thay / recipe và ghi chú. Folder / file đã mở không xuất được (trình duyệt không cho) — sau khi nhập cần mở lại folder.": "Includes settings, shortcuts, groups, pins, colour tags, snippets / macros / replace sets / recipes and notes. Opened folders / files cannot be exported (the browser does not allow it) — open the folders again after importing.",
+  "File có thể chứa dữ liệu nhạy cảm trong ghi chú — nên đặt mật khẩu.": "The file may hold sensitive data from your notes — a password is recommended.",
+  "Kèm lịch sử cục bộ (🕘 Timeline)": "Include local history (🕘 Timeline)",
+  "Đặt mật khẩu": "Set a password",
+  "⬇ Xuất": "⬇ Export",
+  "Mật khẩu cho file profile": "Password for the profile file",
+  "⬇ Đã xuất profile: {s} cài đặt · {n} ghi chú · {l} mục thư viện.": "⬇ Profile exported: {s} settings · {n} notes · {l} library items.",
+  "{n} mục folder / file không xuất được — mở lại folder sau khi nhập.": "{n} folder / file items could not be exported — open the folders again after importing.",
+  "Không xuất được profile: {msg}": "Could not export the profile: {msg}",
+  "File lớn hơn 200 MB — không nhập.": "The file is larger than 200 MB — not imported.",
+  "File không phải JSON / gzip hợp lệ.": "The file is not valid JSON / gzip.",
+  "File không phải profile One Editor (version 1).": "The file is not a One Editor profile (version 1).",
+  "Đã huỷ nhập profile.": "Profile import cancelled.",
+  "cài đặt": "settings",
+  "phím tắt riêng": "custom shortcuts",
+  "mục ghim": "pins",
+  "nhãn màu": "colour tags",
+  "bộ thay": "replace sets",
+  "ghi chú": "notes",
+  "bản lịch sử": "history snapshots",
+  "Nhập profile “{name}”": "Import profile “{name}”",
+  "File không có mục nào.": "The file has no items.",
+  "Xuất lúc {t}": "Exported at {t}",
+  "Gộp: thêm vào dữ liệu hiện có. Thay toàn bộ: các loại có trong file thay hẳn bản hiện tại (ghi chú hiện có bị xoá). Trang tải lại sau khi nhập.": "Merge: add to what is here. Replace all: every kind in the file replaces the current one (current notes are deleted). The page reloads after importing.",
+  "Gộp": "Merge",
+  "Đóng các tab One Editor khác trước khi nhập — chúng có thể ghi đè dữ liệu vừa nhập.": "Close other One Editor tabs before importing — they could overwrite the imported data.",
+  "Thay toàn bộ: thư viện (snippet, macro, bộ thay, recipe) sẽ bị thay bằng nội dung file; ghi chú và cài đặt giữ nguyên. Tiếp tục?": "Replace all: the library (snippets, macros, replace sets, recipes) will be replaced by the file; notes and settings stay. Continue?",
+  "Thay toàn bộ…": "Replace all…",
+  "Thay toàn bộ: {n} ghi chú hiện có cùng cài đặt, thư viện, group sẽ bị thay bằng nội dung file. Không hoàn tác được. Tiếp tục?": "Replace all: the {n} current notes plus settings, library and groups will be replaced by the file. This cannot be undone. Continue?",
+  "{n} mục trùng tên / id với dữ liệu hiện có.\nOK = thay bằng bản trong file · Huỷ = giữ cả hai (thêm số vào tên).": "{n} items have the same name / id as existing ones.\nOK = take the file's version · Cancel = keep both (a number is added to the name).",
+  "Nhập profile bị ngắt: {msg} — tải lại trang (F5) trước khi sửa tiếp.": "Profile import stopped: {msg} — reload the page (F5) before editing further.",
+});
+// English strings for phase 14b (main page): data ops, demos, opening .db / .xlsx / .docx — keyed by the Vietnamese source.
+I18n.add({
+  "SQL trên các tab CSV / JSON · file SQLite": "SQL over CSV / JSON tabs · SQLite file", "Dữ liệu giả (JSON Schema / theo cột)": "Fake data (JSON Schema / by columns)", "Xem xlsx / docx (chỉ đọc)": "View xlsx / docx (read-only)",
+  ".xls / .ods chưa hỗ trợ — mở bằng Excel / LibreOffice rồi lưu lại thành .xlsx.": ".xls / .ods are not supported — open the file in Excel / LibreOffice and save it as .xlsx.",
+  // Demos
+  "SQL: JOIN 2 tab CSV (sql.js trong Worker)": "SQL: JOIN 2 CSV tabs (sql.js in a Worker)", "SQLite: mở file .db mẫu (bảng + view)": "SQLite: open a sample .db file (tables + view)",
+  "Dữ liệu giả từ JSON Schema (seed cố định)": "Fake data from a JSON Schema (fixed seed)", "xlsx: workbook 3 sheet (tạo bằng SheetJS)": "xlsx: 3-sheet workbook (made with SheetJS)",
+});
+// English strings for phase 14c (main page): log / FIX / SWIFT op labels, demos, SWIFT hover — keyed by the Vietnamese source.
+I18n.add({
+  "FIX → Vòng đời lệnh + sơ đồ": "FIX → Order lifecycle + diagram", "Gộp log theo thời gian + histogram": "Merge logs by time + histogram", "SWIFT MT → Chi tiết + kiểm cấu trúc": "SWIFT MT → Detail + structure check",
+  "Gộp 3 log lệch giờ + histogram (có stack trace)": "Merge 3 logs with skewed clocks + histogram (with a stack trace)",
+  "FIX: vòng đời lệnh New → Replace → Partial → Filled (+1 chuyển lạ)": "FIX: order lifecycle New → Replace → Partial → Filled (+1 odd change)",
+  "SWIFT MT540: chi tiết + kiểm 16R/16S (1 bản lỗi)": "SWIFT MT540: detail + 16R/16S check (1 broken copy)",
+  "Không nạp được từ điển SWIFT ({file}).": "Could not load the SWIFT dictionary ({file}).",
+});
+// English strings for phase 14d (main page): cURL / X.509 / protobuf / OpenAPI op labels and demos — keyed by the Vietnamese source.
+I18n.add({
+  "cURL ⇄ code (fetch · axios · Go · C# · Python · PowerShell · .http)": "cURL ⇄ code (fetch · axios · Go · C# · Python · PowerShell · .http)",
+  "Chứng chỉ X.509 (PEM / DER) → chi tiết": "X.509 certificate (PEM / DER) → details", "Protobuf thô (hex / base64) → cây field": "Raw protobuf (hex / base64) → field tree",
+  "OpenAPI / Swagger → Tài liệu API": "OpenAPI / Swagger → API docs",
+  "cURL → Python requests (che token / cookie)": "cURL → Python requests (token / cookie masked)", "Chứng chỉ X.509: chuỗi 2 cert + 1 cert hết hạn + khoá riêng": "X.509 certificates: a 2-cert chain + 1 expired cert + a private key",
+  "Protobuf thô (hex) → cây field": "Raw protobuf (hex) → field tree", "OpenAPI Pet Store → Tài liệu API (lọc, $ref vòng)": "OpenAPI Pet Store → API docs (filter, circular $ref)",
+});
+// English strings for phase 14e (main page): Git conflict scan / commands / status bar, patch op label and demos — keyed by the Vietnamese source.
+I18n.add({
+  "Conflict Git: 2 khối (1 kiểu diff3) + Markdown có “=======” không phải conflict": "Git conflict: 2 blocks (1 diff3) + Markdown whose “=======” is not a conflict",
+  "Patch 2 file → áp vào tab (1 hunk lệch 3 dòng)": "2-file patch → apply to tabs (1 hunk off by 3 lines)",
+  "Xem patch (unified / git diff) + áp vào tab": "View patch (unified / git diff) + apply to a tab",
+  "Tab này không có conflict Git.": "This tab has no Git conflict.",
+  "Conflict {k}/{n} — dòng {l}.": "Conflict {k}/{n} — line {l}.",
+  "Đặt con trỏ trong một khối conflict trước.": "Put the cursor inside a conflict block first.",
+  "✔ {what}: {n} conflict — còn {left} · Ctrl+Z để hoàn tác.": "✔ {what}: {n} conflict — {left} left · Ctrl+Z to undo.",
+  "Conflict Git: {a} ⇄ {b}": "Git conflict: {a} ⇄ {b}",
+  "So sánh: xuất .patch (View 1 cũ → View 2 mới, unified)": "Compare: export .patch (View 1 old → View 2 new, unified)",
+  "Conflict Git: tới conflict kế": "Git conflict: next conflict",
+  "Conflict Git: về conflict trước": "Git conflict: previous conflict",
+  "Conflict Git: Accept Current (khối ở con trỏ)": "Git conflict: Accept Current (block at the cursor)",
+  "Conflict Git: Accept Incoming (khối ở con trỏ)": "Git conflict: Accept Incoming (block at the cursor)",
+  "Conflict Git: Accept Both (khối ở con trỏ)": "Git conflict: Accept Both (block at the cursor)",
+  "Conflict Git: Accept all current": "Git conflict: Accept all current",
+  "Conflict Git: Accept all incoming": "Git conflict: Accept all incoming",
+  "Conflict Git trong tab — bấm để tới conflict kế (Palette: Accept all current / incoming)": "Git conflicts in this tab — click for the next one (Palette: Accept all current / incoming)",
 });
 // Vietnamese for CodeMirror's own UI (search panel, go to line, folding); CodeMirror keys its phrases by the English text.
 const CM_PHRASES_VI = {
@@ -3736,6 +3930,27 @@ const ThemePicker = (() => {
     select.addEventListener("change", () => { apply(select.value); store.set("theme", select.value); });
   }
   return { bind, apply };
+})();
+// UI size small / medium / large: one localStorage key shared by every tool; sets html[data-ui-size] and binds every select.ui-size-pick.
+const UiSize = (() => {
+  const KEY = "web-tool.ui-size", SIZES = ["small", "medium", "large"], listeners = [];
+  const get = () => { try { const v = localStorage.getItem(KEY); return SIZES.includes(v) ? v : "medium"; } catch { return "medium"; } };
+  const picks = () => document.querySelectorAll("select.ui-size-pick");
+  function apply(v) {
+    document.documentElement.dataset.uiSize = v;
+    picks().forEach(s => { s.value = v; });
+    listeners.forEach(fn => fn(v));
+  }
+  function set(v) {
+    if (!SIZES.includes(v)) return;
+    try { localStorage.setItem(KEY, v); } catch { /* private mode: size lasts this page only */ }
+    apply(v);
+  }
+  const onChange = fn => listeners.push(fn);
+  apply(get());
+  picks().forEach(s => s.addEventListener("change", () => set(s.value)));
+  addEventListener("storage", e => { if (e.key === KEY) apply(get()); });
+  return { SIZES, get, set, onChange };
 })();
 // Phone portrait (phone-portrait-layout.css): .pane-switch buttons scroll the .pane-scroller right after them; data-pane-go jumps to a pane; ⋯ opens the header actions.
 const PhoneLayout = (() => {
@@ -4808,6 +5023,9 @@ const VendorPaths = (() => {
     syntaxCheck: "vendor/syntax-check-parsers-1/syntax-check-parsers.min.js",
     prettier: P_DIR + "standalone.js",
     isoGit: "vendor/isomorphic-git-1.44.11/isomorphic-git-with-buffer.min.js",
+    sqljs: "vendor/sqljs-1.16.0/sql-wasm-base64.js",
+    sheetjs: "vendor/sheetjs-mini-0.20.3/xlsx-mini.js",
+    mammoth: "vendor/mammoth-1.13.0/mammoth-browser.js",
     extras: "one-editor-extras.js",
   };
   for (const p of ["babel", "estree", "typescript", "postcss", "html", "markdown", "yaml", "graphql"]) PATHS["prettier-" + p] = P_DIR + "plugins/" + p + ".js";
@@ -4888,8 +5106,8 @@ const HexDump = (() => {
     return rows.join("\n") + "\n";
   }
 
-  async function ofFile(file) {
-    return format(new Uint8Array(await file.slice(0, LIMIT).arrayBuffer()), file.size);
+  async function ofFile(file, limit = LIMIT) {
+    return format(new Uint8Array(await file.slice(0, limit).arrayBuffer()), file.size);
   }
 
   return { format, ofFile, LIMIT };
@@ -4929,6 +5147,46 @@ const NameMatch = (() => {
   }
 
   return { fold, filter, seek, range };
+})();
+// Pure (node test): what a pasted text is — JWT, cURL, cron, long URL, Base64 (UTF-8 / gzip), PEM, FIX, SWIFT MT, epoch, minified JSON / XML, OpenAPI — on its first 64 KB.
+const PasteDetect = (() => {
+  const HEAD = 65536;
+  const atobSafe = s => { try { return atob(s); } catch { return null; } };
+  const printable = s => { let bad = 0; for (let i = 0; i < s.length; i++) { const c = s.charCodeAt(i); if (c < 9 || (c > 13 && c < 32) || c === 127) bad++; } return bad <= s.length * 0.02; };
+  // A cut sample may end inside a multi-byte character, so it is decoded leniently.
+  function utf8(bin, cut) { try { return new TextDecoder("utf-8", { fatal: !cut }).decode(Uint8Array.from(bin, c => c.charCodeAt(0))); } catch { return null; } }
+  // 2001–2040 only, no leading 0: a 10-digit phone / account number is not a date.
+  const epochIso = n => { const ms = n.length === 13 ? +n : +n * 1000; return n[0] !== "0" && ms >= 978307200000 && ms < 2240611200000 ? new Date(ms).toISOString() : null; };
+  const NAME = "(?:JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC|MON|TUE|WED|THU|FRI|SAT|SUN)", TOKEN = `(?:[\\d*?/,LW#-]+|${NAME}(?:[-,]${NAME})*)`;
+  const CRON = new RegExp(`^${TOKEN}(?:\\s+${TOKEN}){4,6}$`, "i");
+
+  // → { kind, label, lang?, op?, steps?, info? } or null; label is the Vietnamese name shown in "Phát hiện {label}".
+  function detect(text) {
+    if (typeof text !== "string") return null;
+    const t = text.slice(0, HEAD).trim(), one = !/\n/.test(t);
+    if (t.length < 6) return null;
+    if (one && /^eyJ[\w-]{4,}\.eyJ[\w-]*\.[\w-]*$/.test(t)) return { kind: "jwt", label: "JWT", op: "jwt" };
+    if (/^-----BEGIN [A-Z0-9 ]+-----/.test(t)) return { kind: "pem", label: /PRIVATE KEY/.test(t.slice(0, 80)) ? "khoá riêng PEM" : "PEM (chứng chỉ / khoá)", op: "x509" };
+    if (/^curl(?:\.exe)?\s/i.test(t)) return { kind: "curl", label: "lệnh cURL", lang: "Shell", op: "curl-convert" };
+    if (/^(?:[^\n]*?[\x01|^])?8=FIX[\w.]*[\x01|^][\s\S]*?35=/.test(t.slice(0, 2000))) return { kind: "fix", label: "message FIX", lang: "FIX", op: "fix-detail" };
+    if (/^\{1:F0\d/.test(t)) return { kind: "swift", label: "SWIFT MT (ISO 15022)", lang: "SWIFT MT", op: "swift-detail" };
+    if (/^(?:openapi:\s*["']?3\.|swagger:\s*["']?2\.)/m.test(t.slice(0, 4000)) || /^\{\s*"(?:openapi|swagger)"\s*:\s*"[23]\./.test(t)) return { kind: "openapi", label: "OpenAPI / Swagger", lang: t[0] === "{" ? "JSON" : "YAML", op: "openapi-doc" };
+    if (one && /^https?:\/\/\S+\?\S+=/.test(t) && t.length >= 60) return { kind: "url", label: "URL có query", op: "url-parts" };
+    if (one && (/^@(?:yearly|annually|monthly|weekly|daily|hourly)$/.test(t) || (CRON.test(t) && /[*?/]/.test(t)))) return { kind: "cron", label: "biểu thức cron", op: "cron" };
+    if (one && /^\d{10}(?:\d{3})?$/.test(t)) { const iso = epochIso(t); if (iso) return { kind: "epoch", label: "epoch", info: iso }; }
+    if (one && t.length >= 120 && /^[[{]/.test(t)) { try { JSON.parse(t); return { kind: "json", label: "JSON 1 dòng", lang: "JSON", op: "json-pretty" }; } catch { /* not JSON */ } }
+    if (t.length >= 120 && /^<[?!\w]/.test(t) && t.split("\n").length <= 2 && /<\/[\w:.-]+>\s*$/.test(t)) return { kind: "xml", label: /^<!doctype html|^<html/i.test(t) ? "HTML 1 dòng" : "XML 1 dòng", lang: /^<!doctype html|^<html/i.test(t) ? "HTML" : "XML", op: "format" };
+    const b = t.replace(/\s+/g, "");
+    if (b.length >= 16 && b.length % 4 === 0 && /^[A-Za-z0-9+/]+={0,2}$/.test(b) && /[A-Z]/.test(b) && /[a-z0-9+/]/.test(b)) {
+      const bin = atobSafe(b.slice(0, 8192));
+      if (bin && bin.charCodeAt(0) === 0x1f && bin.charCodeAt(1) === 0x8b) return { kind: "base64", label: "Base64 (gzip)", op: "recipe", steps: [{ op: "b64dec" }, { op: "gunzip" }] };
+      const s = bin && utf8(bin, b.length > 8192);
+      if (s && printable(s)) return { kind: "base64", label: "Base64 (UTF-8)", op: "recipe", steps: [{ op: "b64dec" }] };
+    }
+    return null;
+  }
+
+  return { detect, HEAD };
 })();
 // Recycle bin rules (ADR #27): per-delete cap, total cap (oldest go first), expiry after 30 days and "a (2).txt" names when restoring onto a taken name.
 const TrashQuota = (() => {
@@ -5239,11 +5497,11 @@ const LangDetect = (() => {
     "Scala": "scala", "Groovy": "groovy gradle", "Lua": "lua", "Perl": "pl pm", "R": "r", "Dart": "dart", "VB.NET": "vb",
     "Shell": "sh bash zsh ksh", "PowerShell": "ps1 psm1 psd1", "Dockerfile": "dockerfile", "TOML": "toml",
     "Properties files": "properties ini cfg conf env", "diff": "diff patch", "ProtoBuf": "proto", "Vue": "vue",
-    "Mermaid": "mmd mermaid", "PlantUML": "puml plantuml pu iuml", "D2": "d2", "DBML": "dbml", "Structurizr": "dsl", "Graphviz": "dot gv", "FIX": "fix",
+    "Mermaid": "mmd mermaid", "PlantUML": "puml plantuml pu iuml", "D2": "d2", "DBML": "dbml", "Structurizr": "dsl", "Graphviz": "dot gv", "FIX": "fix", "SWIFT MT": "fin",
     "CSV": "csv", "TSV": "tsv tab", "Log": "log", "GraphQL": "graphql gql", [PLAIN]: "txt text",
   };
   const NAMES = { dockerfile: "Dockerfile", jenkinsfile: "Groovy", gemfile: "Ruby", rakefile: "Ruby", ".env": "Properties files", ".editorconfig": "Properties files", ".gitignore": PLAIN };
-  const NO_HIGHLIGHT = new Set(["Mermaid", "PlantUML", "D2", "DBML", "Structurizr", "Graphviz", "FIX", "CSV", "TSV", "Log", "GraphQL", PLAIN]);
+  const NO_HIGHLIGHT = new Set(["Mermaid", "PlantUML", "D2", "DBML", "Structurizr", "Graphviz", "FIX", "SWIFT MT", "CSV", "TSV", "Log", "GraphQL", PLAIN]);
   const BY_EXT = {}, ALIAS = {};
   for (const [id, exts] of Object.entries(EXT)) {
     ALIAS[id.toLowerCase()] = id;
@@ -5289,6 +5547,7 @@ const LangDetect = (() => {
     Structurizr: [[/^\s*workspace\b[^{\n]*\{/gm, 4, 1], [/^\s*(?:model|views)\s*\{/gm, 2, 2], [/=\s*(?:person|softwareSystem|container)\b/g, 2]],
     Graphviz: [[/^\s*(?:strict\s+)?(?:di)?graph(?:[ \t]+(?:"[^"\n]*"|[\w.]+))?\s*\{/gm, 6, 1]],
     FIX: [[/(?:^|\cA|\|)8=FIXT?\.\d\.\d(?:\cA|\|)/gm, 6, 1], [/(?:\cA|\|)35=\w{1,2}(?:\cA|\|)/g, 2, 1]],
+    "SWIFT MT": [[/^\{1:F0\d[A-Z0-9]{12}/gm, 6, 1], [/^:16[RS]:\w+/gm, 1, 2]],
     DBML: [[/^\s*Table\s+[\w."]+(?:\s+as\s+\w+)?\s*(?:\[[^\]]*\])?\s*\{/gm, 3], [/^\s*Ref\s*\w*\s*:/gm, 2], [/\[(?:pk|primary key|not null|increment|unique|ref:)[^\]]*\]/gi, 1], [/^\s*Enum\s+[\w."]+\s*\{/gm, 2]],
     D2: [[/^\s*direction:\s*(?:right|down|left|up)\s*$/gm, 4, 1], [/^\s*[\w.]+\.(?:shape|style\.[\w-]+|icon):\s*\S/gm, 2], [/^\s*shape:\s*\w+/gm, 2], [/^\s*[\w ."]+?\s*(?:<->|->|--)\s*[\w ."]+?(?::\s*.*)?$/gm, 1]],
     Markdown: [[/^#{1,6}\s+\S/gm, 2, 2], [/^\s*(?:[-*+]|\d+\.)\s+\S/gm, 1], [/\[[^\]\n]+\]\([^)\s]+\)/g, 2], [/^```/gm, 2], [/^>\s/gm, 1], [/\*\*[^*\n]+\*\*/g, 1]],
@@ -5324,6 +5583,7 @@ const LangDetect = (() => {
     if (s.startsWith("<?php")) return "PHP";
     if (/^<\?xml|^<svg[\s>]/i.test(s)) return "XML";
     if (s.startsWith("<")) return Detect.markup(s) === "html" ? "HTML" : "XML";
+    if (/^\{1:F0\d/.test(s)) return "SWIFT MT";
     if (looksJson(s)) return "JSON";
     // Short lines keep the overlapping quantifiers in RULES linear (one 20k-char line took ~0.3 s).
     const sample = t.split("\n", 400).map(l => l.slice(0, 400)).join("\n"), score = {};
@@ -5363,7 +5623,7 @@ const LangDetect = (() => {
     return " ".repeat(best ? +best[0] : 2);
   }
 
-  const ids = [PLAIN, ...Object.keys(EXT).filter(k => k !== PLAIN).sort((a, b) => a.localeCompare(b))];
+  const ids = [PLAIN, ...Object.keys(EXT).filter(k => k !== PLAIN).sort(new Intl.Collator().compare)];
   const highlighter = id => NO_HIGHLIGHT.has(id) || !Object.hasOwn(EXT, id) ? "" : id;
   const extOf = id => Object.hasOwn(EXT, id) ? EXT[id].split(" ")[0] : "txt";
 
@@ -5411,17 +5671,28 @@ const OutputOps = (() => {
     "translate": { label: "Dịch", group: "Dịch", lang: same, live: d => Translate.liveOn(d), pane: true, restore: d => Translate.restored(d), run: (t, c) => Translate.run(t, c) },
     "filter": { label: "Lọc dòng (log)", group: "Log", lang: same, live: true, pane: true, run: async (t, c) => { await DataOps.load(); return LineFilter.run(t, c); } },
     "fix-detail": { label: "FIX → Chi tiết message", group: "Log", lang: "JSON", live: true, pane: true, run: (t, c) => FixDetailOp.run(t, c) },
+    "fix-lifecycle": { label: "FIX → Vòng đời lệnh + sơ đồ", group: "Log", lang: "Markdown", live: true, pane: true, run: power("fixLifecycle") },
+    "log-merge": { label: "Gộp log theo thời gian + histogram", group: "Log", lang: "Log", live: false, pane: true, run: power("logMerge") },
+    "swift-detail": { label: "SWIFT MT → Chi tiết + kiểm cấu trúc", group: "Log", lang: "JSON", live: true, pane: true, run: power("swiftDetail") },
     "tree": { label: "Cây JSON / XML", group: "Dữ liệu", lang: "Plain Text", live: true, pane: true, run: (t, c) => DataOps.tree(t, c) },
     "query": { label: "Truy vấn JSONPath / XPath", group: "Dữ liệu", lang: "JSON", live: true, pane: true, run: (t, c) => DataOps.query(t, c) },
     "jwt": { label: "JWT decode (không kiểm chữ ký)", group: "Công cụ dev", lang: "JSON", live: true, pane: true, restore: d => DevReport.restore(d), run: t => DevReport.jwt(t) },
     "url-parts": { label: "URL → thành phần + bảng query", group: "Công cụ dev", lang: "JSON", live: true, pane: true, restore: d => DevReport.restore(d), run: t => DevReport.url(t) },
     "regex": { label: "Regex tester (cú pháp JavaScript)", group: "Công cụ dev", lang: "JSON", live: true, pane: true, run: power("regex") },
     "cron": { label: "Cron → giải thích + 10 lần chạy kế", group: "Công cụ dev", lang: "Markdown", live: true, run: power("cron") },
+    "curl-convert": { label: "cURL ⇄ code (fetch · axios · Go · C# · Python · PowerShell · .http)", group: "Công cụ dev", lang: c => PowerTools.state(c.id, "curl-convert").lang || "JavaScript", live: true, pane: true, run: power("curlConvert") },
+    "x509": { label: "Chứng chỉ X.509 (PEM / DER) → chi tiết", group: "Công cụ dev", lang: "Markdown", live: true, pane: true, run: power("x509") },
+    "protobuf": { label: "Protobuf thô (hex / base64) → cây field", group: "Công cụ dev", lang: "Plain Text", live: true, run: power("protobuf") },
+    "openapi-doc": { label: "OpenAPI / Swagger → Tài liệu API", group: "Công cụ dev", lang: "Markdown", live: true, pane: true, run: power("openapiDoc") },
+    "patch-view": { label: "Xem patch (unified / git diff) + áp vào tab", group: "Công cụ dev", lang: "Markdown", live: true, pane: true, run: power("patchView") },
     "invisible": { label: "Tìm ký tự vô hình / chữ giống Latin", group: "Công cụ dev", lang: "Plain Text", live: true, pane: true, run: power("invisible") },
     "recipe": { label: "Recipe biến đổi (kiểu CyberChef)", group: "Công cụ dev", lang: "Plain Text", live: true, pane: true, run: power("recipe") },
     "sql-insert": { label: "CSV / JSON → SQL INSERT", group: "Chuyển đổi", lang: "SQL", live: true, run: power("sqlInsert") },
     "sql-update": { label: "CSV / JSON → SQL UPDATE … WHERE khoá", group: "Chuyển đổi", lang: "SQL", live: true, run: power("sqlUpdate") },
     "json-schema": { label: "JSON → JSON Schema (2020-12)", group: "Sinh kiểu từ JSON", lang: "JSON", live: true, run: power("schema") },
+    "sql-query": { label: "SQL trên các tab CSV / JSON · file SQLite", group: "Dữ liệu", lang: "CSV", live: false, pane: true, run: power("sqlQuery") },
+    "fake-data": { label: "Dữ liệu giả (JSON Schema / theo cột)", group: "Dữ liệu", lang: c => PowerTools.state(c.id, "fake-data").v?.format === "csv" ? "CSV" : "JSON", live: true, pane: true, run: power("fakeData") },
+    "office": { label: "Xem xlsx / docx (chỉ đọc)", group: "Dữ liệu", lang: "CSV", live: false, pane: true, run: power("office") },
     "syntax-check": { label: "Kiểm cú pháp (không chạy code)", group: "Chạy code", lang: "Plain Text", live: d => { const s = Docs.get(d.link.src) || d; return (s.state ? s.state.doc.length : s.text.length) <= CodeLint.LIVE_MAX; }, pane: true, run: power("syntaxCheck") },
     "run-code": { label: "Chạy HTML / JS (sandbox)", group: "Chạy code", lang: "Plain Text", live: d => PowerTools.state(d.link.src, "run-code").live === true, pane: true, run: power("run") },
     "code-image": { label: "Code → ảnh (PNG / SVG)", group: "Xuất", lang: "SVG", live: true, pane: true, run: power("codeImage") },
@@ -6540,6 +6811,155 @@ TODO: write the upgrade guide
       } },
   });
 })();
+// Phase 14a demos: profile backup file, sticky scroll, smart paste; content is fake and in English.
+(() => {
+  const t = (n, text) => ({ n, l: "", t: text });
+  // Writing aids are installed once the page is ready (after the first paint).
+  const whenReady = fn => { const go = () => document.body.classList.contains("ready") ? fn() : setTimeout(go, 100); go(); };
+  const b64u = s => btoa(s).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+  const PROFILE = JSON.stringify({ app: "one-editor-profile", version: 1, created: "2026-11-25T09:00:00.000Z",
+    prefs: { font: 14, sticky: true, keys: "vscode" },
+    meta: { snippets: [{ prefix: "ordlog", body: "console.log(\"order\", ${1:id});", lang: "JavaScript", desc: "log an order" }], macros: {}, replaceSets: [], recipes: [{ name: "b64 → text", steps: [{ op: "b64dec" }] }],
+      groups: [{ id: "g-demo", name: "Desk", items: [{ kind: "note", id: "note-demo-1" }] }], pinned: [{ kind: "note", id: "note-demo-1" }], tags: {} },
+    notes: [{ id: "note-demo-1", kind: "note", name: "desk-checklist.md", lang: "Markdown", text: "# Desk checklist\n\n- open the session\n- check limits\n", updated: 1764061200000 }] }, null, 2);
+
+  function body(n) {
+    const out = [];
+    for (let i = 1; i <= n; i++) out.push(`      const step${i} = book.levels[${i % 5}]?.qty ?? 0;`, `      total += step${i} * price;`);
+    return out.join("\n");
+  }
+  const ENGINE_TS = `// Sticky scroll demo: scroll down — the class / method / if lines stay pinned at the top.
+export class MatchingEngine {
+  private books = new Map<string, OrderBook>();
+
+  constructor(private readonly venue: string) {}
+
+  public reprice(symbol: string, price: number): number {
+    const book = this.books.get(symbol);
+    let total = 0;
+    if (book) {
+      for (const side of ["BUY", "SELL"]) {
+${body(40)}
+      }
+    }
+    return total;
+  }
+}
+`;
+  const GUIDE_MD = ["# Operations guide", "", "## Market open", "", ...Array.from({ length: 30 }, (x, i) => `- Pre-open check ${i + 1}: confirm limits and sessions.`), "", "### Auction", "",
+    ...Array.from({ length: 30 }, (x, i) => `Auction note ${i + 1}: orders queue until the uncross.`), "", "## Market close", "", "Reconcile fills.", ""].join("\n");
+
+  function scrollTo(line) {
+    whenReady(() => {
+      for (const g of Views.groups.slice(0, Views.count)) if (g.active) {
+        const st = g.view.state, pos = st.doc.line(Math.min(line, st.doc.lines)).from;
+        g.view.dispatch({ effects: CM.view.EditorView.scrollIntoView(pos, { y: "start" }) });
+      }
+    });
+  }
+
+  const JWT = b64u(JSON.stringify({ alg: "HS256", typ: "JWT" })) + "." + b64u(JSON.stringify({ sub: "DEMO-001", name: "Demo Trader", role: "dealer", iat: 1764061200, exp: 1764064800 })) + ".c2lnbmF0dXJlLW5vdC1jaGVja2Vk";
+  const B64 = btoa("Settlement batch DEMO-42 closed: 128 trades, 0 breaks.\n");
+
+  Object.assign(DEMOS, {
+    "profile-backup": { label: "Sao lưu profile: file mẫu + ⚙ Dữ liệu đã lưu", payload: () => ({ v: 1, views: [[t("one-editor-profile-sample.json", PROFILE)], []] }),
+      after: () => whenReady(() => { SettingsTab.open("data", 1); StatusBar.msg(T("Mẫu: file profile ở View 1 (JSON, không nén). ⚙ Dữ liệu đã lưu ▸ ⬇ Xuất profile / ⬆ Nhập profile — nhập sẽ tải lại trang."), "good"); }) },
+    "sticky-scroll": { label: "Sticky scroll: class / method / heading dính đầu màn hình", payload: () => ({ v: 1, views: [[t("matching-engine.ts", ENGINE_TS)], [t("operations-guide.md", GUIDE_MD)]] }), after: () => scrollTo(45) },
+    "smart-paste": { label: "Dán thông minh: JWT + Base64 ⇒ gợi ý phép ▶", payload: () => ({ v: 1, views: [[t("pasted-token", JWT + "\n")], [t("pasted-blob", B64 + "\n")]] }),
+      after: () => whenReady(() => SmartPaste.detectVisible()) },
+  });
+})();
+// Phase 14b demos: SQL over 2 CSV tabs, a SQLite file and an xlsx made at run time (extras), fake data from a JSON Schema; content is fake and in English.
+(() => {
+  const t = (n, text) => ({ n, l: "", t: text });
+  const ORDERS = "order_id,customer_id,symbol,side,qty,price\n1001,C01,ACME,BUY,500,21.40\n1002,C02,BOLT,SELL,1200,8.15\n1003,C01,CRUX,BUY,300,54.90\n1004,C03,ACME,SELL,200,21.75\n1005,C02,DYNA,BUY,800,12.05\n1006,C04,EVOX,BUY,100,99.50\n1007,C01,BOLT,BUY,700,8.20\n";
+  const CUSTOMERS = "customer_id,name,tier,account\nC01,Alex Carter,gold,007001\nC02,Blair Novak,silver,007002\nC03,Casey Lin,silver,007003\nC04,Drew Patel,bronze,007004\n";
+  const JOIN = "-- Each open CSV tab is a table: orders, customers\nSELECT c.name, c.tier, COUNT(*) AS orders, SUM(o.qty * o.price) AS notional\nFROM orders o\nJOIN customers c ON c.customer_id = o.customer_id\nGROUP BY c.name, c.tier\nORDER BY notional DESC;\n";
+  const SCHEMA = JSON.stringify({
+    $schema: "https://json-schema.org/draft/2020-12/schema", title: "Order", type: "object", required: ["orderId", "account", "symbol", "side", "qty", "price", "createdAt"],
+    properties: {
+      orderId: { type: "string", format: "uuid" }, account: { type: "string", pattern: "^DEMO[0-9]{6}$" }, symbol: { $ref: "#/$defs/ticker" },
+      side: { enum: ["BUY", "SELL"] }, qty: { type: "integer", minimum: 100, maximum: 10000, multipleOf: 100 }, price: { type: "number", minimum: 1, maximum: 250 },
+      createdAt: { type: "string", format: "date-time" }, trader: { type: "object", properties: { name: { type: "string" }, email: { type: "string", format: "email" } }, required: ["name"] },
+      tags: { type: "array", items: { type: "string", enum: ["algo", "care", "dma", "block"] }, maxItems: 2 },
+    },
+    $defs: { ticker: { type: "string", pattern: "^[A-Z]{3,4}$" } },
+  }, null, 2) + "\n";
+  const extras = fn => () => PowerTools.use(fn);
+
+  Object.assign(DEMOS, {
+    "sql-join": { label: "SQL: JOIN 2 tab CSV (sql.js trong Worker)", payload: () => ({ v: 1, views: [[t("orders.csv", ORDERS), t("customers.csv", CUSTOMERS)], []], run: "sql-query", opts: { query: JOIN } }) },
+    "sqlite-db": { label: "SQLite: mở file .db mẫu (bảng + view)", open: extras(() => DataDemos.sqlite()) },
+    "fake-data-schema": { label: "Dữ liệu giả từ JSON Schema (seed cố định)", payload: () => ({ v: 1, views: [[t("order.schema.json", SCHEMA)], []], run: "fake-data", opts: { n: 25, seed: "demo", format: "json", mode: "schema" } }) },
+    "xlsx-sheets": { label: "xlsx: workbook 3 sheet (tạo bằng SheetJS)", open: extras(() => DataDemos.xlsx()) },
+  });
+})();
+// Phase 14c demo labels; content: PowerDemos in tools/one-editor-extras.js (js/log/log-domain-demos.js).
+(() => {
+  const LIST = { "log-merge": "Gộp 3 log lệch giờ + histogram (có stack trace)", "fix-lifecycle": "FIX: vòng đời lệnh New → Replace → Partial → Filled (+1 chuyển lạ)", "swift-mt540": "SWIFT MT540: chi tiết + kiểm 16R/16S (1 bản lỗi)" };
+  for (const [k, label] of Object.entries(LIST)) DEMOS[k] = { label, lazy: true };
+})();
+// Phase 14d demo labels; content: PowerDemos in tools/one-editor-extras.js (js/devtools/curl-x509-protobuf-openapi-demos.js).
+(() => {
+  const LIST = { "curl-convert": "cURL → Python requests (che token / cookie)", "x509-pem": "Chứng chỉ X.509: chuỗi 2 cert + 1 cert hết hạn + khoá riêng", "protobuf-raw": "Protobuf thô (hex) → cây field", "openapi-petstore": "OpenAPI Pet Store → Tài liệu API (lọc, $ref vòng)" };
+  for (const [k, label] of Object.entries(LIST)) DEMOS[k] = { label, lazy: true };
+})();
+// Phase 14e demo labels; content: PowerDemos in tools/one-editor-extras.js (js/editor/git-conflict-patch-demos.js).
+(() => {
+  const LIST = { "git-conflict": "Conflict Git: 2 khối (1 kiểu diff3) + Markdown có “=======” không phải conflict", "patch-apply": "Patch 2 file → áp vào tab (1 hunk lệch 3 dòng)" };
+  for (const [k, label] of Object.entries(LIST)) DEMOS[k] = { label, lazy: true };
+})();
+// Git conflict blocks: whole-line markers <<<<<<< · ||||||| (diff3 base) · ======= · >>>>>>>, a block counts only when all its markers are there in order (a setext "=======" heading alone never matches).
+const GitConflict = (() => {
+  const START = /^<{7}(?: |$)/, BASE = /^\|{7}(?: |$)/, MID = /^={7}$/, END = /^>{7}(?: |$)/;
+  const has = text => /^<{7}(?: |\r?$)/m.test(text) && /^>{7}(?: |\r?$)/m.test(text);
+
+  // → [{ from, to, line, endLine, a, b, ours: [from, to], base: [from, to] | null, theirs: [from, to] }] — char offsets, `to` past the end marker's line break.
+  function find(text, max = 1000) {
+    const out = [];
+    if (!has(text)) return out;
+    let pos = 0, line = 0, cur = null;
+    for (;;) {
+      const nl = text.indexOf("\n", pos), end = nl < 0 ? text.length : nl, next = nl < 0 ? text.length : nl + 1;
+      let s = text.slice(pos, end);
+      if (s.endsWith("\r")) s = s.slice(0, -1);
+      line++;
+      if (START.test(s)) cur = { from: pos, line, a: s.slice(8).trim(), oursFrom: next, stage: 1 };
+      else if (cur?.stage === 1 && BASE.test(s)) Object.assign(cur, { oursTo: pos, baseFrom: next, stage: 2 });
+      else if (cur && cur.stage < 3 && MID.test(s)) {
+        if (cur.stage === 1) cur.oursTo = pos; else cur.baseTo = pos;
+        Object.assign(cur, { theirsFrom: next, stage: 3 });
+      } else if (cur?.stage === 3 && END.test(s)) {
+        out.push({ from: cur.from, to: next, line: cur.line, endLine: line, a: cur.a, b: s.slice(8).trim(), ours: [cur.oursFrom, cur.oursTo], base: cur.baseFrom === undefined ? null : [cur.baseFrom, cur.baseTo], theirs: [cur.theirsFrom, pos] });
+        cur = null;
+        if (out.length >= max) break;
+      }
+      if (nl < 0) break;
+      pos = next;
+    }
+    return out;
+  }
+
+  // choice: "current" (ours) · "incoming" (theirs) · "both" (ours then theirs) · "base".
+  function pick(text, b, choice) {
+    const part = r => r ? text.slice(r[0], r[1]) : "";
+    if (choice === "incoming") return part(b.theirs);
+    if (choice === "both") return part(b.ours) + part(b.theirs);
+    if (choice === "base") return part(b.base);
+    return part(b.ours);
+  }
+
+  // Every block resolved the same way → the changes (ascending, original offsets) for one transaction.
+  const changes = (text, blocks, choice) => blocks.map(b => ({ from: b.from, to: b.to, insert: pick(text, b, choice) }));
+
+  function resolveAll(text, choice) {
+    let out = "", at = 0;
+    for (const c of changes(text, find(text), choice)) { out += text.slice(at, c.from) + c.insert; at = c.to; }
+    return out + text.slice(at);
+  }
+
+  return { has, find, pick, changes, resolveAll };
+})();
 // Bookmark line lists: sorted unique line numbers, and the text of given lines read from plain text without splitting it all.
 const BookmarkLines = (() => {
   const clean = lines => Array.isArray(lines) ? [...new Set(lines)].filter(n => Number.isInteger(n) && n > 0).sort((a, b) => a - b) : [];
@@ -6607,6 +7027,9 @@ const NotesDb = (() => {
     return true;
   }
 
+  // Saved notes only (profile backup); open file / temp tabs are not part of a profile.
+  const notesAll = async () => ok ? (await req(db.transaction("docs", "readonly").objectStore("docs").getAll())).filter(r => r?.kind === "note") : [];
+
   async function getMeta(key) {
     if (!ok) return undefined;
     try { return await req(db.transaction("meta", "readonly").objectStore("meta").get(key)); } catch (e) { fail(e); return undefined; }
@@ -6659,7 +7082,7 @@ const NotesDb = (() => {
     await done(t);
   }
 
-  return { open, loadAll, save, getMeta, putMeta, delMeta, clear, histList, histText, histWrite, trashList, trashData, trashWrite, get ok() { return ok; }, get error() { return error; } };
+  return { open, loadAll, save, notesAll, getMeta, putMeta, delMeta, clear, histList, histText, histWrite, trashList, trashData, trashWrite, get ok() { return ok; }, get error() { return error; } };
 })();
 // Explorer recycle bin over NotesDb (ADR #27): a delete first copies the items into IndexedDB and waits for the transaction to complete — only then does the caller remove them from disk; restore writes them back.
 const TrashStore = (() => {
@@ -7231,6 +7654,7 @@ const Symbols = (() => {
 
   // → [{ label, kind, line, pos }] in document order.
   function list(state) {
+    if (/^\s*\{1:F0\d/.test(state.sliceDoc(0, 64))) return SwiftMarks.outline(state.doc.toString()).map(s => ({ label: s.label, kind: "H" + (s.depth + 1), line: s.line, pos: state.doc.line(s.line).from }));
     let out = fromTree(state);
     if (!out.length) out = fromLines(state);
     return out.map(s => Object.assign(s, { line: state.doc.lineAt(s.pos).number }));
@@ -7747,7 +8171,7 @@ const TokenStyles = (() => {
 // CodeMirror 6 editor config shared by every tab: compartments for language / wrap / theme / UI phrases / read-only so settings change without losing undo history.
 const CmSetup = (() => {
   let C = null, themes = null, onUpdate = null, minimap = null, guides = null, words = null;
-  const comp = {}, extra = { vim: [], keys: [], aids: [] };
+  const comp = {}, extra = { vim: [], keys: [], aids: [], writing: [] };
   const settings = { wrap: true, minimap: false, guides: false, hidden: false, numHover: true, lint: true, words: true };
 
   const isDark = () => {
@@ -7776,7 +8200,7 @@ const CmSetup = (() => {
 
   function init() {
     C = globalThis.CM;
-    for (const k of ["lang", "wrap", "theme", "phrases", "ro", "minimap", "guides", "compare", "hidden", "numHover", "lint", "words", "vim", "keys", "aids"]) comp[k] = new C.state.Compartment();
+    for (const k of ["lang", "wrap", "theme", "phrases", "ro", "minimap", "guides", "compare", "hidden", "numHover", "lint", "words", "vim", "keys", "aids", "writing"]) comp[k] = new C.state.Compartment();
     themes = { light: makeTheme(false), dark: makeTheme(true) };
     CompareDeco.init();
     MixedEol.init();
@@ -7796,7 +8220,7 @@ const CmSetup = (() => {
     comp.numHover.reconfigure(settings.numHover ? NumHover.extension() : []),
     comp.lint.reconfigure(settings.lint ? DataLint.extension() : []),
     comp.words.reconfigure(settings.words ? wordCompletion() : []),
-    ...["vim", "keys", "aids"].map(k => comp[k].reconfigure(extra[k])),
+    ...["vim", "keys", "aids", "writing"].map(k => comp[k].reconfigure(extra[k])),
   ];
 
   // Indent guides from the lazily loaded bundle; colours follow the page theme tokens.
@@ -7814,16 +8238,16 @@ const CmSetup = (() => {
   function extensions(readOnly, indent) {
     const { view: V, state: S, language: L, commands: K, search: F, autocomplete: A } = C;
     return [
-      comp.vim.of([]), comp.keys.of([]), comp.aids.of([]),
+      comp.vim.of([]), comp.keys.of([]), comp.aids.of([]), comp.writing.of([]),
       V.lineNumbers(), V.highlightActiveLineGutter(), V.highlightSpecialChars(), K.history(), L.foldGutter(),
       V.drawSelection(), V.dropCursor(), S.EditorState.allowMultipleSelections.of(true), L.indentOnInput(),
       L.bracketMatching(), A.closeBrackets(), A.autocompletion(), V.rectangularSelection({ eventFilter: e => e.altKey && e.shiftKey }),
       V.EditorView.clickAddsSelectionRange.of(e => e.altKey || e.ctrlKey || e.metaKey), L.indentUnit.of(indent || "  "),
       V.highlightActiveLine(), F.highlightSelectionMatches(), F.search({ top: true }),
       V.keymap.of([...A.closeBracketsKeymap, ...K.defaultKeymap, ...F.searchKeymap, ...K.historyKeymap, ...L.foldKeymap, ...A.completionKeymap, K.indentWithTab]),
-      Bookmarks.extension(), ClipHistory.extension(), TokenStyles.extension(), RainbowCsv.extension(), LogFixMarks.extension(), FixHover.extension(), CompareDeco.field, MixedEol.field, comp.compare.of([]), comp.lang.of([]), comp.ro.of(readOnly ? [S.EditorState.readOnly.of(true)] : []),
+      Bookmarks.extension(), ClipHistory.extension(), TokenStyles.extension(), RainbowCsv.extension(), LogFixMarks.extension(), FixHover.extension(), SwiftMarks.extension(), CompareDeco.field, MixedEol.field, comp.compare.of([]), comp.lang.of([]), comp.ro.of(readOnly ? [S.EditorState.readOnly.of(true)] : []),
       ...[comp.wrap, comp.theme, comp.phrases, comp.minimap, comp.guides, comp.hidden, comp.numHover, comp.lint, comp.words].map(c => c.of([])),
-      V.EditorView.updateListener.of(u => { if (onUpdate) onUpdate(u); SearchInSelection.decorate(u.view); if (u.docChanged && u.transactions.some(tr => tr.isUserEvent("input.paste"))) PowerTools.pasted(u); }),
+      V.EditorView.updateListener.of(u => { if (onUpdate) onUpdate(u); SearchInSelection.decorate(u.view); if (u.docChanged && u.transactions.some(tr => tr.isUserEvent("input.paste"))) { PowerTools.pasted(u); SmartPaste.pasted(u); } }),
     ];
   }
 
@@ -7832,7 +8256,7 @@ const CmSetup = (() => {
   const langEffect = support => comp.lang.reconfigure(support || []);
   const compareEffect = ext => comp.compare.reconfigure(ext || []);
 
-  // Extensions the lazy extras provide (Vim, key profile, visual aids + snippets).
+  // Extensions installed after boot (Vim, key profile, visual aids + snippets, writing aids).
   const setExtra = (k, ext) => { extra[k] = ext; Views.applySettings(); };
 
   return {
@@ -7886,7 +8310,7 @@ const Docs = (() => {
       disk: init.disk && Number.isFinite(init.disk.size) && Number.isFinite(init.disk.mod) ? { size: init.disk.size, mod: init.disk.mod } : null,
       enc: [...Encoding.WRITABLE, ...Encoding.READ_ONLY].includes(init.enc) ? init.enc : "utf-8", link: init.link && typeof init.link.src === "string" ? { src: init.link.src, op: init.link.op, ...(init.link.opts && typeof init.link.opts === "object" ? { opts: init.link.opts } : {}) } : null,
       updated: +init.updated || Date.now(), pending: init.pending ?? true, scrollTop: 0, langApplied: null, pinned: !!init.pinned, hex: !!init.hex,
-      cloneOf: init.kind === "clone" ? init.cloneOf : null, marks: BookmarkLines.clean(init.marks), marksLive: false,
+      cloneOf: init.kind === "clone" ? init.cloneOf : null, marks: BookmarkLines.clean(init.marks), marksLive: false, spell: typeof init.spell === "boolean" ? init.spell : undefined,
       // File opened from a Drive / OneDrive link: where Save writes back (CloudDrive.save).
       remote: init.remote && typeof init.remote.kind === "string" ? { ...init.remote } : null,
       detected: LangDetect.detect(init.name, text),
@@ -7982,12 +8406,16 @@ const StatusBar = (() => {
   let raf = 0, storageNote = "";
   const SHORT = { note: "Ghi chú", file: "File", temp: "Tab tạm", output: "Kết quả liên kết", folder: "Folder", trash: "Thùng rác", results: "Kết quả", settings: "Cài đặt" };
   const set = (id, text) => { $(id).textContent = text; };
+  const svgIcon = id => { const s = document.createElementNS("http://www.w3.org/2000/svg", "svg"); s.setAttribute("class", "ic ic-sm"); s.setAttribute("aria-hidden", "true"); const u = document.createElementNS("http://www.w3.org/2000/svg", "use"); u.setAttribute("href", "#" + id); s.append(u); return s; };
   const words = s => (s.match(/[\p{L}\p{N}_]+/gu) || []).length;
 
   function draw() {
     raf = 0;
     const doc = Views.activeDoc(), st = doc && Views.activeView().state;
-    set("btnKeys","⌨ " + KeyProfiles.label());
+    $("btnKeys").replaceChildren(svgIcon("ic-keyboard"), " " + KeyProfiles.label());
+    const nc = Conflicts.count(doc);
+    $("stConflict").hidden = !nc;
+    if (nc) $("stConflict").replaceChildren(svgIcon("ic-git"), " " + T("{n} conflict", { n: I18n.num(nc) }));
     if (!doc) { ["stPos", "stCount", "stLint", "stSrc"].forEach(id => set(id, "")); return; }
     const main = st.selection.main, line = st.doc.lineAt(main.head), n = st.selection.ranges.length;
     // Code point under the cursor.
@@ -7995,9 +8423,15 @@ const StatusBar = (() => {
     set("stPos", T("Dòng {l}, Cột {c}", { l: I18n.num(line.number), c: I18n.num(main.head - line.from + 1) }) + (cp >= 0 ? " · U+" + cp.toString(16).toUpperCase().padStart(4, "0") : "")
       + (n > 1 ? " · " + T("{n} vùng chọn", { n }) : main.empty ? "" : " · " + T("chọn {n}", { n: I18n.num(main.to - main.from) })));
     const len = st.doc.length;
-    set("stCount", T("{l} dòng · {c} ký tự", { l: I18n.num(st.doc.lines), c: I18n.num(len) }) + (len <= 200000 ? " · " + T("{w} từ", { w: I18n.num(words(st.doc.toString())) }) : ""));
+    let count = T("{l} dòng · {c} ký tự", { l: I18n.num(st.doc.lines), c: I18n.num(len) });
+    if (len <= 200000 && Writing.prose(doc)) {
+      const w = Writing.words(st.doc.toString());
+      count += " · " + T("{w} từ · ~{m} phút đọc", { w: I18n.num(w), m: I18n.num(Writing.minutes(w)) }) + (n === 1 && !main.empty ? " · " + T("chọn {w} từ", { w: I18n.num(Writing.words(st.sliceDoc(main.from, main.to))) }) : "");
+    } else if (len <= 200000) count += " · " + T("{w} từ", { w: I18n.num(words(st.doc.toString())) });
+    set("stCount", count);
     const nl = CM.lint.diagnosticCount(st);
-    set("stLint", nl ? "⚠ " + I18n.num(nl) : "");
+    if (nl) $("stLint").replaceChildren(svgIcon("ic-alert"), " " + I18n.num(nl));
+    else set("stLint", "");
     set("stSrc", TabStrip.ICON[doc.kind] + " " + T(SHORT[doc.kind]) + (doc.kind === "output" && doc.edited ? " ✎" : "") + (doc.stale ? " · " + T("chưa đọc lại") : "") + (Docs.root(doc).diskChanged ? " · ⚠ " + T("đổi trên đĩa") : "") + (Tail.on(Docs.root(doc).id) ? " · 🔁 " + T("theo dõi") : ""));
     $("stSrc").title = T(TabStrip.sourceOf(doc));
   }
@@ -11272,8 +11706,9 @@ const LogFixMarks = (() => {
 
   function build(view) {
     const lang = langOf(view), D = CM.view.Decoration;
-    if (lang !== "Log" && lang !== "FIX") return D.none;
-    const spans = lang === "Log" ? logSpans : fixSpans, b = new CM.state.RangeSetBuilder(), doc = view.state.doc;
+    const spans = lang === "Log" ? logSpans : lang === "FIX" ? fixSpans : lang === SwiftMarks.LANG ? SwiftMarks.spans : null;
+    if (!spans) return D.none;
+    const b = new CM.state.RangeSetBuilder(), doc = view.state.doc;
     marks ??= {};
     for (const { from, to } of view.visibleRanges) {
       for (let pos = from; pos <= to;) {
@@ -11336,6 +11771,51 @@ const FixHover = (() => {
   }
 
   return { describe, extension, openInParser, load };
+})();
+// SWIFT MT tabs (main page, light): Outline by message / 16R sequence, block · tag · qualifier marks (LogFixMarks), hover ⇒ tag meaning from the dictionary in tools/one-editor-extras.js.
+const SwiftMarks = (() => {
+  const LANG = "SWIFT MT";
+  const TAG = /^:(\d{2}[A-Z]?):(?::([A-Z0-9]{4})\/[A-Z0-9]{0,8}\/)?/;
+  let ext = null;
+
+  // → [{ label, depth, line }]: each message (MT + sender) and its 16R sequences, nested (line scan, no parse).
+  function outline(text, max = 3000) {
+    const out = [], lines = text.split("\n", 200000);
+    let depth = 0;
+    for (let n = 0; n < lines.length && out.length < max; n++) {
+      const l = lines[n];
+      if (l.startsWith("{1:")) { depth = 0; const mt = /\{2:[IO](\d{3})/.exec(l); out.push({ label: "MT" + (mt ? mt[1] : "?") + " " + l.slice(6, 18), depth: 0, line: n + 1 }); }
+      else if (l.startsWith(":16R:")) out.push({ label: l.slice(5).trim(), depth: Math.min(5, ++depth), line: n + 1 });
+      else if (l.startsWith(":16S:")) depth = Math.max(0, depth - 1);
+    }
+    return out;
+  }
+
+  // [from, to, class] spans of one line, in order (pure): a field line → tag · qualifier · value; any other line → block markers.
+  function spans(text) {
+    const m = TAG.exec(text);
+    if (!m) return [...text.matchAll(/\{[1-5S]:|-?\}/g)].map(x => [x.index, x.index + x[0].length, "sw-blk"]);
+    const seq = m[1] === "16R" || m[1] === "16S", tagEnd = m[1].length + 2, out = [[0, tagEnd, seq ? "sw-seq" : "sw-tag"]];
+    if (m[2]) out.push([tagEnd, m[0].length, "sw-q"]);
+    if (text.length > m[0].length) out.push([m[0].length, text.length, seq ? "sw-seq" : "fx-v"]);
+    return out;
+  }
+
+  function extension() {
+    return ext ??= CM.view.hoverTooltip(async (view, pos) => {
+      const g = Views.groups.find(x => x.view === view), doc = g && Docs.get(g.active);
+      if (!doc || Docs.effectiveLang(doc) !== LANG) return null;
+      const line = view.state.doc.lineAt(pos), m = TAG.exec(line.text.slice(0, 400)), b2 = /\{2:[IO](\d{3})/.exec(line.text.slice(0, 400));
+      const at = m ? 0 : b2 ? b2.index : -1, end = m ? line.length : b2 ? b2.index + b2[0].length : -1;
+      if (at < 0 || pos - line.from < at || pos - line.from > end) return null;
+      let info;
+      try { await VendorPaths.load("extras"); } catch (e) { info = { title: "SWIFT", rows: [["", T("Không nạp được từ điển SWIFT ({file}).", { file: e.message })]] }; }
+      info ??= m ? SwiftDict.describe(m[1], m[2] || "", line.text.slice(m[0].length)) : SwiftDict.describeMt(b2[1]);
+      return { pos: line.from + at, end: line.from + end, above: true, create: () => ({ dom: NumHover.render(info) }) };
+    }, { hoverTime: 300 });
+  }
+
+  return { outline, spans, extension, LANG };
 })();
 // "fix-detail" op: FIX Parser's Message detail for a FIX tab; the pane lives in tools/one-editor-extras.js, loaded on first run.
 const FixDetailOp = (() => {
@@ -11562,9 +12042,9 @@ const PreviewPane = (() => {
     p.err.hidden = !v.error;
     if (v.error) {
       p.hadError = true;
-      const d = v.error.detail;
-      p.err.classList.toggle("warn", !!v.error.warn);
-      p.err.textContent = (v.error.warn ? "⚠ " : "✖ ") + v.error.message + (d && !v.error.message.includes(d) ? "\n\n" + d : "") + (p.has ? "\n\n" + (p.kind === "translate" ? T("Đang hiện bản dịch gần nhất (mờ).") : T("Đang hiện bản vẽ hợp lệ gần nhất (mờ).")) : "");
+      const d = v.error.detail, warn = !!(v.error.warn || v.error.stopped);
+      p.err.classList.toggle("warn", warn);
+      p.err.textContent = (warn ? "⚠ " : "✖ ") + v.error.message + (d && !v.error.message.includes(d) ? "\n\n" + d : "") + (p.has ? "\n\n" + (p.kind === "translate" ? T("Đang hiện bản dịch gần nhất (mờ).") : T("Đang hiện bản vẽ hợp lệ gần nhất (mờ).")) : "");
       p.body.classList.toggle("stale", p.has);
       return;
     }
@@ -11684,7 +12164,7 @@ const OutputLink = (() => {
 
   function fail(src, e) {
     const line = e.line || 0;
-    StatusBar.msg(e.message + (line ? " — " + T("bấm để tới dòng {n}", { n: line }) : ""), e.warn ? "warn" : "bad", line ? () => Views.revealLine(src, line) : null);
+    StatusBar.msg(e.message + (line ? " — " + T("bấm để tới dòng {n}", { n: line }) : ""), e.warn || e.stopped ? "warn" : "bad", line ? () => Views.revealLine(src, line) : null);
   }
 
   // quiet: live re-run (no focus change, no success message). Async ops (Prettier, sql-formatter) drop a result overtaken by a newer run.
@@ -12380,7 +12860,10 @@ const EditorMenu = (() => {
     if (pos !== null && !st.selection.ranges.some(r => pos >= r.from && pos <= r.to)) v.dispatch({ selection: { anchor: pos } });
     if (!x && !y) { const c = v.coordsAtPos(st.selection.main.head); if (c) { x = c.left; y = c.bottom; } }
     const mark = TabMenu.entry("🔖 " + T("Bookmark: bật / tắt ở dòng này"), key("bookmark"), () => BookmarkList.toggle(Docs.get(g.active)));
-    TabMenu.show([...editNodes(v), mark, sep(), ...SelectionActions.nodes(v, x, y), ...styleNodes()], x, y);
+    const d = Docs.get(g.active), spell = Writing.spellOn(d);
+    const spelling = [TabMenu.entry((spell ? "✓ " : "") + T("Kiểm chính tả English (tab này)"), key("spellToggle"), () => Writing.toggleSpell(d)),
+      ...(spell ? [TabMenu.entry(T("Gợi ý chính tả (menu trình duyệt)"), T("Shift+chuột phải"), ExplorerMenu.armNative)] : [])];
+    TabMenu.show([...editNodes(v), mark, ...spelling, sep(), ...SelectionActions.nodes(v, x, y), ...styleNodes()], x, y);
   }
 
   function openFromButton(btn) {
@@ -12399,6 +12882,16 @@ const EditorMenu = (() => {
 // Opening local files as tabs: reuse a tab already showing the same handle, > 50 MB → chunked read-only viewer, ask before showing a binary file (read-only).
 const FileOpen = (() => {
   const MAX_BYTES = 50 * 1024 * 1024;
+  // Data files with a viewer (extras): by extension, checked against the magic bytes when the head is given; "old" = .xls / .ods (not supported).
+  const SQLITE = "SQLite format 3\0", BIN_HEX = 65536;
+  function binKind(name, head) {
+    const ext = /\.([^.]+)$/.exec(name || "")?.[1].toLowerCase() || "", zip = !head || (head[0] === 0x50 && head[1] === 0x4b);
+    if (["sqlite", "sqlite3", "db"].includes(ext)) return !head || String.fromCharCode(...head.subarray(0, 16)) === SQLITE ? "sqlite" : "";
+    if (ext === "xlsx" || ext === "xlsm") return zip ? "xlsx" : "";
+    if (ext === "docx") return zip ? "docx" : "";
+    // A ".xls" that is really HTML / TSV (report exports) still opens as text.
+    return (ext === "xls" && (!head || (head[0] === 0xd0 && head[1] === 0xcf))) || (ext === "ods" && zip) ? "old" : "";
+  }
 
   async function sameOpen(handle) {
     for (const d of Docs.list()) if (d.kind === "file" && d.handle && await d.handle.isSameEntry(handle).catch(() => false)) return d;
@@ -12417,11 +12910,15 @@ const FileOpen = (() => {
     if (handle && show) RecentFiles.add(handle);
     if (dup) { if (show) Views.open(dup, Views.where(dup.id) >= 0 ? Views.where(dup.id) : gi); else Views.add(dup, gi); return dup; }
     // Binary (NUL in the first 8 KB): read-only hex of the first 1 MB, so the 50 MB text limit does not apply.
-    const head = new Uint8Array(await file.slice(0, 8192).arrayBuffer());
-    if (head.includes(0) && !Encoding.detect(head).enc.startsWith("utf-16")) {
-      if (!confirm(T("“{name}” là file nhị phân. Mở dạng hex (chỉ đọc)?", { name: file.name }))) return null;
-      const doc = Docs.create({ kind: "file", name: file.name, text: await HexDump.ofFile(file), handle, readOnly: true, hex: true, lang: LangDetect.PLAIN });
+    const head = new Uint8Array(await file.slice(0, 8192).arrayBuffer()), bin = binKind(file.name, head);
+    if (bin === "old") throw new Error(T(".xls / .ods chưa hỗ trợ — mở bằng Excel / LibreOffice rồi lưu lại thành .xlsx."));
+    if (bin || head.includes(0) && !Encoding.detect(head).enc.startsWith("utf-16")) {
+      if (!bin && !confirm(T("“{name}” là file nhị phân. Mở dạng hex (chỉ đọc)?", { name: file.name }))) return null;
+      const doc = Docs.create({ kind: "file", name: file.name, text: await HexDump.ofFile(file, bin ? BIN_HEX : undefined), handle, readOnly: true, hex: true, lang: LangDetect.PLAIN });
+      doc.file = file;
       Views.open(doc, gi);
+      // .db / .xlsx / .docx: the hex tab is the source, ▶ shows tables / SQL / the document in the other view.
+      if (bin) OutputLink.run(doc, RunOp.of(doc));
       return doc;
     }
     if (file.size > MAX_BYTES) return BigFile.open(file, gi, handle);
@@ -12461,7 +12958,7 @@ const FileOpen = (() => {
       if (perm !== "granted") { StatusBar.msg(T("Bấm vào đây để đọc lại “{name}” từ đĩa (trình duyệt cần bạn cho phép).", { name: doc.name }), "warn", retry, tip); return; }
       const file = await doc.handle.getFile();
       if (doc.bigStart != null) { await BigFile.attach(doc, file); return; }
-      const r = doc.hex ? { text: await HexDump.ofFile(file), eol: "\n", bom: false, binary: true } : await LocalFs.readText(file, doc.enc && doc.enc !== "utf-8" ? doc.enc : undefined);
+      const r = doc.hex ? { text: await HexDump.ofFile(file, binKind(doc.name) ? BIN_HEX : undefined), eol: "\n", bom: false, binary: true } : await LocalFs.readText(file, doc.enc && doc.enc !== "utf-8" ? doc.enc : undefined);
       if (!Docs.get(doc.id)) return;
       Object.assign(doc, { stale: false, disk: DiskSync.stamp(file), diskChanged: false, text: r.text, state: null, eol: r.eol, eolMixed: r.eolMixed, eolList: r.eolList, bom: r.bom, enc: r.enc, readOnly: r.binary || r.readOnly, detected: LangDetect.detect(doc.name, r.text) });
       const gi = Views.where(doc.id);
@@ -12473,7 +12970,7 @@ const FileOpen = (() => {
     } finally { doc.reloading = false; }
   }
 
-  return { open, openMany, reload };
+  return { open, openMany, reload, binKind };
 })();
 // Read-only promise fs for isomorphic-git over a FileSystemDirectoryHandle ("/" = the handle); writes fail with EROFS.
 const GitHandleFs = (() => {
@@ -12768,8 +13265,8 @@ const MyLibrary = (() => {
   const named = (list, field) => arr(list).filter(x => x && typeof x.name === "string" && x.name.trim()).slice(0, 100).map(x => ({ name: x.name.trim().slice(0, 80), [field]: arr(x[field]) }));
 
   // text → { snippets, macros: [{ name, steps }], replaceSets, recipes }; throws .code "big" | "json" | "format".
-  function parse(text) {
-    if (typeof text !== "string" || text.length > MAX_BYTES) throw fail("big");
+  function parse(text, max = MAX_BYTES) {
+    if (typeof text !== "string" || text.length > max) throw fail("big");
     let o;
     try { o = JSON.parse(text); } catch { throw fail("json"); }
     if (!o || typeof o !== "object" || o.version !== VERSION) throw fail("format");
@@ -16240,7 +16737,7 @@ const ExplorerMenu = (() => {
   box.addEventListener("contextmenu", onMenu);
   // window capture: ahead of the app shortcuts on document (F2 = next bookmark there).
   addEventListener("keydown", onKey, true);
-  return { properties, items, backItems, groupItems, newEntries, viewEntries, folderTabEntry, wantsNative };
+  return { properties, items, backItems, groupItems, newEntries, viewEntries, folderTabEntry, wantsNative, armNative };
 })();
 // Recycle bin tab (kind "trash", 🗑): items deleted in the Explorer, kept in IndexedDB by TrashStore — restore, download, delete for good; one tab at most, rows and multi-selection as in a folder tab.
 const TrashTab = (() => {
@@ -17054,7 +17551,12 @@ const RecentFiles = (() => {
 
   async function load() {
     const saved = await NotesDb.getMeta("recent");
-    list = Array.isArray(saved) ? saved.filter(r => r && r.handle && typeof r.name === "string") : [];
+    const prev = Array.isArray(saved) ? saved.filter(r => r && r.handle && typeof r.name === "string") : [];
+    if (list.length) {
+      const seen = new Set(list.map(r => r.name));
+      list = [...list, ...prev.filter(r => !seen.has(r.name))].slice(0, MAX);
+      persist();
+    } else list = prev;
   }
 
   async function add(handle) {
@@ -17117,10 +17619,12 @@ const Pinned = (() => {
   // A disk rename moves only that handle object: the pinned copy follows it.
   function renamed(item, handle) { Object.assign(item, { handle, name: handle.name }); changed(); }
 
+  const loading = () => { if (!ready) StatusBar.msg(T("Đang nạp mục Đã ghim — thử lại sau giây lát."), "warn"); return !ready; };
+
   // find() is async: a quick double click would otherwise pin the same entry twice.
   let busy = false;
   async function toggleHandle(handle) {
-    if (!ready || busy || !handle || typeof handle.isSameEntry !== "function") return;
+    if (loading() || busy || !handle || typeof handle.isSameEntry !== "function") return;
     busy = true;
     try {
       const hit = await find(handle);
@@ -17132,7 +17636,7 @@ const Pinned = (() => {
   }
 
   function toggleNote(doc) {
-    if (!ready) return;
+    if (loading()) return;
     const on = !hasNote(doc);
     list = on ? [...list, { kind: "note", id: doc.id }] : list.filter(p => p.id !== doc.id);
     changed();
@@ -17141,7 +17645,7 @@ const Pinned = (() => {
 
   // Folder opened from a Google Drive / OneDrive link: pinned by its link.
   function toggleCloud(node) {
-    if (!ready || !node.link) return;
+    if (!node.link || loading()) return;
     const on = !hasCloud(node.link);
     list = on ? [...list, { kind: "cloud", name: node.name, link: node.link }] : list.filter(p => !(p.kind === "cloud" && p.link === node.link));
     changed();
@@ -17158,7 +17662,8 @@ const Pinned = (() => {
   async function addActive() {
     const d = Views.activeDoc(), it = d && Groups.ofDoc(d);
     if (!d) { StatusBar.msg(T("Chưa có tab nào đang chọn."), "warn"); return; }
-    if (!ready || !it) { StatusBar.msg(T("Tab này không ghim được: chỉ ghi chú, file / folder trên máy (Chrome / Edge) và folder mở từ link."), "warn"); return; }
+    if (loading()) return;
+    if (!it) { StatusBar.msg(T("Tab này không ghim được: chỉ ghi chú, file / folder trên máy (Chrome / Edge) và folder mở từ link."), "warn"); return; }
     const has = it.kind === "note" ? list.some(p => p.kind === "note" && p.id === it.id) : it.kind === "cloud" ? hasCloud(it.link) : !!(await find(it.handle));
     if (has) { StatusBar.msg(T("“{name}” đã có trong mục Đã ghim.", { name: nameOf(it) }), "warn"); return; }
     if (it.kind === "note") toggleNote(Docs.get(it.id)); else if (it.kind === "cloud") toggleCloud(it); else toggleHandle(it.handle);
@@ -17192,8 +17697,13 @@ const Groups = (() => {
 
   async function init() {
     const saved = await NotesDb.getMeta("groups").catch(() => null);
-    list = Array.isArray(saved) ? saved.filter(g => g && typeof g.id === "string" && typeof g.name === "string")
+    const prev = Array.isArray(saved) ? saved.filter(g => g && typeof g.id === "string" && typeof g.name === "string")
       .map(g => ({ id: g.id, name: g.name, items: Array.isArray(g.items) ? g.items.filter(Pinned.valid) : [] })) : [];
+    if (list.length) {
+      const ids = new Set(list.map(g => g.id));
+      list = [...list, ...prev.filter(g => !ids.has(g.id))];
+      persist();
+    } else list = prev;
     Docs.on((type, doc) => {
       if (type !== "remove") return;
       let hit = false;
@@ -17433,7 +17943,10 @@ const FindReplace = (() => {
 })();
 // Activity bar: side panel registry (show / toggle / remember), badges on the icons, ⚙ 🗑 buttons at the bottom, roving tabindex (rail ↑↓ above 900 px, strip ←→ below).
 const SidePanels = (() => {
-  const reg = new Map(), badges = new Map();
+  const reg = new Map(), badges = new Map(), lazies = new Map();
+  const lazy = (name, fn) => { if (!reg.has(name)) lazies.set(name, fn); };
+  const ensure = name => { const fn = lazies.get(name); if (fn) { lazies.delete(name); fn(); } };
+  const flushLazy = () => { for (const [k, fn] of [...lazies]) { lazies.delete(k); fn(); } };
   const nav = document.querySelector(".activity");
   const btn = name => nav.querySelector(`[data-side="${name}"]`);
   const buttons = () => [...nav.querySelectorAll("button:not([hidden])")];
@@ -17455,6 +17968,7 @@ const SidePanels = (() => {
   // quiet: restoring after F5 — no focus, no carousel jump, a hidden side bar stays hidden.
   function show(name, arg, quiet = false) {
     if (!btn(name) || !document.querySelector(`[data-side-panel="${name}"]`)) name = "explorer";
+    ensure(name);
     cur = name;
     nav.querySelectorAll("[data-side]").forEach(b => { const on = b.dataset.side === name; b.classList.toggle("on", on); b.setAttribute("aria-pressed", String(on)); });
     document.querySelectorAll("[data-side-panel]").forEach(p => { p.hidden = p.dataset.sidePanel !== name; });
@@ -17549,7 +18063,7 @@ const SidePanels = (() => {
     if (SidePanelList.collapsed()) collapsed();
   }
 
-  return { init, register, show, toggle, collapsed, badge, visible, get current() { return cur; } };
+  return { init, register, lazy, flushLazy, show, toggle, collapsed, badge, visible, get current() { return cur; } };
 })();
 // Shared builders for side panel lists: foldable file groups (details.sx-file), rows with hover actions, empty note, debounced redraw while the panel shows.
 const SidePanelList = (() => {
@@ -17930,7 +18444,7 @@ const ProblemsPanel = (() => {
   let gen = 0;
 
   const openDocs = () => [...new Set(Views.groups.slice(0, Views.count).flatMap(g => g.tabs))].map(Docs.get)
-    .filter(d => d && d.kind !== "clone" && !Docs.isList(d) && !PreviewPane.isPane(d) && !d.hex && !d.big && !d.stale && !d.sealed && DataLint.owns(Docs.effectiveLang(d)));
+    .filter(d => d && d.kind !== "clone" && !Docs.isList(d) && !PreviewPane.isPane(d) && !d.hex && !d.big && !d.stale && !d.sealed && (DataLint.owns(Docs.effectiveLang(d)) || Conflicts.list(d).length));
   const onScreen = d => Views.groups.slice(0, Views.count).find(g => g.active === d.id && g.view);
   const tooBig = (d, st) => st.doc.length > (CodeLint.LANGS.has(Docs.effectiveLang(d)) ? CodeLint.LIVE_MAX : DataLint.MAX);
 
@@ -17940,7 +18454,14 @@ const ProblemsPanel = (() => {
   }
 
   // Live diagnostics for tabs on screen, cache for the others (null = not checked yet for this text).
+  // Git conflicts (R16) first, then the lint of a language DataLint checks.
   function known(d) {
+    if (!DataLint.owns(Docs.effectiveLang(d))) return Conflicts.items(d);
+    const l = lint(d);
+    return l && Conflicts.items(d).concat(l);
+  }
+
+  function lint(d) {
     const g = onScreen(d);
     if (g) { const out = []; CM.lint.forEachDiagnostic(g.view.state, x => out.push(item(g.view.state, x))); return out; }
     const st = d.state, c = cache.get(d.id);
@@ -18032,6 +18553,7 @@ const ProblemsPanel = (() => {
     Settings.onChange(Dom.debounce(render, 100));
     I18n.onChange(render);
     SidePanels.register("problems", { show });
+    badge();
   }
 
   return { init, render };
@@ -18544,7 +19066,7 @@ const HotExit = (() => {
   const serialize = (d, sealed) => ({
     id: d.id, kind: d.kind, name: d.name, lang: d.lang, text: secret(d) || secret(d.link && Docs.get(d.link.src)) ? "" : d.big ? bigText(d) : handleOnly(d) ? "" : Docs.text(d), stale: d.big ? !!d.handle : handleOnly(d), sealed: sealed || d.sealed || undefined,
     bigStart: d.big && d.handle ? d.big.start : null, handle: d.handle || null, dirty: d.dirty, edited: d.edited,
-    readOnly: d.readOnly, eol: d.eol, eolMixed: d.eolMixed, eolList: d.eolMixed ? (d.state ? MixedEol.codesOf(d.state) : d.eolList) : null, bom: d.bom, enc: d.enc, link: d.link, updated: d.updated, pinned: d.pinned, hex: d.hex, disk: d.disk, remote: d.remote, marks: Bookmarks.linesOf(d),
+    readOnly: d.readOnly, eol: d.eol, eolMixed: d.eolMixed, eolList: d.eolMixed ? (d.state ? MixedEol.codesOf(d.state) : d.eolList) : null, bom: d.bom, enc: d.enc, link: d.link, updated: d.updated, pinned: d.pinned, hex: d.hex, spell: d.spell, disk: d.disk, remote: d.remote, marks: Bookmarks.linesOf(d),
     folder: d.kind === "folder" ? FolderItems.saved(d) : undefined,
     results: d.kind === "results" ? ResultsTab.saved(d) : undefined,
     settings: d.kind === "settings" ? SettingsTab.saved(d) : undefined,
@@ -18612,18 +19134,33 @@ const HotExit = (() => {
 
   // Before wiping storage: no more writes from this page.
   const stop = () => { stopped = true; clearTimeout(timer); };
+  // A wipe / import that failed half-way: saving (and the unsaved-work warning) comes back.
+  const resume = () => { stopped = false; schedule(); };
 
-  return { init, restore, flush, schedule, stop, secret };
+  return { init, restore, flush, schedule, stop, resume, secret };
 })();
 // ▶ Run's operation per tab: the one picked by hand for it, else a default fitting its language; a result tab shows the op that made it.
 const RunOp = (() => {
   const picked = new Map();
-  const BY_LANG = { JSON: "json-pretty", JavaScript: "run-code", HTML: "run-code", Log: "filter", FIX: "fix-detail" };
+  const BY_LANG = { JSON: "json-pretty", JavaScript: "run-code", HTML: "run-code", Log: "filter", FIX: "fix-detail", "SWIFT MT": "swift-detail", diff: "patch-view" };
+  // Dev tools by content (first 4 KB) in tabs whose language does not say it: curl, PEM, OpenAPI, a .http request.
+  const HEAD_LANGS = new Set(["Plain Text", "Shell", "PowerShell", "YAML", "JSON"]);
+  const BY_HEAD = [
+    [/^\s*curl(?:\.exe)?\s/i, "curl-convert"],
+    [/^(?:\s*#[^\n]*\n)*\s*-----BEGIN (?:[A-Z0-9 ]+ )?(?:CERTIFICATE|PRIVATE KEY)-----/, "x509"],
+    [/^(?:openapi:\s*["']?3\.|swagger:\s*["']?2\.)|^\s*\{[\s\S]*?"(?:openapi"\s*:\s*"3\.|swagger"\s*:\s*"2\.)/m, "openapi-doc"],
+    [/^(?:\s*(?:#|\/\/|@\w+\s*=)[^\n]*\n|\s*\n)*\s*(?:GET|POST|PUT|PATCH|DELETE|HEAD|OPTIONS)\s+(?:https?:\/\/|\{\{|\/)\S*/, "curl-convert"],
+  ];
   const keyOf = doc => doc.kind === "output" && doc.link ? doc.link.src : Docs.root(doc).id;
 
   function suggest(doc) {
+    const bin = doc.hex && FileOpen.binKind(doc.name);
+    if (bin === "sqlite") return "sql-query";
+    if (bin === "xlsx" || bin === "docx") return "office";
     const lang = Docs.effectiveLang(doc);
+    if (HEAD_LANGS.has(lang)) { const head = doc.state ? doc.state.sliceDoc(0, 4096) : doc.text.slice(0, 4096), hit = BY_HEAD.find(([re]) => re.test(head)); if (hit) return hit[1]; }
     if (Object.hasOwn(BY_LANG, lang)) return BY_LANG[lang];
+    if (lang === "Plain Text") { const hit = PasteDetect.detect(doc.state ? doc.state.sliceDoc(0, PasteDetect.HEAD) : doc.text.slice(0, PasteDetect.HEAD)); if (hit?.op && !hit.steps && OutputOps.get(hit.op)) return hit.op; }
     // No real formatter (format only re-indents): ▶ checks the syntax instead.
     if (CodeLint.LANGS.has(lang) && Formatter.tier(lang) === 3) return "syntax-check";
     return PreviewPane.kindOf(Docs.root(doc)) ? "preview" : "format";
@@ -19160,6 +19697,15 @@ function registerFormatCompareCommands(C, doc, hasDoc) {
   C("cmpCase", "So sánh: bỏ qua hoa / thường (bật / tắt)", null, () => Compare.setOpt("case"));
   C("cmpInline", "So sánh: kiểu inline 1 cột (bật / tắt)", null, () => Compare.setOpt("inline"));
   C("cmpJson", "So sánh JSON theo cấu trúc (bỏ qua thứ tự key)", null, Compare.jsonTree);
+  C("cmpPatch", "So sánh: xuất .patch (View 1 cũ → View 2 mới, unified)", null, () => PowerTools.use(() => PatchOp.exportPair()));
+  const conf = () => Conflicts.count(Views.activeDoc()) > 0;
+  C("conflictNext", "Conflict Git: tới conflict kế", null, () => Conflicts.jump(1), conf);
+  C("conflictPrev", "Conflict Git: về conflict trước", null, () => Conflicts.jump(-1), conf);
+  C("conflictCurrent", "Conflict Git: Accept Current (khối ở con trỏ)", null, () => Conflicts.accept("current"), conf);
+  C("conflictIncoming", "Conflict Git: Accept Incoming (khối ở con trỏ)", null, () => Conflicts.accept("incoming"), conf);
+  C("conflictBoth", "Conflict Git: Accept Both (khối ở con trỏ)", null, () => Conflicts.accept("both"), conf);
+  C("conflictAllCurrent", "Conflict Git: Accept all current", null, () => Conflicts.acceptAll("current"), conf);
+  C("conflictAllIncoming", "Conflict Git: Accept all incoming", null, () => Conflicts.acceptAll("incoming"), conf);
 }
 // Phase 2b commands (encoding, EOL, line ops, column, MIME / hash, macro, large files). Ctrl+Shift+R reloads the browser, hence Alt+Shift+R / P for macros.
 function registerNotepadppCommands(C, hasDoc) {
@@ -19363,7 +19909,7 @@ function registerEditorExtraCommands(C, doc, hasDoc) {
 // Phase 9 commands: ops reuse their labels, the rest run in the lazy bundle.
 function registerPowerToolCommands(C, doc, hasDoc) {
   const use = fn => () => PowerTools.use(fn);
-  for (const id of ["cron", "sql-insert", "sql-update", "json-schema", "invisible", "recipe", "regex", "run-code", "code-image"])
+  for (const id of ["cron", "sql-insert", "sql-update", "json-schema", "invisible", "recipe", "regex", "run-code", "code-image", "sql-query", "fake-data", "office", "log-merge", "fix-lifecycle", "swift-detail", "curl-convert", "x509", "protobuf", "openapi-doc", "patch-view"])
     C("op-" + id, () => T(OutputOps.get(id).label) + " ⇢", id === "run-code" ? "Ctrl+k r" : null, () => OutputLink.run(doc(), id), hasDoc);
   C("sqlOptions", "SQL từ dữ liệu: tuỳ chọn…", null, use(() => SqlOptions.open()), hasDoc);
   C("batchReplace", "Thay hàng loạt…", null, use(() => BatchUi.open()), hasDoc);
@@ -19889,6 +20435,322 @@ const Aids = (() => {
   }
 
   return { apply, toggle, expand, shrink, settings };
+})();
+// Sticky scroll (VS Code style): the opening lines of the blocks around the top of the view stay pinned there (≤ 5), click jumps; Markdown by heading level, code by syntax tree, else by indentation.
+const Sticky = (() => {
+  const MAX = 5, MAX_DOC = 1 << 20, BACK = 3000;
+  const on = () => Prefs.get("sticky", true) !== false;
+  const indentOf = s => { const m = /^[ \t]*/.exec(s)[0]; let n = 0; for (const c of m) n += c === "\t" ? 4 : 1; return n; };
+
+  // Pure: lineText(n) → string; the lines above `top` with less indentation than everything below them (blank lines skipped).
+  function byIndent(lineText, top) {
+    const out = [];
+    let need = indentOf(lineText(top));
+    if (!lineText(top).trim()) return out;
+    for (let n = top - 1; n >= 1 && n > top - BACK && need > 0 && out.length < MAX; n--) {
+      const s = lineText(n);
+      if (!s.trim()) continue;
+      const k = indentOf(s);
+      if (k < need) { out.unshift(n); need = k; }
+    }
+    return out;
+  }
+
+  // Pure: headings [{ line, level }] in order → the heading chain above `top`.
+  function byHeading(heads, top) {
+    const chain = [];
+    for (const h of heads) {
+      if (h.line >= top) break;
+      while (chain.length && chain[chain.length - 1].level >= h.level) chain.pop();
+      chain.push(h);
+    }
+    return chain.slice(-MAX).map(h => h.line);
+  }
+
+  const cache = new WeakMap();
+  function headings(state) {
+    const tree = CM.language.syntaxTree(state), hit = cache.get(state.doc);
+    if (hit && hit.tree === tree) return hit.list;
+    const list = [];
+    for (let c = tree.topNode.firstChild; c; c = c.nextSibling) {
+      const m = /^(?:ATX|Setext)Heading(\d)$/.exec(c.name);
+      if (m) list.push({ line: state.doc.lineAt(c.from).number, level: +m[1] });
+    }
+    cache.set(state.doc, { tree, list });
+    return list;
+  }
+
+  // Nodes that start above the top line and still cover it, one per start line.
+  function byTree(state, top) {
+    const tree = CM.language.syntaxTree(state), at = state.doc.line(top), lines = [];
+    for (let n = tree.resolveInner(at.from + /^\s*/.exec(at.text)[0].length, 1); n && n.parent; n = n.parent) {
+      const a = state.doc.lineAt(n.from).number;
+      if (a < top && state.doc.lineAt(n.to).number >= top && lines[0] !== a) lines.unshift(a);
+    }
+    return lines.slice(-MAX);
+  }
+
+  function chain(state, lang, top) {
+    if (top <= 1) return [];
+    if (lang === "Markdown") return byHeading(headings(state), top);
+    if (CM.language.syntaxTree(state).length) return byTree(state, top);
+    return lang === "Plain Text" ? [] : byIndent(n => state.doc.line(n).text, top);
+  }
+
+  const docOf = view => { const g = Views.groups.find(x => x.view === view); return g && Docs.get(g.active); };
+  const usable = (view, d) => on() && innerWidth > 640 && d && !d.big && !d.hex && view.state.doc.length <= MAX_DOC;
+
+  const plugin = () => CM.view.ViewPlugin.fromClass(class {
+    constructor(view) {
+      this.view = view; this.raf = 0; this.key = "";
+      this.dom = document.createElement("div");
+      this.dom.className = "oe-sticky";
+      this.dom.hidden = true;
+      this.dom.addEventListener("mousedown", e => e.preventDefault());
+      // The bar sits outside the scroller: the wheel over it still scrolls the editor.
+      this.dom.addEventListener("wheel", e => { view.scrollDOM.scrollBy(e.deltaX, e.deltaY); e.preventDefault(); }, { passive: false });
+      view.dom.append(this.dom);
+      this.onScroll = () => this.schedule();
+      view.scrollDOM.addEventListener("scroll", this.onScroll, { passive: true });
+      this.schedule();
+    }
+    update(u) { if (u.docChanged || u.geometryChanged || u.viewportChanged || u.transactions.some(t => t.effects.length)) { this.key = ""; this.schedule(); } }
+    schedule() { if (!this.raf) this.raf = requestAnimationFrame(() => { this.raf = 0; this.draw(); }); }
+    draw() {
+      const v = this.view, d = docOf(v);
+      if (!usable(v, d)) { this.dom.hidden = true; this.key = ""; return; }
+      const lh = v.defaultLineHeight, topPx = v.scrollDOM.getBoundingClientRect().top - v.documentTop;
+      const lineAt = y => v.state.doc.lineAt(v.lineBlockAtHeight(Math.max(0, y)).from).number;
+      const lang = Docs.effectiveLang(d);
+      let lines = chain(v.state, lang, lineAt(topPx));
+      // The pinned rows hide lines under them: the chain is that of the first line still visible.
+      if (lines.length) lines = chain(v.state, lang, lineAt(topPx + lines.length * lh));
+      const key = lines.join(",") + "|" + v.state.doc.length;
+      if (key === this.key) return;
+      this.key = key;
+      this.dom.hidden = !lines.length;
+      if (!lines.length) return;
+      const gut = v.dom.querySelector(".cm-gutters")?.offsetWidth || 0;
+      this.dom.style.top = v.scrollDOM.offsetTop + "px";
+      this.dom.style.setProperty("--sticky-gut", gut + "px");
+      this.dom.replaceChildren(...lines.map(n => {
+        const line = v.state.doc.line(n), row = document.createElement("div");
+        row.className = "oe-sticky-row";
+        row.style.height = lh + "px";
+        const num = document.createElement("span"), txt = document.createElement("span");
+        num.className = "oe-sticky-num"; num.textContent = n;
+        txt.className = "oe-sticky-txt"; txt.textContent = line.text.slice(0, 400);
+        row.append(num, txt);
+        row.title = T("Tới dòng {n}", { n });
+        row.onclick = () => { v.dispatch({ selection: { anchor: line.from }, effects: CM.view.EditorView.scrollIntoView(line.from, { y: "start" }) }); v.focus(); };
+        return row;
+      }));
+    }
+    destroy() { cancelAnimationFrame(this.raf); this.view.scrollDOM.removeEventListener("scroll", this.onScroll); this.dom.remove(); }
+  });
+
+  let ext = null;
+  const extension = () => ext ??= plugin();
+
+  return { extension, byIndent, byHeading, on, MAX };
+})();
+// Git conflicts in tabs on screen: rescanned 300 ms after an edit / tab switch, count in the status bar, items in Problems, Accept … in one transaction; the block widget loads from the extras bundle (ConflictUi).
+const Conflicts = (() => {
+  const MAX = 5 * 1048576, seen = new Map(), pending = new Set();
+  const ok = d => d && d.state && !d.hex && !d.big && d.kind !== "output" && d.state.doc.length <= MAX;
+  const onScreen = () => Views.groups.slice(0, Views.count).map(g => Docs.get(g.active)).filter(Boolean);
+
+  // fresh: rescan when the text changed since the last scan; otherwise the last result (status bar, no work).
+  function list(d, fresh = true) {
+    if (!ok(d)) return [];
+    const c = seen.get(d.id), t = d.state.doc;
+    if (c && (c.text === t || !fresh)) return c.list;
+    const r = { text: t, list: GitConflict.find(t.toString()) };
+    seen.set(d.id, r);
+    return r.list;
+  }
+  const count = d => (d && seen.get(d.id)?.list.length) || 0;
+
+  function scan(d) {
+    if (!ok(d)) return;
+    const before = count(d), n = list(d).length;
+    if (n || before) PowerTools.use(() => ConflictUi.show(d));
+    if (n !== before) StatusBar.refresh();
+  }
+
+  const flush = Dom.debounce(() => { for (const id of pending) { const d = Docs.get(id); if (d) scan(d); } pending.clear(); }, 300);
+  const queue = d => { pending.add(d.id); flush(); };
+
+  const items = d => list(d).map(b => ({ from: b.from, line: b.line, col: 1, sev: "warning", msg: T("Conflict Git: {a} ⇄ {b}", { a: b.a || "HEAD", b: b.b || "?" }), src: "git" }));
+
+  const docOf = view => Docs.get(Views.groups.find(g => g.view === view)?.active);
+
+  function jump(dir) {
+    const v = Views.activeView(), L = list(Views.activeDoc());
+    if (!L.length) { StatusBar.msg(T("Tab này không có conflict Git."), "warn"); return; }
+    const head = v.state.selection.main.head;
+    let k = dir > 0 ? L.findIndex(b => b.from > head) : L.findLastIndex(b => b.from < head);
+    if (k < 0) k = dir > 0 ? 0 : L.length - 1;
+    v.dispatch({ selection: { anchor: L[k].from }, effects: CM.view.EditorView.scrollIntoView(L[k].from, { y: "center" }) });
+    v.focus();
+    StatusBar.msg(T("Conflict {k}/{n} — dòng {l}.", { k: k + 1, n: L.length, l: L[k].line }));
+  }
+
+  // One block (the one holding `at`, default the cursor) or every block (all) → one transaction, Ctrl+Z undoes it.
+  function accept(choice, at, view = Views.activeView(), all = false) {
+    const d = docOf(view);
+    if (!d) return;
+    if (view.state.readOnly) { StatusBar.msg(T("Tab chỉ đọc — không đổi được."), "warn"); return; }
+    const t = view.state.doc.toString(), L = GitConflict.find(t), pos = at ?? view.state.selection.main.head;
+    const pick = all ? L : L.filter(b => pos >= b.from && (pos < b.to || pos === b.from));
+    if (!pick.length) { StatusBar.msg(all ? T("Tab này không có conflict Git.") : T("Đặt con trỏ trong một khối conflict trước."), "warn"); return; }
+    view.dispatch({ changes: GitConflict.changes(t, pick, choice), selection: { anchor: Math.min(pick[0].from, t.length) }, userEvent: "input.conflict", scrollIntoView: true });
+    scan(d);
+    const left = count(d), what = { current: "Accept Current", incoming: "Accept Incoming", both: "Accept Both" }[choice];
+    StatusBar.msg(T("✔ {what}: {n} conflict — còn {left} · Ctrl+Z để hoàn tác.", { what, n: pick.length, left }), "good");
+  }
+
+  function init() {
+    Docs.on((type, doc) => {
+      if (type === "remove") { seen.delete(doc.id); return; }
+      if (onScreen().includes(doc)) queue(doc);
+    });
+    Views.onChange(() => onScreen().forEach(queue));
+    onScreen().forEach(scan);
+  }
+
+  return { init, list, count, items, jump, accept, acceptAll: choice => accept(choice, 0, Views.activeView(), true), docOf };
+})();
+// Writing aids: browser English spellcheck per tab (default by tab type in ⚙), typewriter scrolling, word count + reading time for prose tabs; installed after the editor is typeable.
+const Writing = (() => {
+  const PROSE = new Set(["Markdown", "Plain Text"]), WPM = 200;
+  const docOf = view => { const g = Views.groups.find(x => x.view === view); return g && Docs.get(g.active); };
+  const prose = d => !!d && (d.kind === "note" || PROSE.has(Docs.effectiveLang(d)));
+  // Notes are usually Vietnamese, so they default off; Markdown / text on; code off.
+  const typeKey = d => d.kind === "note" ? "spellNote" : PROSE.has(Docs.effectiveLang(d)) ? "spellText" : "spellCode";
+  const DEF = { spellNote: false, spellText: true, spellCode: false };
+  const typeDefault = k => Prefs.get(k, DEF[k]) === true;
+  const spellOn = d => !!d && !d.big && !d.hex && (typeof d.spell === "boolean" ? d.spell : typeDefault(typeKey(d)));
+  const typewriter = () => Prefs.get("typewriter", false) === true;
+
+  // Pure: words of a text (letters / digits runs, so "trade-date" is 2) and minutes to read at 200 words a minute.
+  const words = s => (s.match(/[\p{L}\p{N}_]+/gu) || []).length;
+  const minutes = n => Math.max(1, Math.round(n / WPM));
+
+  function build() {
+    const V = CM.view.EditorView, out = [Sticky.extension()];
+    out.push(V.contentAttributes.of(view => spellOn(docOf(view)) ? { spellcheck: "true", lang: "en" } : null));
+    if (typewriter()) out.push(V.scrollMargins.of(view => { const h = Math.max(0, view.scrollDOM.clientHeight / 2 - view.defaultLineHeight); return { top: h, bottom: h }; }), V.theme({ ".cm-content": { paddingBottom: "45vh" } }));
+    out.push(SmartPaste.field());
+    return out;
+  }
+  const apply = () => CmSetup.setExtra("writing", build());
+
+  function toggleSpell(d = Views.activeDoc()) {
+    if (!d || Docs.isList(d)) { StatusBar.msg(T("Chưa có tab nào đang chọn."), "warn"); return; }
+    d.spell = !spellOn(d);
+    d.pending = true;
+    HotExit.schedule();
+    Views.applySettings();
+    StatusBar.msg(d.spell ? T("Kiểm chính tả English: bật cho “{name}” — từ sai được gạch đỏ; Shift+chuột phải lên từ để xem gợi ý.", { name: d.name }) : T("Kiểm chính tả English: tắt cho “{name}”.", { name: d.name }), "good");
+  }
+  function setTypewriter(v) { Prefs.set("typewriter", !!v); apply(); }
+  function setSticky(v) { Prefs.set("sticky", !!v); Views.applySettings(); }
+
+  return { apply, toggleSpell, spellOn, setTypewriter, setSticky, typewriter, prose, words, minutes, typeDefault, DEF };
+})();
+// Smart paste: a paste into an empty tab (or over all of it) is checked by PasteDetect ⇒ a light bar under the tab strip offers the matching ▶ op; nothing runs by itself, ✕ dismisses it for that tab.
+const SmartPaste = (() => {
+  let F = null, setFx = null;
+  const on = () => Prefs.get("smartPaste", true) !== false;
+  const docOf = view => { const g = Views.groups.find(x => x.view === view); return g && Docs.get(g.active); };
+  const dismissed = new Set();
+
+  // Per tab (each tab has its own EditorState): the detection shown, or null.
+  function field() {
+    if (F) return F;
+    const S = CM.state;
+    setFx = S.StateEffect.define();
+    F = S.StateField.define({
+      create: () => null,
+      update: (v, tr) => { for (const e of tr.effects) if (e.is(setFx)) return e.value; return v; },
+      provide: f => CM.view.showPanel.from(f, v => v ? panel : null),
+    });
+    return F;
+  }
+
+  // The panel is reused while the field stays set: it redraws from the field, never from a captured detection.
+  function panel(view) {
+    const dom = document.createElement("div");
+    dom.className = "oe-paste-bar";
+    dom.setAttribute("role", "status");
+    let shown = null;
+    const draw = hit => { shown = hit; dom.replaceChildren(...parts(view, hit)); };
+    draw(view.state.field(F));
+    return { dom, top: true, update: u => { const hit = u.state.field(F); if (hit && hit !== shown) draw(hit); } };
+  }
+
+  function parts(view, hit) {
+    const out = [];
+    const text = document.createElement("span");
+    text.textContent = T("Phát hiện {what}", { what: T(hit.label) }) + (hit.info ? " = " + hit.info : "");
+    out.push(text);
+    const op = hit.op && OutputOps.get(hit.op);
+    if (op) {
+      const run = Object.assign(document.createElement("button"), { type: "button", className: "main", textContent: "▶ " + T(op.label) });
+      run.onclick = () => runOp(view, view.state.field(F) || hit);
+      out.push(run);
+    }
+    const close = Object.assign(document.createElement("button"), { type: "button", textContent: "✕", title: T("Ẩn gợi ý cho tab này") });
+    close.onclick = () => { const d = docOf(view); if (d) dismissed.add(d.id); set(view, null); view.focus(); };
+    out.push(close);
+    return out;
+  }
+
+  const set = (view, v) => view.dispatch({ effects: setFx.of(v) });
+
+  function runOp(view, hit) {
+    const d = docOf(view);
+    if (!d) return;
+    const src = Docs.root(d);
+    set(view, null);
+    RunOp.pick(src, hit.op);
+    Toolbar.sync();
+    if (hit.steps) { PowerTools.use(() => RecipeOp.set(src.id, hit.steps)); return; }
+    OutputLink.run(src, hit.op).catch(e => StatusBar.msg(e.message, "bad"));
+  }
+
+  // The whole tab came from this paste: it was empty, or the paste replaced all of it.
+  const wholePaste = u => u.transactions.some(tr => {
+    if (!tr.isUserEvent("input.paste")) return false;
+    let all = false;
+    tr.changes.iterChangedRanges((a, b) => { all ||= a === 0 && b === tr.startState.doc.length; });
+    return all;
+  });
+
+  function pasted(u) {
+    if (!F || !on() || u.state.field(F, false) === undefined || !wholePaste(u)) return;
+    const d = docOf(u.view);
+    if (!d || dismissed.has(d.id) || u.state.readOnly) return;
+    show(u.view, d, u.state.sliceDoc(0, PasteDetect.HEAD));
+  }
+
+  // Shown after the current update (a view cannot dispatch while it updates).
+  function show(view, d, text) {
+    const hit = PasteDetect.detect(text);
+    setTimeout(() => {
+      if (docOf(view) !== d) return;
+      if (!hit) { if (view.state.field(F, false)) set(view, null); return; }
+      if (hit.lang && Docs.effectiveLang(d) === "Plain Text" && LangDetect.ids.includes(hit.lang)) Docs.update(Docs.root(d), { lang: hit.lang }, "lang");
+      set(view, hit);
+    });
+    return !!hit;
+  }
+
+  // Demo / tests: each visible tab as if it had just been pasted → how many bars.
+  const detectVisible = () => !F ? 0 : Views.groups.slice(0, Views.count).filter(g => { const d = Docs.get(g.active); return d && show(g.view, d, g.view.state.sliceDoc(0, PasteDetect.HEAD)); }).length;
+
+  return { field, pasted, detectVisible, on };
 })();
 // Outline / Function List sidebar: symbols of the active tab (functions, classes, headings by level), filter box, click ⇒ the line; follows tab switches and edits.
 const Outline = (() => {
@@ -20422,6 +21284,8 @@ const LibraryPanel = (() => {
   const cm = CmSetup.settings, aid = id => () => !!Aids.settings()[id];
   S({ id: "theme", group: "editor", type: "choice", label: "Giao diện", hint: "Sáng / tối, hoặc theo hệ điều hành", choices: choose([["auto", "Tự động"], ["light", "Sáng"], ["dark", "Tối"]]),
     get: () => $("uiTheme").value, set: v => { $("uiTheme").value = v; $("uiTheme").dispatchEvent(new Event("change")); }, def: "auto" });
+  S({ id: "uiSize", group: "editor", type: "choice", label: "Cỡ giao diện", hint: "Cỡ chữ và icon của menu, thanh công cụ, Explorer, panel (không đổi chữ editor) — dùng chung mọi tool, chỉ áp trên màn rộng", choices: choose([["small", "Nhỏ"], ["medium", "Vừa"], ["large", "Lớn"]]),
+    get: UiSize.get, set: UiSize.set, def: "medium" });
   const font = () => (Prefs.get("font", 13) | 0) || 13;
   S({ id: "font", group: "editor", type: "number", label: "Cỡ chữ editor (px)", hint: "9–28 — Ctrl+= / Ctrl+- / Ctrl+0 cũng đổi", min: 9, max: 28,
     get: font, set: v => { if (v !== font()) Actions.zoom(v === 13 ? 0 : v - font()); }, def: 13 });
@@ -20468,6 +21332,49 @@ const LibraryPanel = (() => {
     get: () => { const k = String(Prefs.get("gdriveKey", "") || ""); return k ? T("Đã lưu (…{tail})", { tail: k.slice(-4) }) : T("Chưa có"); },
     actions: () => [[T("Đổi…"), () => { if (CloudDrive.askKey() != null) Settings.changed(); }], [T("Xoá"), () => { Prefs.set("gdriveKey", ""); StatusBar.msg(T("Đã xoá API key Google Drive."), "good"); }]] });
 })();
+// Phase 14a in ⚙ Settings + Palette: sticky scroll, spellcheck defaults, typewriter, smart paste; profile backup (export / import live in the extras bundle) + the 14-day reminder.
+const Backup = (() => {
+  const DAY = 86400000, EVERY = 14, DONE = "web_tool.one-editor:profileImported";
+  const exportNow = () => PowerTools.use(() => ProfileBackup.exportDialog());
+  const importNow = () => PowerTools.use(() => ProfileBackup.pickAndImport());
+  // After an import reload: say what came in; else the 14-day reminder when it is on.
+  function remind() {
+    let done = null;
+    try { done = JSON.parse(sessionStorage.getItem(DONE) || "null"); sessionStorage.removeItem(DONE); } catch { /* blocked storage: no message */ }
+    if (done) { StatusBar.msg(T("⬆ Đã nhập profile: {n} ghi chú, {s} cài đặt.", { n: I18n.num(+done.notes || 0), s: I18n.num(+done.prefs || 0) }), "good"); return; }
+    if (Prefs.get("backupRemind", false) !== true) return;
+    const last = +Prefs.get("backupLast", 0) || 0, days = Math.floor((Date.now() - last) / DAY);
+    if (last && days < EVERY) return;
+    StatusBar.msg(last ? T("Đã {d} ngày chưa sao lưu profile One Editor — bấm để xuất.", { d: days }) : T("Chưa sao lưu profile One Editor lần nào — bấm để xuất."), "warn", exportNow, T("Xuất profile…"));
+  }
+  return { exportNow, importNow, remind };
+})();
+
+(() => {
+  const S = Settings.add, pref = (k, def) => () => Prefs.get(k, def) === !def ? !def : def;
+  S({ id: "sticky", group: "editor", label: "Sticky scroll", hint: "Dòng mở hàm / class / tiêu đề đang bao màn hình dính ở đầu editor (≤ 5 dòng, bấm để tới) — tắt khi màn hình ≤ 640 px hoặc file > 1 MB",
+    get: pref("sticky", true), set: v => Writing.setSticky(v), def: true });
+  S({ id: "typewriter", group: "editor", label: "Typewriter scrolling", hint: "Dòng đang gõ luôn ở giữa màn hình", get: pref("typewriter", false), set: v => Writing.setTypewriter(v), def: false });
+  for (const [id, label, hint] of [["spellText", "Kiểm chính tả English: Markdown / Text", "Mặc định cho tab Markdown và văn bản thường — bộ kiểm của trình duyệt"],
+    ["spellNote", "Kiểm chính tả English: ghi chú", "Ghi chú thường viết tiếng Việt nên mặc định tắt"],
+    ["spellCode", "Kiểm chính tả English: code", "Mỗi tab vẫn bật / tắt riêng được (chuột phải hoặc Palette)"]])
+    S({ id, group: "editor", label, hint, get: () => Writing.typeDefault(id), set: v => { Prefs.set(id, !!v); Views.applySettings(); }, def: Writing.DEF[id] });
+  S({ id: "smartPaste", group: "editor", label: "Dán thông minh", hint: "Dán JWT, cURL, cron, URL dài, Base64, PEM, FIX, epoch, JSON / XML 1 dòng vào tab trống ⇒ gợi ý phép ▶ phù hợp (không tự chạy)",
+    get: pref("smartPaste", true), set: v => Prefs.set("smartPaste", !!v), def: true });
+  S({ id: "profile", group: "data", type: "info", label: "Sao lưu / khôi phục profile", hint: "Cài đặt, phím tắt, group, ghim, nhãn màu, snippet / macro / bộ thay / recipe, ghi chú — 1 file .json.gz, có thể đặt mật khẩu",
+    get: () => { const t = +Prefs.get("backupLast", 0); return t ? T("Lần xuất gần nhất: {date}", { date: new Date(t).toLocaleDateString(I18n.lang === "vi" ? "vi-VN" : "en-GB") }) : T("Chưa xuất lần nào"); },
+    actions: () => [[T("⬇ Xuất profile…"), Backup.exportNow], [T("⬆ Nhập profile…"), Backup.importNow]] });
+  S({ id: "backupRemind", group: "data", label: "Nhắc sao lưu mỗi 14 ngày", hint: "Lời nhắc ở thanh trạng thái khi mở One Editor", get: pref("backupRemind", false), set: v => Prefs.set("backupRemind", !!v), def: false });
+})();
+
+function registerWritingBackupCommands() {
+  const C = Commands.add, hasDoc = () => !!Views.activeDoc();
+  C("spellToggle", "Kiểm chính tả English: bật / tắt cho tab này", null, () => Writing.toggleSpell(), hasDoc);
+  C("stickyToggle", "Sticky scroll: bật / tắt", null, () => Writing.setSticky(!Sticky.on()));
+  C("typewriterToggle", "Typewriter scrolling: bật / tắt (dòng đang gõ ở giữa)", null, () => Writing.setTypewriter(!Writing.typewriter()));
+  C("profileExport", "Sao lưu: xuất profile (cài đặt, thư viện, ghi chú…)…", null, Backup.exportNow);
+  C("profileImport", "Sao lưu: nhập profile…", null, Backup.importNow);
+}
 // Boot: load the CodeMirror core, wire controls and listeners, restore the hot-exit session, then open ?demo= / ?data= / a share link.
 const Prefs = (() => {
   const P = "web_tool.one-editor.";
@@ -20550,8 +21457,10 @@ function wireOneEditor() {
   on("btnStyle", "click", e => EditorMenu.openFromButton(e.currentTarget));
   EditorMenu.init();
   on("stLint", "click", () => Commands.run("problems"));
+  on("stConflict", "click", () => Conflicts.jump(1));
   matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => Views.applySettings());
   registerOneEditorCommands();
+  registerWritingBackupCommands();
   document.addEventListener("keydown", Commands.onKey, true);
   $("work").style.setProperty("--ed-font", (Prefs.get("font", 13) | 0 || 13) + "px");
   // Phone carousel: the view swiped into sight becomes the focused one (new tabs, status bar, ▶ Run follow it).
@@ -20562,13 +21471,13 @@ function wireOneEditor() {
   }, 150), { passive: true });
   Split.init();
   SideBar.init();
-  BookmarkList.init();
-  ProblemsPanel.init();
-  GitPanel.init();
-  TodoPanel.init();
-  TimelinePanel.init();
+  SidePanels.lazy("bookmarks", () => BookmarkList.init());
+  SidePanels.lazy("problems", () => ProblemsPanel.init());
+  SidePanels.lazy("git", () => GitPanel.init());
+  SidePanels.lazy("todo", () => TodoPanel.init());
+  SidePanels.lazy("timeline", () => TimelinePanel.init());
   ClipHistory.init();
-  LibraryPanel.init();
+  SidePanels.lazy("library", () => LibraryPanel.init());
   SidePanels.init();
   ExportActions.init();
   DiskSync.init();
@@ -20603,8 +21512,13 @@ function wireOneEditor() {
   TabStrip.init();
   FileDrop.init();
   wireOneEditor();
+  const idle = fn => typeof requestIdleCallback === "function" ? requestIdleCallback(fn, { timeout: 300 }) : setTimeout(fn, 0);
+  // One failed step must not skip the rest (extras, `ready`).
+  const step = async (name, fn) => { try { await fn(); } catch (e) { console.warn("One Editor boot:", name, e); } };
+
   await NotesDb.open();
   HotExit.init();
+  // Before the editor is typeable: a macro saved / imported earlier would overwrite the stored ones.
   await ClipHistory.load();
   await Macro.load();
   // Before restore: tabs it drops keep their bookmarks.
@@ -20614,22 +21528,32 @@ function wireOneEditor() {
   Views.applySettings();
   if (Prefs.get("minimap", false) === true) Actions.setMinimap(true);
   if (Prefs.get("guides", true) !== false) Actions.setGuides(true);
-  await RecentFiles.load();
-  await Pinned.init();
-  await Groups.init();
-  Tags.load();
-  if (!NewWindow.active) Explorer.restore();
-  // Extras (breadcrumbs, bracket colours, snippets, key profile, sessions) load after the editor is usable.
-  EditorExtras.use(async () => { KeyProfiles.init(); Aids.apply(); await Snippets.load(); await Sessions.init(); });
   StatusBar.storage(NotesDb.ok, NotesDb.error);
   StatusBar.msg(T("Sẵn sàng. Kéo-thả file / folder vào View 1 hoặc View 2, hoặc bấm + để tạo ghi chú."));
   if (NewWindow.active) await NewWindow.take();
   await ShareLoader.fromUrl();
   addEventListener("hashchange", () => ShareLoader.fromUrl());
-  Explorer.render();
   Toolbar.sync();
   StatusBar.refresh();
-  document.body.classList.add("ready");
+  document.body.classList.add("typeable");
+  idle(async () => {
+    await step("panels", SidePanels.flushLazy);
+    await step("recent", RecentFiles.load);
+    await step("pinned", Pinned.init);
+    await step("groups", Groups.init);
+    await step("tags", Tags.load);
+    await step("writing", Writing.apply);
+    await step("conflicts", Conflicts.init);
+    // Not awaited: a folder from a Drive / OneDrive link waits on the network.
+    if (!NewWindow.active) step("explorer", Explorer.restore);
+    // Extras (breadcrumbs, bracket colours, snippets, key profile, sessions) load after the editor is usable.
+    EditorExtras.use(async () => { KeyProfiles.init(); Aids.apply(); await Snippets.load(); await Sessions.init(); });
+    Explorer.render();
+    Toolbar.sync();
+    StatusBar.refresh();
+    document.body.classList.add("ready");
+    Backup.remind();
+  });
 })();
 </script>
 </body>

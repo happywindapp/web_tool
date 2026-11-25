@@ -1,7 +1,7 @@
 // English UI strings, keyed by the Vietnamese source text.
 I18n.add({
   // Header, toolbar, markup
-"🔗 Chia sẻ link": "🔗 Share link", "🗑 Xoá dữ liệu": "🗑 Clear data", "Tác giả:": "Author:",
+"🔗 Chia sẻ link": "🔗 Share link", "Chia sẻ link": "Share link", "🗑 Xoá dữ liệu": "🗑 Clear data", "Xoá dữ liệu": "Clear data", "Công cụ": "Toolbar", "Cài đặt": "Settings", "Tác giả:": "Author:",
   "Chép link chứa các tab đang mở (dữ liệu nằm sau dấu #, không gửi lên máy chủ)": "Copy a link holding the open tabs (data sits after the #, never sent to a server)",
   "Xoá mọi ghi chú và tab đã lưu trong IndexedDB của trình duyệt này": "Delete every note and saved tab from this browser's IndexedDB",
   "Lượt truy cập (GoatCounter, cập nhật mỗi ~10 phút)": "Visits (GoatCounter, updates every ~10 minutes)",

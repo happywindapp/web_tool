@@ -1,0 +1,28 @@
+  /* Phase 14b: SQL pane, fake data pane, xlsx / docx viewer. */
+  .pv-sql, .pv-fake, .pv-office { overflow:auto; background:var(--bg); color:var(--ink); display:flex; flex-direction:column; min-height:0; }
+  .pv-fake > .rp-none, .pv-sql > .rp-none { padding:8px 12px; }
+  .sql-tables { display:flex; flex-direction:column; gap:2px; padding:6px 12px; border-bottom:1px solid var(--line); max-height:28vh; overflow:auto; flex:none; }
+  .sql-table { text-align:left; white-space:normal; background:none; border:0; padding:2px 4px; border-radius:4px; color:var(--ink); font-size:calc(13px * var(--ui-k, 1)); overflow-wrap:anywhere; }
+  .sql-table:hover { background:var(--hover); }
+  .sql-cols { color:var(--muted); font-family:Consolas, "Cascadia Mono", monospace; font-size:calc(12px * var(--ui-k, 1)); }
+  .sql-box { margin:6px 12px 0; min-height:5em; resize:vertical; font:calc(13px * var(--ui-k, 1))/1.45 Consolas, "Cascadia Mono", monospace; border:1px solid var(--line); border-radius:6px; padding:6px 8px; background:var(--code); color:var(--ink); flex:none; }
+  .sql-actions { display:flex; flex-wrap:wrap; gap:4px; padding:6px 12px; flex:none; }
+  .sql-info { padding:2px 12px 6px; font-size:calc(12px * var(--ui-k, 1)); color:var(--muted); flex:none; }
+  .sql-info .rx-bad { margin:0; }
+  .sql-grid { flex:1 1 auto; min-height:120px; overflow:auto; padding:0 12px 12px; }
+  .sql-tab { display:table; }
+  .sql-tab tr:hover td { cursor:text; }
+  .sql-tab .sql-num { text-align:right; }
+  .pv-bar .fk-n { width:6em; }
+  .pv-bar .fk-seed { width:7em; font-family:Consolas, "Cascadia Mono", monospace; }
+  .pv-bar .fk-cols { flex:1; min-width:10em; }
+  .pv-fake .rx-tab { margin:0 12px 12px; }
+  .pv-bar .of-filter { width:14em; }
+  .of-sheets { display:flex; flex-wrap:wrap; gap:4px; padding:6px 12px; border-bottom:1px solid var(--line); flex:none; }
+  .of-sheets button.on { background:var(--acc); color:#fff; border-color:var(--acc); }
+  .of-doc { flex:1 1 auto; width:100%; min-height:300px; border:0; background:#fff; }
+  @media (max-width:640px) {
+    .sql-box, .pv-bar .fk-n, .pv-bar .fk-seed, .pv-bar .fk-cols, .pv-bar .of-filter { font-size:calc(16px * var(--ui-k, 1)); }
+    .pv-bar .of-filter, .pv-bar .fk-cols { width:100%; }
+    .sql-tables { max-height:20vh; }
+  }

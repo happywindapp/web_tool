@@ -4,7 +4,7 @@ const PowerOps = (() => {
   function init() {
     if (inited) return;
     inited = true;
-    const V = { invisible: PvInvisible, recipe: PvRecipe, regex: PvRegex, run: PvRun, "code-image": PvCodeImage, syntax: PvSyntax };
+    const V = { invisible: PvInvisible, recipe: PvRecipe, regex: PvRegex, run: PvRun, "code-image": PvCodeImage, syntax: PvSyntax, sql: PvSql, fake: PvFake, office: PvOffice, logmerge: PvLogMerge, fixlife: PvFixLife, swift: PvSwift, curl: PvCurl, x509: PvX509, openapi: PvOpenApi, patch: PvPatch };
     for (const [k, v] of Object.entries(V)) PreviewPane.addView(k, v);
     RegexMarks.init();
   }
@@ -40,5 +40,8 @@ const PowerOps = (() => {
   }
 
   return { init, cron, sqlInsert: sql("insert"), sqlUpdate: sql("update"), sqlOpts, schema, invisible,
-    recipe: (t, c) => RecipeOp.run(t, c), regex: (t, c) => RegexOp.run(t, c), run: (t, c) => RunCode.run(t, c), codeImage: (t, c) => CodeImageOp.run(t, c), syntaxCheck: (t, c) => SyntaxCheckOp.run(t, c) };
+    recipe: (t, c) => RecipeOp.run(t, c), regex: (t, c) => RegexOp.run(t, c), run: (t, c) => RunCode.run(t, c), codeImage: (t, c) => CodeImageOp.run(t, c), syntaxCheck: (t, c) => SyntaxCheckOp.run(t, c),
+    sqlQuery: (t, c) => SqlOp.run(t, c), fakeData: (t, c) => FakeOp.run(t, c), office: (t, c) => OfficeOp.run(t, c),
+    logMerge: (t, c) => LogMergeOp.run(t, c), fixLifecycle: (t, c) => FixLifeOp.run(t, c), swiftDetail: (t, c) => SwiftOp.run(t, c),
+    curlConvert: (t, c) => CurlOp.run(t, c), x509: (t, c) => X509Op.run(t, c), protobuf: t => ProtoOp.run(t), openapiDoc: (t, c) => OpenApiOp.run(t, c), patchView: (t, c) => PatchOp.run(t, c) };
 })();

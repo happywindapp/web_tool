@@ -2,12 +2,13 @@
   :root { --tb:color-mix(in srgb, var(--acc) 10%, var(--panel)); --tb-ink:var(--ink); }
   header.top { background:#164e63; border-bottom:0; color:var(--ink); color-scheme:dark;
                --ink:#ecfeff; --muted:#a5d8e6; --btn:#1f6b85; --line:#4b93aa; --good:#86efac; --bad:#fecaca; --warn:#fde68a; }
-  .lang-switch .gc-views { align-self:center; margin-right:4px; font-size:12px; font-weight:600; color:var(--ink); opacity:.85; white-space:nowrap; }
+  .lang-switch .gc-views { align-self:center; margin-right:4px; font-size:calc(12px * var(--ui-k, 1)); font-weight:600; color:var(--ink); opacity:.85; white-space:nowrap; }
   @media (min-width:641px) { header.top:has(.gc-views:not([hidden])) { padding-right:200px; } }
   .wb-nav { flex:0 0 100%; gap:2px; margin-bottom:-8px; }
   .wb-nav button { padding:6px 14px; border:0; border-radius:6px 6px 0 0; background:transparent; }
   .wb-nav button:hover { background:var(--btn); }
   .wb-nav button.on { background:var(--tb); color:var(--tb-ink); font-weight:600; }
+  @media (min-width:641px) { .wb-nav { margin-bottom:calc(-1 * var(--bar-py)); } header.top .wb-nav button { padding:calc(var(--bar-py) - 1px) 12px; } }
   /* A select is as wide as its longest option; cap it so long sample names don't widen the toolbar (the open list shows them in full) */
   select.demo-picker { max-width:9.5em; text-overflow:ellipsis; }
   .toolbar { background:var(--tb); --line:color-mix(in srgb, var(--acc) 40%, var(--panel)); --muted:color-mix(in srgb, var(--ink) 65%, var(--panel)); }

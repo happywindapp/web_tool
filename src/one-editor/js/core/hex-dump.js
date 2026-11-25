@@ -15,8 +15,8 @@ const HexDump = (() => {
     return rows.join("\n") + "\n";
   }
 
-  async function ofFile(file) {
-    return format(new Uint8Array(await file.slice(0, LIMIT).arrayBuffer()), file.size);
+  async function ofFile(file, limit = LIMIT) {
+    return format(new Uint8Array(await file.slice(0, limit).arrayBuffer()), file.size);
   }
 
   return { format, ofFile, LIMIT };

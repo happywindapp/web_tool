@@ -1,6 +1,6 @@
   .diff-body { display:grid; grid-template-rows:minmax(140px, 34vh) 1fr; min-height:0; }
   .diff-result { margin:0 16px 10px; overflow:auto; min-height:0; background:var(--panel); border:1px solid var(--line); border-radius:8px; }
-  table.dt { width:100%; border-collapse:collapse; table-layout:fixed; font:12.5px/1.5 Consolas, "Cascadia Mono", monospace; }
+  table.dt { width:100%; border-collapse:collapse; table-layout:fixed; font:calc(12.5px * var(--ui-k, 1))/1.5 Consolas, "Cascadia Mono", monospace; }
   table.dt col.lnc { width:4.5em; }
   table.dt td { padding:0 8px; vertical-align:top; white-space:pre-wrap; word-break:break-all; }
   table.dt td.ln { color:var(--c); background:var(--gut); text-align:right; user-select:none; }

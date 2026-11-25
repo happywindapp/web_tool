@@ -203,5 +203,5 @@ const ExplorerMenu = (() => {
   box.addEventListener("contextmenu", onMenu);
   // window capture: ahead of the app shortcuts on document (F2 = next bookmark there).
   addEventListener("keydown", onKey, true);
-  return { properties, items, backItems, groupItems, newEntries, viewEntries, folderTabEntry, wantsNative };
+  return { properties, items, backItems, groupItems, newEntries, viewEntries, folderTabEntry, wantsNative, armNative };
 })();

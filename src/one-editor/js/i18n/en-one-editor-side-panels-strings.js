@@ -2,6 +2,7 @@
 I18n.add({
   "{n} mục trong thùng rác": "{n} items in the recycle bin",
   "Hiện panel: {name}": "Show panel: {name}",
+  "Đang nạp mục Đã ghim — thử lại sau giây lát.": "Loading the Pinned list — try again in a moment.",
   // Problems
   "Problems: lỗi của mọi tab đang mở (⚠ thanh bên)": "Problems: errors of every open tab (⚠ side bar)",
   "Problems — lỗi / cảnh báo của mọi tab đang mở (Ctrl+Shift+M)": "Problems — errors / warnings of every open tab (Ctrl+Shift+M)",

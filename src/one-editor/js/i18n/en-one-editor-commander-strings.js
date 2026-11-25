@@ -31,6 +31,8 @@ I18n.add({
   "Checkbox ở mỗi dòng tab folder (luôn có trên màn hình cảm ứng)": "A check box on each folder tab row (always on touch screens)",
   "File đang chọn hiện cạnh danh sách (Alt+P)": "The selected file shows beside the list (Alt+P)",
   "Sáng / tối, hoặc theo hệ điều hành": "Light / dark, or follow the operating system",
+  "Cỡ giao diện": "Interface size",
+  "Cỡ chữ và icon của menu, thanh công cụ, Explorer, panel (không đổi chữ editor) — dùng chung mọi tool, chỉ áp trên màn rộng": "Text and icon size of menus, toolbar, Explorer and panels (editor text unchanged) — shared by every tool, wide screens only",
   "Cỡ chữ editor (px)": "Editor font size (px)",
   "9–28 — Ctrl+= / Ctrl+- / Ctrl+0 cũng đổi": "9–28 — Ctrl+= / Ctrl+- / Ctrl+0 change it too",
   "Xuống dòng mềm": "Word wrap",

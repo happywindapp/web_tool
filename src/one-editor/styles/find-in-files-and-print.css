@@ -1,16 +1,16 @@
   /* Find in files (phase 6): replace row, scope options, status + Stop, results grouped per file */
   .sx-form input#sxReplace { flex:1 1 100%; min-width:0; padding:3px 8px; }
-  .sx-form #sxReplaceAll { padding:2px 8px; font-size:12px; }
-  .sx-status { display:flex; gap:6px; align-items:flex-start; padding:4px 8px; font-size:12px; color:var(--muted); border-bottom:1px solid var(--line); }
+  .sx-form #sxReplaceAll { padding:2px 8px; font-size:calc(12px * var(--ui-k, 1)); }
+  .sx-status { display:flex; gap:6px; align-items:flex-start; padding:4px 8px; font-size:calc(12px * var(--ui-k, 1)); color:var(--muted); border-bottom:1px solid var(--line); }
   .sx-status:has(#sxStatus:empty) { display:none; }
   .sx-status #sxStatus { flex:1 1 auto; min-width:0; }
   .sx-status #sxStatus.bad { color:var(--bad); } .sx-status #sxStatus.warn { color:var(--warn); }
   .sx-file > summary { display:flex; gap:6px; align-items:center; padding:2px 6px 2px 4px; cursor:pointer; }
-  .sx-file > summary .sx-doc { margin:0; flex:0 1 auto; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:12px; color:var(--ink); }
+  .sx-file > summary .sx-doc { margin:0; flex:0 1 auto; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:calc(12px * var(--ui-k, 1)); color:var(--ink); }
   .sx-file > summary .sx-path { flex:1 1 0; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--muted); direction:rtl; text-align:left; }
-  .sx-file > summary .sx-n { padding:0 6px; border-radius:9px; background:var(--hover); font-size:11px; }
+  .sx-file > summary .sx-n { padding:0 6px; border-radius:9px; background:var(--hover); font-size:calc(11px * var(--ui-k, 1)); }
   .sx-file .sx-hit { padding-left:22px; }
-  @media (max-width:640px) { .sx-form input[type=text] { max-width:none; } .sx-form input#sxReplace { font-size:16px; } .sx-file > summary { min-height:36px; } }
+  @media (max-width:640px) { .sx-form input[type=text] { max-width:none; } .sx-form input#sxReplace { font-size:calc(16px * var(--ui-k, 1)); } .sx-file > summary { min-height:36px; } }
 
   /* Print: only #printOut (filled by ExportActions before printing), always dark text on white */
   #printOut { display:none; }
@@ -32,11 +32,11 @@
   .pb-sev.error, .gt-d > summary .sx-doc { color:var(--bad); } .pb-sev.warning, .gt-m > summary .sx-doc { color:var(--warn); }
   .gt-a > summary .sx-doc { color:var(--good); } .gt-u > summary .sx-doc { color:var(--muted); }
   .pb-src, .gt-dir { color:var(--muted); }
-  #pbStatus { flex:1 1 100%; font-size:12px; }
-  .todo-tag { padding:0 4px; border-radius:4px; font-size:11px; font-weight:600; }
+  #pbStatus { flex:1 1 100%; font-size:calc(12px * var(--ui-k, 1)); }
+  .todo-tag { padding:0 4px; border-radius:4px; font-size:calc(11px * var(--ui-k, 1)); font-weight:600; }
   .todo-bad.todo-tag, .todo-bad > summary .sx-doc { color:var(--bad); } .todo-warn.todo-tag, .todo-warn > summary .sx-doc { color:var(--warn); } .todo-acc.todo-tag, .todo-acc > summary .sx-doc { color:var(--acc); }
   .todo-tag.todo-bad { background:color-mix(in srgb, var(--bad) 12%, transparent); } .todo-tag.todo-warn { background:color-mix(in srgb, var(--warn) 12%, transparent); } .todo-tag.todo-acc { background:color-mix(in srgb, var(--acc) 12%, transparent); }
-  .tl-name { flex:1 1 auto; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--muted); font-size:12px; }
+  .tl-name { flex:1 1 auto; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--muted); font-size:calc(12px * var(--ui-k, 1)); }
   #tdStatus { flex:1 1 auto; min-width:0; }
   .ex-bar-btn[aria-pressed="true"] { background:color-mix(in srgb, var(--acc) 20%, var(--btn)); border-color:var(--acc); }
   .cb-item { display:flex; flex-direction:column; align-items:flex-start; gap:1px; }

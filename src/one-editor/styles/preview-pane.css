@@ -9,20 +9,20 @@
   .pv-body { display:grid; min-height:0; min-width:0; }
   .pv-body > * { min-height:0; min-width:0; }
   .pv-body.stale > * { opacity:.35; }
-  .pv-type { margin-right:auto; color:var(--muted); font-size:12px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; min-width:0; }
+  .pv-type { margin-right:auto; color:var(--muted); font-size:calc(12px * var(--ui-k, 1)); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; min-width:0; }
   .pv-pct { min-width:58px; }
   .pv-view { position:relative; overflow:hidden; contain:strict; cursor:grab; user-select:none; touch-action:none; background-color:#fff;
              background-image:radial-gradient(rgba(100, 116, 139, .22) 1px, transparent 1px); background-size:18px 18px; }
   .pv-view.grab { cursor:grabbing; }
   .pv-stage { position:absolute; left:0; top:0; transform-origin:0 0; transform:translate(0, 0); }
   .pv-stage svg { display:block; }
-  .pv-note { padding:6px 10px; color:var(--muted); font-size:12px; white-space:pre-wrap; border-top:1px solid var(--line); }
-  .pv-err { margin:0; max-height:40%; overflow:auto; padding:8px 10px; font-size:12px; white-space:pre-wrap; color:var(--bad); border-top:2px solid var(--bad);
+  .pv-note { padding:6px 10px; color:var(--muted); font-size:calc(12px * var(--ui-k, 1)); white-space:pre-wrap; border-top:1px solid var(--line); }
+  .pv-err { margin:0; max-height:40%; overflow:auto; padding:8px 10px; font-size:calc(12px * var(--ui-k, 1)); white-space:pre-wrap; color:var(--bad); border-top:2px solid var(--bad);
             background:color-mix(in srgb, var(--bad) 8%, var(--panel)); }
   /* Renders off-screen-but-visible so the browser does not throttle it; never clickable or focusable. */
   .pv-sandbox { position:fixed; left:0; top:0; width:100vw; height:100vh; border:0; opacity:0; pointer-events:none; z-index:-1; }
   /* Markdown: page-like reading surface in the app theme. */
-  .pv-md { overflow:auto; padding:16px 24px 40vh; line-height:1.6; color:var(--ink); background:var(--bg); font-size:14px; overflow-wrap:anywhere; }
+  .pv-md { overflow:auto; padding:16px 24px 40vh; line-height:1.6; color:var(--ink); background:var(--bg); font-size:calc(14px * var(--ui-k, 1)); overflow-wrap:anywhere; }
   .pv-md > :first-child { margin-top:0; }
   .pv-md h1, .pv-md h2 { border-bottom:1px solid var(--line); padding-bottom:.25em; }
   .pv-md a { color:var(--acc); }
@@ -46,7 +46,7 @@
   .pv-frame { width:100%; height:100%; border:0; background:#fff; }
   /* CSV / JSON table */
   .pv-table { overflow:auto; background:var(--bg); }
-  .pv-table table { border-collapse:collapse; font-size:12px; font-family:ui-monospace, Consolas, monospace; }
+  .pv-table table { border-collapse:collapse; font-size:calc(12px * var(--ui-k, 1)); font-family:ui-monospace, Consolas, monospace; }
   .pv-table th, .pv-table td { border:1px solid var(--line); padding:3px 8px; text-align:left; white-space:pre; max-width:40ch; overflow:hidden; text-overflow:ellipsis; }
   .pv-table th { position:sticky; top:0; background:var(--panel); z-index:1; }
   .pv-table td:first-child, .pv-table th:first-child { color:var(--muted); text-align:right; }

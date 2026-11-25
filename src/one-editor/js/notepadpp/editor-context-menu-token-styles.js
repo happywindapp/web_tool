@@ -68,7 +68,10 @@ const EditorMenu = (() => {
     if (pos !== null && !st.selection.ranges.some(r => pos >= r.from && pos <= r.to)) v.dispatch({ selection: { anchor: pos } });
     if (!x && !y) { const c = v.coordsAtPos(st.selection.main.head); if (c) { x = c.left; y = c.bottom; } }
     const mark = TabMenu.entry("🔖 " + T("Bookmark: bật / tắt ở dòng này"), key("bookmark"), () => BookmarkList.toggle(Docs.get(g.active)));
-    TabMenu.show([...editNodes(v), mark, sep(), ...SelectionActions.nodes(v, x, y), ...styleNodes()], x, y);
+    const d = Docs.get(g.active), spell = Writing.spellOn(d);
+    const spelling = [TabMenu.entry((spell ? "✓ " : "") + T("Kiểm chính tả English (tab này)"), key("spellToggle"), () => Writing.toggleSpell(d)),
+      ...(spell ? [TabMenu.entry(T("Gợi ý chính tả (menu trình duyệt)"), T("Shift+chuột phải"), ExplorerMenu.armNative)] : [])];
+    TabMenu.show([...editNodes(v), mark, ...spelling, sep(), ...SelectionActions.nodes(v, x, y), ...styleNodes()], x, y);
   }
 
   function openFromButton(btn) {

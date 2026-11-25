@@ -1,0 +1,2 @@
+  /* Phase 14e: Git conflict count in the status bar (the block widget styles load with the extras bundle). */
+  .statusbar #stConflict { color:var(--warn); font-weight:600; }

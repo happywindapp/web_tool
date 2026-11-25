@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'unsafe-inline'; img-src data: blob:; font-src data:; frame-src 'self' https://embed.diagrams.net; media-src https://api.dictionaryapi.dev; connect-src https://quan111.goatcounter.com https://api.mymemory.translated.net https://api.dictionaryapi.dev https://api.tatoeba.org https://r.jina.ai https://www.googleapis.com https://api.onedrive.com https://api-badgerp.svc.ms https://my.microsoftpersonalcontent.com https://*.1drv.com">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; worker-src blob:; style-src 'unsafe-inline'; img-src data: blob:; font-src data:; frame-src 'self' https://embed.diagrams.net; media-src https://api.dictionaryapi.dev; connect-src https://quan111.goatcounter.com https://api.mymemory.translated.net https://api.dictionaryapi.dev https://api.tatoeba.org https://r.jina.ai https://www.googleapis.com https://api.onedrive.com https://api-badgerp.svc.ms https://my.microsoftpersonalcontent.com https://*.1drv.com">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>One Editor</title>
 <style>
@@ -24,6 +24,8 @@
 /* @include styles/data-tree-query-rainbow.css */
 /* @include styles/log-fix-highlight-filter.css */
 /* @include styles/editor-extras-outline-crumbs.css */
+/* @include styles/sticky-scroll-paste-bar-profile.css */
+/* @include styles/git-conflict-status.css */
 /* @include styles/token-style-highlights-and-editor-menu.css */
 /* @include ../data-workbench/styles/phone-portrait-layout.css */
 </style>
@@ -44,17 +46,36 @@
 </script>
 </head>
 <body>
+<!-- Icons: Lucide (ISC License, https://lucide.dev) -->
+<svg hidden aria-hidden="true"><defs>
+  <symbol id="ic-folder" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></symbol>
+  <symbol id="ic-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></symbol>
+  <symbol id="ic-list" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h.01M3 18h.01M3 6h.01M8 12h13M8 18h13M8 6h13"/></symbol>
+  <symbol id="ic-bookmark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></symbol>
+  <symbol id="ic-git" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><line x1="6" x2="6" y1="3" y2="15"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M18 9a9 9 0 0 1-9 9"/></symbol>
+  <symbol id="ic-alert" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></symbol>
+  <symbol id="ic-history" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></symbol>
+  <symbol id="ic-check-sq" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="m9 12 2 2 4-4"/></symbol>
+  <symbol id="ic-clipboard" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></symbol>
+  <symbol id="ic-puzzle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M19.439 7.85c-.049.322.059.648.289.878l1.568 1.568c.47.47.706 1.087.706 1.704s-.235 1.233-.706 1.704l-1.611 1.611a.98.98 0 0 1-.837.276c-.47-.07-.802-.48-.968-.925a2.501 2.501 0 1 0-3.214 3.214c.446.166.855.497.925.968a.979.979 0 0 1-.276.837l-1.61 1.61a2.404 2.404 0 0 1-1.705.707 2.402 2.402 0 0 1-1.704-.706l-1.568-1.568a1.026 1.026 0 0 0-.877-.29c-.493.074-.84.504-1.02.968a2.5 2.5 0 1 1-3.237-3.237c.464-.18.894-.527.967-1.02a1.026 1.026 0 0 0-.289-.877l-1.568-1.568A2.402 2.402 0 0 1 1.998 12c0-.617.236-1.234.706-1.704L4.23 8.77c.24-.24.581-.353.917-.303.515.077.877.528 1.073 1.01a2.5 2.5 0 1 0 3.259-3.259c-.482-.196-.933-.558-1.01-1.073-.05-.336.062-.676.303-.917l1.525-1.525A2.402 2.402 0 0 1 12 1.998c.617 0 1.234.236 1.704.706l1.568 1.568c.23.23.556.338.877.29.493-.074.84-.504 1.02-.968a2.5 2.5 0 1 1 3.237 3.237c-.464.18-.894.527-.967 1.02Z"/></symbol>
+  <symbol id="ic-trash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></symbol>
+  <symbol id="ic-settings" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></symbol>
+  <symbol id="ic-link" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></symbol>
+  <symbol id="ic-wrench" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></symbol>
+  <symbol id="ic-keyboard" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="M6 8h.001M10 8h.001M14 8h.001M18 8h.001M8 12h.001M12 12h.001M16 12h.001M7 16h10"/></symbol>
+</defs></svg>
 <header class="top">
   <a class="btn" href="../index.html">← Home</a>
   <button id="btnRunTop" class="main" title="Chạy phép đã chọn trên tab đang mở — kết quả ra tab liên kết ở view kia (Ctrl+Enter)">▶ Chạy</button>
   <h1><a class="app-title" href="one-editor.html" target="_blank" rel="noopener" title="Mở One Editor ở tab trình duyệt mới">One Editor</a></h1>
   <button class="more-toggle" title="Thêm thao tác" aria-expanded="false">⋯</button>
-  <button id="btnShare" title="Chép link chứa các tab đang mở (dữ liệu nằm sau dấu #, không gửi lên máy chủ)">🔗 Chia sẻ link</button>
+  <button id="btnShare" title="Chép link chứa các tab đang mở (dữ liệu nằm sau dấu #, không gửi lên máy chủ)"><svg class="ic" aria-hidden="true"><use href="#ic-link"/></svg> Chia sẻ link</button>
   <button id="btnOpenIn" title="Mở nội dung tab đang mở bằng tool khác (Data Workbench, FIX Parser, Diagram Editor, One Editor) ở tab trình duyệt mới — dữ liệu nằm sau dấu #, không gửi lên máy chủ" aria-haspopup="menu">↗ Mở bằng tool ▾</button>
   <label class="chk" title="Giao diện sáng / tối">Giao diện <select id="uiTheme"><option value="auto">Tự động</option><option value="light">Sáng</option><option value="dark">Tối</option></select></label>
-  <button id="btnToolbar" title="Ẩn / hiện thanh công cụ" aria-pressed="true">🧰 Công cụ</button>
-  <button id="btnSettings" title="Cài đặt — mọi cài đặt của One Editor (Ctrl+,)">⚙ Cài đặt</button>
-  <button id="btnClear" title="Xoá mọi ghi chú và tab đã lưu trong IndexedDB của trình duyệt này">🗑 Xoá dữ liệu</button>
+  <label class="chk ui-size-label" title="Cỡ chữ và icon của giao diện — dùng chung mọi tool">Cỡ <select class="ui-size-pick"><option value="small">Nhỏ</option><option value="medium">Vừa</option><option value="large">Lớn</option></select></label>
+  <button id="btnToolbar" title="Ẩn / hiện thanh công cụ" aria-pressed="true"><svg class="ic" aria-hidden="true"><use href="#ic-wrench"/></svg> Công cụ</button>
+  <button id="btnSettings" title="Cài đặt — mọi cài đặt của One Editor (Ctrl+,)"><svg class="ic" aria-hidden="true"><use href="#ic-settings"/></svg> Cài đặt</button>
+  <button id="btnClear" title="Xoá mọi ghi chú và tab đã lưu trong IndexedDB của trình duyệt này"><svg class="ic" aria-hidden="true"><use href="#ic-trash"/></svg> Xoá dữ liệu</button>
   <span class="seg lang-switch" title="Ngôn ngữ"><span class="gc-views" title="Lượt truy cập (GoatCounter, cập nhật mỗi ~10 phút)" hidden></span><button data-lang="vi">VI</button><button data-lang="en">EN</button></span>
 </header>
 <div class="toolbar">
@@ -72,7 +93,7 @@
   <button id="btnFormat" title="Format tab đang mở theo ngôn ngữ — kết quả ra tab liên kết ở view kia (Shift+Alt+F: format tại chỗ)">✨ Format</button>
   <select id="demo" class="demo-picker" title="Nạp dữ liệu mẫu thành tab tạm (không đè bài đang sửa)" data-i18n-skip></select>
   <span class="sep"></span>
-  <label class="chk" title="Ngôn ngữ của tab đang mở — mặc định tự nhận theo tên file, shebang / modeline rồi nội dung">Ngôn ngữ <select id="langSel" data-i18n-skip></select></label>
+  <select id="langSel" title="Ngôn ngữ của tab đang mở — mặc định tự nhận theo tên file, shebang / modeline rồi nội dung" data-i18n-skip></select>
   <label class="chk" title="Xuống dòng mềm (Alt+Z)"><input id="chkWrap" type="checkbox"> Xuống dòng</label>
   <label class="chk desktop-only" title="Bản thu nhỏ của file ở mép phải editor — bấm / kéo trên đó để cuộn"><input id="chkMinimap" type="checkbox"> Minimap</label>
   <button id="btnZoomIn" class="icon-btn" title="Phóng to chữ (Ctrl+=)">A+</button>
@@ -94,20 +115,20 @@
   <aside class="pane" id="explorerPane">
     <nav class="activity" role="toolbar" aria-label="Thanh hoạt động">
       <div class="act-top">
-      <button data-side="explorer" class="on" title="Explorer — tab đang mở, ghi chú, gần đây, folder (Ctrl+Shift+E)">📁</button>
-      <button data-side="search" title="Tìm / thay trong mọi tab, ghi chú và folder đang mở (Ctrl+Shift+F / Ctrl+Shift+H)">🔍</button>
-      <button data-side="outline" title="Outline — hàm, class, tiêu đề của tab đang mở">☰</button>
-      <button data-side="bookmarks" title="Bookmark — mọi dòng đã đánh dấu trong tab, ghi chú và file (Ctrl+F2 đặt / bỏ, F2 / Shift+F2 tới cái kế / trước)">🔖</button>
-      <button data-side="git" title="Git — file đã đổi so với HEAD của repo trong folder Explorer, chỉ đọc (Ctrl+Shift+G)">⎇</button>
-      <button data-side="problems" title="Problems — lỗi / cảnh báo của mọi tab đang mở (Ctrl+Shift+M)">⚠</button>
-      <button data-side="timeline" title="Timeline — lịch sử cục bộ của tab đang chọn: so sánh, khôi phục">🕘</button>
-      <button data-side="todo" title="TODO / FIXME — các tag trong tab, ghi chú và folder đang mở">☑</button>
-      <button data-side="clipboard" title="Lịch sử clipboard — các đoạn đã chép / cắt, bấm để chèn vào con trỏ">📋</button>
-      <button data-side="library" title="Thư viện của tôi — snippet, macro, bộ thay hàng loạt, recipe; xuất / nhập file">🧩</button>
+      <button data-side="explorer" class="on" title="Explorer — tab đang mở, ghi chú, gần đây, folder (Ctrl+Shift+E)"><svg class="ic" aria-hidden="true"><use href="#ic-folder"/></svg></button>
+      <button data-side="search" title="Tìm / thay trong mọi tab, ghi chú và folder đang mở (Ctrl+Shift+F / Ctrl+Shift+H)"><svg class="ic" aria-hidden="true"><use href="#ic-search"/></svg></button>
+      <button data-side="outline" title="Outline — hàm, class, tiêu đề của tab đang mở"><svg class="ic" aria-hidden="true"><use href="#ic-list"/></svg></button>
+      <button data-side="bookmarks" title="Bookmark — mọi dòng đã đánh dấu trong tab, ghi chú và file (Ctrl+F2 đặt / bỏ, F2 / Shift+F2 tới cái kế / trước)"><svg class="ic" aria-hidden="true"><use href="#ic-bookmark"/></svg></button>
+      <button data-side="git" title="Git — file đã đổi so với HEAD của repo trong folder Explorer, chỉ đọc (Ctrl+Shift+G)"><svg class="ic" aria-hidden="true"><use href="#ic-git"/></svg></button>
+      <button data-side="problems" title="Problems — lỗi / cảnh báo của mọi tab đang mở (Ctrl+Shift+M)"><svg class="ic" aria-hidden="true"><use href="#ic-alert"/></svg></button>
+      <button data-side="timeline" title="Timeline — lịch sử cục bộ của tab đang chọn: so sánh, khôi phục"><svg class="ic" aria-hidden="true"><use href="#ic-history"/></svg></button>
+      <button data-side="todo" title="TODO / FIXME — các tag trong tab, ghi chú và folder đang mở"><svg class="ic" aria-hidden="true"><use href="#ic-check-sq"/></svg></button>
+      <button data-side="clipboard" title="Lịch sử clipboard — các đoạn đã chép / cắt, bấm để chèn vào con trỏ"><svg class="ic" aria-hidden="true"><use href="#ic-clipboard"/></svg></button>
+      <button data-side="library" title="Thư viện của tôi — snippet, macro, bộ thay hàng loạt, recipe; xuất / nhập file"><svg class="ic" aria-hidden="true"><use href="#ic-puzzle"/></svg></button>
       </div>
       <div class="act-bottom">
-      <button data-act="trash" title="Thùng rác — file đã xoá trong Explorer, khôi phục được" hidden>🗑</button>
-      <button data-act="settings" title="Cài đặt — mọi cài đặt của One Editor (Ctrl+,)">⚙</button>
+      <button data-act="trash" title="Thùng rác — file đã xoá trong Explorer, khôi phục được" hidden><svg class="ic" aria-hidden="true"><use href="#ic-trash"/></svg></button>
+      <button data-act="settings" title="Cài đặt — mọi cài đặt của One Editor (Ctrl+,)"><svg class="ic" aria-hidden="true"><use href="#ic-settings"/></svg></button>
       </div>
     </nav>
     <div class="side" data-side-panel="explorer">
@@ -192,6 +213,7 @@
   <span id="stPos" data-i18n-skip></span>
   <span id="stCount" data-i18n-skip></span>
   <button id="stLint" class="link bad" title="Lỗi / cảnh báo của tab — bấm để mở danh sách (Ctrl+Shift+M), F8 tới lỗi kế" data-i18n-skip></button>
+  <button id="stConflict" class="link warn" title="Conflict Git trong tab — bấm để tới conflict kế (Palette: Accept all current / incoming)" data-i18n-skip hidden></button>
   <span id="stSrc" data-i18n-skip></span>
   <span id="stStore" data-i18n-skip hidden></span>
   <!-- @include ../data-workbench/partials/author-credit-in-footer.html -->
@@ -254,11 +276,17 @@
 // @include js/i18n/en-one-editor-commander-search-compare-strings.js
 // @include js/i18n/en-one-editor-bookmarks-strings.js
 // @include js/i18n/en-one-editor-side-panels-strings.js
+// @include js/i18n/en-one-editor-writing-paste-backup-strings.js
+// @include js/i18n/en-one-editor-data-files-strings.js
+// @include js/i18n/en-one-editor-log-domain-main-strings.js
+// @include js/i18n/en-one-editor-devtools-14d-main-strings.js
+// @include js/i18n/en-one-editor-git-14e-main-strings.js
 // @include js/i18n/vi-codemirror-phrases.js
 // @include ../data-workbench/js/core/text-utils.js
 // @include ../data-workbench/js/core/dom-and-storage-helpers.js
 // @include ../data-workbench/js/core/share-link-codec.js
 // @include ../data-workbench/js/core/theme-picker-auto-light-dark.js
+// @include ../data-workbench/js/core/ui-size-picker-small-medium-large.js
 // @include ../data-workbench/js/core/phone-pane-switcher.js
 // @include ../data-workbench/js/parsers/format-detect.js
 // @include ../data-workbench/js/parsers/json-tolerant-parser.js
@@ -277,6 +305,7 @@
 // @include js/core/fuzzy-match.js
 // @include js/core/hex-dump.js
 // @include js/core/explorer-name-match-pure.js
+// @include js/core/paste-content-detect-pure.js
 // @include js/core/explorer-trash-quota-pure.js
 // @include js/core/explorer-group-and-column-filter-pure.js
 // @include js/core/explorer-history-hotlist-pure.js
@@ -302,6 +331,12 @@
 // @include js/core/demo-samples-power-tools.js
 // @include js/core/demo-samples-explorer-folder.js
 // @include js/core/demo-samples-side-panels.js
+// @include js/core/demo-samples-writing-backup.js
+// @include js/core/demo-samples-data-sql-office.js
+// @include js/core/demo-samples-log-domain.js
+// @include js/core/demo-samples-dev-tools-14d.js
+// @include js/core/demo-samples-git-14e.js
+// @include js/core/git-conflict-markers-pure.js
 // @include js/core/bookmark-lines-pure.js
 // @include js/providers/notes-indexeddb-provider.js
 // @include js/providers/explorer-trash-indexeddb-store.js
@@ -370,6 +405,7 @@
 // @include js/data/rainbow-csv-columns.js
 // @include js/log/log-fix-line-highlight.js
 // @include js/log/fix-tag-hover.js
+// @include js/log/swift-mt-outline-marks-hover.js
 // @include js/log/fix-detail-op-entry.js
 // @include js/log/file-tail-monitor.js
 // @include js/editor/editor-extras-lazy-entry.js
@@ -474,6 +510,10 @@
 // @include js/editor/keymap-profiles.js
 // @include js/editor/snippets-completion.js
 // @include js/editor/editor-visual-aids.js
+// @include js/editor/sticky-scroll-header.js
+// @include js/editor/git-conflict-scan.js
+// @include js/editor/writing-spellcheck-typewriter.js
+// @include js/editor/smart-paste-banner.js
 // @include js/editor/outline-panel.js
 // @include js/workbench/named-sessions.js
 // @include js/core/encrypted-share-codec.js
@@ -482,6 +522,7 @@
 // @include js/workbench/timeline-side-panel.js
 // @include js/workbench/my-library-side-panel.js
 // @include js/workbench/settings-entries-built-in.js
+// @include js/workbench/writing-backup-settings-and-commands.js
 // @include js/core/app-boot.js
 </script>
 </body>

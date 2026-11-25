@@ -2,8 +2,8 @@
   .pv-fix { display:grid; grid-template-rows:minmax(120px, 42%) minmax(0, 1fr); height:100%; min-height:0; background:var(--bg); color:var(--ink); }
   .fx-list { display:grid; grid-template-rows:auto minmax(0, 1fr); min-height:0; background:var(--bg); color:var(--ink); border-bottom:2px solid var(--line); }
   .fx-list[hidden], .fx-list [hidden] { display:none !important; }
-  .fx-filters { display:flex; flex-wrap:wrap; gap:4px 6px; align-items:center; padding:4px 6px; background:var(--panel); border-bottom:1px solid var(--line); font-size:12px; }
-  .fx-filters input[type=text], .fx-filters select, .fx-filters button { font-size:12px; padding:2px 6px; }
+  .fx-filters { display:flex; flex-wrap:wrap; gap:4px 6px; align-items:center; padding:4px 6px; background:var(--panel); border-bottom:1px solid var(--line); font-size:calc(12px * var(--ui-k, 1)); }
+  .fx-filters input[type=text], .fx-filters select, .fx-filters button { font-size:calc(12px * var(--ui-k, 1)); padding:2px 6px; }
   .fx-filters .fx-q { flex:1 1 180px; min-width:120px; }
   .fx-filters select { max-width:15em; }
   /* A narrow list (phone, 3-column layout): the filters stay on one scrolling row so the table keeps its height. */
@@ -12,7 +12,7 @@
   .fx-grid { position:relative; overflow:auto; min-height:0; }
   .fx-grid:focus { outline:0; }
   .pv-fix .fx-detail { overflow:auto; padding:8px 10px 24px; }
-  .pv-fix table, .fx-list table { border-collapse:collapse; width:100%; font:12px/1.35 Consolas, "Cascadia Mono", monospace; }
+  .pv-fix table, .fx-list table { border-collapse:collapse; width:100%; font:calc(12px * var(--ui-k, 1))/1.35 Consolas, "Cascadia Mono", monospace; }
   .pv-fix th, .fx-list th { position:sticky; top:0; z-index:1; background:var(--gut); text-align:left; font-weight:600; padding:4px 6px; border-bottom:1px solid var(--line); white-space:nowrap; }
   .fx-list th[data-col] { cursor:pointer; } .fx-list th[data-col]:hover { color:var(--acc); }
   .fx-list td { padding:3px 6px; border-bottom:1px solid var(--line); white-space:nowrap; max-width:260px; overflow:hidden; text-overflow:ellipsis; }
@@ -22,7 +22,7 @@
   .fx-list tr.admin td { color:var(--muted); } .fx-list tr.in td.dir { color:var(--tn); }
   .fx-list td.lv-error { color:var(--bad); } .fx-list td.lv-warn { color:var(--warn); } .fx-list td.lv-info { color:var(--muted); } .fx-list td.lv-ok { color:var(--good); }
   .fx-list td.t-rej { color:var(--bad); font-weight:600; } .fx-list td.t-er { color:var(--good); font-weight:600; } .fx-list td.t-app { color:var(--k); font-weight:600; }
-  .fx-list .more { padding:8px; text-align:center; color:var(--muted); font-size:12px; }
+  .fx-list .more { padding:8px; text-align:center; color:var(--muted); font-size:calc(12px * var(--ui-k, 1)); }
   /* 3 panes (◫): the source view gets the list under its editor, the pane keeps only the detail. */
   .pv-fix.solo { grid-template-rows:minmax(0, 1fr); }
   .group.fx3 { grid-template-rows:auto minmax(90px, 1fr) minmax(0, 1fr); }
@@ -34,16 +34,16 @@
   }
   .pv-tools button.on { background:var(--acc); color:#fff; border-color:var(--acc); }
   .pv-fix .dhead { display:flex; flex-wrap:wrap; gap:4px 10px; align-items:baseline; margin-bottom:6px; }
-  .pv-fix .dhead b { font-size:15px; }
-  .pv-fix .purpose { font-size:12.5px; margin:-2px 0 6px; } .pv-fix .purpose div + div { margin-top:2px; }
-  .pv-fix .prefix { font:12px Consolas, monospace; color:var(--muted); margin-bottom:4px; word-break:break-all; }
+  .pv-fix .dhead b { font-size:calc(15px * var(--ui-k, 1)); }
+  .pv-fix .purpose { font-size:calc(12.5px * var(--ui-k, 1)); margin:-2px 0 6px; } .pv-fix .purpose div + div { margin-top:2px; }
+  .pv-fix .prefix { font:calc(12px * var(--ui-k, 1)) Consolas, monospace; color:var(--muted); margin-bottom:4px; word-break:break-all; }
   .pv-fix .dacts { display:flex; flex-wrap:wrap; gap:6px; margin:6px 0; }
-  .pv-fix .dacts button { font-size:12px; padding:3px 8px; }
-  .pv-fix ul.issues { margin:4px 0 8px; padding-left:18px; font-size:12.5px; }
+  .pv-fix .dacts button { font-size:calc(12px * var(--ui-k, 1)); padding:3px 8px; }
+  .pv-fix ul.issues { margin:4px 0 8px; padding-left:18px; font-size:calc(12.5px * var(--ui-k, 1)); }
   .pv-fix ul.issues li { cursor:pointer; }
   .pv-fix li.error { color:var(--bad); } .pv-fix li.warn { color:var(--warn); } .pv-fix li.info { color:var(--muted); }
   .pv-fix .good { color:var(--good); }
-  .pv-fix .hint { font-size:12px; margin:2px 0 4px; }
+  .pv-fix .hint { font-size:calc(12px * var(--ui-k, 1)); margin:2px 0 4px; }
   .pv-fix table.fields th { top:-8px; }
   .pv-fix table.fields td { padding:3px 6px; border-bottom:1px solid var(--line); vertical-align:top; }
   .pv-fix table.fields td.tg { color:var(--tn); font-weight:600; text-align:right; white-space:nowrap; }
@@ -56,12 +56,12 @@
   .pv-fix table.fields td.mn .hv { color:var(--muted); }
   .pv-fix table.fields td.mn .desc { color:var(--muted); font-style:italic; font-family:"Segoe UI", Arial, sans-serif; }
   .pv-fix table.fields tbody tr[data-tag]:hover td { background:var(--hover); }
-  .pv-fix pre.raw { margin:10px 0 0; padding:8px; background:var(--code); border:1px solid var(--line); border-radius:6px; white-space:pre-wrap; word-break:break-all; font:12px/1.5 Consolas, monospace; }
+  .pv-fix pre.raw { margin:10px 0 0; padding:8px; background:var(--code); border:1px solid var(--line); border-radius:6px; white-space:pre-wrap; word-break:break-all; font:calc(12px * var(--ui-k, 1))/1.5 Consolas, monospace; }
   .pv-fix pre.raw .tn { color:var(--tn); } .pv-fix pre.raw .av { color:var(--av); } .pv-fix pre.raw .d { color:var(--muted); } .pv-fix pre.raw .bad { color:var(--bad); }
   .tip { position:fixed; z-index:50; max-width:480px; padding:8px 10px; background:var(--panel); color:var(--ink); border:1px solid var(--line); border-radius:8px;
-         box-shadow:0 6px 24px rgba(0,0,0,.18); font:12.5px/1.45 "Segoe UI", Arial, sans-serif; pointer-events:none; }
+         box-shadow:0 6px 24px rgba(0,0,0,.18); font:calc(12.5px * var(--ui-k, 1))/1.45 "Segoe UI", Arial, sans-serif; pointer-events:none; }
   .tip .tt-h { margin-bottom:4px; } .tip .tt-h .tn { font-family:Consolas, monospace; color:var(--tn); }
-  .tip .tt-req { margin-left:6px; padding:0 6px; border-radius:8px; background:var(--gut); color:var(--muted); font-size:11.5px; }
+  .tip .tt-req { margin-left:6px; padding:0 6px; border-radius:8px; background:var(--gut); color:var(--muted); font-size:calc(11.5px * var(--ui-k, 1)); }
   .tip .tt-v code { font-family:Consolas, monospace; color:var(--av); }
   .tip .tt-c { color:var(--muted); margin-top:2px; }
   .tip .tt-sec { margin-top:6px; padding-top:6px; border-top:1px solid var(--line); }

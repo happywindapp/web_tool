@@ -1,5 +1,5 @@
   /* Data tools: tree pane, JSONPath / XPath query pane, Rainbow CSV column colours, Problems count. */
-  .pv-tree, .pv-query { overflow:auto; padding:8px 12px 24px; background:var(--bg); color:var(--ink); font:13px/1.55 Consolas, "Cascadia Mono", monospace; }
+  .pv-tree, .pv-query { overflow:auto; padding:8px 12px 24px; background:var(--bg); color:var(--ink); font:calc(13px * var(--ui-k, 1))/1.55 Consolas, "Cascadia Mono", monospace; }
   .pv-tree details { padding-left:16px; }
   .pv-tree > details, .pv-tree > .tleaf { padding-left:0; }
   .pv-tree .tleaf { padding-left:30px; }
@@ -26,4 +26,4 @@
   .rb4 { color:var(--l); } .rb5 { color:var(--acc); } .rb6 { color:var(--bad); } .rb7 { color:var(--muted); }
   #stLint { font-weight:600; }
   #stLint:empty { display:none; }
-  @media (max-width:640px) { .dq-input { width:100%; } .pv-query td { font-size:12px; } }
+  @media (max-width:640px) { .dq-input { width:100%; } .pv-query td { font-size:calc(12px * var(--ui-k, 1)); } }

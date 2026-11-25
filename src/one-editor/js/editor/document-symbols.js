@@ -33,6 +33,7 @@ const Symbols = (() => {
 
   // → [{ label, kind, line, pos }] in document order.
   function list(state) {
+    if (/^\s*\{1:F0\d/.test(state.sliceDoc(0, 64))) return SwiftMarks.outline(state.doc.toString()).map(s => ({ label: s.label, kind: "H" + (s.depth + 1), line: s.line, pos: state.doc.line(s.line).from }));
     let out = fromTree(state);
     if (!out.length) out = fromLines(state);
     return out.map(s => Object.assign(s, { line: state.doc.lineAt(s.pos).number }));

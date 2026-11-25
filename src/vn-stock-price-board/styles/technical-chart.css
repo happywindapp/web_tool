@@ -1,19 +1,19 @@
   /* Technical chart: compact chart in the detail pane + near full-screen dialog. */
   .mini-chart { border-top:1px solid var(--line); padding:6px 0 4px; }
   .cbar { display:flex; flex-wrap:wrap; gap:6px; align-items:center; padding:0 12px 6px; }
-  .cbar select, .cbar button { padding:3px 8px; font-size:12.5px; }
+  .cbar select, .cbar button { padding:3px 8px; font-size:calc(12.5px * var(--ui-k, 1)); }
   .cbar .seg button { padding:3px 7px; }
   .cbar .seg button.on { background:var(--acc); color:#fff; border-color:var(--acc); }
   .cbar button:disabled { opacity:.35; }
   .cbox { position:relative; }
   .mini-chart .cbox { height:260px; margin:0 6px; }
   .chost { position:absolute; inset:0; }
-  .clegend { position:absolute; z-index:3; top:2px; left:8px; right:70px; display:flex; flex-wrap:wrap; gap:2px 10px; font-size:11.5px; font-variant-numeric:tabular-nums;
+  .clegend { position:absolute; z-index:3; top:2px; left:8px; right:70px; display:flex; flex-wrap:wrap; gap:2px 10px; font-size:calc(11.5px * var(--ui-k, 1)); font-variant-numeric:tabular-nums;
              color:var(--muted); pointer-events:none; text-shadow:0 0 3px var(--panel); }
   .clegend b { font-weight:600; }
   .cmsg { position:absolute; z-index:4; inset:0; display:grid; place-items:center; margin:0; padding:12px; text-align:center; color:var(--muted); background:var(--panel); }
   .cmsg[hidden] { display:none; }
-  button.chart-btn { min-height:0; padding:3px 12px; border:1px solid var(--acc); border-radius:999px; background:var(--acc); color:#fff; font-size:12.5px; font-weight:600; vertical-align:2px; box-shadow:0 1px 3px rgb(14 116 144 / .35); }
+  button.chart-btn { min-height:0; padding:3px 12px; border:1px solid var(--acc); border-radius:999px; background:var(--acc); color:#fff; font-size:calc(12.5px * var(--ui-k, 1)); font-weight:600; vertical-align:2px; box-shadow:0 1px 3px rgb(14 116 144 / .35); }
   @media (hover:hover) { button.chart-btn:hover { background:color-mix(in srgb, var(--acc) 82%, #000); } }
   .cbar button.chart-btn { margin-left:auto; padding:3px 12px; }
 
@@ -24,57 +24,57 @@
   .chart-dlg > * { flex:none; }
   .chart-dlg .cbox { flex:1 1 0; min-height:200px; margin:0 8px; overflow-x:hidden; overflow-y:auto; overscroll-behavior:contain; }
   .dlg-head { display:flex; align-items:center; gap:8px; padding:8px 12px; border-bottom:1px solid var(--line); }
-  .dlg-head #dlgTitle { flex:1 1 auto; min-width:0; font-size:15px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-  .dlg-head #dlgTitle b:first-child { font-size:18px; }
+  .dlg-head #dlgTitle { flex:1 1 auto; min-width:0; font-size:calc(15px * var(--ui-k, 1)); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .dlg-head #dlgTitle b:first-child { font-size:calc(18px * var(--ui-k, 1)); }
   .chart-dlg .cbar { padding:8px 12px 4px; }
   .indmenu { position:relative; }
-  .indmenu > summary { list-style:none; padding:3px 10px; border:1px solid var(--line); border-radius:6px; background:var(--btn); font-size:12.5px; cursor:pointer; white-space:nowrap; }
+  .indmenu > summary { list-style:none; padding:3px 10px; border:1px solid var(--line); border-radius:6px; background:var(--btn); font-size:calc(12.5px * var(--ui-k, 1)); cursor:pointer; white-space:nowrap; }
   .indmenu > summary::-webkit-details-marker { display:none; }
   .indmenu[open] > summary { border-color:var(--acc); }
   .indpanel { position:absolute; z-index:20; top:calc(100% + 4px); left:0; display:grid; gap:1px; width:max-content; max-width:min(420px, 90vw); max-height:60vh; overflow:auto;
-              padding:6px 10px; border:1px solid var(--line); border-radius:8px; background:var(--panel); box-shadow:0 6px 18px rgb(0 0 0 / .25); font-size:12.5px; }
-  .indpanel > b { margin-top:4px; color:var(--muted); font-size:11px; text-transform:uppercase; }
+              padding:6px 10px; border:1px solid var(--line); border-radius:8px; background:var(--panel); box-shadow:0 6px 18px rgb(0 0 0 / .25); font-size:calc(12.5px * var(--ui-k, 1)); }
+  .indpanel > b { margin-top:4px; color:var(--muted); font-size:calc(11px * var(--ui-k, 1)); text-transform:uppercase; }
   .indpanel label { display:flex; align-items:baseline; gap:6px; padding:2px 0; cursor:pointer; white-space:nowrap; }
   .indrow { display:flex; align-items:center; gap:6px; padding:0 4px 0 8px; border-left:3px solid transparent; border-radius:4px; }
   .indrow.core { border-left-color:var(--acc); background:color-mix(in srgb, var(--acc) 14%, transparent); }
   .indrow.core label > b { color:var(--acc); }
-  .indnote { color:var(--muted); font-size:11px; }
+  .indnote { color:var(--muted); font-size:calc(11px * var(--ui-k, 1)); }
   .xdot { color:#eab308; }
   .indrow label { flex:1 1 auto; min-width:0; }
-  .qbtn { flex:none; width:20px; height:20px; padding:0; border:1px solid var(--line); border-radius:50%; background:var(--btn); color:var(--acc); font-size:12px; font-weight:700; line-height:1; cursor:pointer; }
+  .qbtn { flex:none; width:20px; height:20px; padding:0; border:1px solid var(--line); border-radius:50%; background:var(--btn); color:var(--acc); font-size:calc(12px * var(--ui-k, 1)); font-weight:700; line-height:1; cursor:pointer; }
   .qbtn:hover, .qbtn:focus-visible { border-color:var(--acc); background:var(--acc); color:#fff; }
   dialog.ind-guide { width:min(760px, 96vw); }
   .ind-guide .dlg-head b { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .ind-guide .dlg-head button { padding:2px 10px; }
-  .ig-body { padding:8px 14px; font-size:13.5px; line-height:1.5; }
+  .ig-body { padding:8px 14px; font-size:calc(13.5px * var(--ui-k, 1)); line-height:1.5; }
   .ig-on { display:inline-flex; gap:6px; margin-bottom:6px; }
   .ig-fig { margin:0 0 6px; }
-  .ig-fig figcaption { font-size:11.5px; text-align:right; }
+  .ig-fig figcaption { font-size:calc(11.5px * var(--ui-k, 1)); text-align:right; }
   .ig-svg { display:block; width:100%; height:auto; border:1px solid var(--line); border-radius:6px; }
   .ig-svg .ig-bg { fill:var(--panel); }
   .ig-svg .ig-up { stroke:var(--up, #16a34a); fill:var(--up, #16a34a); }
   .ig-svg .ig-dn { stroke:var(--down, #dc2626); fill:var(--down, #dc2626); }
   .ig-svg .ig-lvl { stroke:var(--muted); stroke-dasharray:3 3; stroke-width:1; }
-  .ig-svg .ig-ax { fill:var(--muted); font-size:10.5px; }
+  .ig-svg .ig-ax { fill:var(--muted); font-size:calc(10.5px * var(--ui-k, 1)); }
   .ig-svg .ig-ev path { stroke:none; }
-  .ig-svg .ig-ev text { font-size:10.5px; font-weight:700; paint-order:stroke; stroke:var(--panel); stroke-width:3px; }
+  .ig-svg .ig-ev text { font-size:calc(10.5px * var(--ui-k, 1)); font-weight:700; paint-order:stroke; stroke:var(--panel); stroke-width:3px; }
   .ig-svg .ig-ev.up { fill:var(--up, #16a34a); } .ig-svg .ig-ev.down { fill:var(--down, #dc2626); } .ig-svg .ig-ev.warn { fill:#d97706; }
-  @media (max-width: 640px) { .ig-svg .ig-ax, .ig-svg .ig-ev text { font-size:16px; } }
-  .ig-sec h4 { margin:10px 0 2px; color:var(--acc); font-size:13.5px; }
+  @media (max-width: 640px) { .ig-svg .ig-ax, .ig-svg .ig-ev text { font-size:calc(16px * var(--ui-k, 1)); } }
+  .ig-sec h4 { margin:10px 0 2px; color:var(--acc); font-size:calc(13.5px * var(--ui-k, 1)); }
   .ig-sec p, .ig-sec ul { margin:0; } .ig-sec ul { padding-left:20px; }
   .ig-ex li { margin-bottom:3px; } .ig-warn p { padding:6px 10px; border-left:3px solid #d97706; border-radius:4px; background:rgb(217 119 6 / .1); }
-  .indpanel label .muted { font-size:11.5px; overflow:hidden; text-overflow:ellipsis; }
+  .indpanel label .muted { font-size:calc(11.5px * var(--ui-k, 1)); overflow:hidden; text-overflow:ellipsis; }
   .ichips { display:flex; flex-wrap:wrap; gap:6px; padding:0 12px 6px; }
-  .ichip { display:inline-flex; align-items:center; gap:3px; padding:2px 4px 2px 8px; border:1px solid var(--line); border-radius:999px; font-size:12px; background:var(--gut); }
+  .ichip { display:inline-flex; align-items:center; gap:3px; padding:2px 4px 2px 8px; border:1px solid var(--line); border-radius:999px; font-size:calc(12px * var(--ui-k, 1)); background:var(--gut); }
   .ichip input { width:4.2em; padding:1px 3px; border:1px solid var(--line); border-radius:4px; background:var(--btn); color:var(--ink); font:inherit; }
   .ichip button { min-height:0; padding:0 5px; border:0; background:none; color:var(--muted); }
-  .dlg-foot { padding:4px 12px 8px; font-size:12px; }
+  .dlg-foot { padding:4px 12px 8px; font-size:calc(12px * var(--ui-k, 1)); }
 
   /* Full chart help: legend items explain themselves on hover; .ctip follows the cursor over marked bars / indicator panes. */
   .chart-dlg .clegend span { pointer-events:auto; cursor:help; }
-  .pane-tags > span { position:absolute; z-index:3; left:8px; padding:0 5px; border-radius:4px; background:color-mix(in srgb, var(--panel) 80%, transparent); font-size:11.5px; pointer-events:auto; cursor:help; }
+  .pane-tags > span { position:absolute; z-index:3; left:8px; padding:0 5px; border-radius:4px; background:color-mix(in srgb, var(--panel) 80%, transparent); font-size:calc(11.5px * var(--ui-k, 1)); pointer-events:auto; cursor:help; }
   .ctip { position:absolute; z-index:6; max-width:300px; padding:6px 9px; border:1px solid var(--line); border-radius:8px; background:var(--panel);
-          box-shadow:0 4px 14px rgb(0 0 0 / .25); font-size:12px; line-height:1.45; pointer-events:none; }
+          box-shadow:0 4px 14px rgb(0 0 0 / .25); font-size:calc(12px * var(--ui-k, 1)); line-height:1.45; pointer-events:none; }
   .ctip[hidden] { display:none; }
   .tip-ev + .tip-ev, .tip-ev + .tip-pane { margin-top:5px; padding-top:5px; border-top:1px solid var(--gut); }
   .tip-read { margin-top:3px; font-weight:600; }
@@ -82,7 +82,7 @@
     dialog.chart-dlg { width:100vw; height:100dvh; border:0; border-radius:0; }
     .chart-dlg .cbar, .ichips { flex-wrap:nowrap; overflow-x:auto; scrollbar-width:none; }
     .chart-dlg .cbar > *, .ichips > * { flex:none; }
-    .ichip input { font-size:16px; width:3.6em; }
+    .ichip input { font-size:calc(16px * var(--ui-k, 1)); width:3.6em; }
     .mini-chart .cbox { height:230px; }
     .cbar select, .cbar button { min-height:34px; }
     .mini-chart .cbar select { max-width:30vw; }

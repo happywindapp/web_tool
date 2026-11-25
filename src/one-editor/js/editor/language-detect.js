@@ -11,11 +11,11 @@ const LangDetect = (() => {
     "Scala": "scala", "Groovy": "groovy gradle", "Lua": "lua", "Perl": "pl pm", "R": "r", "Dart": "dart", "VB.NET": "vb",
     "Shell": "sh bash zsh ksh", "PowerShell": "ps1 psm1 psd1", "Dockerfile": "dockerfile", "TOML": "toml",
     "Properties files": "properties ini cfg conf env", "diff": "diff patch", "ProtoBuf": "proto", "Vue": "vue",
-    "Mermaid": "mmd mermaid", "PlantUML": "puml plantuml pu iuml", "D2": "d2", "DBML": "dbml", "Structurizr": "dsl", "Graphviz": "dot gv", "FIX": "fix",
+    "Mermaid": "mmd mermaid", "PlantUML": "puml plantuml pu iuml", "D2": "d2", "DBML": "dbml", "Structurizr": "dsl", "Graphviz": "dot gv", "FIX": "fix", "SWIFT MT": "fin",
     "CSV": "csv", "TSV": "tsv tab", "Log": "log", "GraphQL": "graphql gql", [PLAIN]: "txt text",
   };
   const NAMES = { dockerfile: "Dockerfile", jenkinsfile: "Groovy", gemfile: "Ruby", rakefile: "Ruby", ".env": "Properties files", ".editorconfig": "Properties files", ".gitignore": PLAIN };
-  const NO_HIGHLIGHT = new Set(["Mermaid", "PlantUML", "D2", "DBML", "Structurizr", "Graphviz", "FIX", "CSV", "TSV", "Log", "GraphQL", PLAIN]);
+  const NO_HIGHLIGHT = new Set(["Mermaid", "PlantUML", "D2", "DBML", "Structurizr", "Graphviz", "FIX", "SWIFT MT", "CSV", "TSV", "Log", "GraphQL", PLAIN]);
   const BY_EXT = {}, ALIAS = {};
   for (const [id, exts] of Object.entries(EXT)) {
     ALIAS[id.toLowerCase()] = id;
@@ -61,6 +61,7 @@ const LangDetect = (() => {
     Structurizr: [[/^\s*workspace\b[^{\n]*\{/gm, 4, 1], [/^\s*(?:model|views)\s*\{/gm, 2, 2], [/=\s*(?:person|softwareSystem|container)\b/g, 2]],
     Graphviz: [[/^\s*(?:strict\s+)?(?:di)?graph(?:[ \t]+(?:"[^"\n]*"|[\w.]+))?\s*\{/gm, 6, 1]],
     FIX: [[/(?:^|\cA|\|)8=FIXT?\.\d\.\d(?:\cA|\|)/gm, 6, 1], [/(?:\cA|\|)35=\w{1,2}(?:\cA|\|)/g, 2, 1]],
+    "SWIFT MT": [[/^\{1:F0\d[A-Z0-9]{12}/gm, 6, 1], [/^:16[RS]:\w+/gm, 1, 2]],
     DBML: [[/^\s*Table\s+[\w."]+(?:\s+as\s+\w+)?\s*(?:\[[^\]]*\])?\s*\{/gm, 3], [/^\s*Ref\s*\w*\s*:/gm, 2], [/\[(?:pk|primary key|not null|increment|unique|ref:)[^\]]*\]/gi, 1], [/^\s*Enum\s+[\w."]+\s*\{/gm, 2]],
     D2: [[/^\s*direction:\s*(?:right|down|left|up)\s*$/gm, 4, 1], [/^\s*[\w.]+\.(?:shape|style\.[\w-]+|icon):\s*\S/gm, 2], [/^\s*shape:\s*\w+/gm, 2], [/^\s*[\w ."]+?\s*(?:<->|->|--)\s*[\w ."]+?(?::\s*.*)?$/gm, 1]],
     Markdown: [[/^#{1,6}\s+\S/gm, 2, 2], [/^\s*(?:[-*+]|\d+\.)\s+\S/gm, 1], [/\[[^\]\n]+\]\([^)\s]+\)/g, 2], [/^```/gm, 2], [/^>\s/gm, 1], [/\*\*[^*\n]+\*\*/g, 1]],
@@ -96,6 +97,7 @@ const LangDetect = (() => {
     if (s.startsWith("<?php")) return "PHP";
     if (/^<\?xml|^<svg[\s>]/i.test(s)) return "XML";
     if (s.startsWith("<")) return Detect.markup(s) === "html" ? "HTML" : "XML";
+    if (/^\{1:F0\d/.test(s)) return "SWIFT MT";
     if (looksJson(s)) return "JSON";
     // Short lines keep the overlapping quantifiers in RULES linear (one 20k-char line took ~0.3 s).
     const sample = t.split("\n", 400).map(l => l.slice(0, 400)).join("\n"), score = {};
@@ -135,7 +137,7 @@ const LangDetect = (() => {
     return " ".repeat(best ? +best[0] : 2);
   }
 
-  const ids = [PLAIN, ...Object.keys(EXT).filter(k => k !== PLAIN).sort((a, b) => a.localeCompare(b))];
+  const ids = [PLAIN, ...Object.keys(EXT).filter(k => k !== PLAIN).sort(new Intl.Collator().compare)];
   const highlighter = id => NO_HIGHLIGHT.has(id) || !Object.hasOwn(EXT, id) ? "" : id;
   const extOf = id => Object.hasOwn(EXT, id) ? EXT[id].split(" ")[0] : "txt";
 

@@ -5,7 +5,7 @@ const ProblemsPanel = (() => {
   let gen = 0;
 
   const openDocs = () => [...new Set(Views.groups.slice(0, Views.count).flatMap(g => g.tabs))].map(Docs.get)
-    .filter(d => d && d.kind !== "clone" && !Docs.isList(d) && !PreviewPane.isPane(d) && !d.hex && !d.big && !d.stale && !d.sealed && DataLint.owns(Docs.effectiveLang(d)));
+    .filter(d => d && d.kind !== "clone" && !Docs.isList(d) && !PreviewPane.isPane(d) && !d.hex && !d.big && !d.stale && !d.sealed && (DataLint.owns(Docs.effectiveLang(d)) || Conflicts.list(d).length));
   const onScreen = d => Views.groups.slice(0, Views.count).find(g => g.active === d.id && g.view);
   const tooBig = (d, st) => st.doc.length > (CodeLint.LANGS.has(Docs.effectiveLang(d)) ? CodeLint.LIVE_MAX : DataLint.MAX);
 
@@ -15,7 +15,14 @@ const ProblemsPanel = (() => {
   }
 
   // Live diagnostics for tabs on screen, cache for the others (null = not checked yet for this text).
+  // Git conflicts (R16) first, then the lint of a language DataLint checks.
   function known(d) {
+    if (!DataLint.owns(Docs.effectiveLang(d))) return Conflicts.items(d);
+    const l = lint(d);
+    return l && Conflicts.items(d).concat(l);
+  }
+
+  function lint(d) {
     const g = onScreen(d);
     if (g) { const out = []; CM.lint.forEachDiagnostic(g.view.state, x => out.push(item(g.view.state, x))); return out; }
     const st = d.state, c = cache.get(d.id);
@@ -107,6 +114,7 @@ const ProblemsPanel = (() => {
     Settings.onChange(Dom.debounce(render, 100));
     I18n.onChange(render);
     SidePanels.register("problems", { show });
+    badge();
   }
 
   return { init, render };

@@ -48,17 +48,17 @@
   #dioFrame { min-height:0; }
   #dioFrame iframe { display:block; width:100%; height:100%; border:0; background:#fff; }
   .gate { align-self:center; justify-self:center; max-width:560px; padding:24px; text-align:center; }
-  .gate h2 { margin:0 0 8px; font-size:18px; }
+  .gate h2 { margin:0 0 8px; font-size:calc(18px * var(--ui-k, 1)); }
   .gate p { margin:0 0 12px; }
   .gate button { padding:8px 18px; margin-bottom:12px; }
 
   .statusbar { background:var(--panel); border-top:1px solid var(--line); padding:6px 16px; max-height:30vh; overflow:auto; }
   .status-row { display:flex; flex-wrap:wrap; gap:4px 14px; align-items:baseline; min-height:20px; }
   #status { font-weight:600; }
-  #err { margin:4px 0; padding:6px 8px; background:color-mix(in srgb, var(--bad) 10%, var(--panel)); border-radius:6px; color:var(--bad); font:12px/1.4 Consolas, monospace; white-space:pre-wrap; cursor:pointer; }
+  #err { margin:4px 0; padding:6px 8px; background:color-mix(in srgb, var(--bad) 10%, var(--panel)); border-radius:6px; color:var(--bad); font:calc(12px * var(--ui-k, 1))/1.4 Consolas, monospace; white-space:pre-wrap; cursor:pointer; }
 
   dialog { width:min(720px, 92vw); max-height:80vh; padding:0; border:1px solid var(--line); border-radius:8px; background:var(--panel); color:var(--ink); }
   #hList { margin:0; padding:8px 16px 12px 36px; overflow:auto; max-height:60vh; }
   #hList li { padding:4px 0; border-bottom:1px solid var(--gut); }
-  #hList code { display:block; color:var(--muted); font-size:12px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  #hList code { display:block; color:var(--muted); font-size:calc(12px * var(--ui-k, 1)); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   @media (max-width: 900px) { .studio { grid-template-columns:minmax(0, 1fr); grid-template-rows:repeat(2, minmax(280px, 1fr)); gap:10px; overflow-y:auto; } #split { display:none; } }

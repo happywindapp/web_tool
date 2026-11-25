@@ -7,7 +7,12 @@ const RecentFiles = (() => {
 
   async function load() {
     const saved = await NotesDb.getMeta("recent");
-    list = Array.isArray(saved) ? saved.filter(r => r && r.handle && typeof r.name === "string") : [];
+    const prev = Array.isArray(saved) ? saved.filter(r => r && r.handle && typeof r.name === "string") : [];
+    if (list.length) {
+      const seen = new Set(list.map(r => r.name));
+      list = [...list, ...prev.filter(r => !seen.has(r.name))].slice(0, MAX);
+      persist();
+    } else list = prev;
   }
 
   async function add(handle) {

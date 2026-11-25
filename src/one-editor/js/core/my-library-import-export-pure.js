@@ -31,8 +31,8 @@ const MyLibrary = (() => {
   const named = (list, field) => arr(list).filter(x => x && typeof x.name === "string" && x.name.trim()).slice(0, 100).map(x => ({ name: x.name.trim().slice(0, 80), [field]: arr(x[field]) }));
 
   // text → { snippets, macros: [{ name, steps }], replaceSets, recipes }; throws .code "big" | "json" | "format".
-  function parse(text) {
-    if (typeof text !== "string" || text.length > MAX_BYTES) throw fail("big");
+  function parse(text, max = MAX_BYTES) {
+    if (typeof text !== "string" || text.length > max) throw fail("big");
     let o;
     try { o = JSON.parse(text); } catch { throw fail("json"); }
     if (!o || typeof o !== "object" || o.version !== VERSION) throw fail("format");

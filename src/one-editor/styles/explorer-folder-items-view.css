@@ -1,12 +1,12 @@
   /* Folder tab (FolderItems): Windows Explorer–like item view in place of the editor (data-view = FolderView mode); narrow details keep name + size */
-  .group > .fi { grid-row:2; grid-column:1; display:none; flex-direction:column; min-height:0; min-width:0; background:var(--code); font-size:13px; container-type:inline-size; }
+  .group > .fi { grid-row:2; grid-column:1; display:none; flex-direction:column; min-height:0; min-width:0; background:var(--code); font-size:calc(13px * var(--ui-k, 1)); container-type:inline-size; }
   .group.is-folder > .fi:not([hidden]) { display:flex; }
   .group.is-folder > .host { visibility:hidden; }
   .group.is-folder > .pvhost, .group.is-folder > .empty, .group.is-folder > .fx-list { display:none; }
   .fi-bar { display:flex; align-items:center; gap:4px; padding:4px 6px; background:var(--gut); border-bottom:1px solid var(--line); }
   .fi-bar > .fi-nav { flex:none; padding:2px 8px; }
-  .fi-addr { flex:1 1 auto; min-width:0; padding:3px 8px; font-family:Consolas, "Cascadia Mono", monospace; font-size:12px; }
-  .fi-count { flex:none; color:var(--muted); font-size:12px; }
+  .fi-addr { flex:1 1 auto; min-width:0; padding:3px 8px; font-family:Consolas, "Cascadia Mono", monospace; font-size:calc(12px * var(--ui-k, 1)); }
+  .fi-count { flex:none; color:var(--muted); font-size:calc(12px * var(--ui-k, 1)); }
   .fi-row { display:grid; grid-template-columns:1.2em minmax(0, 1fr) 10.5em 8em 6.5em; gap:10px; align-items:center; width:100%; padding:3px 12px; border:0; border-radius:0;
     background:transparent; color:var(--ink); font:inherit; text-align:left; }
   .fi-row > span { overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
@@ -35,7 +35,7 @@
   .fi[data-view="tiles"] .fi-row { grid-template-columns:44px minmax(0, 1fr); grid-template-areas:"ico name" "ico type" "ico size"; gap:0 8px; padding:6px 8px; }
   .fi[data-view="content"] .fi-row { grid-template-columns:36px minmax(0, 1fr) auto; grid-template-areas:"ico name mod" "ico type size"; gap:0 14px; padding:6px 12px;
     border-bottom:1px solid var(--line); }
-  .fi:is([data-view="tiles"], [data-view="content"]) .fi-row > .fi-ico { grid-area:ico; font-size:30px; }
+  .fi:is([data-view="tiles"], [data-view="content"]) .fi-row > .fi-ico { grid-area:ico; font-size:calc(30px * var(--ui-k, 1)); }
   .fi:is([data-view="tiles"], [data-view="content"]) .fi-row > .fi-name { grid-area:name; }
   .fi:is([data-view="tiles"], [data-view="content"]) .fi-row > .fi-type { grid-area:type; }
   .fi:is([data-view="tiles"], [data-view="content"]) .fi-row > .fi-size { grid-area:size; }
@@ -45,7 +45,7 @@
   .fi-row > .fi-mod, .fi-row > .fi-type, .fi-row > .fi-size { color:var(--muted); }
   .fi-row > .fi-size, .fi-head > .fi-size { text-align:right; }
   .fi-head { padding-top:0; padding-bottom:0; border-bottom:1px solid var(--line); }
-  .fi-head > button { padding:4px 0; border:0; background:transparent; color:var(--muted); font:inherit; font-size:12px; text-align:left; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .fi-head > button { padding:4px 0; border:0; background:transparent; color:var(--muted); font:inherit; font-size:calc(12px * var(--ui-k, 1)); text-align:left; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .fi-list { flex:1 1 0; min-height:0; overflow:auto; padding-bottom:12px; }
   .fi-row.on { background:color-mix(in srgb, var(--acc) 18%, transparent); }
   .fi-row:focus-visible { outline:1px dotted var(--acc); outline-offset:-2px; }
@@ -65,5 +65,5 @@
   .ex-sacts { position:absolute; top:0; right:0; bottom:0; display:flex; align-items:center; }
   .ex-sacts > .ex-acts, .ex-sacts > .ex-act { height:100%; align-items:center; background:var(--panel); }
   @media (hover:hover) { details.ex-dir > summary:hover > .ex-sacts > * { background:var(--hover); } }
-  .ex-chk { display:inline-flex; align-items:center; gap:3px; margin-right:4px; text-transform:none; letter-spacing:0; font-size:11px; cursor:pointer; }
+  .ex-chk { display:inline-flex; align-items:center; gap:3px; margin-right:4px; text-transform:none; letter-spacing:0; font-size:calc(11px * var(--ui-k, 1)); cursor:pointer; }
   .ex-chk > input { margin:0; }

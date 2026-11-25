@@ -3,7 +3,7 @@
   .paste textarea { border:1px solid var(--line); border-radius:8px; }
   .grid-wrap { flex:1; overflow:auto; min-height:0; background:var(--panel); border:1px solid var(--line); border-radius:8px; }
   .empty { padding:24px; text-align:center; }
-  table.grid { border-collapse:collapse; font:12.5px/1.5 Consolas, "Cascadia Mono", monospace; }
+  table.grid { border-collapse:collapse; font:calc(12.5px * var(--ui-k, 1))/1.5 Consolas, "Cascadia Mono", monospace; }
   table.grid th, table.grid td { border:1px solid var(--line); padding:3px 8px; white-space:pre; max-width:420px; overflow:hidden; text-overflow:ellipsis; vertical-align:top; }
   table.grid thead th { position:sticky; top:0; z-index:1; background:var(--gut); text-align:left; }
   table.grid td.num { text-align:right; }

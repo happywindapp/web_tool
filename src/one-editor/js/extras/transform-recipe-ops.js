@@ -76,6 +76,8 @@ const RecipeOps = (() => {
     jsonEsc: { label: "JSON escape", group: "Dữ liệu", run: v => StrTools.jsonEscape(text(v)) },
     jsonUnesc: { label: "JSON unescape", group: "Dữ liệu", run: v => StrTools.jsonUnescape(text(v)) },
     jwt: { label: "JWT decode (không kiểm chữ ký)", group: "Dữ liệu", run: v => DevReport.jwt(text(v)).text },
+    x509: { label: "Chứng chỉ X.509 → chi tiết", group: "Dữ liệu", run: v => X509Op.recipe(v) },
+    protobuf: { label: "Protobuf thô → cây field", group: "Dữ liệu", run: v => ProtoOp.recipe(v) },
     epoch: { label: "Epoch → ISO (UTC)", group: "Dữ liệu", run: v => text(v).replace(/\b\d{10}(?:\d{3})?\b/g, m => { const ms = DevNum.epochMs(m); return ms ? DevNum.iso(ms) : m; }) },
     hash: { label: "Hash", group: "Dữ liệu", args: [{ k: "alg", label: "Thuật toán", type: "select", def: "SHA-256", options: ["SHA-1", "SHA-256", "SHA-384", "SHA-512"] }], run: (v, a) => hash(v, a.alg) },
     replace: { label: "Thay (regex)", group: "Văn bản", args: [{ k: "find", label: "Tìm", type: "text", def: "" }, { k: "repl", label: "Thay bằng", type: "text", def: "" }, { k: "flags", label: "Cờ", type: "text", def: "g" }],

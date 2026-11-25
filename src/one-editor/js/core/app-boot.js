@@ -80,8 +80,10 @@ function wireOneEditor() {
   on("btnStyle", "click", e => EditorMenu.openFromButton(e.currentTarget));
   EditorMenu.init();
   on("stLint", "click", () => Commands.run("problems"));
+  on("stConflict", "click", () => Conflicts.jump(1));
   matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => Views.applySettings());
   registerOneEditorCommands();
+  registerWritingBackupCommands();
   document.addEventListener("keydown", Commands.onKey, true);
   $("work").style.setProperty("--ed-font", (Prefs.get("font", 13) | 0 || 13) + "px");
   // Phone carousel: the view swiped into sight becomes the focused one (new tabs, status bar, ▶ Run follow it).
@@ -92,13 +94,13 @@ function wireOneEditor() {
   }, 150), { passive: true });
   Split.init();
   SideBar.init();
-  BookmarkList.init();
-  ProblemsPanel.init();
-  GitPanel.init();
-  TodoPanel.init();
-  TimelinePanel.init();
+  SidePanels.lazy("bookmarks", () => BookmarkList.init());
+  SidePanels.lazy("problems", () => ProblemsPanel.init());
+  SidePanels.lazy("git", () => GitPanel.init());
+  SidePanels.lazy("todo", () => TodoPanel.init());
+  SidePanels.lazy("timeline", () => TimelinePanel.init());
   ClipHistory.init();
-  LibraryPanel.init();
+  SidePanels.lazy("library", () => LibraryPanel.init());
   SidePanels.init();
   ExportActions.init();
   DiskSync.init();
@@ -133,8 +135,13 @@ function wireOneEditor() {
   TabStrip.init();
   FileDrop.init();
   wireOneEditor();
+  const idle = fn => typeof requestIdleCallback === "function" ? requestIdleCallback(fn, { timeout: 300 }) : setTimeout(fn, 0);
+  // One failed step must not skip the rest (extras, `ready`).
+  const step = async (name, fn) => { try { await fn(); } catch (e) { console.warn("One Editor boot:", name, e); } };
+
   await NotesDb.open();
   HotExit.init();
+  // Before the editor is typeable: a macro saved / imported earlier would overwrite the stored ones.
   await ClipHistory.load();
   await Macro.load();
   // Before restore: tabs it drops keep their bookmarks.
@@ -144,20 +151,30 @@ function wireOneEditor() {
   Views.applySettings();
   if (Prefs.get("minimap", false) === true) Actions.setMinimap(true);
   if (Prefs.get("guides", true) !== false) Actions.setGuides(true);
-  await RecentFiles.load();
-  await Pinned.init();
-  await Groups.init();
-  Tags.load();
-  if (!NewWindow.active) Explorer.restore();
-  // Extras (breadcrumbs, bracket colours, snippets, key profile, sessions) load after the editor is usable.
-  EditorExtras.use(async () => { KeyProfiles.init(); Aids.apply(); await Snippets.load(); await Sessions.init(); });
   StatusBar.storage(NotesDb.ok, NotesDb.error);
   StatusBar.msg(T("Sẵn sàng. Kéo-thả file / folder vào View 1 hoặc View 2, hoặc bấm + để tạo ghi chú."));
   if (NewWindow.active) await NewWindow.take();
   await ShareLoader.fromUrl();
   addEventListener("hashchange", () => ShareLoader.fromUrl());
-  Explorer.render();
   Toolbar.sync();
   StatusBar.refresh();
-  document.body.classList.add("ready");
+  document.body.classList.add("typeable");
+  idle(async () => {
+    await step("panels", SidePanels.flushLazy);
+    await step("recent", RecentFiles.load);
+    await step("pinned", Pinned.init);
+    await step("groups", Groups.init);
+    await step("tags", Tags.load);
+    await step("writing", Writing.apply);
+    await step("conflicts", Conflicts.init);
+    // Not awaited: a folder from a Drive / OneDrive link waits on the network.
+    if (!NewWindow.active) step("explorer", Explorer.restore);
+    // Extras (breadcrumbs, bracket colours, snippets, key profile, sessions) load after the editor is usable.
+    EditorExtras.use(async () => { KeyProfiles.init(); Aids.apply(); await Snippets.load(); await Sessions.init(); });
+    Explorer.render();
+    Toolbar.sync();
+    StatusBar.refresh();
+    document.body.classList.add("ready");
+    Backup.remind();
+  });
 })();

@@ -1,6 +1,9 @@
 // Activity bar: side panel registry (show / toggle / remember), badges on the icons, ⚙ 🗑 buttons at the bottom, roving tabindex (rail ↑↓ above 900 px, strip ←→ below).
 const SidePanels = (() => {
-  const reg = new Map(), badges = new Map();
+  const reg = new Map(), badges = new Map(), lazies = new Map();
+  const lazy = (name, fn) => { if (!reg.has(name)) lazies.set(name, fn); };
+  const ensure = name => { const fn = lazies.get(name); if (fn) { lazies.delete(name); fn(); } };
+  const flushLazy = () => { for (const [k, fn] of [...lazies]) { lazies.delete(k); fn(); } };
   const nav = document.querySelector(".activity");
   const btn = name => nav.querySelector(`[data-side="${name}"]`);
   const buttons = () => [...nav.querySelectorAll("button:not([hidden])")];
@@ -22,6 +25,7 @@ const SidePanels = (() => {
   // quiet: restoring after F5 — no focus, no carousel jump, a hidden side bar stays hidden.
   function show(name, arg, quiet = false) {
     if (!btn(name) || !document.querySelector(`[data-side-panel="${name}"]`)) name = "explorer";
+    ensure(name);
     cur = name;
     nav.querySelectorAll("[data-side]").forEach(b => { const on = b.dataset.side === name; b.classList.toggle("on", on); b.setAttribute("aria-pressed", String(on)); });
     document.querySelectorAll("[data-side-panel]").forEach(p => { p.hidden = p.dataset.sidePanel !== name; });
@@ -116,5 +120,5 @@ const SidePanels = (() => {
     if (SidePanelList.collapsed()) collapsed();
   }
 
-  return { init, register, show, toggle, collapsed, badge, visible, get current() { return cur; } };
+  return { init, register, lazy, flushLazy, show, toggle, collapsed, badge, visible, get current() { return cur; } };
 })();

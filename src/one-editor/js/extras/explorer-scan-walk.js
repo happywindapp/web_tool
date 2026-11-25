@@ -45,7 +45,7 @@ const ScanWalk = (() => {
     if (!n || n.path !== path) throw new Error(T("Không thấy folder “{path}” trong Explorer — mở lại folder rồi bấm ↻.", { path }));
     return n;
   }
-  const num = n => n.toLocaleString(I18n.lang);
+  const num = I18n.num;
   function tail(st) {
     return [st.capped ? T("Dừng ở {max} mục.", { max: num(MAX) }) : "", st.cut ? T("{n} folder có hơn {max} mục — chỉ xét {max} mục đầu.", { n: st.cut, max: num(LocalFs.MAX_ENTRIES) }) : "",
       st.failed.length ? T("{n} mục không đọc được.", { n: st.failed.length }) : ""].filter(Boolean).join(" ");

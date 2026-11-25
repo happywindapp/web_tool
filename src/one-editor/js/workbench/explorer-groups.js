@@ -8,8 +8,13 @@ const Groups = (() => {
 
   async function init() {
     const saved = await NotesDb.getMeta("groups").catch(() => null);
-    list = Array.isArray(saved) ? saved.filter(g => g && typeof g.id === "string" && typeof g.name === "string")
+    const prev = Array.isArray(saved) ? saved.filter(g => g && typeof g.id === "string" && typeof g.name === "string")
       .map(g => ({ id: g.id, name: g.name, items: Array.isArray(g.items) ? g.items.filter(Pinned.valid) : [] })) : [];
+    if (list.length) {
+      const ids = new Set(list.map(g => g.id));
+      list = [...list, ...prev.filter(g => !ids.has(g.id))];
+      persist();
+    } else list = prev;
     Docs.on((type, doc) => {
       if (type !== "remove") return;
       let hit = false;

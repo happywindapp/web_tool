@@ -13,6 +13,8 @@
 | WT-6 | low | Tab CSV đoán kiểu số theo chuẩn JSON: `27.500` (kiểu VN = 27500) bị hiểu là 27.5 khi chuyển sang JSON/SQL. Người dùng tắt "Tự đoán kiểu" khi dữ liệu dùng dấu chấm ngăn nghìn | `Val.infer` | open — cân nhắc tuỳ chọn locale số |
 | WT-7 | low | (có từ tool cũ) `fix()` tính `lineCol` bằng slice từ đầu chuỗi mỗi lần → O(n × số fix), XML vài MB nhiều `&` trần có thể đứng tab; HTML không phát hiện thuộc tính trùng khác hoa/thường (`ID`/`id`) | `JsonTool.parse` / `MarkupTool.build` | open |
 | WT-8 | low | SQL INSERT chỉ nhân đôi `'` (chuẩn ANSI/PostgreSQL/SQL Server); MySQL mặc định coi `\` là escape → giá trị kết thúc bằng `\` làm vỡ câu lệnh | `Writers.sql` | closed 2026-10-28: chọn PostgreSQL (mặc định) / MySQL / SQL Server / SQLite |
+| WT-9 | low | One Editor: headless `phase12c` mục `640: tap 🕘 ⇒ Timeline` FAIL ổn định, `phase12a` `640: tap ☰ → Outline` chập chờn; `phase11b` `390x844: tap the check box` chập chờn (FAIL trên bản build 14b, PASS trên 14c) — có cả trên bản build trước 14a (nghi từ phase 13, chưa tìm nguyên nhân) | `plans/261118-0209-one-editor/headless/phase12c-headless.mjs` | open 2026-11-25 |
+| WT-10 | low | One Editor: headless `phase11a` crash ở dòng 199 (`null.textContent`) và `phase10` mục `bin survives F5` FAIL — y hệt trên bản build 14a (2 script gán cứng BASE, không đọc `OE_BASE`) | `plans/261118-0209-one-editor/headless/phase11a-headless.mjs`, `phase10-explorer-file-manager-headless.mjs` | open 2026-11-25 |
 
 ## Blockers
 

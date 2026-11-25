@@ -1,7 +1,7 @@
   /* Valuation tab (snowflake, fair price, P/E–P/B bands, health scores) + financial / foreign-flow SVG charts. */
   .radar, .vchart { display:block; width:100%; height:auto; }
   .radar { max-width:290px; margin:0 auto; }
-  :is(.radar, .vchart) .ax { font-size:9.5px; fill:var(--muted); }
+  :is(.radar, .vchart) .ax { font-size:calc(9.5px * var(--ui-k, 1)); fill:var(--muted); }
   :is(.radar, .vchart) .ring { fill:none; stroke:var(--line); stroke-width:1; }
   .snow { stroke-width:2; fill-opacity:.35; } .snow.up { fill:var(--up); stroke:var(--up); } .snow.ref { fill:var(--ref); stroke:var(--ref); } .snow.down { fill:var(--down); stroke:var(--down); }
   .vchart { padding:0 8px; }
@@ -9,24 +9,24 @@
   .pl.acc { stroke:var(--acc); }
   .vchart .barA { fill:#2563eb; } .vchart .barB { fill:var(--up); } .vchart .barC { fill:#f97316; } .vchart .neg { opacity:.75; }
   .vchart .upb { fill:var(--up); } .vchart .downb { fill:var(--down); }
-  .legend { display:flex; flex-wrap:wrap; gap:4px 12px; font-size:11.5px; color:var(--muted); }
+  .legend { display:flex; flex-wrap:wrap; gap:4px 12px; font-size:calc(11.5px * var(--ui-k, 1)); color:var(--muted); }
   .legend .sw { display:inline-block; width:10px; height:10px; margin-right:4px; border-radius:2px; vertical-align:-1px; }
   .sw.barA { background:#2563eb; } .sw.barB { background:var(--up); } .sw.barC { background:#f97316; } .sw.acc { background:var(--acc); }
 
   .snowbox { display:grid; grid-template-columns:minmax(0, 1fr); gap:4px; padding:0 8px; }
-  .snowlist details { border-bottom:1px solid var(--gut); padding:3px 4px; font-size:12.5px; }
+  .snowlist details { border-bottom:1px solid var(--gut); padding:3px 4px; font-size:calc(12.5px * var(--ui-k, 1)); }
   .snowlist summary, .dpanel details summary { cursor:pointer; }
-  ul.checks { list-style:none; margin:4px 0 2px; padding:0 0 0 4px; font-size:12px; }
+  ul.checks { list-style:none; margin:4px 0 2px; padding:0 0 0 4px; font-size:calc(12px * var(--ui-k, 1)); }
   ul.checks li { padding:1px 0; }
   ul.checks i, .checks i { display:inline-block; width:1.2em; font-style:normal; text-align:center; }
   i.ok { color:var(--up); } i.no { color:var(--down); } i.na { color:var(--muted); }
-  .dpanel > div > details { margin:0 12px; font-size:12.5px; }
+  .dpanel > div > details { margin:0 12px; font-size:calc(12.5px * var(--ui-k, 1)); }
 
-  .dcfin { display:flex; flex-wrap:wrap; gap:6px 12px; padding:4px 12px 0; font-size:12px; }
+  .dcfin { display:flex; flex-wrap:wrap; gap:6px 12px; padding:4px 12px 0; font-size:calc(12px * var(--ui-k, 1)); }
   .dcfin label { display:flex; align-items:center; gap:4px; color:var(--muted); }
   .dcfin input { width:4.5em; padding:2px 4px; border:1px solid var(--line); border-radius:4px; background:var(--btn); color:var(--ink); font:inherit; }
-  .bandhead { padding:4px 12px 0; font-size:12px; }
+  .bandhead { padding:4px 12px 0; font-size:calc(12px * var(--ui-k, 1)); }
   .dtable.num td:not(:first-child), .dtable.num th:not(:first-child) { text-align:right; }
   .dtable tr.sum td { border-top:1px solid var(--line); }
-  @media (max-width: 640px) { .dcfin input { font-size:16px; } }
+  @media (max-width: 640px) { .dcfin input { font-size:calc(16px * var(--ui-k, 1)); } }
   .peers tr.me td { background:var(--sel); font-weight:600; } .peers tr[data-sym] { cursor:pointer; }

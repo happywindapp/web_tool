@@ -16,7 +16,7 @@ const Docs = (() => {
       disk: init.disk && Number.isFinite(init.disk.size) && Number.isFinite(init.disk.mod) ? { size: init.disk.size, mod: init.disk.mod } : null,
       enc: [...Encoding.WRITABLE, ...Encoding.READ_ONLY].includes(init.enc) ? init.enc : "utf-8", link: init.link && typeof init.link.src === "string" ? { src: init.link.src, op: init.link.op, ...(init.link.opts && typeof init.link.opts === "object" ? { opts: init.link.opts } : {}) } : null,
       updated: +init.updated || Date.now(), pending: init.pending ?? true, scrollTop: 0, langApplied: null, pinned: !!init.pinned, hex: !!init.hex,
-      cloneOf: init.kind === "clone" ? init.cloneOf : null, marks: BookmarkLines.clean(init.marks), marksLive: false,
+      cloneOf: init.kind === "clone" ? init.cloneOf : null, marks: BookmarkLines.clean(init.marks), marksLive: false, spell: typeof init.spell === "boolean" ? init.spell : undefined,
       // File opened from a Drive / OneDrive link: where Save writes back (CloudDrive.save).
       remote: init.remote && typeof init.remote.kind === "string" ? { ...init.remote } : null,
       detected: LangDetect.detect(init.name, text),

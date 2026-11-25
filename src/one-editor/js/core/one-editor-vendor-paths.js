@@ -12,6 +12,9 @@ const VendorPaths = (() => {
     syntaxCheck: "vendor/syntax-check-parsers-1/syntax-check-parsers.min.js",
     prettier: P_DIR + "standalone.js",
     isoGit: "vendor/isomorphic-git-1.44.11/isomorphic-git-with-buffer.min.js",
+    sqljs: "vendor/sqljs-1.16.0/sql-wasm-base64.js",
+    sheetjs: "vendor/sheetjs-mini-0.20.3/xlsx-mini.js",
+    mammoth: "vendor/mammoth-1.13.0/mammoth-browser.js",
     extras: "one-editor-extras.js",
   };
   for (const p of ["babel", "estree", "typescript", "postcss", "html", "markdown", "yaml", "graphql"]) PATHS["prettier-" + p] = P_DIR + "plugins/" + p + ".js";

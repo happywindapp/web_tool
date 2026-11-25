@@ -20,7 +20,7 @@
   .tab-menu > button small { color:var(--muted); }
   .tab-menu > button:focus-visible { outline:none; background:color-mix(in srgb, var(--acc) 16%, transparent); }
 
-  .ex-sec h3 { display:flex; align-items:center; gap:2px; margin:8px 6px 2px 10px; font-size:11px; letter-spacing:.04em; text-transform:uppercase; color:var(--muted); }
+  .ex-sec h3 { display:flex; align-items:center; gap:2px; margin:8px 6px 2px 10px; font-size:calc(11px * var(--ui-k, 1)); letter-spacing:.04em; text-transform:uppercase; color:var(--muted); }
   .ex-fold { flex:1 1 auto; min-width:0; padding:2px 0; border:0; border-radius:0; background:transparent; color:inherit; font:inherit; letter-spacing:inherit;
              text-transform:inherit; text-align:left; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .ex-fold::before { content:"▾"; display:inline-block; width:1.1em; transition:transform .12s; }
@@ -33,7 +33,7 @@
   .ex-item { flex:1 1 auto; min-width:0; padding:3px 8px 3px 14px; border:0; border-radius:0; background:transparent; text-align:left;
              white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .ex-act { flex:none; padding:1px 7px; border:0; background:transparent; color:var(--muted); }
-  .ex-empty { margin:2px 14px 4px; font-size:12px; color:var(--muted); }
+  .ex-empty { margin:2px 14px 4px; font-size:calc(12px * var(--ui-k, 1)); color:var(--muted); }
   .ex-open { margin:2px 14px 6px; }
   details.ex-dir > summary { padding:3px 8px 3px 14px; cursor:pointer; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .ex-kids { padding-left:12px; }
@@ -45,7 +45,7 @@
               font-style:normal; text-align:center; color:#fff; box-shadow:0 0 0 1px var(--bg, #fff); pointer-events:none; }
   .git-c { background:#15803d; } .git-m, .git-d { background:#dc2626; } .git-a { background:#2563eb; } .git-u { background:#64748b; }
   .git-ignored { opacity:.55; }
-  .ex-prop { display:flex; gap:12px; max-width:min(420px, calc(100vw - 16px)); padding:3px 14px; font-size:12px; }
+  .ex-prop { display:flex; gap:12px; max-width:min(420px, calc(100vw - 16px)); padding:3px 14px; font-size:calc(12px * var(--ui-k, 1)); }
   .ex-prop > span { flex:none; width:7.5em; color:var(--muted); }
   .ex-prop > b { min-width:0; font-weight:500; overflow-wrap:anywhere; }
 

@@ -27,8 +27,9 @@ const LogFixMarks = (() => {
 
   function build(view) {
     const lang = langOf(view), D = CM.view.Decoration;
-    if (lang !== "Log" && lang !== "FIX") return D.none;
-    const spans = lang === "Log" ? logSpans : fixSpans, b = new CM.state.RangeSetBuilder(), doc = view.state.doc;
+    const spans = lang === "Log" ? logSpans : lang === "FIX" ? fixSpans : lang === SwiftMarks.LANG ? SwiftMarks.spans : null;
+    if (!spans) return D.none;
+    const b = new CM.state.RangeSetBuilder(), doc = view.state.doc;
     marks ??= {};
     for (const { from, to } of view.visibleRanges) {
       for (let pos = from; pos <= to;) {

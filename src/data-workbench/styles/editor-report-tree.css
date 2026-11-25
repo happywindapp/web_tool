@@ -11,9 +11,9 @@
   textarea.hl-on::placeholder { color:var(--muted); }
   textarea.hl-on::selection { background:color-mix(in srgb, var(--acc) 30%, transparent); }
   .out-wrap { min-height:0; display:grid; }
-  .tree { overflow:auto; padding:8px 12px; font:12.5px/1.6 Consolas, monospace; }
+  .tree { overflow:auto; padding:8px 12px; font:calc(12.5px * var(--ui-k, 1))/1.6 Consolas, monospace; }
   .tree details { margin-left:14px; } .tree summary { cursor:pointer; margin-left:-14px; } .tree .leaf { margin-left:0; }
   footer.report { background:var(--panel); border-top:1px solid var(--line); padding:6px 16px 10px; max-height:28vh; overflow:auto; }
   .status { font-weight:600; margin:4px 0; }
   .msgs { margin:0; padding-left:20px; } .msgs li[data-line] { cursor:pointer; padding:1px 0; } .msgs li:hover { background:var(--hover); }
-  .hint { font-size:12px; }
+  .hint { font-size:calc(12px * var(--ui-k, 1)); }

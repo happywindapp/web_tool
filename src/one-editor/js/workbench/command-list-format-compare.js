@@ -23,4 +23,13 @@ function registerFormatCompareCommands(C, doc, hasDoc) {
   C("cmpCase", "So sánh: bỏ qua hoa / thường (bật / tắt)", null, () => Compare.setOpt("case"));
   C("cmpInline", "So sánh: kiểu inline 1 cột (bật / tắt)", null, () => Compare.setOpt("inline"));
   C("cmpJson", "So sánh JSON theo cấu trúc (bỏ qua thứ tự key)", null, Compare.jsonTree);
+  C("cmpPatch", "So sánh: xuất .patch (View 1 cũ → View 2 mới, unified)", null, () => PowerTools.use(() => PatchOp.exportPair()));
+  const conf = () => Conflicts.count(Views.activeDoc()) > 0;
+  C("conflictNext", "Conflict Git: tới conflict kế", null, () => Conflicts.jump(1), conf);
+  C("conflictPrev", "Conflict Git: về conflict trước", null, () => Conflicts.jump(-1), conf);
+  C("conflictCurrent", "Conflict Git: Accept Current (khối ở con trỏ)", null, () => Conflicts.accept("current"), conf);
+  C("conflictIncoming", "Conflict Git: Accept Incoming (khối ở con trỏ)", null, () => Conflicts.accept("incoming"), conf);
+  C("conflictBoth", "Conflict Git: Accept Both (khối ở con trỏ)", null, () => Conflicts.accept("both"), conf);
+  C("conflictAllCurrent", "Conflict Git: Accept all current", null, () => Conflicts.acceptAll("current"), conf);
+  C("conflictAllIncoming", "Conflict Git: Accept all incoming", null, () => Conflicts.acceptAll("incoming"), conf);
 }

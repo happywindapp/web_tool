@@ -46,6 +46,9 @@ const NotesDb = (() => {
     return true;
   }
 
+  // Saved notes only (profile backup); open file / temp tabs are not part of a profile.
+  const notesAll = async () => ok ? (await req(db.transaction("docs", "readonly").objectStore("docs").getAll())).filter(r => r?.kind === "note") : [];
+
   async function getMeta(key) {
     if (!ok) return undefined;
     try { return await req(db.transaction("meta", "readonly").objectStore("meta").get(key)); } catch (e) { fail(e); return undefined; }
@@ -98,5 +101,5 @@ const NotesDb = (() => {
     await done(t);
   }
 
-  return { open, loadAll, save, getMeta, putMeta, delMeta, clear, histList, histText, histWrite, trashList, trashData, trashWrite, get ok() { return ok; }, get error() { return error; } };
+  return { open, loadAll, save, notesAll, getMeta, putMeta, delMeta, clear, histList, histText, histWrite, trashList, trashData, trashWrite, get ok() { return ok; }, get error() { return error; } };
 })();

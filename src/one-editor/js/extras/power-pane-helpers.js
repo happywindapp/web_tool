@@ -51,5 +51,21 @@ const PowerUi = (() => {
     if (out && out.link.opts !== v) { out.link.opts = v; out.pending = true; HotExit.schedule(); }
   }
 
-  return { mk, button, viewOf, select, edit, opts, saveOpts };
+  // #pako: link of an op payload ({ v, views, run, opts }); done(n chars) → the status message.
+  async function shareLink(payload, done) {
+    const url = location.href.split(/[?#]/)[0] + "#" + await ShareCodec.encode(payload), ok = await Dom.copy(url);
+    if (!ok) prompt(T("Chép link này:"), url);
+    StatusBar.msg(done(I18n.num(url.length)) + (url.length > 60000 ? " " + T("Link dài — vài ứng dụng chat có thể cắt mất.") : ""), ok ? "good" : "warn");
+  }
+
+  // Big grids: the first slice now, the rest in later tasks (no long task); a new render with the same key cancels the old one.
+  const slicing = new WeakMap();
+  function appendSliced(parent, items, make, key = parent, size = 200) {
+    clearTimeout(slicing.get(key));
+    let i = 0;
+    const step = () => { const end = Math.min(items.length, i + size); for (; i < end; i++) parent.append(make(items[i], i)); if (i < items.length) slicing.set(key, setTimeout(step, 0)); };
+    step();
+  }
+
+  return { mk, button, viewOf, select, edit, opts, saveOpts, shareLink, appendSliced };
 })();

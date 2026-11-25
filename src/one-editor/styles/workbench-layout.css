@@ -44,22 +44,25 @@
       radial-gradient(farthest-side at 0 50%, rgb(0 0 0 / .2), transparent) left / 8px 100% no-repeat scroll, radial-gradient(farthest-side at 100% 50%, rgb(0 0 0 / .2), transparent) right / 8px 100% no-repeat scroll, var(--gut); }
   .act-top, .act-bottom { display:flex; flex:none; gap:2px; }
   .act-bottom { margin-left:auto; }
-  .activity button { position:relative; flex:none; padding:4px 12px; border:0; border-radius:6px 6px 0 0; background:transparent; font-size:16px; }
+  .activity button { position:relative; flex:none; padding:5px 11px; border:0; border-radius:6px 6px 0 0; background:transparent; color:inherit; }
+  .ic { width:calc(15px * var(--ui-k, 1)); height:calc(15px * var(--ui-k, 1)); vertical-align:-2.5px; flex:none; pointer-events:none; }
+  .ic-sm { width:calc(13px * var(--ui-k, 1)); height:calc(13px * var(--ui-k, 1)); vertical-align:-2px; }
+  .activity button .ic { display:block; margin:0 auto; width:calc(18px * var(--ui-k, 1)); height:calc(18px * var(--ui-k, 1)); }
   .act-badge { position:absolute; top:0; right:1px; min-width:15px; height:15px; padding:0 3px; border-radius:8px; background:var(--acc); color:#fff; box-shadow:0 0 0 1.5px var(--gut);
     font:600 9.5px/15px system-ui, sans-serif; text-align:center; pointer-events:none; }
   .activity button.on { background:color-mix(in srgb, var(--acc) 20%, transparent); box-shadow:inset 0 -2px 0 var(--acc); }
   .side { display:flex; flex-direction:column; min-width:0; min-height:0; }
   #explorerPane .bar input { flex:1 1 auto; min-width:0; padding:3px 8px; }
-  #explorer, #sxResults { flex:1 1 0; min-height:0; overflow:auto; padding:2px 0 12px; font-size:13px; }
+  #explorer, #sxResults { flex:1 1 0; min-height:0; overflow:auto; padding:2px 0 12px; font-size:calc(13px * var(--ui-k, 1)); }
   .sx-form { display:flex; flex-wrap:wrap; gap:4px 8px; align-items:center; padding:6px 8px; border-bottom:1px solid var(--line); }
   .sx-form input[type=text] { flex:1 1 100%; min-width:0; padding:3px 8px; }
-  .sx-doc { margin:8px 8px 2px 10px; font-size:12px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-  .sx-hit { font-family:Consolas, "Cascadia Mono", monospace; font-size:12px; }
+  .sx-doc { margin:8px 8px 2px 10px; font-size:calc(12px * var(--ui-k, 1)); color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .sx-hit { font-family:Consolas, "Cascadia Mono", monospace; font-size:calc(12px * var(--ui-k, 1)); }
   .sx-hit b { color:var(--acc); background:color-mix(in srgb, var(--acc) 15%, transparent); }
   .sx-hit small { color:var(--muted); }
 
-  .statusbar { display:flex; flex-wrap:wrap; gap:2px 14px; align-items:center; padding:4px 16px; background:var(--panel); border-top:1px solid var(--line); font-size:12px; color:var(--muted); }
-  .statusbar #status { flex:1 1 200px; min-width:0; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .statusbar { display:flex; flex-wrap:wrap; gap:2px 14px; align-items:center; padding:4px 16px; background:var(--panel); border-top:1px solid var(--line); font-size:calc(12px * var(--ui-k, 1)); color:var(--muted); }
+  .statusbar #status { flex:1 1 200px; min-width:0; contain:inline-size; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .statusbar #status.good { color:var(--good); } .statusbar #status.bad { color:var(--bad); } .statusbar #status.warn { color:var(--warn); }
   .statusbar #status.jump { cursor:pointer; text-decoration:underline dotted; }
   .statusbar button.link { padding:0 4px; border:0; background:transparent; color:inherit; font:inherit; }
@@ -95,10 +98,10 @@
     #work.pane-scroller { grid-template:none; grid-auto-flow:column; grid-auto-columns:100%; grid-template-rows:minmax(0, 1fr); gap:0; padding:0; }
     #work > * { grid-area:auto; }
     .host .cm-editor { font-size:max(16px, var(--ed-font, 13px)); }
-    #qpInput { font-size:16px; }
+    #qpInput { font-size:calc(16px * var(--ui-k, 1)); }
     .toolbar .desktop-only, #work .cm-minimap-gutter { display:none; }
-    #explorer { font-size:15px; }
-    #explorerPane .bar input, .sx-form input[type=text] { font-size:16px; }
+    #explorer { font-size:calc(15px * var(--ui-k, 1)); }
+    #explorerPane .bar input, .sx-form input[type=text] { font-size:calc(16px * var(--ui-k, 1)); }
     .activity button { min-height:40px; }
     #stCount, #stSrc, #stStore:not(.bad) { display:none; }
   }

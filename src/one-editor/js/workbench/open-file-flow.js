@@ -1,6 +1,16 @@
 // Opening local files as tabs: reuse a tab already showing the same handle, > 50 MB → chunked read-only viewer, ask before showing a binary file (read-only).
 const FileOpen = (() => {
   const MAX_BYTES = 50 * 1024 * 1024;
+  // Data files with a viewer (extras): by extension, checked against the magic bytes when the head is given; "old" = .xls / .ods (not supported).
+  const SQLITE = "SQLite format 3\0", BIN_HEX = 65536;
+  function binKind(name, head) {
+    const ext = /\.([^.]+)$/.exec(name || "")?.[1].toLowerCase() || "", zip = !head || (head[0] === 0x50 && head[1] === 0x4b);
+    if (["sqlite", "sqlite3", "db"].includes(ext)) return !head || String.fromCharCode(...head.subarray(0, 16)) === SQLITE ? "sqlite" : "";
+    if (ext === "xlsx" || ext === "xlsm") return zip ? "xlsx" : "";
+    if (ext === "docx") return zip ? "docx" : "";
+    // A ".xls" that is really HTML / TSV (report exports) still opens as text.
+    return (ext === "xls" && (!head || (head[0] === 0xd0 && head[1] === 0xcf))) || (ext === "ods" && zip) ? "old" : "";
+  }
 
   async function sameOpen(handle) {
     for (const d of Docs.list()) if (d.kind === "file" && d.handle && await d.handle.isSameEntry(handle).catch(() => false)) return d;
@@ -19,11 +29,15 @@ const FileOpen = (() => {
     if (handle && show) RecentFiles.add(handle);
     if (dup) { if (show) Views.open(dup, Views.where(dup.id) >= 0 ? Views.where(dup.id) : gi); else Views.add(dup, gi); return dup; }
     // Binary (NUL in the first 8 KB): read-only hex of the first 1 MB, so the 50 MB text limit does not apply.
-    const head = new Uint8Array(await file.slice(0, 8192).arrayBuffer());
-    if (head.includes(0) && !Encoding.detect(head).enc.startsWith("utf-16")) {
-      if (!confirm(T("“{name}” là file nhị phân. Mở dạng hex (chỉ đọc)?", { name: file.name }))) return null;
-      const doc = Docs.create({ kind: "file", name: file.name, text: await HexDump.ofFile(file), handle, readOnly: true, hex: true, lang: LangDetect.PLAIN });
+    const head = new Uint8Array(await file.slice(0, 8192).arrayBuffer()), bin = binKind(file.name, head);
+    if (bin === "old") throw new Error(T(".xls / .ods chưa hỗ trợ — mở bằng Excel / LibreOffice rồi lưu lại thành .xlsx."));
+    if (bin || head.includes(0) && !Encoding.detect(head).enc.startsWith("utf-16")) {
+      if (!bin && !confirm(T("“{name}” là file nhị phân. Mở dạng hex (chỉ đọc)?", { name: file.name }))) return null;
+      const doc = Docs.create({ kind: "file", name: file.name, text: await HexDump.ofFile(file, bin ? BIN_HEX : undefined), handle, readOnly: true, hex: true, lang: LangDetect.PLAIN });
+      doc.file = file;
       Views.open(doc, gi);
+      // .db / .xlsx / .docx: the hex tab is the source, ▶ shows tables / SQL / the document in the other view.
+      if (bin) OutputLink.run(doc, RunOp.of(doc));
       return doc;
     }
     if (file.size > MAX_BYTES) return BigFile.open(file, gi, handle);
@@ -63,7 +77,7 @@ const FileOpen = (() => {
       if (perm !== "granted") { StatusBar.msg(T("Bấm vào đây để đọc lại “{name}” từ đĩa (trình duyệt cần bạn cho phép).", { name: doc.name }), "warn", retry, tip); return; }
       const file = await doc.handle.getFile();
       if (doc.bigStart != null) { await BigFile.attach(doc, file); return; }
-      const r = doc.hex ? { text: await HexDump.ofFile(file), eol: "\n", bom: false, binary: true } : await LocalFs.readText(file, doc.enc && doc.enc !== "utf-8" ? doc.enc : undefined);
+      const r = doc.hex ? { text: await HexDump.ofFile(file, binKind(doc.name) ? BIN_HEX : undefined), eol: "\n", bom: false, binary: true } : await LocalFs.readText(file, doc.enc && doc.enc !== "utf-8" ? doc.enc : undefined);
       if (!Docs.get(doc.id)) return;
       Object.assign(doc, { stale: false, disk: DiskSync.stamp(file), diskChanged: false, text: r.text, state: null, eol: r.eol, eolMixed: r.eolMixed, eolList: r.eolList, bom: r.bom, enc: r.enc, readOnly: r.binary || r.readOnly, detected: LangDetect.detect(doc.name, r.text) });
       const gi = Views.where(doc.id);
@@ -75,5 +89,5 @@ const FileOpen = (() => {
     } finally { doc.reloading = false; }
   }
 
-  return { open, openMany, reload };
+  return { open, openMany, reload, binKind };
 })();

@@ -1,27 +1,27 @@
   /* Ví BTC & cá voi tab (wl- prefix). */
   .wl { padding-bottom:16px; }
   .wl-sec { display:flex; flex-wrap:wrap; gap:4px 12px; align-items:baseline; margin:12px 12px 4px; padding-bottom:4px; border-bottom:1px solid var(--line); }
-  .wl-sec b { font-size:14px; } .wl-sec .muted { font-size:12px; }
+  .wl-sec b { font-size:calc(14px * var(--ui-k, 1)); } .wl-sec .muted { font-size:calc(12px * var(--ui-k, 1)); }
   .wl-form, .wl-ctl { display:flex; flex-wrap:wrap; gap:6px 8px; align-items:center; padding:4px 12px; }
   .wl-form input[type=text] { flex:1 1 180px; min-width:0; }
   .wl-form input[data-f=addr], .wl-form input[data-f=baddr] { flex:2 1 260px; font-family:Consolas, monospace; }
   .wl-head { display:flex; flex-wrap:wrap; gap:4px 8px; align-items:center; margin:6px 12px; }
-  .wl-full { max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:12px; }
+  .wl-full { max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:calc(12px * var(--ui-k, 1)); }
   .wl-pad { margin:4px 12px; }
   .wl-head a { color:var(--acc); }
   .wl-scroll { overflow-x:auto; margin:4px 12px; border:1px solid var(--line); border-radius:8px; }
-  .wl-tbl { width:100%; border-collapse:collapse; font-size:12.5px; font-variant-numeric:tabular-nums; white-space:nowrap; }
-  .wl-tbl th { padding:4px 8px; background:var(--gut); color:var(--muted); font-size:11.5px; font-weight:600; text-align:left; border-bottom:1px solid var(--line); }
+  .wl-tbl { width:100%; border-collapse:collapse; font-size:calc(12.5px * var(--ui-k, 1)); font-variant-numeric:tabular-nums; white-space:nowrap; }
+  .wl-tbl th { padding:4px 8px; background:var(--gut); color:var(--muted); font-size:calc(11.5px * var(--ui-k, 1)); font-weight:600; text-align:left; border-bottom:1px solid var(--line); }
   .wl-tbl td { padding:4px 8px; border-bottom:1px solid color-mix(in srgb, var(--line) 45%, transparent); vertical-align:top; }
   .wl-tbl .r { text-align:right; }
   .wl-tbl tbody tr:last-child td { border-bottom:0; }
   button.wl-lk { min-height:0; padding:0; border:0; background:none; color:var(--acc); font:inherit; cursor:pointer; text-align:left; max-width:16em; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; vertical-align:bottom; }
   button.wl-lk:hover { text-decoration:underline; }
-  button.wl-cp { min-height:0; padding:0 4px; margin-left:4px; border:0; background:none; color:var(--muted); font-size:13px; line-height:1.2; }
+  button.wl-cp { min-height:0; padding:0 4px; margin-left:4px; border:0; background:none; color:var(--muted); font-size:calc(13px * var(--ui-k, 1)); line-height:1.2; }
   .wl-tx a { display:inline-block; max-width:11em; overflow:hidden; text-overflow:ellipsis; vertical-align:bottom; color:var(--acc); font-family:Consolas, monospace; }
   .wl-tbl button[data-edit], .wl-tbl button[data-del] { padding:1px 7px; }
   @media (max-width: 640px) {
-    .wl-form input, .wl-form select { font-size:16px; }
+    .wl-form input, .wl-form select { font-size:calc(16px * var(--ui-k, 1)); }
     .wl-sec, .wl-form, .wl-ctl, .wl-head { margin-left:8px; margin-right:8px; padding-left:0; padding-right:0; }
     .wl-scroll { margin-left:8px; margin-right:8px; }
     .wl-form input[type=text] { flex-basis:100%; }

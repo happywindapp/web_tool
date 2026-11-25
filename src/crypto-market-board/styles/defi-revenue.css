@@ -1,15 +1,15 @@
   /* "DeFi & Doanh thu" tab (df- prefix). */
   .df { padding-bottom: 12px; }
   .df .dsec { display: flex; align-items: center; gap: 6px; margin-top: 6px; padding: 8px 12px 2px; border-top: 1px solid var(--line); } .df .dsec b { margin-right: auto; }
-  .df .dsec .seg button { padding: 2px 8px; font-size: 12px; }
+  .df .dsec .seg button { padding: 2px 8px; font-size: calc(12px * var(--ui-k, 1)); }
   .df .df-tabs { margin-top: 0; border-top: 0; overflow-x: auto; }
   .df-tabs .seg { flex-wrap: nowrap; }
   .df-tabs .seg button { white-space: nowrap; }
-  .df-ctl { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; padding: 6px 12px; font-size: 12.5px; }
+  .df-ctl { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; padding: 6px 12px; font-size: calc(12.5px * var(--ui-k, 1)); }
   .df-ctl input[type="search"], .df-ctl select { padding: 3px 8px; border: 1px solid var(--line); border-radius: 6px; background: var(--btn); color: var(--ink); font: inherit; max-width: 100%; }
   .df-ctl input[type="search"] { width: 220px; }
   .df-ctl label { display: inline-flex; align-items: center; gap: 4px; }
-  .df-ctl [data-n] { margin-left: auto; font-size: 11.5px; }
+  .df-ctl [data-n] { margin-left: auto; font-size: calc(11.5px * var(--ui-k, 1)); }
   .df-scroll { overflow-x: auto; margin: 0 8px; border-top: 1px solid var(--line); }
   table.df-t { width: 100%; min-width: 560px; margin: 0; white-space: nowrap; }
   .df-t th[data-sort] { cursor: pointer; user-select: none; }
@@ -18,18 +18,18 @@
   .df-t th.df-l, .df-t td.df-l { position: sticky; left: 0; z-index: 1; background: var(--panel); max-width: 200px; overflow: hidden; text-overflow: ellipsis; }
   .df-t tbody tr:hover td { background: var(--hover); }
   @media (hover: none) { .df-t tbody tr:hover td { background: var(--panel); } }
-  .df-rk { display: inline-block; min-width: 24px; margin-right: 4px; color: var(--muted); font-size: 11px; }
+  .df-rk { display: inline-block; min-width: 24px; margin-right: 4px; color: var(--muted); font-size: calc(11px * var(--ui-k, 1)); }
   .df-name { color: var(--acc); font-weight: 600; cursor: pointer; }
   .df-nm { font-weight: 600; }
   .df-bars { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 0 14px; padding: 0 8px; }
   button.df-bar { display: grid; grid-template-columns: 130px minmax(0, 1fr) 76px 58px; align-items: center; gap: 8px; min-height: 0; padding: 4px 6px; border: 0; border-bottom: 1px solid var(--gut);
-                  border-radius: 0; background: none; color: var(--ink); font-size: 12.5px; text-align: left; font-variant-numeric: tabular-nums; }
+                  border-radius: 0; background: none; color: var(--ink); font-size: calc(12.5px * var(--ui-k, 1)); text-align: left; font-variant-numeric: tabular-nums; }
   .df-bn { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .df-bt { display: block; height: 8px; border-radius: 4px; background: var(--gut); overflow: hidden; } .df-bt i { display: block; height: 100%; background: var(--acc); }
-  .df-bar b { text-align: right; } .df-bar em { font-style: normal; text-align: right; font-size: 11.5px; }
+  .df-bar b { text-align: right; } .df-bar em { font-style: normal; text-align: right; font-size: calc(11.5px * var(--ui-k, 1)); }
   @media (hover: hover) { button.df-bar:hover { background: var(--hover); } }
   @media (max-width: 640px) {
-    .df-ctl input[type="search"], .df-ctl select { font-size: 16px; }
+    .df-ctl input[type="search"], .df-ctl select { font-size: calc(16px * var(--ui-k, 1)); }
     .df-ctl input[type="search"] { width: 100%; flex: 1 1 100%; }
     .df-ctl [data-n] { margin-left: 0; }
     .df-scroll { margin: 0 4px; }
