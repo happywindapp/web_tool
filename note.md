@@ -1,6 +1,6 @@
 # Note
 
-Ghi chú nháp cá nhân. Không phải source of truth — tài liệu chính thức nằm ở `docs/`.
+Ghi chú nháp cá nhân. Không phải source of truth — tài liệu chính thức nằm ở `docs/`
 
 ---
 
