@@ -114,6 +114,29 @@
 // @include js/extras/unified-patch-pure.js
 // @include js/extras/unified-patch-op-and-pane.js
 // @include js/editor/git-conflict-patch-demos.js
+// File + on-device AI (phase 14f): checksum (SHA-1/256/512 native or in a Blob Worker) + sum file check, split / join files, Chrome built-in AI ops.
+// @include js/i18n/en-one-editor-file-ai-14f-strings.js
+// @include styles/file-checksum-split-join-ai.css
+// @include js/extras/file-checksum-sha-pure.js
+// @include js/extras/file-split-join-pure.js
+// @include js/extras/explorer-file-checksum.js
+// @include js/extras/checksum-verify-op-and-pane.js
+// @include js/extras/explorer-split-join-files.js
+// @include js/devtools/on-device-ai-ops.js
+// @include js/extras/file-checksum-demos.js
+// Text & list tools + encoders (phase 15a): wrap / join lines, extract URL·e-mail·IP, slug, HTML → text, numbers → words, word frequency, Base32/58/85 · HMAC · UUID v7 / ULID · CIDR · chmod.
+// @include js/i18n/en-one-editor-text-utils-15a-strings.js
+// @include styles/text-utilities-dialog.css
+// @include js/extras/wrap-join-lines-pure.js
+// @include js/extras/extract-urls-emails-ips-pure.js
+// @include js/extras/slug-and-html-to-text-pure.js
+// @include js/extras/number-to-words-vi-en-pure.js
+// @include js/extras/word-frequency-pure.js
+// @include js/devtools/base-n-hmac-uuid7-cidr-chmod-pure.js
+// @include js/extras/text-utility-tools.js
+// @include js/extras/text-tool-options-dialog.js
+// @include js/devtools/encoder-selection-actions.js
+// @include js/extras/text-utilities-demos.js
 // Explorer tar / gzip (phase 11d): Tar for ExplorerArchive.
 // @include js/core/tar-gzip-archive-pure.js
 // Explorer find & compare (phase 11e): advanced file search, duplicate files, folder compare + one-way sync for FileTools / the 🔎 tab.

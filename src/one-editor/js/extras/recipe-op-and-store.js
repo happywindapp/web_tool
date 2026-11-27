@@ -15,7 +15,7 @@ const RecipeOp = (() => {
   // New steps are kept at once; the result re-runs now, or after a pause while an argument is typed.
   const timers = new Map();
   function set(srcId, list, later = false) {
-    PowerUi.saveOpts(srcId, "recipe", list);
+    PowerUi.saveOpts(srcId, "recipe", list, RecipeRun.clean(list));
     clearTimeout(timers.get(srcId));
     const go = () => { timers.delete(srcId); const src = Docs.get(srcId); if (src) OutputLink.run(src, "recipe", true); };
     if (later) timers.set(srcId, setTimeout(go, 300)); else go();
@@ -32,6 +32,7 @@ const RecipeOp = (() => {
   }
   async function save(name, list) {
     await load();
+    list = RecipeRun.clean(list);
     const at = saved.findIndex(r => r.name === name);
     if (at < 0 && saved.length >= MAX_SAVED) throw new Error(T("Đã đủ {n} recipe — xoá bớt trước.", { n: MAX_SAVED }));
     const next = saved.slice();
@@ -45,7 +46,7 @@ const RecipeOp = (() => {
   async function share(srcId) {
     const src = Docs.get(srcId);
     if (!src) { StatusBar.msg(T("Tab nguồn của kết quả này đã đóng."), "warn"); return; }
-    const payload = { v: 1, views: [[{ n: src.name, l: src.lang || "", t: Docs.text(src) }], []], run: "recipe", opts: steps(srcId) };
+    const payload = { v: 1, views: [[{ n: src.name, l: src.lang || "", t: Docs.text(src) }], []], run: "recipe", opts: RecipeRun.clean(steps(srcId)) };
     const url = location.href.split(/[?#]/)[0] + "#" + await ShareCodec.encode(payload), ok = await Dom.copy(url);
     if (!ok) prompt(T("Chép link này:"), url);
     StatusBar.msg(T("🔗 Đã chép link recipe ({n} ký tự) — mở link là chạy lại đúng các bước.", { n: I18n.num(url.length) }) + (url.length > 60000 ? " " + T("Link dài — vài ứng dụng chat có thể cắt mất.") : ""), ok ? "good" : "warn");

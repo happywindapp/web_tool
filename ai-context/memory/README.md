@@ -74,3 +74,5 @@
 - [codemirror-line-decoration-follows-line-content.md](codemirror-line-decoration-follows-line-content.md) — bookmark `Decoration.line`: chèn ở đầu dòng ⇒ `mapPos(pos, 1)` để theo nội dung; thay cả text giữ số dòng; `doc.marks` + `marksLive`, chụp marks trước khi reset `state`.
 - [one-editor-boot-time-text-shaping-and-inline-compile.md](one-editor-boot-time-text-shaping-and-inline-compile.md) — khởi động chậm ở CPU 4×: text shaping emoji (font fallback) ~1 s + compile script inline 1,15 MB; khai báo "Segoe UI Emoji" không giúp.
 - [boot-trace-and-self-review-once-per-phase.md](boot-trace-and-self-review-once-per-phase.md) — đo boot CPU 4× + agent self-review chỉ 1 lần ở đợt cuối phase, không từng đợt con
+- [one-editor-op-tone-opfs-writable-swap-vm-bench.md](one-editor-op-tone-opfs-writable-swap-vm-bench.md) — op cần status vàng ⇒ trả `tone`; file OPFS rỗng tới khi `close()`; đo hiệu năng ngoài `vm`.
+- [one-editor-global-name-clash-and-recipe-secret-args.md](one-editor-global-name-clash-and-recipe-secret-args.md) — module mọi tool ghép chung scope (grep tên trước); arg `secret` + `persist = RecipeRun.clean(list)` ở mọi đường ghi `link.opts`.

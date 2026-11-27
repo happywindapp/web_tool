@@ -29,6 +29,7 @@ const Toolbar = (() => {
     const groups = {};
     for (const id of OutputOps.ids) {
       const op = OutputOps.get(id);
+      if (op.when && !op.when()) continue;
       (groups[op.group] ??= Object.assign(document.createElement("optgroup"), { label: T(op.group) })).append(opt(id, T(op.label) + " ⇢"));
     }
     $("opSel").replaceChildren(...Object.values(groups));

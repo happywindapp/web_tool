@@ -53,6 +53,8 @@ const LineOps = (() => {
     pascal: perLine(s => words(s).map(cap).join("")),
     snake: perLine(s => words(s).map(w => w.toLocaleLowerCase()).join("_")),
     kebab: perLine(s => words(s).map(w => w.toLocaleLowerCase()).join("-")),
+    constant: perLine(s => words(s).map(w => w.toLocaleUpperCase()).join("_")),
+    dot: perLine(s => words(s).map(w => w.toLocaleLowerCase()).join(".")),
     b64enc: b64,
     b64dec: unb64,
     urlEnc: t => encodeURIComponent(t),

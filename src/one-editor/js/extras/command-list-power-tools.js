@@ -1,8 +1,9 @@
 // Phase 9 commands: ops reuse their labels, the rest run in the lazy bundle.
 function registerPowerToolCommands(C, doc, hasDoc) {
   const use = fn => () => PowerTools.use(fn);
-  for (const id of ["cron", "sql-insert", "sql-update", "json-schema", "invisible", "recipe", "regex", "run-code", "code-image", "sql-query", "fake-data", "office", "log-merge", "fix-lifecycle", "swift-detail", "curl-convert", "x509", "protobuf", "openapi-doc", "patch-view"])
+  for (const id of ["cron", "sql-insert", "sql-update", "json-schema", "invisible", "recipe", "regex", "run-code", "code-image", "sql-query", "fake-data", "office", "log-merge", "fix-lifecycle", "swift-detail", "curl-convert", "x509", "protobuf", "openapi-doc", "patch-view", "checksum-verify"])
     C("op-" + id, () => T(OutputOps.get(id).label) + " ⇢", id === "run-code" ? "Ctrl+k r" : null, () => OutputLink.run(doc(), id), hasDoc);
+  for (const id of Object.keys(LocalAi.KINDS)) C("op-" + id, () => T(OutputOps.get(id).label) + " ⇢", null, () => OutputLink.run(doc(), id), () => LocalAi.can(id) && hasDoc());
   C("sqlOptions", "SQL từ dữ liệu: tuỳ chọn…", null, use(() => SqlOptions.open()), hasDoc);
   C("batchReplace", "Thay hàng loạt…", null, use(() => BatchUi.open()), hasDoc);
   C("mdTable", "Markdown: TSV / CSV → bảng", null, use(() => MdActions.toTable()), hasDoc);

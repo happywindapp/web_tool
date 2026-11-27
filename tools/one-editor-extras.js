@@ -6503,10 +6503,11 @@ const PowerUi = (() => {
     if (s.v === undefined) { const o = outOf(srcId, op)?.link?.opts; s.v = o ? clean(o) : def(); }
     return s.v;
   }
-  function saveOpts(srcId, op, v) {
+  function saveOpts(srcId, op, v, persist = v) {
     PowerTools.state(srcId, op).v = v;
     const out = outOf(srcId, op);
-    if (out && out.link.opts !== v) { out.link.opts = v; out.pending = true; HotExit.schedule(); }
+    // A stripped copy (persist ≠ v) is new on every call: compare by content so a live re-run does not re-save.
+    if (out && out.link.opts !== persist && (persist === v || JSON.stringify(out.link.opts) !== JSON.stringify(persist))) { out.link.opts = persist; out.pending = true; HotExit.schedule(); }
   }
 
   // #pako: link of an op payload ({ v, views, run, opts }); done(n chars) → the status message.
@@ -7449,6 +7450,20 @@ const RecipeOps = (() => {
     urlenc: { label: "URL encode", group: "Mã hoá", run: v => LineOps.text("urlEnc", text(v)) },
     htmldec: { label: "HTML entity decode", group: "Mã hoá", run: v => LineOps.text("htmlDec", text(v)) },
     htmlenc: { label: "HTML entity encode", group: "Mã hoá", run: v => LineOps.text("htmlEnc", text(v)) },
+    b32enc: { label: "Sang Base32", group: "Mã hoá", run: v => EncPlus.b32enc(bytes(v)) },
+    b32dec: { label: "Từ Base32", group: "Mã hoá", run: v => EncPlus.b32dec(text(v)) },
+    b58enc: { label: "Sang Base58 (Bitcoin)", group: "Mã hoá", run: v => EncPlus.b58enc(bytes(v)) },
+    b58dec: { label: "Từ Base58 (Bitcoin)", group: "Mã hoá", run: v => EncPlus.b58dec(text(v)) },
+    a85enc: { label: "Sang Ascii85", group: "Mã hoá", run: v => EncPlus.a85enc(bytes(v)) },
+    a85dec: { label: "Từ Ascii85", group: "Mã hoá", run: v => EncPlus.a85dec(text(v)) },
+    z85enc: { label: "Sang Z85", group: "Mã hoá", run: v => EncPlus.a85enc(bytes(v), true) },
+    z85dec: { label: "Từ Z85", group: "Mã hoá", run: v => EncPlus.a85dec(text(v), true) },
+    hmac: { label: "HMAC", group: "Mã hoá", args: [{ k: "alg", label: "Thuật toán", type: "select", def: "SHA-256", options: ["SHA-1", "SHA-256", "SHA-512"] }, { k: "key", label: "Khoá (không lưu)", type: "secret", def: "" },
+      { k: "keyFmt", label: "Dạng khoá", type: "select", def: "text", options: ["text", "hex", "base64"] }, { k: "out", label: "Kết quả", type: "select", def: "hex", options: ["hex", "base64"] }],
+      run: (v, a) => EncPlus.hmac(bytes(v), a.key, a) },
+    idTime: { label: "UUID v7 / ULID → thời điểm", group: "Dữ liệu", run: v => lines(v, l => l.map(s => { const r = s.trim() && EncPlus.idTime(s); return r ? s.trim() + "\t" + r.kind + "\t" + DevNum.iso(r.ms) : s; })) },
+    cidr: { label: "CIDR → dải địa chỉ", group: "Dữ liệu", run: v => lines(v, l => l.filter(s => s.trim()).map(s => EncPlus.cidrText(s))) },
+    chmod: { label: "chmod octal ⇄ rwx", group: "Dữ liệu", run: v => lines(v, l => l.map(s => { if (!s.trim()) return s; const r = EncPlus.chmod(s); return s.trim() + "\t" + (/^\d/.test(s.trim()) ? r.symbolic : r.octal); })) },
     gunzip: { label: "Gunzip", group: "Nén", run: v => stream(v, "gzip", true) },
     inflate: { label: "Inflate (zlib)", group: "Nén", run: v => stream(v, "deflate", true) },
     inflateRaw: { label: "Inflate (raw deflate)", group: "Nén", run: v => stream(v, "deflate-raw", true) },
@@ -7480,13 +7495,13 @@ const RecipeOps = (() => {
 const RecipeRun = (() => {
   const MAX_IN = 10 * 1024 * 1024, MAX_STEPS = 50, HEX_SHOW = 64 * 1024;
 
-  // Untrusted (link, IndexedDB) → known ops, string / boolean args only.
+  // Untrusted (link, IndexedDB) → known ops, string / boolean args only; a secret arg (HMAC key) is always blanked, so it never reaches a link, hot exit or a saved recipe.
   function clean(list) {
     return (Array.isArray(list) ? list : []).slice(0, MAX_STEPS).filter(s => s && Object.hasOwn(RecipeOps.OPS, s.op)).map(s => {
       const args = {};
       for (const a of RecipeOps.OPS[s.op].args || []) {
         const v = s.args && s.args[a.k];
-        args[a.k] = a.type === "check" ? v === true : a.type === "select" ? (a.options.includes(v) ? v : a.def) : typeof v === "string" ? v.slice(0, 2000) : a.def;
+        args[a.k] = a.type === "secret" ? "" : a.type === "check" ? v === true : a.type === "select" ? (a.options.includes(v) ? v : a.def) : typeof v === "string" ? v.slice(0, 2000) : a.def;
       }
       return { op: s.op, on: s.on !== false, args };
     });
@@ -7545,7 +7560,7 @@ const RecipeOp = (() => {
   // New steps are kept at once; the result re-runs now, or after a pause while an argument is typed.
   const timers = new Map();
   function set(srcId, list, later = false) {
-    PowerUi.saveOpts(srcId, "recipe", list);
+    PowerUi.saveOpts(srcId, "recipe", list, RecipeRun.clean(list));
     clearTimeout(timers.get(srcId));
     const go = () => { timers.delete(srcId); const src = Docs.get(srcId); if (src) OutputLink.run(src, "recipe", true); };
     if (later) timers.set(srcId, setTimeout(go, 300)); else go();
@@ -7562,6 +7577,7 @@ const RecipeOp = (() => {
   }
   async function save(name, list) {
     await load();
+    list = RecipeRun.clean(list);
     const at = saved.findIndex(r => r.name === name);
     if (at < 0 && saved.length >= MAX_SAVED) throw new Error(T("Đã đủ {n} recipe — xoá bớt trước.", { n: MAX_SAVED }));
     const next = saved.slice();
@@ -7575,7 +7591,7 @@ const RecipeOp = (() => {
   async function share(srcId) {
     const src = Docs.get(srcId);
     if (!src) { StatusBar.msg(T("Tab nguồn của kết quả này đã đóng."), "warn"); return; }
-    const payload = { v: 1, views: [[{ n: src.name, l: src.lang || "", t: Docs.text(src) }], []], run: "recipe", opts: steps(srcId) };
+    const payload = { v: 1, views: [[{ n: src.name, l: src.lang || "", t: Docs.text(src) }], []], run: "recipe", opts: RecipeRun.clean(steps(srcId)) };
     const url = location.href.split(/[?#]/)[0] + "#" + await ShareCodec.encode(payload), ok = await Dom.copy(url);
     if (!ok) prompt(T("Chép link này:"), url);
     StatusBar.msg(T("🔗 Đã chép link recipe ({n} ký tự) — mở link là chạy lại đúng các bước.", { n: I18n.num(url.length) }) + (url.length > 60000 ? " " + T("Link dài — vài ứng dụng chat có thể cắt mất.") : ""), ok ? "good" : "warn");
@@ -7626,7 +7642,7 @@ const PvRecipe = {
     function argInput(s, i, a) {
       if (a.type === "check") { const l = mk("label", "chk"), c = mk("input", "", null, { type: "checkbox", checked: !!s.args[a.k] }); c.onchange = () => { const n = steps(); n[i].args[a.k] = c.checked; commit(n); }; l.append(c, T(a.label)); return l; }
       if (a.type === "select") { const x = mk("select", "", null, { title: T(a.label) }); a.options.forEach(o => x.append(mk("option", "", o, { value: o }))); x.value = s.args[a.k]; x.onchange = () => { const n = steps(); n[i].args[a.k] = x.value; commit(n); }; return x; }
-      const x = mk("input", "rc-arg", null, { type: "text", value: s.args[a.k] ?? "", placeholder: T(a.label), title: T(a.label), spellcheck: false, autocomplete: "off" });
+      const x = mk("input", "rc-arg", null, { type: a.type === "secret" ? "password" : "text", value: s.args[a.k] ?? "", placeholder: T(a.label), title: T(a.label), spellcheck: false, autocomplete: "off" });
       x.oninput = () => { const n = steps(); if (!n[i]) return; n[i].args[a.k] = x.value; commit(n, true); };
       return x;
     }
@@ -7677,7 +7693,8 @@ const PvRecipe = {
     v.show = d => {
       v.last = d;
       // Steps preset by a link / demo are written to the result tab once it exists (F5 keeps them).
-      PowerUi.saveOpts(d.srcId, "recipe", RecipeOp.steps(d.srcId));
+      const cur = RecipeOp.steps(d.srcId);
+      PowerUi.saveOpts(d.srcId, "recipe", cur, RecipeRun.clean(cur));
       const key = JSON.stringify(d.steps.map(s => [s.op, s.on]));
       if (key !== v.key || !list.contains(document.activeElement)) { v.key = key; rows(); }
       states();
@@ -9432,7 +9449,7 @@ const PowerOps = (() => {
   function init() {
     if (inited) return;
     inited = true;
-    const V = { invisible: PvInvisible, recipe: PvRecipe, regex: PvRegex, run: PvRun, "code-image": PvCodeImage, syntax: PvSyntax, sql: PvSql, fake: PvFake, office: PvOffice, logmerge: PvLogMerge, fixlife: PvFixLife, swift: PvSwift, curl: PvCurl, x509: PvX509, openapi: PvOpenApi, patch: PvPatch };
+    const V = { invisible: PvInvisible, recipe: PvRecipe, regex: PvRegex, run: PvRun, "code-image": PvCodeImage, syntax: PvSyntax, sql: PvSql, fake: PvFake, office: PvOffice, logmerge: PvLogMerge, fixlife: PvFixLife, swift: PvSwift, curl: PvCurl, x509: PvX509, openapi: PvOpenApi, patch: PvPatch, sumcheck: PvSumCheck };
     for (const [k, v] of Object.entries(V)) PreviewPane.addView(k, v);
     RegexMarks.init();
   }
@@ -9471,7 +9488,8 @@ const PowerOps = (() => {
     recipe: (t, c) => RecipeOp.run(t, c), regex: (t, c) => RegexOp.run(t, c), run: (t, c) => RunCode.run(t, c), codeImage: (t, c) => CodeImageOp.run(t, c), syntaxCheck: (t, c) => SyntaxCheckOp.run(t, c),
     sqlQuery: (t, c) => SqlOp.run(t, c), fakeData: (t, c) => FakeOp.run(t, c), office: (t, c) => OfficeOp.run(t, c),
     logMerge: (t, c) => LogMergeOp.run(t, c), fixLifecycle: (t, c) => FixLifeOp.run(t, c), swiftDetail: (t, c) => SwiftOp.run(t, c),
-    curlConvert: (t, c) => CurlOp.run(t, c), x509: (t, c) => X509Op.run(t, c), protobuf: t => ProtoOp.run(t), openapiDoc: (t, c) => OpenApiOp.run(t, c), patchView: (t, c) => PatchOp.run(t, c) };
+    curlConvert: (t, c) => CurlOp.run(t, c), x509: (t, c) => X509Op.run(t, c), protobuf: t => ProtoOp.run(t), openapiDoc: (t, c) => OpenApiOp.run(t, c), patchView: (t, c) => PatchOp.run(t, c), checksumVerify: (t, c) => SumCheckOp.run(t, c),
+    aiSummarize: (t, c) => LocalAiOps.run("summarize", t, c), aiExplain: (t, c) => LocalAiOps.run("explain", t, c), aiProofread: (t, c) => LocalAiOps.run("proofread", t, c) };
 })();
 // Log + domain (phase 14c): log merge in a Blob Worker + histogram, FIX order lifecycle + sequence diagram, SWIFT MT dictionary + detail.
 // English strings for phase 14c (extras): log merge pane, FIX order lifecycle, SWIFT MT detail — keyed by the Vietnamese source.
@@ -11940,6 +11958,1641 @@ Object.assign(PowerDemos, (() => {
   return {
     "git-conflict": { payload: () => ({ v: 1, views: [[t("order-service.js", CONFLICT, "JavaScript")], [t("RELEASE-NOTES.md", NOTES, "Markdown")]] }) },
     "patch-apply": { payload: () => ({ v: 1, views: [[t("limit-orders.patch", PATCH())], [t("order-service.js", ORDER_TAB, "JavaScript"), t("app.yaml", CFG, "YAML")]], run: "patch-view" }) },
+  };
+})());
+// File + on-device AI (phase 14f): checksum (SHA-1/256/512 native or in a Blob Worker) + sum file check, split / join files, Chrome built-in AI ops.
+// English strings for phase 14f (lazy bundle): checksum engine + 🔎 actions, sum file check pane, split / join dialogs, on-device AI ops — keyed by the Vietnamese source.
+I18n.add({
+  "Đã huỷ.": "Cancelled.",
+  "Đang tải model AI trên máy {p}% (chỉ lần đầu) — bấm để huỷ.": "Downloading the on-device AI model {p}% (first time only) — click to cancel.",
+  "Bấm để huỷ": "Click to cancel",
+  "Máy / trình duyệt này không chạy được {api} (thiếu phần cứng hoặc chưa bật).": "This machine / browser cannot run {api} (hardware too small or not enabled).",
+  "Đang chuẩn bị model AI trên máy — bấm để huỷ.": "Preparing the on-device AI model — click to cancel.",
+  "Trình duyệt này không có API AI trên máy cho việc này.": "This browser has no on-device AI API for this.",
+  "Tab trống — không có gì để gửi cho AI.": "The tab is empty — nothing to give the AI.",
+  "✔ AI trên máy ({api}) đã xong — dữ liệu không rời máy.": "✔ On-device AI ({api}) done — data never left this machine.",
+  "Kết quả do model nhỏ trên máy tạo ({api}) — hãy kiểm lại.": "Written by a small on-device model ({api}) — check it.",
+  "Chỉ gửi {n} ký tự đầu.": "Only the first {n} characters were used.",
+  "{n} chỗ sửa.": "{n} corrections.",
+  "Không thấy dòng checksum (\"<hash>  <tên file>\" hoặc \"SHA256 (tên) = <hash>\").": "No checksum lines (\"<hash>  <file name>\" or \"SHA256 (name) = <hash>\").",
+  "Đang kiểm checksum — bấm để dừng.": "Verifying checksums — click to stop.",
+  "Bấm để dừng": "Click to stop",
+  "Đang kiểm “{name}” {p}% ({i}/{n}) — bấm để dừng.": "Checking “{name}” {p}% ({i}/{n}) — click to stop.",
+  "Không biết folder của file này (mở folder chứa nó trong Explorer) — đã so với các tab cùng tên đang mở.": "The folder of this file is unknown (open its folder in the Explorer) — compared with open tabs of the same name.",
+  "{n} dòng không đọc được: {list}": "{n} unreadable lines: {list}",
+  "{ok} OK · {bad} sai · {miss} thiếu": "{ok} OK · {bad} wrong · {miss} missing",
+  "🔗 Đã chép link checksum ({n} ký tự) — mở link là kiểm lại với các tab cùng tên.": "🔗 Checksum link copied ({n} characters) — opening it checks again against tabs of the same name.",
+  "Sai hash": "Wrong hash",
+  "OK": "OK",
+  "Không thấy file": "File not found",
+  "Lỗi đọc": "Read error",
+  "đĩa": "disk",
+  "tab đang mở": "open tab",
+  "Hash mong đợi": "Expected hash",
+  "Hash tính được": "Computed hash",
+  "Thuật toán": "Algorithm",
+  "Checksum · {ok}/{n} OK": "Checksum · {ok}/{n} OK",
+  "Dừng kiểm checksum": "Stop the checksum check",
+  "Chép link chia sẻ: nội dung file checksum": "Copy a share link: the checksum file's content",
+  "Đang tính {alg}: “{name}” {pct} · {i}/{n} file": "Computing {alg}: “{name}” {pct} · file {i}/{n}",
+  "Đã dừng — giữ {n} hash đã tính.": "Stopped — kept the {n} hashes computed.",
+  "{n} file · {alg}": "{n} files · {alg}",
+  "{ok} khớp hash đã dán.": "{ok} match the pasted hash.",
+  "✓ Hash khớp ({ok}/{n} file).": "✓ Hash matches ({ok}/{n} files).",
+  "✗ Không file nào khớp hash đã dán.": "✗ No file matches the pasted hash.",
+  "Chưa có hash nào để xuất.": "No hashes to export yet.",
+  "Folder không ghi được — đã tải “{name}” xuống.": "The folder is not writable — downloaded “{name}” instead.",
+  "Xuất “{name}”": "Export “{name}”",
+  "✔ Đã xuất “{name}” ({n} dòng) — ▶ Kiểm tra checksum để đối chiếu lại.": "✔ Exported “{name}” ({n} lines) — ▶ Verify checksums to check again.",
+  "Dán hash để so (SHA-1 / SHA-256 / SHA-512, có thể kèm tên file):": "Paste a hash to compare (SHA-1 / SHA-256 / SHA-512, a file name may follow):",
+  "So": "Compare",
+  "Không nhận ra hash — cần 40 / 64 / 128 ký tự hex.": "Not a hash — 40 / 64 / 128 hex characters expected.",
+  "Hash dán là {a}, kết quả đang là {b} — chạy lại Checksum ▸ {a} để so đúng.": "The pasted hash is {a}, the results are {b} — run Checksum ▸ {a} to compare.",
+  "Dán hash để so ✓/✗…": "Paste a hash to compare ✓/✗…",
+  "Chép kết quả (dạng sha256sum)": "Copy the results (sha256sum format)",
+  "✔ Đã chép {n} dòng.": "✔ Copied {n} lines.",
+  "Xuất file {ext}": "Export a {ext} file",
+  "Đã dừng — đã xoá các file đang ghi dở.": "Stopped — the half-written files were removed.",
+  "Đã có “{name}” trong folder — đổi tên / xoá trước rồi chạy lại.": "“{name}” already exists in the folder — rename / delete it first, then run again.",
+  "Ctrl+Z trong Explorer ⇒ chuyển vào thùng rác.": "Ctrl+Z in the Explorer ⇒ move them to the recycle bin.",
+  "Theo số dòng:": "By lines:",
+  "dòng / phần (không cắt giữa dòng)": "lines / part (never inside a line)",
+  "Theo dung lượng:": "By size:",
+  "/ phần": "/ part",
+  "→ {a}, {b}… (số phần biết sau khi đọc file)": "→ {a}, {b}… (the number of parts is known after reading)",
+  "Nhập dung lượng mỗi phần (> 0).": "Enter the size of each part (> 0).",
+  "Quá {max} phần — tăng dung lượng mỗi phần.": "More than {max} parts — make each part bigger.",
+  "→ {n} phần: {a} … {b}": "→ {n} parts: {a} … {b}",
+  "Cắt file “{name}”": "Split “{name}”",
+  "Cắt ra các phần": "Split",
+  "Số không hợp lệ.": "Invalid number.",
+  "Đang cắt: phần {k} · {done} / {total}": "Splitting: part {k} · {done} / {total}",
+  "Quá {max} phần — tăng số dòng mỗi phần.": "More than {max} parts — put more lines in each part.",
+  "Cắt “{name}” thành {n} phần": "Split “{name}” into {n} parts",
+  "✔ Đã cắt “{name}” thành {n} phần ({a} … {b}).": "✔ Split “{name}” into {n} parts ({a} … {b}).",
+  "Không thấy các phần tiếp theo (.002, .003…) cạnh “{name}”.": "No next parts (.002, .003…) next to “{name}”.",
+  "Chèn xuống dòng giữa các file (khi file trước không kết thúc bằng xuống dòng)": "Insert a line break between files (when the previous one does not end with one)",
+  "Tên file gộp:": "Joined file name:",
+  "Gộp {n} file": "Join {n} files",
+  "Gộp lại": "Join",
+  "Tên file không hợp lệ.": "Invalid file name.",
+  "Đang gộp: file {k}/{n} · {done} / {total}": "Joining: file {k}/{n} · {done} / {total}",
+  "Gộp thành “{name}”": "Join into “{name}”",
+  "✔ Đã gộp {n} file thành “{name}” ({size}).": "✔ Joined {n} files into “{name}” ({size}).",
+});
+document.head.append(Object.assign(document.createElement("style"), { textContent: ".pv:has(> .pv-body > .pv-sumcheck) { grid-template-columns: minmax(0, 1fr); }\n.pv-sumcheck { overflow: auto; padding: 6px; }\n.sc-grid { border-collapse: collapse; font-size: 12px; width: 100%; }\n.sc-grid th, .sc-grid td { border-bottom: 1px solid var(--line, #ddd); padding: 3px 6px; text-align: left; vertical-align: top; }\n.sc-hash { font-family: var(--mono, monospace); word-break: break-all; font-size: 11px; }\n.sc-ok .sc-st { color: #15803d; font-weight: 600; }\n.sc-bad .sc-st, .sc-error .sc-st { color: #b91c1c; font-weight: 600; }\n.sc-missing .sc-st { color: #a16207; font-weight: 600; }\n.sj-dlg { max-width: min(560px, calc(100vw - 32px)); width: 100%; }\n.sj-title { margin: 0 0 8px; font-size: 15px; }\n.sj-opt { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 6px 0; }\n.sj-num { width: 7em; }\n.sj-name { flex: 1 1 12em; min-width: 0; }\n.sj-plan, .sj-note { font-size: 12px; margin: 6px 0; min-height: 1.2em; overflow-wrap: anywhere; }\n.sj-note.warn { color: #a16207; }\n.sj-note.bad { color: #b91c1c; }\n.sj-bar { width: 100%; }\n.sj-list { max-height: 40vh; overflow: auto; margin: 4px 0; padding-left: 2em; }\n.sj-list li { display: flex; align-items: center; gap: 4px; padding: 2px 0; }\n.sj-file { flex: 1; min-width: 0; overflow-wrap: anywhere; }\n.sj-list button { min-width: 2.2em; }\n@media (pointer: coarse) { .sj-list button { min-height: 36px; } }" }));
+// Checksum, pure (node test; also runs in the hash worker as "(" + fileChecksumPureFactory + ")()"): SHA-1 / SHA-256 / SHA-512 fed chunk by chunk, sha256sum / BSD sum files (parse / format), hash typed or pasted by the user.
+function fileChecksumPureFactory() {
+  const ALGS = ["SHA-1", "SHA-256", "SHA-512"], HEX_LEN = { "SHA-1": 40, "SHA-256": 64, "SHA-512": 128 };
+  const EXT = { "SHA-1": ".sha1", "SHA-256": ".sha256", "SHA-512": ".sha512" };
+  const PRIMES = [];
+  for (let n = 2; PRIMES.length < 80; n++) if (PRIMES.every(p => n % p)) PRIMES.push(n);
+  // floor(n^(1/k)) by Newton from above; the SHA-2 constants come from it instead of 240 typed hex words.
+  function iroot(n, k) {
+    let x = 1n << BigInt(Math.ceil(n.toString(2).length / Number(k)) + 1);
+    for (;;) { const y = ((k - 1n) * x + n / x ** (k - 1n)) / k; if (y >= x) return x; x = y; }
+  }
+  const M64 = (1n << 64n) - 1n;
+  const frac64 = (p, k) => iroot(BigInt(p) << (64n * k), k) & M64;
+  let K64 = null;
+  function consts() {
+    if (K64) return K64;
+    const split = list => { const a = new Int32Array(list.length * 2); list.forEach((v, i) => { a[2 * i] = Number(v >> 32n) | 0; a[2 * i + 1] = Number(v & 0xffffffffn) | 0; }); return a; };
+    const K = PRIMES.map(p => frac64(p, 3n)), H = PRIMES.slice(0, 8).map(p => frac64(p, 2n));
+    K64 = { K: split(K), H: split(H) };
+    K64.K32 = Int32Array.from({ length: 64 }, (_, i) => K64.K[2 * i]);
+    K64.H32 = Int32Array.from({ length: 8 }, (_, i) => K64.H[2 * i]);
+    return K64;
+  }
+
+  const rd = (b, o) => (b[o] << 24) | (b[o + 1] << 16) | (b[o + 2] << 8) | b[o + 3];
+  const hex = words => Array.from(words, w => (w >>> 0).toString(16).padStart(8, "0")).join("");
+
+  function sha1Core() {
+    const H = Int32Array.of(0x67452301, 0xefcdab89 | 0, 0x98badcfe | 0, 0x10325476, 0xc3d2e1f0 | 0), W = new Int32Array(80);
+    return { size: 64, H, out: 5, block(b, o) {
+      for (let i = 0; i < 16; i++) W[i] = rd(b, o + 4 * i);
+      for (let i = 16; i < 80; i++) { const x = W[i - 3] ^ W[i - 8] ^ W[i - 14] ^ W[i - 16]; W[i] = (x << 1) | (x >>> 31); }
+      let a = H[0], bb = H[1], c = H[2], d = H[3], e = H[4];
+      for (let i = 0; i < 80; i++) {
+        const f = i < 20 ? (bb & c) | (~bb & d) : i < 40 ? bb ^ c ^ d : i < 60 ? (bb & c) | (bb & d) | (c & d) : bb ^ c ^ d;
+        const k = i < 20 ? 0x5a827999 : i < 40 ? 0x6ed9eba1 : i < 60 ? 0x8f1bbcdc | 0 : 0xca62c1d6 | 0;
+        const t = (((a << 5) | (a >>> 27)) + f + e + k + W[i]) | 0;
+        e = d; d = c; c = (bb << 30) | (bb >>> 2); bb = a; a = t;
+      }
+      H[0] = (H[0] + a) | 0; H[1] = (H[1] + bb) | 0; H[2] = (H[2] + c) | 0; H[3] = (H[3] + d) | 0; H[4] = (H[4] + e) | 0;
+    } };
+  }
+
+  function sha256Core() {
+    const { K32, H32 } = consts(), H = Int32Array.from(H32), W = new Int32Array(64);
+    const r = (x, n) => (x >>> n) | (x << (32 - n));
+    return { size: 64, H, out: 8, block(b, o) {
+      for (let i = 0; i < 16; i++) W[i] = rd(b, o + 4 * i);
+      for (let i = 16; i < 64; i++) {
+        const x = W[i - 15], y = W[i - 2];
+        W[i] = (W[i - 16] + (r(x, 7) ^ r(x, 18) ^ (x >>> 3)) + W[i - 7] + (r(y, 17) ^ r(y, 19) ^ (y >>> 10))) | 0;
+      }
+      let a = H[0], bb = H[1], c = H[2], d = H[3], e = H[4], f = H[5], g = H[6], h = H[7];
+      for (let i = 0; i < 64; i++) {
+        const t1 = (h + (((e >>> 6) | (e << 26)) ^ ((e >>> 11) | (e << 21)) ^ ((e >>> 25) | (e << 7))) + ((e & f) ^ (~e & g)) + K32[i] + W[i]) | 0;
+        const t2 = ((((a >>> 2) | (a << 30)) ^ ((a >>> 13) | (a << 19)) ^ ((a >>> 22) | (a << 10))) + ((a & bb) ^ (a & c) ^ (bb & c))) | 0;
+        h = g; g = f; f = e; e = (d + t1) | 0; d = c; c = bb; bb = a; a = (t1 + t2) | 0;
+      }
+      H[0] = (H[0] + a) | 0; H[1] = (H[1] + bb) | 0; H[2] = (H[2] + c) | 0; H[3] = (H[3] + d) | 0; H[4] = (H[4] + e) | 0; H[5] = (H[5] + f) | 0; H[6] = (H[6] + g) | 0; H[7] = (H[7] + h) | 0;
+    } };
+  }
+
+  // 64-bit words as (hi, lo) Int32 pairs; sums of lo halves carry through a float (exact below 2^53).
+  function sha512Core() {
+    const { K } = consts(), H = Int32Array.from(consts().H), W = new Int32Array(160), S = new Int32Array(16), C = 0x100000000;
+    return { size: 128, H, out: 16, block(b, o) {
+      for (let i = 0; i < 32; i++) W[i] = rd(b, o + 4 * i);
+      for (let i = 16; i < 80; i++) {
+        let xh = W[2 * (i - 15)], xl = W[2 * (i - 15) + 1];
+        const s0h = ((xh >>> 1) | (xl << 31)) ^ ((xh >>> 8) | (xl << 24)) ^ (xh >>> 7);
+        const s0l = ((xl >>> 1) | (xh << 31)) ^ ((xl >>> 8) | (xh << 24)) ^ ((xl >>> 7) | (xh << 25));
+        xh = W[2 * (i - 2)]; xl = W[2 * (i - 2) + 1];
+        const s1h = ((xh >>> 19) | (xl << 13)) ^ ((xl >>> 29) | (xh << 3)) ^ (xh >>> 6);
+        const s1l = ((xl >>> 19) | (xh << 13)) ^ ((xh >>> 29) | (xl << 3)) ^ ((xl >>> 6) | (xh << 26));
+        const lo = (s0l >>> 0) + (s1l >>> 0) + (W[2 * (i - 7) + 1] >>> 0) + (W[2 * (i - 16) + 1] >>> 0);
+        W[2 * i] = (s0h + s1h + W[2 * (i - 7)] + W[2 * (i - 16)] + ((lo / C) | 0)) | 0;
+        W[2 * i + 1] = lo | 0;
+      }
+      let ah = H[0], al = H[1], bh = H[2], bl = H[3], ch = H[4], cl = H[5], dh = H[6], dl = H[7], eh = H[8], el = H[9], fh = H[10], fl = H[11], gh = H[12], gl = H[13], hh = H[14], hl = H[15];
+      for (let i = 0; i < 160; i += 2) {
+        const S1h = ((eh >>> 14) | (el << 18)) ^ ((eh >>> 18) | (el << 14)) ^ ((el >>> 9) | (eh << 23));
+        const S1l = ((el >>> 14) | (eh << 18)) ^ ((el >>> 18) | (eh << 14)) ^ ((eh >>> 9) | (el << 23));
+        const t1l = (hl >>> 0) + (S1l >>> 0) + (((el & fl) ^ (~el & gl)) >>> 0) + (K[i + 1] >>> 0) + (W[i + 1] >>> 0);
+        const t1h = (hh + S1h + ((eh & fh) ^ (~eh & gh)) + K[i] + W[i] + ((t1l / C) | 0)) | 0;
+        const S0h = ((ah >>> 28) | (al << 4)) ^ ((al >>> 2) | (ah << 30)) ^ ((al >>> 7) | (ah << 25));
+        const S0l = ((al >>> 28) | (ah << 4)) ^ ((ah >>> 2) | (al << 30)) ^ ((ah >>> 7) | (al << 25));
+        const t2l = (S0l >>> 0) + ((((al & bl) ^ (al & cl) ^ (bl & cl))) >>> 0);
+        const t2h = (S0h + ((ah & bh) ^ (ah & ch) ^ (bh & ch)) + ((t2l / C) | 0)) | 0;
+        const t1 = t1l >>> 0, t2 = t2l >>> 0, e2 = (dl >>> 0) + t1, a2 = t1 + t2;
+        hh = gh; hl = gl; gh = fh; gl = fl; fh = eh; fl = el;
+        eh = (dh + t1h + ((e2 / C) | 0)) | 0; el = e2 | 0;
+        dh = ch; dl = cl; ch = bh; cl = bl; bh = ah; bl = al;
+        ah = (t1h + t2h + ((a2 / C) | 0)) | 0; al = a2 | 0;
+      }
+      S[0] = ah; S[1] = al; S[2] = bh; S[3] = bl; S[4] = ch; S[5] = cl; S[6] = dh; S[7] = dl; S[8] = eh; S[9] = el; S[10] = fh; S[11] = fl; S[12] = gh; S[13] = gl; S[14] = hh; S[15] = hl;
+      for (let i = 0; i < 16; i += 2) {
+        const lo = (H[i + 1] >>> 0) + (S[i + 1] >>> 0);
+        H[i] = (H[i] + S[i] + ((lo / C) | 0)) | 0; H[i + 1] = lo | 0;
+      }
+    } };
+  }
+
+  const CORES = { "SHA-1": sha1Core, "SHA-256": sha256Core, "SHA-512": sha512Core };
+  // create(alg) → { update(Uint8Array), hex() }: Merkle–Damgård padding with the bit length big-endian at the end.
+  function create(alg) {
+    if (!CORES[alg]) throw new Error("unknown hash: " + alg);
+    const core = CORES[alg](), n = core.size, buf = new Uint8Array(n);
+    let used = 0, len = 0;
+    function update(u8) {
+      let i = 0;
+      len += u8.length;
+      if (used) { const k = Math.min(n - used, u8.length); buf.set(u8.subarray(0, k), used); used += k; i = k; if (used < n) return; core.block(buf, 0); used = 0; }
+      for (; i + n <= u8.length; i += n) core.block(u8, i);
+      if (i < u8.length) { buf.set(u8.subarray(i), 0); used = u8.length - i; }
+    }
+    function hexOut() {
+      const bits = len * 8, tail = new Uint8Array((used + 1 + n / 8 > n ? 2 : 1) * n);
+      tail.set(buf.subarray(0, used));
+      tail[used] = 0x80;
+      const e = tail.length, hi = Math.floor(bits / 0x100000000), lo = bits >>> 0;
+      tail[e - 8] = hi >>> 24; tail[e - 7] = hi >>> 16; tail[e - 6] = hi >>> 8; tail[e - 5] = hi;
+      tail[e - 4] = lo >>> 24; tail[e - 3] = lo >>> 16; tail[e - 2] = lo >>> 8; tail[e - 1] = lo;
+      for (let o = 0; o < e; o += n) core.block(tail, o);
+      return hex(core.H.subarray(0, core.out));
+    }
+    return { update, hex: hexOut };
+  }
+
+  const algOfLen = len => ALGS.find(a => HEX_LEN[a] === len) || "";
+  const algOfName = name => { const m = /(?:\.|^)(sha(?:1|256|512))(?:sums?)?$/i.exec(String(name || "")); return m ? "SHA-" + m[1].slice(3) : ""; };
+
+  // GNU "hash  name" / "hash *name" (a leading "\" escapes \\ and \n in the name) and BSD "SHA256 (name) = hash"; "#" lines and blanks skipped.
+  function parse(text) {
+    const entries = [], bad = [];
+    String(text).split(/\r?\n/).forEach((raw, k) => {
+      const line = raw.replace(/^﻿/, "");
+      if (!line.trim() || /^\s*[#;]/.test(line)) return;
+      let m = /^\s*(\\?)([0-9a-fA-F]{40}|[0-9a-fA-F]{64}|[0-9a-fA-F]{128}) [ *](.+)$/.exec(line), hash = "", name = "";
+      if (m) { hash = m[2]; name = m[1] ? m[3].replace(/\\(\\|n)/g, (_, c) => (c === "n" ? "\n" : "\\")) : m[3]; }
+      else if ((m = /^\s*SHA-?(1|256|512)\s*\((.+)\)\s*=\s*([0-9a-fA-F]+)\s*$/i.exec(line)) && HEX_LEN["SHA-" + m[1]] === m[3].length) { hash = m[3]; name = m[2]; }
+      if (!hash) { bad.push(k + 1); return; }
+      entries.push({ line: k + 1, hash: hash.toLowerCase(), name: name.replace(/^\.\//, ""), alg: algOfLen(hash.length) });
+    });
+    return { entries, bad };
+  }
+
+  function format(rows) {
+    return rows.map(r => { const esc = /[\\\n]/.test(r.name); return (esc ? "\\" : "") + r.hash + "  " + (esc ? r.name.replace(/\\/g, "\\\\").replace(/\n/g, "\\n") : r.name); }).join("\n") + (rows.length ? "\n" : "");
+  }
+
+  // What the user pasted: a bare hash, "hash  name", "SHA256 (x) = hash", spaced / colon groups; → lowercase hex or "".
+  function cleanHash(s) {
+    const t = String(s || "").trim(), one = parse(t).entries[0];
+    if (one) return one.hash;
+    const h = t.replace(/[\s:-]/g, "").toLowerCase();
+    return /^[0-9a-f]+$/.test(h) && algOfLen(h.length) ? h : "";
+  }
+
+  return { ALGS, HEX_LEN, EXT, create, parse, format, cleanHash, algOfLen, algOfName };
+}
+const ShaSum = fileChecksumPureFactory();
+// Split / join files, pure (node test): part names name.ext.001…, byte plan, line cuts fed chunk by chunk (never inside a line), natural order, the parts of a ".001" set like Total Commander.
+const FileSplit = (() => {
+  const collator = new Intl.Collator(undefined, { numeric: true, sensitivity: "base" });
+  const natural = names => [...names].sort((a, b) => collator.compare(a, b) || (a < b ? -1 : a > b ? 1 : 0));
+  const digits = total => Math.max(3, String(total).length);
+  const partName = (name, i, total) => name + "." + String(i + 1).padStart(digits(total), "0");
+  const MAX_PARTS = 9999;
+
+  // [{ start, end }] of at most `bytes` each; an empty file is one empty part.
+  function bySize(size, bytes) {
+    const n = Math.max(1, Math.floor(bytes)), out = [];
+    for (let s = 0; s < size; s += n) out.push({ start: s, end: Math.min(size, s + n) });
+    return out.length ? out : [{ start: 0, end: 0 }];
+  }
+  const count = (size, bytes) => Math.max(1, Math.ceil(size / Math.max(1, Math.floor(bytes))));
+
+  // Lines per part: feed(chunk) → absolute offsets where a new part starts (right after the LF ending the n-th line); CR LF stays whole.
+  function lineCutter(lines) {
+    const n = Math.max(1, Math.floor(lines));
+    let pos = 0, seen = 0;
+    return {
+      feed(u8) {
+        const cuts = [];
+        for (let i = u8.indexOf(10); i >= 0; i = u8.indexOf(10, i + 1)) if (++seen === n) { seen = 0; cuts.push(pos + i + 1); }
+        pos += u8.length;
+        return cuts;
+      },
+    };
+  }
+  // Cuts (from lineCutter) + size → parts; a cut at the very end leaves no empty last part.
+  function partsFromCuts(cuts, size) {
+    const edges = [0, ...cuts.filter(c => c > 0 && c < size), size], out = [];
+    for (let i = 0; i + 1 < edges.length; i++) out.push({ start: edges[i], end: edges[i + 1] });
+    return out;
+  }
+
+  const PART = /^(.+)\.(\d{3,})$/;
+  const isFirstPart = name => { const m = PART.exec(name); return !!m && /^0*1$/.test(m[2]); };
+  // ".001" picked ⇒ its siblings .002, .003… in a row (same width) from the folder's names; → { target, parts } or null.
+  function partSet(first, names) {
+    const m = PART.exec(first);
+    if (!m || !isFirstPart(first)) return null;
+    const have = new Set(names), w = m[2].length, parts = [first];
+    for (let i = 2; ; i++) { const p = m[1] + "." + String(i).padStart(w, "0"); if (!have.has(p)) break; parts.push(p); }
+    return { target: m[1], parts };
+  }
+  // Name of a joined file: the parts' base, else "first-joined.ext".
+  function joinName(names) {
+    const m = PART.exec(names[0] || "");
+    if (m && names.every(n => PART.exec(n)?.[1] === m[1])) return m[1];
+    const f = names[0] || "joined", k = f.lastIndexOf(".");
+    return k > 0 ? f.slice(0, k) + "-joined" + f.slice(k) : f + "-joined";
+  }
+
+  // "1.5 MB" style input → bytes (KB = 1024); NaN when not a positive number.
+  function bytesOf(value, unit) {
+    const v = Number(String(value).replace(",", "."));
+    return v > 0 && isFinite(v) ? Math.max(1, Math.floor(v * (unit === "MB" ? 1048576 : unit === "KB" ? 1024 : 1))) : NaN;
+  }
+
+  return { natural, partName, bySize, count, lineCutter, partsFromCuts, partSet, isFirstPart, joinName, bytesOf, MAX_PARTS };
+})();
+// Checksum of files: ≤ 1 GB by crypto.subtle.digest, bigger in 8 MB slices inside a Blob Worker (progress, Stop); the 🔎 tab rows, pasted hash ✓/✗, sha256sum export; hashes cached by path + size + date.
+function checksumWorkerHandlers() {
+  return {
+    async hash(d, progress) {
+      const h = ShaSum.create(d.alg), f = d.file, step = 8 << 20;
+      let last = 0;
+      for (let p = 0; p < f.size; p += step) {
+        h.update(new Uint8Array(await f.slice(p, p + step).arrayBuffer()));
+        if (Date.now() - last > 150) { last = Date.now(); progress(Math.min(f.size, p + step)); }
+      }
+      return h.hex();
+    },
+  };
+}
+
+const FileSum = (() => {
+  const cfg = { native: 1 << 30 };
+  const cache = new Map();
+  let worker = null;
+  const w = () => worker ??= BlobWorker.create({ libs: [], code: () => "const ShaSum = (" + fileChecksumPureFactory + ")();\nconst HANDLERS = (" + checksumWorkerHandlers + ")();" });
+  const stoppedError = () => Object.assign(new Error(T("Đã dừng.")), { stopped: true });
+  const hexOf = buf => Array.from(new Uint8Array(buf), b => b.toString(16).padStart(2, "0")).join("");
+  const pct = (a, b) => (b ? Math.floor((a / b) * 100) : 100) + "%";
+
+  // file → hex; opts: { key (cache), progress(done, total), stopped() }; a stop while the worker runs terminates it.
+  async function hashFile(file, alg, opts = {}) {
+    const key = opts.key ? opts.key + "|" + file.size + "|" + file.lastModified + "|" + alg : "";
+    if (key && cache.has(key)) return cache.get(key);
+    if (opts.stopped?.()) throw stoppedError();
+    let hex;
+    if (file.size <= cfg.native) hex = hexOf(await crypto.subtle.digest(alg, await file.arrayBuffer()));
+    else {
+      const wk = w();
+      hex = await wk.call("hash", { file, alg }, { progress: done => { if (opts.stopped?.()) wk.stop(); else opts.progress?.(done, file.size); } });
+    }
+    if (opts.stopped?.()) throw stoppedError();
+    if (key) { if (cache.size > 2000) cache.clear(); cache.set(key, hex); }
+    return hex;
+  }
+  const hashText = (text, alg) => crypto.subtle.digest(alg, new TextEncoder().encode(text)).then(hexOf);
+
+  // Criteria paths → file nodes (folders walked, .git / node_modules kept: a checksum covers everything).
+  async function nodesOf(c, sink, st) {
+    if (Array.isArray(c.nodes)) {
+      const out = [];
+      for (const n of c.nodes) if (!n.dir) out.push(n); else for await (const k of ScanWalk.walk(n, { skip: false, stop: sink.stopped, st })) if (!k.dir) out.push(k);
+      return out;
+    }
+    const out = [];
+    for (const p of c.files || []) {
+      const k = p.lastIndexOf("/"), dir = await ScanWalk.folder(p.slice(0, k)), f = (await Explorer.loadKids(dir)).find(x => !x.dir && x.name === p.slice(k + 1));
+      if (f) out.push(f); else st.failed.push(p);
+    }
+    for (const p of c.dirs || []) for await (const k of ScanWalk.walk(await ScanWalk.folder(p), { skip: false, stop: sink.stopped, st })) if (!k.dir) out.push(k);
+    return out;
+  }
+
+  // The 🔎 provider: one row per file (status = hash, ✓ / ✗ against c.expect).
+  async function run(c, sink) {
+    const alg = ShaSum.ALGS.includes(c?.alg) ? c.alg : "SHA-256", st = ScanWalk.stats(), expect = ShaSum.cleanHash(c?.expect || "");
+    const nodes = await nodesOf(c || {}, sink, st);
+    let done = 0, ok = 0;
+    for (const n of nodes) {
+      if (sink.stopped()) break;
+      const { file } = await n.read();
+      const say = (a, b) => sink.progress(T("Đang tính {alg}: “{name}” {pct} · {i}/{n} file", { alg, name: n.name, pct: pct(a, b), i: done + 1, n: nodes.length }));
+      say(0, file.size);
+      let hex;
+      try { hex = await hashFile(file, alg, { key: n.path, progress: say, stopped: sink.stopped }); }
+      catch (e) { if (e.stopped || sink.stopped()) break; st.failed.push(n.path + ": " + e.message); continue; }
+      const st2 = expect ? (hex === expect ? "ok" : "bad") : "";
+      if (st2 === "ok") ok++;
+      sink.add([{ node: n, key: n.path, group: alg, hash: hex, st: st2, status: (st2 ? (st2 === "ok" ? "✓ " : "✗ ") : "") + hex, statusTitle: alg + " " + hex, stat: { size: file.size, mod: file.lastModified } }]);
+      done++;
+    }
+    if (sink.stopped()) { StatusBar.msg(T("Đã dừng — giữ {n} hash đã tính.", { n: done }), "warn"); return; }
+    if (st.failed.length || st.capped) sink.incomplete();
+    sink.done([T("{n} file · {alg}", { n: done, alg }), expect ? T("{ok} khớp hash đã dán.", { ok }) : "", ScanWalk.tail(st)].filter(Boolean).join(" "));
+    if (expect) StatusBar.msg(ok ? T("✓ Hash khớp ({ok}/{n} file).", { ok, n: done }) : T("✗ Không file nào khớp hash đã dán."), ok ? "good" : "warn");
+  }
+
+  // Names of the rows relative to the folder they share (sha256sum style, "/" separators).
+  function rowsOf(items) {
+    const dirs = items.map(it => it.node.path.split("/").slice(0, -1));
+    let k = 0;
+    while (dirs.length && dirs.every(d => k < d.length && d[k] === dirs[0][k])) k++;
+    return { k, base: dirs[0]?.slice(0, k).join("/") || "", rows: items.map((it, i) => ({ hash: it.hash, name: [...dirs[i].slice(k), it.node.name].join("/") })) };
+  }
+
+  async function exportSum(ctl) {
+    const items = ctl.items.filter(it => it.hash), alg = ctl.criteria?.alg || "SHA-256";
+    if (!items.length) { StatusBar.msg(T("Chưa có hash nào để xuất."), "warn"); return; }
+    const { base, rows } = rowsOf(items), text = ShaSum.format(rows), ext = ShaSum.EXT[alg];
+    const name0 = items.length === 1 ? items[0].node.name + ext : "checksums" + ext;
+    const dir = base ? await FolderPaths.resolve(base) : null;
+    if (!dir || dir.path !== base || !ExplorerOps.writableNode(dir)) { Dom.download(new Blob([text], { type: "text/plain" }), name0, "text/plain"); StatusBar.msg(T("Folder không ghi được — đã tải “{name}” xuống.", { name: name0 }), "good"); return; }
+    try {
+      await LocalFs.writable(dir.handle);
+      const name = await ExplorerOps.freeName(dir.handle, name0, false), h = await dir.handle.getFileHandle(name, { create: true });
+      await LocalFs.writeHandle(h, text);
+      ExplorerDisk.reload(dir);
+      ExplorerUndo.created(T("Xuất “{name}”", { name }), [{ handle: h, parent: dir.handle, path: dir.path }]);
+      await FileOpen.openMany([{ file: await h.getFile(), handle: h }], Views.focused);
+      StatusBar.msg(T("✔ Đã xuất “{name}” ({n} dòng) — ▶ Kiểm tra checksum để đối chiếu lại.", { name, n: rows.length }), "good");
+    } catch (e) { StatusBar.msg(T("Thao tác trên đĩa lỗi: {msg}", { msg: e.message }), "bad"); }
+  }
+
+  async function paste(ctl) {
+    const v = await AskText.ask(T("Dán hash để so (SHA-1 / SHA-256 / SHA-512, có thể kèm tên file):"), ctl.criteria?.expect || "", T("So"));
+    if (v == null) return;
+    const h = ShaSum.cleanHash(v);
+    if (v.trim() && !h) { StatusBar.msg(T("Không nhận ra hash — cần 40 / 64 / 128 ký tự hex."), "warn"); return; }
+    if (h && ShaSum.algOfLen(h.length) !== (ctl.criteria?.alg || "SHA-256")) StatusBar.msg(T("Hash dán là {a}, kết quả đang là {b} — chạy lại Checksum ▸ {a} để so đúng.", { a: ShaSum.algOfLen(h.length), b: ctl.criteria?.alg }), "warn");
+    const c = { ...ctl.criteria, expect: h };
+    if (ctl.criteria?.nodes) Object.defineProperty(c, "nodes", { value: ctl.criteria.nodes });
+    ctl.rerun(c);
+  }
+
+  function menu(ctl) {
+    const E = TabMenu.entry, items = ctl.items.filter(it => it.hash);
+    return [E(T("Dán hash để so ✓/✗…"), "", () => paste(ctl)),
+      E(T("Chép kết quả (dạng sha256sum)"), "", async () => { const ok = await Dom.copy(ShaSum.format(rowsOf(items).rows)); StatusBar.msg(ok ? T("✔ Đã chép {n} dòng.", { n: items.length }) : T("Không chép được — trình duyệt chặn clipboard."), ok ? "good" : "bad"); }),
+      E(T("Xuất file {ext}", { ext: ShaSum.EXT[ctl.criteria?.alg || "SHA-256"] }), "", () => exportSum(ctl))];
+  }
+
+  return { cfg, hashFile, hashText, run, menu, rowsOf, worker: () => worker };
+})();
+
+// One-line text prompt (a <dialog>, never window.prompt): ask(label, value, okLabel) → the text, null when cancelled.
+const AskText = (() => {
+  let dlg = null;
+  function build() {
+    const { mk } = PowerUi;
+    dlg = mk("dialog", "name-ask");
+    dlg.dataset.i18nSkip = "";
+    const form = mk("form", "", null, { method: "dialog" }), label = mk("label"), row = mk("div", "name-ask-btns");
+    label.append(mk("span"), mk("input", "", null, { type: "text", spellcheck: false, autocomplete: "off" }));
+    row.append(mk("button", "", "", { type: "button", onclick: () => dlg.close("") }), mk("button", "main", "", { type: "submit", value: "ok" }));
+    form.append(label, row);
+    dlg.append(form);
+    document.body.append(dlg);
+  }
+  function ask(msg, value = "", ok = T("OK")) {
+    if (!dlg) build();
+    const input = dlg.querySelector("input"), [cancel, go] = dlg.querySelectorAll(".name-ask-btns > button");
+    dlg.querySelector("label > span").textContent = msg;
+    cancel.textContent = T("Huỷ");
+    go.textContent = ok;
+    input.value = value;
+    dlg.returnValue = "";
+    dlg.showModal();
+    input.select();
+    return new Promise(done => dlg.addEventListener("close", () => done(dlg.returnValue === "ok" ? input.value : null), { once: true }));
+  }
+  return { ask };
+})();
+// "checksum-verify" op: a .sha256 / .sha1 / .sha512 (sha256sum / BSD lines) → each file of the sum file's folder (Explorer) or, failing that, an open tab of that name hashed and marked OK / FAILED / MISSING.
+const SumCheckOp = (() => {
+  const OP = "checksum-verify";
+  let job = null;
+  const nameOf = p => p.split("/").pop();
+
+  // The sum file's folder as a directory handle: its path below the Explorer root (handle.resolve).
+  async function baseDir(doc) {
+    const root = Explorer.root();
+    if (!doc?.handle || !root?.handle || root.parent) return null;
+    const parts = await root.handle.resolve(doc.handle).catch(() => null);
+    if (!parts) return null;
+    let dir = root.handle;
+    for (const p of parts.slice(0, -1)) dir = await dir.getDirectoryHandle(p);
+    return dir;
+  }
+  async function fileAt(dir, name) {
+    const parts = name.split("/").filter(p => p && p !== ".");
+    if (!parts.length || parts.includes("..")) return null;
+    try {
+      for (const p of parts.slice(0, -1)) dir = await dir.getDirectoryHandle(p);
+      return await (await dir.getFileHandle(parts.at(-1))).getFile();
+    } catch { return null; }
+  }
+  const tabOf = (name, srcId) => Docs.list().find(d => d.id !== srcId && d.kind !== "output" && !d.hex && !d.big && !Docs.isList(d) && d.name === nameOf(name)) || null;
+
+  async function run(t, c) {
+    const src = Docs.get(c.id), { entries, bad } = ShaSum.parse(t);
+    if (!entries.length) throw Object.assign(new Error(T("Không thấy dòng checksum (\"<hash>  <tên file>\" hoặc \"SHA256 (tên) = <hash>\").")), { warn: true });
+    const me = job = { stopped: false }, stopped = () => me.stopped;
+    const dir = await baseDir(src).catch(() => null), rows = [];
+    StatusBar.msg(T("Đang kiểm checksum — bấm để dừng."), "", stop, T("Bấm để dừng"));
+    for (const [i, e] of entries.entries()) {
+      if (stopped()) break;
+      const file = dir ? await fileAt(dir, e.name) : null, tab = file ? null : tabOf(e.name, c.id);
+      let actual = "", from = file ? "disk" : tab ? "tab" : "";
+      try {
+        if (file) actual = await FileSum.hashFile(file, e.alg, { stopped, progress: (a, b) => StatusBar.msg(T("Đang kiểm “{name}” {p}% ({i}/{n}) — bấm để dừng.", { name: e.name, p: Math.floor((a / b) * 100), i: i + 1, n: entries.length }), "", stop, T("Bấm để dừng")) });
+        else if (tab) actual = await FileSum.hashText(Docs.text(tab), e.alg);
+      } catch (err) { if (err.stopped) break; from = "err"; actual = err.message; }
+      rows.push({ ...e, from, actual, st: !from ? "missing" : from === "err" ? "error" : actual === e.hash ? "ok" : "bad" });
+    }
+    if (job === me) job = null;
+    if (me.stopped) throw Object.assign(new Error(T("Đã dừng.")), { stopped: true });
+    const n = st => rows.filter(r => r.st === st).length, word = { ok: "OK", bad: "FAILED", missing: "MISSING", error: "ERROR" };
+    const notes = [!dir ? T("Không biết folder của file này (mở folder chứa nó trong Explorer) — đã so với các tab cùng tên đang mở.") : "", bad.length ? T("{n} dòng không đọc được: {list}", { n: bad.length, list: bad.slice(0, 10).join(", ") }) : ""].filter(Boolean);
+    const sum = T("{ok} OK · {bad} sai · {miss} thiếu", { ok: n("ok"), bad: n("bad") + n("error"), miss: n("missing") });
+    const all = !(n("bad") + n("error") + n("missing"));
+    return { text: rows.map(r => r.name + ": " + word[r.st]).join("\n") + "\n# " + sum + "\n", notes: [(all ? "✓ " : "✗ ") + sum, ...notes], tone: all ? "good" : "warn", view: { kind: "sumcheck", srcId: c.id, rows, disk: !!dir } };
+  }
+  function stop() { if (job) { job.stopped = true; FileSum.worker()?.stop(); } }
+
+  async function share(srcId) {
+    const src = Docs.get(srcId);
+    if (!src) { StatusBar.msg(T("Tab nguồn của kết quả này đã đóng."), "warn"); return; }
+    await PowerUi.shareLink({ v: 1, views: [[{ n: src.name, l: src.lang || "", t: Docs.text(src) }]], run: OP }, n => T("🔗 Đã chép link checksum ({n} ký tự) — mở link là kiểm lại với các tab cùng tên.", { n }));
+  }
+
+  return { run, stop, share };
+})();
+
+const PvSumCheck = {
+  create(p) {
+    const { mk, button } = PowerUi;
+    const stopB = button("", () => SumCheckOp.stop()), link = button("", () => v.last && SumCheckOp.share(v.last.srcId));
+    const v = { el: mk("div", "pv-sumcheck"), tools: [stopB, link], last: null };
+    const MARK = { ok: ["✓", "OK"], bad: ["✗", "Sai hash"], missing: ["?", "Không thấy file"], error: ["!", "Lỗi đọc"] };
+    const FROM = { disk: "đĩa", tab: "tab đang mở" };
+
+    function row(r) {
+      const tr = mk("tr", "sc-" + r.st), [sym, word] = MARK[r.st];
+      tr.append(mk("td", "sc-st", sym + " " + T(word)), mk("td", "sc-name", r.name), mk("td", "", r.alg), mk("td", "sc-hash", r.hash),
+        mk("td", "sc-hash", r.st === "error" ? r.actual : r.actual || "—"), mk("td", "", r.from && FROM[r.from] ? T(FROM[r.from]) : ""));
+      return tr;
+    }
+    function render() {
+      const d = v.last, c = st => d.rows.filter(r => r.st === st).length;
+      p.type.textContent = T("Checksum · {ok}/{n} OK", { ok: c("ok"), n: d.rows.length });
+      const tb = mk("table", "sc-grid"), head = mk("tr");
+      for (const h of ["Kết quả", "File", "Thuật toán", "Hash mong đợi", "Hash tính được", "Nguồn"]) head.append(mk("th", "", T(h)));
+      tb.append(head);
+      v.el.replaceChildren(tb);
+      PowerUi.appendSliced(tb, d.rows, row, v, 300);
+    }
+    v.labels = () => { stopB.textContent = T("■ Dừng"); stopB.title = T("Dừng kiểm checksum"); link.textContent = T("🔗 Link"); link.title = T("Chép link chia sẻ: nội dung file checksum"); if (v.last) render(); };
+    v.show = d => { v.last = d; render(); return true; };
+    return v;
+  },
+};
+// Explorer "Cắt file…" (by lines — never inside a line — or by KB / MB → name.ext.001…) and "Gộp file…" (natural order, reorder, optional newline between files; a ".001" gathers its parts): streamed 8 MB at a time, progress + Stop in the dialog, the new files are one undo step (Ctrl+Z ⇒ recycle bin).
+const SplitJoin = (() => {
+  const CHUNK = 8 << 20, { mk, button } = PowerUi;
+  const fmt = n => I18n.num(n) + " B";
+  const size = n => (n >= 1048576 ? (n / 1048576).toFixed(1) + " MB" : n >= 1024 ? (n / 1024).toFixed(1) + " KB" : n + " B");
+  const prefs = () => Prefs.get("splitJoin", {});
+  const savePrefs = v => Prefs.set("splitJoin", { ...prefs(), ...v });
+
+  // Dialog frame: title, body, progress line, Cancel / ■ Stop + the main button; go(ui) runs the job, close when it resolves true.
+  function dialog(title, body, okLabel, go) {
+    const dlg = mk("dialog", "sj-dlg"), form = mk("form", "", null, { method: "dialog" }), bar = mk("progress", "sj-bar", null, { max: 1, value: 0 }), note = mk("div", "sj-note");
+    const cancel = button(T("Huỷ"), () => (ui.busy ? (ui.stopped = true) : dlg.close())), ok = Object.assign(button(okLabel, null), { type: "submit", className: "main" });
+    const ui = { busy: false, stopped: false, bar, note, dlg,
+      progress(done, total, text) { bar.hidden = false; bar.value = total ? done / total : 0; note.className = "sj-note"; note.textContent = text; } };
+    bar.hidden = true;
+    dlg.dataset.i18nSkip = "";
+    const row = mk("div", "name-ask-btns");
+    row.append(cancel, ok);
+    form.append(mk("h3", "sj-title", title), ...body, bar, note, row);
+    dlg.append(form);
+    form.addEventListener("submit", async e => {
+      e.preventDefault();
+      if (ui.busy) return;
+      Object.assign(ui, { busy: true, stopped: false });
+      ok.disabled = true;
+      cancel.textContent = T("■ Dừng");
+      let done = false;
+      try { done = await go(ui); }
+      catch (err) { note.className = "sj-note " + (err.stopped ? "warn" : "bad"); note.textContent = err.message; StatusBar.msg(err.message, err.stopped ? "warn" : "bad"); }
+      Object.assign(ui, { busy: false });
+      ok.disabled = false;
+      cancel.textContent = T("Đóng");
+      if (done) dlg.close();
+    });
+    dlg.addEventListener("cancel", e => { if (ui.busy) { e.preventDefault(); ui.stopped = true; } });
+    dlg.addEventListener("close", () => dlg.remove());
+    document.body.append(dlg);
+    dlg.showModal();
+    return ui;
+  }
+  const stoppedError = () => Object.assign(new Error(T("Đã dừng — đã xoá các file đang ghi dở.")), { stopped: true });
+
+  // Files written so far; on a stop / error they are removed again (a half part is worse than none).
+  function writer(dir) {
+    const made = [];
+    let w = null;
+    return {
+      made,
+      async open(name) {
+        if (await LocalFs.exists(dir, name)) throw new Error(T("Đã có “{name}” trong folder — đổi tên / xoá trước rồi chạy lại.", { name }));
+        const h = await dir.getFileHandle(name, { create: true });
+        made.push(h);
+        w = await h.createWritable();
+      },
+      write: data => w.write(data),
+      async close() { if (w) { const x = w; w = null; await x.close(); } },
+      async drop() { if (w) await w.abort().catch(() => {}); w = null; for (const h of made) await dir.removeEntry(h.name).catch(() => {}); },
+    };
+  }
+
+  async function finish(node, out, label, msg) {
+    ExplorerDisk.reload(node.parent);
+    ExplorerUndo.created(label, out.made.map(h => ({ handle: h, parent: node.parent.handle, path: node.parent.path })));
+    StatusBar.msg(msg + " " + T("Ctrl+Z trong Explorer ⇒ chuyển vào thùng rác."), "good");
+    return true;
+  }
+
+  function split(node) {
+    const p = prefs(), byLines = mk("input", "", null, { type: "radio", name: "sj-mode", checked: p.mode !== "size" }), bySize = mk("input", "", null, { type: "radio", name: "sj-mode", checked: p.mode === "size" });
+    const lines = mk("input", "sj-num", null, { type: "number", min: 1, step: 1, value: p.lines || 1000 }), amount = mk("input", "sj-num", null, { type: "text", inputMode: "decimal", value: p.amount || "10" });
+    const unit = mk("select");
+    unit.append(new Option("KB", "KB"), new Option("MB", "MB"));
+    unit.value = p.unit === "KB" ? "KB" : "MB";
+    const plan = mk("div", "sj-plan");
+    let fileSize = null;
+    const r1 = mk("label", "sj-opt"), r2 = mk("label", "sj-opt");
+    r1.append(byLines, T("Theo số dòng:") + " ", lines, " " + T("dòng / phần (không cắt giữa dòng)"));
+    r2.append(bySize, T("Theo dung lượng:") + " ", amount, unit, " " + T("/ phần"));
+    function preview() {
+      if (fileSize == null) return;
+      if (byLines.checked) { plan.textContent = T("→ {a}, {b}… (số phần biết sau khi đọc file)", { a: FileSplit.partName(node.name, 0, 1), b: FileSplit.partName(node.name, 1, 2) }); return; }
+      const b = FileSplit.bytesOf(amount.value, unit.value), n = FileSplit.count(fileSize, b);
+      plan.textContent = !b ? T("Nhập dung lượng mỗi phần (> 0).") : n > FileSplit.MAX_PARTS ? T("Quá {max} phần — tăng dung lượng mỗi phần.", { max: I18n.num(FileSplit.MAX_PARTS) })
+        : T("→ {n} phần: {a} … {b}", { n: I18n.num(n), a: FileSplit.partName(node.name, 0, n), b: FileSplit.partName(node.name, n - 1, n) });
+    }
+    for (const x of [byLines, bySize, lines, amount, unit]) x.addEventListener("input", preview);
+    node.read().then(({ file }) => { fileSize = file.size; preview(); }, () => {});
+    dialog(T("Cắt file “{name}”", { name: node.name }), [r1, r2, plan], T("Cắt ra các phần"), async ui => {
+      const { file } = await node.read(), dir = node.parent.handle, mode = byLines.checked ? "lines" : "size";
+      const nLines = Math.floor(+lines.value), bytes = FileSplit.bytesOf(amount.value, unit.value);
+      if (mode === "lines" ? !(nLines >= 1) : !bytes || FileSplit.count(file.size, bytes) > FileSplit.MAX_PARTS) { plan.textContent = T("Số không hợp lệ."); return false; }
+      savePrefs({ mode, lines: nLines, amount: amount.value, unit: unit.value });
+      await LocalFs.writable(dir);
+      const out = writer(dir);
+      let part = 0, last = 0;
+      const tick = (done, force) => { if (force || Date.now() - last > 120) { last = Date.now(); ui.progress(done, file.size, T("Đang cắt: phần {k} · {done} / {total}", { k: part, done: size(done), total: size(file.size) })); } };
+      try {
+        if (mode === "size") {
+          const plan = FileSplit.bySize(file.size, bytes);
+          for (const [i, r] of plan.entries()) {
+            await out.open(FileSplit.partName(node.name, i, plan.length)); part = i + 1;
+            for (let s = r.start; s < r.end; s += CHUNK) { if (ui.stopped) throw stoppedError(); await out.write(file.slice(s, Math.min(r.end, s + CHUNK))); tick(Math.min(r.end, s + CHUNK)); }
+            await out.close();
+          }
+        } else {
+          // Width of the numbers is unknown up front: 3 digits, like Total Commander (> 999 parts ⇒ more digits from there on).
+          const cut = FileSplit.lineCutter(nLines);
+          let start = 0;
+          await out.open(FileSplit.partName(node.name, 0, 1)); part = 1;
+          for (let s = 0; s < file.size; s += CHUNK) {
+            if (ui.stopped) throw stoppedError();
+            const end = Math.min(file.size, s + CHUNK);
+            for (const c of cut.feed(new Uint8Array(await file.slice(s, end).arrayBuffer()))) {
+              if (c >= file.size) continue;
+              await out.write(file.slice(start, c)); await out.close();
+              start = c;
+              if (part >= FileSplit.MAX_PARTS) throw new Error(T("Quá {max} phần — tăng số dòng mỗi phần.", { max: I18n.num(FileSplit.MAX_PARTS) }));
+              await out.open(FileSplit.partName(node.name, part, part + 1)); part++;
+            }
+            if (end > start) { await out.write(file.slice(start, end)); start = end; }
+            tick(end);
+          }
+          await out.close();
+        }
+      } catch (e) { await out.drop(); throw e; }
+      tick(file.size, true);
+      return finish(node, out, T("Cắt “{name}” thành {n} phần", { name: node.name, n: out.made.length }), T("✔ Đã cắt “{name}” thành {n} phần ({a} … {b}).", { name: node.name, n: out.made.length, a: out.made[0].name, b: out.made.at(-1).name }));
+    });
+  }
+
+  async function join(picked) {
+    let nodes = picked.filter(n => !n.dir), target = "";
+    if (nodes.length === 1) {
+      const kids = (await Explorer.loadKids(nodes[0].parent)).filter(k => !k.dir), set = FileSplit.partSet(nodes[0].name, kids.map(k => k.name));
+      if (!set || set.parts.length < 2) { StatusBar.msg(T("Không thấy các phần tiếp theo (.002, .003…) cạnh “{name}”.", { name: nodes[0].name }), "warn"); return; }
+      nodes = set.parts.map(n => kids.find(k => k.name === n));
+      target = set.target;
+    } else nodes = FileSplit.natural(nodes.map(n => n.name)).map(name => nodes.find(n => n.name === name));
+    const list = mk("ol", "sj-list"), nl = mk("input", "", null, { type: "checkbox", checked: false }), name = mk("input", "sj-name", null, { type: "text", spellcheck: false, value: target || FileSplit.joinName(nodes.map(n => n.name)) });
+    function paint() {
+      list.replaceChildren(...nodes.map((n, i) => {
+        const li = mk("li"), up = button("↑", () => { [nodes[i - 1], nodes[i]] = [nodes[i], nodes[i - 1]]; paint(); }, T("Lên")), down = button("↓", () => { [nodes[i + 1], nodes[i]] = [nodes[i], nodes[i + 1]]; paint(); }, T("Xuống"));
+        up.disabled = i === 0; down.disabled = i === nodes.length - 1;
+        li.append(mk("span", "sj-file", n.name), up, down);
+        return li;
+      }));
+    }
+    paint();
+    const opt = mk("label", "sj-opt"), out0 = mk("label", "sj-opt");
+    opt.append(nl, " " + T("Chèn xuống dòng giữa các file (khi file trước không kết thúc bằng xuống dòng)"));
+    out0.append(T("Tên file gộp:") + " ", name);
+    dialog(T("Gộp {n} file", { n: nodes.length }), [list, opt, out0], T("Gộp lại"), async ui => {
+      const dir = nodes[0].parent.handle, files = await Promise.all(nodes.map(n => n.read().then(r => r.file))), total = files.reduce((s, f) => s + f.size, 0);
+      const clean = ShareState.cleanName(name.value);
+      if (!clean || clean === "." || clean === "..") { ui.note.textContent = T("Tên file không hợp lệ."); return false; }
+      await LocalFs.writable(dir);
+      const want = await ExplorerOps.freeName(dir, clean, false), out = writer(dir);
+      let done = 0, last = 0;
+      try {
+        await out.open(want);
+        for (const [i, f] of files.entries()) {
+          for (let s = 0; s < f.size; s += CHUNK) {
+            if (ui.stopped) throw stoppedError();
+            await out.write(f.slice(s, Math.min(f.size, s + CHUNK)));
+            done += Math.min(f.size, s + CHUNK) - s;
+            if (Date.now() - last > 120) { last = Date.now(); ui.progress(done, total, T("Đang gộp: file {k}/{n} · {done} / {total}", { k: i + 1, n: files.length, done: size(done), total: size(total) })); }
+          }
+          if (nl.checked && i < files.length - 1 && f.size && new Uint8Array(await f.slice(f.size - 1).arrayBuffer())[0] !== 10) await out.write("\n");
+        }
+        await out.close();
+      } catch (e) { await out.drop(); throw e; }
+      ui.progress(total, total, fmt(total));
+      return finish(nodes[0], out, T("Gộp thành “{name}”", { name: want }), T("✔ Đã gộp {n} file thành “{name}” ({size}).", { n: files.length, name: want, size: size(total) }));
+    });
+  }
+
+  return { split, join };
+})();
+// "ai-summarize" / "ai-explain" / "ai-proofread" ops on Chrome's built-in model (Summarizer, LanguageModel, Proofreader / Rewriter): the first use may download the model (progress in the status bar, click = cancel); nothing leaves the machine.
+const LocalAiOps = (() => {
+  const MAX = 20000;
+  let busy = null;
+  const api = name => (typeof globalThis[name]?.create === "function" ? globalThis[name] : null);
+  const stopped = () => Object.assign(new Error(T("Đã huỷ.")), { stopped: true });
+  const cancel = () => busy?.abort();
+
+  // create() options shared by every API: download progress + cancel.
+  function common(ac) {
+    return {
+      signal: ac.signal,
+      monitor(m) { m.addEventListener("downloadprogress", e => StatusBar.msg(T("Đang tải model AI trên máy {p}% (chỉ lần đầu) — bấm để huỷ.", { p: Math.round((e.loaded || 0) * 100) }), "", cancel, T("Bấm để huỷ"))); },
+    };
+  }
+  async function make(name, opts, ac) {
+    const A = api(name), avail = await A.availability(opts).catch(() => "unavailable");
+    if (avail === "unavailable") throw Object.assign(new Error(T("Máy / trình duyệt này không chạy được {api} (thiếu phần cứng hoặc chưa bật).", { api: name })), { warn: true });
+    if (avail !== "available") StatusBar.msg(T("Đang chuẩn bị model AI trên máy — bấm để huỷ."), "", cancel, T("Bấm để huỷ"));
+    return A.create({ ...opts, ...common(ac) });
+  }
+
+  const SYS = {
+    summarize: "Summarize the user's text as short Markdown bullet points. Keep names, numbers and identifiers exact.",
+    explain: "You explain code, regular expressions and log excerpts to a developer. Answer in Markdown: what it does, step by step, then pitfalls. Be concise.",
+    proofread: "Fix grammar, spelling and punctuation of the user's English text. Keep its meaning, tone and formatting. Reply with the corrected text only.",
+  };
+  const LM_OPTS = { expectedInputs: [{ type: "text", languages: ["en"] }], expectedOutputs: [{ type: "text", languages: ["en"] }] };
+  async function prompt(kind, text, ac, hint = "") {
+    const s = await make("LanguageModel", LM_OPTS, ac);
+    try { return await s.prompt([{ role: "system", content: SYS[kind] }, { role: "user", content: (hint ? hint + "\n\n" : "") + text }], { signal: ac.signal }); }
+    finally { s.destroy?.(); }
+  }
+
+  async function exec(kind, text, ac, lang) {
+    if (kind === "summarize" && api("Summarizer")) {
+      const s = await make("Summarizer", { type: "key-points", format: "markdown", length: "medium", expectedInputLanguages: ["en"], outputLanguage: "en" }, ac);
+      try { return { out: await s.summarize(text, { signal: ac.signal }), by: "Summarizer" }; } finally { s.destroy?.(); }
+    }
+    if (kind === "proofread" && api("Proofreader")) {
+      const p = await make("Proofreader", { expectedInputLanguages: ["en"] }, ac);
+      try { const r = await p.proofread(text, { signal: ac.signal }); return { out: r?.correctedInput ?? String(r ?? ""), by: "Proofreader", n: r?.corrections?.length }; } finally { p.destroy?.(); }
+    }
+    if (kind === "proofread" && api("Rewriter")) {
+      const r = await make("Rewriter", { tone: "as-is", format: "as-is", length: "as-is", sharedContext: SYS.proofread }, ac);
+      try { return { out: await r.rewrite(text, { signal: ac.signal, context: SYS.proofread }), by: "Rewriter" }; } finally { r.destroy?.(); }
+    }
+    if (!api("LanguageModel")) throw Object.assign(new Error(T("Trình duyệt này không có API AI trên máy cho việc này.")), { warn: true });
+    const hint = kind === "explain" ? "Explain this " + (lang === "Log" ? "log excerpt" : /regex/i.test(lang) ? "regular expression" : lang && lang !== "Plain Text" ? lang + " code" : "text") + ":" : "";
+    return { out: await prompt(kind, text, ac, hint), by: "LanguageModel" };
+  }
+
+  async function run(kind, t, c) {
+    const text = t.trim();
+    if (!text) throw Object.assign(new Error(T("Tab trống — không có gì để gửi cho AI.")), { warn: true });
+    busy?.abort();
+    const ac = busy = new AbortController(), src = Docs.get(c.id), lang = src ? Docs.effectiveLang(src) : "";
+    try {
+      const r = await exec(kind, text.slice(0, MAX), ac, lang);
+      StatusBar.msg(T("✔ AI trên máy ({api}) đã xong — dữ liệu không rời máy.", { api: r.by }), "good");
+      const notes = [T("Kết quả do model nhỏ trên máy tạo ({api}) — hãy kiểm lại.", { api: r.by }), text.length > MAX ? T("Chỉ gửi {n} ký tự đầu.", { n: I18n.num(MAX) }) : "", r.n != null ? T("{n} chỗ sửa.", { n: r.n }) : ""].filter(Boolean);
+      return { text: String(r.out ?? "").replace(/\n?$/, "\n"), notes };
+    } catch (e) {
+      if (ac.signal.aborted || e?.name === "AbortError") throw stopped();
+      throw e;
+    } finally { if (busy === ac) busy = null; }
+  }
+
+  return { run, cancel };
+})();
+// Phase 14f demo content (label in demo-samples-file-ai-14f.js): a SHA-256 sum file checked against 3 open tabs — 2 match, 1 was edited after the sums were made, 1 file is missing. All fake.
+Object.assign(PowerDemos, (() => {
+  const t = (n, text, l = "") => ({ n, l, t: text });
+  const sha = text => { const h = ShaSum.create("SHA-256"); h.update(new TextEncoder().encode(text)); return h.hex(); };
+  const README = "# Demo Release 1.4.2 (fake)\n\nOrder gateway build for the demo exchange. Not a real product.\n";
+  const CONFIG = "{\n  \"service\": \"order-gateway\",\n  \"port\": 9443,\n  \"maxOrdersPerSecond\": 200\n}\n";
+  const NOTES = "Release notes (fake demo)\n- Faster order routing\n- Fixed a rounding bug in fees\n";
+  const SUMS = () => "# SHA-256 checksums of demo-release-1.4.2 (fake) — made with sha256sum\n" + ShaSum.format([
+    { hash: sha(README), name: "README.md" }, { hash: sha(CONFIG.replace("9443", "8443")), name: "config.json" },
+    { hash: sha(NOTES), name: "NOTES.txt" }, { hash: sha("binary build"), name: "bin/order-gateway.exe" }]);
+  return {
+    "checksum-verify": { payload: () => ({ v: 1, views: [[t("demo-release-1.4.2.sha256", SUMS())], [t("README.md", README, "Markdown"), t("config.json", CONFIG, "JSON"), t("NOTES.txt", NOTES)]], run: "checksum-verify" }) },
+  };
+})());
+// Text & list tools + encoders (phase 15a): wrap / join lines, extract URL·e-mail·IP, slug, HTML → text, numbers → words, word frequency, Base32/58/85 · HMAC · UUID v7 / ULID · CIDR · chmod.
+// English strings for phase 15a (lazy bundle): text tool dialog + options, notes, encoder errors, recipe steps, demo hints — keyed by the Vietnamese source.
+I18n.add({
+  "Ký tự “{c}” không thuộc Base32.": "Character “{c}” is not Base32.",
+  "Ký tự “{c}” không thuộc Base58.": "Character “{c}” is not Base58.",
+  "Z85 cần số byte chia hết cho 4 (đang có {n}).": "Z85 needs a byte count divisible by 4 (got {n}).",
+  "Z85 cần số ký tự chia hết cho 5 (đang có {n}).": "Z85 needs a character count divisible by 5 (got {n}).",
+  "Ascii85 thiếu ký tự ở cuối.": "Ascii85 is missing characters at the end.",
+  "Ký tự “{c}” không thuộc {alpha}.": "Character “{c}” is not {alpha}.",
+  "Nhóm 5 ký tự vượt 32 bit — không phải {alpha}.": "A 5-character group exceeds 32 bits — not {alpha}.",
+  "Nhập khoá HMAC (không lưu, không đi theo link).": "Type the HMAC key (never saved, never in a link).",
+  "Khoá hex không hợp lệ.": "Invalid hex key.",
+  "Khoá Base64 không hợp lệ.": "Invalid Base64 key.",
+  "Nhập dạng địa chỉ/prefix, vd 10.0.0.0/22 hoặc 2001:db8::/48.": "Type address/prefix, e.g. 10.0.0.0/22 or 2001:db8::/48.",
+  "Prefix /{p} vượt {max}.": "Prefix /{p} is over {max}.",
+  "Địa chỉ “{ip}” không hợp lệ.": "Address “{ip}” is not valid.",
+  "mạng {ip}": "network {ip}",
+  "dải {a} – {b}": "range {a} – {b}",
+  "{n} địa chỉ": "{n} addresses",
+  "Nhập quyền dạng 755 / 0644 / 4755 hoặc rwxr-x---.": "Type a mode like 755 / 0644 / 4755 or rwxr-x---.",
+  "✔ Đã đổi {n} vùng — Ctrl+Z để hoàn tác.": "✔ Changed {n} ranges — Ctrl+Z to undo.",
+  "Đặt con trỏ vào dòng có giá trị, hoặc bôi đen nó.": "Put the cursor on the line with the value, or select it.",
+  "Không phải UUID v7 hay ULID.": "Not a UUID v7 or ULID.",
+  "bấm để chép": "click to copy",
+  "Nhập khoá HMAC trên pane Recipe — khoá chỉ nằm trong bộ nhớ, không lưu, không đi theo link.": "Type the HMAC key on the Recipe pane — it stays in memory only, never saved, never in a link.",
+  "Quá lớn ({mb} MB) — công cụ này nhận tối đa 20 MB.": "Too large ({mb} MB) — this tool takes at most 20 MB.",
+  "vùng chọn ({n} ký tự)": "selection ({n} characters)",
+  "cả tab “{name}”": "whole tab “{name}”",
+  "Xem trước": "Preview",
+  "Mẫu có sẵn": "Preset",
+  "⤶ Thay tại chỗ": "⤶ Replace in place",
+  "Một lần Ctrl+Z để hoàn tác": "One Ctrl+Z undoes it",
+  "⇢ Mở ở view kia": "⇢ Open in the other view",
+  "Tab kết quả liên kết — sửa nguồn là tự cập nhật": "Linked result tab — follows edits of the source",
+  "🔗 Đã chép link ({n} ký tự) — mở link là chạy lại với các tuỳ chọn này.": "🔗 Link copied ({n} characters) — opening it runs again with these options.",
+  "Tab nguồn đã đổi — mở lại hộp thoại.": "The source tab changed — open the dialog again.",
+  "✔ {tool}: đã thay — Ctrl+Z để hoàn tác.": "✔ {tool}: replaced — Ctrl+Z to undo.",
+  "Đã chọn cả tab — chuột phải ▸ “Aa Đổi kiểu chữ ▸”, hoặc Palette “Chữ: …”.": "Whole tab selected — right-click ▸ “Aa Change case ▸”, or Palette “Case: …”.",
+  "Khoá HMAC mẫu “demo-secret” chỉ nằm trong bộ nhớ. Tab ids-and-modes.txt: đặt con trỏ vào dòng ▸ Palette “UUID v7 / ULID → thời điểm” / “chmod”.": "The sample HMAC key “demo-secret” is in memory only. Tab ids-and-modes.txt: put the cursor on a line ▸ Palette “UUID v7 / ULID → timestamp” / “chmod”.",
+  "Bọc / nối dòng": "Wrap / join lines",
+  "Tuỳ chỉnh": "Custom",
+  "SQL IN (lô 1.000)": "SQL IN (batches of 1,000)",
+  "SQL VALUES (lô 1.000)": "SQL VALUES (batches of 1,000)",
+  "Tiền tố mỗi dòng": "Prefix of each line",
+  "Hậu tố mỗi dòng": "Suffix of each line",
+  "Nháy": "Quotes",
+  "Không nháy": "No quotes",
+  "'…' (SQL, '' trong chuỗi)": "'…' (SQL, '' inside)",
+  "'…' — số giữ nguyên": "'…' — numbers left bare",
+  "Dấu nối (\\n = xuống dòng)": "Joiner (\\n = new line)",
+  "Chia lô N dòng (0 = không chia)": "Batches of N lines (0 = no batches)",
+  "Đầu mỗi lô": "Batch head",
+  "Cuối mỗi lô": "Batch tail",
+  "Giữa các lô": "Between batches",
+  "Bỏ dòng trống": "Drop empty lines",
+  "{items} dòng → {batches} lô.": "{items} lines → {batches} batches.",
+  "Toàn số ⇒ không thêm nháy.": "All numbers ⇒ no quotes.",
+  "Trích URL / email / IP": "Extract URL / e-mail / IP",
+  "Bỏ trùng": "Drop duplicates",
+  "Đếm số lần (cột 2, khi bỏ trùng)": "Count occurrences (column 2, with duplicates dropped)",
+  "{kind}: {n} ({all} lần)": "{kind}: {n} ({all} times)",
+  "Slug (bỏ dấu tiếng Việt)": "Slug (drop Vietnamese accents)",
+  "Giữ hoa / thường": "Keep case",
+  "Số → chữ": "Numbers → words",
+  "Tiếng Việt": "Vietnamese",
+  "Thêm “đồng” (tiếng Việt)": "Add “đồng” (Vietnamese)",
+  "Viết hoa chữ đầu": "Capitalise the first letter",
+  "Đổi {n} số.": "Converted {n} numbers.",
+  "{n} số quá {d} chữ số — giữ nguyên.": "{n} numbers longer than {d} digits — left as they are.",
+  "Bỏ stopword English (the, and, of…)": "Skip English stopwords (the, and, of…)",
+  "Top N (0 = tất cả)": "Top N (0 = all)",
+  "{total} từ, {distinct} từ khác nhau.": "{total} words, {distinct} distinct.",
+  "Sang Base32": "To Base32",
+  "Từ Base32": "From Base32",
+  "Sang Base58 (Bitcoin)": "To Base58 (Bitcoin)",
+  "Từ Base58 (Bitcoin)": "From Base58 (Bitcoin)",
+  "Sang Ascii85": "To Ascii85",
+  "Từ Ascii85": "From Ascii85",
+  "Sang Z85": "To Z85",
+  "Từ Z85": "From Z85",
+  "Khoá (không lưu)": "Key (never saved)",
+  "Dạng khoá": "Key format",
+  "UUID v7 / ULID → thời điểm": "UUID v7 / ULID → timestamp",
+  "CIDR → dải địa chỉ": "CIDR → address range",
+});
+document.head.append(Object.assign(document.createElement("style"), { textContent: "  /* Phase 15a: options dialog of the text & list tools (fields grid, live preview, actions). */\n  dialog.tt-dlg { width:min(760px, calc(100vw - 16px)); max-height:92dvh; }\n  .tt-dlg form { min-width:0; }\n  .tt-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(min(220px, 100%), 1fr)); gap:6px 10px; align-items:end; }\n  .tt-grid input[type=text], .tt-grid input[type=number], .tt-grid select { min-width:0; width:100%; box-sizing:border-box; font-family:Consolas, \"Cascadia Mono\", monospace; }\n  .tt-dlg label.chk { display:inline-flex; align-items:center; gap:4px; font-size:calc(12px * var(--ui-k, 1)); }\n  .tt-multi { display:flex; flex-wrap:wrap; gap:4px 10px; }\n  .tt-out { width:100%; box-sizing:border-box; min-height:8em; max-height:40dvh; resize:vertical; font:calc(12px * var(--ui-k, 1))/1.45 Consolas, \"Cascadia Mono\", monospace; background:var(--panel); color:var(--ink); border:1px solid var(--line); border-radius:6px; padding:6px 8px; white-space:pre; }\n  .tt-note { min-height:1.2em; overflow-wrap:anywhere; }\n  .tt-note.bad { color:var(--bad); }\n  .tt-acts { flex-wrap:wrap; }\n  @media (pointer:coarse) {\n    .tt-grid input[type=text], .tt-grid input[type=number], .tt-grid select { font-size:calc(16px * var(--ui-k, 1)); }\n    .tt-acts button { min-height:40px; }\n  }" }));
+// Wrap / join lines (pure): each line → prefix + quoted item + suffix, joined, optionally in batches of N with a head / tail per batch (SQL IN, VALUES, JSON array…).
+const WrapLines = (() => {
+  const QUOTES = ["none", "single", "double", "singleAuto"];
+  const DEF = { prefix: "", suffix: "", quote: "single", join: ", ", batch: 0, head: "(", tail: ")", sep: "\\n", trim: true, skipEmpty: true, unique: false };
+  // SQL IN: Oracle takes at most 1,000 items per IN list; SQL Server takes at most 1,000 rows per VALUES.
+  const PRESETS = {
+    "sql-in": { quote: "singleAuto", join: ", ", batch: 1000, head: "id IN (", tail: ")", sep: "\\nOR ", prefix: "", suffix: "" },
+    "sql-values": { quote: "singleAuto", prefix: "(", suffix: ")", join: ",\\n", batch: 1000, head: "VALUES\\n", tail: ";", sep: "\\n" },
+    "json-array": { quote: "double", prefix: "", suffix: "", join: ", ", batch: 0, head: "[", tail: "]", sep: "\\n" },
+    "go-slice": { quote: "double", prefix: "", suffix: "", join: ", ", batch: 0, head: "[]string{", tail: "}", sep: "\\n" },
+    "cs-array": { quote: "double", prefix: "", suffix: "", join: ", ", batch: 0, head: "new[] { ", tail: " }", sep: "\\n" },
+  };
+  const MAX_BATCH = 1000000;
+
+  // \n and \t typed in a field mean a line break / tab; \\ is a backslash.
+  const unesc = s => String(s).replace(/\\(n|t|\\)/g, (a, c) => c === "n" ? "\n" : c === "t" ? "\t" : "\\");
+  const isNum = s => /^-?(?:\d+(?:\.\d+)?|\.\d+)(?:e[+-]?\d+)?$/i.test(s);
+  const json = s => JSON.stringify(s);
+
+  // Untrusted (link, hot exit) → known fields of known types.
+  function clean(o) {
+    const v = { ...DEF };
+    if (!o || typeof o !== "object") return v;
+    for (const k of ["prefix", "suffix", "join", "head", "tail", "sep"]) if (typeof o[k] === "string") v[k] = o[k].slice(0, 500);
+    for (const k of ["trim", "skipEmpty", "unique"]) if (typeof o[k] === "boolean") v[k] = o[k];
+    if (QUOTES.includes(o.quote)) v.quote = o.quote;
+    const n = Math.floor(+o.batch);
+    v.batch = Number.isFinite(n) && n > 0 ? Math.min(n, MAX_BATCH) : 0;
+    return v;
+  }
+
+  // → { text, items, batches }.
+  function run(text, opts) {
+    const o = clean(opts);
+    let items = text.replace(/\r\n?/g, "\n").replace(/\n$/, "").split("\n");
+    if (o.trim) items = items.map(s => s.trim());
+    if (o.skipEmpty) items = items.filter(s => s.trim());
+    if (o.unique) items = [...new Set(items)];
+    const auto = o.quote === "singleAuto" && items.length && items.every(isNum);
+    const q = o.quote === "double" ? json : o.quote === "single" || (o.quote === "singleAuto" && !auto) ? s => "'" + s.replace(/'/g, "''") + "'" : s => s;
+    const pre = unesc(o.prefix), suf = unesc(o.suffix), join = unesc(o.join), head = unesc(o.head), tail = unesc(o.tail), sep = unesc(o.sep);
+    const wrapped = items.map(s => pre + q(s) + suf), size = o.batch || wrapped.length || 1, out = [];
+    for (let i = 0; i < wrapped.length || (!i && !wrapped.length); i += size) out.push(head + wrapped.slice(i, i + size).join(join) + tail);
+    return { text: out.join(sep), items: items.length, batches: wrapped.length ? out.length : 0, numeric: auto };
+  }
+
+  return { DEF, PRESETS, QUOTES, clean, run, unesc };
+})();
+// Extract URLs / e-mails / IPv4 / IPv6 from any text (pure): validated matches in order of first appearance, optional de-dupe + occurrence count.
+const ExtractText = (() => {
+  const KINDS = ["url", "email", "ipv4", "ipv6"];
+  const NAME = { url: "URL", email: "Email", ipv4: "IPv4", ipv6: "IPv6" };
+  const DEF = { kinds: ["url"], unique: true, count: true };
+
+  const octet = s => /^(?:0|[1-9]\d{0,2})$/.test(s) && +s <= 255;
+  const isV4 = s => { const p = s.split("."); return p.length === 4 && p.every(octet); };
+  function isV6(s) {
+    if (!/[0-9a-f]/i.test(s) || /:::/.test(s)) return false;
+    const halves = s.split("::");
+    if (halves.length > 2) return false;
+    const groups = halves.map(h => h ? h.split(":") : []), flat = groups.flat();
+    let need = 8;
+    if (flat.length && flat[flat.length - 1].includes(".")) { if (!isV4(flat.pop())) return false; need = 6; }
+    if (!flat.every(g => /^[0-9a-f]{1,4}$/i.test(g))) return false;
+    return halves.length === 2 ? flat.length < need : flat.length === need;
+  }
+
+  // Trailing punctuation and unbalanced closing brackets belong to the sentence, not the URL.
+  function trimUrl(u) {
+    for (;;) {
+      const c = u[u.length - 1];
+      if (/[.,;:!?'"]/.test(c)) { u = u.slice(0, -1); continue; }
+      const pair = { ")": "(", "]": "[", "}": "{" }[c];
+      if (pair && u.split(pair).length < u.split(c).length) { u = u.slice(0, -1); continue; }
+      return u;
+    }
+  }
+
+  const FIND = {
+    url: t => [...t.matchAll(/\b(?:https?|ftp):\/\/[^\s<>"'`]+|\bwww\.[a-z0-9-]+(?:\.[a-z0-9-]+)+[^\s<>"'`]*/gi)].map(m => trimUrl(m[0])).filter(u => u.length > 8),
+    email: t => [...t.matchAll(/(?<![\w.%+-])[A-Za-z0-9](?:[A-Za-z0-9._%+-]{0,62}[A-Za-z0-9_%+-])?@[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?(?:\.[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?)*\.[A-Za-z]{2,24}\b/g)].map(m => m[0]),
+    ipv4: t => [...t.matchAll(/(?<![\d.])\d{1,3}(?:\.\d{1,3}){3}(?!\.?\d)/g)].map(m => m[0]).filter(isV4),
+    ipv6: t => [...t.matchAll(/(?<![\w:.])[0-9a-f]{0,4}(?::[0-9a-f]{0,4}){2,7}(?::\d{1,3}(?:\.\d{1,3}){3})?(?![\w:.])/gi)].map(m => m[0]).filter(isV6),
+  };
+
+  function clean(o) {
+    const kinds = Array.isArray(o?.kinds) ? KINDS.filter(k => o.kinds.includes(k)) : DEF.kinds;
+    return { kinds: kinds.length ? kinds : DEF.kinds, unique: typeof o?.unique === "boolean" ? o.unique : DEF.unique, count: typeof o?.count === "boolean" ? o.count : DEF.count };
+  }
+
+  // → { text, total: { kind: n found }, groups: [{ kind, items: [{ value, n }] }] }.
+  function run(text, opts) {
+    const o = clean(opts), groups = [], total = {};
+    for (const kind of o.kinds) {
+      const found = FIND[kind](text);
+      total[kind] = found.length;
+      let items;
+      if (o.unique) { const m = new Map(); for (const v of found) m.set(v, (m.get(v) || 0) + 1); items = [...m].map(([value, n]) => ({ value, n })); }
+      else items = found.map(value => ({ value, n: 1 }));
+      groups.push({ kind, items });
+    }
+    const lines = [];
+    for (const g of groups) {
+      if (o.kinds.length > 1) lines.push((lines.length ? "\n" : "") + "# " + NAME[g.kind] + " · " + g.items.length);
+      for (const it of g.items) lines.push(o.unique && o.count ? it.value + "\t" + it.n : it.value);
+    }
+    return { text: lines.join("\n") + (lines.length ? "\n" : ""), total, groups };
+  }
+
+  return { KINDS, NAME, DEF, clean, run, isV4, isV6 };
+})();
+// Slug (accents dropped, đ → d, other characters → "-") and HTML → plain text over a parsed DOM (block → new line, li → "- ", table → TSV). Pure: the caller parses with DOMParser.
+const Slug = (() => {
+  const MARKS = new RegExp("[" + String.fromCharCode(0x300) + "-" + String.fromCharCode(0x36f) + "]", "g");
+  function make(s, keepCase = false) {
+    const t = s.normalize("NFD").replace(MARKS, "").replace(/đ/g, "d").replace(/Đ/g, "D").replace(/[^A-Za-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+    return keepCase ? t : t.toLowerCase();
+  }
+  // One slug per line (empty lines kept).
+  const lines = (text, keepCase) => text.split("\n").map(l => l.trim() ? make(l, keepCase) : l.replace(/\r$/, "")).join("\n");
+  return { make, lines };
+})();
+
+const HtmlText = (() => {
+  const BLOCK = new Set(["ADDRESS", "ARTICLE", "ASIDE", "BLOCKQUOTE", "DD", "DIV", "DL", "DT", "FIELDSET", "FIGCAPTION", "FIGURE", "FOOTER", "FORM", "H1", "H2", "H3", "H4", "H5", "H6", "HEADER", "HR", "MAIN", "NAV", "OL", "P", "PRE", "SECTION", "UL", "DETAILS", "SUMMARY", "CAPTION"]);
+  const SKIP = new Set(["SCRIPT", "STYLE", "NOSCRIPT", "TEMPLATE", "HEAD", "IFRAME", "OBJECT", "SVG", "CANVAS"]);
+  const cellText = el => el.textContent.replace(/\s+/g, " ").trim();
+
+  // node: a DOM Node (Document / Element / Text); → plain text with at most one blank line in a row.
+  function convert(node) {
+    const out = [];
+    let pre = 0;
+    const nl = (n = 1) => { out.push({ nl: n }); };
+    function walk(n) {
+      if (n.nodeType === 3) { out.push(pre ? { pre: n.data } : n.data.replace(/\s+/g, " ")); return; }
+      if (n.nodeType !== 1 && n.nodeType !== 9 && n.nodeType !== 11) return;
+      const tag = n.nodeName ? n.nodeName.toUpperCase() : "";
+      if (SKIP.has(tag)) return;
+      if (tag === "BR") { nl(); return; }
+      if (tag === "TABLE") { nl(2); table(n); nl(2); return; }
+      if (tag === "LI") { nl(); out.push("- "); kids(n); nl(); return; }
+      const block = BLOCK.has(tag);
+      if (block) nl(/^H\d$|^P$|^PRE$|^BLOCKQUOTE$|^HR$/.test(tag) ? 2 : 1);
+      if (tag === "PRE") pre++;
+      kids(n);
+      if (tag === "PRE") pre--;
+      if (block) nl(/^H\d$|^P$|^PRE$|^BLOCKQUOTE$/.test(tag) ? 2 : 1);
+    }
+    const kids = n => { for (const c of n.childNodes) walk(c); };
+    function table(t) {
+      const rows = [];
+      (function find(n) { for (const c of n.childNodes) { if (c.nodeType !== 1) continue; const g = c.nodeName.toUpperCase(); if (g === "TR") rows.push(c); else if (g !== "TABLE") find(c); } })(t);
+      rows.forEach((r, i) => { if (i) nl(); out.push([...r.childNodes].filter(c => c.nodeType === 1 && /^T[DH]$/i.test(c.nodeName)).map(cellText).join("\t")); });
+    }
+    walk(node);
+    // Line breaks collapse: spaces around a break vanish, never more than one blank line.
+    let s = "", want = 0;
+    for (const x of out) {
+      if (x.nl) { want = Math.max(want, x.nl); continue; }
+      const raw = typeof x === "string" ? x : x.pre;
+      if (!raw) continue;
+      // Whitespace between blocks (source indentation / new lines) is not text.
+      if (typeof x === "string" && !raw.trim() && (want || !s || s.endsWith("\n"))) continue;
+      if (want && s) s = s.replace(/[ \t]+$/, "") + "\n".repeat(want);
+      want = 0;
+      s += typeof x === "string" && (!s || s.endsWith("\n")) ? raw.replace(/^ +/, "") : raw;
+    }
+    s = s.replace(/^\n+|\s+$/g, "");
+    return s ? s + "\n" : "";
+  }
+
+  return { convert };
+})();
+// Numbers → words (pure): Vietnamese (mốt, lăm, linh, mươi / mười, tư; nghìn · triệu · tỷ, repeating to tỷ tỷ; "phẩy" for decimals) and English; up to 21 integer digits.
+// Vietnamese words are single-quoted data: the i18n coverage test only scans double-quoted UI strings.
+const NumWords = (() => {
+  const MAX_DIGITS = 21;
+  const VI = 'không một hai ba bốn năm sáu bảy tám chín'.split(' ');
+  const W = { hundred: 'trăm', ten: 'mười', tens: 'mươi', odd: 'linh', one: 'mốt', four: 'tư', five: 'lăm', thousand: 'nghìn', million: 'triệu', billion: 'tỷ', minus: 'âm', point: 'phẩy', dong: 'đồng' };
+  const EN = "zero one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen".split(" ");
+  const EN_TENS = "  twenty thirty forty fifty sixty seventy eighty ninety".split(" ");
+  const EN_SCALE = ["", "thousand", "million", "billion", "trillion", "quadrillion", "quintillion"];
+  const DEF = { lang: "vi", dong: false, cap: true };
+
+  // "1.234.567,89" / "1,234,567.89" / "1_000" → { neg, int, frac } (digit strings); the last of two different separators is the decimal one,
+  // a single separator followed by exactly 3 digits is a thousands separator in that language (vi ".", en ",").
+  function parse(s, lang = "vi") {
+    const m = /^(-)?(\d+(?:[.,_]\d+)*)$/.exec(s.trim());
+    if (!m) return null;
+    let body = m[2].replace(/_/g, "");
+    const seps = body.match(/[.,]/g) || [];
+    let dec = "";
+    if (seps.length) {
+      const last = seps[seps.length - 1], kinds = new Set(seps);
+      if (kinds.size === 2) dec = last;
+      else if (seps.length === 1 && !(new RegExp("^\\d{1,3}\\" + last + "\\d{3}$").test(body) && last === (lang === "en" ? "," : "."))) dec = last;
+    }
+    let int = body, frac = "";
+    if (dec) { const at = body.lastIndexOf(dec); int = body.slice(0, at); frac = body.slice(at + 1); if (/[.,]/.test(frac)) return null; }
+    int = int.replace(/[.,]/g, "").replace(/^0+(?=\d)/, "");
+    return { neg: !!m[1], int, frac };
+  }
+
+  // Vietnamese: 3 digits; full = not the leading group (reads "không trăm", "linh").
+  function viGroup(n, full) {
+    const a = Math.floor(n / 100), b = Math.floor(n / 10) % 10, c = n % 10, out = [];
+    if (a || full) out.push(VI[a], W.hundred);
+    if (b === 0) { if (c && (a || full)) out.push(W.odd); if (c) out.push(VI[c]); }
+    else if (b === 1) { out.push(W.ten); if (c) out.push(c === 5 ? W.five : VI[c]); }
+    else { out.push(VI[b], W.tens); if (c) out.push(c === 1 ? W.one : c === 4 ? W.four : c === 5 ? W.five : VI[c]); }
+    return out;
+  }
+  // Groups below a billion; a whole zero group is skipped.
+  function viBelowBillion(n, full) {
+    const g = [Math.floor(n / 1e6), Math.floor(n / 1e3) % 1000, n % 1000], names = [W.million, W.thousand, ""], out = [];
+    g.forEach((v, i) => { if (!v) return; out.push(...viGroup(v, full || out.length > 0)); if (names[i]) out.push(names[i]); });
+    return out;
+  }
+  function viInt(big, full = false) {
+    if (big === 0n) return full ? [] : [VI[0]];
+    const hi = big / 1000000000n, lo = Number(big % 1000000000n), out = [];
+    if (hi) out.push(...viInt(hi), W.billion);
+    if (lo) out.push(...viBelowBillion(lo, full || !!hi));
+    return out;
+  }
+
+  function enGroup(n) {
+    const out = [], a = Math.floor(n / 100), r = n % 100;
+    if (a) out.push(EN[a], "hundred");
+    if (r >= 20) out.push(EN_TENS[Math.floor(r / 10)] + (r % 10 ? "-" + EN[r % 10] : ""));
+    else if (r) out.push(EN[r]);
+    return out;
+  }
+  function enInt(big) {
+    if (big === 0n) return [EN[0]];
+    const out = [];
+    for (let i = EN_SCALE.length - 1; i >= 0; i--) {
+      const v = Number((big / 10n ** BigInt(3 * i)) % 1000n);
+      if (v) out.push(...enGroup(v), ...(EN_SCALE[i] ? [EN_SCALE[i]] : []));
+    }
+    return out;
+  }
+
+  // One number string → words, or null when it is not a number / has more than 21 integer digits.
+  function words(s, opts = {}) {
+    const o = { ...DEF, ...opts }, p = parse(s, o.lang);
+    if (!p || p.int.length > MAX_DIGITS) return null;
+    const vi = o.lang !== "en", big = BigInt(p.int || "0"), out = [];
+    if (p.neg && (big || /[1-9]/.test(p.frac))) out.push(vi ? W.minus : "minus");
+    out.push(...(vi ? viInt(big) : enInt(big)));
+    if (p.frac) {
+      out.push(vi ? W.point : "point");
+      if (vi) { const lead = /^0*/.exec(p.frac)[0], rest = p.frac.slice(lead.length); out.push(...[...lead].map(() => VI[0])); if (rest) out.push(...(rest.length > 3 ? [...rest].map(d => VI[+d]) : viInt(BigInt(rest)))); }
+      else out.push(...[...p.frac].map(d => EN[+d]));
+    }
+    if (o.dong && vi) out.push(W.dong);
+    const t = out.join(" ");
+    return o.cap ? t.charAt(0).toLocaleUpperCase() + t.slice(1) : t;
+  }
+
+  const clean = o => ({ lang: o?.lang === "en" ? "en" : "vi", dong: o?.dong === true, cap: typeof o?.cap === "boolean" ? o.cap : DEF.cap });
+  // Every number in the text → words (not parts of ids / dates / ranges like INV-2026-0042, 10-20); → { text, n, skipped }.
+  function replaceAll(text, opts) {
+    const o = clean(opts);
+    let n = 0, skipped = 0;
+    const out = text.replace(/(?<![\w.,-])-?\d+(?:[.,_]\d+)*(?![\w-])/g, m => { const w = words(m, o); if (w === null) { skipped++; return m; } n++; return w; });
+    return { text: out, n, skipped };
+  }
+
+  return { DEF, MAX_DIGITS, parse, words, clean, replaceAll };
+})();
+// Word frequency (pure): words (letters / digits, any script, ' and - inside) counted case-insensitively → Markdown table word · count · %, optional English stopwords off, top N.
+const WordFreq = (() => {
+  const STOP = new Set(("a about above after again against all am an and any are as at be because been before being below between both but by can did do does doing down during each few for from further " +
+    "had has have having he her here hers herself him himself his how i if in into is it its itself just me more most my myself no nor not now of off on once only or other our ours ourselves out over own " +
+    "same she should so some such than that the their theirs them themselves then there these they this those through to too under until up very was we were what when where which while who whom why will with " +
+    "you your yours yourself yourselves s t don can't won't isn't aren't wasn't weren't i'm it's that's there's").split(" "));
+  const DEF = { stop: true, top: 100 };
+  const clean = o => ({ stop: typeof o?.stop === "boolean" ? o.stop : DEF.stop, top: Math.max(0, Math.min(100000, Math.floor(+o?.top) || 0)) });
+
+  // → { text, words: [{ word, n }], total, distinct }.
+  function run(text, opts) {
+    const o = clean(opts), m = new Map();
+    let total = 0;
+    for (const [w] of text.matchAll(/[\p{L}\p{N}]+(?:['’-][\p{L}\p{N}]+)*/gu)) {
+      const k = w.toLocaleLowerCase().replace(/’/g, "'");
+      if (o.stop && STOP.has(k)) continue;
+      total++;
+      m.set(k, (m.get(k) || 0) + 1);
+    }
+    const all = [...m].map(([word, n]) => ({ word, n })).sort((a, b) => b.n - a.n || (a.word < b.word ? -1 : a.word > b.word ? 1 : 0));
+    const list = o.top ? all.slice(0, o.top) : all, pct = n => (total ? (100 * n / total).toFixed(2) : "0.00") + "%";
+    const rows = list.map((r, i) => "| " + (i + 1) + " | " + r.word.replace(/\|/g, "\\|") + " | " + r.n + " | " + pct(r.n) + " |");
+    return { text: ["| # | Word | Count | % |", "|---:|---|---:|---:|", ...rows].join("\n") + "\n", words: list, total, distinct: all.length };
+  }
+
+  return { DEF, STOP, clean, run };
+})();
+// Encoders + small dev tools (pure, bytes = Uint8Array): Base32 (RFC 4648) · Base58 (Bitcoin) · Ascii85 · Z85 · HMAC (WebCrypto) · UUID v7 / ULID make + time · CIDR IPv4 / IPv6 · chmod octal ⇄ rwx.
+const EncPlus = (() => {
+  const bad = msg => { throw new Error(msg); };
+  const tr = (s, p) => typeof T === "function" ? T(s, p) : s.replace(/\{(\w+)\}/g, (m, k) => p?.[k] ?? m);
+
+  const B32 = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
+  function b32enc(u) {
+    let out = "", bits = 0, val = 0;
+    for (const b of u) { val = (val << 8) | b; bits += 8; while (bits >= 5) { out += B32[(val >>> (bits - 5)) & 31]; bits -= 5; } }
+    if (bits) out += B32[(val << (5 - bits)) & 31];
+    return out + "=".repeat((8 - out.length % 8) % 8);
+  }
+  function b32dec(s) {
+    const t = s.replace(/[\s=]+/g, "").toUpperCase(), out = [];
+    let bits = 0, val = 0;
+    for (const c of t) { const i = B32.indexOf(c); if (i < 0) bad(tr("Ký tự “{c}” không thuộc Base32.", { c })); val = ((val << 5) | i) & 0xfff; bits += 5; if (bits >= 8) { out.push((val >>> (bits - 8)) & 255); bits -= 8; } }
+    return Uint8Array.from(out);
+  }
+
+  const B58 = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
+  function b58enc(u) {
+    let zeros = 0;
+    while (zeros < u.length && !u[zeros]) zeros++;
+    let n = 0n;
+    for (const b of u) n = n * 256n + BigInt(b);
+    let out = "";
+    while (n > 0n) { out = B58[Number(n % 58n)] + out; n /= 58n; }
+    return "1".repeat(zeros) + out;
+  }
+  function b58dec(s) {
+    const t = s.trim();
+    let zeros = 0;
+    while (zeros < t.length && t[zeros] === "1") zeros++;
+    let n = 0n;
+    for (const c of t.slice(zeros)) { const i = B58.indexOf(c); if (i < 0) bad(tr("Ký tự “{c}” không thuộc Base58.", { c })); n = n * 58n + BigInt(i); }
+    const out = [];
+    while (n > 0n) { out.unshift(Number(n % 256n)); n /= 256n; }
+    return Uint8Array.from([...new Array(zeros).fill(0), ...out]);
+  }
+
+  const Z85 = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.-:+=^!/*?&<>()[]{}@%$#";
+  // Ascii85 (Adobe, "z" for 4 zero bytes, no <~ ~> added) and Z85 (ZeroMQ, input length a multiple of 4).
+  function a85enc(u, z85 = false) {
+    if (z85 && u.length % 4) bad(tr("Z85 cần số byte chia hết cho 4 (đang có {n}).", { n: u.length }));
+    let out = "";
+    for (let i = 0; i < u.length; i += 4) {
+      const n = Math.min(4, u.length - i);
+      let v = 0;
+      for (let k = 0; k < 4; k++) v = v * 256 + (k < n ? u[i + k] : 0);
+      if (!z85 && n === 4 && v === 0) { out += "z"; continue; }
+      const d = [];
+      for (let k = 0; k < 5; k++) { d.unshift(v % 85); v = Math.floor(v / 85); }
+      out += d.slice(0, n + 1).map(x => z85 ? Z85[x] : String.fromCharCode(x + 33)).join("");
+    }
+    return out;
+  }
+  function a85dec(s, z85 = false) {
+    let t = s.replace(/\s+/g, "");
+    if (!z85) t = t.replace(/^<~/, "").replace(/~>$/, "").replace(/z/g, "!!!!!");
+    if (z85 && t.length % 5) bad(tr("Z85 cần số ký tự chia hết cho 5 (đang có {n}).", { n: t.length }));
+    const out = [];
+    for (let i = 0; i < t.length; i += 5) {
+      const n = Math.min(5, t.length - i);
+      if (n === 1) bad(tr("Ascii85 thiếu ký tự ở cuối."));
+      let v = 0;
+      for (let k = 0; k < 5; k++) {
+        const c = k < n ? t[i + k] : "u", x = z85 ? Z85.indexOf(c) : c.charCodeAt(0) - 33;
+        if (x < 0 || x > 84) bad(tr("Ký tự “{c}” không thuộc {alpha}.", { c, alpha: z85 ? "Z85" : "Ascii85" }));
+        v = v * 85 + x;
+      }
+      if (v > 0xffffffff) bad(tr("Nhóm 5 ký tự vượt 32 bit — không phải {alpha}.", { alpha: z85 ? "Z85" : "Ascii85" }));
+      for (let k = 0; k < n - 1; k++) out.push(Math.floor(v / 256 ** (3 - k)) % 256);
+    }
+    return Uint8Array.from(out);
+  }
+
+  // HMAC: key as text (UTF-8) / hex / base64 → hex or base64 of the MAC.
+  async function hmac(u, key, { alg = "SHA-256", keyFmt = "text", out = "hex" } = {}) {
+    if (!key) bad(tr("Nhập khoá HMAC (không lưu, không đi theo link)."));
+    let k;
+    if (keyFmt === "hex") { const h = key.replace(/\s+/g, ""); if (!/^(?:[0-9a-f]{2})+$/i.test(h)) bad(tr("Khoá hex không hợp lệ.")); k = Uint8Array.from(h.match(/../g), x => parseInt(x, 16)); }
+    else if (keyFmt === "base64") { try { k = Uint8Array.from(atob(key.replace(/\s+/g, "").replace(/-/g, "+").replace(/_/g, "/")), c => c.charCodeAt(0)); } catch { bad(tr("Khoá Base64 không hợp lệ.")); } }
+    else k = new TextEncoder().encode(key);
+    const ck = await crypto.subtle.importKey("raw", k, { name: "HMAC", hash: alg }, false, ["sign"]);
+    const mac = new Uint8Array(await crypto.subtle.sign("HMAC", ck, u));
+    return out === "base64" ? btoa(String.fromCharCode(...mac)) : [...mac].map(b => b.toString(16).padStart(2, "0")).join("");
+  }
+
+  // UUID v7: 48-bit Unix ms + version 7 + variant 10 + random. ULID: 10 Crockford chars of time + 16 random.
+  const hex = u => [...u].map(b => b.toString(16).padStart(2, "0")).join("");
+  function uuid7(ms = Date.now(), rnd = crypto.getRandomValues(new Uint8Array(10))) {
+    const b = new Uint8Array(16);
+    let t = ms;
+    for (let i = 5; i >= 0; i--) { b[i] = t % 256; t = Math.floor(t / 256); }
+    b.set(rnd, 6);
+    b[6] = (b[6] & 0x0f) | 0x70;
+    b[8] = (b[8] & 0x3f) | 0x80;
+    const h = hex(b);
+    return [h.slice(0, 8), h.slice(8, 12), h.slice(12, 16), h.slice(16, 20), h.slice(20)].join("-");
+  }
+  const CROCK = "0123456789ABCDEFGHJKMNPQRSTVWXYZ";
+  function ulid(ms = Date.now(), rnd = crypto.getRandomValues(new Uint8Array(16))) {
+    let t = ms, head = "";
+    for (let i = 0; i < 10; i++) { head = CROCK[t % 32] + head; t = Math.floor(t / 32); }
+    return head + [...rnd].map(b => CROCK[b & 31]).join("");
+  }
+  // → { kind: "UUID v7" | "ULID" | "UUID v1" | "UUID v6", ms } or null.
+  function idTime(s) {
+    const t = s.trim();
+    if (/^[0-9a-f]{8}-?[0-9a-f]{4}-?7[0-9a-f]{3}-?[89ab][0-9a-f]{3}-?[0-9a-f]{12}$/i.test(t)) return { kind: "UUID v7", ms: parseInt(t.replace(/-/g, "").slice(0, 12), 16) };
+    if (/^[0-7][0-9A-HJKMNP-TV-Z]{25}$/i.test(t)) { let ms = 0; for (const c of t.slice(0, 10).toUpperCase()) ms = ms * 32 + CROCK.indexOf(c); return { kind: "ULID", ms }; }
+    return null;
+  }
+
+  // IPv4 / IPv6 CIDR → { v, network, broadcast?, mask?, wildcard?, first, last, hosts (BigInt), prefix }.
+  const v4 = s => { const p = s.split("."); if (p.length !== 4 || !p.every(x => /^\d{1,3}$/.test(x) && +x <= 255)) return null; return p.reduce((a, x) => a * 256n + BigInt(x), 0n); };
+  const v4s = n => [24n, 16n, 8n, 0n].map(k => String((n >> k) & 255n)).join(".");
+  function v6(s) {
+    const h = s.split("::");
+    if (h.length > 2) return null;
+    const part = x => x ? x.split(":") : [];
+    let a = part(h[0]), b = part(h[1] ?? "");
+    const tail = (b.length ? b : a)[(b.length ? b : a).length - 1];
+    if (tail && tail.includes(".")) { const n = v4(tail); if (n === null) return null; const arr = b.length ? b : a; arr.splice(-1, 1, ((n >> 16n) & 0xffffn).toString(16), (n & 0xffffn).toString(16)); }
+    if (h.length === 1 && a.length !== 8) return null;
+    if (h.length === 2 && a.length + b.length > 7) return null;
+    const all = [...a, ...new Array(8 - a.length - b.length).fill("0"), ...b];
+    if (!all.every(x => /^[0-9a-f]{1,4}$/i.test(x))) return null;
+    return all.reduce((acc, x) => (acc << 16n) + BigInt(parseInt(x, 16)), 0n);
+  }
+  function v6s(n) {
+    const g = [];
+    for (let k = 112n; k >= 0n; k -= 16n) g.push(Number((n >> k) & 0xffffn));
+    let best = -1, len = 0;
+    for (let i = 0; i < 8;) { if (g[i]) { i++; continue; } let j = i; while (j < 8 && !g[j]) j++; if (j - i > len && j - i > 1) { best = i; len = j - i; } i = j; }
+    const hx = g.map(x => x.toString(16));
+    return best < 0 ? hx.join(":") : hx.slice(0, best).join(":") + "::" + hx.slice(best + len).join(":");
+  }
+  function cidr(s) {
+    const m = /^\s*([0-9a-f.:]+)\s*\/\s*(\d{1,3})\s*$/i.exec(s);
+    if (!m) bad(tr("Nhập dạng địa chỉ/prefix, vd 10.0.0.0/22 hoặc 2001:db8::/48."));
+    const isV6 = m[1].includes(":"), bits = isV6 ? 128n : 32n, p = BigInt(+m[2]);
+    if (p > bits) bad(tr("Prefix /{p} vượt {max}.", { p: m[2], max: String(bits) }));
+    const ip = isV6 ? v6(m[1]) : v4(m[1]);
+    if (ip === null) bad(tr("Địa chỉ “{ip}” không hợp lệ.", { ip: m[1] }));
+    const all = (1n << bits) - 1n, mask = p ? (all << (bits - p)) & all : 0n, net = ip & mask, end = net | (all ^ mask), size = 1n << (bits - p), fmt = isV6 ? v6s : v4s;
+    if (isV6) return { v: 6, prefix: Number(p), network: fmt(net), first: fmt(net), last: fmt(end), hosts: size, host: ip !== net };
+    const usable = p >= 31n ? size : size - 2n;
+    return { v: 4, prefix: Number(p), network: fmt(net), broadcast: fmt(end), mask: fmt(mask), wildcard: fmt(all ^ mask), first: fmt(p >= 31n ? net : net + 1n), last: fmt(p >= 31n ? end : end - 1n), hosts: usable, host: ip !== net };
+  }
+
+  // One line: "10.0.0.0/22 · mạng … · broadcast … · mask … · host a – b (n)".
+  function cidrText(s) {
+    const r = cidr(s), num = x => typeof I18n !== "undefined" ? I18n.num(x) : String(x), parts = [s.trim(), tr("mạng {ip}", { ip: r.network })];
+    if (r.v === 4) parts.push(tr("broadcast {ip}", { ip: r.broadcast }), tr("mask {ip}", { ip: r.mask }), tr("host {a} – {b} ({n})", { a: r.first, b: r.last, n: num(r.hosts) }));
+    else parts.push(tr("dải {a} – {b}", { a: r.first, b: r.last }), tr("{n} địa chỉ", { n: r.hosts > 10n ** 15n ? "2^" + (128 - r.prefix) : num(r.hosts) }));
+    return parts.join(" · ");
+  }
+
+  // chmod: "755" / "0755" / "4755" ⇄ "rwxr-xr-x" (a leading file-type char like "-" or "d" is allowed and dropped).
+  function chmod(s) {
+    const t = s.trim();
+    if (/^[0-7]{3,4}$/.test(t)) {
+      const d = t.padStart(4, "0").split("").map(Number), sp = d[0], out = [];
+      for (let i = 1; i <= 3; i++) {
+        const x = d[i], special = sp & (4 >> (i - 1));
+        out.push(x & 4 ? "r" : "-", x & 2 ? "w" : "-", special ? (i === 3 ? (x & 1 ? "t" : "T") : (x & 1 ? "s" : "S")) : x & 1 ? "x" : "-");
+      }
+      return { octal: t.padStart(4, "0").replace(/^0(?=\d{3}$)/, ""), symbolic: out.join("") };
+    }
+    const m = /^[-dlbcps]?([r-][w-][xsS-][r-][w-][xsS-][r-][w-][xtT-])$/.exec(t);
+    if (!m) bad(tr("Nhập quyền dạng 755 / 0644 / 4755 hoặc rwxr-x---."));
+    const r = m[1];
+    let sp = 0, digits = "";
+    for (let i = 0; i < 3; i++) {
+      const [a, b, c] = r.slice(i * 3, i * 3 + 3);
+      if (/[sStT]/.test(c)) sp |= 4 >> i;
+      digits += (a === "r" ? 4 : 0) + (b === "w" ? 2 : 0) + (/[xst]/.test(c) ? 1 : 0);
+    }
+    return { octal: (sp ? sp : "") + digits, symbolic: r };
+  }
+
+  return { b32enc, b32dec, b58enc, b58dec, a85enc, a85dec, hmac, uuid7, ulid, idTime, cidr, cidrText, chmod, v6, v6s };
+})();
+// Phase 15a text & list tools: one entry per ▶ op (wrap / join lines, extract URL·e-mail·IP, slug, HTML → text, numbers → words, word frequency) — fields for the options dialog, clean(), run().
+const TextTools = (() => {
+  const n = x => I18n.num(x);
+  const TOOLS = {
+    "wrap-lines": {
+      title: "Bọc / nối dòng", replace: true, clean: WrapLines.clean,
+      presets: [["", "Tuỳ chỉnh"], ["sql-in", "SQL IN (lô 1.000)"], ["sql-values", "SQL VALUES (lô 1.000)"], ["json-array", "JSON array"], ["go-slice", "Go slice"], ["cs-array", "C# array"]],
+      fields: [
+        { k: "prefix", label: "Tiền tố mỗi dòng", type: "text" }, { k: "suffix", label: "Hậu tố mỗi dòng", type: "text" },
+        { k: "quote", label: "Nháy", type: "select", options: [["none", "Không nháy"], ["single", "'…' (SQL, '' trong chuỗi)"], ["singleAuto", "'…' — số giữ nguyên"], ["double", "\"…\" (escape \\\")"]] },
+        { k: "join", label: "Dấu nối (\\n = xuống dòng)", type: "text" }, { k: "batch", label: "Chia lô N dòng (0 = không chia)", type: "number" },
+        { k: "head", label: "Đầu mỗi lô", type: "text" }, { k: "tail", label: "Cuối mỗi lô", type: "text" }, { k: "sep", label: "Giữa các lô", type: "text" },
+        { k: "trim", label: "Bỏ khoảng trắng đầu / cuối", type: "check" }, { k: "skipEmpty", label: "Bỏ dòng trống", type: "check" }, { k: "unique", label: "Bỏ dòng trùng", type: "check" },
+      ],
+      run: (t, o) => { const r = WrapLines.run(t, o); return { text: r.text, notes: [T("{items} dòng → {batches} lô.", { items: n(r.items), batches: n(r.batches) }) + (r.numeric ? " " + T("Toàn số ⇒ không thêm nháy.") : "")] }; },
+    },
+    "extract": {
+      title: "Trích URL / email / IP", clean: ExtractText.clean,
+      fields: [{ k: "kinds", label: "Loại", type: "multi", options: ExtractText.KINDS.map(k => [k, ExtractText.NAME[k]]) }, { k: "unique", label: "Bỏ trùng", type: "check" }, { k: "count", label: "Đếm số lần (cột 2, khi bỏ trùng)", type: "check" }],
+      run: (t, o) => { const r = ExtractText.run(t, o); return { text: r.text, notes: [r.groups.map(g => T("{kind}: {n} ({all} lần)", { kind: ExtractText.NAME[g.kind], n: n(g.items.length), all: n(r.total[g.kind]) })).join(" · ")] }; },
+    },
+    "slug-lines": {
+      title: "Slug (bỏ dấu tiếng Việt)", replace: true, clean: o => ({ keepCase: o?.keepCase === true }),
+      fields: [{ k: "keepCase", label: "Giữ hoa / thường", type: "check" }],
+      run: (t, o) => ({ text: Slug.lines(t, o.keepCase) }),
+    },
+    "html-to-text": {
+      title: "HTML → văn bản", clean: () => ({}), fields: [],
+      // DOMParser never runs scripts or fetches images / styles of the parsed document.
+      run: t => ({ text: HtmlText.convert(new DOMParser().parseFromString(t, "text/html").body || document.createElement("body")) }),
+    },
+    "number-words": {
+      title: "Số → chữ", replace: true, clean: NumWords.clean,
+      fields: [{ k: "lang", label: "Ngôn ngữ", type: "select", options: [["vi", "Tiếng Việt"], ["en", "English"]] }, { k: "dong", label: "Thêm “đồng” (tiếng Việt)", type: "check" }, { k: "cap", label: "Viết hoa chữ đầu", type: "check" }],
+      run: (t, o) => { const r = NumWords.replaceAll(t, o); return { text: r.text, notes: [T("Đổi {n} số.", { n: n(r.n) }) + (r.skipped ? " " + T("{n} số quá {d} chữ số — giữ nguyên.", { n: n(r.skipped), d: NumWords.MAX_DIGITS }) : "")] }; },
+    },
+    "word-freq": {
+      title: "Tần suất từ", clean: WordFreq.clean,
+      fields: [{ k: "stop", label: "Bỏ stopword English (the, and, of…)", type: "check" }, { k: "top", label: "Top N (0 = tất cả)", type: "number" }],
+      run: (t, o) => { const r = WordFreq.run(t, o); return { text: r.text, notes: [T("{total} từ, {distinct} từ khác nhau.", { total: n(r.total), distinct: n(r.distinct) })] }; },
+    },
+  };
+
+  const get = id => Object.hasOwn(TOOLS, id) ? TOOLS[id] : null;
+  const opts = (srcId, id) => PowerUi.opts(srcId, id, get(id).clean, () => get(id).clean({}));
+  // ▶ op: options of the source tab (dialog / link / hot exit).
+  function op(id, t, c) {
+    const tool = get(id), r = tool.run(t, opts(c.id, id));
+    return { text: r.text, notes: r.notes || [] };
+  }
+
+  return { TOOLS, get, opts, op };
+})();
+// Options dialog of a 15a text tool on the selection (or the whole tab): live preview, then replace in place (one Ctrl+Z), a linked result tab in the other view, or a 🔗 link.
+const TextToolDlg = (() => {
+  const { mk, button } = PowerUi;
+  const PREVIEW_MAX = 20000, IN_MAX = 20 * 1024 * 1024;
+
+  // The active tab + its first selection range, captured when the dialog opens.
+  function capture() {
+    const d = Views.activeDoc();
+    if (!d) { StatusBar.msg(T("Chưa có tab nào đang mở."), "warn"); return null; }
+    const v = Views.activeView(), ranges = v ? v.state.selection.ranges.filter(r => !r.empty) : [];
+    const src = Docs.root(d), sel = ranges.length && v ? { from: ranges[0].from, to: ranges[0].to, text: v.state.sliceDoc(ranges[0].from, ranges[0].to) } : null;
+    return { src, view: v, gi: Views.focused, sel, text: sel ? sel.text : Docs.text(src) };
+  }
+
+  function field(f, val, onchange) {
+    const lab = mk("label", f.type === "check" ? "chk" : "sql-f");
+    if (f.type === "check") { const c = mk("input", "", null, { type: "checkbox", checked: !!val }); c.onchange = onchange; lab.append(c, T(f.label)); return { el: lab, get: () => c.checked, set: x => { c.checked = !!x; } }; }
+    if (f.type === "multi") {
+      const box = mk("div", "tt-multi"), cs = f.options.map(([k, l]) => { const c = mk("input", "", null, { type: "checkbox", checked: val.includes(k), value: k }); c.onchange = onchange; const L = mk("label", "chk"); L.append(c, T(l)); box.append(L); return c; });
+      lab.append(mk("span", "", T(f.label)), box);
+      return { el: lab, get: () => cs.filter(c => c.checked).map(c => c.value), set: x => cs.forEach(c => { c.checked = x.includes(c.value); }) };
+    }
+    let input;
+    if (f.type === "select") { input = mk("select"); f.options.forEach(([k, l]) => input.append(mk("option", "", T(l), { value: k }))); input.value = val; input.onchange = onchange; }
+    else { input = mk("input", "", null, { type: f.type === "number" ? "number" : "text", value: String(val ?? ""), spellcheck: false, autocomplete: "off", ...(f.type === "number" ? { min: "0" } : {}) }); input.oninput = onchange; }
+    lab.append(mk("span", "", T(f.label)), input);
+    return { el: lab, get: () => f.type === "number" ? +input.value || 0 : input.value, set: x => { input.value = String(x ?? ""); } };
+  }
+
+  function open(id) {
+    const tool = TextTools.get(id), c = capture();
+    if (!tool || !c) return;
+    if (c.text.length > IN_MAX) { StatusBar.msg(T("Quá lớn ({mb} MB) — công cụ này nhận tối đa 20 MB.", { mb: (c.text.length / 1048576).toFixed(1) }), "warn"); return; }
+    let o = { ...TextTools.opts(c.src.id, id) };
+    const dlg = mk("dialog", "qp pw-dlg tt-dlg", null, { "aria-label": T(tool.title) }), form = mk("form", "", null, { method: "dialog" });
+    const head = mk("p", "", T("{tool}: {what}", { tool: T(tool.title), what: c.sel ? T("vùng chọn ({n} ký tự)", { n: I18n.num(c.sel.text.length) }) : T("cả tab “{name}”", { name: c.src.name }) }));
+    const grid = mk("div", "tt-grid"), out = mk("textarea", "tt-out", null, { readOnly: true, spellcheck: false, rows: 8, "aria-label": T("Xem trước") }), note = mk("p", "muted tt-note");
+    let timer = 0;
+    const refresh = () => {
+      clearTimeout(timer);
+      timer = setTimeout(() => {
+        fields.forEach(([f, w]) => { o[f.k] = w.get(); });
+        o = tool.clean(o);
+        try { const r = tool.run(c.text, o); out.value = r.text.length > PREVIEW_MAX ? r.text.slice(0, PREVIEW_MAX) + "\n…" : r.text; note.textContent = (r.notes || []).join(" "); note.classList.remove("bad"); }
+        catch (e) { out.value = ""; note.textContent = e.message; note.classList.add("bad"); }
+      }, 120);
+    };
+    const fields = tool.fields.map(f => [f, field(f, o[f.k], refresh)]);
+    if (tool.presets) {
+      const pick = field({ k: "preset", label: "Mẫu có sẵn", type: "select", options: tool.presets }, "", () => {
+        const p = WrapLines.PRESETS[pick.get()];
+        if (!p) return;
+        fields.forEach(([f, w]) => { if (Object.hasOwn(p, f.k)) w.set(p[f.k]); });
+        refresh();
+      });
+      grid.append(pick.el);
+    }
+    fields.forEach(([, w]) => grid.append(w.el));
+    const done = msg => { dlg.close(); if (msg) StatusBar.msg(msg, "good"); };
+    const save = () => { fields.forEach(([f, w]) => { o[f.k] = w.get(); }); o = tool.clean(o); };
+    const acts = mk("div", "pw-acts tt-acts");
+    if (tool.replace) acts.append(button(T("⤶ Thay tại chỗ"), () => { save(); replace(c, tool, o) && done(); }, T("Một lần Ctrl+Z để hoàn tác")));
+    acts.append(button(T("⇢ Mở ở view kia"), () => { save(); toOther(c, id, o); done(); }, T("Tab kết quả liên kết — sửa nguồn là tự cập nhật")),
+      button(T("🔗 Link"), () => { save(); PowerUi.shareLink({ v: 1, views: [[{ n: c.src.name, l: c.src.lang || "", t: c.text }], []], run: id, opts: o }, k => T("🔗 Đã chép link ({n} ký tự) — mở link là chạy lại với các tuỳ chọn này.", { n: k })); }),
+      mk("button", "", T("Đóng"), { value: "cancel", formNoValidate: true }));
+    form.append(head, grid, out, note, acts);
+    dlg.append(form);
+    dlg.addEventListener("close", () => { clearTimeout(timer); dlg.remove(); });
+    document.body.append(dlg);
+    dlg.showModal();
+    refresh();
+  }
+
+  // One transaction on the captured range (or the whole tab).
+  function replace(c, tool, o) {
+    const v = c.view;
+    if (!v || !Docs.get(c.src.id) || Views.groups[c.gi]?.active !== c.src.id) { StatusBar.msg(T("Tab nguồn đã đổi — mở lại hộp thoại."), "warn"); return false; }
+    if (v.state.readOnly) { StatusBar.msg(T("Tab chỉ đọc — không đổi được."), "warn"); return false; }
+    const from = c.sel ? c.sel.from : 0, to = c.sel ? c.sel.to : v.state.doc.length;
+    if (v.state.sliceDoc(from, to) !== c.text) { StatusBar.msg(T("Tab nguồn đã đổi — mở lại hộp thoại."), "warn"); return false; }
+    let r;
+    try { r = tool.run(c.text, o); } catch (e) { StatusBar.msg(e.message, "bad"); return false; }
+    v.dispatch({ changes: { from, to, insert: r.text }, selection: c.sel ? { anchor: from, head: from + r.text.length } : undefined, userEvent: "input.transform", scrollIntoView: true });
+    StatusBar.msg(T("✔ {tool}: đã thay — Ctrl+Z để hoàn tác.", { tool: T(tool.title) }) + (r.notes?.length ? " " + r.notes.join(" ") : ""), "good");
+    return true;
+  }
+
+  // A selection becomes a temp tab beside its source, so the result follows only that fragment.
+  function toOther(c, id, o) {
+    let src = c.src;
+    if (c.sel) { src = Docs.create({ kind: "temp", name: SelectionActions.tabName(c.src), lang: "", text: c.sel.text }); Views.open(src, c.gi, false); Views.activate(c.gi, c.src.id, false); }
+    PowerUi.saveOpts(src.id, id, o);
+    // Saved again once the result tab exists: its link.opts keeps them over F5.
+    OutputLink.run(src, id).then(ok => ok && PowerUi.saveOpts(src.id, id, o));
+  }
+
+  return { open };
+})();
+// Palette side of the 15a encoders: encode / decode each selection (whole tab when none) in one undo step, insert UUID v7 / ULID, describe a CIDR / chmod / id in the status bar, HMAC through a recipe step.
+const EncActions = (() => {
+  const FN = {
+    b32enc: t => EncPlus.b32enc(RecipeOps.bytes(t)), b32dec: t => RecipeOps.text(EncPlus.b32dec(t)),
+    b58enc: t => EncPlus.b58enc(RecipeOps.bytes(t)), b58dec: t => RecipeOps.text(EncPlus.b58dec(t)),
+    a85enc: t => EncPlus.a85enc(RecipeOps.bytes(t)), a85dec: t => RecipeOps.text(EncPlus.a85dec(t)),
+    z85enc: t => EncPlus.a85enc(RecipeOps.bytes(t), true), z85dec: t => RecipeOps.text(EncPlus.a85dec(t, true)),
+  };
+  const editable = () => {
+    const v = Views.activeDoc() && Views.activeView();
+    if (!v) { StatusBar.msg(T("Chưa có tab nào đang mở."), "warn"); return null; }
+    if (v.state.readOnly) { StatusBar.msg(T("Tab chỉ đọc — không đổi được."), "warn"); return null; }
+    return v;
+  };
+
+  function map(id) {
+    const v = editable();
+    if (!v) return;
+    const st = v.state, ranges = st.selection.ranges.filter(r => !r.empty), targets = ranges.length ? ranges : [{ from: 0, to: st.doc.length }];
+    let changes;
+    try { changes = targets.map(r => ({ from: r.from, to: r.to, insert: FN[id](st.sliceDoc(r.from, r.to)) })); }
+    catch (e) { StatusBar.msg(e.message, "bad"); return; }
+    v.dispatch({ changes, userEvent: "input.transform" });
+    StatusBar.msg(T("✔ Đã đổi {n} vùng — Ctrl+Z để hoàn tác.", { n: targets.length }), "good");
+  }
+
+  function insert(kind) {
+    const v = editable();
+    if (!v) return;
+    v.dispatch(v.state.changeByRange(r => { const s = EncPlus[kind](); return { changes: { from: r.from, to: r.to, insert: s }, range: CM.state.EditorSelection.cursor(r.from + s.length) }; }), { userEvent: "input", scrollIntoView: true });
+    v.focus();
+  }
+
+  // The selection, else the line under the cursor → one status line (click = copy).
+  function describe(kind) {
+    const v = Views.activeDoc() && Views.activeView();
+    if (!v) return;
+    const st = v.state, r = st.selection.main, s = (r.empty ? st.doc.lineAt(r.head).text : st.sliceDoc(r.from, r.to)).trim();
+    if (!s) { StatusBar.msg(T("Đặt con trỏ vào dòng có giá trị, hoặc bôi đen nó."), "warn"); return; }
+    let out;
+    try {
+      if (kind === "cidr") out = EncPlus.cidrText(s);
+      else if (kind === "chmod") { const c = EncPlus.chmod(s); out = c.octal + " ⇄ " + c.symbolic; }
+      else { const id = EncPlus.idTime(s); if (!id) throw new Error(T("Không phải UUID v7 hay ULID.")); out = id.kind + " · " + DevNum.iso(id.ms) + " · " + DevNum.localIso(id.ms); }
+    } catch (e) { StatusBar.msg(e.message, "bad"); return; }
+    StatusBar.msg(out + " — " + T("bấm để chép"), "good", () => Dom.copy(out), T("Chép"));
+  }
+
+  // The tab's recipe gets an HMAC step (kept when it has one); the key is typed on the pane and stays in memory only.
+  function hmac(doc) {
+    const src = doc();
+    if (!src) return;
+    const list = RecipeOp.steps(src.id).map(s => ({ ...s, args: { ...s.args } }));
+    if (!list.some(s => s.op === "hmac")) list.push(RecipeRun.step("hmac"));
+    PowerUi.saveOpts(src.id, "recipe", list, RecipeRun.clean(list));
+    OutputLink.run(src, "recipe").then(ok => ok && StatusBar.msg(T("Nhập khoá HMAC trên pane Recipe — khoá chỉ nằm trong bộ nhớ, không lưu, không đi theo link."), "warn"));
+  }
+
+  return { map, insert, describe, hmac, FN };
+})();
+// Phase 15a demo content (labels in demo-samples-text-utils-15a.js). All data fake; the slug sample is Vietnamese on purpose (accent removal).
+Object.assign(PowerDemos, (() => {
+  const t = (n, text, l = "") => ({ n, l, t: text });
+  const tab = name => Docs.list().find(d => d.kind === "temp" && d.name === name);
+  const CASES = "order book snapshot\nmax_orders_per_second\nClientOrderID\nsettlement-date-t2\nHttpRequestTimeout\nfee.rate.percent\n";
+  const IDS = Array.from({ length: 1200 }, (x, i) => "ORD-" + (100001 + i)).join("\n") + "\n";
+  const LOG = `2026-11-20 09:15:02.114 INFO  gateway started on 0.0.0.0:9443 (pid 4120), docs at https://docs.example.com/gateway/v2?lang=en.
+2026-11-20 09:15:03.900 WARN  client 10.20.30.41 retried 3x; contact ops-team@demo-broker.example or see (https://status.example.org/incidents/42).
+2026-11-20 09:15:04.001 ERROR peer 10.20.30.256 rejected: bad octet; fallback to [2001:db8:85a3::8a2e:370:7334]:9443
+2026-11-20 09:15:05.120 INFO  heartbeat from fe80::1ff:fe23:4567:890a, mac 00:1a:2b:3c:4d:5e, build 1.2.3.4.5
+2026-11-20 09:15:06.450 INFO  client 10.20.30.41 reconnected; report sent to risk.desk@demo-broker.example, ops-team@demo-broker.example
+2026-11-20 09:15:07.003 DEBUG mirror www.example.net/feeds/latest, ipv4-mapped ::ffff:192.0.2.33
+`;
+  const TITLES = 'Hướng dẫn đặt lệnh mua cổ phiếu\nBáo cáo giao dịch tháng 11/2026\nĐiều khoản & Chính sách bảo mật (bản thử)\n';
+  const HTML = `<h1>Release notes 1.4.2 (fake)</h1>
+<p>Faster <b>order routing</b> and a fix for <a href="https://example.com/fees">fee rounding</a>.</p>
+${"<"}script>alert("never runs")${"<"}/script>
+<ul><li>New: bulk cancel</li><li>Fixed: T+2 date on holidays</li></ul>
+<table><tr><th>Symbol</th><th>Qty</th></tr><tr><td>ACME</td><td>1,000</td></tr><tr><td>DEMO</td><td>250</td></tr></table>
+<pre>  limit = 200
+  burst = 50</pre>
+`;
+  const AMOUNTS = "Invoice INV-2026-0042: 1.250.000\nDeposit: 15.000.000,50\nFee: 21\nRefund: 105\nBudget: 2.000.000.000.000\n";
+  const MESSAGE = "order=ORD-1001&qty=100&price=25.50&ts=1764212400000";
+  const NETWORK = "10.20.30.0/22\n192.168.1.7/31\n2001:db8:abcd:12::/48\n";
+  const IDS2 = "0197c1e4-6a40-7b3e-9a6f-1c2d3e4f5a6b\n01JDQ3Z8K4M5N6P7Q8R9S0T1V2\nrwxr-x---\n4755\n";
+  const runRecipe = (name, steps) => { const d = tab(name); if (d) { PowerUi.saveOpts(d.id, "recipe", steps, RecipeRun.clean(steps)); OutputLink.run(d, "recipe"); } };
+
+  return {
+    "case-styles": { payload: () => ({ v: 1, views: [[t("identifiers.txt", CASES)], []] }),
+      after: () => { const v = Views.activeView(); v.dispatch({ selection: { anchor: 0, head: v.state.doc.length } }); v.focus(); StatusBar.msg(T("Đã chọn cả tab — chuột phải ▸ “Aa Đổi kiểu chữ ▸”, hoặc Palette “Chữ: …”.")); } },
+    "wrap-sql-in": { payload: () => ({ v: 1, views: [[t("order-ids.txt", IDS)], []], run: "wrap-lines", opts: { ...WrapLines.DEF, ...WrapLines.PRESETS["sql-in"] } }) },
+    "extract-ips-urls": { payload: () => ({ v: 1, views: [[t("gateway.log", LOG, "Log")], []], run: "extract", opts: { kinds: ExtractText.KINDS, unique: true, count: true } }) },
+    "slug-html-text": { payload: () => ({ v: 1, views: [[t("titles.txt", TITLES), t("release-notes.html", HTML, "HTML")], []], run: "slug-lines" }),
+      after: () => { const d = tab("release-notes.html"); if (d) OutputLink.run(d, "html-to-text"); } },
+    "number-words-vi": { payload: () => ({ v: 1, views: [[t("amounts.txt", AMOUNTS)], []], run: "number-words", opts: { lang: "vi", dong: true, cap: true } }) },
+    // No run in the payload: the HMAC key is set here in memory, the way the recipe pane keeps it (never in a link).
+    "encoders-hmac-cidr": { payload: () => ({ v: 1, views: [[t("message.txt", MESSAGE), t("network.txt", NETWORK), t("ids-and-modes.txt", IDS2)], []] }),
+      after: () => {
+        runRecipe("message.txt", [{ op: "hmac", on: true, args: { alg: "SHA-256", key: "demo-secret", keyFmt: "text", out: "hex" } }]);
+        runRecipe("network.txt", [RecipeRun.step("cidr")]);
+        StatusBar.msg(T("Khoá HMAC mẫu “demo-secret” chỉ nằm trong bộ nhớ. Tab ids-and-modes.txt: đặt con trỏ vào dòng ▸ Palette “UUID v7 / ULID → thời điểm” / “chmod”."));
+      } },
   };
 })());
 // Explorer tar / gzip (phase 11d): Tar for ExplorerArchive.

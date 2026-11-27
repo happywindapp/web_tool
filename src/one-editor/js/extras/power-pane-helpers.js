@@ -45,10 +45,11 @@ const PowerUi = (() => {
     if (s.v === undefined) { const o = outOf(srcId, op)?.link?.opts; s.v = o ? clean(o) : def(); }
     return s.v;
   }
-  function saveOpts(srcId, op, v) {
+  function saveOpts(srcId, op, v, persist = v) {
     PowerTools.state(srcId, op).v = v;
     const out = outOf(srcId, op);
-    if (out && out.link.opts !== v) { out.link.opts = v; out.pending = true; HotExit.schedule(); }
+    // A stripped copy (persist ≠ v) is new on every call: compare by content so a live re-run does not re-save.
+    if (out && out.link.opts !== persist && (persist === v || JSON.stringify(out.link.opts) !== JSON.stringify(persist))) { out.link.opts = persist; out.pending = true; HotExit.schedule(); }
   }
 
   // #pako: link of an op payload ({ v, views, run, opts }); done(n chars) → the status message.

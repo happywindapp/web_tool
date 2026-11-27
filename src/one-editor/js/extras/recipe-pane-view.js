@@ -39,7 +39,7 @@ const PvRecipe = {
     function argInput(s, i, a) {
       if (a.type === "check") { const l = mk("label", "chk"), c = mk("input", "", null, { type: "checkbox", checked: !!s.args[a.k] }); c.onchange = () => { const n = steps(); n[i].args[a.k] = c.checked; commit(n); }; l.append(c, T(a.label)); return l; }
       if (a.type === "select") { const x = mk("select", "", null, { title: T(a.label) }); a.options.forEach(o => x.append(mk("option", "", o, { value: o }))); x.value = s.args[a.k]; x.onchange = () => { const n = steps(); n[i].args[a.k] = x.value; commit(n); }; return x; }
-      const x = mk("input", "rc-arg", null, { type: "text", value: s.args[a.k] ?? "", placeholder: T(a.label), title: T(a.label), spellcheck: false, autocomplete: "off" });
+      const x = mk("input", "rc-arg", null, { type: a.type === "secret" ? "password" : "text", value: s.args[a.k] ?? "", placeholder: T(a.label), title: T(a.label), spellcheck: false, autocomplete: "off" });
       x.oninput = () => { const n = steps(); if (!n[i]) return; n[i].args[a.k] = x.value; commit(n, true); };
       return x;
     }
@@ -90,7 +90,8 @@ const PvRecipe = {
     v.show = d => {
       v.last = d;
       // Steps preset by a link / demo are written to the result tab once it exists (F5 keeps them).
-      PowerUi.saveOpts(d.srcId, "recipe", RecipeOp.steps(d.srcId));
+      const cur = RecipeOp.steps(d.srcId);
+      PowerUi.saveOpts(d.srcId, "recipe", cur, RecipeRun.clean(cur));
       const key = JSON.stringify(d.steps.map(s => [s.op, s.on]));
       if (key !== v.key || !list.contains(document.activeElement)) { v.key = key; rows(); }
       states();

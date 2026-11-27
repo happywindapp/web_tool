@@ -85,6 +85,7 @@ function registerOneEditorCommands() {
   registerLogFixCommands(C, doc, hasDoc);
   registerEditorExtraCommands(C, doc, hasDoc);
   registerPowerToolCommands(C, doc, hasDoc);
+  TextUtilCmds.register(C, doc, hasDoc);
   C("language", "Đổi ngôn ngữ của tab", null, () => $("langSel").focus(), hasDoc);
   C("share", "Chia sẻ link các tab đang mở", null, () => ShareLoader.share());
   SelectionActions.register(C);

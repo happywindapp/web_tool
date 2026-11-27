@@ -19,6 +19,7 @@ const OutputOps = (() => {
   const types = lang => (t, c) => { const r = JsonTool.parse(t); return { text: TypeGen.generate(r.ast, lang, TypeGen.pascal(baseName(c.name))), fixes: r.fixes }; };
   const same = c => c.lang;
   const power = name => (t, c) => PowerTools.op(name)(t, c);
+  const tool = id => async (t, c) => { await PowerTools.load(); return TextTools.op(id, t, c); };
 
   const OPS = {
     "json-pretty": { label: "JSON đẹp", group: "Format", lang: "JSON", live: true, run: t => JSON.stringify(parseJson(t), null, 2) },
@@ -53,7 +54,17 @@ const OutputOps = (() => {
     "x509": { label: "Chứng chỉ X.509 (PEM / DER) → chi tiết", group: "Công cụ dev", lang: "Markdown", live: true, pane: true, run: power("x509") },
     "protobuf": { label: "Protobuf thô (hex / base64) → cây field", group: "Công cụ dev", lang: "Plain Text", live: true, run: power("protobuf") },
     "openapi-doc": { label: "OpenAPI / Swagger → Tài liệu API", group: "Công cụ dev", lang: "Markdown", live: true, pane: true, run: power("openapiDoc") },
+    "checksum-verify": { label: "Kiểm tra checksum (.sha256 / .sha1 / .sha512)", group: "Công cụ dev", lang: "Plain Text", live: false, pane: true, run: power("checksumVerify") },
     "patch-view": { label: "Xem patch (unified / git diff) + áp vào tab", group: "Công cụ dev", lang: "Markdown", live: true, pane: true, run: power("patchView") },
+    "ai-summarize": { label: "🧠 Tóm tắt (AI trên máy)", group: "AI trên máy", lang: "Markdown", live: false, when: () => LocalAi.can("ai-summarize"), run: power("aiSummarize") },
+    "ai-explain": { label: "🧠 Giải thích code / regex / log (AI trên máy)", group: "AI trên máy", lang: "Markdown", live: false, when: () => LocalAi.can("ai-explain"), run: power("aiExplain") },
+    "ai-proofread": { label: "🧠 Sửa câu English (AI trên máy)", group: "AI trên máy", lang: same, live: false, when: () => LocalAi.can("ai-proofread"), run: power("aiProofread") },
+    "wrap-lines": { label: "Bọc / nối dòng (SQL IN · VALUES · JSON array…)", group: "Văn bản & danh sách", lang: "Plain Text", live: true, run: tool("wrap-lines") },
+    "extract": { label: "Trích URL / email / IPv4 / IPv6", group: "Văn bản & danh sách", lang: "Plain Text", live: true, run: tool("extract") },
+    "slug-lines": { label: "Slug từng dòng (bỏ dấu tiếng Việt)", group: "Văn bản & danh sách", lang: "Plain Text", live: true, run: tool("slug-lines") },
+    "html-to-text": { label: "HTML → văn bản", group: "Văn bản & danh sách", lang: "Plain Text", live: true, run: tool("html-to-text") },
+    "number-words": { label: "Số → chữ (tiếng Việt / English)", group: "Văn bản & danh sách", lang: "Plain Text", live: true, run: tool("number-words") },
+    "word-freq": { label: "Tần suất từ", group: "Văn bản & danh sách", lang: "Markdown", live: true, run: tool("word-freq") },
     "invisible": { label: "Tìm ký tự vô hình / chữ giống Latin", group: "Công cụ dev", lang: "Plain Text", live: true, pane: true, run: power("invisible") },
     "recipe": { label: "Recipe biến đổi (kiểu CyberChef)", group: "Công cụ dev", lang: "Plain Text", live: true, pane: true, run: power("recipe") },
     "sql-insert": { label: "CSV / JSON → SQL INSERT", group: "Chuyển đổi", lang: "SQL", live: true, run: power("sqlInsert") },

@@ -1,0 +1,25 @@
+// English strings for phase 14f (main page): Explorer Checksum / split / join menu rows, the checksum 🔎 provider, on-device AI detection, op labels and demo — keyed by the Vietnamese source.
+I18n.add({
+  "Kiểm tra checksum: file .sha256 với 3 tab (1 sai hash, 1 thiếu file)": "Checksum check: a .sha256 file against 3 tabs (1 wrong hash, 1 missing file)",
+  "Kiểm tra checksum (.sha256 / .sha1 / .sha512)": "Verify checksums (.sha256 / .sha1 / .sha512)",
+  "🧠 Tóm tắt (AI trên máy)": "🧠 Summarize (on-device AI)",
+  "🧠 Giải thích code / regex / log (AI trên máy)": "🧠 Explain code / regex / log (on-device AI)",
+  "🧠 Sửa câu English (AI trên máy)": "🧠 Fix English sentences (on-device AI)",
+  "AI trên máy": "On-device AI",
+  "Cần Chrome / Edge ≥ 138 trên Windows 10/11, macOS 13+, Linux hoặc Chromebook Plus; GPU > 4 GB VRAM hoặc CPU 16 GB RAM, 4 nhân; ổ đĩa trống ≥ 22 GB; lần đầu Chrome tải model (mạng không đo lưu lượng). Không có trên điện thoại.":
+    "Needs Chrome / Edge ≥ 138 on Windows 10/11, macOS 13+, Linux or a Chromebook Plus; a GPU with > 4 GB VRAM or a CPU with 16 GB RAM and 4 cores; ≥ 22 GB free disk; Chrome downloads the model on first use (unmetered network). Not on phones.",
+  "Trình duyệt có: {list}. Model chạy trên máy, dữ liệu không rời máy.": "This browser has: {list}. The model runs on this machine; data never leaves it.",
+  "Trình duyệt này không có API AI trên máy — các mục 🧠 bị ẩn.": "This browser has no on-device AI API — the 🧠 entries are hidden.",
+  "🧠 AI trên máy…": "🧠 On-device AI…",
+  "AI trên máy (không gửi dữ liệu đi)": "On-device AI (no data sent anywhere)",
+  "AI trên máy (Chrome built-in)": "On-device AI (Chrome built-in)",
+  "Cắt file…": "Split file…",
+  "Gộp các phần (.001, .002…)…": "Join the parts (.001, .002…)…",
+  "Gộp {n} file…": "Join {n} files…",
+  "Khớp hash đã dán": "Matches the pasted hash",
+  "Khác hash đã dán": "Differs from the pasted hash",
+  "✓ So hash / xuất ▾": "✓ Compare / export ▾",
+  "Dán hash để so ✓/✗, chép kết quả, xuất file .sha256": "Paste a hash to compare ✓/✗, copy the results, export a .sha256 file",
+  "{alg} · {name}": "{alg} · {name}",
+  "Checksum": "Checksum",
+});

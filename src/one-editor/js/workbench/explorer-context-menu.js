@@ -61,6 +61,7 @@ const ExplorerMenu = (() => {
       E(T("Xoá vĩnh viễn…"), "Shift+Delete", () => ExplorerDisk.remove(node, { permanent: true })));
     out.push(sep(), E(T(node.dir ? "Tải xuống (ZIP)" : "Tải xuống"), "", () => ExplorerArchive.download(node)));
     if (child) out.push(...ExplorerArchive.menu([node], head));
+    out.push(...FileOps.entries([node]));
     out.push(sep(), Tags.entry([node], head));
     if (node.handle) out.push(E(T("Ghim / bỏ ghim"), "", () => Pinned.toggleHandle(node.handle)));
     else if (node.remote && !node.parent && node.link) out.push(E(T("Ghim / bỏ ghim"), "", () => Pinned.toggleCloud(node)));
@@ -88,6 +89,7 @@ const ExplorerMenu = (() => {
       E(T("Xoá"), "Delete", () => ExplorerDisk.remove(nodes)), E(T("Xoá vĩnh viễn…"), "Shift+Delete", () => ExplorerDisk.remove(nodes, { permanent: true })));
     out.push(sep(), E(T("Tải xuống (ZIP)"), "", () => ExplorerArchive.download(nodes)));
     if (disk) out.push(...ExplorerArchive.menu(nodes, head));
+    out.push(...FileOps.entries(nodes));
     out.push(sep(), Tags.entry(nodes, head), ...Groups.entries(nodes.map(Groups.ofNode), head), E(T("Sao chép đường dẫn"), "", () => copyPath(nodes)), E(T("Thuộc tính"), "Alt+Enter", () => properties(nodes, head)), sep(), nativeEntry());
     return tidy(out);
   }

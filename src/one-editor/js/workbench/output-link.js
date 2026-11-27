@@ -65,7 +65,7 @@ const OutputLink = (() => {
     if (op.live === true) parts.push(T("Sửa nguồn là tab kết quả tự cập nhật."));
     parts.push(...r.notes);
     if (r.fixes.length) parts.push(T("Đã tự sửa {n} lỗi ở tab nguồn — bấm để xem danh sách.", { n: r.fixes.length }));
-    StatusBar.msg(parts.join(" "), r.fixes.length ? "warn" : "good", r.fixes.length ? () => FixMarks.openList(src) : null, T("Mở danh sách chỗ đã tự sửa"));
+    StatusBar.msg(parts.join(" "), r.tone || (r.fixes.length ? "warn" : "good"), r.fixes.length ? () => FixMarks.openList(src) : null, T("Mở danh sách chỗ đã tự sửa"));
     PhoneLayout.show(Views.where(out.id) + 1);
   }
 

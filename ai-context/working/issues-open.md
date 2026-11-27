@@ -15,6 +15,7 @@
 | WT-8 | low | SQL INSERT chỉ nhân đôi `'` (chuẩn ANSI/PostgreSQL/SQL Server); MySQL mặc định coi `\` là escape → giá trị kết thúc bằng `\` làm vỡ câu lệnh | `Writers.sql` | closed 2026-10-28: chọn PostgreSQL (mặc định) / MySQL / SQL Server / SQLite |
 | WT-9 | low | One Editor: headless `phase12c` mục `640: tap 🕘 ⇒ Timeline` FAIL ổn định, `phase12a` `640: tap ☰ → Outline` chập chờn; `phase11b` `390x844: tap the check box` chập chờn (FAIL trên bản build 14b, PASS trên 14c) — có cả trên bản build trước 14a (nghi từ phase 13, chưa tìm nguyên nhân) | `plans/261118-0209-one-editor/headless/phase12c-headless.mjs` | open 2026-11-25 |
 | WT-10 | low | One Editor: headless `phase11a` crash ở dòng 199 (`null.textContent`) và `phase10` mục `bin survives F5` FAIL — y hệt trên bản build 14a (2 script gán cứng BASE, không đọc `OE_BASE`) | `plans/261118-0209-one-editor/headless/phase11a-headless.mjs`, `phase10-explorer-file-manager-headless.mjs` | open 2026-11-25 |
+| WT-11 | low | One Editor: headless `phase12d` mục Palette “Dán từ lịch sử clipboard…” FAIL — lệnh `clipPaste` không usable (`hasDoc` false sau F5, không có tab đang hoạt động); FAIL y hệt trên file chính trước 15a (bản 14f) ⇒ có sẵn từ 14d–14f | `plans/261118-0209-one-editor/headless/phase12d-headless.mjs:49`, `js/workbench/command-list.js:57` | open 2026-11-27 |
 
 ## Blockers
 

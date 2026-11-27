@@ -24,7 +24,7 @@ function registerNotepadppCommands(C, hasDoc) {
   C("colNumbers", "Cột: chèn số tăng dần…", null, N.numbers, hasDoc);
 
   const TEXT = [["upper", "Chữ: HOA"], ["lower", "Chữ: thường"], ["title", "Chữ: Viết Hoa Đầu Từ"], ["camel", "Chữ: camelCase"], ["pascal", "Chữ: PascalCase"],
-    ["snake", "Chữ: snake_case"], ["kebab", "Chữ: kebab-case"], ["b64enc", "MIME: mã hoá Base64"], ["b64dec", "MIME: giải mã Base64"], ["urlEnc", "MIME: URL encode"],
+    ["snake", "Chữ: snake_case"], ["kebab", "Chữ: kebab-case"], ["constant", "Chữ: CONSTANT_CASE"], ["dot", "Chữ: dot.case"], ["b64enc", "MIME: mã hoá Base64"], ["b64dec", "MIME: giải mã Base64"], ["urlEnc", "MIME: URL encode"],
     ["urlDec", "MIME: URL decode"], ["htmlEnc", "MIME: mã hoá HTML entity"], ["htmlDec", "MIME: giải mã HTML entity"]];
   for (const [id, text] of TEXT) C("text-" + id, text, null, () => N.text(id), hasDoc);
   for (const alg of ["SHA-1", "SHA-256", "SHA-512"]) C("hash-" + alg, () => T("Hash {alg} của vùng chọn (hoặc cả tab)", { alg }), null, () => N.hash(alg), hasDoc);

@@ -39,7 +39,7 @@ const SelectionActions = (() => {
     const tmp = Docs.create({ kind: "temp", name: tabName(c.doc), lang: kind === "run" ? langOf(c.sel, c.doc) : "", text: c.sel });
     Views.open(tmp, c.gi, false);
     Views.activate(c.gi, c.doc.id, false);
-    OutputLink.run(tmp, kind === "run" ? RunOp.suggest(tmp) : "translate");
+    OutputLink.run(tmp, kind === "run" ? RunOp.suggest(tmp) : kind);
   }
 
   // Clipboard first, while this page still has the focus; then the AI page in a new tab.
@@ -68,7 +68,9 @@ const SelectionActions = (() => {
       TabMenu.entry(T("🌐 Dịch vùng chọn"), "", () => runOnSelection("translate")),
       TabMenu.entry(T("▶ Chạy vùng chọn"), langOf(sel, doc), () => runOnSelection("run")),
       TabMenu.entry(T("↗ Mở vùng chọn bằng tool…"), "", () => OpenInTool.menuAt(x, y)),
-      TabMenu.entry(T("🤖 Hỏi AI…"), "", () => aiMenu(x, y)),
+      TabMenu.entry(T("🤖 Hỏi AI…"), "~" + I18n.num(TokenEst.count(sel)) + " token", () => aiMenu(x, y)),
+      ...LocalAi.entries(x, y, runOnSelection),
+      ...TextUtilCmds.nodes(x, y),
       Object.assign(document.createElement("hr"), { className: "menu-sep" }),
     ];
   }
@@ -78,8 +80,9 @@ const SelectionActions = (() => {
     const has = () => !!Views.activeDoc() && !!text(Views.activeView()).trim();
     C("selTranslate", "🌐 Dịch vùng chọn ở view kia", null, () => runOnSelection("translate"), has);
     C("selRun", "▶ Chạy vùng chọn (tự nhận ngôn ngữ)", null, () => runOnSelection("run"), has);
+    for (const op of Object.keys(LocalAi.KINDS)) C("sel-" + op, () => T(LocalAi.KINDS[op].label) + " — " + T("vùng chọn"), null, () => runOnSelection(op), () => LocalAi.can(op) && has());
     for (const a of AI) C("askAi-" + a.name, () => T("🤖 Hỏi {ai} về vùng chọn", { ai: a.name }), null, () => askAi(a.name), has);
   }
 
-  return { AI, text, langOf, tabName, aiUrl, nodes, register, askAi };
+  return { AI, text, langOf, tabName, aiUrl, nodes, register, askAi, runOn: runOnSelection };
 })();

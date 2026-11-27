@@ -2,13 +2,13 @@
 const RecipeRun = (() => {
   const MAX_IN = 10 * 1024 * 1024, MAX_STEPS = 50, HEX_SHOW = 64 * 1024;
 
-  // Untrusted (link, IndexedDB) → known ops, string / boolean args only.
+  // Untrusted (link, IndexedDB) → known ops, string / boolean args only; a secret arg (HMAC key) is always blanked, so it never reaches a link, hot exit or a saved recipe.
   function clean(list) {
     return (Array.isArray(list) ? list : []).slice(0, MAX_STEPS).filter(s => s && Object.hasOwn(RecipeOps.OPS, s.op)).map(s => {
       const args = {};
       for (const a of RecipeOps.OPS[s.op].args || []) {
         const v = s.args && s.args[a.k];
-        args[a.k] = a.type === "check" ? v === true : a.type === "select" ? (a.options.includes(v) ? v : a.def) : typeof v === "string" ? v.slice(0, 2000) : a.def;
+        args[a.k] = a.type === "secret" ? "" : a.type === "check" ? v === true : a.type === "select" ? (a.options.includes(v) ? v : a.def) : typeof v === "string" ? v.slice(0, 2000) : a.def;
       }
       return { op: s.op, on: s.on !== false, args };
     });

@@ -6,6 +6,7 @@ const RunOp = (() => {
   const HEAD_LANGS = new Set(["Plain Text", "Shell", "PowerShell", "YAML", "JSON"]);
   const BY_HEAD = [
     [/^\s*curl(?:\.exe)?\s/i, "curl-convert"],
+    [/^(?:\s*#[^\n]*\n|\s*\n)*\s*(?:\\?(?:[0-9a-f]{40}|[0-9a-f]{64}|[0-9a-f]{128}) [ *]\S|SHA-?(?:1|256|512) \()/i, "checksum-verify"],
     [/^(?:\s*#[^\n]*\n)*\s*-----BEGIN (?:[A-Z0-9 ]+ )?(?:CERTIFICATE|PRIVATE KEY)-----/, "x509"],
     [/^(?:openapi:\s*["']?3\.|swagger:\s*["']?2\.)|^\s*\{[\s\S]*?"(?:openapi"\s*:\s*"3\.|swagger"\s*:\s*"2\.)/m, "openapi-doc"],
     [/^(?:\s*(?:#|\/\/|@\w+\s*=)[^\n]*\n|\s*\n)*\s*(?:GET|POST|PUT|PATCH|DELETE|HEAD|OPTIONS)\s+(?:https?:\/\/|\{\{|\/)\S*/, "curl-convert"],

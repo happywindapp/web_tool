@@ -1,0 +1,15 @@
+  /* Phase 15a: options dialog of the text & list tools (fields grid, live preview, actions). */
+  dialog.tt-dlg { width:min(760px, calc(100vw - 16px)); max-height:92dvh; }
+  .tt-dlg form { min-width:0; }
+  .tt-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(min(220px, 100%), 1fr)); gap:6px 10px; align-items:end; }
+  .tt-grid input[type=text], .tt-grid input[type=number], .tt-grid select { min-width:0; width:100%; box-sizing:border-box; font-family:Consolas, "Cascadia Mono", monospace; }
+  .tt-dlg label.chk { display:inline-flex; align-items:center; gap:4px; font-size:calc(12px * var(--ui-k, 1)); }
+  .tt-multi { display:flex; flex-wrap:wrap; gap:4px 10px; }
+  .tt-out { width:100%; box-sizing:border-box; min-height:8em; max-height:40dvh; resize:vertical; font:calc(12px * var(--ui-k, 1))/1.45 Consolas, "Cascadia Mono", monospace; background:var(--panel); color:var(--ink); border:1px solid var(--line); border-radius:6px; padding:6px 8px; white-space:pre; }
+  .tt-note { min-height:1.2em; overflow-wrap:anywhere; }
+  .tt-note.bad { color:var(--bad); }
+  .tt-acts { flex-wrap:wrap; }
+  @media (pointer:coarse) {
+    .tt-grid input[type=text], .tt-grid input[type=number], .tt-grid select { font-size:calc(16px * var(--ui-k, 1)); }
+    .tt-acts button { min-height:40px; }
+  }
