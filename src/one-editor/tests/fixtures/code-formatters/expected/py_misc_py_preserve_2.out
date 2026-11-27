@@ -1,0 +1,40 @@
+"""Fake helpers for formatter tests."""
+
+from typing import Iterable
+
+
+def route(
+  order,
+  venues: Iterable[str],
+  *,
+  retries=3,
+  timeout_ms=1500,
+  fallback_venue="MAIN",
+  log_prefix='route',
+):
+  for attempt in range(retries):
+    match order.get("type"):
+      case "limit" if order["price"] > 0:
+        return f'{log_prefix}: limit {order["price"]} via {venues}'
+      case "market":
+        return "market"
+      case _:
+        pass
+  result = {
+    "venue": fallback_venue,
+    "attempts": retries,
+    'note': "it's a fallback",
+    "nested": [
+      1,
+      2,
+      3,
+    ],
+  }
+  lam = lambda x: x * 2
+  return result if result else None
+
+
+class Router(object):
+  @staticmethod
+  def name():
+    return 'router'

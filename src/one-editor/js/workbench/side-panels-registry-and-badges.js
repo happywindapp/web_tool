@@ -60,7 +60,7 @@ const SidePanels = (() => {
 
   function label(b) {
     const n = badges.get(b.dataset.side || b.dataset.act);
-    b.setAttribute("aria-label", b.title.split(" — ")[0] + (n && n.n ? " — " + (n.tip || I18n.num(n.n)) : ""));
+    b.setAttribute("aria-label", (b.title || b.dataset.tipTitle || "").split(" — ")[0] + (n && n.n ? " — " + (n.tip || I18n.num(n.n)) : ""));
   }
 
   // n = 0 hides the badge; tip goes on the badge and into the icon's accessible name.

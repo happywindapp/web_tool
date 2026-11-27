@@ -33,7 +33,11 @@ const Commands = (() => {
     exec(c);
   }
 
-  const keyLabel = c => c.keys[0] ? c.keys[0].replace(/(^|[+ ])([a-z])(?= |$)/g, (m, p, l) => p + l.toUpperCase()) : "";
+  const ARROWS = { Up: "↑", Down: "↓", Left: "←", Right: "→" };
+  const pretty = k => k.replace(/(^|[+ ])([a-z])(?= |$)/g, (m, p, l) => p + l.toUpperCase()).replace(/Arrow(Up|Down|Left|Right)/g, (m, d) => ARROWS[d]);
+  const keyLabel = c => c.keys[0] ? pretty(c.keys[0]) : "";
+  const find = id => list.find(x => x.id === id);
+  const keysOf = id => find(id)?.keys.map(pretty) || [];
   const bound = e => byKey.has(keyOf(e)) || prefixes.has(keyOf(e));
-  return { add, all, run, onKey, keyOf, keyLabel, bound, onRun: f => ran.push(f) };
+  return { add, all, run, onKey, keyOf, keyLabel, keysOf, find, bound, onRun: f => ran.push(f) };
 })();

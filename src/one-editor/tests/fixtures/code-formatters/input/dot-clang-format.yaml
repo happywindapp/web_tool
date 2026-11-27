@@ -1,0 +1,7 @@
+---
+BasedOnStyle: Mozilla
+IndentWidth: 3
+ColumnLimit: 72
+BreakBeforeBraces: Allman
+PointerAlignment: Left
+...

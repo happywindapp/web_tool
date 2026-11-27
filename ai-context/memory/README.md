@@ -76,3 +76,5 @@
 - [boot-trace-and-self-review-once-per-phase.md](boot-trace-and-self-review-once-per-phase.md) — đo boot CPU 4× + agent self-review chỉ 1 lần ở đợt cuối phase, không từng đợt con
 - [one-editor-op-tone-opfs-writable-swap-vm-bench.md](one-editor-op-tone-opfs-writable-swap-vm-bench.md) — op cần status vàng ⇒ trả `tone`; file OPFS rỗng tới khi `close()`; đo hiệu năng ngoài `vm`.
 - [one-editor-global-name-clash-and-recipe-secret-args.md](one-editor-global-name-clash-and-recipe-secret-args.md) — module mọi tool ghép chung scope (grep tên trước); arg `secret` + `persist = RecipeRun.clean(list)` ở mọi đường ghi `link.opts`.
+- [one-editor-hover-tooltips-stash-title-and-data-cmd.md](one-editor-hover-tooltips-stash-title-and-data-cmd.md) — tooltip gỡ `title` khi hover (đọc `dataset.tipTitle`), chỉ đóng khi vùng chứa nút cuộn, phím lấy từ `data-cmd`
+- [one-editor-wasm-code-formatters-traps.md](one-editor-wasm-code-formatters-traps.md) — gofmt / clang-format / ruff WASM: clang không báo lỗi cú pháp, ruff offset byte UTF-8, lint khi gõ giữ mark, lọc opts từ link, CLI fixture ở `C:\_devtools`.

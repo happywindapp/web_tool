@@ -1,6 +1,7 @@
 // Compare the active tabs of two views (Notepad++ Compare): both stay editable, the diff re-runs 150 ms after an edit, scrolling is synced, Alt+↑/↓ jumps between blocks; narrow screens get one inline (unified) view.
 const Compare = (() => {
   let s = null, timer = 0, ignore = null;
+  const toggled = [];
   const opt = { ws: false, case: false, inline: false };
   const narrow = () => matchMedia("(max-width: 640px)").matches;
   const docs = () => [Docs.get(s.a), Docs.get(s.b)];
@@ -14,9 +15,10 @@ const Compare = (() => {
     Views.onChange(() => { if (s && (s.gb >= Views.count || Views.groups[s.ga].active !== s.a || Views.groups[s.gb].active !== s.b)) stop(); });
   }
 
-  function start(ga = Views.focused) {
+  function start(ga = Views.focused, gb) {
     if (Views.count < 2) Views.setLayout("2c");
-    const gb = Views.other(ga), a = Views.activeDoc(ga), b = Views.activeDoc(gb);
+    if (gb === undefined) gb = Views.other(ga);
+    const a = Views.activeDoc(ga), b = Views.activeDoc(gb);
     if (!a || !b) { StatusBar.msg(T("Cần 2 tab đang mở ở 2 view để so sánh — mở thêm tab ở View {n}.", { n: (a ? gb : ga) + 1 }), "warn"); return false; }
     stop(true);
     s = { ga, gb, a: a.id, b: b.id, chunks: [], inline: opt.inline || narrow() };
@@ -27,6 +29,7 @@ const Compare = (() => {
     document.body.classList.add("comparing");
     diff();
     if (s.inline) PhoneLayout.show(gb + 1);
+    toggled.forEach(f => f());
     return true;
   }
 
@@ -37,6 +40,7 @@ const Compare = (() => {
     s = null;
     clearTimeout(timer);
     document.body.classList.remove("comparing");
+    toggled.forEach(f => f());
     if (!silent) StatusBar.msg(T("Đã tắt so sánh."));
   }
 
@@ -113,6 +117,12 @@ const Compare = (() => {
     copyAt(fromA, viewOf(fromA ? s.ga : s.gb).state.selection.main.head);
   }
 
+  // Copies the block under view gi's cursor over the other compared view, whichever view is focused.
+  function copyFrom(gi) {
+    if (!s || s.inline || (gi !== s.ga && gi !== s.gb)) return;
+    copyAt(gi === s.ga, viewOf(gi).state.selection.main.head);
+  }
+
   function copyAt(fromA, pos) {
     const v = viewOf(fromA ? s.ga : s.gb), w = viewOf(fromA ? s.gb : s.ga);
     const c = s.chunks.find(c => { const f = fromA ? c.fromA : c.fromB, t = fromA ? c.toA : c.toB; return pos >= f && (pos < t || pos === f); });
@@ -126,7 +136,7 @@ const Compare = (() => {
   function setOpt(key) {
     opt[key] = !opt[key];
     Prefs.set("compare", opt);
-    if (s) start(s.ga); else StatusBar.msg(T("Tuỳ chọn so sánh đã lưu — bật so sánh để áp dụng."));
+    if (s) start(s.ga, s.gb); else StatusBar.msg(T("Tuỳ chọn so sánh đã lưu — bật so sánh để áp dụng."));
   }
 
   // JSON compared by structure (key order ignored) → a report tab in the focused view.
@@ -143,5 +153,6 @@ const Compare = (() => {
     StatusBar.msg(T("✔ So JSON theo cấu trúc: {n} khác biệt.", { n: list.length }), list.length ? "" : "good");
   }
 
-  return { init, start, stop, toggle: () => s ? stop() : start(), jump, copyBlock, setOpt, jsonTree, get active() { return !!s; }, opt };
+  return { init, start, stop, toggle: () => s ? stop() : start(), jump, copyBlock, copyFrom, setOpt, jsonTree, onToggle: f => toggled.push(f),
+    get active() { return !!s; }, get inline() { return !!s?.inline; }, get pair() { return s ? [s.ga, s.gb] : null; }, opt };
 })();

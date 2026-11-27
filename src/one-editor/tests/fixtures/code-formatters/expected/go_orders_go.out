@@ -1,0 +1,26 @@
+package orders
+
+import (
+	"fmt"
+	"strings"
+)
+
+type Order struct {
+	ID     string
+	Symbol string
+	Qty    int
+	Price  float64
+}
+
+func (o Order) Notional() float64 { return float64(o.Qty) * o.Price }
+
+func Describe(list []Order) string {
+	var b strings.Builder
+	for i, o := range list {
+		if o.Qty <= 0 {
+			continue
+		}
+		fmt.Fprintf(&b, "%d. %s %s x%d @ %.2f\n", i+1, o.ID, o.Symbol, o.Qty, o.Price)
+	}
+	return b.String()
+}

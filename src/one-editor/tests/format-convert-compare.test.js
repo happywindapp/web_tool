@@ -22,7 +22,7 @@ const { OutputOps, ShareState, DEMOS, Formatter, FormatActions, TypeGen, JsonToo
 const SOH = String.fromCharCode(1);
 
 test("format tier: JSON/XML/SQL/FIX → 1, Prettier languages → 2, the rest → 3", () => {
-  eq(["JSON", "XML", "SQL", "FIX", "JavaScript", "YAML", "GraphQL", "Go", "Python", "Plain Text"].map(Formatter.tier), [1, 1, 1, 1, 2, 2, 2, 3, 3, 3]);
+  eq(["JSON", "XML", "SQL", "FIX", "JavaScript", "YAML", "GraphQL", "Go", "Python", "C++", "Rust", "Plain Text"].map(Formatter.tier), [1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 3, 3]);
   assert.equal(LangDetect.byName("schema.graphql"), "GraphQL");
 });
 
@@ -33,6 +33,23 @@ test("format JSON: tolerant repair reported as fixes with lines, indent detected
   Formatter.opts.indent = "2";
   assert.equal((await Formatter.format('{"a":{"b":1}}', "JSON")).text, '{\n  "a": {\n    "b": 1\n  }\n}\n');
   Formatter.opts.indent = "auto";
+});
+
+test("format WASM tier: engine + language + link options reach WasmFmt; a syntax error is located; a failure falls back with the reason", async () => {
+  const seen = [];
+  ctx.PowerTools = { load: async () => {} };
+  ctx.WasmFmt = { format: async (text, lang, engine, o) => { seen.push([lang, engine, o.clang, o.pyWidth]); return text === "bad" ? { error: { line: 3, col: 7, msg: "expected ')'" } } : { text: "ok\n", notes: [] }; } };
+  assert.equal((await Formatter.format("x", "C#", { clang: "Google", pyWidth: "99", evil: 1 })).text, "ok\n");
+  await Formatter.format("x", "Python");
+  eq(seen, [["C#", "clang-format", "Google", 88], ["Python", "ruff", "LLVM", 88]], "unknown key / wrong type from a link are dropped");
+  assert.equal((await Formatter.format('{"a":1}', "JSON", { indent: "100000000" })).text, '{\n  "a": 1\n}\n', "a huge indent from a link is ignored");
+  assert.equal((await Formatter.format('{"a":1}', "JSON", { indent: "4", sql: "oracle" })).text, '{\n    "a": 1\n}\n');
+  await assert.rejects(Formatter.format("bad", "Go"), e => e.line === 3 && e.col === 7 && /Go/.test(e.message));
+  ctx.PowerTools = { load: async () => { throw new Error("one-editor-extras.js"); } };
+  const r = await Formatter.format("def f():\n  return 1   \n", "Python");
+  assert.equal(r.fallback, true);
+  assert.equal(r.text, "def f():\n  return 1\n", "Python fallback only trims line ends");
+  assert.match(r.notes[0], /ruff: one-editor-extras\.js/);
 });
 
 test("format XML (tolerant) and minify JSON / XML / CSS; minify refuses other languages", async () => {

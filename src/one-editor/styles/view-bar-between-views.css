@@ -1,0 +1,19 @@
+  /* View bar = #split column: view buttons on top, the rest drags to resize; the tab bar copies hide while it shows (> 900px, not touch landscape). */
+  #split { flex-direction:column; align-items:stretch; gap:2px; padding:3px 0; min-height:0; overflow:hidden auto; scrollbar-width:none;
+    border:1px solid var(--line); border-radius:6px; background:var(--gut); cursor:col-resize; touch-action:none; }
+  #split[hidden], #split > [data-off] { display:none; }
+  #split > button { flex:none; margin:0 2px; padding:5px 0; border:0; border-radius:4px; background:transparent; color:inherit; line-height:1.2; cursor:pointer; }
+  #split > button:disabled { opacity:.35; cursor:default; }
+  #split > button:enabled:active { filter:brightness(.78); }
+  #split > .vb-sep { flex:none; height:1px; margin:3px 5px; background:var(--line); }
+  #split > button[aria-pressed="true"] { background:color-mix(in srgb, var(--acc) 22%, transparent); box-shadow:inset 2px 0 0 var(--acc); }
+  #split > .vb-grip { flex:1 1 auto; min-height:24px; margin:4px auto 0; width:4px; border-radius:2px; }
+  #split > .vb-grip:focus-visible { outline:2px solid var(--acc); outline-offset:1px; }
+  #split:hover > .vb-grip, #split > .vb-grip:focus-visible { background:var(--line); }
+  @media (hover:hover) { #split > button:enabled:hover { background:var(--line); color:var(--ink); } }
+  @media (min-width:901px) and (not ((max-height:500px) and (pointer:coarse))) {
+    #split { display:flex; }
+    #work.max-l:not(.lay-21) > .group:not([data-group="0"]), #work.max-l.lay-21 > .group[data-group="2"],
+    #work.max-r:not(.lay-21) > .group[data-group="0"], #work.max-r.lay-21 > .group:is([data-group="0"], [data-group="1"]) { display:none; }
+    #work:is(.lay-2c, .lay-12, .lay-21) .gbar > :is(.gpreview, .gtranslate, .grun, .gnew, .gmove) { display:none; }
+  }

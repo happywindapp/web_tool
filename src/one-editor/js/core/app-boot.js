@@ -139,6 +139,8 @@ function wireOneEditor() {
   CmSetup.init();
   Views.init();
   TabStrip.init();
+  ViewBar.init();
+  HoverTips.init();
   FileDrop.init();
   wireOneEditor();
   const idle = fn => typeof requestIdleCallback === "function" ? requestIdleCallback(fn, { timeout: 300 }) : setTimeout(fn, 0);

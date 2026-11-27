@@ -153,19 +153,27 @@ const Views = (() => {
     for (const id of tabs.slice(from)) if (id !== keepId && !Docs.get(id)?.pinned && !close(id)) break;
   }
 
-  function move(id, to) {
+  // at = index among the target's other tabs (-1: the end); within one view it only reorders. Pinned tabs stay first.
+  function move(id, to, at = -1) {
     const from = where(id);
-    if (from < 0 || from === to || to < 0 || to >= count || !Docs.get(id)) return;
-    detach(id);
-    groups[to].tabs.push(id);
+    if (from < 0 || to < 0 || to >= count || !Docs.get(id) || (from === to && at < 0)) return;
+    const t = groups[to].tabs;
+    if (from === to) t.splice(t.indexOf(id), 1); else detach(id);
+    t.splice(at < 0 ? t.length : Math.min(at, t.length), 0, id);
     pinFirst(groups[to]);
-    activate(to, id, true);
+    if (from === to) { TabStrip.render(groups[to]); changed(); } else activate(to, id, true);
   }
 
-  // Exchanges the focused view with "the other" one.
-  function swap() {
-    const a = groups[focused], b = groups[other()];
-    if (!b) return;
+  // Shifts the tab one place left (-1) / right (+1) in its view.
+  function shift(id, dir) {
+    const gi = where(id), k = gi < 0 ? -1 : groups[gi].tabs.indexOf(id);
+    if (k >= 0) move(id, gi, Math.max(0, k + dir));
+  }
+
+  // Exchanges view ai (default: focused) with view bi (default: "the other" one).
+  function swap(ai = focused, bi = other(ai)) {
+    const a = groups[ai], b = groups[bi];
+    if (!a || !b || a === b) return;
     keepScroll(a); keepScroll(b);
     const act = [b.active, a.active];
     [a.tabs, b.tabs] = [b.tabs, a.tabs];
@@ -205,7 +213,7 @@ const Views = (() => {
   }) });
 
   return {
-    init, setLayout, add, open, activate, close, reopen, togglePin, closeMany, move, swap, where, other, activeDoc, applyEffect, replaceText,
+    init, setLayout, add, open, activate, close, reopen, togglePin, closeMany, move, shift, swap, where, other, activeDoc, applyEffect, replaceText,
     revealLine, applySettings, snapshot, refresh, renderAll: () => groups.forEach(refresh), focus: i => setFocused(Math.min(Math.max(i | 0, 0), count - 1)),
     activeView: (i = focused) => groups[i].view, tabsOf: i => [...groups[i].tabs], groups,
     get focused() { return focused; }, get count() { return count; }, get layout() { return layout; }, onChange: f => listeners.push(f), onLint: f => lintFns.push(f),

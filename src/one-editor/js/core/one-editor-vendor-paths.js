@@ -18,6 +18,9 @@ const VendorPaths = (() => {
     extras: "one-editor-extras.js",
   };
   for (const p of ["babel", "estree", "typescript", "postcss", "html", "markdown", "yaml", "graphql"]) PATHS["prettier-" + p] = P_DIR + "plugins/" + p + ".js";
+  // Code formatters (scripts/vendor-one-editor-code-formatters.ps1), run in a Blob Worker.
+  const FMT = [["fmtGofmt", "gofmt", "0.7.3"], ["fmtClang", "clang", "23.1.1"], ["fmtRuff", "ruff", "0.15.20"]];
+  for (const [n, k, v] of FMT) PATHS[n] = "vendor/code-formatter-" + k + "-" + v + "/code-formatter-" + k + ".js";
   const loading = {};
 
   function load(name) {
@@ -30,5 +33,5 @@ const VendorPaths = (() => {
     });
   }
 
-  return { load, PATHS };
+  return { load, PATHS, FMT };
 })();

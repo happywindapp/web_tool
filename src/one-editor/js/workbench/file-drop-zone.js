@@ -1,10 +1,13 @@
-// Drag & drop: files dropped on View 1 / View 2 open there (elsewhere: the focused view), a folder becomes the Explorer tree, a dragged tab moves to the view it is dropped on; on a writable folder tab ExplorerDnd copies them in instead.
+// Drag & drop: files dropped on View 1 / View 2 open there (elsewhere: the focused view), a folder becomes the Explorer tree, a dragged tab moves to the view it is dropped on (on a tab bar: at that spot, also within its own view); on a writable folder tab ExplorerDnd copies them in instead.
 const FileDrop = (() => {
   const types = e => [...(e.dataTransfer?.types || [])];
   const isTab = e => types(e).includes(TabStrip.TAB_TYPE);
   const isFiles = e => types(e).includes("Files");
   let over = null;
+  let ins = null;
   const mark = el => { if (over === el) return; over?.classList.remove("drop-target"); over = el; over?.classList.add("drop-target"); };
+  const markTab = p => { ins?.classList.remove("tab-ins-before", "tab-ins-after"); ins = p?.el || null; ins?.classList.add(p.after ? "tab-ins-after" : "tab-ins-before"); };
+  const unmark = () => { mark(null); markTab(null); };
 
   // Handles / entries must be read during the drop event: the DataTransfer is emptied once it returns.
   function takeItems(dt) {
@@ -35,19 +38,20 @@ const FileDrop = (() => {
       const grp = isTab(e) && Groups.dropSec(e.target);
       e.dataTransfer.dropEffect = isTab(e) && !grp ? "move" : "copy";
       mark(grp || (isFiles(e) && ExplorerDnd.takesFiles(e.target) ? null : e.target.closest?.(".group, #explorerPane") || null));
+      markTab(isTab(e) && !grp ? TabStrip.dropAt(e.target, e.clientX) : null);
     }, true);
-    document.addEventListener("dragleave", e => { if (!e.relatedTarget) mark(null); }, true);
-    document.addEventListener("dragend", () => mark(null), true);
+    document.addEventListener("dragleave", e => { if (!e.relatedTarget) unmark(); }, true);
+    document.addEventListener("dragend", unmark, true);
     // Capture phase: CodeMirror would otherwise paste a dropped file's text into the document.
     document.addEventListener("drop", e => {
       if (!isFiles(e) && !isTab(e)) return;
       e.preventDefault();
       e.stopPropagation();
-      mark(null);
+      unmark();
       const g = e.target.closest?.(".group"), gi = g ? +g.dataset.group : -1;
       const grp = Groups.dropSec(e.target);
       if (isTab(e) && grp) { Groups.dropDoc(grp, e.dataTransfer.getData(TabStrip.TAB_TYPE)); return; }
-      if (isTab(e)) { if (gi >= 0) Views.move(e.dataTransfer.getData(TabStrip.TAB_TYPE), gi); return; }
+      if (isTab(e)) { if (gi >= 0) Views.move(e.dataTransfer.getData(TabStrip.TAB_TYPE), gi, TabStrip.dropAt(e.target, e.clientX)?.at ?? -1); return; }
       const items = takeItems(e.dataTransfer);
       if (ExplorerDnd.dropFiles(e.target, items)) return;
       openDropped(items, gi >= 0 ? gi : Views.focused)

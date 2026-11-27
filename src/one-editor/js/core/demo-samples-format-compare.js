@@ -88,4 +88,6 @@ fmt.Println("orders")
     "json-to-types": { label: "JSON → Go struct (và TS / C# / Java / C++)", payload: () => ({ v: 1, views: [[t("trade.json", TRADE_JSON)], []], run: "to-go" }) },
     "html-to-md": { label: "HTML → Markdown (bảng, task list, code)", payload: () => ({ v: 1, views: [[t("release-notes.html", PAGE_HTML)], []], run: "html-to-md" }) },
   });
+  // Phase 15b content: js/format/code-formatter-demos.js (extras).
+  for (const [k, label] of [["format-go", "Format Go (gofmt, có tab lỗi)"], ["format-cpp-clang", "Format C++ · Java · C# (clang-format Google)"], ["format-python-ruff", "Format Python (ruff, có tab lỗi)"]]) DEMOS[k] = { label, lazy: true };
 })();

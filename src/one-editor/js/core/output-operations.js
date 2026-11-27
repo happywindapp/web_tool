@@ -24,7 +24,7 @@ const OutputOps = (() => {
   const OPS = {
     "json-pretty": { label: "JSON đẹp", group: "Format", lang: "JSON", live: true, run: t => JSON.stringify(parseJson(t), null, 2) },
     "json-minify": { label: "JSON gọn 1 dòng", group: "Format", lang: "JSON", live: true, run: t => JSON.stringify(parseJson(t)) },
-    "format": { label: "Format theo ngôn ngữ", group: "Format", lang: same, live: true, run: (t, c) => Formatter.format(t, c.lang) },
+    "format": { label: "Format theo ngôn ngữ", group: "Format", lang: same, live: true, run: (t, c) => Formatter.format(t, c.lang, PowerTools.state(c.id, "format").link) },
     "minify": { label: "Minify (JSON · XML · HTML · CSS)", group: "Format", lang: same, live: true, run: (t, c) => Formatter.minify(t, c.lang) },
     "to-json": { label: "→ JSON", group: "Chuyển đổi", lang: "JSON", live: true, run: (t, c) => convert(t, c, "json") },
     "to-yaml": { label: "→ YAML", group: "Chuyển đổi", lang: "YAML", live: true, run: (t, c) => convert(t, c, "yaml") },

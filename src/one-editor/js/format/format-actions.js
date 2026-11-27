@@ -27,6 +27,8 @@ const FormatActions = (() => {
     try { r = await Formatter.format(text, lang); }
     catch (e) { FixMarks.show(doc, [], e); if (quiet) return e; StatusBar.msg(e.message, "bad", e.line ? () => Views.revealLine(doc, e.line) : null); return false; }
     if (!Docs.get(doc.id) || Docs.text(doc) !== text) return false;
+    // Format on save does not write the fallback re-indent of a failed engine: it saves as is and reports why.
+    if (quiet && r.fallback) return new Error(r.notes[0]);
     const gi = Views.groups.findIndex(g => g.active === doc.id && g.i < Views.count);
     if (r.text !== text) {
       const change = minimalChange(text, r.text);
@@ -37,7 +39,7 @@ const FormatActions = (() => {
     if (quiet && !r.fixes.length) return true;
     const parts = [r.text === text ? T("✔ Đã đúng định dạng — không đổi gì.") : T("✔ Đã format “{name}” ({lang}) — Ctrl+Z để hoàn tác.", { name: doc.name, lang }), ...r.notes];
     if (r.fixes.length) parts.push(T("Đã tự sửa {n} lỗi — bấm để xem danh sách.", { n: r.fixes.length }));
-    StatusBar.msg(parts.join(" "), r.fixes.length ? "warn" : "good", r.fixes.length ? () => FixMarks.openList(doc) : null, T("Mở danh sách chỗ đã tự sửa"));
+    StatusBar.msg(parts.join(" "), r.fixes.length || r.fallback ? "warn" : "good", r.fixes.length ? () => FixMarks.openList(doc) : null, T("Mở danh sách chỗ đã tự sửa"));
     return true;
   }
 
@@ -98,5 +100,5 @@ const FormatActions = (() => {
     window.open(url.href, "_blank", "noopener");
   }
 
-  return { load, inPlace, pasted, beforeSave, saveFormatFailed, setOpt, askWidth, toggle, openInFixParser, minimalChange, flags };
+  return { load, keep, inPlace, pasted, beforeSave, saveFormatFailed, setOpt, askWidth, toggle, openInFixParser, minimalChange, flags };
 })();

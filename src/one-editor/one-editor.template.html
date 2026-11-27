@@ -13,6 +13,8 @@
   @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { color-scheme:dark; } }
 /* @include styles/workbench-layout.css */
 /* @include styles/tabs-and-explorer-tree.css */
+/* @include styles/view-bar-between-views.css */
+/* @include styles/hover-tooltips-with-shortcuts.css */
 /* @include styles/preview-pane.css */
 /* @include styles/explorer-folder-items-view.css */
 /* @include styles/explorer-folder-items-selection-preview.css */
@@ -65,8 +67,8 @@
   <symbol id="ic-keyboard" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="M6 8h.001M10 8h.001M14 8h.001M18 8h.001M8 12h.001M12 12h.001M16 12h.001M7 16h10"/></symbol>
 </defs></svg>
 <header class="top">
-  <a class="btn" href="../index.html">← Home</a>
-  <button id="btnRunTop" class="main" title="Chạy phép đã chọn trên tab đang mở — kết quả ra tab liên kết ở view kia (Ctrl+Enter)">▶ Chạy</button>
+  <a class="btn" href="../index.html" title="Về trang chủ web_tool — danh sách mọi tool">← Home</a>
+  <button id="btnRunTop" data-cmd="run" class="main" title="Chạy phép đã chọn trên tab đang mở — kết quả ra tab liên kết ở view kia (Ctrl+Enter)">▶ Chạy</button>
   <h1><a class="app-title" href="one-editor.html" target="_blank" rel="noopener" title="Mở One Editor ở tab trình duyệt mới">One Editor</a></h1>
   <button class="more-toggle" title="Thêm thao tác" aria-expanded="false">⋯</button>
   <button id="btnShare" title="Chép link chứa các tab đang mở (dữ liệu nằm sau dấu #, không gửi lên máy chủ)"><svg class="ic" aria-hidden="true"><use href="#ic-link"/></svg> Chia sẻ link</button>
@@ -74,53 +76,53 @@
   <label class="chk" title="Giao diện sáng / tối">Giao diện <select id="uiTheme"><option value="auto">Tự động</option><option value="light">Sáng</option><option value="dark">Tối</option></select></label>
   <label class="chk ui-size-label" title="Cỡ chữ và icon của giao diện — dùng chung mọi tool">Cỡ <select class="ui-size-pick"><option value="small">Nhỏ</option><option value="medium">Vừa</option><option value="large">Lớn</option></select></label>
   <button id="btnToolbar" title="Ẩn / hiện thanh công cụ" aria-pressed="true"><svg class="ic" aria-hidden="true"><use href="#ic-wrench"/></svg> Công cụ</button>
-  <button id="btnSettings" title="Cài đặt — mọi cài đặt của One Editor (Ctrl+,)"><svg class="ic" aria-hidden="true"><use href="#ic-settings"/></svg> Cài đặt</button>
+  <button id="btnSettings" data-cmd="settings" title="Cài đặt — mọi cài đặt của One Editor (Ctrl+,)"><svg class="ic" aria-hidden="true"><use href="#ic-settings"/></svg> Cài đặt</button>
   <button id="btnClear" title="Xoá mọi ghi chú và tab đã lưu trong IndexedDB của trình duyệt này"><svg class="ic" aria-hidden="true"><use href="#ic-trash"/></svg> Xoá dữ liệu</button>
-  <span class="seg lang-switch" title="Ngôn ngữ"><span class="gc-views" title="Lượt truy cập (GoatCounter, cập nhật mỗi ~10 phút)" hidden></span><button data-lang="vi">VI</button><button data-lang="en">EN</button></span>
+  <span class="seg lang-switch" title="Ngôn ngữ"><span class="gc-views" title="Lượt truy cập (GoatCounter, cập nhật mỗi ~10 phút)" hidden></span><button data-lang="vi" title="Giao diện tiếng Việt">VI</button><button data-lang="en" title="English interface">EN</button></span>
 </header>
 <div class="toolbar">
-  <button id="btnRun" class="main" title="Chạy phép đã chọn trên tab đang mở — kết quả ra tab liên kết ở view kia (Ctrl+Enter)">▶ Chạy</button>
+  <button id="btnRun" data-cmd="run" class="main" title="Chạy phép đã chọn trên tab đang mở — kết quả ra tab liên kết ở view kia (Ctrl+Enter)">▶ Chạy</button>
   <select id="opSel" title="Phép ▶ Chạy sẽ chạy — tự chọn theo ngôn ngữ của tab; chọn tay thì tab nhớ phép đó" data-i18n-skip></select>
-  <button id="btnNew" title="Ghi chú mới — tự lưu trong trình duyệt (Alt+N)">+ Ghi chú</button>
-  <button id="btnOpen" title="Mở file (Ctrl+O) hoặc folder trên máy — hoặc kéo-thả vào View 1 / View 2" aria-haspopup="menu">📂 Mở ▾</button>
-  <button id="btnSave" title="Lưu (Ctrl+S): file → ghi đè lên đĩa; ghi chú → đã tự lưu trong trình duyệt">💾 Lưu</button>
-  <button id="btnSaveAs" title="Lưu thành file mới (Ctrl+Shift+S); trình duyệt không hỗ trợ thì tải xuống">Lưu thành…</button>
+  <button id="btnNew" data-cmd="newNote" title="Ghi chú mới — tự lưu trong trình duyệt (Alt+N)">+ Ghi chú</button>
+  <button id="btnOpen" data-cmd="openFiles" title="Mở file (Ctrl+O) hoặc folder trên máy — hoặc kéo-thả vào View 1 / View 2" aria-haspopup="menu">📂 Mở ▾</button>
+  <button id="btnSave" data-cmd="save" title="Lưu (Ctrl+S): file → ghi đè lên đĩa; ghi chú → đã tự lưu trong trình duyệt">💾 Lưu</button>
+  <button id="btnSaveAs" data-cmd="saveAs" title="Lưu thành file mới (Ctrl+Shift+S); trình duyệt không hỗ trợ thì tải xuống">Lưu thành…</button>
   <button id="btnUndo" title="Hoàn tác (Ctrl+Z)">↶ Hoàn tác</button>
   <button id="btnRedo" title="Làm lại (Ctrl+Y / Ctrl+Shift+Z)">↷ Làm lại</button>
   <button id="btnFind" title="Tìm / thay trong tab đang mở (Ctrl+F) — có tìm / thay trong vùng chọn">🔍 Tìm</button>
   <button id="btnStyle" title="Tô màu token kiểu Notepad++ — chữ đang chọn hoặc từ dưới con trỏ: tô mọi chỗ / 1 token, xoá màu, tới chỗ tô (chuột phải trong editor cũng có; Ctrl+K 1…6, Ctrl+K 0 xoá hết)">🖍 Tô màu</button>
   <button id="btnRefresh" title="Làm mới từ đĩa: đọc lại mọi tab file (kể cả tab chưa đọc lại sau F5) và các folder đang mở trong Explorer">🔄 Làm mới</button>
-  <button id="btnFormat" title="Format tab đang mở theo ngôn ngữ — kết quả ra tab liên kết ở view kia (Shift+Alt+F: format tại chỗ)">✨ Format</button>
+  <button id="btnFormat" data-cmd="formatOut formatHere" title="Format tab đang mở theo ngôn ngữ — kết quả ra tab liên kết ở view kia (Shift+Alt+F: format tại chỗ)">✨ Format</button>
   <select id="demo" class="demo-picker" title="Nạp dữ liệu mẫu thành tab tạm (không đè bài đang sửa)" data-i18n-skip></select>
   <span class="sep"></span>
   <select id="langSel" title="Ngôn ngữ của tab đang mở — mặc định tự nhận theo tên file, shebang / modeline rồi nội dung" data-i18n-skip></select>
-  <label class="chk" title="Xuống dòng mềm (Alt+Z)"><input id="chkWrap" type="checkbox"> Xuống dòng</label>
+  <label class="chk" title="Xuống dòng mềm (Alt+Z)" data-cmd="wrap"><input id="chkWrap" type="checkbox"> Xuống dòng</label>
   <label class="chk desktop-only" title="Bản thu nhỏ của file ở mép phải editor — bấm / kéo trên đó để cuộn"><input id="chkMinimap" type="checkbox"> Minimap</label>
-  <button id="btnZoomIn" class="icon-btn" title="Phóng to chữ (Ctrl+=)">A+</button>
-  <button id="btnZoomOut" class="icon-btn" title="Thu nhỏ chữ (Ctrl+-, Ctrl+0 về mặc định)">A−</button>
+  <button id="btnZoomIn" data-cmd="zoomIn" class="icon-btn" title="Phóng to chữ (Ctrl+=)">A+</button>
+  <button id="btnZoomOut" data-cmd="zoomOut zoomReset" class="icon-btn" title="Thu nhỏ chữ (Ctrl+-, Ctrl+0 về mặc định)">A−</button>
   <button id="btnHidden" class="icon-btn" title="Hiện / ẩn mọi ký tự ẩn — dấu cách, Tab, xuống dòng (Show All Characters)" aria-pressed="false">¶</button>
   <button id="btnEnc" title="Bảng mã của tab — bấm để đọc lại file với bảng mã khác, chuyển sang bảng mã khác hoặc đổi kiểu xuống dòng (như menu Encoding của Notepad++)" aria-haspopup="menu" data-i18n-skip>—</button>
   <button id="btnKeys" title="Bộ phím tắt của editor — bấm để đổi: Notepad++ · VS Code · Sublime Text (Vim bật / tắt trong ⌘ Lệnh)" data-i18n-skip></button>
   <span class="sep"></span>
-  <button id="btnCompare" title="So sánh tab đang mở của 2 view — Alt+↓ / Alt+↑ nhảy giữa các khối khác (bấm lần nữa để tắt)">≠ So sánh</button>
-  <button id="btnSwap" title="Đổi chỗ view đang chọn với view kế tiếp">⇆</button>
+  <button id="btnCompare" data-cmd="compare cmpNext cmpPrev" title="So sánh tab đang mở của 2 view — Alt+↓ / Alt+↑ nhảy giữa các khối khác (bấm lần nữa để tắt)">≠ So sánh</button>
+  <button id="btnSwap" data-cmd="swap" title="Đổi chỗ view đang chọn với view kế tiếp">⇆</button>
   <span class="sep"></span>
   <select id="layoutSel" title="Layout: 1 view · 2 cột · 3 cột · 2 hàng · lưới 2×2 (Alt+Shift+1/2/3/8/5) · 1x2 (1 view | 2 view trên dưới) · 2x1 (2 view trên dưới | 1 view)" data-i18n-skip></select>
   <select id="splitSel" class="desktop-only" title="Tỷ lệ view 50:50 · 25:75 · 75:25 — 2 cột, 1x2, 2x1, 2×2: độ rộng cột · 3 cột: 25:25:50 / 50:25:25 · 2 hàng: chiều cao (1 view ⇒ chuyển sang 2 cột)" data-i18n-skip></select>
   <button id="btnFnList" title="Function List — hàm / class / tiêu đề của tab ở sidebar, bấm để nhảy tới (bấm lần nữa để ẩn)">ƒ Function</button>
-  <button id="btnPalette" title="Command Palette — mọi lệnh và phím tắt (Ctrl+Shift+P; Ctrl+P mở nhanh, Ctrl+R symbol, Ctrl+G dòng)">⌘ Lệnh</button>
+  <button id="btnPalette" data-cmd="palette quickOpen" title="Command Palette — mọi lệnh và phím tắt (Ctrl+Shift+P; Ctrl+P mở nhanh, Ctrl+R symbol, Ctrl+G dòng)">⌘ Lệnh</button>
 </div>
 <div class="seg pane-switch"><button>Explorer</button><button>View 1</button><button>View 2</button><button hidden>View 3</button><button hidden>View 4</button></div>
 <main id="work" class="pane-scroller">
   <aside class="pane" id="explorerPane">
     <nav class="activity" role="toolbar" aria-label="Thanh hoạt động">
       <div class="act-top">
-      <button data-side="explorer" class="on" title="Explorer — tab đang mở, ghi chú, gần đây, folder (Ctrl+Shift+E)"><svg class="ic" aria-hidden="true"><use href="#ic-folder"/></svg></button>
-      <button data-side="search" title="Tìm / thay trong mọi tab, ghi chú và folder đang mở (Ctrl+Shift+F / Ctrl+Shift+H)"><svg class="ic" aria-hidden="true"><use href="#ic-search"/></svg></button>
+      <button data-side="explorer" data-cmd="sideExplorer" class="on" title="Explorer — tab đang mở, ghi chú, gần đây, folder (Ctrl+Shift+E)"><svg class="ic" aria-hidden="true"><use href="#ic-folder"/></svg></button>
+      <button data-side="search" data-cmd="sideSearch sideReplace" title="Tìm / thay trong mọi tab, ghi chú và folder đang mở (Ctrl+Shift+F / Ctrl+Shift+H)"><svg class="ic" aria-hidden="true"><use href="#ic-search"/></svg></button>
       <button data-side="outline" title="Outline — hàm, class, tiêu đề của tab đang mở"><svg class="ic" aria-hidden="true"><use href="#ic-list"/></svg></button>
-      <button data-side="bookmarks" title="Bookmark — mọi dòng đã đánh dấu trong tab, ghi chú và file (Ctrl+F2 đặt / bỏ, F2 / Shift+F2 tới cái kế / trước)"><svg class="ic" aria-hidden="true"><use href="#ic-bookmark"/></svg></button>
-      <button data-side="git" title="Git — file đã đổi so với HEAD của repo trong folder Explorer, chỉ đọc (Ctrl+Shift+G)"><svg class="ic" aria-hidden="true"><use href="#ic-git"/></svg></button>
-      <button data-side="problems" title="Problems — lỗi / cảnh báo của mọi tab đang mở (Ctrl+Shift+M)"><svg class="ic" aria-hidden="true"><use href="#ic-alert"/></svg></button>
+      <button data-side="bookmarks" data-cmd="bookmark bookmarkNext bookmarkPrev" title="Bookmark — mọi dòng đã đánh dấu trong tab, ghi chú và file (Ctrl+F2 đặt / bỏ, F2 / Shift+F2 tới cái kế / trước)"><svg class="ic" aria-hidden="true"><use href="#ic-bookmark"/></svg></button>
+      <button data-side="git" data-cmd="sideGit" title="Git — file đã đổi so với HEAD của repo trong folder Explorer, chỉ đọc (Ctrl+Shift+G)"><svg class="ic" aria-hidden="true"><use href="#ic-git"/></svg></button>
+      <button data-side="problems" data-cmd="problems" title="Problems — lỗi / cảnh báo của mọi tab đang mở (Ctrl+Shift+M)"><svg class="ic" aria-hidden="true"><use href="#ic-alert"/></svg></button>
       <button data-side="timeline" title="Timeline — lịch sử cục bộ của tab đang chọn: so sánh, khôi phục"><svg class="ic" aria-hidden="true"><use href="#ic-history"/></svg></button>
       <button data-side="todo" title="TODO / FIXME — các tag trong tab, ghi chú và folder đang mở"><svg class="ic" aria-hidden="true"><use href="#ic-check-sq"/></svg></button>
       <button data-side="clipboard" title="Lịch sử clipboard — các đoạn đã chép / cắt, bấm để chèn vào con trỏ"><svg class="ic" aria-hidden="true"><use href="#ic-clipboard"/></svg></button>
@@ -128,7 +130,7 @@
       </div>
       <div class="act-bottom">
       <button data-act="trash" title="Thùng rác — file đã xoá trong Explorer, khôi phục được" hidden><svg class="ic" aria-hidden="true"><use href="#ic-trash"/></svg></button>
-      <button data-act="settings" title="Cài đặt — mọi cài đặt của One Editor (Ctrl+,)"><svg class="ic" aria-hidden="true"><use href="#ic-settings"/></svg></button>
+      <button data-act="settings" data-cmd="settings" title="Cài đặt — mọi cài đặt của One Editor (Ctrl+,)"><svg class="ic" aria-hidden="true"><use href="#ic-settings"/></svg></button>
       </div>
     </nav>
     <div class="side" data-side-panel="explorer">
@@ -187,23 +189,23 @@
     </div>
   </aside>
   <section class="pane group" data-group="0" aria-label="View 1">
-    <div class="gbar"><div class="tabs" role="tablist" data-i18n-skip></div><button class="gpreview" title="Preview tab này ở view kia — sơ đồ, chart, Markdown, HTML, SVG, bảng CSV/JSON, draw.io — tự cập nhật khi gõ (Ctrl+K V)" hidden>👁</button><button class="gtranslate" title="Dịch tab này ở view kia — đọc to, từ điển tiếng Anh; tab chỉ có 1 link ⇒ dịch cả trang web; dùng bộ dịch trên máy, không có thì hỏi trước khi gửi MyMemory (Ctrl+K T)" hidden>🌐</button><button class="grun" title="Chạy HTML / JS trong sandbox ở view kia (Ctrl+K R)" hidden>▶</button><button class="gnew" title="Ghi chú mới ở view này (Alt+N)">+</button><button class="gmove" title="Chuyển tab đang mở sang view kế tiếp">⇥</button></div>
+    <div class="gbar"><div class="tabs" role="tablist" data-i18n-skip></div><button class="gpreview" data-cmd="preview" title="Preview tab này ở view kia — sơ đồ, chart, Markdown, HTML, SVG, bảng CSV/JSON, draw.io — tự cập nhật khi gõ (Ctrl+K V)" hidden>👁</button><button class="gtranslate" data-cmd="translate" title="Dịch tab này ở view kia — đọc to, từ điển tiếng Anh; tab chỉ có 1 link ⇒ dịch cả trang web; dùng bộ dịch trên máy, không có thì hỏi trước khi gửi MyMemory (Ctrl+K T)" hidden>🌐</button><button class="grun" data-cmd="op-run-code" title="Chạy HTML / JS trong sandbox ở view kia (Ctrl+K R)" hidden>▶</button><button class="gnew" data-cmd="newNote" title="Ghi chú mới ở view này (Alt+N)">+</button><button class="gmove" data-cmd="moveTab" title="Chuyển tab đang mở sang view kế tiếp">⇥</button></div>
     <div class="host" data-i18n-skip></div>
     <div class="empty"><p><b>View 1</b></p><p>Kéo-thả file hoặc folder vào đây, hoặc bấm + để tạo ghi chú.</p><p class="demo-picker">Hoặc chọn một mẫu ở “Samples”.</p></div>
   </section>
-  <div id="split" tabindex="0" role="separator" aria-orientation="vertical" title="Kéo để đổi độ rộng 2 view (← → khi đang chọn, nhấp đúp về 50/50)"></div>
+  <div id="split" title="Kéo để đổi độ rộng 2 view (← → khi đang chọn, nhấp đúp về 50/50)"><button class="vb-right" data-cmd="vbMoveRight" title="Chuyển tab đang mở ở view trái sang view phải">→</button><button class="vb-left" data-cmd="vbMoveLeft" title="Chuyển tab đang mở ở view phải sang view trái">←</button><button class="vb-swap" data-cmd="swap" title="Đổi chỗ tab của view trái và view phải">⇄</button><button class="vb-clone" data-cmd="cloneTab" title="Mở tab đang chọn thêm ở view bên kia (2 view cùng sửa 1 tab)">⧉</button><span class="vb-sep"></span><button class="vb-compare" data-cmd="compare" title="So sánh 2 view (bật / tắt)" aria-pressed="false">≠</button><button class="vb-cmp vb-prev" data-cmd="cmpPrev" title="So sánh: về khối khác trước (Alt+↑)" hidden>↑</button><button class="vb-cmp vb-next" data-cmd="cmpNext" title="So sánh: tới khối khác kế tiếp (Alt+↓)" hidden>↓</button><button class="vb-cmp vb-ltr" data-cmd="cmpCopyRight" title="So sánh: chép khối ở con trỏ view trái sang view phải" hidden>⇒</button><button class="vb-cmp vb-rtl" data-cmd="cmpCopyLeft" title="So sánh: chép khối ở con trỏ view phải sang view trái" hidden>⇐</button><span class="vb-sep"></span><button class="vb-sync" data-cmd="scrollSync" title="Cuộn đồng bộ 2 view (bật / tắt) — cuộn bên này, bên kia cuộn theo" aria-pressed="false">🔗</button><span class="vb-sep"></span><button class="vb-op" data-cmd="run" title="▶ Chạy phép đang chọn, kết quả ra view kia (Ctrl+Enter)" hidden>⇢</button><button class="vb-format" data-cmd="formatOut" title="✨ Format → tab kết quả ở view kia" hidden>✨</button><button class="vb-preview" data-cmd="preview" title="Preview tab này ở view kia — sơ đồ, chart, Markdown, HTML, SVG, bảng CSV/JSON, draw.io — tự cập nhật khi gõ (Ctrl+K V)" hidden>👁</button><button class="vb-translate" data-cmd="translate" title="Dịch tab này ở view kia — đọc to, từ điển tiếng Anh; tab chỉ có 1 link ⇒ dịch cả trang web; dùng bộ dịch trên máy, không có thì hỏi trước khi gửi MyMemory (Ctrl+K T)" hidden>🌐</button><button class="vb-run" data-cmd="op-run-code" title="Chạy HTML / JS trong sandbox ở view kia (Ctrl+K R)" hidden>▶</button><button class="vb-new" data-cmd="newNote" title="Ghi chú mới ở view đang chọn (Alt+N)">+</button><span class="vb-sep"></span><button class="vb-max" data-cmd="maximizeSide" title="Phóng to bên đang chọn — ẩn tạm bên kia (bấm lại để hiện)" aria-pressed="false">⛶</button><button class="vb-even" data-cmd="evenSplit" title="Chia đều 2 view (50:50)">⚖</button><div class="vb-grip" tabindex="0" role="separator" aria-orientation="vertical" title="Kéo để đổi độ rộng 2 view (← → khi đang chọn, nhấp đúp về 50/50)"></div></div>
   <section class="pane group" data-group="1" aria-label="View 2">
-    <div class="gbar"><div class="tabs" role="tablist" data-i18n-skip></div><button class="gpreview" title="Preview tab này ở view kia — sơ đồ, chart, Markdown, HTML, SVG, bảng CSV/JSON, draw.io — tự cập nhật khi gõ (Ctrl+K V)" hidden>👁</button><button class="gtranslate" title="Dịch tab này ở view kia — đọc to, từ điển tiếng Anh; tab chỉ có 1 link ⇒ dịch cả trang web; dùng bộ dịch trên máy, không có thì hỏi trước khi gửi MyMemory (Ctrl+K T)" hidden>🌐</button><button class="grun" title="Chạy HTML / JS trong sandbox ở view kia (Ctrl+K R)" hidden>▶</button><button class="gnew" title="Ghi chú mới ở view này (Alt+N)">+</button><button class="gmove" title="Chuyển tab đang mở sang view kế tiếp">⇥</button></div>
+    <div class="gbar"><div class="tabs" role="tablist" data-i18n-skip></div><button class="gpreview" data-cmd="preview" title="Preview tab này ở view kia — sơ đồ, chart, Markdown, HTML, SVG, bảng CSV/JSON, draw.io — tự cập nhật khi gõ (Ctrl+K V)" hidden>👁</button><button class="gtranslate" data-cmd="translate" title="Dịch tab này ở view kia — đọc to, từ điển tiếng Anh; tab chỉ có 1 link ⇒ dịch cả trang web; dùng bộ dịch trên máy, không có thì hỏi trước khi gửi MyMemory (Ctrl+K T)" hidden>🌐</button><button class="grun" data-cmd="op-run-code" title="Chạy HTML / JS trong sandbox ở view kia (Ctrl+K R)" hidden>▶</button><button class="gnew" data-cmd="newNote" title="Ghi chú mới ở view này (Alt+N)">+</button><button class="gmove" data-cmd="moveTab" title="Chuyển tab đang mở sang view kế tiếp">⇥</button></div>
     <div class="host" data-i18n-skip></div>
     <div class="empty"><p><b>View 2</b></p><p>Bấm ▶ Chạy khi đang ở View 1 thì kết quả hiện ở đây thành tab liên kết (⇢), sửa nguồn là tab tự cập nhật.</p></div>
   </section>
   <section class="pane group" data-group="2" aria-label="View 3" hidden>
-    <div class="gbar"><div class="tabs" role="tablist" data-i18n-skip></div><button class="gpreview" title="Preview tab này ở view kia — sơ đồ, chart, Markdown, HTML, SVG, bảng CSV/JSON, draw.io — tự cập nhật khi gõ (Ctrl+K V)" hidden>👁</button><button class="gtranslate" title="Dịch tab này ở view kia — đọc to, từ điển tiếng Anh; tab chỉ có 1 link ⇒ dịch cả trang web; dùng bộ dịch trên máy, không có thì hỏi trước khi gửi MyMemory (Ctrl+K T)" hidden>🌐</button><button class="grun" title="Chạy HTML / JS trong sandbox ở view kia (Ctrl+K R)" hidden>▶</button><button class="gnew" title="Ghi chú mới ở view này (Alt+N)">+</button><button class="gmove" title="Chuyển tab đang mở sang view kế tiếp">⇥</button></div>
+    <div class="gbar"><div class="tabs" role="tablist" data-i18n-skip></div><button class="gpreview" data-cmd="preview" title="Preview tab này ở view kia — sơ đồ, chart, Markdown, HTML, SVG, bảng CSV/JSON, draw.io — tự cập nhật khi gõ (Ctrl+K V)" hidden>👁</button><button class="gtranslate" data-cmd="translate" title="Dịch tab này ở view kia — đọc to, từ điển tiếng Anh; tab chỉ có 1 link ⇒ dịch cả trang web; dùng bộ dịch trên máy, không có thì hỏi trước khi gửi MyMemory (Ctrl+K T)" hidden>🌐</button><button class="grun" data-cmd="op-run-code" title="Chạy HTML / JS trong sandbox ở view kia (Ctrl+K R)" hidden>▶</button><button class="gnew" data-cmd="newNote" title="Ghi chú mới ở view này (Alt+N)">+</button><button class="gmove" data-cmd="moveTab" title="Chuyển tab đang mở sang view kế tiếp">⇥</button></div>
     <div class="host" data-i18n-skip></div>
     <div class="empty"><p><b>View 3</b></p><p>Kéo tab hoặc file vào đây.</p></div>
   </section>
   <section class="pane group" data-group="3" aria-label="View 4" hidden>
-    <div class="gbar"><div class="tabs" role="tablist" data-i18n-skip></div><button class="gpreview" title="Preview tab này ở view kia — sơ đồ, chart, Markdown, HTML, SVG, bảng CSV/JSON, draw.io — tự cập nhật khi gõ (Ctrl+K V)" hidden>👁</button><button class="gtranslate" title="Dịch tab này ở view kia — đọc to, từ điển tiếng Anh; tab chỉ có 1 link ⇒ dịch cả trang web; dùng bộ dịch trên máy, không có thì hỏi trước khi gửi MyMemory (Ctrl+K T)" hidden>🌐</button><button class="grun" title="Chạy HTML / JS trong sandbox ở view kia (Ctrl+K R)" hidden>▶</button><button class="gnew" title="Ghi chú mới ở view này (Alt+N)">+</button><button class="gmove" title="Chuyển tab đang mở sang view kế tiếp">⇥</button></div>
+    <div class="gbar"><div class="tabs" role="tablist" data-i18n-skip></div><button class="gpreview" data-cmd="preview" title="Preview tab này ở view kia — sơ đồ, chart, Markdown, HTML, SVG, bảng CSV/JSON, draw.io — tự cập nhật khi gõ (Ctrl+K V)" hidden>👁</button><button class="gtranslate" data-cmd="translate" title="Dịch tab này ở view kia — đọc to, từ điển tiếng Anh; tab chỉ có 1 link ⇒ dịch cả trang web; dùng bộ dịch trên máy, không có thì hỏi trước khi gửi MyMemory (Ctrl+K T)" hidden>🌐</button><button class="grun" data-cmd="op-run-code" title="Chạy HTML / JS trong sandbox ở view kia (Ctrl+K R)" hidden>▶</button><button class="gnew" data-cmd="newNote" title="Ghi chú mới ở view này (Alt+N)">+</button><button class="gmove" data-cmd="moveTab" title="Chuyển tab đang mở sang view kế tiếp">⇥</button></div>
     <div class="host" data-i18n-skip></div>
     <div class="empty"><p><b>View 4</b></p><p>Kéo tab hoặc file vào đây.</p></div>
   </section>
@@ -249,6 +251,7 @@
 // @include ../data-workbench/js/i18n/en-shared-theme-sessions-filters.js
 // @include ../data-workbench/js/i18n/en-parser-converter-messages.js
 // @include js/i18n/en-one-editor-strings.js
+// @include js/i18n/en-one-editor-view-bar-strings.js
 // @include js/i18n/en-one-editor-format-compare-strings.js
 // @include js/i18n/en-one-editor-notepadpp-strings.js
 // @include js/i18n/en-one-editor-preview-strings.js
@@ -408,6 +411,7 @@
 // @include js/editor/code-syntax-check-engines.js
 // @include js/editor/code-syntax-lint.js
 // @include js/data/rainbow-csv-columns.js
+// @include js/editor/plain-text-symbol-lead-lines.js
 // @include js/log/log-fix-line-highlight.js
 // @include js/log/fix-tag-hover.js
 // @include js/log/swift-mt-outline-marks-hover.js
@@ -499,6 +503,9 @@
 // @include js/workbench/toolbar-actions.js
 // @include js/workbench/toolbar-notepadpp-buttons-and-menus.js
 // @include js/workbench/split-resizer.js
+// @include js/workbench/view-bar-between-views.js
+// @include js/workbench/view-scroll-sync.js
+// @include js/workbench/hover-tooltips-with-shortcuts.js
 // @include js/workbench/command-list.js
 // @include js/workbench/command-list-format-compare.js
 // @include js/notepadpp/command-list-notepadpp.js

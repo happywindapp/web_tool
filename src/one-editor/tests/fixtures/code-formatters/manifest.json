@@ -1,0 +1,134 @@
+{
+ "versions": {
+  "gofmt": "go version go1.26.1 windows/amd64",
+  "clang": "clang-format version 23.1.1",
+  "ruff": "ruff 0.15.20"
+ },
+ "cases": [
+  {
+   "engine": "gofmt",
+   "input": "go/orders.go",
+   "expected": "go_orders_go.out"
+  },
+  {
+   "engine": "gofmt",
+   "input": "go/generics.go",
+   "expected": "go_generics_go.out"
+  },
+  {
+   "engine": "gofmt",
+   "input": "go/bad.go",
+   "expected": null,
+   "error": {
+    "line": 7,
+    "col": 2
+   }
+  },
+  {
+   "engine": "clang-format",
+   "input": "cpp/order_book.cpp",
+   "style": "LLVM",
+   "expected": "cpp_order_book_cpp_LLVM.out"
+  },
+  {
+   "engine": "clang-format",
+   "input": "cpp/order_book.cpp",
+   "style": "Google",
+   "expected": "cpp_order_book_cpp_Google.out"
+  },
+  {
+   "engine": "clang-format",
+   "input": "cpp/order_book.cpp",
+   "style": "Chromium",
+   "expected": "cpp_order_book_cpp_Chromium.out"
+  },
+  {
+   "engine": "clang-format",
+   "input": "cpp/order_book.cpp",
+   "style": "Mozilla",
+   "expected": "cpp_order_book_cpp_Mozilla.out"
+  },
+  {
+   "engine": "clang-format",
+   "input": "cpp/order_book.cpp",
+   "style": "WebKit",
+   "expected": "cpp_order_book_cpp_WebKit.out"
+  },
+  {
+   "engine": "clang-format",
+   "input": "cpp/order_book.cpp",
+   "style": "Microsoft",
+   "expected": "cpp_order_book_cpp_Microsoft.out"
+  },
+  {
+   "engine": "clang-format",
+   "input": "cpp/templates.cpp",
+   "style": "Google",
+   "expected": "cpp_templates_cpp_Google.out"
+  },
+  {
+   "engine": "clang-format",
+   "input": "c/ring_buffer.c",
+   "style": "LLVM",
+   "expected": "c_ring_buffer_c_LLVM.out"
+  },
+  {
+   "engine": "clang-format",
+   "input": "java/OrderBook.java",
+   "style": "Google",
+   "expected": "java_OrderBook_java_Google.out"
+  },
+  {
+   "engine": "clang-format",
+   "input": "cs/OrderMath.cs",
+   "style": "Microsoft",
+   "expected": "cs_OrderMath_cs_Microsoft.out"
+  },
+  {
+   "engine": "clang-format",
+   "input": "proto/order.proto",
+   "style": "Google",
+   "expected": "proto_order_proto_Google.out"
+  },
+  {
+   "engine": "clang-format",
+   "input": "cpp/templates.cpp",
+   "styleFile": "dot-clang-format.yaml",
+   "expected": "cpp_templates_cpp_file.out"
+  },
+  {
+   "engine": "ruff",
+   "input": "py/orders.py",
+   "config": {},
+   "expected": "py_orders_py_default.out"
+  },
+  {
+   "engine": "ruff",
+   "input": "py/misc.py",
+   "config": {
+    "line_width": 60,
+    "quote_style": "single"
+   },
+   "expected": "py_misc_py_60_single.out"
+  },
+  {
+   "engine": "ruff",
+   "input": "py/misc.py",
+   "config": {
+    "quote_style": "preserve",
+    "indent_width": 2
+   },
+   "expected": "py_misc_py_preserve_2.out"
+  },
+  {
+   "engine": "ruff",
+   "input": "py/bad.py",
+   "config": {},
+   "expected": null,
+   "error": {
+    "line": 3,
+    "col": 21
+   }
+  }
+ ]
+}

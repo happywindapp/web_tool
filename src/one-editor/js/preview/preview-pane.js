@@ -60,11 +60,15 @@ const PreviewPane = (() => {
   const head = d => d.state ? d.state.doc.sliceString(0, 2000) : String(d.text || "").slice(0, 2000);
   const kindOf = d => PreviewKind.of(Docs.effectiveLang(d), head(d), d.name);
   // 👁 in the view's tab bar only for a tab that has a preview; 🌐 for any text tab.
+  const buttons = d => {
+    const plain = !!d && !isPane(d) && !d.hex && !d.big;
+    return { preview: plain && !!kindOf(d), translate: plain, run: plain && ["HTML", "JavaScript"].includes(Docs.effectiveLang(d)) };
+  };
   const syncButton = g => {
-    const d = Docs.get(g.active), plain = !!d && !isPane(d) && !d.hex && !d.big;
-    g.el.querySelector(".gpreview").hidden = !plain || !kindOf(d);
-    g.el.querySelector(".gtranslate").hidden = !plain;
-    g.el.querySelector(".grun").hidden = !plain || !["HTML", "JavaScript"].includes(Docs.effectiveLang(d));
+    const b = buttons(Docs.get(g.active));
+    g.el.querySelector(".gpreview").hidden = !b.preview;
+    g.el.querySelector(".gtranslate").hidden = !b.translate;
+    g.el.querySelector(".grun").hidden = !b.run;
   };
 
   // Called on every view refresh: shows the active preview tab in place of the editor.
@@ -137,6 +141,6 @@ const PreviewPane = (() => {
   const viewOf = id => panes.get(id)?.view || null;
   // Views of a lazily loaded bundle (data tools) register themselves here.
   const addView = (kind, view) => { extra[kind] = view; };
-  return { init, addView, isPreview, isPane, viewOf, kindOf, mount, show, rerun, choice, printable, fit: act(p => p.view.fit()), exportSvg: act(exportSvg), exportPng: act(exportPng), copySvg: act(copySvg),
+  return { init, addView, isPreview, isPane, viewOf, kindOf, buttons, mount, show, rerun, choice, printable, fit: act(p => p.view.fit()), exportSvg: act(exportSvg), exportPng: act(exportPng), copySvg: act(copySvg),
     exportSvgOf: exportSvg, exportPngOf: exportPng, copySvgOf: copySvg };
 })();

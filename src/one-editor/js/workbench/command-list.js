@@ -45,8 +45,10 @@ function registerOneEditorCommands() {
   for (const l of Layouts.LIST) C("layout-" + l.id, () => T("Layout: {name}", { name: T(l.label) }), l.key, () => A.setLayout(l.id));
   for (let i = 0; i < Layouts.MAX; i++) C("focus" + (i + 1), () => T("Tới View {n}", { n: i + 1 }), "Alt+" + (i + 1), () => { V.focus(i); if (V.activeDoc()) view().focus(); PhoneLayout.show(V.focused + 1); }, () => i < V.count);
   C("moveTab", "Chuyển tab sang view kế tiếp", null, () => A.moveTab(), hasDoc);
+  C("tabLeft", "Dời tab sang trái (trong view)", null, withDoc(d => V.shift(d.id, -1)), hasDoc);
+  C("tabRight", "Dời tab sang phải (trong view)", null, withDoc(d => V.shift(d.id, 1)), hasDoc);
   C("cloneTab", "Mở tab này thêm ở view kế tiếp (2 view cùng sửa 1 tab)", "Ctrl+\\", A.cloneTab, hasDoc);
-  C("swap", "Đổi chỗ view này với view kế tiếp", null, () => V.swap(), many);
+  C("swap", "Đổi chỗ view này với view kế tiếp", "Ctrl+k s", () => ViewBar.swap(), many);
   C("explorer", "Ẩn / hiện Explorer", "Ctrl+b", A.toggleExplorer);
   C("toolbar", "Ẩn / hiện thanh công cụ", null, A.toggleToolbar);
   C("sideExplorer", "Hiện Explorer", "Ctrl+Shift+e", () => SidePanels.show("explorer"));

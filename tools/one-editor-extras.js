@@ -13595,6 +13595,108 @@ ${"<"}script>alert("never runs")${"<"}/script>
       } },
   };
 })());
+// Code formatters (phase 15b): gofmt · clang-format · ruff, WASM in a Blob Worker per engine (tools/vendor/code-formatter-*).
+// English strings for phase 15b (extras bundle): gofmt · clang-format · ruff notes — keyed by the Vietnamese source.
+I18n.add({
+  "clang-format: dùng {file} ở gốc folder “{folder}”.": "clang-format: using {file} at the root of folder “{folder}”.",
+  "Không đọc được {file}: {msg}": "Could not read {file}: {msg}",
+});
+// gofmt · clang-format · ruff (WASM, tools/vendor/code-formatter-*), one Blob Worker per engine started on its first use: format(text, lang, engine, opts) → { text, notes } | { error: { line, col, msg } }; a load / run failure rejects.
+function wasmFormatterWorkerHandlers() {
+  // ruff reports UTF-8 byte offsets ("… at byte range 6..7").
+  function lineCol(text, byte) {
+    const pre = new TextDecoder().decode(new TextEncoder().encode(text).subarray(0, byte));
+    return { line: pre.split("\n").length, col: pre.length - pre.lastIndexOf("\n") };
+  }
+  return {
+    gofmt(d) {
+      try { return { text: self.fmtGofmt.format(d.text) }; }
+      catch (e) {
+        const m = /^(\d+):(\d+): ([^\n]*)/.exec(e && e.message);
+        if (!m) throw e;
+        return { error: { line: +m[1], col: +m[2], msg: m[3] } };
+      }
+    },
+    // A syntax error is not an error for clang-format (it formats what it can, like the CLI); a bad style throws.
+    "clang-format"(d) { return { text: self.fmtClang.format(d.text, d.file, d.style) }; },
+    ruff(d) {
+      try { return { text: self.fmtRuff.format(d.text, null, d.config) }; }
+      catch (e) {
+        if (typeof e !== "string") throw e;
+        const m = / at byte range (\d+)\.\.\d+\s*$/.exec(e);
+        return { error: { ...(m ? lineCol(d.text, +m[1]) : { line: 0, col: 0 }), msg: m ? e.slice(0, m.index) : e } };
+      }
+    },
+  };
+}
+
+const WasmFmt = (() => {
+  const LIB = { gofmt: "fmtGofmt", "clang-format": "fmtClang", ruff: "fmtRuff" };
+  const FILE = { C: "main.c", "C++": "main.cpp", Java: "Main.java", "C#": "main.cs", ProtoBuf: "main.proto" };
+  const QUOTES = ["double", "single", "preserve"];
+  const workers = {};
+  const worker = engine => workers[engine] ??= BlobWorker.create({ libs: [LIB[engine]], code: () => "const HANDLERS = (" + wasmFormatterWorkerHandlers + ")();" });
+
+  // The open folder's root .clang-format (or _clang-format), read on every format so an edit applies at once.
+  async function folderStyle() {
+    const root = Explorer.root();
+    if (!root?.handle) return null;
+    for (const name of [".clang-format", "_clang-format"]) {
+      let file;
+      try { file = await (await root.handle.getFileHandle(name)).getFile(); }
+      catch (e) { if (e.name === "NotFoundError" || e.name === "TypeMismatchError") continue; throw new Error(T("Không đọc được {file}: {msg}", { file: name, msg: e.message })); }
+      const text = await file.text();
+      if (text.trim()) return { text, file: name, folder: root.name || root.handle.name };
+    }
+    return null;
+  }
+
+  function config(o) {
+    const width = Math.round(+o.pyWidth);
+    const c = { line_width: width >= 1 && width <= 320 ? width : 88, quote_style: QUOTES.includes(o.pyQuote) ? o.pyQuote : "double" };
+    // "auto" keeps ruff's own 4 spaces (same as the CLI); an explicit choice wins.
+    if (o.indent === "tab") c.indent_style = "tab";
+    else if (+o.indent > 0) c.indent_width = +o.indent;
+    return c;
+  }
+
+  async function format(text, lang, engine, o = {}) {
+    if (!LIB[engine]) throw new Error(engine);
+    const data = { text }, notes = [];
+    if (engine === "clang-format") {
+      const f = await folderStyle();
+      data.file = FILE[lang] || "main.cpp";
+      data.style = f ? f.text : Formatter.CLANG_STYLES.includes(o.clang) ? o.clang : "LLVM";
+      if (f) notes.push(T("clang-format: dùng {file} ở gốc folder “{folder}”.", f));
+    } else if (engine === "ruff") data.config = config(o);
+    try {
+      const r = await worker(engine).call(engine, data, { timeout: 30000 });
+      return r.error ? r : { text: r.text, notes };
+    } catch (e) {
+      // A trap may leave the WASM memory broken: the next call starts a fresh worker.
+      worker(engine).stop();
+      throw e;
+    }
+  }
+
+  return { format };
+})();
+// Phase 15b demo content (labels in demo-samples-format-compare.js): messy Go / C++ · Java · C# / Python run through ▶ Format, plus a tab with a syntax error for Shift+Alt+F. All data fake.
+Object.assign(PowerDemos, (() => {
+  const t = (n, text) => ({ n, l: "", t: text });
+  const GO = 'package orders\n\nimport (\n"fmt"\n    "strings"\n)\n\ntype Order struct{\nID string\n  Symbol   string\nQty int\n    Price float64\n}\n\nfunc (o Order) Notional() float64{ return float64(o.Qty)*o.Price }\n\nfunc Describe(list []Order) string {\nvar b strings.Builder\nfor i,o:=range list{\nif o.Qty<=0 {continue}\n  fmt.Fprintf(&b,"%d. %s %s x%d @ %.2f\\n",i+1,o.ID,o.Symbol,o.Qty,o.Price)\n}\nreturn b.String()\n}\n';
+  const GO_BAD = 'package orders\n\nfunc Total(list []Order) float64 {\n\tsum := 0.0\n\tfor _, o := range list {\n\t\tsum += o.Notional(\n\t}\n\treturn sum\n}\n';
+  const CPP = '#include <vector>\n#include <string>\nnamespace demo{\nstruct Order{std::string id;std::string symbol;int qty;double price;};\nclass OrderBook{\npublic:\nvoid add(const Order& o){if(o.qty<=0)return;orders_.push_back(o);}\ndouble notional() const{double s=0;for(const auto& o:orders_){s+=o.qty*o.price;}return s;}\nprivate:\nstd::vector<Order> orders_;\n};\n}  // namespace demo\n';
+  const JAVA = 'package demo.orders;\nimport java.util.List;\npublic class OrderBook{\nprivate final List<Order> orders;\npublic OrderBook(List<Order> orders){this.orders=orders;}\npublic double notional(){return orders.stream().filter(o->o.qty()>0).mapToDouble(o->o.qty()*o.price()).sum();}\n}\n';
+  const CS = 'namespace Demo.Orders{\npublic record Order(string Id,string Symbol,int Qty,decimal Price);\npublic static class OrderMath{\npublic static decimal Notional(IEnumerable<Order> list)=>list.Where(o=>o.Qty>0).Sum(o=>o.Qty*o.Price);\n}\n}\n';
+  const PY = 'import json\nfrom dataclasses import dataclass\n@dataclass\nclass Order :\n    id:str\n    symbol:str\n    qty:int\n    price:float\ndef notional(orders:list[Order])->float:\n  return sum( o.qty*o.price for o in orders if o.qty>0 )\ndef to_json(orders):\n    return json.dumps([{ \'id\':o.id,\'symbol\':o.symbol,"qty":o.qty } for o in orders],indent=2)\nif __name__=="__main__":\n    book=[Order("ORD-1","ACME",100,25.5),Order(\'ORD-2\',\'DEMO\',0,10.0)]\n    print(notional(book),to_json(book))\n';
+  const PY_BAD = 'def settle(orders):\n    for o in orders:\n        if o.qty > 0\n            print(o.id)\n';
+  return {
+    "format-go": { payload: () => ({ v: 1, views: [[t("orders.go", GO), t("broken.go", GO_BAD)], []], run: "format" }) },
+    "format-cpp-clang": { payload: () => ({ v: 1, views: [[t("order_book.cpp", CPP), t("OrderBook.java", JAVA), t("OrderMath.cs", CS)], []], run: "format", opts: { clang: "Google" } }) },
+    "format-python-ruff": { payload: () => ({ v: 1, views: [[t("orders.py", PY), t("broken.py", PY_BAD)], []], run: "format" }) },
+  };
+})());
 // Explorer tar / gzip (phase 11d): Tar for ExplorerArchive.
 // tar (ustar + PAX for long / non-ASCII names) write / read and gzip through the browser's own streams (no library); links and special entries are listed as skip.
 const Tar = (() => {

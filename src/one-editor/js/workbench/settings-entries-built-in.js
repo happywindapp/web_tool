@@ -48,6 +48,11 @@
   S({ id: "lint", group: "editor", label: "Kiểm lỗi khi gõ", hint: "Dữ liệu (JSON, XML, YAML…) và cú pháp code", get: () => cm.lint, set: v => { cm.lint = v; Prefs.set("lint", v); Views.applySettings(); }, def: true });
   S({ id: "numHover", group: "editor", label: "Tooltip quy đổi số / timestamp", hint: "Rê chuột lên số: hex, nhị phân, ngày giờ", get: () => cm.numHover, set: v => DevActions.setHover(v), def: true });
   S({ id: "words", group: "editor", label: "Gợi ý từ có sẵn trong file khi gõ", get: () => cm.words, set: v => Actions.setWords(v), def: true });
+  const fo = Formatter.opts, fset = k => v => { fo[k] = v; FormatActions.keep(); }, list = a => () => a.map(s => [s, s]);
+  S({ id: "fmtClang", group: "editor", type: "choice", label: "clang-format: style mặc định", hint: "Folder có .clang-format ở gốc thì dùng file đó", choices: list(Formatter.CLANG_STYLES), get: () => fo.clang, set: fset("clang"), def: "LLVM" });
+  S({ id: "fmtPyWidth", group: "editor", type: "number", label: "ruff: line-length", min: 40, max: 200, get: () => fo.pyWidth, set: fset("pyWidth"), def: 88 });
+  S({ id: "fmtPyQuote", group: "editor", type: "choice", label: "ruff: quote-style", choices: list(["double", "single", "preserve"]), get: () => fo.pyQuote, set: fset("pyQuote"), def: "double" });
+  S({ id: "fmtVer", group: "editor", type: "info", label: "gofmt · clang-format · ruff", get: () => VendorPaths.FMT.map(x => x[2]).join(" · ") });
   for (const [id, label, def] of [["rulers", "Thước cột 80 / 120", false], ["brackets", "Tô màu cặp ngoặc", true], ["swatches", "Ô màu cạnh mã màu CSS", true], ["crumbs", "Breadcrumbs (đường dẫn symbol trên editor)", false]])
     S({ id: "aid-" + id, group: "editor", label, get: aid(id), set: flip(aid(id), () => Aids.toggle(id)), def });
 

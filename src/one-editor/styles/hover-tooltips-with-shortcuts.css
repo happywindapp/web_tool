@@ -1,0 +1,15 @@
+  /* HoverTips: note + shortcut chips for bar buttons; follows the theme tokens and the UI size (--ui-k). */
+  .htip { position:fixed; z-index:70; display:flex; flex-direction:column; gap:2px; max-width:min(300px, calc(100vw - 8px)); padding:6px 9px;
+    border:1px solid var(--line); border-radius:6px; background:var(--panel); color:var(--ink); box-shadow:0 4px 14px rgb(0 0 0 / .18);
+    font:calc(12px * var(--ui-k, 1))/1.4 system-ui, sans-serif; text-align:left; white-space:pre-line; pointer-events:none; }
+  .htip[hidden] { display:none; }
+  .htip > b { font-weight:600; }
+  .htip-d { display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:3; overflow:hidden; color:var(--muted); }
+  .htip-k { display:flex; flex-wrap:wrap; align-items:center; gap:3px 5px; margin-top:3px; }
+  .htip-l { color:var(--muted); margin-right:2px; }
+  .htip-or { color:var(--muted); }
+  .htip-chord { display:inline-flex; gap:2px; }
+  .htip kbd { padding:0 5px; border:1px solid var(--line); border-bottom-width:2px; border-radius:4px; background:var(--gut); color:var(--ink);
+    font:calc(11px * var(--ui-k, 1))/1.5 Consolas, "Cascadia Mono", monospace; }
+  @media (prefers-reduced-motion:no-preference) { .htip { animation:htip-in .12s ease-out; } }
+  @keyframes htip-in { from { opacity:0; translate:0 2px; } }

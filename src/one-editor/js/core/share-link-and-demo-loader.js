@@ -23,8 +23,8 @@ const ShareLoader = (() => {
       StatusBar.msg(T("Link có regex — chưa tự chạy; bấm ▶ Chạy để chạy “{op}”.", { op: T(OutputOps.get(p.held).label) }), "warn");
     }
     if (p.run) {
-      // Tabs marked as previewed each get their preview back; an older link without marks previews its first previewable tab.
-      const marked = p.run === "preview" ? made.filter((d, k) => p.views.flat()[k].preview) : [];
+      // Marked tabs each get their preview / ▶ Format result back; an older link without marks previews its first previewable tab.
+      const marked = made.filter((d, k) => p.views.flat()[k].preview);
       const runOn = marked.length ? marked : [p.run === "preview" ? made.find(d => PreviewPane.kindOf(d)) || src : src];
       runOn.forEach(d => RunOp.pick(d, p.run));
       Toolbar.sync();
@@ -76,13 +76,15 @@ const ShareLoader = (() => {
 
   // pw: encrypt the payload into a "#enc:" link (Crypt, extras bundle).
   async function share(pw = "") {
-    // A preview tab has no text: its source tab is marked and the link runs "preview" on it again.
-    const docs = Views.groups.slice(0, Views.count).map(g => g.tabs.map(Docs.get).filter(d => d && d.kind !== "clone" && !Docs.isList(d)));
-    const shown = new Set(docs.flat().filter(PreviewPane.isPreview).map(d => d.link.src));
-    const views = docs.map(list => list.filter(d => !PreviewPane.isPreview(d)).map(d => ({ name: d.name, lang: d.lang, text: Docs.text(d), preview: shown.has(d.id) })));
+    // A preview tab has no text and a ▶ Format result is made again: the source tab is marked and the link re-runs the op on it (format with its options).
+    const docs = Views.groups.slice(0, Views.count).map(g => g.tabs.map(Docs.get).filter(d => d && d.kind !== "clone" && !Docs.isList(d))), all = docs.flat();
+    let ran = all.filter(PreviewPane.isPreview), run = ran.length ? "preview" : "";
+    if (!run) { ran = all.filter(d => d.kind === "output" && d.link?.op === "format" && all.some(s => s.id === d.link.src)); run = ran.length ? "format" : ""; }
+    const shown = new Set(ran.map(d => d.link.src));
+    const views = docs.map(list => list.filter(d => !ran.includes(d)).map(d => ({ name: d.name, lang: d.lang, text: Docs.text(d), preview: shown.has(d.id) })));
     if (!views.some(v => v.length)) { StatusBar.msg(T("Chưa có tab nào để chia sẻ."), "warn"); return; }
-    const run = shown.size ? "preview" : "";
     const payload = ShareState.build(views, CmSetup.settings.wrap, Views.layout, Compare.active, run);
+    if (run === "format") payload.opts = { ...Formatter.opts, ...PowerTools.state(ran[0].link.src, "format").link };
     const url = location.href.split(/[?#]/)[0] + "#" + (pw ? await Crypt.encodeLink(payload, pw) : await ShareCodec.encode(payload));
     const copied = await Dom.copy(url);
     if (!copied) prompt(T("Chép link này:"), url);

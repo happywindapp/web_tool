@@ -69,16 +69,19 @@ const SettingsTab = (() => {
     return row;
   }
 
-  function toolbarVisibility(list) {
+  // Show all / hide all for a group of button toggles (toolbar, view bar); the toolbar one also shows / hides the bar itself.
+  const shown = (g, show) => (g !== "toolbar" || Actions.toolbarVisible() === show) && Settings.inGroup(g).every(e => e.get() === show);
+  function toolbarVisibility(list, g) {
     const group = el("div", "st-toolbar-visibility");
+    group.dataset.group = g;
     group.setAttribute("role", "radiogroup");
-    group.setAttribute("aria-label", groupName("toolbar"));
+    group.setAttribute("aria-label", groupName(g));
     for (const [value, text] of [["show", "Hiện tất cả"], ["hide", "Ẩn tất cả"]]) {
       const label = el("label"), radio = el("input"), show = value === "show";
-      Object.assign(radio, { type: "radio", name: "toolbar-visibility", value });
+      Object.assign(radio, { type: "radio", name: g + "-visibility", value });
       radio.onchange = async () => {
         for (const e of list) if (e.get() !== show) await Settings.set(e, show);
-        Actions.setToolbarVisible(show);
+        if (g === "toolbar") Actions.setToolbarVisible(show);
       };
       label.append(radio, el("span", "", T(text)));
       group.append(label);
@@ -89,7 +92,7 @@ const SettingsTab = (() => {
   function section(g, list, whole) {
     const head = el("div", "st-head");
     head.append(el("h3", "", groupName(g)));
-    if (whole && g === "toolbar") head.append(toolbarVisibility(list));
+    if (whole && (g === "toolbar" || g === "viewbar")) head.append(toolbarVisibility(list, g));
     else if (whole && list.some(Settings.hasDefault)) head.append(btn("st-act", "↺ " + T("Mặc định cả nhóm"), () => Settings.resetGroup(g)));
     return [head, ...list.map(item)];
   }
@@ -115,10 +118,7 @@ const SettingsTab = (() => {
   function values() {
     raf = 0;
     if (!visible()) return;
-    for (const radio of t.ui.main.querySelectorAll(".st-toolbar-visibility input")) {
-      const show = radio.value === "show";
-      radio.checked = Actions.toolbarVisible() === show && Settings.inGroup("toolbar").every(e => e.get() === show);
-    }
+    for (const radio of t.ui.main.querySelectorAll(".st-toolbar-visibility input")) radio.checked = shown(radio.closest("[data-group]").dataset.group, radio.value === "show");
     for (const row of t.ui.main.querySelectorAll(".st-item")) {
       const e = Settings.entry(row.dataset.id), c = row.querySelector(".st-val, input, select");
       row.classList.toggle("mod", !Settings.isDefault(e));

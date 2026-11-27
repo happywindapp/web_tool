@@ -5,13 +5,13 @@
   #explorerPane { grid-area:ex; } #split { grid-area:sp; }
   .group[data-group="0"] { grid-area:g0; } .group[data-group="1"] { grid-area:g1; } .group[data-group="2"] { grid-area:g2; } .group[data-group="3"] { grid-area:g3; }
   #work.lay-1 { grid-template:"ex g0" minmax(0, 1fr) / var(--exw) minmax(0, 1fr); }
-  #work.lay-2c { grid-template:"ex g0 sp g1" minmax(0, 1fr) / var(--exw) minmax(0, var(--v1, 1fr)) 4px minmax(0, var(--v2, 1fr)); }
+  #work.lay-2c { grid-template:"ex g0 sp g1" minmax(0, 1fr) / var(--exw) minmax(0, var(--v1, 1fr)) var(--vbw, 30px) minmax(0, var(--v2, 1fr)); }
   /* grid-template with area strings rejects repeat(), so the columns are spelled out. */
   #work.lay-3c { grid-template:"ex g0 g1 g2" minmax(0, 1fr) / var(--exw) minmax(0, var(--c1, 1fr)) minmax(0, var(--c2, 1fr)) minmax(0, var(--c3, 1fr)); }
   #work.lay-2r { grid-template:"ex g0" minmax(0, var(--r1, 1fr)) "ex g1" minmax(0, var(--r2, 1fr)) / var(--exw) minmax(0, 1fr); }
   #work.lay-4g { grid-template:"ex g0 g1" minmax(0, var(--r1, 1fr)) "ex g2 g3" minmax(0, var(--r2, 1fr)) / var(--exw) minmax(0, var(--c1, 1fr)) minmax(0, var(--c2, 1fr)); }
-  #work.lay-12 { grid-template:"ex g0 sp g1" minmax(0, var(--r1, 1fr)) "ex g0 sp g2" minmax(0, var(--r2, 1fr)) / var(--exw) minmax(0, var(--v1, 1fr)) 4px minmax(0, var(--v2, 1fr)); }
-  #work.lay-21 { grid-template:"ex g0 sp g2" minmax(0, var(--r1, 1fr)) "ex g1 sp g2" minmax(0, var(--r2, 1fr)) / var(--exw) minmax(0, var(--v1, 1fr)) 4px minmax(0, var(--v2, 1fr)); }
+  #work.lay-12 { grid-template:"ex g0 sp g1" minmax(0, var(--r1, 1fr)) "ex g0 sp g2" minmax(0, var(--r2, 1fr)) / var(--exw) minmax(0, var(--v1, 1fr)) var(--vbw, 30px) minmax(0, var(--v2, 1fr)); }
+  #work.lay-21 { grid-template:"ex g0 sp g2" minmax(0, var(--r1, 1fr)) "ex g1 sp g2" minmax(0, var(--r2, 1fr)) / var(--exw) minmax(0, var(--v1, 1fr)) var(--vbw, 30px) minmax(0, var(--v2, 1fr)); }
   #work.gap-x { cursor:col-resize; } #work.gap-y { cursor:row-resize; }
   .host .cm-editor .cm-bookmark { background:color-mix(in srgb, var(--warn) 14%, transparent); box-shadow:inset 3px 0 0 var(--warn); }
   body.no-toolbar { grid-template-rows:auto minmax(0, 1fr) auto; }
@@ -28,19 +28,26 @@
   body.zen { grid-template-rows:minmax(0, 1fr); }
   body.zen > header.top, body.zen > .toolbar, body.zen > .statusbar { display:none; }
   .zen-exit { position:fixed; top:6px; right:12px; z-index:40; opacity:.8; }
-  .group { position:relative; grid-template-rows:auto minmax(0, 1fr); }
+  .group { position:relative; grid-template-rows:auto minmax(0, 1fr); --code:#fff; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .group { --code:#1a2436; } }
+  :root[data-theme="dark"] .group { --code:#1a2436; }
   .group.focused { border-color:var(--acc); }
   .group > .host, .group > .empty { grid-row:2; grid-column:1; min-height:0; min-width:0; }
   .host { overflow:hidden; background:var(--code); }
   .host .cm-editor { height:100%; font-size:var(--ed-font, 13px); }
+  /* One hue per lead char (• - + = > < / { } [ ] ~ ? | \), 24° apart; lightness per theme keeps it readable. */
+  .oe-sym-0 { --sym-h:0; } .oe-sym-1 { --sym-h:24; } .oe-sym-2 { --sym-h:48; } .oe-sym-3 { --sym-h:72; } .oe-sym-4 { --sym-h:96; }
+  .oe-sym-5 { --sym-h:120; } .oe-sym-6 { --sym-h:144; } .oe-sym-7 { --sym-h:168; } .oe-sym-8 { --sym-h:192; } .oe-sym-9 { --sym-h:216; }
+  .oe-sym-10 { --sym-h:240; } .oe-sym-11 { --sym-h:264; } .oe-sym-12 { --sym-h:288; } .oe-sym-13 { --sym-h:312; } .oe-sym-14 { --sym-h:336; }
+  .host .cm-line.oe-sym-line { color:hsl(var(--sym-h) 75% 30%); }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .host .cm-line.oe-sym-line { color:hsl(var(--sym-h) 80% 72%); } }
+  :root[data-theme="dark"] .host .cm-line.oe-sym-line { color:hsl(var(--sym-h) 80% 72%); }
   .host .cm-editor.cm-focused { outline:0; }
   .group > .empty { display:none; place-content:center; padding:24px; text-align:center; color:var(--muted); }
   .group > .empty p { margin:0 0 6px; max-width:420px; }
   .group.is-empty > .host { visibility:hidden; }
   .group.is-empty > .empty { display:grid; }
   .group.drop-target, #explorerPane.drop-target { outline:3px dashed var(--acc); outline-offset:-3px; }
-  #split { cursor:col-resize; border-radius:3px; touch-action:none; }
-  #split:hover, #split:focus-visible { background:var(--line); outline:0; }
 
   #explorerPane { grid-template-columns:minmax(0, 1fr); grid-template-rows:auto minmax(0, 1fr); }
   /* Strip: scrolls sideways; the local / scroll background pair shades whichever edge still hides icons. */

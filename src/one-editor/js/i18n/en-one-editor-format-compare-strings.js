@@ -28,7 +28,7 @@ I18n.add({
   "Format: thụt lề tự dò theo file": "Format: indent detected from the file", "Format: thụt lề 2 dấu cách": "Format: indent 2 spaces",
   "Format: thụt lề 4 dấu cách": "Format: indent 4 spaces", "Format: thụt lề bằng Tab": "Format: indent with Tab",
   "Format: độ rộng dòng (print width)…": "Format: line width (print width)…", "Format SQL theo dialect {name}": "Format SQL as {name}",
-  "Bật / tắt format khi lưu (JSON, XML, SQL, FIX, Prettier)": "Toggle format on save (JSON, XML, SQL, FIX, Prettier)", "Bật / tắt format khi dán": "Toggle format on paste",
+  "Bật / tắt format khi lưu (JSON, XML, SQL, FIX, Prettier, gofmt, clang-format, ruff)": "Toggle format on save (JSON, XML, SQL, FIX, Prettier, gofmt, clang-format, ruff)", "Bật / tắt format khi dán": "Toggle format on paste",
   "Mở tab này trong FIX Parser": "Open this tab in FIX Parser", "Chuyển đổi: {op}": "Convert: {op}",
   "So sánh 2 view (bật / tắt)": "Compare 2 views (on / off)", "So sánh: tới khối khác kế tiếp": "Compare: next difference",
   "So sánh: về khối khác trước": "Compare: previous difference", "So sánh: chép khối ở con trỏ sang view kia": "Compare: copy the block at the cursor to the other view",
@@ -45,4 +45,8 @@ I18n.add({
   "Cần 2 tab JSON ở 2 view.": "Needs a JSON tab in each of 2 views.", "“{name}” không có JSON.": "“{name}” holds no JSON.",
   "So JSON theo cấu trúc (bỏ qua thứ tự key): {a} ⇄ {b}": "JSON compared by structure (key order ignored): {a} ⇄ {b}",
   "{n} khác biệt:": "{n} differences:", "Không có khác biệt.": "No differences.", "✔ So JSON theo cấu trúc: {n} khác biệt.": "✔ JSON compared by structure: {n} differences.",
+  // Phase 15b
+  "Không chạy được {engine}: {msg}": "Could not run {engine}: {msg}", "clang-format: style mặc định": "clang-format: default style",
+  "Folder có .clang-format ở gốc thì dùng file đó": "A .clang-format at the folder root wins",
+  "Format Go (gofmt, có tab lỗi)": "Format Go (gofmt, with an error tab)", "Format Python (ruff, có tab lỗi)": "Format Python (ruff, with an error tab)",
 });

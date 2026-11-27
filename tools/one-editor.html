@@ -103,13 +103,13 @@
   #explorerPane { grid-area:ex; } #split { grid-area:sp; }
   .group[data-group="0"] { grid-area:g0; } .group[data-group="1"] { grid-area:g1; } .group[data-group="2"] { grid-area:g2; } .group[data-group="3"] { grid-area:g3; }
   #work.lay-1 { grid-template:"ex g0" minmax(0, 1fr) / var(--exw) minmax(0, 1fr); }
-  #work.lay-2c { grid-template:"ex g0 sp g1" minmax(0, 1fr) / var(--exw) minmax(0, var(--v1, 1fr)) 4px minmax(0, var(--v2, 1fr)); }
+  #work.lay-2c { grid-template:"ex g0 sp g1" minmax(0, 1fr) / var(--exw) minmax(0, var(--v1, 1fr)) var(--vbw, 30px) minmax(0, var(--v2, 1fr)); }
   /* grid-template with area strings rejects repeat(), so the columns are spelled out. */
   #work.lay-3c { grid-template:"ex g0 g1 g2" minmax(0, 1fr) / var(--exw) minmax(0, var(--c1, 1fr)) minmax(0, var(--c2, 1fr)) minmax(0, var(--c3, 1fr)); }
   #work.lay-2r { grid-template:"ex g0" minmax(0, var(--r1, 1fr)) "ex g1" minmax(0, var(--r2, 1fr)) / var(--exw) minmax(0, 1fr); }
   #work.lay-4g { grid-template:"ex g0 g1" minmax(0, var(--r1, 1fr)) "ex g2 g3" minmax(0, var(--r2, 1fr)) / var(--exw) minmax(0, var(--c1, 1fr)) minmax(0, var(--c2, 1fr)); }
-  #work.lay-12 { grid-template:"ex g0 sp g1" minmax(0, var(--r1, 1fr)) "ex g0 sp g2" minmax(0, var(--r2, 1fr)) / var(--exw) minmax(0, var(--v1, 1fr)) 4px minmax(0, var(--v2, 1fr)); }
-  #work.lay-21 { grid-template:"ex g0 sp g2" minmax(0, var(--r1, 1fr)) "ex g1 sp g2" minmax(0, var(--r2, 1fr)) / var(--exw) minmax(0, var(--v1, 1fr)) 4px minmax(0, var(--v2, 1fr)); }
+  #work.lay-12 { grid-template:"ex g0 sp g1" minmax(0, var(--r1, 1fr)) "ex g0 sp g2" minmax(0, var(--r2, 1fr)) / var(--exw) minmax(0, var(--v1, 1fr)) var(--vbw, 30px) minmax(0, var(--v2, 1fr)); }
+  #work.lay-21 { grid-template:"ex g0 sp g2" minmax(0, var(--r1, 1fr)) "ex g1 sp g2" minmax(0, var(--r2, 1fr)) / var(--exw) minmax(0, var(--v1, 1fr)) var(--vbw, 30px) minmax(0, var(--v2, 1fr)); }
   #work.gap-x { cursor:col-resize; } #work.gap-y { cursor:row-resize; }
   .host .cm-editor .cm-bookmark { background:color-mix(in srgb, var(--warn) 14%, transparent); box-shadow:inset 3px 0 0 var(--warn); }
   body.no-toolbar { grid-template-rows:auto minmax(0, 1fr) auto; }
@@ -126,19 +126,26 @@
   body.zen { grid-template-rows:minmax(0, 1fr); }
   body.zen > header.top, body.zen > .toolbar, body.zen > .statusbar { display:none; }
   .zen-exit { position:fixed; top:6px; right:12px; z-index:40; opacity:.8; }
-  .group { position:relative; grid-template-rows:auto minmax(0, 1fr); }
+  .group { position:relative; grid-template-rows:auto minmax(0, 1fr); --code:#fff; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .group { --code:#1a2436; } }
+  :root[data-theme="dark"] .group { --code:#1a2436; }
   .group.focused { border-color:var(--acc); }
   .group > .host, .group > .empty { grid-row:2; grid-column:1; min-height:0; min-width:0; }
   .host { overflow:hidden; background:var(--code); }
   .host .cm-editor { height:100%; font-size:var(--ed-font, 13px); }
+  /* One hue per lead char (• - + = > < / { } [ ] ~ ? | \), 24° apart; lightness per theme keeps it readable. */
+  .oe-sym-0 { --sym-h:0; } .oe-sym-1 { --sym-h:24; } .oe-sym-2 { --sym-h:48; } .oe-sym-3 { --sym-h:72; } .oe-sym-4 { --sym-h:96; }
+  .oe-sym-5 { --sym-h:120; } .oe-sym-6 { --sym-h:144; } .oe-sym-7 { --sym-h:168; } .oe-sym-8 { --sym-h:192; } .oe-sym-9 { --sym-h:216; }
+  .oe-sym-10 { --sym-h:240; } .oe-sym-11 { --sym-h:264; } .oe-sym-12 { --sym-h:288; } .oe-sym-13 { --sym-h:312; } .oe-sym-14 { --sym-h:336; }
+  .host .cm-line.oe-sym-line { color:hsl(var(--sym-h) 75% 30%); }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .host .cm-line.oe-sym-line { color:hsl(var(--sym-h) 80% 72%); } }
+  :root[data-theme="dark"] .host .cm-line.oe-sym-line { color:hsl(var(--sym-h) 80% 72%); }
   .host .cm-editor.cm-focused { outline:0; }
   .group > .empty { display:none; place-content:center; padding:24px; text-align:center; color:var(--muted); }
   .group > .empty p { margin:0 0 6px; max-width:420px; }
   .group.is-empty > .host { visibility:hidden; }
   .group.is-empty > .empty { display:grid; }
   .group.drop-target, #explorerPane.drop-target { outline:3px dashed var(--acc); outline-offset:-3px; }
-  #split { cursor:col-resize; border-radius:3px; touch-action:none; }
-  #split:hover, #split:focus-visible { background:var(--line); outline:0; }
 
   #explorerPane { grid-template-columns:minmax(0, 1fr); grid-template-rows:auto minmax(0, 1fr); }
   /* Strip: scrolls sideways; the local / scroll background pair shades whichever edge still hides icons. */
@@ -251,11 +258,14 @@ body.recording .statusbar { box-shadow: inset 0 2px 0 #e5534b; }
   .tab.on { background:var(--code); color:var(--ink); }
   .group.focused .tab.on { box-shadow:inset 0 2px 0 var(--acc); font-weight:600; }
   .tab:focus-visible { outline:2px solid var(--acc); outline-offset:-2px; }
+  .tab.tab-ins-before { box-shadow:inset 3px 0 0 var(--acc); } .tab.tab-ins-after { box-shadow:inset -3px 0 0 var(--acc); }
   .tab .x, .tab .pin { min-width:22px; padding:0 4px; border:0; background:transparent; color:inherit; line-height:1.3; }
   .tab .pin { display:none; font-size:.85em; }
   .tab.on .pin, .tab.pinned .pin { display:inline-block; }
   .tab:not(.pinned) .pin, .ex-pin:not(.on) { opacity:.45; filter:grayscale(1); }
   .gbar > button { flex:none; border:0; border-left:1px solid var(--line); border-radius:0; background:transparent; padding:2px 10px; }
+  .gbar > button.tscroll { padding:2px 7px; font-weight:700; } .gbar > button.tprev { border-left:0; border-right:1px solid var(--line); }
+  .gbar > button.tscroll:disabled { opacity:.35; cursor:default; }
   .tab-rename { width:auto; min-width:6em; max-width:min(200px, 50vw); padding:1px 4px; border:1px solid var(--acc); border-radius:3px; background:var(--panel); color:var(--ink); font:inherit; user-select:text; }
   .tab-menu { position:fixed; z-index:60; display:flex; flex-direction:column; min-width:240px; max-width:calc(100vw - 8px); padding:4px 0; border:1px solid var(--line);
               border-radius:8px; background:var(--panel); color:var(--ink); box-shadow:0 8px 24px rgb(0 0 0 / .25); }
@@ -322,6 +332,40 @@ body.recording .statusbar { box-shadow: inset 0 2px 0 #e5534b; }
     .ex-fold, .ex-bar-btn { min-height:36px; }
     .ex-bar-btn { min-width:38px; }
   }
+  /* View bar = #split column: view buttons on top, the rest drags to resize; the tab bar copies hide while it shows (> 900px, not touch landscape). */
+  #split { flex-direction:column; align-items:stretch; gap:2px; padding:3px 0; min-height:0; overflow:hidden auto; scrollbar-width:none;
+    border:1px solid var(--line); border-radius:6px; background:var(--gut); cursor:col-resize; touch-action:none; }
+  #split[hidden], #split > [data-off] { display:none; }
+  #split > button { flex:none; margin:0 2px; padding:5px 0; border:0; border-radius:4px; background:transparent; color:inherit; line-height:1.2; cursor:pointer; }
+  #split > button:disabled { opacity:.35; cursor:default; }
+  #split > button:enabled:active { filter:brightness(.78); }
+  #split > .vb-sep { flex:none; height:1px; margin:3px 5px; background:var(--line); }
+  #split > button[aria-pressed="true"] { background:color-mix(in srgb, var(--acc) 22%, transparent); box-shadow:inset 2px 0 0 var(--acc); }
+  #split > .vb-grip { flex:1 1 auto; min-height:24px; margin:4px auto 0; width:4px; border-radius:2px; }
+  #split > .vb-grip:focus-visible { outline:2px solid var(--acc); outline-offset:1px; }
+  #split:hover > .vb-grip, #split > .vb-grip:focus-visible { background:var(--line); }
+  @media (hover:hover) { #split > button:enabled:hover { background:var(--line); color:var(--ink); } }
+  @media (min-width:901px) and (not ((max-height:500px) and (pointer:coarse))) {
+    #split { display:flex; }
+    #work.max-l:not(.lay-21) > .group:not([data-group="0"]), #work.max-l.lay-21 > .group[data-group="2"],
+    #work.max-r:not(.lay-21) > .group[data-group="0"], #work.max-r.lay-21 > .group:is([data-group="0"], [data-group="1"]) { display:none; }
+    #work:is(.lay-2c, .lay-12, .lay-21) .gbar > :is(.gpreview, .gtranslate, .grun, .gnew, .gmove) { display:none; }
+  }
+  /* HoverTips: note + shortcut chips for bar buttons; follows the theme tokens and the UI size (--ui-k). */
+  .htip { position:fixed; z-index:70; display:flex; flex-direction:column; gap:2px; max-width:min(300px, calc(100vw - 8px)); padding:6px 9px;
+    border:1px solid var(--line); border-radius:6px; background:var(--panel); color:var(--ink); box-shadow:0 4px 14px rgb(0 0 0 / .18);
+    font:calc(12px * var(--ui-k, 1))/1.4 system-ui, sans-serif; text-align:left; white-space:pre-line; pointer-events:none; }
+  .htip[hidden] { display:none; }
+  .htip > b { font-weight:600; }
+  .htip-d { display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:3; overflow:hidden; color:var(--muted); }
+  .htip-k { display:flex; flex-wrap:wrap; align-items:center; gap:3px 5px; margin-top:3px; }
+  .htip-l { color:var(--muted); margin-right:2px; }
+  .htip-or { color:var(--muted); }
+  .htip-chord { display:inline-flex; gap:2px; }
+  .htip kbd { padding:0 5px; border:1px solid var(--line); border-bottom-width:2px; border-radius:4px; background:var(--gut); color:var(--ink);
+    font:calc(11px * var(--ui-k, 1))/1.5 Consolas, "Cascadia Mono", monospace; }
+  @media (prefers-reduced-motion:no-preference) { .htip { animation:htip-in .12s ease-out; } }
+  @keyframes htip-in { from { opacity:0; translate:0 2px; } }
   /* Preview tab: the view's editor hides and the drawing shows in its place; the canvas stays light like Diagram Editor. */
   .group > .pvhost { grid-row:2; grid-column:1; min-height:0; min-width:0; display:none; }
   .group.is-preview > .pvhost { display:grid; }
@@ -993,8 +1037,8 @@ body.recording .statusbar { box-shadow: inset 0 2px 0 #e5534b; }
   <symbol id="ic-keyboard" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="M6 8h.001M10 8h.001M14 8h.001M18 8h.001M8 12h.001M12 12h.001M16 12h.001M7 16h10"/></symbol>
 </defs></svg>
 <header class="top">
-  <a class="btn" href="../index.html">← Home</a>
-  <button id="btnRunTop" class="main" title="Chạy phép đã chọn trên tab đang mở — kết quả ra tab liên kết ở view kia (Ctrl+Enter)">▶ Chạy</button>
+  <a class="btn" href="../index.html" title="Về trang chủ web_tool — danh sách mọi tool">← Home</a>
+  <button id="btnRunTop" data-cmd="run" class="main" title="Chạy phép đã chọn trên tab đang mở — kết quả ra tab liên kết ở view kia (Ctrl+Enter)">▶ Chạy</button>
   <h1><a class="app-title" href="one-editor.html" target="_blank" rel="noopener" title="Mở One Editor ở tab trình duyệt mới">One Editor</a></h1>
   <button class="more-toggle" title="Thêm thao tác" aria-expanded="false">⋯</button>
   <button id="btnShare" title="Chép link chứa các tab đang mở (dữ liệu nằm sau dấu #, không gửi lên máy chủ)"><svg class="ic" aria-hidden="true"><use href="#ic-link"/></svg> Chia sẻ link</button>
@@ -1002,53 +1046,53 @@ body.recording .statusbar { box-shadow: inset 0 2px 0 #e5534b; }
   <label class="chk" title="Giao diện sáng / tối">Giao diện <select id="uiTheme"><option value="auto">Tự động</option><option value="light">Sáng</option><option value="dark">Tối</option></select></label>
   <label class="chk ui-size-label" title="Cỡ chữ và icon của giao diện — dùng chung mọi tool">Cỡ <select class="ui-size-pick"><option value="small">Nhỏ</option><option value="medium">Vừa</option><option value="large">Lớn</option></select></label>
   <button id="btnToolbar" title="Ẩn / hiện thanh công cụ" aria-pressed="true"><svg class="ic" aria-hidden="true"><use href="#ic-wrench"/></svg> Công cụ</button>
-  <button id="btnSettings" title="Cài đặt — mọi cài đặt của One Editor (Ctrl+,)"><svg class="ic" aria-hidden="true"><use href="#ic-settings"/></svg> Cài đặt</button>
+  <button id="btnSettings" data-cmd="settings" title="Cài đặt — mọi cài đặt của One Editor (Ctrl+,)"><svg class="ic" aria-hidden="true"><use href="#ic-settings"/></svg> Cài đặt</button>
   <button id="btnClear" title="Xoá mọi ghi chú và tab đã lưu trong IndexedDB của trình duyệt này"><svg class="ic" aria-hidden="true"><use href="#ic-trash"/></svg> Xoá dữ liệu</button>
-  <span class="seg lang-switch" title="Ngôn ngữ"><span class="gc-views" title="Lượt truy cập (GoatCounter, cập nhật mỗi ~10 phút)" hidden></span><button data-lang="vi">VI</button><button data-lang="en">EN</button></span>
+  <span class="seg lang-switch" title="Ngôn ngữ"><span class="gc-views" title="Lượt truy cập (GoatCounter, cập nhật mỗi ~10 phút)" hidden></span><button data-lang="vi" title="Giao diện tiếng Việt">VI</button><button data-lang="en" title="English interface">EN</button></span>
 </header>
 <div class="toolbar">
-  <button id="btnRun" class="main" title="Chạy phép đã chọn trên tab đang mở — kết quả ra tab liên kết ở view kia (Ctrl+Enter)">▶ Chạy</button>
+  <button id="btnRun" data-cmd="run" class="main" title="Chạy phép đã chọn trên tab đang mở — kết quả ra tab liên kết ở view kia (Ctrl+Enter)">▶ Chạy</button>
   <select id="opSel" title="Phép ▶ Chạy sẽ chạy — tự chọn theo ngôn ngữ của tab; chọn tay thì tab nhớ phép đó" data-i18n-skip></select>
-  <button id="btnNew" title="Ghi chú mới — tự lưu trong trình duyệt (Alt+N)">+ Ghi chú</button>
-  <button id="btnOpen" title="Mở file (Ctrl+O) hoặc folder trên máy — hoặc kéo-thả vào View 1 / View 2" aria-haspopup="menu">📂 Mở ▾</button>
-  <button id="btnSave" title="Lưu (Ctrl+S): file → ghi đè lên đĩa; ghi chú → đã tự lưu trong trình duyệt">💾 Lưu</button>
-  <button id="btnSaveAs" title="Lưu thành file mới (Ctrl+Shift+S); trình duyệt không hỗ trợ thì tải xuống">Lưu thành…</button>
+  <button id="btnNew" data-cmd="newNote" title="Ghi chú mới — tự lưu trong trình duyệt (Alt+N)">+ Ghi chú</button>
+  <button id="btnOpen" data-cmd="openFiles" title="Mở file (Ctrl+O) hoặc folder trên máy — hoặc kéo-thả vào View 1 / View 2" aria-haspopup="menu">📂 Mở ▾</button>
+  <button id="btnSave" data-cmd="save" title="Lưu (Ctrl+S): file → ghi đè lên đĩa; ghi chú → đã tự lưu trong trình duyệt">💾 Lưu</button>
+  <button id="btnSaveAs" data-cmd="saveAs" title="Lưu thành file mới (Ctrl+Shift+S); trình duyệt không hỗ trợ thì tải xuống">Lưu thành…</button>
   <button id="btnUndo" title="Hoàn tác (Ctrl+Z)">↶ Hoàn tác</button>
   <button id="btnRedo" title="Làm lại (Ctrl+Y / Ctrl+Shift+Z)">↷ Làm lại</button>
   <button id="btnFind" title="Tìm / thay trong tab đang mở (Ctrl+F) — có tìm / thay trong vùng chọn">🔍 Tìm</button>
   <button id="btnStyle" title="Tô màu token kiểu Notepad++ — chữ đang chọn hoặc từ dưới con trỏ: tô mọi chỗ / 1 token, xoá màu, tới chỗ tô (chuột phải trong editor cũng có; Ctrl+K 1…6, Ctrl+K 0 xoá hết)">🖍 Tô màu</button>
   <button id="btnRefresh" title="Làm mới từ đĩa: đọc lại mọi tab file (kể cả tab chưa đọc lại sau F5) và các folder đang mở trong Explorer">🔄 Làm mới</button>
-  <button id="btnFormat" title="Format tab đang mở theo ngôn ngữ — kết quả ra tab liên kết ở view kia (Shift+Alt+F: format tại chỗ)">✨ Format</button>
+  <button id="btnFormat" data-cmd="formatOut formatHere" title="Format tab đang mở theo ngôn ngữ — kết quả ra tab liên kết ở view kia (Shift+Alt+F: format tại chỗ)">✨ Format</button>
   <select id="demo" class="demo-picker" title="Nạp dữ liệu mẫu thành tab tạm (không đè bài đang sửa)" data-i18n-skip></select>
   <span class="sep"></span>
   <select id="langSel" title="Ngôn ngữ của tab đang mở — mặc định tự nhận theo tên file, shebang / modeline rồi nội dung" data-i18n-skip></select>
-  <label class="chk" title="Xuống dòng mềm (Alt+Z)"><input id="chkWrap" type="checkbox"> Xuống dòng</label>
+  <label class="chk" title="Xuống dòng mềm (Alt+Z)" data-cmd="wrap"><input id="chkWrap" type="checkbox"> Xuống dòng</label>
   <label class="chk desktop-only" title="Bản thu nhỏ của file ở mép phải editor — bấm / kéo trên đó để cuộn"><input id="chkMinimap" type="checkbox"> Minimap</label>
-  <button id="btnZoomIn" class="icon-btn" title="Phóng to chữ (Ctrl+=)">A+</button>
-  <button id="btnZoomOut" class="icon-btn" title="Thu nhỏ chữ (Ctrl+-, Ctrl+0 về mặc định)">A−</button>
+  <button id="btnZoomIn" data-cmd="zoomIn" class="icon-btn" title="Phóng to chữ (Ctrl+=)">A+</button>
+  <button id="btnZoomOut" data-cmd="zoomOut zoomReset" class="icon-btn" title="Thu nhỏ chữ (Ctrl+-, Ctrl+0 về mặc định)">A−</button>
   <button id="btnHidden" class="icon-btn" title="Hiện / ẩn mọi ký tự ẩn — dấu cách, Tab, xuống dòng (Show All Characters)" aria-pressed="false">¶</button>
   <button id="btnEnc" title="Bảng mã của tab — bấm để đọc lại file với bảng mã khác, chuyển sang bảng mã khác hoặc đổi kiểu xuống dòng (như menu Encoding của Notepad++)" aria-haspopup="menu" data-i18n-skip>—</button>
   <button id="btnKeys" title="Bộ phím tắt của editor — bấm để đổi: Notepad++ · VS Code · Sublime Text (Vim bật / tắt trong ⌘ Lệnh)" data-i18n-skip></button>
   <span class="sep"></span>
-  <button id="btnCompare" title="So sánh tab đang mở của 2 view — Alt+↓ / Alt+↑ nhảy giữa các khối khác (bấm lần nữa để tắt)">≠ So sánh</button>
-  <button id="btnSwap" title="Đổi chỗ view đang chọn với view kế tiếp">⇆</button>
+  <button id="btnCompare" data-cmd="compare cmpNext cmpPrev" title="So sánh tab đang mở của 2 view — Alt+↓ / Alt+↑ nhảy giữa các khối khác (bấm lần nữa để tắt)">≠ So sánh</button>
+  <button id="btnSwap" data-cmd="swap" title="Đổi chỗ view đang chọn với view kế tiếp">⇆</button>
   <span class="sep"></span>
   <select id="layoutSel" title="Layout: 1 view · 2 cột · 3 cột · 2 hàng · lưới 2×2 (Alt+Shift+1/2/3/8/5) · 1x2 (1 view | 2 view trên dưới) · 2x1 (2 view trên dưới | 1 view)" data-i18n-skip></select>
   <select id="splitSel" class="desktop-only" title="Tỷ lệ view 50:50 · 25:75 · 75:25 — 2 cột, 1x2, 2x1, 2×2: độ rộng cột · 3 cột: 25:25:50 / 50:25:25 · 2 hàng: chiều cao (1 view ⇒ chuyển sang 2 cột)" data-i18n-skip></select>
   <button id="btnFnList" title="Function List — hàm / class / tiêu đề của tab ở sidebar, bấm để nhảy tới (bấm lần nữa để ẩn)">ƒ Function</button>
-  <button id="btnPalette" title="Command Palette — mọi lệnh và phím tắt (Ctrl+Shift+P; Ctrl+P mở nhanh, Ctrl+R symbol, Ctrl+G dòng)">⌘ Lệnh</button>
+  <button id="btnPalette" data-cmd="palette quickOpen" title="Command Palette — mọi lệnh và phím tắt (Ctrl+Shift+P; Ctrl+P mở nhanh, Ctrl+R symbol, Ctrl+G dòng)">⌘ Lệnh</button>
 </div>
 <div class="seg pane-switch"><button>Explorer</button><button>View 1</button><button>View 2</button><button hidden>View 3</button><button hidden>View 4</button></div>
 <main id="work" class="pane-scroller">
   <aside class="pane" id="explorerPane">
     <nav class="activity" role="toolbar" aria-label="Thanh hoạt động">
       <div class="act-top">
-      <button data-side="explorer" class="on" title="Explorer — tab đang mở, ghi chú, gần đây, folder (Ctrl+Shift+E)"><svg class="ic" aria-hidden="true"><use href="#ic-folder"/></svg></button>
-      <button data-side="search" title="Tìm / thay trong mọi tab, ghi chú và folder đang mở (Ctrl+Shift+F / Ctrl+Shift+H)"><svg class="ic" aria-hidden="true"><use href="#ic-search"/></svg></button>
+      <button data-side="explorer" data-cmd="sideExplorer" class="on" title="Explorer — tab đang mở, ghi chú, gần đây, folder (Ctrl+Shift+E)"><svg class="ic" aria-hidden="true"><use href="#ic-folder"/></svg></button>
+      <button data-side="search" data-cmd="sideSearch sideReplace" title="Tìm / thay trong mọi tab, ghi chú và folder đang mở (Ctrl+Shift+F / Ctrl+Shift+H)"><svg class="ic" aria-hidden="true"><use href="#ic-search"/></svg></button>
       <button data-side="outline" title="Outline — hàm, class, tiêu đề của tab đang mở"><svg class="ic" aria-hidden="true"><use href="#ic-list"/></svg></button>
-      <button data-side="bookmarks" title="Bookmark — mọi dòng đã đánh dấu trong tab, ghi chú và file (Ctrl+F2 đặt / bỏ, F2 / Shift+F2 tới cái kế / trước)"><svg class="ic" aria-hidden="true"><use href="#ic-bookmark"/></svg></button>
-      <button data-side="git" title="Git — file đã đổi so với HEAD của repo trong folder Explorer, chỉ đọc (Ctrl+Shift+G)"><svg class="ic" aria-hidden="true"><use href="#ic-git"/></svg></button>
-      <button data-side="problems" title="Problems — lỗi / cảnh báo của mọi tab đang mở (Ctrl+Shift+M)"><svg class="ic" aria-hidden="true"><use href="#ic-alert"/></svg></button>
+      <button data-side="bookmarks" data-cmd="bookmark bookmarkNext bookmarkPrev" title="Bookmark — mọi dòng đã đánh dấu trong tab, ghi chú và file (Ctrl+F2 đặt / bỏ, F2 / Shift+F2 tới cái kế / trước)"><svg class="ic" aria-hidden="true"><use href="#ic-bookmark"/></svg></button>
+      <button data-side="git" data-cmd="sideGit" title="Git — file đã đổi so với HEAD của repo trong folder Explorer, chỉ đọc (Ctrl+Shift+G)"><svg class="ic" aria-hidden="true"><use href="#ic-git"/></svg></button>
+      <button data-side="problems" data-cmd="problems" title="Problems — lỗi / cảnh báo của mọi tab đang mở (Ctrl+Shift+M)"><svg class="ic" aria-hidden="true"><use href="#ic-alert"/></svg></button>
       <button data-side="timeline" title="Timeline — lịch sử cục bộ của tab đang chọn: so sánh, khôi phục"><svg class="ic" aria-hidden="true"><use href="#ic-history"/></svg></button>
       <button data-side="todo" title="TODO / FIXME — các tag trong tab, ghi chú và folder đang mở"><svg class="ic" aria-hidden="true"><use href="#ic-check-sq"/></svg></button>
       <button data-side="clipboard" title="Lịch sử clipboard — các đoạn đã chép / cắt, bấm để chèn vào con trỏ"><svg class="ic" aria-hidden="true"><use href="#ic-clipboard"/></svg></button>
@@ -1056,7 +1100,7 @@ body.recording .statusbar { box-shadow: inset 0 2px 0 #e5534b; }
       </div>
       <div class="act-bottom">
       <button data-act="trash" title="Thùng rác — file đã xoá trong Explorer, khôi phục được" hidden><svg class="ic" aria-hidden="true"><use href="#ic-trash"/></svg></button>
-      <button data-act="settings" title="Cài đặt — mọi cài đặt của One Editor (Ctrl+,)"><svg class="ic" aria-hidden="true"><use href="#ic-settings"/></svg></button>
+      <button data-act="settings" data-cmd="settings" title="Cài đặt — mọi cài đặt của One Editor (Ctrl+,)"><svg class="ic" aria-hidden="true"><use href="#ic-settings"/></svg></button>
       </div>
     </nav>
     <div class="side" data-side-panel="explorer">
@@ -1115,23 +1159,23 @@ body.recording .statusbar { box-shadow: inset 0 2px 0 #e5534b; }
     </div>
   </aside>
   <section class="pane group" data-group="0" aria-label="View 1">
-    <div class="gbar"><div class="tabs" role="tablist" data-i18n-skip></div><button class="gpreview" title="Preview tab này ở view kia — sơ đồ, chart, Markdown, HTML, SVG, bảng CSV/JSON, draw.io — tự cập nhật khi gõ (Ctrl+K V)" hidden>👁</button><button class="gtranslate" title="Dịch tab này ở view kia — đọc to, từ điển tiếng Anh; tab chỉ có 1 link ⇒ dịch cả trang web; dùng bộ dịch trên máy, không có thì hỏi trước khi gửi MyMemory (Ctrl+K T)" hidden>🌐</button><button class="grun" title="Chạy HTML / JS trong sandbox ở view kia (Ctrl+K R)" hidden>▶</button><button class="gnew" title="Ghi chú mới ở view này (Alt+N)">+</button><button class="gmove" title="Chuyển tab đang mở sang view kế tiếp">⇥</button></div>
+    <div class="gbar"><div class="tabs" role="tablist" data-i18n-skip></div><button class="gpreview" data-cmd="preview" title="Preview tab này ở view kia — sơ đồ, chart, Markdown, HTML, SVG, bảng CSV/JSON, draw.io — tự cập nhật khi gõ (Ctrl+K V)" hidden>👁</button><button class="gtranslate" data-cmd="translate" title="Dịch tab này ở view kia — đọc to, từ điển tiếng Anh; tab chỉ có 1 link ⇒ dịch cả trang web; dùng bộ dịch trên máy, không có thì hỏi trước khi gửi MyMemory (Ctrl+K T)" hidden>🌐</button><button class="grun" data-cmd="op-run-code" title="Chạy HTML / JS trong sandbox ở view kia (Ctrl+K R)" hidden>▶</button><button class="gnew" data-cmd="newNote" title="Ghi chú mới ở view này (Alt+N)">+</button><button class="gmove" data-cmd="moveTab" title="Chuyển tab đang mở sang view kế tiếp">⇥</button></div>
     <div class="host" data-i18n-skip></div>
     <div class="empty"><p><b>View 1</b></p><p>Kéo-thả file hoặc folder vào đây, hoặc bấm + để tạo ghi chú.</p><p class="demo-picker">Hoặc chọn một mẫu ở “Samples”.</p></div>
   </section>
-  <div id="split" tabindex="0" role="separator" aria-orientation="vertical" title="Kéo để đổi độ rộng 2 view (← → khi đang chọn, nhấp đúp về 50/50)"></div>
+  <div id="split" title="Kéo để đổi độ rộng 2 view (← → khi đang chọn, nhấp đúp về 50/50)"><button class="vb-right" data-cmd="vbMoveRight" title="Chuyển tab đang mở ở view trái sang view phải">→</button><button class="vb-left" data-cmd="vbMoveLeft" title="Chuyển tab đang mở ở view phải sang view trái">←</button><button class="vb-swap" data-cmd="swap" title="Đổi chỗ tab của view trái và view phải">⇄</button><button class="vb-clone" data-cmd="cloneTab" title="Mở tab đang chọn thêm ở view bên kia (2 view cùng sửa 1 tab)">⧉</button><span class="vb-sep"></span><button class="vb-compare" data-cmd="compare" title="So sánh 2 view (bật / tắt)" aria-pressed="false">≠</button><button class="vb-cmp vb-prev" data-cmd="cmpPrev" title="So sánh: về khối khác trước (Alt+↑)" hidden>↑</button><button class="vb-cmp vb-next" data-cmd="cmpNext" title="So sánh: tới khối khác kế tiếp (Alt+↓)" hidden>↓</button><button class="vb-cmp vb-ltr" data-cmd="cmpCopyRight" title="So sánh: chép khối ở con trỏ view trái sang view phải" hidden>⇒</button><button class="vb-cmp vb-rtl" data-cmd="cmpCopyLeft" title="So sánh: chép khối ở con trỏ view phải sang view trái" hidden>⇐</button><span class="vb-sep"></span><button class="vb-sync" data-cmd="scrollSync" title="Cuộn đồng bộ 2 view (bật / tắt) — cuộn bên này, bên kia cuộn theo" aria-pressed="false">🔗</button><span class="vb-sep"></span><button class="vb-op" data-cmd="run" title="▶ Chạy phép đang chọn, kết quả ra view kia (Ctrl+Enter)" hidden>⇢</button><button class="vb-format" data-cmd="formatOut" title="✨ Format → tab kết quả ở view kia" hidden>✨</button><button class="vb-preview" data-cmd="preview" title="Preview tab này ở view kia — sơ đồ, chart, Markdown, HTML, SVG, bảng CSV/JSON, draw.io — tự cập nhật khi gõ (Ctrl+K V)" hidden>👁</button><button class="vb-translate" data-cmd="translate" title="Dịch tab này ở view kia — đọc to, từ điển tiếng Anh; tab chỉ có 1 link ⇒ dịch cả trang web; dùng bộ dịch trên máy, không có thì hỏi trước khi gửi MyMemory (Ctrl+K T)" hidden>🌐</button><button class="vb-run" data-cmd="op-run-code" title="Chạy HTML / JS trong sandbox ở view kia (Ctrl+K R)" hidden>▶</button><button class="vb-new" data-cmd="newNote" title="Ghi chú mới ở view đang chọn (Alt+N)">+</button><span class="vb-sep"></span><button class="vb-max" data-cmd="maximizeSide" title="Phóng to bên đang chọn — ẩn tạm bên kia (bấm lại để hiện)" aria-pressed="false">⛶</button><button class="vb-even" data-cmd="evenSplit" title="Chia đều 2 view (50:50)">⚖</button><div class="vb-grip" tabindex="0" role="separator" aria-orientation="vertical" title="Kéo để đổi độ rộng 2 view (← → khi đang chọn, nhấp đúp về 50/50)"></div></div>
   <section class="pane group" data-group="1" aria-label="View 2">
-    <div class="gbar"><div class="tabs" role="tablist" data-i18n-skip></div><button class="gpreview" title="Preview tab này ở view kia — sơ đồ, chart, Markdown, HTML, SVG, bảng CSV/JSON, draw.io — tự cập nhật khi gõ (Ctrl+K V)" hidden>👁</button><button class="gtranslate" title="Dịch tab này ở view kia — đọc to, từ điển tiếng Anh; tab chỉ có 1 link ⇒ dịch cả trang web; dùng bộ dịch trên máy, không có thì hỏi trước khi gửi MyMemory (Ctrl+K T)" hidden>🌐</button><button class="grun" title="Chạy HTML / JS trong sandbox ở view kia (Ctrl+K R)" hidden>▶</button><button class="gnew" title="Ghi chú mới ở view này (Alt+N)">+</button><button class="gmove" title="Chuyển tab đang mở sang view kế tiếp">⇥</button></div>
+    <div class="gbar"><div class="tabs" role="tablist" data-i18n-skip></div><button class="gpreview" data-cmd="preview" title="Preview tab này ở view kia — sơ đồ, chart, Markdown, HTML, SVG, bảng CSV/JSON, draw.io — tự cập nhật khi gõ (Ctrl+K V)" hidden>👁</button><button class="gtranslate" data-cmd="translate" title="Dịch tab này ở view kia — đọc to, từ điển tiếng Anh; tab chỉ có 1 link ⇒ dịch cả trang web; dùng bộ dịch trên máy, không có thì hỏi trước khi gửi MyMemory (Ctrl+K T)" hidden>🌐</button><button class="grun" data-cmd="op-run-code" title="Chạy HTML / JS trong sandbox ở view kia (Ctrl+K R)" hidden>▶</button><button class="gnew" data-cmd="newNote" title="Ghi chú mới ở view này (Alt+N)">+</button><button class="gmove" data-cmd="moveTab" title="Chuyển tab đang mở sang view kế tiếp">⇥</button></div>
     <div class="host" data-i18n-skip></div>
     <div class="empty"><p><b>View 2</b></p><p>Bấm ▶ Chạy khi đang ở View 1 thì kết quả hiện ở đây thành tab liên kết (⇢), sửa nguồn là tab tự cập nhật.</p></div>
   </section>
   <section class="pane group" data-group="2" aria-label="View 3" hidden>
-    <div class="gbar"><div class="tabs" role="tablist" data-i18n-skip></div><button class="gpreview" title="Preview tab này ở view kia — sơ đồ, chart, Markdown, HTML, SVG, bảng CSV/JSON, draw.io — tự cập nhật khi gõ (Ctrl+K V)" hidden>👁</button><button class="gtranslate" title="Dịch tab này ở view kia — đọc to, từ điển tiếng Anh; tab chỉ có 1 link ⇒ dịch cả trang web; dùng bộ dịch trên máy, không có thì hỏi trước khi gửi MyMemory (Ctrl+K T)" hidden>🌐</button><button class="grun" title="Chạy HTML / JS trong sandbox ở view kia (Ctrl+K R)" hidden>▶</button><button class="gnew" title="Ghi chú mới ở view này (Alt+N)">+</button><button class="gmove" title="Chuyển tab đang mở sang view kế tiếp">⇥</button></div>
+    <div class="gbar"><div class="tabs" role="tablist" data-i18n-skip></div><button class="gpreview" data-cmd="preview" title="Preview tab này ở view kia — sơ đồ, chart, Markdown, HTML, SVG, bảng CSV/JSON, draw.io — tự cập nhật khi gõ (Ctrl+K V)" hidden>👁</button><button class="gtranslate" data-cmd="translate" title="Dịch tab này ở view kia — đọc to, từ điển tiếng Anh; tab chỉ có 1 link ⇒ dịch cả trang web; dùng bộ dịch trên máy, không có thì hỏi trước khi gửi MyMemory (Ctrl+K T)" hidden>🌐</button><button class="grun" data-cmd="op-run-code" title="Chạy HTML / JS trong sandbox ở view kia (Ctrl+K R)" hidden>▶</button><button class="gnew" data-cmd="newNote" title="Ghi chú mới ở view này (Alt+N)">+</button><button class="gmove" data-cmd="moveTab" title="Chuyển tab đang mở sang view kế tiếp">⇥</button></div>
     <div class="host" data-i18n-skip></div>
     <div class="empty"><p><b>View 3</b></p><p>Kéo tab hoặc file vào đây.</p></div>
   </section>
   <section class="pane group" data-group="3" aria-label="View 4" hidden>
-    <div class="gbar"><div class="tabs" role="tablist" data-i18n-skip></div><button class="gpreview" title="Preview tab này ở view kia — sơ đồ, chart, Markdown, HTML, SVG, bảng CSV/JSON, draw.io — tự cập nhật khi gõ (Ctrl+K V)" hidden>👁</button><button class="gtranslate" title="Dịch tab này ở view kia — đọc to, từ điển tiếng Anh; tab chỉ có 1 link ⇒ dịch cả trang web; dùng bộ dịch trên máy, không có thì hỏi trước khi gửi MyMemory (Ctrl+K T)" hidden>🌐</button><button class="grun" title="Chạy HTML / JS trong sandbox ở view kia (Ctrl+K R)" hidden>▶</button><button class="gnew" title="Ghi chú mới ở view này (Alt+N)">+</button><button class="gmove" title="Chuyển tab đang mở sang view kế tiếp">⇥</button></div>
+    <div class="gbar"><div class="tabs" role="tablist" data-i18n-skip></div><button class="gpreview" data-cmd="preview" title="Preview tab này ở view kia — sơ đồ, chart, Markdown, HTML, SVG, bảng CSV/JSON, draw.io — tự cập nhật khi gõ (Ctrl+K V)" hidden>👁</button><button class="gtranslate" data-cmd="translate" title="Dịch tab này ở view kia — đọc to, từ điển tiếng Anh; tab chỉ có 1 link ⇒ dịch cả trang web; dùng bộ dịch trên máy, không có thì hỏi trước khi gửi MyMemory (Ctrl+K T)" hidden>🌐</button><button class="grun" data-cmd="op-run-code" title="Chạy HTML / JS trong sandbox ở view kia (Ctrl+K R)" hidden>▶</button><button class="gnew" data-cmd="newNote" title="Ghi chú mới ở view này (Alt+N)">+</button><button class="gmove" data-cmd="moveTab" title="Chuyển tab đang mở sang view kế tiếp">⇥</button></div>
     <div class="host" data-i18n-skip></div>
     <div class="empty"><p><b>View 4</b></p><p>Kéo tab hoặc file vào đây.</p></div>
   </section>
@@ -2419,7 +2463,7 @@ I18n.add({
   "Đóng các tab bên phải (trừ tab ghim)": "Close tabs to the right (except pinned)", "Mở lại tab vừa đóng": "Reopen closed tab", "Đổi tên tab": "Rename tab", "Ghim / bỏ ghim tab": "Pin / unpin tab",
   "Bấm tên tab đang mở / chuột phải: đổi tên, ghim, đóng…": "Click the active tab's name / right-click: rename, pin, close…",
   "Bookmark: bật / tắt ở dòng này": "Bookmark: toggle on this line", "Bookmark: tới cái kế tiếp": "Bookmark: next", "Bookmark: về cái trước": "Bookmark: previous", "Bookmark: xoá hết trong tab": "Bookmark: clear all in tab",
-  "Tới View {n}": "Go to View {n}", "Chuyển tab sang view kế tiếp": "Move tab to the next view", "Mở tab này thêm ở view kế tiếp (2 view cùng sửa 1 tab)": "Also open this tab in the next view (both views edit one tab)",
+  "Tới View {n}": "Go to View {n}", "Chuyển tab sang view kế tiếp": "Move tab to the next view", "Dời tab sang trái (trong view)": "Move tab left (in the view)", "Dời tab sang phải (trong view)": "Move tab right (in the view)", "Cuộn tab sang trái (hoặc lăn chuột trên thanh tab)": "Scroll tabs left (or use the mouse wheel on the tab bar)", "Cuộn tab sang phải (hoặc lăn chuột trên thanh tab)": "Scroll tabs right (or use the mouse wheel on the tab bar)","Mở tab này thêm ở view kế tiếp (2 view cùng sửa 1 tab)": "Also open this tab in the next view (both views edit one tab)",
   "Đổi chỗ view này với view kế tiếp": "Swap this view with the next one", "Ẩn / hiện Explorer": "Show / hide Explorer", "Bật / tắt xuống dòng mềm": "Toggle soft wrap",
   "Phóng to chữ": "Bigger text", "Thu nhỏ chữ": "Smaller text", "Cỡ chữ mặc định": "Default text size", "Chế độ Zen (ẩn mọi thanh)": "Zen mode (hide all bars)",
   "▶ Chạy phép đang chọn, kết quả ra view kia": "▶ Run the selected operation, result in the other view", "Chia sẻ link các tab đang mở": "Share a link to the open tabs",
@@ -2536,6 +2580,36 @@ I18n.add({
   "(dừng ở {n} mục)": "(stopped at {n} items)",
   "Không đọc được: {msg}": "Could not read: {msg}",
 });
+// English strings for the view bar between two views (ViewBar, ScrollSync) — keyed by the Vietnamese source.
+I18n.add({
+  "Chuyển tab đang mở ở view trái sang view phải": "Move the left view’s active tab to the right view",
+  "Chuyển tab đang mở ở view phải sang view trái": "Move the right view’s active tab to the left view",
+  "Ghi chú mới ở view đang chọn (Alt+N)": "New note in the focused view (Alt+N)",
+  "Đổi chỗ tab của view trái và view phải": "Swap the tabs of the left and right views",
+  "Mở tab đang chọn thêm ở view bên kia (2 view cùng sửa 1 tab)": "Also open the active tab in the view on the other side (both views edit one tab)",
+  "So sánh: về khối khác trước (Alt+↑)": "Compare: previous difference (Alt+↑)",
+  "So sánh: tới khối khác kế tiếp (Alt+↓)": "Compare: next difference (Alt+↓)",
+  "So sánh: chép khối ở con trỏ view trái sang view phải": "Compare: copy the block at the left view’s cursor to the right view",
+  "So sánh: chép khối ở con trỏ view phải sang view trái": "Compare: copy the block at the right view’s cursor to the left view",
+  "Cuộn đồng bộ 2 view (bật / tắt) — cuộn bên này, bên kia cuộn theo": "Sync scrolling of the two views (on / off) — scroll one side, the other follows",
+  "Cuộn đồng bộ 2 view: bật": "Synced scrolling: on",
+  "Cuộn đồng bộ 2 view: tắt": "Synced scrolling: off",
+  "▶ Chạy phép đang chọn, kết quả ra view kia (Ctrl+Enter)": "▶ Run the selected operation, result in the other view (Ctrl+Enter)",
+  "Phóng to bên đang chọn — ẩn tạm bên kia (bấm lại để hiện)": "Maximize the focused side — hides the other side for now (click again to show it)",
+  "Chia đều 2 view (50:50)": "Split the two views evenly (50:50)",
+  "Thanh view": "View bar",
+  "→ Chuyển tab sang view phải": "→ Move tab to the right view", "← Chuyển tab sang view trái": "← Move tab to the left view",
+  "⇄ Đổi chỗ tab 2 bên": "⇄ Swap the two sides’ tabs", "⧉ Clone tab sang bên kia": "⧉ Clone tab to the other side",
+  "↑ ↓ ⇒ ⇐ khi đang so sánh": "↑ ↓ ⇒ ⇐ while comparing", "🔗 Cuộn đồng bộ": "🔗 Synced scrolling",
+  "⇢ Chạy phép đang chọn": "⇢ Run the selected operation", "✨ Format ra view kia": "✨ Format into the other view",
+  "👁 Preview": "👁 Preview", "🌐 Dịch": "🌐 Translate", "▶ Chạy HTML / JS": "▶ Run HTML / JS",
+  "⛶ Phóng to 1 bên": "⛶ Maximize one side", "⚖ Chia đều 50:50": "⚖ Split evenly 50:50",
+  "Chuyển tab sang view bên phải": "Move tab to the view on the right", "Chuyển tab sang view bên trái": "Move tab to the view on the left",
+  "Cuộn đồng bộ 2 view (bật / tắt)": "Synced scrolling of the two views (on / off)",
+  "Phóng to bên đang chọn / hiện lại 2 bên": "Maximize the focused side / show both sides again",
+  "Về trang chủ web_tool — danh sách mọi tool": "Back to the web_tool home — list of all tools",
+  "Giao diện tiếng Việt": "Vietnamese interface",
+});
 // English strings for phase 2a (format, convert, compare), keyed by the Vietnamese source text.
 I18n.add({
   // Toolbar, demos, op groups
@@ -2566,7 +2640,7 @@ I18n.add({
   "Format: thụt lề tự dò theo file": "Format: indent detected from the file", "Format: thụt lề 2 dấu cách": "Format: indent 2 spaces",
   "Format: thụt lề 4 dấu cách": "Format: indent 4 spaces", "Format: thụt lề bằng Tab": "Format: indent with Tab",
   "Format: độ rộng dòng (print width)…": "Format: line width (print width)…", "Format SQL theo dialect {name}": "Format SQL as {name}",
-  "Bật / tắt format khi lưu (JSON, XML, SQL, FIX, Prettier)": "Toggle format on save (JSON, XML, SQL, FIX, Prettier)", "Bật / tắt format khi dán": "Toggle format on paste",
+  "Bật / tắt format khi lưu (JSON, XML, SQL, FIX, Prettier, gofmt, clang-format, ruff)": "Toggle format on save (JSON, XML, SQL, FIX, Prettier, gofmt, clang-format, ruff)", "Bật / tắt format khi dán": "Toggle format on paste",
   "Mở tab này trong FIX Parser": "Open this tab in FIX Parser", "Chuyển đổi: {op}": "Convert: {op}",
   "So sánh 2 view (bật / tắt)": "Compare 2 views (on / off)", "So sánh: tới khối khác kế tiếp": "Compare: next difference",
   "So sánh: về khối khác trước": "Compare: previous difference", "So sánh: chép khối ở con trỏ sang view kia": "Compare: copy the block at the cursor to the other view",
@@ -2583,6 +2657,10 @@ I18n.add({
   "Cần 2 tab JSON ở 2 view.": "Needs a JSON tab in each of 2 views.", "“{name}” không có JSON.": "“{name}” holds no JSON.",
   "So JSON theo cấu trúc (bỏ qua thứ tự key): {a} ⇄ {b}": "JSON compared by structure (key order ignored): {a} ⇄ {b}",
   "{n} khác biệt:": "{n} differences:", "Không có khác biệt.": "No differences.", "✔ So JSON theo cấu trúc: {n} khác biệt.": "✔ JSON compared by structure: {n} differences.",
+  // Phase 15b
+  "Không chạy được {engine}: {msg}": "Could not run {engine}: {msg}", "clang-format: style mặc định": "clang-format: default style",
+  "Folder có .clang-format ở gốc thì dùng file đó": "A .clang-format at the folder root wins",
+  "Format Go (gofmt, có tab lỗi)": "Format Go (gofmt, with an error tab)", "Format Python (ruff, có tab lỗi)": "Format Python (ruff, with an error tab)",
 });
 // English strings for phase 2b (encoding, EOL, line ops, column, MIME / hash, macro, large files), keyed by the Vietnamese source text.
 I18n.add({
@@ -5103,6 +5181,9 @@ const VendorPaths = (() => {
     extras: "one-editor-extras.js",
   };
   for (const p of ["babel", "estree", "typescript", "postcss", "html", "markdown", "yaml", "graphql"]) PATHS["prettier-" + p] = P_DIR + "plugins/" + p + ".js";
+  // Code formatters (scripts/vendor-one-editor-code-formatters.ps1), run in a Blob Worker.
+  const FMT = [["fmtGofmt", "gofmt", "0.7.3"], ["fmtClang", "clang", "23.1.1"], ["fmtRuff", "ruff", "0.15.20"]];
+  for (const [n, k, v] of FMT) PATHS[n] = "vendor/code-formatter-" + k + "-" + v + "/code-formatter-" + k + ".js";
   const loading = {};
 
   function load(name) {
@@ -5115,7 +5196,7 @@ const VendorPaths = (() => {
     });
   }
 
-  return { load, PATHS };
+  return { load, PATHS, FMT };
 })();
 // Sublime-style layouts (Alt+Shift+1/2/3/8/5): id → number of views; the CSS grid for each is #work.lay-<id>.
 const Layouts = (() => {
@@ -5496,7 +5577,7 @@ const FileTemplates = (() => {
 })();
 // Settings registry (pure, node test): each entry borrows get / set from the module that holds the value, so the ⚙ Settings tab and the old switches are one value; groups, search (Vietnamese + English, accents ignored), defaults, change listeners.
 const Settings = (() => {
-  const GROUPS = [["explorer", "Explorer & tab folder"], ["editor", "Editor"], ["toolbar", "Thanh công cụ"], ["keys", "Phím tắt"], ["preview", "Preview & dịch"], ["data", "Dữ liệu đã lưu"]];
+  const GROUPS = [["explorer", "Explorer & tab folder"], ["editor", "Editor"], ["toolbar", "Thanh công cụ"], ["viewbar", "Thanh view"], ["keys", "Phím tắt"], ["preview", "Preview & dịch"], ["data", "Dữ liệu đã lưu"]];
   const TYPES = new Set(["bool", "choice", "number", "text", "info"]), list = [], listeners = [];
 
   // e: { id, group, label, hint, type: "bool" | "choice" | "number" | "text" | "info", get(), set(v), def, choices() → [[value, label]], min, max, actions() → [[label, run]] }.
@@ -5571,9 +5652,13 @@ const Commands = (() => {
     exec(c);
   }
 
-  const keyLabel = c => c.keys[0] ? c.keys[0].replace(/(^|[+ ])([a-z])(?= |$)/g, (m, p, l) => p + l.toUpperCase()) : "";
+  const ARROWS = { Up: "↑", Down: "↓", Left: "←", Right: "→" };
+  const pretty = k => k.replace(/(^|[+ ])([a-z])(?= |$)/g, (m, p, l) => p + l.toUpperCase()).replace(/Arrow(Up|Down|Left|Right)/g, (m, d) => ARROWS[d]);
+  const keyLabel = c => c.keys[0] ? pretty(c.keys[0]) : "";
+  const find = id => list.find(x => x.id === id);
+  const keysOf = id => find(id)?.keys.map(pretty) || [];
   const bound = e => byKey.has(keyOf(e)) || prefixes.has(keyOf(e));
-  return { add, all, run, onKey, keyOf, keyLabel, bound, onRun: f => ran.push(f) };
+  return { add, all, run, onKey, keyOf, keyLabel, keysOf, find, bound, onRun: f => ran.push(f) };
 })();
 // Language of a document: file name/extension → shebang/modeline → content score. Ids are CodeMirror language-data names plus a few with no highlighter yet.
 const LangDetect = (() => {
@@ -5746,7 +5831,7 @@ const OutputOps = (() => {
   const OPS = {
     "json-pretty": { label: "JSON đẹp", group: "Format", lang: "JSON", live: true, run: t => JSON.stringify(parseJson(t), null, 2) },
     "json-minify": { label: "JSON gọn 1 dòng", group: "Format", lang: "JSON", live: true, run: t => JSON.stringify(parseJson(t)) },
-    "format": { label: "Format theo ngôn ngữ", group: "Format", lang: same, live: true, run: (t, c) => Formatter.format(t, c.lang) },
+    "format": { label: "Format theo ngôn ngữ", group: "Format", lang: same, live: true, run: (t, c) => Formatter.format(t, c.lang, PowerTools.state(c.id, "format").link) },
     "minify": { label: "Minify (JSON · XML · HTML · CSS)", group: "Format", lang: same, live: true, run: (t, c) => Formatter.minify(t, c.lang) },
     "to-json": { label: "→ JSON", group: "Chuyển đổi", lang: "JSON", live: true, run: (t, c) => convert(t, c, "json") },
     "to-yaml": { label: "→ YAML", group: "Chuyển đổi", lang: "YAML", live: true, run: (t, c) => convert(t, c, "yaml") },
@@ -6180,6 +6265,8 @@ fmt.Println("orders")
     "json-to-types": { label: "JSON → Go struct (và TS / C# / Java / C++)", payload: () => ({ v: 1, views: [[t("trade.json", TRADE_JSON)], []], run: "to-go" }) },
     "html-to-md": { label: "HTML → Markdown (bảng, task list, code)", payload: () => ({ v: 1, views: [[t("release-notes.html", PAGE_HTML)], []], run: "html-to-md" }) },
   });
+  // Phase 15b content: js/format/code-formatter-demos.js (extras).
+  for (const [k, label] of [["format-go", "Format Go (gofmt, có tab lỗi)"], ["format-cpp-clang", "Format C++ · Java · C# (clang-format Google)"], ["format-python-ruff", "Format Python (ruff, có tab lỗi)"]]) DEMOS[k] = { label, lazy: true };
 })();
 // Phase 2b demos (encoding, EOL, line ops, column, macro) added to DEMOS; file demos open real bytes so encoding / EOL detection runs; content is fake.
 (() => {
@@ -8366,7 +8453,7 @@ const CmSetup = (() => {
       V.EditorView.clickAddsSelectionRange.of(e => e.altKey || e.ctrlKey || e.metaKey), L.indentUnit.of(indent || "  "),
       V.highlightActiveLine(), F.highlightSelectionMatches(), F.search({ top: true }),
       V.keymap.of([...A.closeBracketsKeymap, ...K.defaultKeymap, ...F.searchKeymap, ...K.historyKeymap, ...L.foldKeymap, ...A.completionKeymap, K.indentWithTab]),
-      Bookmarks.extension(), ClipHistory.extension(), TokenStyles.extension(), RainbowCsv.extension(), LogFixMarks.extension(), FixHover.extension(), SwiftMarks.extension(), CompareDeco.field, MixedEol.field, comp.compare.of([]), comp.lang.of([]), comp.ro.of(readOnly ? [S.EditorState.readOnly.of(true)] : []),
+      Bookmarks.extension(), ClipHistory.extension(), TokenStyles.extension(), RainbowCsv.extension(), LeadSymbolLines.extension(), LogFixMarks.extension(), FixHover.extension(), SwiftMarks.extension(), CompareDeco.field, MixedEol.field, comp.compare.of([]), comp.lang.of([]), comp.ro.of(readOnly ? [S.EditorState.readOnly.of(true)] : []),
       ...[comp.wrap, comp.theme, comp.phrases, comp.minimap, comp.guides, comp.hidden, comp.numHover, comp.lint, comp.words].map(c => c.of([])),
       V.EditorView.updateListener.of(u => { if (onUpdate) onUpdate(u); SearchInSelection.decorate(u.view); if (u.docChanged && u.transactions.some(tr => tr.isUserEvent("input.paste"))) { PowerTools.pasted(u); SmartPaste.pasted(u); } }),
     ];
@@ -8578,7 +8665,7 @@ const StatusBar = (() => {
 
   return { refresh, msg, storage, redraw: () => { draw(); storage(NotesDb.ok, storageNote); } };
 })();
-// Tab strip of one view: click to show, click the active tab's name / double-click / right-click menu to rename in place, 📌 to pin, × / middle-click / Alt+W to close, drag onto another view to move it (⇥ does the same on touch).
+// Tab strip of one view: click to show, click the active tab's name / double-click / right-click menu to rename in place, 📌 to pin, × / middle-click / Alt+W to close, drag along the tab bar to reorder / onto another view to move it (⇥ does the same on touch).
 const TabStrip = (() => {
   let editing = null;
   const TAB_TYPE = "application/x-one-editor-tab";
@@ -8621,7 +8708,55 @@ const TabStrip = (() => {
       return tab;
     }));
     strip.querySelector(".tab.on")?.scrollIntoView({ block: "nearest", inline: "nearest" });
+    syncs.get(g.i)?.();
   }
+
+  // Where a dragged tab lands on the tab bar under x → { at (among the other tabs), el, after } for the insert mark; null off the bar.
+  let dragId = null;
+  function dropAt(target, x) {
+    const strip = target.closest?.(".gbar")?.querySelector(".tabs");
+    if (!strip) return null;
+    const tabs = [...strip.querySelectorAll(".tab")].filter(t => t.dataset.id !== dragId);
+    const k = tabs.findIndex(t => { const r = t.getBoundingClientRect(); return x < r.left + r.width / 2; });
+    return k < 0 ? { at: tabs.length, el: tabs.at(-1), after: true } : { at: k, el: tabs[k], after: false };
+  }
+
+  // Too many tabs: the wheel scrolls the strip sideways, ‹ › at both ends show only while it overflows (disabled at an end).
+  function scroller(strip) {
+    let aim = null;
+    // Clicks during a smooth scroll add up from where it is heading, not from where it is now.
+    const step = dir => {
+      const max = strip.scrollWidth - strip.clientWidth;
+      aim = Math.min(max, Math.max(0, (aim ?? strip.scrollLeft) + dir * Math.max(120, strip.clientWidth * 0.8)));
+      strip.scrollTo({ left: aim, behavior: "smooth" });
+    };
+    strip.addEventListener("scrollend", () => { aim = null; });
+    const btn = (cls, txt, tip, dir) => {
+      const b = Object.assign(document.createElement("button"), { className: "tscroll " + cls, textContent: txt, title: T(tip), hidden: true, tabIndex: -1 });
+      b.onclick = () => step(dir);
+      return b;
+    };
+    const prev = btn("tprev", "‹", "Cuộn tab sang trái (hoặc lăn chuột trên thanh tab)", -1), next = btn("tnext", "›", "Cuộn tab sang phải (hoặc lăn chuột trên thanh tab)", 1);
+    strip.before(prev);
+    strip.after(next);
+    const sync = () => {
+      const max = strip.scrollWidth - strip.clientWidth, over = max > 1;
+      prev.hidden = next.hidden = !over;
+      prev.disabled = strip.scrollLeft <= 0;
+      next.disabled = strip.scrollLeft >= max - 1;
+    };
+    strip.addEventListener("scroll", sync, { passive: true });
+    strip.addEventListener("wheel", e => {
+      const d = Math.abs(e.deltaY) > Math.abs(e.deltaX) ? e.deltaY : 0;
+      if (!d || strip.scrollWidth <= strip.clientWidth) return;
+      e.preventDefault();
+      aim = null;
+      strip.scrollLeft += d * (e.deltaMode === 1 ? 16 : 1);
+    }, { passive: false });
+    new ResizeObserver(sync).observe(strip);
+    return sync;
+  }
+  const syncs = new Map();
 
   const save = (doc, raw) => { const name = ShareState.cleanName(raw ?? ""); if (name && name !== doc.name && Docs.get(doc.id)) Docs.rename(doc, name); };
   const label = doc => doc.kind === "file" ? T("Tên tab (không đổi tên file trên đĩa):") : T("Tên mới:");
@@ -8657,6 +8792,7 @@ const TabStrip = (() => {
   function init() {
     for (const g of Views.groups) {
       const strip = g.el.querySelector(".tabs"), idOf = e => e.target.closest(".tab-rename") ? null : e.target.closest(".tab")?.dataset.id;
+      syncs.set(g.i, scroller(strip));
       strip.addEventListener("click", e => {
         const id = idOf(e);
         if (!id) return;
@@ -8684,19 +8820,21 @@ const TabStrip = (() => {
       strip.addEventListener("dragstart", e => {
         const id = idOf(e);
         if (!id) return;
+        dragId = id;
         e.dataTransfer.setData(TAB_TYPE, id);
         e.dataTransfer.effectAllowed = "move";
       });
+      strip.addEventListener("dragend", () => { dragId = null; });
       g.el.querySelector(".gnew").onclick = () => Actions.newNote(g.i);
       g.el.querySelector(".gmove").onclick = () => Actions.moveTab(g.i);
     }
   }
 
-  return { init, render, rename, sourceOf, TAB_TYPE, ICON };
+  return { init, render, rename, sourceOf, dropAt, TAB_TYPE, ICON };
 })();
 // Right-click / Menu key on a tab (or the empty tab strip = its active tab): the tab commands from the registry — rename, pin, move, clone, close.
 const TabMenu = (() => {
-  const IDS = ["renameTab", "pinTab", "pinItem", "addToGroup", "moveTab", "cloneTab", "diskReload", "closeTab", "closeOthers", "closeRight"];
+  const IDS = ["renameTab", "pinTab", "pinItem", "addToGroup", "tabLeft", "tabRight", "moveTab", "cloneTab", "diskReload", "closeTab", "closeOthers", "closeRight"];
   let menu = null, back = null;
   // Focus goes back to where the menu was opened from (a folder tab row has no editor to fall back to).
   const restore = () => { const ok = back?.isConnected && back !== document.body && back.checkVisibility(); if (ok) back.focus({ preventScroll: true }); return ok; };
@@ -8913,19 +9051,27 @@ const Views = (() => {
     for (const id of tabs.slice(from)) if (id !== keepId && !Docs.get(id)?.pinned && !close(id)) break;
   }
 
-  function move(id, to) {
+  // at = index among the target's other tabs (-1: the end); within one view it only reorders. Pinned tabs stay first.
+  function move(id, to, at = -1) {
     const from = where(id);
-    if (from < 0 || from === to || to < 0 || to >= count || !Docs.get(id)) return;
-    detach(id);
-    groups[to].tabs.push(id);
+    if (from < 0 || to < 0 || to >= count || !Docs.get(id) || (from === to && at < 0)) return;
+    const t = groups[to].tabs;
+    if (from === to) t.splice(t.indexOf(id), 1); else detach(id);
+    t.splice(at < 0 ? t.length : Math.min(at, t.length), 0, id);
     pinFirst(groups[to]);
-    activate(to, id, true);
+    if (from === to) { TabStrip.render(groups[to]); changed(); } else activate(to, id, true);
   }
 
-  // Exchanges the focused view with "the other" one.
-  function swap() {
-    const a = groups[focused], b = groups[other()];
-    if (!b) return;
+  // Shifts the tab one place left (-1) / right (+1) in its view.
+  function shift(id, dir) {
+    const gi = where(id), k = gi < 0 ? -1 : groups[gi].tabs.indexOf(id);
+    if (k >= 0) move(id, gi, Math.max(0, k + dir));
+  }
+
+  // Exchanges view ai (default: focused) with view bi (default: "the other" one).
+  function swap(ai = focused, bi = other(ai)) {
+    const a = groups[ai], b = groups[bi];
+    if (!a || !b || a === b) return;
     keepScroll(a); keepScroll(b);
     const act = [b.active, a.active];
     [a.tabs, b.tabs] = [b.tabs, a.tabs];
@@ -8965,7 +9111,7 @@ const Views = (() => {
   }) });
 
   return {
-    init, setLayout, add, open, activate, close, reopen, togglePin, closeMany, move, swap, where, other, activeDoc, applyEffect, replaceText,
+    init, setLayout, add, open, activate, close, reopen, togglePin, closeMany, move, shift, swap, where, other, activeDoc, applyEffect, replaceText,
     revealLine, applySettings, snapshot, refresh, renderAll: () => groups.forEach(refresh), focus: i => setFocused(Math.min(Math.max(i | 0, 0), count - 1)),
     activeView: (i = focused) => groups[i].view, tabsOf: i => [...groups[i].tabs], groups,
     get focused() { return focused; }, get count() { return count; }, get layout() { return layout; }, onChange: f => listeners.push(f), onLint: f => lintFns.push(f),
@@ -9038,7 +9184,7 @@ const FixMarks = (() => {
 
   return { show, openList };
 })();
-// Format by language in 3 tiers: (1) JSON/XML tolerant + sql-formatter + FIX, (2) Prettier with plugins loaded per language, (3) re-indent from the syntax tree + trim line ends.
+// Format by language in 3 tiers: (1) JSON/XML tolerant + sql-formatter + FIX, (2) Prettier with plugins loaded per language or gofmt / clang-format / ruff, (3) re-indent from the syntax tree + trim line ends.
 const Formatter = (() => {
   const PRETTIER = {
     JavaScript: ["babel", "babel estree"], JSX: ["babel", "babel estree"], TypeScript: ["typescript", "typescript estree"], TSX: ["typescript", "typescript estree"],
@@ -9046,15 +9192,19 @@ const Formatter = (() => {
     Vue: ["vue", "html postcss babel estree typescript"], Markdown: ["markdown", "markdown"], YAML: ["yaml", "yaml"], GraphQL: ["graphql", "graphql"],
   };
   const SQL_DIALECTS = { transactsql: "T-SQL", postgresql: "PostgreSQL", mysql: "MySQL", plsql: "PL/SQL" };
+  const CF = "clang-format", WASM = { Go: "gofmt", C: CF, "C++": CF, Java: CF, "C#": CF, ProtoBuf: CF, Python: "ruff" };
+  const CLANG_STYLES = ["LLVM", "Google", "Chromium", "Mozilla", "WebKit", "Microsoft"];
   // Indentation carries meaning there: re-indenting could change the program.
   const INDENT_SENSITIVE = new Set(["Python"]);
-  const opts = { indent: "auto", width: 80, sql: "transactsql" };
+  const opts = { indent: "auto", width: 80, sql: "transactsql", clang: "LLVM", pyWidth: 88, pyQuote: "double" };
   const SOH = String.fromCharCode(1), TAB = String.fromCharCode(9);
 
-  const tier = lang => ["JSON", "XML", "SQL", "FIX"].includes(lang) ? 1 : Object.hasOwn(PRETTIER, lang) ? 2 : 3;
+  const tier = lang => ["JSON", "XML", "SQL", "FIX"].includes(lang) ? 1 : Object.hasOwn(PRETTIER, lang) || Object.hasOwn(WASM, lang) ? 2 : 3;
   const trimEnds = s => s.replace(/[ \t]+$/gm, "");
   // Go is always tab-indented (gofmt), whatever the file currently uses.
-  const unitOf = (text, lang) => opts.indent === "tab" || (opts.indent === "auto" && lang === "Go") ? TAB : opts.indent === "auto" ? LangDetect.indentOf(text) : " ".repeat(+opts.indent || 2);
+  const unitOf = (text, lang, o) => o.indent === "tab" || (o.indent === "auto" && lang === "Go") ? TAB : o.indent === "auto" ? LangDetect.indentOf(text) : " ".repeat(+o.indent || 2);
+  // Options from a share link: known keys of the same type; a huge indent would build a giant string.
+  const known = x => Object.fromEntries(Object.entries(Object(x)).filter(([k, v]) => Object.hasOwn(opts, k) && typeof v === typeof opts[k] && (k !== "sql" || Object.hasOwn(SQL_DIALECTS, v)) && (k !== "indent" || /^(auto|tab|[1-8])$/.test(v))));
   const width = unit => unit === TAB ? 4 : unit.length;
   const located = (msg, line, col) => Object.assign(new Error(msg), { line: line || 0, col: col || 0 });
 
@@ -9080,18 +9230,28 @@ const Formatter = (() => {
     return { text: MarkupTool.serialize(r.root, unit, false) + "\n", fixes: r.fixes };
   }
 
-  async function sql(text, unit) {
+  async function sql(text, unit, o) {
     await VendorPaths.load("sqlFormatter");
-    try { return { text: globalThis.sqlFormatter.format(text, { language: opts.sql, tabWidth: width(unit), useTabs: unit === TAB }) + "\n" }; }
-    catch (e) { const m = /line (\d+)(?:,? column (\d+))?/i.exec(e.message); throw located(T("SQL lỗi ({dialect}): {msg}", { dialect: SQL_DIALECTS[opts.sql], msg: e.message.split("\n")[0] }), m && +m[1], m && +m[2]); }
+    try { return { text: globalThis.sqlFormatter.format(text, { language: o.sql, tabWidth: width(unit), useTabs: unit === TAB }) + "\n" }; }
+    catch (e) { const m = /line (\d+)(?:,? column (\d+))?/i.exec(e.message); throw located(T("SQL lỗi ({dialect}): {msg}", { dialect: SQL_DIALECTS[o.sql], msg: e.message.split("\n")[0] }), m && +m[1], m && +m[2]); }
   }
 
-  async function prettier(text, lang, unit) {
+  // WasmFmt (extras): a failure falls back to reindent and says why.
+  async function wasm(text, lang, unit, o) {
+    const engine = WASM[lang];
+    let r;
+    try { await PowerTools.load(); r = await WasmFmt.format(text, lang, engine, o); }
+    catch (e) { const x = await reindent(text, lang, unit); return { ...x, fallback: true, notes: [T("Không chạy được {engine}: {msg}", { engine, msg: e.message.replace(/\.?$/, ".") }), ...x.notes] }; }
+    if (r.error) throw located(T("{lang} lỗi cú pháp: {msg}", { lang, msg: r.error.msg }), r.error.line, r.error.col);
+    return r;
+  }
+
+  async function prettier(text, lang, unit, o) {
     const [parser, list] = PRETTIER[lang], names = list.split(" ");
     await VendorPaths.load("prettier");
     await Promise.all(names.map(p => VendorPaths.load("prettier-" + p)));
     try {
-      return { text: await globalThis.prettier.format(text, { parser, plugins: names.map(p => globalThis.prettierPlugins[p]), useTabs: unit === TAB, tabWidth: width(unit), printWidth: opts.width }) };
+      return { text: await globalThis.prettier.format(text, { parser, plugins: names.map(p => globalThis.prettierPlugins[p]), useTabs: unit === TAB, tabWidth: width(unit), printWidth: o.width }) };
     } catch (e) {
       const at = e.loc && e.loc.start;
       throw located(T("{lang} lỗi cú pháp: {msg}", { lang, msg: String(e.message).split("\n")[0] }), at && at.line, at && at.column);
@@ -9109,14 +9269,15 @@ const Formatter = (() => {
   }
 
   // → { text, fixes: [{line, col, msg}], notes, tier }; throws an Error with .line/.col on a syntax error (the text is never half-changed).
-  async function format(text, lang) {
-    const unit = unitOf(text, lang), base = { fixes: [], notes: [], tier: tier(lang) };
+  async function format(text, lang, linkOpts) {
+    const o = linkOpts ? { ...opts, ...known(linkOpts) } : opts, unit = unitOf(text, lang, o), base = { fixes: [], notes: [], tier: tier(lang) };
     if (!text.trim()) return { ...base, text };
     if (lang === "JSON") return { ...base, ...json(text, unit) };
     if (lang === "XML") return { ...base, ...xml(text, unit) };
-    if (lang === "SQL") return { ...base, ...await sql(text, unit) };
+    if (lang === "SQL") return { ...base, ...await sql(text, unit, o) };
     if (lang === "FIX") return { ...base, text: fixLines(text) };
-    if (Object.hasOwn(PRETTIER, lang)) return { ...base, ...await prettier(text, lang, unit) };
+    if (Object.hasOwn(PRETTIER, lang)) return { ...base, ...await prettier(text, lang, unit, o) };
+    if (Object.hasOwn(WASM, lang)) return { ...base, ...await wasm(text, lang, unit, o) };
     return { ...base, ...await reindent(text, lang, unit) };
   }
 
@@ -9127,7 +9288,7 @@ const Formatter = (() => {
     throw new Error(T("Minify chỉ dùng cho JSON, XML, HTML, CSS (tab này: {lang}).", { lang }));
   }
 
-  return { format, minify, fixLines, tier, opts, SQL_DIALECTS, PRETTIER };
+  return { format, minify, fixLines, tier, opts, SQL_DIALECTS, PRETTIER, CLANG_STYLES };
 })();
 // HTML → Markdown with turndown + GFM (tables, strikethrough, task lists); <pre><code class="language-x"> keeps x as the fence language.
 const HtmlToMd = (() => {
@@ -9179,6 +9340,8 @@ const FormatActions = (() => {
     try { r = await Formatter.format(text, lang); }
     catch (e) { FixMarks.show(doc, [], e); if (quiet) return e; StatusBar.msg(e.message, "bad", e.line ? () => Views.revealLine(doc, e.line) : null); return false; }
     if (!Docs.get(doc.id) || Docs.text(doc) !== text) return false;
+    // Format on save does not write the fallback re-indent of a failed engine: it saves as is and reports why.
+    if (quiet && r.fallback) return new Error(r.notes[0]);
     const gi = Views.groups.findIndex(g => g.active === doc.id && g.i < Views.count);
     if (r.text !== text) {
       const change = minimalChange(text, r.text);
@@ -9189,7 +9352,7 @@ const FormatActions = (() => {
     if (quiet && !r.fixes.length) return true;
     const parts = [r.text === text ? T("✔ Đã đúng định dạng — không đổi gì.") : T("✔ Đã format “{name}” ({lang}) — Ctrl+Z để hoàn tác.", { name: doc.name, lang }), ...r.notes];
     if (r.fixes.length) parts.push(T("Đã tự sửa {n} lỗi — bấm để xem danh sách.", { n: r.fixes.length }));
-    StatusBar.msg(parts.join(" "), r.fixes.length ? "warn" : "good", r.fixes.length ? () => FixMarks.openList(doc) : null, T("Mở danh sách chỗ đã tự sửa"));
+    StatusBar.msg(parts.join(" "), r.fixes.length || r.fallback ? "warn" : "good", r.fixes.length ? () => FixMarks.openList(doc) : null, T("Mở danh sách chỗ đã tự sửa"));
     return true;
   }
 
@@ -9250,7 +9413,7 @@ const FormatActions = (() => {
     window.open(url.href, "_blank", "noopener");
   }
 
-  return { load, inPlace, pasted, beforeSave, saveFormatFailed, setOpt, askWidth, toggle, openInFixParser, minimalChange, flags };
+  return { load, keep, inPlace, pasted, beforeSave, saveFormatFailed, setOpt, askWidth, toggle, openInFixParser, minimalChange, flags };
 })();
 // Share links are untrusted and the page allows inline handlers, so renderer output is parsed inert and stripped of anything executable before it reaches the DOM.
 const SvgSanitizer = (() => {
@@ -11798,6 +11961,37 @@ const RainbowCsv = (() => {
 
   return { fields, align, shrink, delimOf, extension, openInWorkbench };
 })();
+// Plain Text tabs: a line whose first non-blank char is a bullet / sign / bracket gets that char's own text colour.
+const LeadSymbolLines = (() => {
+  const CHARS = "•-+=><\/{}[]~?|\\", LEAD = /^[ \t]*([•\-+=><\/{}\[\]~?|\\])/;
+  let plugin = null, decos = null;
+
+  const langOf = view => { const g = Views.groups.find(x => x.view === view), d = g && Docs.get(g.active); return d && !PreviewPane.isPane(d) ? Docs.effectiveLang(d) : ""; };
+
+  function build(view) {
+    const D = CM.view.Decoration;
+    if (langOf(view) !== "Plain Text") return D.none;
+    decos ??= [...CHARS].map((c, k) => D.line({ class: "oe-sym-line oe-sym-" + k }));
+    const st = view.state, b = new CM.state.RangeSetBuilder();
+    for (const { from, to } of view.visibleRanges) {
+      for (let pos = from; pos <= to;) {
+        const line = st.doc.lineAt(pos), m = LEAD.exec(line.text.slice(0, 200));
+        if (m) b.add(line.from, line.from, decos[CHARS.indexOf(m[1])]);
+        pos = line.to + 1;
+      }
+    }
+    return b.finish();
+  }
+
+  function extension() {
+    return plugin ??= CM.view.ViewPlugin.fromClass(class {
+      constructor(v) { this.decorations = build(v); }
+      update(u) { if (u.docChanged || u.viewportChanged || u.transactions.some(t => t.effects.length)) this.decorations = build(u.view); }
+    }, { decorations: v => v.decorations });
+  }
+
+  return { CHARS, LEAD, extension };
+})();
 // Log and FIX tabs have no CM grammar: a ViewPlugin marks the visible lines — log levels, timestamps, UUIDs, IPs, strings, numbers; FIX tag=value pairs by header / body / trailer.
 const LogFixMarks = (() => {
   const SOH = String.fromCharCode(1), LONG = 20000;
@@ -12197,11 +12391,15 @@ const PreviewPane = (() => {
   const head = d => d.state ? d.state.doc.sliceString(0, 2000) : String(d.text || "").slice(0, 2000);
   const kindOf = d => PreviewKind.of(Docs.effectiveLang(d), head(d), d.name);
   // 👁 in the view's tab bar only for a tab that has a preview; 🌐 for any text tab.
+  const buttons = d => {
+    const plain = !!d && !isPane(d) && !d.hex && !d.big;
+    return { preview: plain && !!kindOf(d), translate: plain, run: plain && ["HTML", "JavaScript"].includes(Docs.effectiveLang(d)) };
+  };
   const syncButton = g => {
-    const d = Docs.get(g.active), plain = !!d && !isPane(d) && !d.hex && !d.big;
-    g.el.querySelector(".gpreview").hidden = !plain || !kindOf(d);
-    g.el.querySelector(".gtranslate").hidden = !plain;
-    g.el.querySelector(".grun").hidden = !plain || !["HTML", "JavaScript"].includes(Docs.effectiveLang(d));
+    const b = buttons(Docs.get(g.active));
+    g.el.querySelector(".gpreview").hidden = !b.preview;
+    g.el.querySelector(".gtranslate").hidden = !b.translate;
+    g.el.querySelector(".grun").hidden = !b.run;
   };
 
   // Called on every view refresh: shows the active preview tab in place of the editor.
@@ -12274,7 +12472,7 @@ const PreviewPane = (() => {
   const viewOf = id => panes.get(id)?.view || null;
   // Views of a lazily loaded bundle (data tools) register themselves here.
   const addView = (kind, view) => { extra[kind] = view; };
-  return { init, addView, isPreview, isPane, viewOf, kindOf, mount, show, rerun, choice, printable, fit: act(p => p.view.fit()), exportSvg: act(exportSvg), exportPng: act(exportPng), copySvg: act(copySvg),
+  return { init, addView, isPreview, isPane, viewOf, kindOf, buttons, mount, show, rerun, choice, printable, fit: act(p => p.view.fit()), exportSvg: act(exportSvg), exportPng: act(exportPng), copySvg: act(copySvg),
     exportSvgOf: exportSvg, exportPngOf: exportPng, copySvgOf: copySvg };
 })();
 // OutputLink: running an operation on a tab writes a linked output tab ("name ⇢ op") in the OTHER view; re-running updates that same tab, live ops follow edits, user and hand-edited tabs are never silently overwritten.
@@ -12440,6 +12638,7 @@ const CompareIgnore = (() => {
 // Compare the active tabs of two views (Notepad++ Compare): both stay editable, the diff re-runs 150 ms after an edit, scrolling is synced, Alt+↑/↓ jumps between blocks; narrow screens get one inline (unified) view.
 const Compare = (() => {
   let s = null, timer = 0, ignore = null;
+  const toggled = [];
   const opt = { ws: false, case: false, inline: false };
   const narrow = () => matchMedia("(max-width: 640px)").matches;
   const docs = () => [Docs.get(s.a), Docs.get(s.b)];
@@ -12453,9 +12652,10 @@ const Compare = (() => {
     Views.onChange(() => { if (s && (s.gb >= Views.count || Views.groups[s.ga].active !== s.a || Views.groups[s.gb].active !== s.b)) stop(); });
   }
 
-  function start(ga = Views.focused) {
+  function start(ga = Views.focused, gb) {
     if (Views.count < 2) Views.setLayout("2c");
-    const gb = Views.other(ga), a = Views.activeDoc(ga), b = Views.activeDoc(gb);
+    if (gb === undefined) gb = Views.other(ga);
+    const a = Views.activeDoc(ga), b = Views.activeDoc(gb);
     if (!a || !b) { StatusBar.msg(T("Cần 2 tab đang mở ở 2 view để so sánh — mở thêm tab ở View {n}.", { n: (a ? gb : ga) + 1 }), "warn"); return false; }
     stop(true);
     s = { ga, gb, a: a.id, b: b.id, chunks: [], inline: opt.inline || narrow() };
@@ -12466,6 +12666,7 @@ const Compare = (() => {
     document.body.classList.add("comparing");
     diff();
     if (s.inline) PhoneLayout.show(gb + 1);
+    toggled.forEach(f => f());
     return true;
   }
 
@@ -12476,6 +12677,7 @@ const Compare = (() => {
     s = null;
     clearTimeout(timer);
     document.body.classList.remove("comparing");
+    toggled.forEach(f => f());
     if (!silent) StatusBar.msg(T("Đã tắt so sánh."));
   }
 
@@ -12552,6 +12754,12 @@ const Compare = (() => {
     copyAt(fromA, viewOf(fromA ? s.ga : s.gb).state.selection.main.head);
   }
 
+  // Copies the block under view gi's cursor over the other compared view, whichever view is focused.
+  function copyFrom(gi) {
+    if (!s || s.inline || (gi !== s.ga && gi !== s.gb)) return;
+    copyAt(gi === s.ga, viewOf(gi).state.selection.main.head);
+  }
+
   function copyAt(fromA, pos) {
     const v = viewOf(fromA ? s.ga : s.gb), w = viewOf(fromA ? s.gb : s.ga);
     const c = s.chunks.find(c => { const f = fromA ? c.fromA : c.fromB, t = fromA ? c.toA : c.toB; return pos >= f && (pos < t || pos === f); });
@@ -12565,7 +12773,7 @@ const Compare = (() => {
   function setOpt(key) {
     opt[key] = !opt[key];
     Prefs.set("compare", opt);
-    if (s) start(s.ga); else StatusBar.msg(T("Tuỳ chọn so sánh đã lưu — bật so sánh để áp dụng."));
+    if (s) start(s.ga, s.gb); else StatusBar.msg(T("Tuỳ chọn so sánh đã lưu — bật so sánh để áp dụng."));
   }
 
   // JSON compared by structure (key order ignored) → a report tab in the focused view.
@@ -12582,7 +12790,8 @@ const Compare = (() => {
     StatusBar.msg(T("✔ So JSON theo cấu trúc: {n} khác biệt.", { n: list.length }), list.length ? "" : "good");
   }
 
-  return { init, start, stop, toggle: () => s ? stop() : start(), jump, copyBlock, setOpt, jsonTree, get active() { return !!s; }, opt };
+  return { init, start, stop, toggle: () => s ? stop() : start(), jump, copyBlock, copyFrom, setOpt, jsonTree, onToggle: f => toggled.push(f),
+    get active() { return !!s; }, get inline() { return !!s?.inline; }, get pair() { return s ? [s.ga, s.gb] : null; }, opt };
 })();
 // Status-bar encoding / EOL actions: reopen with another encoding (from the original bytes), save with an encoding, convert EOL, toggle BOM, show hidden characters.
 const EncodingActions = (() => {
@@ -17475,16 +17684,19 @@ const SettingsTab = (() => {
     return row;
   }
 
-  function toolbarVisibility(list) {
+  // Show all / hide all for a group of button toggles (toolbar, view bar); the toolbar one also shows / hides the bar itself.
+  const shown = (g, show) => (g !== "toolbar" || Actions.toolbarVisible() === show) && Settings.inGroup(g).every(e => e.get() === show);
+  function toolbarVisibility(list, g) {
     const group = el("div", "st-toolbar-visibility");
+    group.dataset.group = g;
     group.setAttribute("role", "radiogroup");
-    group.setAttribute("aria-label", groupName("toolbar"));
+    group.setAttribute("aria-label", groupName(g));
     for (const [value, text] of [["show", "Hiện tất cả"], ["hide", "Ẩn tất cả"]]) {
       const label = el("label"), radio = el("input"), show = value === "show";
-      Object.assign(radio, { type: "radio", name: "toolbar-visibility", value });
+      Object.assign(radio, { type: "radio", name: g + "-visibility", value });
       radio.onchange = async () => {
         for (const e of list) if (e.get() !== show) await Settings.set(e, show);
-        Actions.setToolbarVisible(show);
+        if (g === "toolbar") Actions.setToolbarVisible(show);
       };
       label.append(radio, el("span", "", T(text)));
       group.append(label);
@@ -17495,7 +17707,7 @@ const SettingsTab = (() => {
   function section(g, list, whole) {
     const head = el("div", "st-head");
     head.append(el("h3", "", groupName(g)));
-    if (whole && g === "toolbar") head.append(toolbarVisibility(list));
+    if (whole && (g === "toolbar" || g === "viewbar")) head.append(toolbarVisibility(list, g));
     else if (whole && list.some(Settings.hasDefault)) head.append(btn("st-act", "↺ " + T("Mặc định cả nhóm"), () => Settings.resetGroup(g)));
     return [head, ...list.map(item)];
   }
@@ -17521,10 +17733,7 @@ const SettingsTab = (() => {
   function values() {
     raf = 0;
     if (!visible()) return;
-    for (const radio of t.ui.main.querySelectorAll(".st-toolbar-visibility input")) {
-      const show = radio.value === "show";
-      radio.checked = Actions.toolbarVisible() === show && Settings.inGroup("toolbar").every(e => e.get() === show);
-    }
+    for (const radio of t.ui.main.querySelectorAll(".st-toolbar-visibility input")) radio.checked = shown(radio.closest("[data-group]").dataset.group, radio.value === "show");
     for (const row of t.ui.main.querySelectorAll(".st-item")) {
       const e = Settings.entry(row.dataset.id), c = row.querySelector(".st-val, input, select");
       row.classList.toggle("mod", !Settings.isDefault(e));
@@ -18195,7 +18404,7 @@ const SidePanels = (() => {
 
   function label(b) {
     const n = badges.get(b.dataset.side || b.dataset.act);
-    b.setAttribute("aria-label", b.title.split(" — ")[0] + (n && n.n ? " — " + (n.tip || I18n.num(n.n)) : ""));
+    b.setAttribute("aria-label", (b.title || b.dataset.tipTitle || "").split(" — ")[0] + (n && n.n ? " — " + (n.tip || I18n.num(n.n)) : ""));
   }
 
   // n = 0 hides the badge; tip goes on the badge and into the icon's accessible name.
@@ -19184,13 +19393,16 @@ const QuickPick = (() => {
 
   return { open, pick, close };
 })();
-// Drag & drop: files dropped on View 1 / View 2 open there (elsewhere: the focused view), a folder becomes the Explorer tree, a dragged tab moves to the view it is dropped on; on a writable folder tab ExplorerDnd copies them in instead.
+// Drag & drop: files dropped on View 1 / View 2 open there (elsewhere: the focused view), a folder becomes the Explorer tree, a dragged tab moves to the view it is dropped on (on a tab bar: at that spot, also within its own view); on a writable folder tab ExplorerDnd copies them in instead.
 const FileDrop = (() => {
   const types = e => [...(e.dataTransfer?.types || [])];
   const isTab = e => types(e).includes(TabStrip.TAB_TYPE);
   const isFiles = e => types(e).includes("Files");
   let over = null;
+  let ins = null;
   const mark = el => { if (over === el) return; over?.classList.remove("drop-target"); over = el; over?.classList.add("drop-target"); };
+  const markTab = p => { ins?.classList.remove("tab-ins-before", "tab-ins-after"); ins = p?.el || null; ins?.classList.add(p.after ? "tab-ins-after" : "tab-ins-before"); };
+  const unmark = () => { mark(null); markTab(null); };
 
   // Handles / entries must be read during the drop event: the DataTransfer is emptied once it returns.
   function takeItems(dt) {
@@ -19221,19 +19433,20 @@ const FileDrop = (() => {
       const grp = isTab(e) && Groups.dropSec(e.target);
       e.dataTransfer.dropEffect = isTab(e) && !grp ? "move" : "copy";
       mark(grp || (isFiles(e) && ExplorerDnd.takesFiles(e.target) ? null : e.target.closest?.(".group, #explorerPane") || null));
+      markTab(isTab(e) && !grp ? TabStrip.dropAt(e.target, e.clientX) : null);
     }, true);
-    document.addEventListener("dragleave", e => { if (!e.relatedTarget) mark(null); }, true);
-    document.addEventListener("dragend", () => mark(null), true);
+    document.addEventListener("dragleave", e => { if (!e.relatedTarget) unmark(); }, true);
+    document.addEventListener("dragend", unmark, true);
     // Capture phase: CodeMirror would otherwise paste a dropped file's text into the document.
     document.addEventListener("drop", e => {
       if (!isFiles(e) && !isTab(e)) return;
       e.preventDefault();
       e.stopPropagation();
-      mark(null);
+      unmark();
       const g = e.target.closest?.(".group"), gi = g ? +g.dataset.group : -1;
       const grp = Groups.dropSec(e.target);
       if (isTab(e) && grp) { Groups.dropDoc(grp, e.dataTransfer.getData(TabStrip.TAB_TYPE)); return; }
-      if (isTab(e)) { if (gi >= 0) Views.move(e.dataTransfer.getData(TabStrip.TAB_TYPE), gi); return; }
+      if (isTab(e)) { if (gi >= 0) Views.move(e.dataTransfer.getData(TabStrip.TAB_TYPE), gi, TabStrip.dropAt(e.target, e.clientX)?.at ?? -1); return; }
       const items = takeItems(e.dataTransfer);
       if (ExplorerDnd.dropFiles(e.target, items)) return;
       openDropped(items, gi >= 0 ? gi : Views.focused)
@@ -19702,14 +19915,27 @@ const ToolbarButtons = (() => {
 // Resizing views (desktop > 900px): the #split bar in 2 columns / 1x2 / 2x1 (drag, ←/→, double-click = 50/50); elsewhere the gap between two views is the handle. Ratios are remembered per layout.
 const Split = (() => {
   const clamp = r => Math.min(0.85, Math.max(0.15, r));
-  let ratio = 0.5;
+  let ratio = 0.5, max = null;
   const fr = { c: [1, 1, 1], r: [1, 1] };
 
   function apply(r) {
     ratio = clamp(r);
     const w = $("work");
+    if (max != null) { max = null; w.classList.remove("max-l", "max-r"); api.onMax?.(); }
     w.style.setProperty("--v1", ratio + "fr");
     w.style.setProperty("--v2", (1 - ratio) + "fr");
+  }
+
+  // Split-bar layouts: shows only side 0 (left) / 1 (right) until apply(); null restores the ratio.
+  function maximize(side) {
+    if (side == null) { if (max != null) apply(ratio); return; }
+    const w = $("work");
+    max = side;
+    w.classList.toggle("max-l", !side);
+    w.classList.toggle("max-r", !!side);
+    w.style.setProperty("--v1", side ? "0fr" : "1fr");
+    w.style.setProperty("--v2", side ? "1fr" : "0fr");
+    api.onMax?.();
   }
 
   function applyTracks() {
@@ -19756,7 +19982,9 @@ const Split = (() => {
     const bar = $("split"), work = $("work");
     apply(+Prefs.get("split", 0.5) || 0.5);
     bar.addEventListener("pointerdown", e => {
+      if (e.target.closest("button")) return;
       e.preventDefault();
+      maximize(null);
       bar.setPointerCapture(e.pointerId);
       const left = Views.groups[0].el.getBoundingClientRect().left;
       const right = Math.max(...Views.groups.slice(0, Views.count).map(g => g.el.getBoundingClientRect().right));
@@ -19767,13 +19995,13 @@ const Split = (() => {
       bar.addEventListener("pointercancel", up, { once: true });
     });
     bar.addEventListener("keydown", e => {
-      const d = e.key === "ArrowLeft" ? -0.05 : e.key === "ArrowRight" ? 0.05 : 0;
+      const d = !e.target.closest(".vb-grip") ? 0 : e.key === "ArrowLeft" ? -0.05 : e.key === "ArrowRight" ? 0.05 : 0;
       if (!d) return;
       e.preventDefault();
       apply(ratio + d);
       Prefs.set("split", ratio);
     });
-    bar.addEventListener("dblclick", () => { apply(0.5); Prefs.set("split", ratio); });
+    bar.addEventListener("dblclick", e => { if (e.target.closest("button")) return; apply(0.5); Prefs.set("split", ratio); });
 
     work.addEventListener("pointermove", e => {
       if (e.target !== work || e.buttons) return;
@@ -19808,7 +20036,330 @@ const Split = (() => {
     applyTracks();
     Prefs.set("tracks-" + L, fr);
   }
-  return { init, gapAt, set, preset, ratio: () => ratio };
+  const api = { init, gapAt, set, preset, maximize, onMax: null, ratio: () => ratio, get maxed() { return max; } };
+  return api;
+})();
+// Bar between the left and right views (#split in 2 columns / 1x2 / 2x1): moves, swaps, clones and compares across the two sides; ⇢ ✨ 👁 🌐 ▶ + act on the focused view, like the tab bar buttons it hides.
+const ViewBar = (() => {
+  const SIDES = { "2c": [[0], [1]], "12": [[0], [1, 2]], "21": [[0, 1], [2]] };
+  let maxLayout = "";
+  const sides = () => SIDES[Views.layout];
+  // On a side with two views the focused one is used.
+  const pick = side => side.includes(Views.focused) ? Views.focused : side[0];
+  const sideOf = gi => { const s = sides(); return !s ? -1 : s[0].includes(gi) ? 0 : s[1].includes(gi) ? 1 : -1; };
+  const opposite = gi => { const k = sideOf(gi); return k < 0 ? -1 : pick(sides()[1 - k]); };
+  const btn = cls => $("split").querySelector(".vb-" + cls);
+
+  // dir 1: left → right, -1: right → left; other layouts: to the next / previous view.
+  function move(dir) {
+    const s = sides();
+    if (!s) {
+      const doc = Views.activeDoc(), to = Views.focused + dir;
+      if (doc && to >= 0 && to < Views.count) Views.move(doc.id, to);
+      return;
+    }
+    const from = pick(dir > 0 ? s[0] : s[1]), to = pick(dir > 0 ? s[1] : s[0]), doc = Views.activeDoc(from);
+    if (doc) Views.move(doc.id, to);
+  }
+
+  function clone() {
+    const doc = Views.activeDoc(), to = opposite(Views.focused);
+    if (doc && to >= 0) CloneSync.cloneTo(doc, to);
+  }
+
+  function compare() {
+    const s = sides();
+    if (Compare.active || !s) Compare.toggle(); else Compare.start(pick(s[0]), pick(s[1]));
+  }
+
+  function swap() {
+    const s = sides();
+    if (s) Views.swap(pick(s[0]), pick(s[1])); else Views.swap();
+  }
+
+  // side 0: copy the block at the left view's cursor to the right, 1: right to left.
+  function copyBlock(side) {
+    const p = Compare.pair;
+    if (p) Compare.copyFrom(p.find(gi => sideOf(gi) === side) ?? p[side]);
+  }
+
+  function maximize() {
+    if (Split.maxed != null) { Split.maximize(null); return; }
+    const k = sideOf(Views.focused);
+    if (k < 0) return;
+    maxLayout = Views.layout;
+    Split.maximize(k);
+  }
+
+  function sync() {
+    const s = sides();
+    // Layout change (it resets #work's classes) or focus moved to the hidden side: show both again.
+    if (Split.maxed != null && (Views.layout !== maxLayout || sideOf(Views.focused) !== Split.maxed)) Split.maximize(null);
+    if (!s) return;
+    const left = Views.activeDoc(pick(s[0])), right = Views.activeDoc(pick(s[1]));
+    btn("right").disabled = !left;
+    btn("left").disabled = !right;
+    btn("swap").disabled = !left && !right;
+    btn("clone").disabled = !Views.activeDoc();
+    const b = PreviewPane.buttons(Views.activeDoc());
+    btn("op").hidden = btn("format").hidden = !b.translate;
+    btn("preview").hidden = !b.preview;
+    btn("translate").hidden = !b.translate;
+    btn("run").hidden = !b.run;
+    btn("compare").setAttribute("aria-pressed", Compare.active);
+    $("split").querySelectorAll(".vb-cmp").forEach(el => { el.hidden = !Compare.active || (Compare.inline && el.matches(".vb-ltr, .vb-rtl")); });
+    btn("sync").setAttribute("aria-pressed", ScrollSync.on);
+    btn("max").setAttribute("aria-pressed", Split.maxed != null);
+  }
+
+  const TOGGLES = [
+    ["right", "→ Chuyển tab sang view phải"], ["left", "← Chuyển tab sang view trái"], ["swap", "⇄ Đổi chỗ tab 2 bên"], ["clone", "⧉ Clone tab sang bên kia"],
+    ["compare", "≠ So sánh"], ["cmp", "↑ ↓ ⇒ ⇐ khi đang so sánh"], ["sync", "🔗 Cuộn đồng bộ"], ["op", "⇢ Chạy phép đang chọn"], ["format", "✨ Format ra view kia"],
+    ["preview", "👁 Preview"], ["translate", "🌐 Dịch"], ["run", "▶ Chạy HTML / JS"], ["new", "+ Ghi chú"], ["max", "⛶ Phóng to 1 bên"], ["even", "⚖ Chia đều 50:50"],
+  ];
+
+  // ⚙ Settings ▸ View bar, like the toolbar: one toggle per button; separators hide around an empty group, all off ⇒ the bar narrows to its grip.
+  function initVisibility() {
+    const bar = $("split");
+    const layout = () => {
+      let sep = null, seen = false;
+      for (const el of bar.children) {
+        if (el.matches(".vb-sep")) { el.hidden = true; if (seen) sep = el; }
+        else if (el.matches("button:not([data-off])")) { if (sep) sep.hidden = false; sep = null; seen = true; }
+      }
+      $("work").style.setProperty("--vbw", seen ? "" : "8px");
+    };
+    for (const [cls, label] of TOGGLES) {
+      const key = "viewbar." + cls, els = bar.querySelectorAll(".vb-" + cls);
+      const show = on => els.forEach(el => el.toggleAttribute("data-off", !on));
+      show(Prefs.get(key, true) !== false);
+      Settings.add({ id: key, group: "viewbar", label, def: true, get: () => !els[0].hasAttribute("data-off"), set: on => { show(on); layout(); Prefs.set(key, on); } });
+    }
+    layout();
+  }
+
+  // Shortcuts (Ctrl+K chords); compare / swap / format / preview… already have their own commands.
+  function commands() {
+    const C = Commands.add, bar = () => !!sides(), cmp = () => Compare.active && !Compare.inline;
+    C("vbMoveRight", "Chuyển tab sang view bên phải", "Ctrl+k ArrowRight", () => move(1), () => !!Views.activeDoc());
+    C("vbMoveLeft", "Chuyển tab sang view bên trái", "Ctrl+k ArrowLeft", () => move(-1), () => !!Views.activeDoc());
+    C("cmpCopyRight", "So sánh: chép khối ở con trỏ view trái sang view phải", "Ctrl+k Shift+ArrowRight", () => copyBlock(0), cmp);
+    C("cmpCopyLeft", "So sánh: chép khối ở con trỏ view phải sang view trái", "Ctrl+k Shift+ArrowLeft", () => copyBlock(1), cmp);
+    C("scrollSync", "Cuộn đồng bộ 2 view (bật / tắt)", "Ctrl+k l", () => { ScrollSync.toggle(); sync(); }, bar);
+    C("maximizeSide", "Phóng to bên đang chọn / hiện lại 2 bên", "Ctrl+k m", maximize, bar);
+    C("evenSplit", "Chia đều 2 view (50:50)", "Ctrl+k =", () => Actions.setSplit("50:50"));
+  }
+
+  function init() {
+    const run = op => () => OutputLink.run(Views.activeDoc(), op), s = () => sides();
+    const on = {
+      right: () => move(1), left: () => move(-1), swap, clone,
+      compare, prev: () => Compare.jump(-1), next: () => Compare.jump(1), ltr: () => copyBlock(0), rtl: () => copyBlock(1),
+      sync: () => { ScrollSync.toggle(); sync(); }, op: () => Actions.run(), format: run("format"), preview: run("preview"), translate: run("translate"),
+      run: run("run-code"), new: () => Actions.newNote(Views.focused), max: maximize, even: () => Actions.setSplit("50:50"),
+    };
+    for (const [k, f] of Object.entries(on)) btn(k).onclick = f;
+    initVisibility();
+    commands();
+    ScrollSync.init();
+    Views.onChange(sync);
+    Compare.onToggle(sync);
+    Split.onMax = sync;
+    Docs.on(type => { if (type === "lang" || type === "rename") sync(); });
+    sync();
+  }
+
+  return { init, move, opposite, compare, swap };
+})();
+// 🔗 on the view bar: scrolling one side scrolls the other — by line when both show an editor, by fraction for a preview / list pane; Compare's own sync wins while comparing.
+const ScrollSync = (() => {
+  let on = false, ignore = null;
+  const panes = new WeakMap();
+  const scrolls = el => el.scrollHeight > el.clientHeight + 1 && /auto|scroll/.test(getComputedStyle(el).overflowY);
+  const editorShown = g => !!g.active && getComputedStyle(g.host).visibility !== "hidden";
+
+  // The element that scrolls the view's content: the editor, else the largest scrolling box of the pane in its place.
+  function scroller(g) {
+    if (editorShown(g)) return g.view.scrollDOM;
+    const hit = panes.get(g.el);
+    if (hit?.isConnected && !hit.closest(".host") && scrolls(hit)) return hit;
+    let best = null, area = 0;
+    for (const el of g.el.querySelectorAll(":scope > :not(.host, .gbar) *")) {
+      const a = el.clientWidth * el.clientHeight;
+      if (a > area && scrolls(el)) { best = el; area = a; }
+    }
+    if (best) panes.set(g.el, best);
+    return best;
+  }
+
+  function sync(e) {
+    const src = e.target;
+    if (!on || Compare.active || !(src instanceof Element)) return;
+    if (ignore === src) { ignore = null; return; }
+    const g = Views.groups.find(x => x.el.contains(src)), to = g ? ViewBar.opposite(g.i) : -1;
+    if (to < 0 || src.closest(".gbar") || scroller(g) !== src) return;
+    const h = Views.groups[to], dst = scroller(h);
+    if (!dst) return;
+    let target;
+    if (src === g.view.scrollDOM && dst === h.view.scrollDOM) {
+      const v = g.view, w = h.view, top = Math.max(0, src.scrollTop - v.documentPadding.top), blk = v.lineBlockAtHeight(top);
+      const ln = Math.min(v.state.doc.lineAt(blk.from).number, w.state.doc.lines);
+      target = w.lineBlockAt(w.state.doc.line(ln).from).top + w.documentPadding.top + (top - blk.top);
+    } else {
+      const span = src.scrollHeight - src.clientHeight;
+      target = span > 0 ? src.scrollTop / span * (dst.scrollHeight - dst.clientHeight) : 0;
+    }
+    const before = dst.scrollTop;
+    if (Math.abs(before - target) < 1) return;
+    ignore = dst;
+    dst.scrollTop = target;
+    if (dst.scrollTop === before) ignore = null;
+  }
+
+  function set(v) {
+    on = !!v;
+    Prefs.set("scrollSync", on);
+    StatusBar.msg(on ? T("Cuộn đồng bộ 2 view: bật") : T("Cuộn đồng bộ 2 view: tắt"));
+  }
+
+  function init() {
+    on = Prefs.get("scrollSync", false) === true;
+    $("work").addEventListener("scroll", sync, { capture: true, passive: true });
+  }
+
+  return { init, set, toggle: () => set(!on), get on() { return on; } };
+})();
+// Hover / keyboard-focus tooltip for the app bars (header, toolbar, view bar, activity bar, tab bar buttons, status bar): the title as a short note + live shortcuts of the data-cmd commands.
+const HoverTips = (() => {
+  const SCOPE = "header.top, body > .toolbar, #split, .activity, .gbar, .statusbar";
+  const CTRL = "button, select, a, label, input, [role=separator]";
+  const DELAY = 450, WARM = 700;
+  let tip = null, cur = null, timer = 0, hiddenAt = 0;
+
+  // The titled control under the pointer / focus inside a bar; tabs keep their own native title.
+  function target(el) {
+    const c = el?.closest?.(CTRL);
+    if (!c || !c.closest(SCOPE) || c.closest(".tabs")) return null;
+    const h = c.hasAttribute("title") || "tipTitle" in c.dataset ? c : c.closest("[title], [data-tip-title]");
+    return h && h.closest(SCOPE) && !h.matches(SCOPE) ? h : null;
+  }
+
+  // The title moves to data-tip-title while hovered so the browser's own tooltip does not show on top.
+  function stash(h) { if (h.hasAttribute("title")) { h.dataset.tipTitle = h.getAttribute("title"); h.removeAttribute("title"); } }
+  function unstash(h) {
+    if (!h || !("tipTitle" in h.dataset)) return;
+    if (!h.hasAttribute("title")) h.setAttribute("title", h.dataset.tipTitle);
+    delete h.dataset.tipTitle;
+    h.removeAttribute("aria-describedby");
+  }
+
+  const norm = k => k.toLowerCase().split(" ").map(p => p.split("+").sort().join("+")).join(" ");
+  const el = (tag, cls, text) => Object.assign(document.createElement(tag), { className: cls, textContent: text ?? "" });
+  const label = c => typeof c.label === "function" ? c.label() : T(c.label);
+
+  // Row names when one button has several commands: no (…) / “— …” tail; a prefix shared by all (“Compare: …”) is dropped, else only the prefix stays.
+  function names(cmds) {
+    const base = cmds.map(c => label(c).replace(/\s*\([^()]*\)/g, "").split(" — ")[0].trim());
+    const pre = base.map(l => l.includes(": ") ? l.split(": ")[0] : "").filter(Boolean);
+    const same = pre.length > 1 && new Set(pre).size === 1;
+    const cap = l => l.charAt(0).toUpperCase() + l.slice(1);
+    return base.map(l => !l.includes(": ") ? l : same ? cap(l.slice(l.indexOf(": ") + 2)) : l.split(": ")[0]);
+  }
+
+  // A "(…)" of the title is dropped when every key it names already shows in the shortcut rows.
+  const KEY = /\b(?:Ctrl|Alt|Shift)\+[^\s,;:)\/]+(?: [A-Z0-9=→←↑↓](?=[\s,;:)\/]|$))?|\bF\d{1,2}\b/g;
+  function note(raw, keys) {
+    const known = new Set(keys.map(norm));
+    return raw.replace(/\s*\(([^()]*)\)/g, (m, inner) => { const found = inner.match(KEY); return found && found.every(k => known.has(norm(k))) ? "" : m; }).trim();
+  }
+
+  function chord(key) {
+    const s = el("span", "htip-chord");
+    key.split(" ").forEach(p => s.append(el("kbd", "", p)));
+    return s;
+  }
+
+  function fill(h) {
+    const cmds = (h.dataset.cmd || "").split(/\s+/).map(id => Commands.find(id)).filter(c => c && c.keys.length);
+    const keys = cmds.flatMap(c => Commands.keysOf(c.id));
+    let text = note((h.dataset.tipTitle ?? h.getAttribute("title") ?? "").trim(), keys), own = [];
+    // No command (editor keys like Ctrl+Z): a "(…)" made only of keys becomes the shortcut row.
+    if (!cmds.length) text = text.replace(/\s*\(([^()]*)\)/, (m, inner) => {
+      const parts = inner.split(/\s+\/\s+/);
+      return parts.every(p => (p.match(KEY) || []).join() === p.trim()) ? (own = parts, "") : m;
+    }).trim();
+    if (!text && !keys.length) return false;
+    const cut = text.indexOf(" — ");
+    tip.replaceChildren(el("b", "", cut > 0 ? text.slice(0, cut) : text));
+    if (cut > 0) tip.append(el("span", "htip-d", text.slice(cut + 3)));
+    const rows = names(cmds);
+    cmds.forEach((c, n) => {
+      const row = el("span", "htip-k");
+      if (cmds.length > 1) row.append(el("span", "htip-l", rows[n]));
+      Commands.keysOf(c.id).slice(0, 2).forEach((k, i) => { if (i) row.append(el("span", "htip-or", "/")); row.append(chord(k)); });
+      tip.append(row);
+    });
+    if (own.length) {
+      const row = el("span", "htip-k");
+      own.forEach((k, i) => { if (i) row.append(el("span", "htip-or", "/")); row.append(chord(k)); });
+      tip.append(row);
+    }
+    return true;
+  }
+
+  // Beside the vertical bars (view bar, activity rail), below the others; flips and clamps to stay on screen.
+  function place(h) {
+    const r = h.getBoundingClientRect(), t = tip.getBoundingClientRect(), vw = innerWidth, vh = innerHeight, g = 6;
+    const rail = h.closest("#split") || (h.closest(".activity") && getComputedStyle(h.closest(".activity")).flexDirection === "column");
+    let x, y;
+    if (rail) { x = r.right + g; if (x + t.width > vw - 4) x = r.left - g - t.width; y = r.top + (r.height - t.height) / 2; }
+    else { y = r.bottom + g; if (y + t.height > vh - 4) y = r.top - g - t.height; x = r.left + (r.width - t.width) / 2; }
+    tip.style.left = Math.round(Math.min(Math.max(4, x), vw - t.width - 4)) + "px";
+    tip.style.top = Math.round(Math.min(Math.max(4, y), vh - t.height - 4)) + "px";
+  }
+
+  function show(h) {
+    if (cur !== h || !h.isConnected || !h.getClientRects().length || !fill(h)) return hide();
+    tip.hidden = false;
+    h.setAttribute("aria-describedby", tip.id);
+    place(h);
+  }
+
+  function hide() {
+    clearTimeout(timer);
+    if (!tip.hidden) hiddenAt = Date.now();
+    tip.hidden = true;
+    unstash(cur);
+    cur = null;
+  }
+
+  // Right after another tip closed, the next one shows at once (moving along a bar).
+  function later(h, now) {
+    if (h === cur) return;
+    hide();
+    cur = h;
+    stash(h);
+    timer = setTimeout(() => show(h), now || Date.now() - hiddenAt < WARM ? 0 : DELAY);
+  }
+
+  function init() {
+    tip = document.body.appendChild(Object.assign(el("div", "htip"), { id: "htip", hidden: true }));
+    tip.setAttribute("role", "tooltip");
+    document.addEventListener("pointerover", e => {
+      if (e.pointerType === "touch") return;
+      const h = target(e.target);
+      if (h) later(h); else if (cur) hide();
+    });
+    document.addEventListener("pointerout", e => { if (!e.relatedTarget && cur) hide(); });
+    for (const type of ["pointerdown", "keydown", "wheel"]) addEventListener(type, () => { if (cur) hide(); }, { capture: true, passive: true });
+    // Only a scroll that moves the control (its bar, the page) closes the tip — not an editor or tab strip scrolling elsewhere.
+    addEventListener("scroll", e => { if (cur && (e.target === document || e.target.contains?.(cur))) hide(); }, { capture: true, passive: true });
+    addEventListener("blur", hide);
+    document.addEventListener("focusin", e => { const h = e.target.matches?.(":focus-visible") && target(e.target); if (h) later(h, true); });
+    document.addEventListener("focusout", e => { if (cur && cur.contains(e.target)) hide(); });
+  }
+
+  return { init, hide };
 })();
 // All One Editor commands. Ctrl+N/T/W/Shift+T and Ctrl+1…8 belong to the browser, hence the Alt variants.
 function registerOneEditorCommands() {
@@ -19857,8 +20408,10 @@ function registerOneEditorCommands() {
   for (const l of Layouts.LIST) C("layout-" + l.id, () => T("Layout: {name}", { name: T(l.label) }), l.key, () => A.setLayout(l.id));
   for (let i = 0; i < Layouts.MAX; i++) C("focus" + (i + 1), () => T("Tới View {n}", { n: i + 1 }), "Alt+" + (i + 1), () => { V.focus(i); if (V.activeDoc()) view().focus(); PhoneLayout.show(V.focused + 1); }, () => i < V.count);
   C("moveTab", "Chuyển tab sang view kế tiếp", null, () => A.moveTab(), hasDoc);
+  C("tabLeft", "Dời tab sang trái (trong view)", null, withDoc(d => V.shift(d.id, -1)), hasDoc);
+  C("tabRight", "Dời tab sang phải (trong view)", null, withDoc(d => V.shift(d.id, 1)), hasDoc);
   C("cloneTab", "Mở tab này thêm ở view kế tiếp (2 view cùng sửa 1 tab)", "Ctrl+\\", A.cloneTab, hasDoc);
-  C("swap", "Đổi chỗ view này với view kế tiếp", null, () => V.swap(), many);
+  C("swap", "Đổi chỗ view này với view kế tiếp", "Ctrl+k s", () => ViewBar.swap(), many);
   C("explorer", "Ẩn / hiện Explorer", "Ctrl+b", A.toggleExplorer);
   C("toolbar", "Ẩn / hiện thanh công cụ", null, A.toggleToolbar);
   C("sideExplorer", "Hiện Explorer", "Ctrl+Shift+e", () => SidePanels.show("explorer"));
@@ -19908,19 +20461,19 @@ function registerFormatCompareCommands(C, doc, hasDoc) {
   const F = FormatActions, cmp = () => Compare.active;
   const toOutput = op => () => OutputLink.run(doc(), op);
 
-  C("formatOut", "✨ Format → tab kết quả ở view kia", null, toOutput("format"), hasDoc);
+  C("formatOut", "✨ Format → tab kết quả ở view kia", "Ctrl+k Shift+f", toOutput("format"), hasDoc);
   C("formatHere", "Format tại chỗ", "Alt+Shift+f", () => F.inPlace(), hasDoc);
   C("minifyOut", "Minify → tab kết quả ở view kia", null, toOutput("minify"), hasDoc);
   for (const [v, label] of [["auto", "Format: thụt lề tự dò theo file"], ["2", "Format: thụt lề 2 dấu cách"], ["4", "Format: thụt lề 4 dấu cách"], ["tab", "Format: thụt lề bằng Tab"]])
     C("fmtIndent-" + v, label, null, () => F.setOpt("indent", v));
   C("fmtWidth", "Format: độ rộng dòng (print width)…", null, F.askWidth);
   for (const [k, name] of Object.entries(Formatter.SQL_DIALECTS)) C("sql-" + k, () => T("Format SQL theo dialect {name}", { name }), null, () => F.setOpt("sql", k));
-  C("fmtOnSave", "Bật / tắt format khi lưu (JSON, XML, SQL, FIX, Prettier)", null, () => F.toggle("onSave"));
+  C("fmtOnSave", "Bật / tắt format khi lưu (JSON, XML, SQL, FIX, Prettier, gofmt, clang-format, ruff)", null, () => F.toggle("onSave"));
   C("fmtOnPaste", "Bật / tắt format khi dán", null, () => F.toggle("onPaste"));
   C("fixParser", "Mở tab này trong FIX Parser", null, () => F.openInFixParser(), () => hasDoc() && Docs.effectiveLang(Docs.root(doc())) === "FIX");
   for (const id of OutputOps.ids.filter(id => id.startsWith("to-") || id === "html-to-md")) C("op-" + id, () => T("Chuyển đổi: {op}", { op: T(OutputOps.get(id).label) }), null, toOutput(id), hasDoc);
 
-  C("compare", "So sánh 2 view (bật / tắt)", null, Compare.toggle);
+  C("compare", "So sánh 2 view (bật / tắt)", "Ctrl+k d", () => ViewBar.compare());
   C("cmpNext", "So sánh: tới khối khác kế tiếp", "Alt+ArrowDown", () => Compare.jump(1), cmp);
   C("cmpPrev", "So sánh: về khối khác trước", "Alt+ArrowUp", () => Compare.jump(-1), cmp);
   C("cmpCopy", "So sánh: chép khối ở con trỏ sang view kia", null, Compare.copyBlock, () => cmp() && !Compare.opt.inline);
@@ -20174,8 +20727,8 @@ const ShareLoader = (() => {
       StatusBar.msg(T("Link có regex — chưa tự chạy; bấm ▶ Chạy để chạy “{op}”.", { op: T(OutputOps.get(p.held).label) }), "warn");
     }
     if (p.run) {
-      // Tabs marked as previewed each get their preview back; an older link without marks previews its first previewable tab.
-      const marked = p.run === "preview" ? made.filter((d, k) => p.views.flat()[k].preview) : [];
+      // Marked tabs each get their preview / ▶ Format result back; an older link without marks previews its first previewable tab.
+      const marked = made.filter((d, k) => p.views.flat()[k].preview);
       const runOn = marked.length ? marked : [p.run === "preview" ? made.find(d => PreviewPane.kindOf(d)) || src : src];
       runOn.forEach(d => RunOp.pick(d, p.run));
       Toolbar.sync();
@@ -20227,13 +20780,15 @@ const ShareLoader = (() => {
 
   // pw: encrypt the payload into a "#enc:" link (Crypt, extras bundle).
   async function share(pw = "") {
-    // A preview tab has no text: its source tab is marked and the link runs "preview" on it again.
-    const docs = Views.groups.slice(0, Views.count).map(g => g.tabs.map(Docs.get).filter(d => d && d.kind !== "clone" && !Docs.isList(d)));
-    const shown = new Set(docs.flat().filter(PreviewPane.isPreview).map(d => d.link.src));
-    const views = docs.map(list => list.filter(d => !PreviewPane.isPreview(d)).map(d => ({ name: d.name, lang: d.lang, text: Docs.text(d), preview: shown.has(d.id) })));
+    // A preview tab has no text and a ▶ Format result is made again: the source tab is marked and the link re-runs the op on it (format with its options).
+    const docs = Views.groups.slice(0, Views.count).map(g => g.tabs.map(Docs.get).filter(d => d && d.kind !== "clone" && !Docs.isList(d))), all = docs.flat();
+    let ran = all.filter(PreviewPane.isPreview), run = ran.length ? "preview" : "";
+    if (!run) { ran = all.filter(d => d.kind === "output" && d.link?.op === "format" && all.some(s => s.id === d.link.src)); run = ran.length ? "format" : ""; }
+    const shown = new Set(ran.map(d => d.link.src));
+    const views = docs.map(list => list.filter(d => !ran.includes(d)).map(d => ({ name: d.name, lang: d.lang, text: Docs.text(d), preview: shown.has(d.id) })));
     if (!views.some(v => v.length)) { StatusBar.msg(T("Chưa có tab nào để chia sẻ."), "warn"); return; }
-    const run = shown.size ? "preview" : "";
     const payload = ShareState.build(views, CmSetup.settings.wrap, Views.layout, Compare.active, run);
+    if (run === "format") payload.opts = { ...Formatter.opts, ...PowerTools.state(ran[0].link.src, "format").link };
     const url = location.href.split(/[?#]/)[0] + "#" + (pw ? await Crypt.encodeLink(payload, pw) : await ShareCodec.encode(payload));
     const copied = await Dom.copy(url);
     if (!copied) prompt(T("Chép link này:"), url);
@@ -21578,6 +22133,11 @@ const LibraryPanel = (() => {
   S({ id: "lint", group: "editor", label: "Kiểm lỗi khi gõ", hint: "Dữ liệu (JSON, XML, YAML…) và cú pháp code", get: () => cm.lint, set: v => { cm.lint = v; Prefs.set("lint", v); Views.applySettings(); }, def: true });
   S({ id: "numHover", group: "editor", label: "Tooltip quy đổi số / timestamp", hint: "Rê chuột lên số: hex, nhị phân, ngày giờ", get: () => cm.numHover, set: v => DevActions.setHover(v), def: true });
   S({ id: "words", group: "editor", label: "Gợi ý từ có sẵn trong file khi gõ", get: () => cm.words, set: v => Actions.setWords(v), def: true });
+  const fo = Formatter.opts, fset = k => v => { fo[k] = v; FormatActions.keep(); }, list = a => () => a.map(s => [s, s]);
+  S({ id: "fmtClang", group: "editor", type: "choice", label: "clang-format: style mặc định", hint: "Folder có .clang-format ở gốc thì dùng file đó", choices: list(Formatter.CLANG_STYLES), get: () => fo.clang, set: fset("clang"), def: "LLVM" });
+  S({ id: "fmtPyWidth", group: "editor", type: "number", label: "ruff: line-length", min: 40, max: 200, get: () => fo.pyWidth, set: fset("pyWidth"), def: 88 });
+  S({ id: "fmtPyQuote", group: "editor", type: "choice", label: "ruff: quote-style", choices: list(["double", "single", "preserve"]), get: () => fo.pyQuote, set: fset("pyQuote"), def: "double" });
+  S({ id: "fmtVer", group: "editor", type: "info", label: "gofmt · clang-format · ruff", get: () => VendorPaths.FMT.map(x => x[2]).join(" · ") });
   for (const [id, label, def] of [["rulers", "Thước cột 80 / 120", false], ["brackets", "Tô màu cặp ngoặc", true], ["swatches", "Ô màu cạnh mã màu CSS", true], ["crumbs", "Breadcrumbs (đường dẫn symbol trên editor)", false]])
     S({ id: "aid-" + id, group: "editor", label, get: aid(id), set: flip(aid(id), () => Aids.toggle(id)), def });
 
@@ -21821,6 +22381,8 @@ function wireOneEditor() {
   CmSetup.init();
   Views.init();
   TabStrip.init();
+  ViewBar.init();
+  HoverTips.init();
   FileDrop.init();
   wireOneEditor();
   const idle = fn => typeof requestIdleCallback === "function" ? requestIdleCallback(fn, { timeout: 300 }) : setTimeout(fn, 0);

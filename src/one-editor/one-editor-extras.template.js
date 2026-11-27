@@ -137,6 +137,10 @@
 // @include js/extras/text-tool-options-dialog.js
 // @include js/devtools/encoder-selection-actions.js
 // @include js/extras/text-utilities-demos.js
+// Code formatters (phase 15b): gofmt · clang-format · ruff, WASM in a Blob Worker per engine (tools/vendor/code-formatter-*).
+// @include js/i18n/en-one-editor-code-formatters-15b-strings.js
+// @include js/format/wasm-code-formatters.js
+// @include js/format/code-formatter-demos.js
 // Explorer tar / gzip (phase 11d): Tar for ExplorerArchive.
 // @include js/core/tar-gzip-archive-pure.js
 // Explorer find & compare (phase 11e): advanced file search, duplicate files, folder compare + one-way sync for FileTools / the 🔎 tab.

@@ -1,0 +1,10 @@
+#include <stdlib.h>
+#include <string.h>
+typedef struct { int *data; size_t head, tail, cap; } ring_t;
+ring_t *ring_new(size_t cap){ring_t *r=malloc(sizeof *r);if(!r)return NULL;r->data=calloc(cap,sizeof(int));r->head=r->tail=0;r->cap=cap;return r;}
+int ring_push(ring_t *r,int v){
+size_t next=(r->head+1)%r->cap;
+if(next==r->tail) return -1;
+r->data[r->head]=v;r->head=next;return 0;
+}
+void ring_free(ring_t *r){ if (r) { free(r->data); free(r); } }

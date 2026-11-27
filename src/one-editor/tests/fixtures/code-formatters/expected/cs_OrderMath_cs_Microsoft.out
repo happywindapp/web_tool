@@ -1,0 +1,21 @@
+using System.Collections.Generic;
+using System.Linq;
+namespace Demo.Orders
+{
+public record Order(string Id, string Symbol, int Qty, decimal Price);
+public static class OrderMath
+{
+    public static decimal Notional(IEnumerable<Order> list) => list.Where(o => o.Qty > 0).Sum(o => o.Qty * o.Price);
+    public static Dictionary<string, int> CountBySymbol(IEnumerable<Order> list)
+    {
+        var d = new Dictionary<string, int>();
+        foreach (var o in list)
+        {
+            if (!d.ContainsKey(o.Symbol))
+                d[o.Symbol] = 0;
+            d[o.Symbol]++;
+        }
+        return d;
+    }
+}
+}

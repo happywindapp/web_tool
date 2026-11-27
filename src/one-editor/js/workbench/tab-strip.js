@@ -1,4 +1,4 @@
-// Tab strip of one view: click to show, click the active tab's name / double-click / right-click menu to rename in place, 📌 to pin, × / middle-click / Alt+W to close, drag onto another view to move it (⇥ does the same on touch).
+// Tab strip of one view: click to show, click the active tab's name / double-click / right-click menu to rename in place, 📌 to pin, × / middle-click / Alt+W to close, drag along the tab bar to reorder / onto another view to move it (⇥ does the same on touch).
 const TabStrip = (() => {
   let editing = null;
   const TAB_TYPE = "application/x-one-editor-tab";
@@ -41,7 +41,55 @@ const TabStrip = (() => {
       return tab;
     }));
     strip.querySelector(".tab.on")?.scrollIntoView({ block: "nearest", inline: "nearest" });
+    syncs.get(g.i)?.();
   }
+
+  // Where a dragged tab lands on the tab bar under x → { at (among the other tabs), el, after } for the insert mark; null off the bar.
+  let dragId = null;
+  function dropAt(target, x) {
+    const strip = target.closest?.(".gbar")?.querySelector(".tabs");
+    if (!strip) return null;
+    const tabs = [...strip.querySelectorAll(".tab")].filter(t => t.dataset.id !== dragId);
+    const k = tabs.findIndex(t => { const r = t.getBoundingClientRect(); return x < r.left + r.width / 2; });
+    return k < 0 ? { at: tabs.length, el: tabs.at(-1), after: true } : { at: k, el: tabs[k], after: false };
+  }
+
+  // Too many tabs: the wheel scrolls the strip sideways, ‹ › at both ends show only while it overflows (disabled at an end).
+  function scroller(strip) {
+    let aim = null;
+    // Clicks during a smooth scroll add up from where it is heading, not from where it is now.
+    const step = dir => {
+      const max = strip.scrollWidth - strip.clientWidth;
+      aim = Math.min(max, Math.max(0, (aim ?? strip.scrollLeft) + dir * Math.max(120, strip.clientWidth * 0.8)));
+      strip.scrollTo({ left: aim, behavior: "smooth" });
+    };
+    strip.addEventListener("scrollend", () => { aim = null; });
+    const btn = (cls, txt, tip, dir) => {
+      const b = Object.assign(document.createElement("button"), { className: "tscroll " + cls, textContent: txt, title: T(tip), hidden: true, tabIndex: -1 });
+      b.onclick = () => step(dir);
+      return b;
+    };
+    const prev = btn("tprev", "‹", "Cuộn tab sang trái (hoặc lăn chuột trên thanh tab)", -1), next = btn("tnext", "›", "Cuộn tab sang phải (hoặc lăn chuột trên thanh tab)", 1);
+    strip.before(prev);
+    strip.after(next);
+    const sync = () => {
+      const max = strip.scrollWidth - strip.clientWidth, over = max > 1;
+      prev.hidden = next.hidden = !over;
+      prev.disabled = strip.scrollLeft <= 0;
+      next.disabled = strip.scrollLeft >= max - 1;
+    };
+    strip.addEventListener("scroll", sync, { passive: true });
+    strip.addEventListener("wheel", e => {
+      const d = Math.abs(e.deltaY) > Math.abs(e.deltaX) ? e.deltaY : 0;
+      if (!d || strip.scrollWidth <= strip.clientWidth) return;
+      e.preventDefault();
+      aim = null;
+      strip.scrollLeft += d * (e.deltaMode === 1 ? 16 : 1);
+    }, { passive: false });
+    new ResizeObserver(sync).observe(strip);
+    return sync;
+  }
+  const syncs = new Map();
 
   const save = (doc, raw) => { const name = ShareState.cleanName(raw ?? ""); if (name && name !== doc.name && Docs.get(doc.id)) Docs.rename(doc, name); };
   const label = doc => doc.kind === "file" ? T("Tên tab (không đổi tên file trên đĩa):") : T("Tên mới:");
@@ -77,6 +125,7 @@ const TabStrip = (() => {
   function init() {
     for (const g of Views.groups) {
       const strip = g.el.querySelector(".tabs"), idOf = e => e.target.closest(".tab-rename") ? null : e.target.closest(".tab")?.dataset.id;
+      syncs.set(g.i, scroller(strip));
       strip.addEventListener("click", e => {
         const id = idOf(e);
         if (!id) return;
@@ -104,13 +153,15 @@ const TabStrip = (() => {
       strip.addEventListener("dragstart", e => {
         const id = idOf(e);
         if (!id) return;
+        dragId = id;
         e.dataTransfer.setData(TAB_TYPE, id);
         e.dataTransfer.effectAllowed = "move";
       });
+      strip.addEventListener("dragend", () => { dragId = null; });
       g.el.querySelector(".gnew").onclick = () => Actions.newNote(g.i);
       g.el.querySelector(".gmove").onclick = () => Actions.moveTab(g.i);
     }
   }
 
-  return { init, render, rename, sourceOf, TAB_TYPE, ICON };
+  return { init, render, rename, sourceOf, dropAt, TAB_TYPE, ICON };
 })();

@@ -1,0 +1,15 @@
+import json
+from dataclasses import dataclass
+@dataclass
+class Order :
+    id:str
+    symbol:str
+    qty:int
+    price:float
+def notional(orders:list[Order])->float:
+  return sum( o.qty*o.price for o in orders if o.qty>0 )
+def to_json(orders):
+    return json.dumps([{ 'id':o.id,'symbol':o.symbol,"qty":o.qty } for o in orders],indent=2)
+if __name__=="__main__":
+    book=[Order("ORD-1","ACME",100,25.5),Order('ORD-2','DEMO',0,10.0)]
+    print(notional(book),to_json(book))

@@ -1,14 +1,27 @@
 // Resizing views (desktop > 900px): the #split bar in 2 columns / 1x2 / 2x1 (drag, ←/→, double-click = 50/50); elsewhere the gap between two views is the handle. Ratios are remembered per layout.
 const Split = (() => {
   const clamp = r => Math.min(0.85, Math.max(0.15, r));
-  let ratio = 0.5;
+  let ratio = 0.5, max = null;
   const fr = { c: [1, 1, 1], r: [1, 1] };
 
   function apply(r) {
     ratio = clamp(r);
     const w = $("work");
+    if (max != null) { max = null; w.classList.remove("max-l", "max-r"); api.onMax?.(); }
     w.style.setProperty("--v1", ratio + "fr");
     w.style.setProperty("--v2", (1 - ratio) + "fr");
+  }
+
+  // Split-bar layouts: shows only side 0 (left) / 1 (right) until apply(); null restores the ratio.
+  function maximize(side) {
+    if (side == null) { if (max != null) apply(ratio); return; }
+    const w = $("work");
+    max = side;
+    w.classList.toggle("max-l", !side);
+    w.classList.toggle("max-r", !!side);
+    w.style.setProperty("--v1", side ? "0fr" : "1fr");
+    w.style.setProperty("--v2", side ? "1fr" : "0fr");
+    api.onMax?.();
   }
 
   function applyTracks() {
@@ -55,7 +68,9 @@ const Split = (() => {
     const bar = $("split"), work = $("work");
     apply(+Prefs.get("split", 0.5) || 0.5);
     bar.addEventListener("pointerdown", e => {
+      if (e.target.closest("button")) return;
       e.preventDefault();
+      maximize(null);
       bar.setPointerCapture(e.pointerId);
       const left = Views.groups[0].el.getBoundingClientRect().left;
       const right = Math.max(...Views.groups.slice(0, Views.count).map(g => g.el.getBoundingClientRect().right));
@@ -66,13 +81,13 @@ const Split = (() => {
       bar.addEventListener("pointercancel", up, { once: true });
     });
     bar.addEventListener("keydown", e => {
-      const d = e.key === "ArrowLeft" ? -0.05 : e.key === "ArrowRight" ? 0.05 : 0;
+      const d = !e.target.closest(".vb-grip") ? 0 : e.key === "ArrowLeft" ? -0.05 : e.key === "ArrowRight" ? 0.05 : 0;
       if (!d) return;
       e.preventDefault();
       apply(ratio + d);
       Prefs.set("split", ratio);
     });
-    bar.addEventListener("dblclick", () => { apply(0.5); Prefs.set("split", ratio); });
+    bar.addEventListener("dblclick", e => { if (e.target.closest("button")) return; apply(0.5); Prefs.set("split", ratio); });
 
     work.addEventListener("pointermove", e => {
       if (e.target !== work || e.buttons) return;
@@ -107,5 +122,6 @@ const Split = (() => {
     applyTracks();
     Prefs.set("tracks-" + L, fr);
   }
-  return { init, gapAt, set, preset, ratio: () => ratio };
+  const api = { init, gapAt, set, preset, maximize, onMax: null, ratio: () => ratio, get maxed() { return max; } };
+  return api;
 })();

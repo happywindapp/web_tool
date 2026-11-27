@@ -1,0 +1,20 @@
+syntax = "proto3";
+package demo.orders.v1;
+option go_package = "example.com/demo/orders/v1;ordersv1";
+enum Side {
+  SIDE_UNSPECIFIED = 0;
+  SIDE_BUY = 1;
+  SIDE_SELL = 2;
+}
+message Order {
+  string id = 1;
+  string symbol = 2;
+  int64 qty = 3;
+  double price = 4;
+  Side side = 5;
+  map<string, string> tags = 6;
+}
+service OrderService {
+  rpc Place(Order) returns (Order);
+  rpc Cancel(Order) returns (Order) {}
+}
